@@ -33,6 +33,7 @@ import { usePermissions } from "@/context/PermissionContext";
 
 import BackButton from "@/components/Common/BackButton";
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
+import { resourceTypeToResourcePathSlug } from "@/components/Schedule/useScheduleResource";
 import { Badge } from "@/components/ui/badge";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
@@ -42,6 +43,7 @@ import {
   Appointment,
   APPOINTMENT_STATUS_COLORS,
   formatScheduleResourceName,
+  SchedulableResourceType,
   UpcomingAppointmentStatuses,
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
@@ -112,7 +114,7 @@ export default function VerifyPatient() {
         <div className="space-y-5 md:max-w-5xl mx-auto">
           {queue_id && (
             <BackButton
-              to={`/facility/${facilityId}/${resource_type}/${resource_id}/queues/${queue_id}`}
+              to={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resource_type as SchedulableResourceType]}/${resource_id}/queues/${queue_id}`}
             >
               <ArrowLeft />
               {t("queue")}
