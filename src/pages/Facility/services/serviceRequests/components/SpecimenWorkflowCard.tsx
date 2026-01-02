@@ -65,10 +65,9 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 import { PrintableQRCode } from "@/components/PrintableQRCode";
 
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAuthUser from "@/hooks/useAuthUser";
 
-import mutate from "@/Utils/request/mutate";
-import { formatName } from "@/Utils/utils";
 import { ProcessSpecimen } from "@/pages/Facility/services/serviceRequests/components/ProcessSpecimen";
 import {
   EDITABLE_SERVICE_REQUEST_STATUSES,
@@ -83,6 +82,9 @@ import {
 } from "@/types/emr/specimen/specimen";
 import specimenApi from "@/types/emr/specimen/specimenApi";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import mutate from "@/Utils/request/mutate";
+import { formatName } from "@/Utils/utils";
 
 // --- Helper function (keep or move to utils) ---
 function formatQuantity(quantity: any): string {
@@ -112,6 +114,8 @@ export function SpecimenWorkflowCard({
   onCollect,
   request,
 }: SpecimenWorkflowCardProps) {
+  useShortcutSubContext("facility:service");
+
   const queryClient = useQueryClient();
   const authUser = useAuthUser();
   const currentUserId = authUser.id;
@@ -452,6 +456,7 @@ export function SpecimenWorkflowCard({
                 >
                   <Plus className="size-4" />
                   {t("collect_specimen")}
+                  <ShortcutBadge actionId="collect-specimen" />
                 </Button>
               </div>
             )}
