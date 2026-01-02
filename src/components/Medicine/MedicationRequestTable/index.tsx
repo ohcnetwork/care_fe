@@ -190,6 +190,7 @@ export default function MedicationRequestTable() {
                   canAccess={canAccess}
                   facilityId={facilityId}
                   dispenseOrderId={selectedDispenseOrderId}
+                  canWrite={canWrite}
                 />
               </div>
             ) : (

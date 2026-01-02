@@ -884,7 +884,11 @@ export function SymptomQuestion({
               },
             ],
             queryKey: ["symptoms", patientId],
-            queryFn: async (limit: number, offset: number) => {
+            queryFn: async (
+              limit: number,
+              offset: number,
+              signal: AbortSignal,
+            ) => {
               const response = await query(symptomApi.listSymptoms, {
                 pathParams: { patientId },
                 queryParams: {
@@ -892,7 +896,7 @@ export function SymptomQuestion({
                   limit,
                   exclude_verification_status: "entered_in_error",
                 },
-              })({ signal: new AbortController().signal });
+              })({ signal });
               return response;
             },
             converter: convertToSymptomRequest,
