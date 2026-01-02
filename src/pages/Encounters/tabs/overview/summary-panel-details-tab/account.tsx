@@ -24,7 +24,6 @@ export const Account = () => {
   const { t } = useTranslation();
   const {
     selectedEncounter: encounter,
-    canWriteSelectedEncounter: canEdit,
     patientId,
     facilityId,
   } = useEncounter();
@@ -65,7 +64,6 @@ export const Account = () => {
               <SquarePen className="cursor-pointer" strokeWidth={1.5} />
             </Button>
           }
-          canWrite={canEdit}
         />
       </div>
 

@@ -440,7 +440,10 @@ export function ValueSetForm({
                     const sanitizedValue = e.target.value
                       .toLowerCase()
                       .replace(/[^a-z0-9_-]/g, "");
-                    field.onChange(sanitizedValue);
+                    form.setValue("slug", sanitizedValue, {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    });
                   }}
                 />
               </FormControl>
