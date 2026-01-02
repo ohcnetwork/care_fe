@@ -250,7 +250,7 @@ export default function DispenseDrawer({
         response as ChargeItemBatchResponse,
       );
 
-      if (chargeItems.length > 0 && onDispenseComplete) {
+      if (onDispenseComplete) {
         onDispenseComplete(chargeItems);
       } else {
         onOpenChange(false);
