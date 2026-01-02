@@ -202,7 +202,7 @@ export function CreateInvoicePage({
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ["chargeItems", facilityId, accountId],
-    queryFn: async ({ pageParam = 0 }) => {
+    queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query(chargeItemApi.listChargeItem, {
         pathParams: { facilityId },
         queryParams: {
@@ -211,7 +211,7 @@ export function CreateInvoicePage({
           status: ChargeItemStatus.billable,
           account: accountId,
         },
-      })({ signal: new AbortController().signal });
+      })({ signal });
       return response as PaginatedResponse<ChargeItemRead>;
     },
     initialPageParam: 0,

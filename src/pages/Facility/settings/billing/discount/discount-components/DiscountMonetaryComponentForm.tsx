@@ -28,6 +28,7 @@ import {
 import {
   ConditionForm,
   conditionSchema,
+  getConditionDiscriminatorValue,
 } from "@/types/base/condition/condition";
 
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -297,7 +298,10 @@ export function DiscountMonetaryComponentForm({
               conditions={
                 form.watch("conditions")?.map((condition) => ({
                   ...condition,
-                  _conditionType: `${condition.metric}_${condition.operation}`,
+                  _conditionType: getConditionDiscriminatorValue(
+                    condition.metric,
+                    condition.operation,
+                  ),
                 })) || []
               }
               availableMetrics={availableMetrics}
