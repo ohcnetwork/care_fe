@@ -6,9 +6,8 @@ test.use({ storageState: "tests/.auth/user.json" });
 let facilityId: string;
 
 test.describe("Facility Overview", () => {
-  facilityId = getFacilityId();
-
   test.beforeEach(async ({ page }) => {
+    facilityId = getFacilityId();
     const targetUrl = `/facility/${facilityId}/overview`;
     await page.goto(targetUrl);
   });
