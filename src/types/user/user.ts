@@ -31,8 +31,8 @@ export interface UserReadMinimal extends UserBase {
 }
 
 export interface UserRead extends UserReadMinimal {
-  geo_organization: Organization;
-  created_by: UserReadMinimal;
+  geo_organization?: Organization;
+  created_by?: UserReadMinimal;
   email: string;
   flags: string[];
 }
@@ -41,11 +41,17 @@ export interface CurrentUserRead extends UserRead, Permissions {
   alt_phone_number?: string;
   date_of_birth?: string;
   is_superuser: boolean;
-  verified?: boolean;
+  qualification: string | null;
+  doctor_experience_commenced_on: string | null;
+  doctor_medical_council_registration: string | null;
+  weekly_working_hours: string | null;
+  verified: boolean;
   facilities: FacilityBareMinimum[];
   organizations: Organization[];
-  profile_picture_url: string;
   last_login: string;
+  pf_endpoint: string | null;
+  pf_p256dh: string | null;
+  pf_auth: string | null;
 }
 
 // Todo: Once backend adds a proper public user read spec, add it here and update the usages where applicable

@@ -164,7 +164,7 @@ export function PaymentReconciliationShow({
             >
               <PrinterIcon className="size-4" />
               {t("print_receipt")}
-              <ShortcutBadge actionId="print-button" />
+              <ShortcutBadge actionId="print-payment-receipt" />
             </Link>
           </Button>
         </div>

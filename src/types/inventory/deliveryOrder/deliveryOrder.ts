@@ -32,6 +32,7 @@ export interface DeliveryOrderCreate extends DeliveryOrder {
   supplier?: string;
   origin?: string;
   destination: string;
+  extensions: Record<string, unknown>;
 }
 
 export interface DeliveryOrderUpdate extends DeliveryOrder {

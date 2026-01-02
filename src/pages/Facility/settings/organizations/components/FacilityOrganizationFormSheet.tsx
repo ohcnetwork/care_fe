@@ -128,7 +128,7 @@ export default function FacilityOrganizationFormSheet({
       queryClient.invalidateQueries({
         queryKey: ["facilityOrganization"],
       });
-      toast.success(t("organization_updated_successfully"));
+      toast.success(t("organizations_updated_successfully"));
       setOpen(false);
     },
   });

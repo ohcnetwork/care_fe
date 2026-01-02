@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import {
+  EncounterListRead,
   EncounterRead,
   EncounterStatus,
 } from "@/types/emr/encounter/encounter";
@@ -20,7 +21,7 @@ import encounterApi from "@/types/emr/encounter/encounterApi";
 import mutate from "@/Utils/request/mutate";
 
 export interface EncounterActionsProps {
-  encounter: EncounterRead;
+  encounter: EncounterRead | EncounterListRead;
 }
 
 export function EncounterActions({ encounter }: EncounterActionsProps) {

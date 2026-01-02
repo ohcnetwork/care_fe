@@ -29,10 +29,10 @@ import PaginationComponent from "@/components/Common/Pagination";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
-import { useShortcuts } from "@/context/ShortcutContext";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
@@ -42,13 +42,13 @@ export function LocationSwitcher() {
   const { facilityId } = useCurrentLocation();
   const { location: extractedLocation } = useCurrentLocation();
   const { state } = useSidebar();
-  const [location, setLocation] = useState<LocationList | undefined>(undefined);
+  const [location, setLocation] = useState<LocationRead | undefined>(undefined);
   const [openDialog, setOpenDialog] = useState(false);
 
   const fallbackUrl = `/facility/${facilityId}/overview`;
 
   useEffect(() => {
-    setLocation(extractedLocation as unknown as LocationList);
+    setLocation(extractedLocation as unknown as LocationRead);
   }, [extractedLocation]);
 
   if (state === "collapsed") {
@@ -117,33 +117,25 @@ export function LocationSelectorDialog({
   onLocationSelect,
 }: {
   facilityId: string;
-  location: LocationList | undefined;
-  setLocation: (location: LocationList | undefined) => void;
+  location: LocationRead | undefined;
+  setLocation: (location: LocationRead | undefined) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
-  navigateUrl?: (location: LocationList) => string;
+  navigateUrl?: (location: LocationRead) => string;
   myLocations?: boolean;
-  onLocationSelect?: (location: LocationList) => void;
+  onLocationSelect?: (location: LocationRead) => void;
 }) {
   const { t } = useTranslation();
-  const shortcuts = useShortcuts();
-  const [locationLevel, setLocationLevel] = useState<LocationList[]>([]);
+  useShortcutSubContext(open ? "patient:search:-global" : undefined, {
+    ignoreInputFields: open,
+  });
+  const [locationLevel, setLocationLevel] = useState<LocationRead[]>([]);
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const resultsPerPage = RESULTS_PER_PAGE_LIMIT;
   const path = usePath();
   const subPath =
     path?.match(/\/facility\/[^/]+\/locations\/[^/]+\/(.*)/)?.[1] || "";
-
-  // this for enabling keyboard shortcuts even when inside input fields
-  useEffect(() => {
-    if (open) {
-      shortcuts.setIgnoreInputFields(true);
-    }
-    return () => {
-      shortcuts.setIgnoreInputFields(false);
-    };
-  }, [open, shortcuts]);
 
   const currentParentId = locationLevel.length
     ? locationLevel[locationLevel.length - 1].id
@@ -173,7 +165,7 @@ export function LocationSelectorDialog({
     enabled: open,
   });
 
-  const handleSelect = (location: LocationList) => {
+  const handleSelect = (location: LocationRead) => {
     if (location.has_children) {
       setLocationLevel([...locationLevel, location]);
     } else {
@@ -183,7 +175,7 @@ export function LocationSelectorDialog({
     setCurrentPage(1);
   };
 
-  const handleConfirmSelection = (newLocation: LocationList) => {
+  const handleConfirmSelection = (newLocation: LocationRead) => {
     const oldLocationId = location?.id;
     setLocation(newLocation);
     setLocationLevel([]);
@@ -203,7 +195,7 @@ export function LocationSelectorDialog({
     }
   };
 
-  const handleLocationClick = (location: LocationList) => {
+  const handleLocationClick = (location: LocationRead) => {
     let currentLocation = location;
     const locationList = [location];
     while (currentLocation?.parent && currentLocation.parent.id) {
@@ -397,9 +389,9 @@ function LocationCommandItem({
   handleSelect,
   handleConfirmSelection,
 }: {
-  location: LocationList;
-  handleSelect: (location: LocationList) => void;
-  handleConfirmSelection: (location: LocationList) => void;
+  location: LocationRead;
+  handleSelect: (location: LocationRead) => void;
+  handleConfirmSelection: (location: LocationRead) => void;
 }) {
   const { t } = useTranslation();
   return (

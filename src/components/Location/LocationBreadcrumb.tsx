@@ -1,12 +1,12 @@
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 
 interface LocationBreadcrumbProps {
-  selectedLocation: LocationList | null;
-  locationHistory: LocationList[];
-  onLocationClick: (location: LocationList) => void;
+  selectedLocation: LocationRead | null;
+  locationHistory: LocationRead[];
+  onLocationClick: (location: LocationRead) => void;
   onRootClick: () => void;
 }
 
@@ -19,11 +19,7 @@ export function LocationBreadcrumb({
   const { t } = useTranslation();
 
   if (!selectedLocation) {
-    return (
-      <h2 className="text-sm font-semibold mt-4">
-        {t("locations_under_my_care_for_immediate_transfer")}
-      </h2>
-    );
+    return <></>;
   }
 
   return (

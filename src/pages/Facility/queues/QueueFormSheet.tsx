@@ -241,7 +241,7 @@ export default function QueueFormSheet({
               {/* Submit Button */}
               <Button
                 type="submit"
-                disabled={isPending || (isEditMode && !form.formState.isDirty)}
+                disabled={isPending || !form.formState.isDirty}
                 className="w-full"
               >
                 {isPending ? (
