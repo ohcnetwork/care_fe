@@ -98,12 +98,21 @@ function MedicationTable({ facilityId, medications }: MedicationTableProps) {
     MedicationDispenseStatus.completed,
   ];
 
-  const statusOptions = [
-    MedicationDispenseStatus.preparation,
-    MedicationDispenseStatus.in_progress,
-    MedicationDispenseStatus.completed,
-    MedicationDispenseStatus.declined,
-  ];
+  const getStatusOptions = (charge_item?: ChargeItemRead) => {
+    const statusOptions = [
+      MedicationDispenseStatus.preparation,
+      MedicationDispenseStatus.in_progress,
+      MedicationDispenseStatus.completed,
+    ];
+    if (
+      !charge_item ||
+      !charge_item?.paid_invoice ||
+      charge_item?.paid_invoice?.status === InvoiceStatus.draft
+    ) {
+      statusOptions.push(MedicationDispenseStatus.declined);
+    }
+    return statusOptions;
+  };
 
   return (
     <div className="overflow-hidden rounded-md border-2 border-white shadow-md">
@@ -177,13 +186,18 @@ function MedicationTable({ facilityId, medications }: MedicationTableProps) {
                         <SelectValue placeholder={t("select_status")} />
                       </SelectTrigger>
                       <SelectContent>
-                        {statusOptions.map((status) => {
-                          return (
-                            <SelectItem key={status} value={status.toString()}>
-                              {t(status)}
-                            </SelectItem>
-                          );
-                        })}
+                        {getStatusOptions(medication?.charge_item).map(
+                          (status) => {
+                            return (
+                              <SelectItem
+                                key={status}
+                                value={status.toString()}
+                              >
+                                {t(status)}
+                              </SelectItem>
+                            );
+                          },
+                        )}
                       </SelectContent>
                     </Select>
                   ) : (
