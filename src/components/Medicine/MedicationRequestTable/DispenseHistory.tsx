@@ -206,7 +206,7 @@ export function DispenseHistory({
                         variant="outline"
                         size="sm"
                         asChild
-                        disabled={!facilityId}
+                        hidden={!facilityId}
                       >
                         <Link
                           href={`/facility/${facilityId}/locations/${medication.location.id}/medication_dispense/patient/${patientId}/${medication.status}?payment_status=${medication.charge_item?.paid_invoice?.status === InvoiceStatus.balanced ? "paid" : "unpaid"}`}
