@@ -196,7 +196,6 @@ export function ResourceCategoryPicker({
           aria-live="polite"
           aria-label={t("loading")}
         >
-          <span className="sr-only">{t("loading")}</span>
           <Loader2 className="h-4 w-4 animate-spin" />
           <Skeleton className="h-4 w-20" />
         </div>

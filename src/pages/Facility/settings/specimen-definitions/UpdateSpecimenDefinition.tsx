@@ -54,7 +54,6 @@ export function UpdateSpecimenDefinition({
         aria-live="polite"
         aria-label={t("loading")}
       >
-        <span className="sr-only">{t("loading")}</span>
         <FormSkeleton rows={4} />
       </div>
     );

@@ -272,7 +272,6 @@ export default function LocationForm({
         aria-live="polite"
         aria-label={t("loading")}
       >
-        <span className="sr-only">{t("loading")}</span>
         <FormSkeleton rows={6} />
       </div>
     );
