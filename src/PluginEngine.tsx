@@ -4,23 +4,54 @@ import {
   PluginManifestWithMeta,
   SupportedPluginComponents,
 } from "@/pluginTypes";
+import { PlugConfig } from "@/types/plugConfig";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import {
   __federation_method_getRemote as getFederationRemote,
   __federation_method_setRemote as setFederationRemote,
   __federation_method_unwrapDefault as unwrapModule,
 } from "__federation__";
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense } from "react";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import Loading from "@/components/Common/Loading";
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
 import query from "@/Utils/request/query";
-import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { Loader2Icon } from "lucide-react";
 import { z } from "zod";
-import { PlugConfigMeta } from "./types/plugConfig";
+
+const getPluginManifest = async (config: PlugConfig) => {
+  if (
+    !config.meta.url ||
+    !z.string().url().safeParse(config.meta.url).success
+  ) {
+    console.error(
+      `Plugin ${config.slug} has an invalid URL (${config.meta.url}) in meta`,
+    );
+    return null;
+  }
+
+  setFederationRemote(config.slug, {
+    url: () => Promise.resolve(config.meta.url as string),
+    format: "esm",
+    from: "vite",
+    externalType: "promise",
+  });
+
+  try {
+    const module = await getFederationRemote(config.slug, "./manifest");
+    const manifest = unwrapModule(module) as PluginManifest;
+    return {
+      ...manifest,
+      meta: config.meta,
+    } as PluginManifestWithMeta;
+  } catch (e) {
+    console.error(`There was an error enabling the app ${config.slug}`, e);
+    return null;
+  }
+};
 
 // Import the remote component synchronously
 export default function PluginEngine({
@@ -28,73 +59,28 @@ export default function PluginEngine({
 }: {
   children: React.ReactNode;
 }) {
-  const [pluginManifests, setPluginManifests] = useState<
-    PluginManifestWithMeta[]
-  >([]);
-
   // Fetch enabled plugins from the backend API
   const { data: enabledPlugins } = useQuery({
     queryKey: ["enabled-plugins"],
     queryFn: query(plugConfigApi.list),
   });
 
-  useEffect(() => {
-    const fetchPluginManifests = async () => {
-      if (!enabledPlugins) return;
+  const pluginsQuery = useQueries({
+    queries: (enabledPlugins?.configs ?? []).map((config) => ({
+      queryKey: ["plugin-manifest", config.slug],
+      queryFn: () => getPluginManifest(config),
+    })),
+    combine: (queries) =>
+      queries.map(({ data, isLoading }, i) => {
+        const config = (enabledPlugins?.configs ?? [])[i];
 
-      const manifests = await Promise.all(
-        enabledPlugins.configs.map(async (plugin) => {
-          if (
-            !plugin.meta.url ||
-            !z.string().url().safeParse(plugin.meta.url).success
-          ) {
-            console.error(
-              `Plugin ${plugin.slug} has an invalid URL (${plugin.meta.url}) in meta`,
-            );
-            return undefined;
-          }
+        if (isLoading) {
+          return { ...config, isLoading: true as const };
+        }
 
-          setFederationRemote(plugin.slug, {
-            url: () => Promise.resolve(plugin.meta.url as string),
-            format: "esm",
-            from: "vite",
-            externalType: "promise",
-          });
-
-          return await getFederationRemote(plugin.slug, "./manifest")
-            .then((module) => {
-              const manifest = unwrapModule<PluginManifest>(module);
-              return {
-                ...manifest,
-                meta: plugin.meta,
-              } as PluginManifestWithMeta;
-            })
-            .catch((e) =>
-              console.error(
-                `There was an error enabling the app ${plugin.slug}`,
-                e,
-              ),
-            );
-        }),
-      );
-      const availablePlugins = manifests.filter(
-        (m): m is PluginManifestWithMeta => m !== undefined,
-      );
-
-      if (availablePlugins.length === 0) {
-        console.log("No plugins found");
-        return;
-      }
-
-      console.log(
-        `Loading ${availablePlugins.length} plugins; available plugins`,
-        availablePlugins,
-      );
-      setPluginManifests(availablePlugins);
-    };
-
-    fetchPluginManifests();
-  }, [enabledPlugins]);
+        return { ...config, isLoading: false as const, ...data! };
+      }),
+  });
 
   return (
     <Suspense fallback={<Loading />}>
@@ -105,7 +91,7 @@ export default function PluginEngine({
           </div>
         }
       >
-        <CareAppsContext.Provider value={pluginManifests}>
+        <CareAppsContext.Provider value={pluginsQuery}>
           <Suspense fallback={<Loading />}></Suspense>
           {children}
         </CareAppsContext.Provider>
@@ -115,24 +101,28 @@ export default function PluginEngine({
 }
 
 type PluginProps<K extends keyof SupportedPluginComponents> =
-  SupportedPluginComponents[K] extends React.FC<infer P> ? P : never;
+  React.ComponentProps<SupportedPluginComponents[K]>;
 
 export function PLUGIN_Component<K extends keyof SupportedPluginComponents>({
   __name,
   ...props
 }: { __name: K } & PluginProps<K>) {
-  const plugins = useCareApps();
+  const careApps = useCareApps();
 
   return (
     <>
-      {plugins.map((plugin) => {
-        const Component = plugin.components?.[__name] as React.ComponentType<
-          PluginProps<K> & { __meta: PlugConfigMeta }
-        >;
+      {careApps.map((plugin) => {
+        if (plugin.isLoading) {
+          return null;
+        }
+
+        const Component = plugin.components?.[
+          __name
+        ] as React.ComponentType<unknown>;
         const propsWithMeta = {
           ...props,
           __meta: plugin.meta,
-        } as PluginProps<K> & { __meta: PlugConfigMeta };
+        };
 
         if (!Component) {
           return null;
@@ -152,7 +142,8 @@ export function PLUGIN_Component<K extends keyof SupportedPluginComponents>({
                 </div>
               }
             >
-              <Component {...propsWithMeta} />
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              <Component {...(propsWithMeta as any)} />
             </React.Suspense>
           </PluginErrorBoundary>
         );
