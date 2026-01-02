@@ -106,6 +106,11 @@ export const PERMISSION_READ_HEALTHCARE_SERVICE = "can_read_healthcare_service";
 export const PERMISSION_WRITE_RESOURCE_CATEGORY = "can_write_resource_category";
 export const PERMISSION_READ_RESOURCE_CATEGORY = "can_read_resource_category";
 
+// Account Permissions
+export const PERMISSION_CREATE_ACCOUNT = "can_create_account";
+export const PERMISSION_UPDATE_ACCOUNT = "can_update_account";
+export const PERMISSION_READ_ACCOUNT = "can_read_account";
+
 export interface Permissions {
   // Patient Permissions
   /** Permission slug: "can_create_patient" */
@@ -253,6 +258,13 @@ export interface Permissions {
   canWriteResourceCategory: boolean;
   /** Permission slug: "can_read_resource_category" */
   canReadResourceCategory: boolean;
+
+  /** Permission slug: "can_create_account" */
+  canCreateAccount: boolean;
+  /** Permission slug: "can_update_account" */
+  canUpdateAccount: boolean;
+  /** Permission slug: "can_read_account" */
+  canReadAccount: boolean;
 }
 
 export type HasPermissionFn = (
@@ -465,5 +477,10 @@ export function getPermissions(
       PERMISSION_READ_RESOURCE_CATEGORY,
       permissions,
     ),
+
+    // Account
+    canCreateAccount: hasPermission(PERMISSION_CREATE_ACCOUNT, permissions),
+    canUpdateAccount: hasPermission(PERMISSION_UPDATE_ACCOUNT, permissions),
+    canReadAccount: hasPermission(PERMISSION_READ_ACCOUNT, permissions),
   };
 }
