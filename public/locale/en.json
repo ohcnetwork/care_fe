@@ -4264,6 +4264,7 @@
   "remove_diagnosis": "Remove Diagnosis",
   "remove_from_selection": "Remove from selection",
   "remove_image": "Remove Image",
+  "remove_item": "Remove item {{name}}",
   "remove_medication": "Remove Medication",
   "remove_medication_confirmation": "Are you sure you want to remove {{medication}}?",
   "remove_name": "Remove {{name}}",

@@ -832,7 +832,10 @@ export default function DispenseDrawer({
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => remove(index)}
-                                    className="text-red-600 hover:text-red-70 hover:bg-white"
+                                    className="hover:text-red-600 hover:bg-white"
+                                    aria-label={t("remove_item", {
+                                      name: productKnowledge.name,
+                                    })}
                                   >
                                     <Trash2 className="size-4" />
                                   </Button>
