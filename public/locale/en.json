@@ -3397,7 +3397,7 @@
   "no_status_found": "No status found",
   "no_stock": "No Stock",
   "no_stock_available": "No Stock Available",
-  "no_stock_available_dispense_description": "Uncheck this item to dispense other items from the list.",
+  "no_stock_available_dispense_description": "Remove this item to dispense other items from the list.",
   "no_storage_guidelines_added": "No storage guidelines added",
   "no_sub_organizations_found": "No sub-organizations found",
   "no_supplier_found": "No supplier found",
