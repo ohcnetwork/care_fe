@@ -49,7 +49,6 @@ import { generateSlug } from "@/Utils/utils";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import DOMPurify from "dompurify";
-import { t } from "i18next";
 import { navigate } from "raviger";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -59,28 +58,6 @@ import {
   generateSingleObjectInsertion,
   insertAtCursor,
 } from "./templateUtils";
-
-const templateBuilderSchema = z.object({
-  name: z.string().min(1, t("field_required")),
-  slug_value: z
-    .string()
-    .trim()
-    .min(5, {
-      message: t("character_count_validation", { min: 5, max: 25 }),
-    })
-    .max(25, {
-      message: t("character_count_validation", { min: 5, max: 25 }),
-    })
-    .regex(/^[a-z0-9-]+$/, {
-      message: t("slug_format_message"),
-    }),
-  status: z.enum(TemplateStatuses),
-  template_type: z.enum(TemplateTypes),
-  default_format: z.enum(TemplateFormats),
-  context: z.string().min(1, t("field_required")),
-  description: z.string().optional(),
-  template_data: z.string().min(1, t("field_required")),
-});
 
 export default function TemplateBuilder({
   facilityId,
@@ -102,6 +79,28 @@ export default function TemplateBuilder({
     format: TemplateFormat | null;
   }>({ isActive: false, data: null, format: null });
 
+  const templateBuilderSchema = z.object({
+    name: z.string().min(1, t("field_required")),
+    slug_value: z
+      .string()
+      .trim()
+      .min(5, {
+        message: t("character_count_validation", { min: 5, max: 25 }),
+      })
+      .max(25, {
+        message: t("character_count_validation", { min: 5, max: 25 }),
+      })
+      .regex(/^[a-z0-9-]+$/, {
+        message: t("slug_format_message"),
+      }),
+    status: z.enum(TemplateStatuses),
+    template_type: z.string().min(1, t("field_required")),
+    default_format: z.enum(TemplateFormats),
+    context: z.string().min(1, t("field_required")),
+    description: z.string().optional(),
+    template_data: z.string().min(1, t("field_required")),
+  });
+
   const form = useForm({
     resolver: zodResolver(templateBuilderSchema),
     defaultValues: {
@@ -109,6 +108,7 @@ export default function TemplateBuilder({
       slug_value: "",
       status: "draft" as TemplateStatus,
       default_format: "html" as TemplateFormat,
+      template_type: "",
       template_data: DEFAULT_TEMPLATE,
       context: "",
     },
@@ -387,7 +387,7 @@ export default function TemplateBuilder({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel aria-required>{t("template_name")}</FormLabel>
+                  <FormLabel>{t("template_name")}</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder={t("enter_template_name")} />
                   </FormControl>
@@ -401,7 +401,7 @@ export default function TemplateBuilder({
               name="slug_value"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel aria-required>{t("slug")}</FormLabel>
+                  <FormLabel>{t("slug")}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -469,7 +469,7 @@ export default function TemplateBuilder({
               name="template_type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel aria-required>{t("report_type")}</FormLabel>
+                  <FormLabel>{t("report_type")}</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
@@ -515,7 +515,7 @@ export default function TemplateBuilder({
               render={({ field }) => {
                 return (
                   <FormItem>
-                    <FormLabel aria-required>{t("select_context")}</FormLabel>
+                    <FormLabel>{t("select_context")}</FormLabel>
 
                     <Select
                       value={field.value}
@@ -681,16 +681,17 @@ function TemplateEditor({
   form,
   textareaRef,
 }: {
-  form: UseFormReturn<z.infer<typeof templateBuilderSchema>>;
+  form: UseFormReturn<any>;
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
 }) {
   const { t } = useTranslation();
+
   return (
     <Form {...form}>
       <FormField
         control={form.control}
         name="template_data"
-        render={({ field: { ...field } }) => (
+        render={({ field }) => (
           <FormItem className="h-full flex flex-col">
             <FormLabel>{t("template_html")}</FormLabel>
             <FormControl>
@@ -702,6 +703,7 @@ function TemplateEditor({
                 spellCheck={false}
               />
             </FormControl>
+            <FormMessage />
           </FormItem>
         )}
       />
