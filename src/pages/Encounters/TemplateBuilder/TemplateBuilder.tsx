@@ -80,7 +80,7 @@ export default function TemplateBuilder({
   }>({ isActive: false, data: null, format: null });
 
   const templateBuilderSchema = z.object({
-    name: z.string().min(1, t("field_required")),
+    name: z.string().trim().min(1, t("field_required")),
     slug_value: z
       .string()
       .trim()
