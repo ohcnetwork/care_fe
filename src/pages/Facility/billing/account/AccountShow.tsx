@@ -207,6 +207,7 @@ export function AccountShow({
         end: new Date().toISOString(),
       },
       patient: account?.patient?.id || "",
+      extensions: account?.extensions || {},
     });
     setCloseAccountStatus({
       sheetOpen: false,
