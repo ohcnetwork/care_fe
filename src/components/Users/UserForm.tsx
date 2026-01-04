@@ -829,7 +829,13 @@ export default function UserForm({
             createPending
           }
         >
-          {isEditMode ? t("update_user") : t("create_user")}
+          {updatePending || createPending
+            ? isEditMode
+              ? t("updating")
+              : t("creating")
+            : isEditMode
+              ? t("update_user")
+              : t("create_user")}
         </Button>
       </form>
     </Form>

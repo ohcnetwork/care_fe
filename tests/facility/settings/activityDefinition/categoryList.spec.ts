@@ -23,7 +23,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 function generateCategoryData() {
-  const title = faker.word.words(2);
+  const title = faker.string.alpha({ length: { min: 5, max: 20 } });
   return {
     title,
     slug: expectedSlug(title),

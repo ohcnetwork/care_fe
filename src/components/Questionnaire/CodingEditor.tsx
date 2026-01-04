@@ -54,7 +54,7 @@ export function CodingEditor({
           ...code,
           display: response.metadata.display,
         });
-        toast.success("Code verified successfully");
+        toast.success(t("code_verified_successfully"));
       }
     },
     onError: (error) => {
@@ -63,7 +63,7 @@ export function CodingEditor({
         type: "manual",
         message: t("code_verification_required"),
       });
-      toast.error("Failed to verify code");
+      toast.error(t("failed_to_verify_code"));
     },
   });
 
@@ -188,7 +188,7 @@ export function CodingEditor({
                     <Input
                       {...field}
                       value={code.display}
-                      placeholder="Unverified"
+                      placeholder={t("unverified")}
                       className={!code.display ? "text-gray-500" : undefined}
                       readOnly
                     />
@@ -206,7 +206,7 @@ export function CodingEditor({
               disabled={isPending}
               onClick={() => {
                 if (!code.system || !code.code) {
-                  toast.error("Please select a system and enter a code first");
+                  toast.error(t("please_select_system_and_code"));
                   return;
                 }
 
