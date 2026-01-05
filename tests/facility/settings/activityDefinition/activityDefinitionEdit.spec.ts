@@ -188,7 +188,7 @@ test.describe("activity definition edit", () => {
       .getByRole("combobox")
       .filter({ hasText: /select.*healthcare service/i });
     await selectFromCommand(page, healthcareServiceTrigger, {
-      search: updatedData.healthcareService!,
+      search: "main pharmacy",
       itemIndex: 0,
     });
 
@@ -255,9 +255,7 @@ test.describe("activity definition edit", () => {
     ).toBeVisible();
 
     await expect(
-      getCardByTitle(page, "Healthcare Service").getByText(
-        updatedData.healthcareService!,
-      ),
+      getCardByTitle(page, "Healthcare Service").getByText("main pharmacy"),
     ).toBeVisible();
 
     await expect(
