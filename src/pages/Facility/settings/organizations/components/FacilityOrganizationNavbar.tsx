@@ -128,7 +128,6 @@ export default function FacilityOrganizationNavbar({
       queryFn: query(facilityOrganizationApi.list, {
         pathParams: { facilityId },
         queryParams: {
-          parent: "",
           limit: 100,
         },
       }),

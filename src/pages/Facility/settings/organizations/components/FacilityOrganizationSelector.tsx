@@ -74,7 +74,6 @@ export default function FacilityOrganizationSelector(
       {
         pathParams: { facilityId },
         queryParams: {
-          parent: "",
           name: facilityOrgSearch,
         },
       },

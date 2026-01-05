@@ -128,7 +128,6 @@ export default function AdminOrganizationNavbar({
       queryKey: ["organization", "list", organizationType],
       queryFn: query(organizationApi.list, {
         queryParams: {
-          parent: "",
           org_type: organizationType,
           limit: 100,
         },

@@ -98,7 +98,6 @@ export const PractitionerSelector = ({
       {
         pathParams: { facilityId },
         queryParams: {
-          parent: "",
           active: true,
           limit: 100,
         },
