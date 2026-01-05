@@ -83,7 +83,7 @@ export const ServicepointDialog = ({
     if (selectedSubQueueId) {
       updateToken({
         sub_queue: selectedSubQueueId,
-        status: TokenStatus.CREATED,
+        status: TokenStatus.IN_PROGRESS,
         note: token.note,
       });
     }

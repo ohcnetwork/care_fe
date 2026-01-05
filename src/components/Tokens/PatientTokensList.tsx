@@ -23,6 +23,7 @@ import {
   renderTokenNumber,
   TOKEN_STATUS_COLORS,
   TokenRetrieve,
+  TokenStatus,
 } from "@/types/tokens/token/token";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
@@ -205,7 +206,7 @@ export default function PatientTokensList({
                       id={`token-card-${token.id}`}
                       className="rounded-md border-none shadow-xs hover:shadow-xs hover:scale-none"
                     />
-                    {tokenId && (
+                    {tokenId && token.status === TokenStatus.CREATED && (
                       <div className="flex justify-center items-center bg-white p-2 rounded-md mb-1 shadow-xs animate-in slide-in-from-top-2 duration-700">
                         <Button
                           variant="outline_primary"

@@ -26,10 +26,13 @@ export default function PatientHomeTabs({
   canListTokens,
 }: PatientHomeTabsProps) {
   const { t } = useTranslation();
-  const [{ tab }, setQueryParams] = useQueryParams<{ tab?: string }>();
+  const [{ tab, token_id }, setQueryParams] = useQueryParams<{
+    tab?: string;
+    token_id?: string;
+  }>();
   const activeTab = tab || "encounters";
   const setActiveTab = (tab: string) => {
-    setQueryParams({ tab }, { overwrite: false });
+    setQueryParams({ tab, token_id }, { overwrite: false });
   };
   const isTab = useBreakpoints({ default: true, lg: false });
 
@@ -90,7 +93,11 @@ export default function PatientHomeTabs({
         )}
 
         {activeTab === "tokens" && canListTokens && isTab && (
-          <PatientTokensList patientId={patientId} facility={facility} />
+          <PatientTokensList
+            patientId={patientId}
+            facility={facility}
+            tokenId={token_id}
+          />
         )}
       </div>
     </div>
