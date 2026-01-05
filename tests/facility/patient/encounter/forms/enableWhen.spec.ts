@@ -663,12 +663,7 @@ test.describe("Enable When Functionality Tests", () => {
 
       // Fill enabled required fields
       await fillFormField(page, "BMI (Body Mass Index)", "input", bmi);
-      await fillFormField(
-        page,
-        "Are you currently pregnant?",
-        "checkbox",
-        "yes",
-      );
+      await fillFormField(page, "Are you currently pregnant?", "radio", "true");
       await fillFormField(page, "Years Since Quit Smoking", "input", quitYears);
 
       await submitAndVerify(page, [age, gender, smokingStatus, quitYears, bmi]);

@@ -191,6 +191,20 @@ export async function fetchOrganizationIds(
 }
 
 /**
+ * Helper function to find input element within a question container
+ * @param questionContainer - The question container locator
+ * @returns The input locator (number or text input)
+ */
+async function findInputInContainer(
+  questionContainer: ReturnType<Page["locator"]>,
+) {
+  const numberInput = questionContainer.locator('input[type="number"]').first();
+  const textInput = questionContainer.locator('input[type="text"]').first();
+  const inputCount = await numberInput.count();
+  return inputCount > 0 ? numberInput : textInput;
+}
+
+/**
  * Helper function to interact with form fields by their label text
  * Supports radio buttons, text inputs, number inputs, textareas, and checkboxes
  */
@@ -215,15 +229,7 @@ export async function fillFormField(
     const questionContainer = labelLocator.locator(
       "xpath=ancestor::div[contains(@id, 'question')]",
     );
-    // Try number input first, fallback to text input
-    const numberInput = questionContainer
-      .locator('input[type="number"]')
-      .first();
-    const textInput = questionContainer.locator('input[type="text"]').first();
-
-    const inputCount = await numberInput.count();
-    const input = inputCount > 0 ? numberInput : textInput;
-
+    const input = await findInputInContainer(questionContainer);
     await input.scrollIntoViewIfNeeded();
     await input.fill(value);
   } else if (action === "textarea") {
@@ -288,14 +294,7 @@ export async function clearFormField(page: Page, labelText: string) {
   const questionContainer = labelLocator.locator(
     "xpath=ancestor::div[contains(@id, 'question')]",
   );
-
-  // Try number input first, then text input
-  const numberInput = questionContainer.locator('input[type="number"]').first();
-  const textInput = questionContainer.locator('input[type="text"]').first();
-
-  const inputCount = await numberInput.count();
-  const input = inputCount > 0 ? numberInput : textInput;
-
+  const input = await findInputInContainer(questionContainer);
   await input.clear();
 }
 

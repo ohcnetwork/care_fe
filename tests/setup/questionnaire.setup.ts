@@ -82,8 +82,8 @@ async function processQuestionnaire(
     // Fix tags if present - convert tag objects to just IDs
     if (Array.isArray(questionnaireData.tags)) {
       questionnaireData.tags = questionnaireData.tags.map((tag: unknown) => {
-        if (typeof tag === "object" && tag.id) {
-          return tag.id;
+        if (typeof tag === "object" && tag !== null && "id" in tag) {
+          return (tag as { id: string }).id;
         }
         return tag;
       });
