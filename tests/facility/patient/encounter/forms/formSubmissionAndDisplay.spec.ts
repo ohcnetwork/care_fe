@@ -1,51 +1,12 @@
 import { faker } from "@faker-js/faker";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { format, subDays } from "date-fns";
+import { fillFormField } from "tests/helper/questionnaire";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Form Submission and Display in Encounter Overview", () => {
-  /**
-   * Helper function to interact with form fields by their label text
-   */
-  async function fillFormField(
-    page: Page,
-    labelText: string,
-    action: "radio" | "input" | "textarea",
-    value: string,
-  ) {
-    // Find the label and navigate to its question container
-    const labelLocator = page.getByText(labelText, { exact: true });
-    await labelLocator.scrollIntoViewIfNeeded();
-
-    if (action === "radio") {
-      // For radio buttons, find the parent container and then the specific radio option
-      const questionContainer = labelLocator.locator(
-        "xpath=ancestor::div[contains(@id, 'question')]",
-      );
-      await questionContainer.locator(`label[for="${value}"]`).click();
-    } else if (action === "input") {
-      // For number inputs, find the parent container
-      const questionContainer = labelLocator.locator(
-        "xpath=ancestor::div[contains(@id, 'question')]",
-      );
-      const input = questionContainer.locator('input[type="number"]').first();
-      await input.scrollIntoViewIfNeeded();
-      await input.fill(value);
-    } else if (action === "textarea") {
-      // For textareas
-      const questionContainer = labelLocator.locator(
-        "xpath=ancestor::div[contains(@class, 'space-y-1')]",
-      );
-      const textarea = questionContainer.locator(
-        'textarea[data-slot="textarea"]',
-      );
-      await textarea.scrollIntoViewIfNeeded();
-      await textarea.fill(value);
-    }
-  }
-
   test("should submit form from encounter page and verify values display in overview", async ({
     page,
   }) => {

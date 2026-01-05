@@ -1,0 +1,250 @@
+{
+  "title": "Enable When Test Questionnaire",
+  "slug": "enable-when-test",
+  "description": "Comprehensive test for enable_when functionality covering all operators and types",
+  "version": "1.0",
+  "status": "active",
+  "subject_type": "encounter",
+  "questions": [
+    {
+      "id": "a1e55ff6-db18-4dcc-8688-d914d8e2983b",
+      "link_id": "Q-001",
+      "text": "Patient Age",
+      "type": "integer",
+      "required": true,
+      "questions": []
+    },
+    {
+      "id": "b2f66aa7-ec29-4edd-9799-e825e9f3a94c",
+      "link_id": "Q-002",
+      "text": "Patient Name",
+      "type": "string",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "c3a77bb8-fd3a-4fee-a8aa-f936faf4ba5d",
+      "link_id": "Q-003",
+      "text": "Middle Name",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "Q-002",
+          "operator": "exists",
+          "answer": true
+        }
+      ]
+    },
+    {
+      "id": "d4b88cc9-ae4b-4aff-b9bb-aa47aba5cb6e",
+      "link_id": "Q-004",
+      "text": "Gender",
+      "type": "choice",
+      "required": true,
+      "answer_option": [
+        {
+          "value": "male",
+          "display": "Male"
+        },
+        {
+          "value": "female",
+          "display": "Female"
+        },
+        {
+          "value": "other",
+          "display": "Other"
+        }
+      ],
+      "questions": []
+    },
+    {
+      "id": "e5c99dda-bf5c-4baa-8acc-bb58bcb6dc7f",
+      "link_id": "Q-005",
+      "text": "Are you currently pregnant?",
+      "type": "boolean",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "Q-004",
+          "operator": "equals",
+          "answer": "female"
+        }
+      ]
+    },
+    {
+      "id": "f6daaeeb-ca6d-4cbb-9bdd-cc69cdc7ed8a",
+      "link_id": "Q-006",
+      "text": "Senior Health Screening Required",
+      "type": "display",
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "Q-001",
+          "operator": "greater_or_equals",
+          "answer": 65
+        }
+      ]
+    },
+    {
+      "id": "a7ebbffc-db7e-4dcc-8cee-dd7aded8fe9b",
+      "link_id": "Q-007",
+      "text": "Pediatric Assessment Required",
+      "type": "display",
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "Q-001",
+          "operator": "less",
+          "answer": 18
+        }
+      ]
+    },
+    {
+      "id": "b8fccaad-ec8f-4edd-9dff-ee8befe9af0c",
+      "link_id": "Q-008",
+      "text": "BMI (Body Mass Index)",
+      "type": "decimal",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "Q-001",
+          "operator": "greater",
+          "answer": 17
+        },
+        {
+          "question": "Q-001",
+          "operator": "less_or_equals",
+          "answer": 64
+        }
+      ],
+      "enable_behavior": "all"
+    },
+    {
+      "id": "c9addbbe-fd9a-4fee-8eaa-ff9cfafabf1d",
+      "link_id": "Q-009",
+      "text": "Smoking Status",
+      "type": "choice",
+      "required": true,
+      "answer_option": [
+        {
+          "value": "never",
+          "display": "Never Smoked"
+        },
+        {
+          "value": "former",
+          "display": "Former Smoker"
+        },
+        {
+          "value": "current",
+          "display": "Current Smoker"
+        }
+      ],
+      "questions": []
+    },
+    {
+      "id": "dabeeccf-aeab-4aff-9fbb-aadaba0bca2e",
+      "link_id": "Q-010",
+      "text": "Years Since Quit Smoking",
+      "type": "integer",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "Q-009",
+          "operator": "equals",
+          "answer": "former"
+        }
+      ]
+    },
+    {
+      "id": "ebcffdda-bfbc-4baa-8acc-bbebcb1cdb3f",
+      "link_id": "Q-011",
+      "text": "Would you like smoking cessation counseling?",
+      "type": "boolean",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "Q-009",
+          "operator": "equals",
+          "answer": "current"
+        }
+      ]
+    },
+    {
+      "id": "fcdaaeeb-cacd-4cbb-9bdd-ccfcdc2dec4a",
+      "link_id": "Q-012",
+      "text": "High Risk Patient - Additional Screening Required",
+      "type": "display",
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "Q-001",
+          "operator": "greater_or_equals",
+          "answer": 50
+        },
+        {
+          "question": "Q-009",
+          "operator": "not_equals",
+          "answer": "never"
+        }
+      ],
+      "enable_behavior": "any"
+    },
+    {
+      "id": "adebbbfc-dbde-4dcc-8cee-ddaddd3efd5b",
+      "link_id": "Q-013",
+      "text": "Systolic Blood Pressure",
+      "type": "integer",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "befcccad-ecef-4edd-9dff-eebeee4fae6c",
+      "link_id": "Q-014",
+      "text": "⚠️ Hypertension Alert - Please consult physician",
+      "type": "display",
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "Q-013",
+          "operator": "exists",
+          "answer": true
+        },
+        {
+          "question": "Q-013",
+          "operator": "greater",
+          "answer": 140
+        }
+      ],
+      "enable_behavior": "all"
+    },
+    {
+      "id": "cfaddbbe-fdfa-4fee-8eaa-ffcfff5abf7d",
+      "link_id": "Q-015",
+      "text": "Currently on any medications?",
+      "type": "string",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "dabeeccf-aeab-4aff-9fbb-aadaaa6bca8e",
+      "link_id": "Q-016",
+      "text": "Medication Review Required",
+      "type": "display",
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "Q-015",
+          "operator": "exists",
+          "answer": true
+        }
+      ]
+    }
+  ],
+  "tags": []
+}
