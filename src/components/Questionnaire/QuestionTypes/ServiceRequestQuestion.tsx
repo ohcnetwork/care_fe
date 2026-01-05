@@ -534,7 +534,7 @@ export function ServiceRequestQuestion({
   ]);
 
   const handleAddServiceRequest = () => {
-    if (!previewServiceRequest || !selectedActivityDefinitionData) return;
+    if (!previewServiceRequest) return;
 
     setServiceRequests([...serviceRequests, previewServiceRequest]);
     updateQuestionnaireResponseCB(

@@ -47,6 +47,10 @@ function AudioPlayer({ src, className }: AudioPlayerProps) {
     }
   }, []);
 
+  const handleEnded = useCallback(() => {
+    setIsPlaying(false);
+  }, []);
+
   useEffect(() => {
     // Create the audio element
     const audio = new Audio(src);
@@ -56,7 +60,7 @@ function AudioPlayer({ src, className }: AudioPlayerProps) {
     audio.addEventListener("loadedmetadata", handleLoadedMetadata);
     audio.addEventListener("durationchange", handleDurationChange);
     audio.addEventListener("timeupdate", handleTimeUpdate);
-    audio.addEventListener("ended", () => setIsPlaying(false));
+    audio.addEventListener("ended", handleEnded);
 
     // Set the ref
     audioRef.current = audio;
@@ -66,7 +70,7 @@ function AudioPlayer({ src, className }: AudioPlayerProps) {
       audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
       audio.removeEventListener("durationchange", handleDurationChange);
       audio.removeEventListener("timeupdate", handleTimeUpdate);
-      audio.removeEventListener("ended", () => setIsPlaying(false));
+      audio.removeEventListener("ended", handleEnded);
       audio.remove();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
