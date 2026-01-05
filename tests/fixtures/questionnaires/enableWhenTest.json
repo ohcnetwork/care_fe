@@ -244,6 +244,98 @@
           "answer": true
         }
       ]
+    },
+    {
+      "id": "ebdaffca-bfbc-4baa-8acc-bbfbcc7ddb4a",
+      "link_id": "Q-017",
+      "text": "Professional Type",
+      "type": "string",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "fcebbbdb-cacd-4cbb-9bdd-ccdcdd8eec5b",
+      "link_id": "Q-018",
+      "text": "Medical License Number",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "Q-017",
+          "operator": "equals",
+          "answer": "Doctor"
+        }
+      ]
+    },
+    {
+      "id": "adfcccec-dbde-4dcc-8cee-ddedef9ffd6c",
+      "link_id": "Q-019",
+      "text": "Category",
+      "type": "string",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "beddddfd-ecef-4edd-9dff-eefefaafae7d",
+      "link_id": "Q-020",
+      "text": "Specify Other Category",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "Q-019",
+          "operator": "not_equals",
+          "answer": "Standard"
+        }
+      ]
+    },
+    {
+      "id": "cfeeeebe-fdfa-4fee-8eaa-fffafbbfbf8e",
+      "link_id": "Q-021",
+      "text": "Risk Score",
+      "type": "integer",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "daffffcf-aeab-4aff-9fbb-aaabaccbca9f",
+      "link_id": "Q-022",
+      "text": "🎉 Perfect Score - Additional Notes",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "Q-021",
+          "operator": "equals",
+          "answer": 100
+        }
+      ]
+    },
+    {
+      "id": "ebaaaada-bfbc-4baa-8acc-bbbbbdccdbaa",
+      "link_id": "Q-023",
+      "text": "Dosage Amount (mg)",
+      "type": "integer",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "fcbbbbeb-cacd-4cbb-9bdd-ccccceddecbb",
+      "link_id": "Q-024",
+      "text": "Non-standard Dosage Explanation",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "Q-023",
+          "operator": "not_equals",
+          "answer": 100
+        }
+      ]
     }
   ],
   "tags": []
