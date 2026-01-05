@@ -142,7 +142,7 @@ export function ServiceRequestDetails({
                 <div className="text-sm text-gray-600 mb-1">
                   {t("locations")}
                 </div>
-                <div className="font-sm font-normal flex flex-wrap gap-1">
+                <div className="text-sm font-normal flex flex-wrap gap-1">
                   {request.locations.map((location) => (
                     <Badge key={location.id} variant="secondary">
                       {location.name}
