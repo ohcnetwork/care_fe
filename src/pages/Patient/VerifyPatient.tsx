@@ -285,29 +285,32 @@ const UpcomingAppointmentsSummary = ({
       <h6 className="text-base font-semibold">{t("upcoming_appointment")}</h6>
 
       <div className="flex w-full gap-2 py-2 pl-4 pr-3 bg-white rounded-lg border border-indigo-400">
-        <div className="flex w-full justify-between items-center">
-          <div className="flex gap-3 items-center">
+        <div className="flex w-full flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:items-center flex-1">
             <span className="text-sm font-semibold">
               {appointment.token_slot.availability.name}
             </span>
-            <div className="h-6 w-0 border" />
-            <span className="text-sm font-medium">
+            <div className="hidden sm:block h-6 w-0 border" />
+            <span className="text-sm font-medium text-gray-600">
               {format(
                 appointment.token_slot.start_datetime,
                 "hh:mm a; dd/MM/yyyy",
               )}
             </span>
-            <div className="h-6 w-0 border" />
-            <span className="text-sm font-medium">
+            <div className="hidden sm:block h-6 w-0 border" />
+            <span className="text-sm font-medium text-gray-600">
               {formatScheduleResourceName(appointment)}
             </span>
           </div>
-          <Badge variant={APPOINTMENT_STATUS_COLORS[appointment.status]}>
+          <Badge
+            variant={APPOINTMENT_STATUS_COLORS[appointment.status]}
+            className="w-fit"
+          >
             {t(appointment.status)}
           </Badge>
         </div>
 
-        <Button variant="ghost" size="lg" asChild>
+        <Button variant="ghost" size="lg" asChild className="shrink-0">
           <Link
             href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointment.id}`}
           >
