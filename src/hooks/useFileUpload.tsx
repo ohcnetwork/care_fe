@@ -304,15 +304,24 @@ export default function useFileUpload(
         if (data) {
           await uploadfile(data, file);
         }
-      } catch {
+      } catch (_error) {
         errors.push(file);
       }
     }
 
     setUploading(false);
-    setFiles(errors);
-    setUploadFileNames(errors?.map((f) => f.name) ?? []);
-    setError(t("file_error__network"));
+
+    // If any files failed to upload, throw an error
+    if (errors.length > 0) {
+      setFiles(errors);
+      setUploadFileNames(errors?.map((f) => f.name) ?? []);
+      setError(t("file_error__network"));
+      setCameraModalOpen(false);
+      throw new Error(t("file_error__network"));
+    }
+
+    // Clear files on successful upload
+    clearFiles();
     setCameraModalOpen(false);
   };
 

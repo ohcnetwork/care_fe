@@ -175,6 +175,8 @@ export default function ConsentFormSheet({
         await fileUpload.handleFileUpload(consentId);
       } catch (_error) {
         toast.error(t("error_uploading_files"));
+        // Don't proceed with success flow if file upload failed
+        return;
       }
     }
 
