@@ -27,20 +27,18 @@ test.describe("Queue Practitioner Search", () => {
     const dialog = page.locator("[role='dialog']").last();
     const searchInput = dialog.getByPlaceholder(/search departments and/i);
 
-    // Search for practitioners - wait for results
     await searchInput.fill("admin");
-    await page.waitForTimeout(1000);
 
-    // Look for the "Practitioners" group heading to ensure we have practitioner results
     const practitionersGroup = dialog.getByText(/practitioners/i);
 
-    // If practitioners are found, select one
     if (await practitionersGroup.isVisible().catch(() => false)) {
       const firstOption = dialog.locator("[role='option']").first();
       await firstOption.click();
-      await expect(dialog).toBeHidden({ timeout: 3000 });
+
+      const selector = page.getByRole("combobox");
+      await expect(selector).not.toContainText(/select/i);
+      await expect(selector).toBeVisible();
     } else {
-      // If no practitioners found in search, just verify search worked
       const options = dialog.locator("[role='option']");
       expect(await options.count()).toBeGreaterThanOrEqual(0);
     }
@@ -53,9 +51,7 @@ test.describe("Queue Practitioner Search", () => {
     const departments = dialog.locator("[role='option']");
 
     await departments.first().click();
-    await page.waitForTimeout(500);
 
-    // Verify we can navigate (either shows back button or new options)
     const backButton = dialog.getByRole("button").filter({
       has: page.locator("svg.lucide-arrow-left"),
     });
