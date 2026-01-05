@@ -97,6 +97,7 @@ export const MedicineIcon: React.FC<IconProps> = ({ className = "size-4" }) => (
     fill="none"
     className={className}
     xmlns="http://www.w3.org/2000/svg"
+    aria-label="Medicine"
   >
     <path
       d="M18.5419 7.86755C18.811 7.92945 19.0793 7.76145 19.1411 7.4923C19.203 7.2232 19.035 6.95485 18.7659 6.893L15.4581 6.13255C15.189 6.07065 14.9207 6.23865 14.8588 6.5078C14.7969 6.7769 14.9649 7.04525 15.234 7.1071L18.5419 7.86755Z"
@@ -180,6 +181,7 @@ export const BedAvailableUnselected: React.FC<IconProps> = ({
     className={className}
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    aria-label="Bed Available and unselected"
   >
     <path d="M2.5 13H3V15H2.5V13Z" fill="white" />
     <path
@@ -245,6 +247,7 @@ export const BedUnavailableUnselected: React.FC<IconProps> = ({
     className={className}
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    aria-label="Bed Unavailable and unselected"
   >
     <path d="M2.5 13H3V15H2.5V13Z" fill="white" />
     <path
@@ -350,6 +353,7 @@ export const BedAvailableSelected: React.FC<IconProps> = ({
     className={className}
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    aria-label="Bed Available and selected"
   >
     <path d="M2.5 13H3V15H2.5V13Z" fill="white" />
     <path
@@ -422,6 +426,7 @@ export const BedUnavailableSelected: React.FC<IconProps> = ({
     className={className}
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    aria-label="Bed Unavailable and selected"
   >
     <path d="M2.5 12.5H3V14.5H2.5V12.5Z" fill="white" />
     <path d="M3 12.5V14.5H2.5V12.5H3Z" fill="#6B7280" />
