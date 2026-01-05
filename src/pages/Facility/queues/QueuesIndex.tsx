@@ -7,7 +7,7 @@ import {
   Plus,
   Settings,
 } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -245,10 +245,9 @@ export default function QueuesIndex({
 
   const availableUsers = availableUsersData?.users || [];
 
-  // Find the selected practitioner - compare IDs properly
-  const selectedPractitioner = useMemo(
-    () => availableUsers.find((user) => user.id === effectiveResourceId),
-    [availableUsers, effectiveResourceId],
+  // Find the selected practitioner
+  const selectedPractitioner = availableUsers.find(
+    (user) => user.id === effectiveResourceId,
   );
 
   // Set default date to today if no date is specified
