@@ -10,10 +10,11 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { formatName } from "@/Utils/utils";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import { FileReadMinimal } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
+import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
 import { ObservationStatus } from "@/types/emr/observation/observation";
 import { DiagnosticReportResultsTable } from "./components/DiagnosticReportResultsTable";
@@ -175,45 +176,67 @@ export default function DiagnosticReportPrint({
           </div>
 
           {/* Patient Details */}
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
-            <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
+          <div className="mt-6 grid md:grid-cols-2 print:grid-cols-2 gap-x-6 gap-y-1">
+            <div className="grid grid-cols-[6rem_auto_1fr] items-center">
               <span className="text-gray-600">{t("patient")}</span>
               <span className="text-gray-600">:</span>
-              <span className="font-semibold break-words">
+              <span className="font-semibold ml-2 wrap-break-word">
                 {report.encounter?.patient?.name}
               </span>
             </div>
-            <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
+            {report.encounter?.patient &&
+              "instance_identifiers" in report.encounter.patient &&
+              report.encounter.patient.instance_identifiers
+                .filter(
+                  ({ config }) =>
+                    config.config.use === PatientIdentifierUse.official,
+                )
+                .map((identifier) => (
+                  <div
+                    key={identifier.config.id}
+                    className="grid grid-cols-[6rem_auto_1fr] items-center"
+                  >
+                    <span className="text-gray-600">
+                      {identifier.config.config.display}
+                    </span>
+                    <span className="text-gray-600">:</span>
+                    <span className="font-semibold ml-2">
+                      {identifier.value}
+                    </span>
+                  </div>
+                ))}
+            <div className="grid grid-cols-[6rem_auto_1fr] items-center">
+              <span className="text-gray-600">
+                {t("age")} / {t("sex")}
+              </span>
+              <span className="text-gray-600">:</span>
+              <span className="font-semibold ml-2">
+                {formatPatientAge(report.encounter.patient, true)} /
+                <span className="capitalize ml-1">
+                  {t(`GENDER__${report.encounter.patient.gender}`)}
+                </span>
+              </span>
+            </div>
+            <div className="grid grid-cols-[6rem_auto_1fr] items-center">
               <span className="text-gray-600">{t("category")}</span>
               <span className="text-gray-600">:</span>
-              <span className="font-semibold break-words">
+              <span className="font-semibold ml-2 wrap-break-word">
                 {report.category?.display || "-"}
               </span>
             </div>
-            <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-              <span className="text-gray-600">{t("status")}</span>
+            <div className="grid grid-cols-[6rem_auto_1fr] items-center">
+              <span className="text-gray-600">{t("report_date")}</span>
               <span className="text-gray-600">:</span>
-              <span className="font-semibold capitalize">
-                {t(report.status)}
+              <span className="font-semibold ml-2">
+                {report.created_date &&
+                  format(new Date(report.created_date), "dd-MM-yyyy")}
               </span>
             </div>
-
-            <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-              <span className="text-gray-600">{t("date")}</span>
+            <div className="grid grid-cols-[6rem_auto_1fr] items-center">
+              <span className="text-gray-600">{t("requested_by")}</span>
               <span className="text-gray-600">:</span>
-              <span className="font-semibold">
-                {report.encounter?.created_date &&
-                  format(
-                    new Date(report.encounter.created_date),
-                    "dd MMM yyyy, EEEE",
-                  )}
-              </span>
-            </div>
-            <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-              <span className="text-gray-600">{t("report_created_by")}</span>
-              <span className="text-gray-600">:</span>
-              <span className="font-semibold">
-                {formatName(report.created_by)}
+              <span className="font-semibold ml-2">
+                {formatName(report.requester)}
               </span>
             </div>
           </div>
