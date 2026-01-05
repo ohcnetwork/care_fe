@@ -68,8 +68,9 @@ export async function createServiceRequest(
   patientId: string,
   encounterId: string,
   allFields: boolean = false,
+  overrides: Partial<Pick<ServiceRequestTestData, "notes" | "priority">> = {},
 ): Promise<ServiceRequestTestData> {
-  const data = generateServiceRequestTestData(allFields);
+  const data = { ...generateServiceRequestTestData(allFields), ...overrides };
 
   await page.goto(
     `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/service_requests`,
@@ -140,4 +141,40 @@ export async function createServiceRequest(
   await expectToast(page, /questionnaire submitted successfully/i);
 
   return data;
+}
+
+export async function getLatestServiceRequestId(
+  page: Page,
+  facilityId: string,
+  patientId: string,
+  encounterId: string,
+  priority?: string,
+): Promise<string> {
+  // Navigate to service requests list to get the latest service request ID
+  await page.goto(
+    `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/service_requests`,
+  );
+
+  let targetRow;
+
+  if (priority) {
+    // Find the first row with matching priority
+    targetRow = page
+      .locator('[data-slot="table-body"] [data-slot="table-row"]')
+      .filter({ hasText: priority })
+      .first();
+  } else {
+    // Fallback to first row (not safe for parallel execution)
+    targetRow = page
+      .locator('[data-slot="table-body"] [data-slot="table-row"]')
+      .first();
+  }
+
+  await targetRow.getByRole("button", { name: "See Details" }).click();
+
+  // Extract service request ID from URL
+  await page.waitForURL(/\/service_requests\/.+$/);
+  const match = page.url().match(/\/service_requests\/([^/?]+)/);
+
+  return match?.[1] || "";
 }
