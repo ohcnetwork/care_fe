@@ -11,6 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import DateField from "@/components/ui/date-field";
@@ -688,14 +689,25 @@ const PatientBasicsContent = ({
                 </span>
               </FormLabel>
               <FormControl>
-                <TagSelectorPopover
-                  facilityId={facilityId}
-                  selected={selectedTags}
-                  onChange={(tags) => {
-                    field.onChange(tags.map((tag) => tag.id));
-                  }}
-                  resource={TagResource.PATIENT}
-                />
+                <>
+                  <TagSelectorPopover
+                    facilityId={facilityId}
+                    selected={selectedTags}
+                    onChange={(tags) => {
+                      field.onChange(tags.map((tag) => tag.id));
+                    }}
+                    resource={TagResource.PATIENT}
+                  />
+                  {selectedTags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {selectedTags.map((tag) => (
+                        <Badge key={tag.id} variant="secondary">
+                          {tag.display}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </>
               </FormControl>
               <FormMessage />
             </FormItem>
