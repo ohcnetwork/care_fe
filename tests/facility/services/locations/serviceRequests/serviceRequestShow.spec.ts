@@ -3,6 +3,7 @@ import {
   createServiceRequest,
   getLatestServiceRequestId,
 } from "tests/facility/encounter/serviceRequests/serviceRequest";
+import { ACTIVITY_DEFINITION_MAPPING } from "tests/facility/settings/activityDefinition/activityDefinition";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getLocationId } from "tests/support/locationId";
@@ -24,10 +25,11 @@ test.beforeAll(async () => {
 
 test.describe("Service Request Show Page", () => {
   let serviceRequestId: string;
+  let serviceRequestData: any;
+  let activityDefinitionMapping: any;
 
   test.beforeEach(async ({ page }) => {
-    // Create a service request with Urgent priority for parallel-safe test execution
-    const serviceRequestData = await createServiceRequest(
+    serviceRequestData = await createServiceRequest(
       page,
       facilityId,
       patientId,
@@ -36,126 +38,106 @@ test.describe("Service Request Show Page", () => {
       { priority: "Urgent" },
     );
 
-    // Get the ID of the newly created service request using priority
+    // Get mapping data for the selected activity definition
+    activityDefinitionMapping =
+      ACTIVITY_DEFINITION_MAPPING[
+        serviceRequestData.activityDefinition as keyof typeof ACTIVITY_DEFINITION_MAPPING
+      ];
+
     serviceRequestId = await getLatestServiceRequestId(
       page,
       facilityId,
       patientId,
       encounterId,
-      serviceRequestData.priority, // Pass priority for parallel-safe matching
+      serviceRequestData.priority,
     );
     expect(serviceRequestId).toBeTruthy();
 
-    // Navigate to the location-specific service request view
     await page.goto(
       `/facility/${facilityId}/locations/${locationId}/service_requests/${serviceRequestId}`,
     );
   });
 
   test.describe("Service Request Details Section", () => {
-    test("should display service request details with status and priority badges", async ({
-      page,
-    }) => {
-      // Verify activity definition title is displayed
-      const activityTitle = page.locator("div.font-semibold.text-gray-600");
-      await expect(activityTitle).toBeVisible();
+    test("should display all service request details", async ({ page }) => {
+      await expect(
+        page.getByText(serviceRequestData.activityDefinition).first(),
+      ).toBeVisible();
 
-      // Verify request ID is displayed
       await expect(page.getByText(/request id:/i)).toBeVisible();
+      await expect(page.getByText(serviceRequestId)).toBeVisible();
 
-      // Verify priority badge is visible
-      const prioritySection = page.locator("div", {
-        hasText: /^priority$/i,
-      });
-      await expect(prioritySection).toBeVisible();
+      await expect(page.getByText(/^priority$/i)).toBeVisible();
+      await expect(page.getByText(serviceRequestData.priority)).toBeVisible();
 
-      // Verify status badge is visible
-      const statusSection = page.locator("div", { hasText: /^status$/i });
-      await expect(statusSection).toBeVisible();
+      await expect(page.getByText(/^status$/i)).toBeVisible();
+      await expect(page.getByText(serviceRequestData.status)).toBeVisible();
 
-      // Verify observation definitions section is visible
-      await expect(page.getByText(/observation_definitions/i)).toBeVisible();
+      await expect(page.getByText(/observation definitions/i)).toBeVisible();
 
-      // Verify specimen section is visible
+      // Verify observation definition badges
+      for (const observation of activityDefinitionMapping.observations) {
+        await expect(
+          page.getByRole("button", { name: observation.title }),
+        ).toBeVisible();
+      }
+
       await expect(
         page.locator("div.text-sm.text-gray-600", { hasText: /^specimen$/i }),
       ).toBeVisible();
 
-      // Verify requested by section is visible
+      // Verify specimen requirement titles
+      for (const specimen of activityDefinitionMapping.specimens) {
+        await expect(page.getByText(specimen.title)).toBeVisible();
+      }
+
       await expect(page.getByText(/requested by/i)).toBeVisible();
-    });
 
-    test("should display body site when provided", async ({ page }) => {
-      // Body site should be visible since we created the service request with all fields
-      const bodySiteSection = page.locator("div", { hasText: /body_site/i });
-      await expect(bodySiteSection).toBeVisible();
-    });
+      if (serviceRequestData.bodySite) {
+        await expect(page.getByText(serviceRequestData.bodySite)).toBeVisible();
+      }
 
-    test("should display intent information", async ({ page }) => {
-      // Verify intent section is visible
       await expect(page.getByText(/intent/i).first()).toBeVisible();
-    });
 
-    test("should display patient instructions when provided", async ({
-      page,
-    }) => {
-      // Patient instructions should be visible
-      await expect(page.getByText(/patient instruction/i)).toBeVisible();
-    });
+      if (serviceRequestData.patientInstruction) {
+        await expect(
+          page.getByText(serviceRequestData.patientInstruction),
+        ).toBeVisible();
+      }
 
-    test("should display notes when provided", async ({ page }) => {
-      // Notes section should be visible
-      await expect(page.getByText(/notes/i)).toBeVisible();
+      if (serviceRequestData.notes) {
+        await expect(page.getByText(serviceRequestData.notes)).toBeVisible();
+      }
     });
   });
 
   test.describe("Charge Items Section", () => {
-    test("should display charge items section", async ({ page }) => {
-      // Verify charge items card is visible
-      const chargeItemsTitle = page.getByRole("heading", {
-        name: /charge_items/i,
-      });
-      await expect(chargeItemsTitle).toBeVisible();
-    });
+    test("should display all charge item details", async ({ page }) => {
+      await expect(
+        page.locator('[data-slot="card-title"]', { hasText: /charge items/i }),
+      ).toBeVisible();
 
-    test("should show add charge items button when not in view only mode", async ({
-      page,
-    }) => {
-      // Look for the add/plus button for charge items
-      const chargeItemsCard = page.locator("div", {
-        has: page.getByRole("heading", { name: /charge_items/i }),
-      });
-      const addButton = chargeItemsCard.locator('button[type="button"]', {
-        has: page.locator("svg"),
-      });
+      for (const chargeItem of activityDefinitionMapping.chargeItems) {
+        await expect(page.getByText(chargeItem.title)).toBeVisible();
+      }
 
-      // Verify button exists (may not be visible if service request is completed)
-      const buttonCount = await addButton.count();
-      expect(buttonCount).toBeGreaterThanOrEqual(0);
-    });
+      await expect(page.getByText(/billable/i)).toBeVisible();
+      await expect(page.getByText(/unpaid/i)).toBeVisible();
 
-    test("should display empty state when no charge items exist", async ({
-      page,
-    }) => {
-      // Check if charge items section exists
-      const chargeItemsSection = page.locator("div", {
-        has: page.getByRole("heading", { name: /charge_items/i }),
-      });
-      await expect(chargeItemsSection).toBeVisible();
-
-      // The section should be present even if empty
-      const cardContent = chargeItemsSection.locator('[class*="CardContent"]');
-      await expect(cardContent).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: /add charge items/i }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: /create invoice/i }),
+      ).toBeVisible();
     });
   });
 
   test.describe("Specimens Section", () => {
     test("should display specimens section header", async ({ page }) => {
-      // Wait for the specimens heading to be visible
-      const specimensHeading = page.getByRole("heading", {
-        name: /specimens/i,
-      });
-      await expect(specimensHeading).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: /specimens/i }),
+      ).toBeVisible();
     });
 
     test("should display print all QR codes button", async ({ page }) => {
@@ -265,8 +247,7 @@ test.describe("Service Request Show Page", () => {
 
   test.describe("Service Request Actions", () => {
     test("should display back button", async ({ page }) => {
-      const backButton = page.getByRole("button", { name: /back/i });
-      await expect(backButton).toBeVisible();
+      await expect(page.getByRole("button", { name: /back/i })).toBeVisible();
     });
 
     test("should navigate back when back button is clicked", async ({

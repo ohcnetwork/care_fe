@@ -67,6 +67,254 @@ export const CHARGE_ITEM_DEFINITIONS = [
   "Fasting Blood Glucose Test",
 ];
 
+export const ACTIVITY_DEFINITION_MAPPING = {
+  Urinalysis: {
+    slug: "urinalysis",
+    title: "Urinalysis",
+    specimens: [
+      {
+        title: "Urinalysis Specimen",
+        typeCollected: "Urine",
+        collectionMethod: "Urine specimen collection, clean catch",
+        patientPreparation: ["Same day but before procedure"],
+        container: {
+          cap: "yellow cap",
+          capacity: { value: 100, unit: "milliliter" },
+          minVolume: { value: 30, unit: "milliliter" },
+          preparation:
+            "Label container. Ensure tight seal to avoid contamination or leakage.",
+        },
+        retention: { value: 2, unit: "hours" },
+      },
+    ],
+    observations: [
+      {
+        title: "Urinalysis Observation",
+        code: {
+          code: "LP7681-2",
+          system: "http://loinc.org",
+          display: "Urine",
+        },
+        category: "laboratory",
+        dataType: "choice",
+        method: "Urine dipstick test",
+      },
+    ],
+    diagnosticReports: ["Urine"],
+    chargeItems: [
+      {
+        title: "Urinalysis Test",
+        basePrice: 500,
+        discounts: [
+          { code: "oldage", display: "Old Age Discount", factor: 10 },
+        ],
+        taxes: [
+          { code: "cgst", display: "CGST", factor: 3 },
+          { code: "igst", display: "IGST", factor: 6 },
+          { code: "gst", display: "GST", factor: 6 },
+        ],
+      },
+    ],
+  },
+  "Lipid Panel": {
+    slug: "lipid_panel",
+    title: "Lipid Panel",
+    specimens: [
+      {
+        title: "Lipid Panel Blood Specimen",
+        typeCollected: "Blood venous",
+        collectionMethod: "Puncture - action",
+        patientPreparation: ["After fasting"],
+        container: {
+          cap: "dark yellow cap",
+          capacity: { value: 5, unit: "milliliter" },
+          minVolume: { value: 2, unit: "milliliter" },
+          preparation:
+            "Invert tube gently 5-6 times. Let stand upright for clotting. Centrifuge within 1 hour of collection.",
+        },
+        retention: { value: 7, unit: "days" },
+      },
+    ],
+    observations: [
+      {
+        title: "Lipid Panel Observation",
+        code: {
+          code: "LP97557-0",
+          system: "http://loinc.org",
+          display: "Lipid panel with direct LDL",
+        },
+        category: "laboratory",
+        dataType: "quantity",
+        qualifiedRanges: [
+          { max: 200, interpretation: "Desirable" },
+          { min: 200, max: 239, interpretation: "Borderline High" },
+          { min: 239, interpretation: "High" },
+        ],
+      },
+    ],
+    diagnosticReports: ["Lipid panel with direct LDL"],
+    chargeItems: [
+      {
+        title: "Lipid Panel Test",
+        basePrice: 400,
+        discounts: [
+          { code: "oldage", display: "Old Age Discount", factor: 10 },
+        ],
+        taxes: [
+          { code: "igst", display: "IGST", factor: 6 },
+          { code: "gst", display: "GST", factor: 6 },
+        ],
+      },
+    ],
+  },
+  "Complete Blood Count (CBC) Panel": {
+    slug: "complete_blood_count",
+    title: "Complete Blood Count (CBC) Panel",
+    specimens: [
+      {
+        title: "CBC Blood Specimen",
+        typeCollected: "Blood venous",
+        collectionMethod: "Puncture - action",
+        patientPreparation: [],
+        container: {
+          cap: "lavender cap",
+          capacity: { value: 10, unit: "milliliter" },
+          minVolume: { value: 3, unit: "milliliter" },
+          preparation:
+            "Invert gently 8-10 times immediately after collection to mix with anticoagulant.",
+        },
+        retention: { value: 6, unit: "hours" },
+      },
+    ],
+    observations: [
+      {
+        title: "Complete Blood Count",
+        code: {
+          code: "58410-2",
+          system: "http://loinc.org",
+          display: "CBC panel - Blood by Automated count",
+        },
+        category: "laboratory",
+        dataType: "quantity",
+        method: "Automated count",
+        unit: {
+          code: "g/dL",
+          system: "http://unitsofmeasure.org",
+          display: "gram per deciliter",
+        },
+        components: [
+          {
+            code: "LP32067-8",
+            display: "Hemoglobin",
+            unit: "g/dL",
+            ranges: [
+              { max: 12, interpretation: "Low" },
+              { min: 12, max: 16, interpretation: "Normal" },
+              { min: 16, interpretation: "High" },
+            ],
+          },
+          {
+            code: "LP15101-6",
+            display: "Hematocrit",
+            unit: "%",
+            ranges: [
+              { max: 36, interpretation: "Low" },
+              { min: 36, max: 48, interpretation: "Normal" },
+              { min: 48, interpretation: "High" },
+            ],
+          },
+          {
+            code: "LA12896-9",
+            display: "Erythrocytes",
+            unit: "10*6/uL",
+            ranges: [
+              { max: 4, interpretation: "Low" },
+              { min: 4, max: 6, interpretation: "Normal" },
+              { min: 6, interpretation: "High" },
+            ],
+          },
+          {
+            code: "LP7631-7",
+            display: "Platelets",
+            unit: "10*3/uL",
+            ranges: [
+              { max: 150, interpretation: "Low" },
+              { min: 150, max: 450, interpretation: "Normal" },
+              { min: 450, interpretation: "High" },
+            ],
+          },
+        ],
+      },
+    ],
+    diagnosticReports: ["CBC panel - Blood by Automated count"],
+    chargeItems: [
+      {
+        title: "Complete Blood Count (CBC) Test",
+        basePrice: 450,
+        discounts: [
+          { code: "child", display: "Child Discount", factor: 5 },
+          { code: "oldage", display: "Old Age Discount", factor: 10 },
+        ],
+        taxes: [
+          { code: "igst", display: "IGST", factor: 6 },
+          { code: "gst", display: "GST", factor: 6 },
+        ],
+      },
+    ],
+  },
+  "Fasting Blood Glucose": {
+    slug: "fasting_glucose",
+    title: "Fasting Blood Glucose",
+    specimens: [
+      {
+        title: "Blood Glucose Test Specimen",
+        typeCollected: "Blood venous",
+        collectionMethod: "Puncture - action",
+        patientPreparation: ["After fasting"],
+        container: {
+          cap: "grey cap",
+          capacity: { value: 5, unit: "milliliter" },
+          minVolume: { value: 2, unit: "milliliter" },
+          preparation:
+            "Label tube immediately after collection. Invert gently 8-10 times to mix anticoagulant. Transport to lab under cold conditions (2-8°C) if processing is delayed.",
+        },
+        retention: { value: 24, unit: "hours" },
+      },
+    ],
+    observations: [
+      {
+        title: "Fasting Blood Glucose",
+        code: {
+          code: "1558-6",
+          system: "http://loinc.org",
+          display: "Fasting glucose [Mass/volume] in Serum or Plasma",
+        },
+        category: "laboratory",
+        dataType: "quantity",
+        qualifiedRanges: [
+          { max: 70, interpretation: "Low" },
+          { min: 70, max: 99, interpretation: "Normal" },
+          { min: 100, interpretation: "High" },
+        ],
+      },
+    ],
+    diagnosticReports: ["Fasting glucose [Mass/volume] in Serum or Plasma"],
+    chargeItems: [
+      {
+        title: "Fasting Blood Glucose Test",
+        basePrice: 600,
+        discounts: [
+          { code: "oldage", display: "Old Age Discount", factor: 10 },
+        ],
+        taxes: [
+          { code: "igst", display: "IGST", factor: 6 },
+          { code: "gst", display: "GST", factor: 6 },
+        ],
+      },
+    ],
+  },
+} as const;
+
 export const STATUS_OPTIONS = [
   "Active",
   "Draft",

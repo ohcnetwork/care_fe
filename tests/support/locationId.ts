@@ -16,7 +16,7 @@ export function getLocationId(): string {
     console.warn("⚠️ Location meta missing — running location setup...");
     try {
       execSync(
-        "npx playwright test --project=setup tests/setup/location.setup.ts",
+        "npx playwright test --project=setup-location tests/setup/location.setup.ts",
         {
           stdio: "inherit",
           cwd: process.cwd(),

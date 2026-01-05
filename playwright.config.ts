@@ -68,6 +68,11 @@ export default defineConfig({
       dependencies: ["setup-facility"],
     },
     {
+      name: "setup-location",
+      testMatch: /.*\/location\.setup\.ts/,
+      dependencies: ["setup-facility"],
+    },
+    {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
       dependencies: ["setup-patient"],
