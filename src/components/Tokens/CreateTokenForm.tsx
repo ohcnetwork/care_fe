@@ -131,8 +131,7 @@ export default function CreateTokenForm({
     }),
     onSuccess: (data: TokenRead) => {
       toast.success(t("token_created"));
-      setIsOpen(false);
-      form.reset();
+      handleOpenChange(false);
       queryClient.invalidateQueries({
         queryKey: ["tokens", patient?.id, facilityId],
       });

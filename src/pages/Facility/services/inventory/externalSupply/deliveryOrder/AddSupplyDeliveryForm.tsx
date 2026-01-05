@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Trash2 } from "lucide-react";
 import { useQueryParams } from "raviger";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -46,6 +46,7 @@ import {
 import { SmartExternalDeliveryRow } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/SmartExternalDeliveryRow";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   MonetaryComponent,
   MonetaryComponentType,
@@ -55,7 +56,6 @@ import {
   ChargeItemDefinitionStatus,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
-import facilityApi from "@/types/facility/facilityApi";
 import {
   ProductCreate,
   ProductRead,
@@ -76,10 +76,17 @@ import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { extractSchemaInfo } from "@/Utils/schema/extensionSchema";
+import { JSONSchema2020 } from "@/Utils/schema/types";
 
 const supplyDeliveryItemSchema = z.object({
   supplied_inventory_item: z.string().optional(),
-  supplied_item_quantity: z.number().min(1, "Quantity must be at least 1"),
+  supplied_item_quantity: z
+    .number()
+    .or(z.nan())
+    .refine((val) => !isNaN(val) && val > 0, {
+      message: "Quantity must be at least 1",
+    }),
   product_knowledge: z
     .custom<ProductKnowledgeBase>()
     .refine((data) => data?.slug, {
@@ -98,6 +105,7 @@ const supplyDeliveryItemSchema = z.object({
   informational_components: z.array(z.custom<MonetaryComponent>()).optional(),
   tax_components: z.array(z.custom<MonetaryComponent>()).optional(),
   discount_components: z.array(z.custom<MonetaryComponent>()).optional(),
+  extensions: z.record(z.unknown()).optional(),
 });
 
 export const createFormSchema = z.object({
@@ -135,6 +143,21 @@ export function AddSupplyDeliveryForm({
     null,
   );
 
+  // Get facility data from hook
+  const { facility } = useCurrentFacility();
+
+  const informationalCodes = facility?.instance_informational_codes || [];
+
+  // Get extensions schema from facility
+  const extensionsSchema: JSONSchema2020 | undefined =
+    facility?.extensions_schema_supply_delivery;
+
+  // Extract extension field metadata for table headers
+  const { fieldMetadata: extensionFields } = useMemo(
+    () => extractSchemaInfo(extensionsSchema),
+    [extensionsSchema],
+  );
+
   // Default values for a new empty item row
   const createEmptyItem = useCallback(
     (): SupplyDeliveryItemValues => ({
@@ -145,19 +168,10 @@ export function AddSupplyDeliveryForm({
       supply_request: undefined,
       _is_inward_stock: !origin,
       is_tax_inclusive: careConfig.inventory.defaultTaxInclusive,
+      extensions: {},
     }),
     [origin],
   );
-
-  // Fetch facility data for informational codes
-  const { data: facilityData } = useQuery({
-    queryKey: ["facility", facilityId],
-    queryFn: query(facilityApi.get, {
-      pathParams: { facilityId },
-    }),
-  });
-
-  const informationalCodes = facilityData?.instance_informational_codes || [];
 
   // Load supply requests when supplyOrder query parameter is present
   const { data: supplyRequests } = useQuery({
@@ -266,6 +280,7 @@ export function AddSupplyDeliveryForm({
       supply_request: request,
       _is_inward_stock: !origin,
       is_tax_inclusive: careConfig.inventory.defaultTaxInclusive,
+      extensions: {},
     }));
     form.setValue("items", itemsFromRequests || []);
     setIsSelectDialogOpen(false);
@@ -478,7 +493,7 @@ export function AddSupplyDeliveryForm({
       origin: origin,
       destination: destination,
       order: deliveryOrderId,
-      extensions: {},
+      extensions: item.extensions || {},
     };
 
     await createSupplyDelivery(deliveryPayload);
@@ -629,8 +644,24 @@ export function AddSupplyDeliveryForm({
                                 <TableHead className="min-w-[120px] text-xs font-semibold">
                                   {t("tax")}
                                 </TableHead>
+                                {extensionFields.map((field) => (
+                                  <TableHead
+                                    key={field.name}
+                                    className="min-w-[100px] text-xs font-semibold"
+                                  >
+                                    {field.label}
+                                    {field.required && (
+                                      <span className="text-red-500 ml-0.5">
+                                        *
+                                      </span>
+                                    )}
+                                  </TableHead>
+                                ))}
                               </>
                             )}
+                            <TableHead className="text-xs font-semibold">
+                              {t("actions")}
+                            </TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -725,7 +756,7 @@ export function AddSupplyDeliveryForm({
                                             {...field}
                                             onChange={(e) =>
                                               field.onChange(
-                                                parseInt(e.target.value) || 1,
+                                                parseInt(e.target.value),
                                               )
                                             }
                                           />
@@ -734,6 +765,17 @@ export function AddSupplyDeliveryForm({
                                       </FormItem>
                                     )}
                                   />
+                                </TableCell>
+                                <TableCell className="align-top p-2">
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => remove(index)}
+                                    aria-label={t("remove")}
+                                  >
+                                    <Trash2 className="size-4" />
+                                  </Button>
                                 </TableCell>
                               </TableRow>
                             ) : (
@@ -748,6 +790,8 @@ export function AddSupplyDeliveryForm({
                                 onProductSelectOpened={() =>
                                   setNewlyAddedRowIndex(null)
                                 }
+                                extensionsSchema={extensionsSchema}
+                                onRemove={() => remove(index)}
                               />
                             ),
                           )}

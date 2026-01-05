@@ -52,6 +52,7 @@ import {
 import specimenApi from "@/types/emr/specimen/specimenApi";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
 
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import { DiagnosticReportForm } from "./components/DiagnosticReportForm";
 import { DiagnosticReportReview } from "./components/DiagnosticReportReview";
@@ -333,6 +334,7 @@ export default function ServiceRequestShow({
                           className="font-semibold border border-gray-400"
                         >
                           {t("mark_as_complete")}
+                          <ShortcutBadge actionId="mark-as-complete" />
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
@@ -350,6 +352,7 @@ export default function ServiceRequestShow({
                             onClick={() => completeServiceRequest({})}
                           >
                             {t("confirm")}
+                            <ShortcutBadge actionId="enter-action" />
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -367,6 +370,7 @@ export default function ServiceRequestShow({
                       }
                     >
                       {t("view_report")}
+                      <ShortcutBadge actionId="view-report" />
                     </Button>
                   )}
                 </div>

@@ -8,7 +8,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 
 import LocationForm from "./LocationForm";
 
@@ -16,7 +16,7 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   facilityId: string;
-  location?: LocationList;
+  location?: LocationRead;
   parentId?: string;
 }
 

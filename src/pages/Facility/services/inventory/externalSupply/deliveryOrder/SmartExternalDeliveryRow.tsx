@@ -1,12 +1,13 @@
 import { format } from "date-fns";
-import { ChevronDown, Plus } from "lucide-react";
-import { useState } from "react";
+import { ChevronDown, Plus, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Command,
@@ -33,6 +34,7 @@ import { cn } from "@/lib/utils";
 
 import { MonetaryComponentSelector } from "@/components/Billing/MonetaryComponentSelector";
 import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPicker";
+import { SchemaField } from "@/components/Extensions/SchemaField";
 import { CURRENCY_SYMBOL } from "@/components/ui/monetary-display";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -40,6 +42,8 @@ import { Code } from "@/types/base/code/code";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ProductRead } from "@/types/inventory/product/product";
+import { extractSchemaInfo } from "@/Utils/schema/extensionSchema";
+import { JSONSchema2020 } from "@/Utils/schema/types";
 
 import { SupplyDeliveryFormValues } from "./AddSupplyDeliveryForm";
 import { useDeliveryRowItem } from "./useDeliveryRowItem";
@@ -50,6 +54,8 @@ interface Props {
   informationalCodes: Code[];
   autoOpenProductSelect?: boolean;
   onProductSelectOpened?: () => void;
+  extensionsSchema?: JSONSchema2020;
+  onRemove?: () => void;
 }
 
 export function SmartExternalDeliveryRow({
@@ -58,10 +64,18 @@ export function SmartExternalDeliveryRow({
   informationalCodes,
   autoOpenProductSelect = false,
   onProductSelectOpened,
+  extensionsSchema,
+  onRemove,
 }: Props) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
   const [batchSelectorOpen, setBatchSelectorOpen] = useState(false);
+
+  // Extract extension field metadata from schema
+  const { fieldMetadata: extensionFields, conditionalRules } = useMemo(
+    () => extractSchemaInfo(extensionsSchema),
+    [extensionsSchema],
+  );
 
   const {
     productKnowledge,
@@ -302,7 +316,7 @@ export function SmartExternalDeliveryRow({
             <Input
               type="number"
               min={0}
-              step="1"
+              step="0.01"
               value={unitPrice || ""}
               placeholder="0"
               onChange={(e) => {
@@ -347,7 +361,7 @@ export function SmartExternalDeliveryRow({
               <Input
                 type="number"
                 min={0}
-                step="1"
+                step="0.01"
                 value={currentValue?.amount || ""}
                 placeholder="0"
                 onChange={(e) => {
@@ -412,6 +426,40 @@ export function SmartExternalDeliveryRow({
             displayMode="short"
           />
         </span>
+      </TableCell>
+
+      {/* Extension Fields - each field in its own column */}
+      {extensionFields.map((fieldMeta) => (
+        <TableCell key={fieldMeta.name} className="align-top">
+          <SchemaField
+            metadata={{
+              ...fieldMeta,
+              label: "",
+              description: undefined,
+              required: false, // Hide asterisk - shown in table header
+            }}
+            control={form.control}
+            basePath={`items.${index}.extensions`}
+            className="min-w-[100px] [&_input]:h-9 gap-0"
+            conditionalRules={conditionalRules}
+          />
+          {fieldMeta.description && (
+            <p className="text-[10px] text-muted-foreground mt-1">
+              {fieldMeta.description}
+            </p>
+          )}
+        </TableCell>
+      ))}
+      <TableCell>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={onRemove}
+          aria-label={t("remove")}
+        >
+          <Trash2 className="size-4" />
+        </Button>
       </TableCell>
     </TableRow>
   );

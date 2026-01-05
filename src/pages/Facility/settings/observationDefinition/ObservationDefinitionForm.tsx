@@ -44,7 +44,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { CodeSchema } from "@/types/base/code/code";
-import { removeConditionType } from "@/types/base/condition/condition";
+import {
+  getConditionDiscriminatorValue,
+  removeConditionType,
+} from "@/types/base/condition/condition";
 import {
   InterpretationType,
   QualifiedRange,
@@ -210,7 +213,10 @@ function ObservationDefinitionFormContent({
                     id: index,
                     conditions: range?.conditions.map((condition) => ({
                       ...condition,
-                      _conditionType: `${condition.metric}_${condition.operation}`,
+                      _conditionType: getConditionDiscriminatorValue(
+                        condition.metric,
+                        condition.operation,
+                      ),
                     })),
                     _interpretation_type:
                       range?.ranges?.length > 0
@@ -224,7 +230,10 @@ function ObservationDefinitionFormContent({
                 id: index,
                 conditions: range?.conditions.map((condition) => ({
                   ...condition,
-                  _conditionType: `${condition.metric}_${condition.operation}`,
+                  _conditionType: getConditionDiscriminatorValue(
+                    condition.metric,
+                    condition.operation,
+                  ),
                 })),
                 _interpretation_type:
                   range?.ranges?.length > 0
