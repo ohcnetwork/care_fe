@@ -15,6 +15,7 @@ import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportAp
 import { FileReadMinimal } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
 
+import { ObservationStatus } from "@/types/emr/observation/observation";
 import { DiagnosticReportResultsTable } from "./components/DiagnosticReportResultsTable";
 
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
@@ -224,7 +225,9 @@ export default function DiagnosticReportPrint({
                 {t("test_results")}
               </h2>
               <DiagnosticReportResultsTable
-                observations={report.observations}
+                observations={report.observations.filter(
+                  (obs) => obs.status !== ObservationStatus.ENTERED_IN_ERROR,
+                )}
               />
             </div>
           </div>

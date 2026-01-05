@@ -227,7 +227,7 @@ function TagFilterDropdown({
   return (
     <div className="p-3 max-h-[30vh] overflow-y-auto">
       <Input
-        placeholder="Search tags..."
+        placeholder={t("search_tags")}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className="h-8 text-sm mb-3"
