@@ -64,3 +64,20 @@ export interface UserCreate extends UserUpdate {
   password?: string;
   email: string;
 }
+
+export interface CreateServiceAccountResponse {
+  id: string;
+  username: string;
+  is_service_account: boolean;
+}
+
+export interface GetServiceAccountsResponse {
+  external_id: string;
+  username: string;
+}
+
+export interface GenerateServiceAccountTokenResponse {
+  token: string;
+  user: string;
+  created: string;
+}
