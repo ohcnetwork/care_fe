@@ -209,9 +209,9 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const careApps = useCareApps();
-  const pluginNavItems = careApps
-    .filter((c) => !!c.navItems)
-    .flatMap((c) => c.navItems) as NavigationLink[];
+  const pluginNavItems = careApps.flatMap((c) =>
+    !c.isLoading && c.navItems ? c.navItems : [],
+  ) as NavigationLink[];
 
   const { facility } = useCurrentFacility();
 

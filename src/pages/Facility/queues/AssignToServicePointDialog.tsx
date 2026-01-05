@@ -5,6 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -93,32 +94,33 @@ export function AssignToServicePointDialog({
             <div
               key={subQueue.id}
               className={cn(
-                "flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors",
+                "flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer",
                 subQueue.id === token.sub_queue?.id && "hidden",
               )}
+              onClick={() => setSelectedSubQueueId(subQueue.id)}
             >
               <RadioGroupItem value={subQueue.id} id={subQueue.id} />
-              <label
+              <Label
                 htmlFor={subQueue.id}
                 className="flex-1 text-sm font-medium cursor-pointer"
               >
                 {subQueue.name}
-              </label>
-              <span className="text-sm">
+              </Label>
+              <span className="text-sm text-gray-600">
                 {preferredServicePointCategories?.[subQueue.id]?.name ??
                   t("all")}
               </span>
             </div>
           ))}
           {assignedServicePoints.length === 0 && (
-            <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+            <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 bg-gray-50 cursor-not-allowed">
               <RadioGroupItem value="none" id="none" disabled />
-              <label
+              <Label
                 htmlFor="none"
-                className="flex-1 text-sm font-medium cursor-pointer"
+                className="flex-1 text-sm font-medium text-gray-500 cursor-not-allowed"
               >
                 {t("no_service_points_available")}
-              </label>
+              </Label>
             </div>
           )}
         </RadioGroup>

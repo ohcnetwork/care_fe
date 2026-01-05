@@ -57,7 +57,7 @@ export const ObservationHistoryTable = ({
       encounterId,
       codes.map((c) => c.code),
     ],
-    queryFn: async ({ pageParam = 0 }) => {
+    queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query(observationApi.list, {
         pathParams: { patientId },
         queryParams: {
@@ -66,8 +66,8 @@ export const ObservationHistoryTable = ({
           codes: codes.map((c) => c.code).join(","),
           offset: String(pageParam),
         },
-      })({ signal: new AbortController().signal });
-      return response;
+      })({ signal });
+      return response as PaginatedResponse<ObservationListRead>;
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
