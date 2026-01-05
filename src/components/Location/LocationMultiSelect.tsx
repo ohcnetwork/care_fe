@@ -13,19 +13,19 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 import query from "@/Utils/request/query";
 import useBreakpoints from "@/hooks/useBreakpoints";
-import { LocationList, LocationTypeIcons } from "@/types/location/location";
+import { LocationRead, LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 interface BaseLocationTreeNodeProps {
-  location: LocationList;
+  location: LocationRead;
   selectedLocations: LocationValue[];
   onSelect: (locationId: string) => void;
   expandedLocations: Set<string>;
   onToggleExpand: (locationId: string) => void;
   level?: number;
   facilityId: string;
-  addLocationsToMap: (locations: LocationList[]) => void;
-  renderLocationInfo: (location: LocationList) => React.ReactNode;
+  addLocationsToMap: (locations: LocationRead[]) => void;
+  renderLocationInfo: (location: LocationRead) => React.ReactNode;
   getPaddingLeft: (level: number) => string;
   className?: string;
 }
@@ -172,14 +172,14 @@ function BaseLocationTreeNode({
 }
 
 interface LocationTreeNodeProps {
-  location: LocationList;
+  location: LocationRead;
   selectedLocations: LocationValue[];
   onSelect: (locationId: string) => void;
   expandedLocations: Set<string>;
   onToggleExpand: (locationId: string) => void;
   level?: number;
   facilityId: string;
-  addLocationsToMap: (locations: LocationList[]) => void;
+  addLocationsToMap: (locations: LocationRead[]) => void;
 }
 
 function LocationTreeNode({
@@ -195,7 +195,7 @@ function LocationTreeNode({
   const Icon =
     LocationTypeIcons[location.form as keyof typeof LocationTypeIcons];
 
-  const renderLocationInfo = (location: LocationList) => (
+  const renderLocationInfo = (location: LocationRead) => (
     <div className="flex items-center flex-1 text-sm gap-2 h-8 w-0">
       <Icon className="size-4 shrink-0" />
       <span className="truncate font-medium">{location.name}</span>
@@ -221,14 +221,14 @@ function LocationTreeNode({
 }
 
 interface SearchResultTreeNodeProps {
-  location: LocationList;
+  location: LocationRead;
   selectedLocations: LocationValue[];
   onSelect: (locationId: string) => void;
   expandedLocations: Set<string>;
   onToggleExpand: (locationId: string) => void;
   level?: number;
   facilityId: string;
-  addLocationsToMap: (locations: LocationList[]) => void;
+  addLocationsToMap: (locations: LocationRead[]) => void;
   path: string[];
 }
 
@@ -246,7 +246,7 @@ function SearchResultTreeNode({
   const Icon =
     LocationTypeIcons[location.form as keyof typeof LocationTypeIcons];
 
-  const renderLocationInfo = (location: LocationList) => (
+  const renderLocationInfo = (location: LocationRead) => (
     <div className="flex items-center flex-1 text-sm gap-2 min-w-0">
       <Icon className="size-4 shrink-0 text-gray-600" />
       <div className="flex flex-col min-w-0 justify-center flex-1 h-8 w-0">
@@ -344,7 +344,7 @@ export default function LocationMultiSelect({
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [allFetchedLocations, setAllFetchedLocations] = useState<
-    Map<string, LocationList>
+    Map<string, LocationRead>
   >(new Map());
 
   // Query for top-level locations
@@ -385,7 +385,7 @@ export default function LocationMultiSelect({
   }, [topLevelLocations?.results, searchResultsData?.results]);
 
   // Function to add locations to the global map (used by LocationTreeNode)
-  const addLocationsToMap = useCallback((locations: LocationList[]) => {
+  const addLocationsToMap = useCallback((locations: LocationRead[]) => {
     setAllFetchedLocations((prev) => {
       const newMap = new Map(prev);
       locations.forEach((loc) => {
@@ -399,13 +399,13 @@ export default function LocationMultiSelect({
     if (!searchQuery.trim() || !searchResultsData?.results) return [];
 
     const results: Array<{
-      location: LocationList;
+      location: LocationRead;
       level: number;
       path: string[];
     }> = [];
 
     // Function to build path from root to a location
-    const buildPath = (location: LocationList): string[] => {
+    const buildPath = (location: LocationRead): string[] => {
       const path: string[] = [];
       let currentParent = location.parent;
 
@@ -428,7 +428,7 @@ export default function LocationMultiSelect({
 
   // Create a map of all available locations for quick lookup
   const locationsMap = useMemo(() => {
-    const map = new Map<string, LocationList>();
+    const map = new Map<string, LocationRead>();
 
     // Add all fetched locations
     allFetchedLocations.forEach((loc) => {

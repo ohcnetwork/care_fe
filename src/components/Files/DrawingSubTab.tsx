@@ -152,7 +152,7 @@ export const DrawingPage = ({
   });
   const { data: patientData } = useQuery({
     queryKey: ["patient", patientId],
-    queryFn: query(patientApi.getPatient, {
+    queryFn: query(patientApi.get, {
       pathParams: { id: patientId ?? "" },
     }),
     enabled: !!patient && !!patientId,
@@ -164,13 +164,13 @@ export const DrawingPage = ({
     hasPermission,
     patient?.permissions ?? patientData?.permissions ?? [],
   );
-  const { canViewEncounter, canWriteEncounter } = getPermissions(
+  const { canReadEncounter, canWriteEncounter } = getPermissions(
     hasPermission,
     encounter?.permissions ?? [],
   );
   const canAccess =
     type === "encounter"
-      ? canViewClinicalData || canViewEncounter
+      ? canViewClinicalData || canReadEncounter
       : canViewClinicalData;
 
   const canWriteCurrentEncounter =

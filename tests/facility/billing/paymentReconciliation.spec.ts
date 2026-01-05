@@ -27,8 +27,10 @@ test.describe("Payment Reconciliation", () => {
     ];
     const selectedMethod = faker.helpers.arrayElement(paymentMethods);
 
-    await page.getByRole("combobox", { name: "Payment Method" }).click();
-    await page.getByRole("option", { name: selectedMethod }).click();
+    await page
+      .locator("label")
+      .filter({ hasText: `${selectedMethod}` })
+      .click();
 
     await page
       .getByRole("combobox")
@@ -42,30 +44,29 @@ test.describe("Payment Reconciliation", () => {
 
     await page.locator('[data-slot="command-item"]').first().click();
 
-    const paymentTypes = ["Payment", "Adjustment", "Advance"];
+    const paymentTypes = [/^Payment$/, /^Adjustment$/, /^Advance$/];
     const selectedType = faker.helpers.arrayElement(paymentTypes);
 
-    await page.getByRole("combobox", { name: "Payment Type" }).click();
-    await page.getByRole("option", { name: selectedType }).click();
+    await page.locator("label").filter({ hasText: selectedType }).click();
 
-    // Enter payment amount
+    // Enter Amount Paid
     const paymentAmount = faker.number.int({ min: 100, max: 5000 }).toString();
     await page
-      .getByRole("textbox", { name: "Payment Amount" })
+      .getByRole("textbox", { name: "Amount Paid" })
       .fill(paymentAmount);
 
-    // If payment method is Cash, enter tender amount
+    // If payment method is Cash, enter Amount Received
     if (selectedMethod === "Cash") {
       const tenderAmount = faker.number
         .int({ min: parseInt(paymentAmount), max: 10000 })
         .toString();
       await page
-        .getByRole("textbox", { name: "Tender Amount" })
+        .getByRole("textbox", { name: "Amount Received" })
         .fill(tenderAmount);
     } else {
-      // For non-cash payments, Tender Amount field should not be visible
+      // For non-cash payments, Amount Received field should not be visible
       await expect(
-        page.getByRole("textbox", { name: "Tender Amount" }),
+        page.getByRole("textbox", { name: "Amount Received" }),
       ).not.toBeVisible();
     }
 
@@ -125,9 +126,67 @@ test.describe("Payment Reconciliation", () => {
     // Verify validation error is shown
     const paymentAmountSection = page
       .locator("div")
-      .filter({ hasText: /^Payment Amount/ })
-      .filter({ hasText: /Invalid input$/ });
+      .filter({ hasText: /^Amount Paid/ })
+      .filter({ hasText: /Please enter a valid amount$/ });
 
     await expect(paymentAmountSection).toBeVisible();
+  });
+
+  test("should record payment twice without refreshing page with location cache", async ({
+    page,
+  }) => {
+    // Open Record Payment
+    await page.getByRole("button", { name: /record payment/i }).click();
+
+    // Select the first location
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: "Select Location" })
+      .click();
+
+    await page
+      .locator('[data-slot="command-item"]')
+      .first()
+      .waitFor({ state: "visible" });
+
+    await page.locator('[data-slot="command-item"]').first().click();
+    // Enter Amount Paid
+    const paymentAmount = faker.number.int({ min: 100, max: 5000 }).toString();
+    await page
+      .getByRole("textbox", { name: "Amount Paid" })
+      .fill(paymentAmount);
+
+    // Enter Amount Received
+    const tenderAmount = faker.number
+      .int({ min: parseInt(paymentAmount), max: 10000 })
+      .toString();
+    await page
+      .getByRole("textbox", { name: "Amount Received" })
+      .fill(tenderAmount);
+
+    // Save payment
+    await page.getByRole("button", { name: /record payment/i }).click();
+
+    // Verify success
+    await expect(
+      page.getByText(/payment.*recorded.*successfully/i),
+    ).toBeVisible();
+
+    // Record Payment again without refreshing the page
+    await page.getByRole("button", { name: /record payment/i }).click();
+
+    // Enter Amount Paid
+    const newPaymentAmount = faker.number.int({ min: 1, max: 100 }).toString();
+    await page
+      .getByRole("textbox", { name: "Amount Paid" })
+      .fill(newPaymentAmount);
+
+    // Save payment
+    await page.getByRole("button", { name: /record payment/i }).click();
+
+    // Verify success
+    await expect(
+      page.getByText(/payment.*recorded.*successfully/i),
+    ).toBeVisible();
   });
 });

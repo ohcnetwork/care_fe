@@ -13,6 +13,8 @@ export const PERMISSION_CREATE_ENCOUNTER = "can_create_encounter";
 export const PERMISSION_LIST_ENCOUNTERS = "can_list_encounter";
 export const PERMISSION_WRITE_ENCOUNTER = "can_write_encounter";
 export const PERMISSION_READ_ENCOUNTER = "can_read_encounter";
+export const PERMISSION_READ_ENCOUNTER_CLINICAL_DATA =
+  "can_read_encounter_clinical_data";
 export const PERMISSION_SUBMIT_ENCOUNTER_QUESTIONNAIRE =
   "can_submit_encounter_questionnaire";
 
@@ -104,6 +106,11 @@ export const PERMISSION_READ_HEALTHCARE_SERVICE = "can_read_healthcare_service";
 export const PERMISSION_WRITE_RESOURCE_CATEGORY = "can_write_resource_category";
 export const PERMISSION_READ_RESOURCE_CATEGORY = "can_read_resource_category";
 
+// Account Permissions
+export const PERMISSION_CREATE_ACCOUNT = "can_create_account";
+export const PERMISSION_UPDATE_ACCOUNT = "can_update_account";
+export const PERMISSION_READ_ACCOUNT = "can_read_account";
+
 export interface Permissions {
   // Patient Permissions
   /** Permission slug: "can_create_patient" */
@@ -127,7 +134,9 @@ export interface Permissions {
   /** Permission slug: "can_write_encounter" */
   canWriteEncounter: boolean;
   /** Permission slug: "can_read_encounter" */
-  canViewEncounter: boolean;
+  canReadEncounter: boolean;
+  /** Permission slug: "can_read_encounter_clinical_data" */
+  canReadEncounterClinicalData: boolean;
   /** Permission slug: "can_submit_encounter_questionnaire" */
   canSubmitEncounterQuestionnaire: boolean;
 
@@ -249,6 +258,13 @@ export interface Permissions {
   canWriteResourceCategory: boolean;
   /** Permission slug: "can_read_resource_category" */
   canReadResourceCategory: boolean;
+
+  /** Permission slug: "can_create_account" */
+  canCreateAccount: boolean;
+  /** Permission slug: "can_update_account" */
+  canUpdateAccount: boolean;
+  /** Permission slug: "can_read_account" */
+  canReadAccount: boolean;
 }
 
 export type HasPermissionFn = (
@@ -282,7 +298,11 @@ export function getPermissions(
     canCreateEncounter: hasPermission(PERMISSION_CREATE_ENCOUNTER, permissions),
     canListEncounters: hasPermission(PERMISSION_LIST_ENCOUNTERS, permissions),
     canWriteEncounter: hasPermission(PERMISSION_WRITE_ENCOUNTER, permissions),
-    canViewEncounter: hasPermission(PERMISSION_READ_ENCOUNTER, permissions),
+    canReadEncounter: hasPermission(PERMISSION_READ_ENCOUNTER, permissions),
+    canReadEncounterClinicalData: hasPermission(
+      PERMISSION_READ_ENCOUNTER_CLINICAL_DATA,
+      permissions,
+    ),
     canSubmitEncounterQuestionnaire: hasPermission(
       PERMISSION_SUBMIT_ENCOUNTER_QUESTIONNAIRE,
       permissions,
@@ -457,5 +477,10 @@ export function getPermissions(
       PERMISSION_READ_RESOURCE_CATEGORY,
       permissions,
     ),
+
+    // Account
+    canCreateAccount: hasPermission(PERMISSION_CREATE_ACCOUNT, permissions),
+    canUpdateAccount: hasPermission(PERMISSION_UPDATE_ACCOUNT, permissions),
+    canReadAccount: hasPermission(PERMISSION_READ_ACCOUNT, permissions),
   };
 }

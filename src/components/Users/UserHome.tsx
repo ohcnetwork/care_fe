@@ -10,6 +10,7 @@ import { userChildProps } from "@/components/Common/UserColumns";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import UserAvailabilityTab from "@/components/Users/UserAvailabilityTab";
 import UserBanner from "@/components/Users/UserBanner";
+import UserDepartmentsTab from "@/components/Users/UserDepartmentsTab";
 import UserSummaryTab from "@/components/Users/UserSummary";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -82,6 +83,10 @@ export default function UserHome(props: UserHomeProps) {
     PROFILE: {
       body: UserSummaryTab,
       hidden: false,
+    },
+    DEPARTMENTS: {
+      body: UserDepartmentsTab,
+      hidden: !props.facilityId,
     },
     AVAILABILITY: {
       body: UserAvailabilityTab,

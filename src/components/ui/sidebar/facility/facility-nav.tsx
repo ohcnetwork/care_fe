@@ -27,7 +27,7 @@ function generateFacilityLinks(
     canListEncounters: boolean;
     canWriteAppointment: boolean;
     canCreateEncounter: boolean;
-    canViewEncounter: boolean;
+    canReadEncounter: boolean;
     canListTokenCategories: boolean;
     canListTemplate: boolean;
   },
@@ -209,9 +209,9 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const careApps = useCareApps();
-  const pluginNavItems = careApps
-    .filter((c) => !!c.navItems)
-    .flatMap((c) => c.navItems) as NavigationLink[];
+  const pluginNavItems = careApps.flatMap((c) =>
+    !c.isLoading && c.navItems ? c.navItems : [],
+  ) as NavigationLink[];
 
   const { facility } = useCurrentFacility();
 
@@ -220,7 +220,7 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     canListEncounters,
     canWriteAppointment,
     canCreateEncounter,
-    canViewEncounter,
+    canReadEncounter,
     canListTokenCategories,
     canListTemplate,
   } = getPermissions(hasPermission, facility?.permissions ?? []);
@@ -229,7 +229,7 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     canListEncounters,
     canWriteAppointment,
     canCreateEncounter,
-    canViewEncounter,
+    canReadEncounter,
     canListTokenCategories,
     canListTemplate,
   };
