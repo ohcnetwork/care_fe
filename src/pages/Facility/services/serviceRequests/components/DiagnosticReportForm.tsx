@@ -223,7 +223,7 @@ export function DiagnosticReportForm({
         },
       }),
       onSuccess: () => {
-        toast.success("Test results saved successfully");
+        toast.success(t("test_results_saved_successfully"));
         queryClient.invalidateQueries({
           queryKey: ["serviceRequest", serviceRequestId],
         });

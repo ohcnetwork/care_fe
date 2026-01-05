@@ -137,16 +137,19 @@ For data mutations, we provide a `mutate` utility that works seamlessly with Tan
 
 ```tsx
 import { useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import mutate from "@/Utils/request/mutate";
 
 function CreatePrescription({ consultationId }: { consultationId: string }) {
+  const { t } = useTranslation();
   const { mutate: createPrescription, isPending } = useMutation({
     mutationFn: mutate(MedicineRoutes.createPrescription, {
       pathParams: { consultationId },
     }),
     onSuccess: () => {
-      toast.success("Prescription created successfully");
+      toast.success(t("prescription_created_successfully"));
     },
   });
 
