@@ -109,9 +109,9 @@ export const DispenseButton = ({
 
             queryClient.invalidateQueries({
               queryKey: [
-                "medication_dispense",
+                "dispenseOrders",
                 selectedEncounter.patient.id,
-                selectedEncounter.id,
+                facilityId,
               ],
             });
 

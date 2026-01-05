@@ -22,7 +22,6 @@ import { useTranslation } from "react-i18next";
 interface DispenseOrderListSelectorProps {
   patientId: string;
   facilityId?: string;
-  locationId?: string;
   selectedDispenseOrderId?: string;
   onSelectDispenseOrder: (dispenseOrder: DispenseOrderRead | undefined) => void;
 }
@@ -30,19 +29,17 @@ interface DispenseOrderListSelectorProps {
 export default function DispenseOrderListSelector({
   patientId,
   facilityId,
-  locationId,
   selectedDispenseOrderId,
   onSelectDispenseOrder,
 }: DispenseOrderListSelectorProps) {
   const { t } = useTranslation();
   const [openDrawer, setOpenDrawer] = React.useState(false);
   const { data: dispenseOrders, isLoading } = useQuery({
-    queryKey: ["dispenseOrders", patientId, facilityId, locationId],
+    queryKey: ["dispenseOrders", patientId, facilityId],
     queryFn: query(dispenseOrderApi.list, {
       pathParams: { facilityId: facilityId ?? "" },
       queryParams: {
         patient: patientId,
-        location: locationId,
       },
     }),
     enabled: !!patientId && !!facilityId,

@@ -14,7 +14,7 @@ import { MedicationStatementList } from "@/components/Patient/MedicationStatemen
 
 import { Button } from "@/components/ui/button";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { PackageIcon, PlusIcon, ReceiptTextIcon } from "lucide-react";
+import { PlusIcon, ReceiptTextIcon } from "lucide-react";
 import { Link } from "raviger";
 
 interface EmptyStateProps {
@@ -182,27 +182,16 @@ export default function MedicationRequestTable() {
               }}
             />
 
-            {selectedDispenseOrderId ? (
-              <div className="flex-1 w-full h-full overflow-auto">
-                <DispenseHistory
-                  patientId={patientId}
-                  encounterId={encounterId}
-                  canAccess={canAccess}
-                  facilityId={facilityId}
-                  dispenseOrderId={selectedDispenseOrderId}
-                  canWrite={canWrite}
-                />
-              </div>
-            ) : (
-              <div className="w-full flex-1 h-full flex items-center justify-center">
-                <div className="flex flex-col items-center">
-                  <PackageIcon className="text-gray-500" />
-                  <h3 className="font-medium">
-                    {t("no_dispense_orders_found")}
-                  </h3>
-                </div>
-              </div>
-            )}
+            <div className="flex-1 w-full h-full overflow-auto">
+              <DispenseHistory
+                patientId={patientId}
+                encounterId={encounterId}
+                canAccess={canAccess}
+                facilityId={facilityId}
+                dispenseOrderId={selectedDispenseOrderId}
+                canWrite={canWrite}
+              />
+            </div>
           </div>
         </TabsContent>
       </Tabs>
