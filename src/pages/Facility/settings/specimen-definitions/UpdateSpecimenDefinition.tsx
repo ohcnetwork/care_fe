@@ -17,10 +17,6 @@ interface UpdateSpecimenDefinitionProps {
   specimenSlug: string;
 }
 
-/**
- * Page component for updating existing Specimen Definitions.
- * Uses FormSkeleton for consistent loading UI.
- */
 export function UpdateSpecimenDefinition({
   facilityId,
   specimenSlug,
@@ -66,20 +62,7 @@ export function UpdateSpecimenDefinition({
   }
 
   if (!specimenDefinition) {
-    return (
-      <Page title={t("update_specimen_definition")} hideTitleOnPage>
-        <div className="container mx-auto max-w-3xl">
-          <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
-              {t("update_specimen_definition")}
-            </h1>
-          </div>
-          <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-            <div className="text-sm text-gray-500">{t("not_found")}</div>
-          </div>
-        </div>
-      </Page>
-    );
+    return <div>{t("not_found")}</div>;
   }
 
   return (
