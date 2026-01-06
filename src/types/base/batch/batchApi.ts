@@ -1,4 +1,4 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
+import { HttpMethod, Type } from "@/Utils/request/types";
 import { BatchRequestResponse } from "@/types/base/batch/batch";
 
 import { BatchRequestBody } from "./batch";

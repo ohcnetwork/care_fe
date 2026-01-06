@@ -1,4 +1,4 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
+import { HttpMethod, Type } from "@/Utils/request/types";
 import { CareTeamRequest } from "@/types/careTeam/careTeam";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 
