@@ -8,8 +8,8 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 
-import { HttpMethod } from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { HttpMethod } from "@/Utils/request/types";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
 
 interface LocationPickerProps {

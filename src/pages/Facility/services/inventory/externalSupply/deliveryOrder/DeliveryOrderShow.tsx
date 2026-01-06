@@ -426,7 +426,7 @@ export function DeliveryOrderShow({
             </div>
           </div>
           <div className="flex items-center justify-end gap-2">
-            {!isRequester &&
+            {(!isRequester || !internal) &&
               deliveryOrder.status === DeliveryOrderStatus.draft && (
                 <Button variant="outline" asChild>
                   <Link href={`${deliveryOrderId}/edit`}>

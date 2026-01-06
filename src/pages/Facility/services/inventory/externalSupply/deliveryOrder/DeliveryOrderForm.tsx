@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -27,7 +27,9 @@ import { Textarea } from "@/components/ui/textarea";
 import BackButton from "@/components/Common/BackButton";
 import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
+import { getExtensionProps, useExtensions } from "@/hooks/useExtensions";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import {
@@ -45,10 +47,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 
-const createDeliveryOrderFormSchema = (
-  t: (key: string) => string,
-  internal: boolean,
-) =>
+const createBaseSchema = (t: (key: string) => string, internal: boolean) =>
   z.object({
     name: z.string().min(1, t("name_is_required")),
     note: z.string().optional(),
@@ -61,8 +60,6 @@ const createDeliveryOrderFormSchema = (
     destination: z.string().min(1, t("destination_required")),
     tags: z.array(z.string()),
   });
-
-type FormValues = z.infer<ReturnType<typeof createDeliveryOrderFormSchema>>;
 
 interface Props {
   facilityId: string;
@@ -78,18 +75,16 @@ export default function DeliveryOrderForm({
   deliveryOrderId,
 }: Props) {
   const { t } = useTranslation();
-
+  const { facility, isFacilityLoading } = useCurrentFacility();
   const isEditMode = Boolean(deliveryOrderId);
   const [qParams] = useQueryParams();
   const supplyOrderId = qParams.supplyOrder;
+  const queryClient = useQueryClient();
 
   const { data: existingData, isFetching } = useQuery({
     queryKey: ["deliveryOrder", deliveryOrderId],
     queryFn: query(deliveryOrderApi.retrieveDeliveryOrder, {
-      pathParams: {
-        facilityId: facilityId,
-        deliveryOrderId: deliveryOrderId!,
-      },
+      pathParams: { facilityId, deliveryOrderId: deliveryOrderId! },
     }),
     enabled: isEditMode,
   });
@@ -98,26 +93,12 @@ export default function DeliveryOrderForm({
     {
       queryKey: ["requestOrder", supplyOrderId],
       queryFn: query(requestOrderApi.retrieveRequestOrder, {
-        pathParams: {
-          facilityId: facilityId,
-          requestOrderId: supplyOrderId!,
-        },
+        pathParams: { facilityId, requestOrderId: supplyOrderId! },
       }),
       enabled: !!supplyOrderId && !isEditMode,
     },
   );
 
-  const title = isEditMode ? t("edit_delivery") : t("create_delivery");
-
-  const returnPath = getInventoryBasePath(
-    facilityId,
-    locationId,
-    internal,
-    false,
-    internal ? false : true,
-  );
-
-  const queryClient = useQueryClient();
   const [supplierSearchQuery, setSupplierSearchQuery] = useState("");
   const [searchDeliveryFrom, setSearchDeliveryFrom] = useState("");
 
@@ -145,26 +126,32 @@ export default function DeliveryOrderForm({
         ordering: "sort_index",
       },
     }),
-    select: (data: PaginatedResponse<LocationRead>) => {
-      // Filter out the current location
-      return data.results.filter((location) => location.id !== locationId);
-    },
+    select: (data: PaginatedResponse<LocationRead>) =>
+      data.results.filter((location) => location.id !== locationId),
   });
 
   const vendorOptions =
-    availableSuppliers?.results.map((supplier) => ({
-      label: supplier.name,
-      value: supplier.id,
-    })) || [];
-
+    availableSuppliers?.results.map((s) => ({ label: s.name, value: s.id })) ||
+    [];
   const deliveryFromOptions =
-    deliveryFromLocations?.map((location) => ({
-      label: location.name,
-      value: location.id,
-    })) || [];
+    deliveryFromLocations?.map((l) => ({ label: l.name, value: l.id })) || [];
 
+  const ext = useMemo(
+    () => getExtensionProps(facility?.extensions_schema_supply_delivery_order),
+    [facility?.extensions_schema_supply_delivery_order],
+  );
+
+  const formSchema = useMemo(
+    () =>
+      createBaseSchema(t, internal).extend({
+        extensions: ext.validation.optional(),
+      }),
+    [t, internal, ext.validation],
+  );
+
+  type FormValues = z.infer<typeof formSchema>;
   const form = useForm<FormValues>({
-    resolver: zodResolver(createDeliveryOrderFormSchema(t, internal)),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       note: "",
@@ -172,7 +159,14 @@ export default function DeliveryOrderForm({
       origin: internal ? locationId : undefined,
       destination: internal ? "" : locationId,
       tags: [],
+      extensions: ext.defaults,
     },
+  });
+
+  const extensions = useExtensions({
+    schema: facility?.extensions_schema_supply_delivery_order,
+    form,
+    existingData: existingData?.extensions,
   });
 
   useEffect(() => {
@@ -184,9 +178,9 @@ export default function DeliveryOrderForm({
         origin: existingData.origin?.id || undefined,
         destination: existingData.destination.id,
         tags: existingData.tags.map((tag) => tag.id),
+        extensions: { ...extensions.defaults, ...existingData.extensions },
       });
     } else if (!isEditMode && supplyOrderData) {
-      // Prefill form with supply order data
       form.reset({
         name: supplyOrderData.name,
         note: supplyOrderData.note || "",
@@ -194,9 +188,10 @@ export default function DeliveryOrderForm({
         origin: supplyOrderData.origin?.id || undefined,
         destination: supplyOrderData.destination.id,
         tags: supplyOrderData.tags.map((tag) => tag.id),
+        extensions: extensions.defaults,
       });
     }
-  }, [isEditMode, existingData, supplyOrderData, form]);
+  }, [isEditMode, existingData, supplyOrderData, form, extensions.defaults]);
 
   const tagIds = form.watch("tags");
   const selectedTags = useTagConfigs({ ids: tagIds, facilityId })
@@ -205,9 +200,7 @@ export default function DeliveryOrderForm({
 
   const { mutate: createDeliveryOrder, isPending: isCreating } = useMutation({
     mutationFn: mutate(deliveryOrderApi.createDeliveryOrder, {
-      pathParams: {
-        facilityId: facilityId,
-      },
+      pathParams: { facilityId },
     }),
     onSuccess: (deliveryOrder: DeliveryOrderRetrieve) => {
       queryClient.invalidateQueries({ queryKey: ["deliveryOrders"] });
@@ -227,15 +220,11 @@ export default function DeliveryOrderForm({
 
   const { mutate: updateDeliveryOrder, isPending: isUpdating } = useMutation({
     mutationFn: mutate(deliveryOrderApi.updateDeliveryOrder, {
-      pathParams: {
-        facilityId: facilityId,
-        deliveryOrderId: deliveryOrderId!,
-      },
+      pathParams: { facilityId, deliveryOrderId: deliveryOrderId! },
     }),
     onSuccess: (deliveryOrder: DeliveryOrderRetrieve) => {
       queryClient.invalidateQueries({ queryKey: ["deliveryOrders"] });
       toast.success(t("order_updated"));
-
       navigate(
         getInventoryBasePath(
           facilityId,
@@ -250,24 +239,37 @@ export default function DeliveryOrderForm({
   });
 
   function onSubmit(data: FormValues) {
+    const { extensions: formExtensions, ...restData } = data;
+    const cleanedExtensions = extensions.prepareForSubmit(formExtensions);
+
     if (isEditMode && deliveryOrderId) {
       updateDeliveryOrder({
-        ...data,
+        ...restData,
         id: deliveryOrderId,
         status: existingData?.status || DeliveryOrderStatus.draft,
+        extensions: cleanedExtensions,
       });
     } else {
       createDeliveryOrder({
-        ...data,
+        ...restData,
         status: DeliveryOrderStatus.draft,
-        extensions: {},
+        extensions: cleanedExtensions,
       });
     }
   }
 
+  const title = isEditMode ? t("edit_delivery") : t("create_delivery");
+  const returnPath = getInventoryBasePath(
+    facilityId,
+    locationId,
+    internal,
+    false,
+    !internal,
+  );
   const isPending = isCreating || isUpdating;
 
   if (
+    isFacilityLoading ||
     (isEditMode && isFetching) ||
     (!isEditMode && supplyOrderId && isFetchingSupplyOrder)
   ) {
@@ -311,7 +313,7 @@ export default function DeliveryOrderForm({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <input type="submit" hidden />
-            <Card className="p-0  bg-gray-50">
+            <Card className="p-0 bg-gray-50">
               <CardContent className="space-y-4 p-4 rounded-md">
                 <div className="grid sm:grid-cols-2 gap-4 items-start">
                   <FormField
@@ -343,7 +345,7 @@ export default function DeliveryOrderForm({
                         </FormLabel>
                         <FormControl>
                           <Autocomplete
-                            disabled={internal && supplyOrderId}
+                            disabled={internal && !!supplyOrderId}
                             options={
                               internal ? deliveryFromOptions : vendorOptions
                             }
@@ -388,6 +390,7 @@ export default function DeliveryOrderForm({
                       <FormLabel>
                         {t("note")}
                         <span className="text-gray-500 text-sm italic">
+                          {" "}
                           ({t("optional")})
                         </span>
                       </FormLabel>
@@ -420,6 +423,7 @@ export default function DeliveryOrderForm({
                     )}
                   />
                 )}
+                {extensions.fields}
               </CardContent>
             </Card>
 
