@@ -354,8 +354,6 @@ export function EditInvoiceTable({
         ]);
       }
     });
-
-    toast.success(t("global_discount_applied"));
   };
 
   const handleClearAllDiscounts = () => {
