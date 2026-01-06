@@ -207,8 +207,7 @@ function ServiceRequestForm({
           </Badge>
         </div>
       )}
-      {activityDefinition?.locations &&
-        activityDefinition.locations.length > 0 && (
+{activityDefinition?.locations?.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap w-full">
             <span className="font-medium text-sm text-gray-700">
               {t("locations")}:
