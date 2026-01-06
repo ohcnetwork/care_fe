@@ -364,6 +364,7 @@ export function ReportSubTab({ associatingId, reportType }: ReportTabProps) {
           facilityId={facility?.id || ""}
           associatingId={associatingId}
           permissions={facility?.permissions ?? []}
+          reportType={reportType}
           trigger={
             <Button variant="outline_primary">
               <CareIcon icon="l-plus" className="mr-1" />
