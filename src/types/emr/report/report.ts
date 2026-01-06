@@ -46,3 +46,9 @@ export interface ReportArchiveRead {
   archived_datetime: string;
   archived_by: string;
 }
+
+export enum ReportType {
+  DISCHARGE_SUMMARY = "discharge_summary",
+  PATIENT_SUMMARY = "patient_summary",
+  ACCOUNT_REPORT = "account_report",
+}

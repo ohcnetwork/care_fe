@@ -14,6 +14,7 @@ import {
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
+import { ReportType } from "@/types/emr/report/report";
 import { FileType } from "@/types/files/file";
 import { ReportSubTab } from "./ReportSubTab";
 
@@ -109,9 +110,12 @@ export const FilesTab = ({
 
         <TabsContent value="reports">
           <ReportSubTab
-            encounter={encounter}
-            patient={patient}
             associatingId={associatingId}
+            reportType={
+              type === FileType.PATIENT
+                ? ReportType.PATIENT_SUMMARY
+                : ReportType.DISCHARGE_SUMMARY
+            }
           />
         </TabsContent>
 

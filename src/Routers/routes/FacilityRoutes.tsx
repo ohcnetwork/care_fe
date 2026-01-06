@@ -124,6 +124,12 @@ const FacilityRoutes: AppRoutes = {
   }) => (
     <AccountShow facilityId={facilityId} accountId={accountId} tab="payments" />
   ),
+  "/facility/:facilityId/billing/account/:accountId/reports": ({
+    facilityId,
+    accountId,
+  }) => (
+    <AccountShow facilityId={facilityId} accountId={accountId} tab="reports" />
+  ),
   "/facility/:facilityId/billing/account/:accountId/bed_charge_items": ({
     facilityId,
     accountId,
