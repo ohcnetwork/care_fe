@@ -137,7 +137,7 @@ export function ServiceRequestDetails({
                 </div>
               </div>
             )}
-            {request.locations && request.locations.length > 0 && (
+            {request.locations?.length > 0 && (
               <div>
                 <div className="text-sm text-gray-600 mb-1">
                   {t("locations")}
