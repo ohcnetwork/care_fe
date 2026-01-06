@@ -361,7 +361,6 @@ export function EditInvoiceTable({
     items.forEach((_, itemIndex) => {
       form.setValue(`items.${itemIndex}.discounts`, []);
     });
-    toast.success(t("all_discounts_cleared"));
   };
 
   if (chargeItems.length === 0) {
