@@ -15,8 +15,9 @@ import Autocomplete from "@/components/ui/autocomplete";
 
 import { ExtensionFieldMetadata } from "@/Utils/schema/types";
 
-import { API, HttpMethod } from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import { HttpMethod } from "@/Utils/request/types";
+import { API } from "@/Utils/request/utils";
 
 interface AutocompleteFieldProps<TFieldValues extends FieldValues> {
   /** Field metadata from JSON Schema */
