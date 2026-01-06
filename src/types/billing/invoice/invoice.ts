@@ -28,9 +28,13 @@ export interface InvoiceBase {
   payment_terms?: string;
   note?: string;
   issue_date?: string;
+  locked: boolean;
 }
 
-export interface InvoiceCreate extends Omit<InvoiceBase, "id" | "number"> {
+export interface InvoiceCreate extends Omit<
+  InvoiceBase,
+  "id" | "number" | "locked"
+> {
   account: string;
   charge_items: string[];
 }

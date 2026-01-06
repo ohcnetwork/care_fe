@@ -1,5 +1,4 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 
 import {
   AccountBase,
@@ -38,5 +37,17 @@ export default {
     path: "/api/v1/facility/{facilityId}/account/{accountId}/rebalance/",
     method: HttpMethod.POST,
     TRes: Type<AccountRead>(),
+  },
+  setTags: {
+    path: "/api/v1/facility/{facilityId}/account/{external_id}/set_tags/",
+    method: HttpMethod.POST,
+    TRes: Type<AccountRead>(),
+    TBody: Type<{ tags: string[] }>(),
+  },
+  removeTags: {
+    path: "/api/v1/facility/{facilityId}/account/{external_id}/remove_tags/",
+    method: HttpMethod.POST,
+    TRes: Type<AccountRead>(),
+    TBody: Type<{ tags: string[] }>(),
   },
 } as const;

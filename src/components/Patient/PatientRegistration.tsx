@@ -106,7 +106,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
 
   const patientQuery = useQuery({
     queryKey: ["patient", patientId],
-    queryFn: query(patientApi.getPatient, {
+    queryFn: query(patientApi.get, {
       pathParams: { id: patientId || "" },
     }),
     enabled: !!patientId,
@@ -184,7 +184,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
       permanent_address: data.permanent_address || "",
       permanent_address_same_as_address:
         data.address === data.permanent_address,
-      geo_organization: data.geo_organization.id,
+      geo_organization: data.geo_organization?.id || "",
       pincode: data.pincode || undefined,
 
       is_deceased: !!data.deceased_datetime,
@@ -206,7 +206,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   const phoneNumber = form.watch("phone_number");
   const patientPhoneSearch = useQuery({
     queryKey: ["patients", "phone-number", phoneNumber],
-    queryFn: query.debounced(patientApi.searchPatient, {
+    queryFn: query.debounced(patientApi.search, {
       body: { phone_number: phoneNumber },
     }),
     enabled: isValidPhoneNumber(phoneNumber),
@@ -218,7 +218,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
     mutationKey: ["create_patient"],
-    mutationFn: mutate(patientApi.addPatient),
+    mutationFn: mutate(patientApi.create),
     onSuccess: (resp: PatientRead) => {
       toast.success(t("patient_registration_success"));
       // Lets navigate the user to the verify page as the patient is not accessible to the user yet
@@ -234,7 +234,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
 
   const { mutate: updatePatient, isPending: isUpdatingPatient } = useMutation({
     mutationKey: ["update_patient"],
-    mutationFn: mutate(patientApi.updatePatient, {
+    mutationFn: mutate(patientApi.update, {
       pathParams: { id: patientId || "" },
     }),
     onSuccess: () => {
@@ -298,7 +298,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     if (!patientId) {
       createPatient({
         ...basePayload,
-        facility: facilityId,
         tags: values.tags,
       });
     } else {

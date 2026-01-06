@@ -41,7 +41,15 @@ import {
   InvoiceStatus,
 } from "@/types/billing/invoice/invoice";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, BadgeCheck, ChevronDown, PrinterIcon } from "lucide-react";
+import {
+  BadgeCheck,
+  ChevronDown,
+  ChevronLeft,
+  FileCheck,
+  PrinterIcon,
+  ReceiptText,
+  SquareArrowOutUpRight,
+} from "lucide-react";
 import { Link, navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 
@@ -61,9 +69,13 @@ import { paymentmethodMap } from "@/pages/Facility/billing/paymentReconciliation
 import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
+import { getPartialId } from "@/types/emr/patient/patient";
+import patientApi from "@/types/emr/patient/patientApi";
 import facilityApi from "@/types/facility/facilityApi";
+import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import dayjs from "@/Utils/dayjs";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
@@ -118,6 +130,22 @@ export function InvoiceShow({
     }),
   });
 
+  const patient = invoice?.account.patient;
+
+  // Fetch patient data for identifiers
+  const { data: verifiedPatient } = useQuery({
+    queryKey: ["patient-verify", patient?.id, patient?.year_of_birth],
+    queryFn: query(patientApi.searchRetrieve, {
+      pathParams: { facilityId },
+      body: {
+        phone_number: patient?.phone_number ?? "",
+        year_of_birth: patient?.year_of_birth?.toString() ?? "",
+        partial_id: patient ? getPartialId(patient) : "",
+      },
+    }),
+    enabled: !!patient,
+  });
+
   const { mutate: removeChargeItem, isPending: isRemoving } = useMutation({
     mutationFn: mutate(chargeItemApi.removeChargeItemFromInvoice, {
       pathParams: { facilityId, invoiceId },
@@ -155,6 +183,32 @@ export function InvoiceShow({
     },
     onError: () => {
       toast.error(t("failed_to_update_invoice"));
+    },
+  });
+
+  const { mutate: lockInvoice, isPending: isLockPending } = useMutation({
+    mutationFn: mutate(invoiceApi.lockInvoice, {
+      pathParams: { facilityId, invoiceId },
+    }),
+    onSuccess: () => {
+      toast.success(t("invoice_locked_successfully"));
+      queryClient.invalidateQueries({ queryKey: ["invoice", invoiceId] });
+    },
+    onError: () => {
+      toast.error(t("failed_to_lock_invoice"));
+    },
+  });
+
+  const { mutate: unlockInvoice, isPending: isUnlockPending } = useMutation({
+    mutationFn: mutate(invoiceApi.unlockInvoice, {
+      pathParams: { facilityId, invoiceId },
+    }),
+    onSuccess: () => {
+      toast.success(t("invoice_unlocked_successfully"));
+      queryClient.invalidateQueries({ queryKey: ["invoice", invoiceId] });
+    },
+    onError: () => {
+      toast.error(t("failed_to_unlock_invoice"));
     },
   });
 
@@ -260,8 +314,10 @@ export function InvoiceShow({
     return t("appointment_invoice_alert");
   })();
 
-  const isInvoiceRecordPaymentPluginsPresent = useCareApps().some(
-    (plugin) => plugin.components?.InvoiceRecordPaymentOptions,
+  const careApps = useCareApps();
+  const isInvoiceRecordPaymentPluginsPresent = careApps.some(
+    (plugin) =>
+      !plugin.isLoading && plugin.components?.InvoiceRecordPaymentOptions,
   );
 
   if (isLoading) {
@@ -289,22 +345,70 @@ export function InvoiceShow({
 
   return (
     <div className="space-y-8 relative">
-      <div className="flex items-start justify-between flex-col sm:flex-row gap-4 sm:items-center">
-        <div className="flex items-center gap-4">
-          <BackButton>
-            <ArrowLeft />
+      <div className="flex items-start justify-between flex-col sm:flex-row gap-4 sm:items-center border-b-3 border-double pb-4">
+        <div className="flex gap-3 sm:gap-6 flex-col md:flex-row">
+          <BackButton variant="link" className="px-0 justify-start">
+            <ChevronLeft />
             <span>{t("back")}</span>
           </BackButton>
-        </div>
-        <div className="flex gap-2 flex-col sm:flex-row w-full sm:w-auto">
-          <Button variant="outline" asChild>
+          <div className="h-auto w-px bg-gray-300" aria-hidden="true" />
+          <div>
+            <label className="text-gray-700 text-sm font-medium">
+              {t("patient_name")}
+            </label>
+            <Link
+              href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
+                {
+                  phone_number: invoice.account.patient.phone_number,
+                  year_of_birth:
+                    invoice.account.patient.year_of_birth?.toString() || "",
+                  partial_id: invoice.account.patient.id.slice(0, 5),
+                },
+              ).toString()}`}
+            >
+              <div className="font-semibold text-gray-950 underline">
+                {invoice.account.patient.name}
+                <SquareArrowOutUpRight className="ml-1 size-4 inline" />
+              </div>
+            </Link>
+          </div>
+
+          <div>
+            <label className="text-gray-700 text-sm font-medium">
+              {t("account")}
+            </label>
             <Link
               href={`/facility/${facilityId}/billing/account/${invoice.account.id}`}
             >
-              {t("view_account")}
-              <ShortcutBadge actionId="view-account" />
+              <div className="font-semibold text-gray-950 underline">
+                {invoice.account.name}
+                <SquareArrowOutUpRight className="ml-1 size-4 inline" />
+              </div>
             </Link>
-          </Button>
+          </div>
+          <div className="flex flex-row gap-6">
+            <div>
+              <label className="text-gray-700 text-sm font-medium">
+                {t("amount_due")}
+              </label>
+              <div className="font-semibold text-gray-950">
+                <MonetaryDisplay amount={invoice.account.total_balance} />
+              </div>
+            </div>
+            <div>
+              <label className="text-gray-700 text-sm font-medium">
+                {t("status")}
+              </label>
+              <div className="font-semibold text-gray-950">
+                <Badge variant={ACCOUNT_STATUS_COLORS[invoice.account.status]}>
+                  {t(invoice.account.status)}
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-2 flex-col sm:flex-row w-full sm:w-auto">
           {invoice?.status === InvoiceStatus.draft && (
             <Button
               variant="outline_primary"
@@ -373,6 +477,12 @@ export function InvoiceShow({
             <Badge variant={INVOICE_STATUS_COLORS[invoice.status]}>
               {t(invoice.status)}
             </Badge>
+            {invoice.locked && (
+              <Badge variant="secondary" className="gap-1">
+                <CareIcon icon="l-lock" className="size-3" />
+                {t("locked")}
+              </Badge>
+            )}
           </div>
           <div className="flex flex-row gap-2">
             {invoice.status === InvoiceStatus.draft && (
@@ -406,6 +516,31 @@ export function InvoiceShow({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {invoice.locked ? (
+                    <DropdownMenuItem asChild className="text-primary-900">
+                      <Button
+                        variant="ghost"
+                        onClick={() => unlockInvoice({})}
+                        disabled={isUnlockPending}
+                        className="w-full flex flex-row justify-stretch items-center"
+                      >
+                        <CareIcon icon="l-unlock" className="mr-1" />
+                        <span>{t("unlock_invoice")}</span>
+                      </Button>
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem asChild className="text-primary-900">
+                      <Button
+                        variant="ghost"
+                        onClick={() => lockInvoice({})}
+                        disabled={isLockPending}
+                        className="w-full flex flex-row justify-stretch items-center"
+                      >
+                        <CareIcon icon="l-lock" className="mr-1" />
+                        <span>{t("lock_invoice")}</span>
+                      </Button>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem asChild className="text-primary-900">
                     <Button
                       variant="ghost"
@@ -483,6 +618,23 @@ export function InvoiceShow({
                       invoice.account.patient.phone_number,
                     )}
                   </p>
+                  {verifiedPatient &&
+                    "instance_identifiers" in verifiedPatient &&
+                    verifiedPatient.instance_identifiers
+                      .filter(
+                        ({ config }) =>
+                          config.config.use === PatientIdentifierUse.official &&
+                          !config.config.auto_maintained,
+                      )
+                      .map((identifier) => (
+                        <p
+                          key={identifier.config.id}
+                          className="font-medium text-gray-700 text-sm ml-2"
+                        >
+                          <span>{identifier.config.config.display}: </span>
+                          <span>{identifier.value}</span>
+                        </p>
+                      ))}
                 </div>
                 <div className="mt-2">
                   {invoice.note && <p>{invoice.note}</p>}
@@ -849,13 +1001,16 @@ export function InvoiceShow({
                   <span>{t("total")}</span>
                   <MonetaryDisplay amount={String(invoice.total_gross)} />
                 </div>
-                <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
+                <div className="p-1 pb-2.5 border-t-2 border-dashed border-gray-200 w-full" />
               </div>
             </div>
 
             {invoice.payments?.length > 0 && (
               <>
                 <div className="border-x border-b border-t border-gray-300 rounded-b-md -mt-4 space-y-2">
+                  <div className="-mt-7 px-3 font-medium ">
+                    {t("payments_received_against_this_invoice")}
+                  </div>
                   <Table>
                     <TableHeader>
                       <TableRow className="border-b border-gray-200">
@@ -1065,24 +1220,37 @@ export function InvoiceShow({
         }}
       />
 
-      <div className="p-2">
-        <div className="space-y-2 flex gap-8">
-          <div>
-            <p className="text-sm text-gray-500">{t("last_modified_by")}</p>
-            <p className="text-sm font-semibold">
-              {formatName(invoice.updated_by)}
-            </p>
-            <p className="text-xs text-gray-500">
-              {formatDateTime(invoice.modified_date)}
-            </p>
+      <div className="flex gap-10 max-w-4xl mx-auto">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center justify-center size-14 bg-white rounded-full border border-gray-200">
+            <FileCheck className="size-4" />
           </div>
           <div>
-            <p className="text-sm text-gray-500">{t("created_by")}</p>
-            <p className="text-sm font-semibold">
-              {formatName(invoice.created_by)}
+            <span className="text-sm font-semibold text-gray-950">
+              {t("invoice_updated")}
+            </span>
+            <p className="text-sm text-gray-600">
+              {t("by_label", { label: formatName(invoice.updated_by) })}
             </p>
             <p className="text-xs text-gray-500">
-              {formatDateTime(invoice.created_date)}
+              {formatDateTime(invoice.modified_date, "hh:mm A - MMM DD, YYYY")}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="flex items-center justify-center size-14 bg-white rounded-full border border-gray-200">
+            <ReceiptText className="size-4" />
+          </div>
+          <div>
+            <span className="text-sm font-semibold text-gray-950">
+              {t("draft_invoice_created")}
+            </span>
+            <p className="text-sm text-gray-600">
+              {t("by_label", { label: formatName(invoice.created_by) })}
+            </p>
+            <p className="text-xs text-gray-500">
+              {formatDateTime(invoice.created_date, "hh:mm A - MMM DD, YYYY")}
             </p>
           </div>
         </div>

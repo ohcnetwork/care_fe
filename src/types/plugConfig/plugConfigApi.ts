@@ -1,4 +1,4 @@
-import { API } from "@/Utils/request/api";
+import { API } from "@/Utils/request/utils";
 import { PlugConfig } from "@/types/plugConfig";
 
 /**

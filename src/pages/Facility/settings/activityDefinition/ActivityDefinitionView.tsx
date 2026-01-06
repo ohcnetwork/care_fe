@@ -348,6 +348,31 @@ export default function ActivityDefinitionView({
           </Card>
         )}
 
+        {definition.healthcare_service && (
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("healthcare_service")}</CardTitle>
+              <CardDescription>
+                {t("healthcare_service_for_activity")}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50">
+                <div className="space-y-2">
+                  <p className="font-medium">
+                    {definition.healthcare_service.name}
+                  </p>
+                  {definition.healthcare_service.extra_details && (
+                    <p className="text-sm text-gray-600">
+                      {definition.healthcare_service.extra_details}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {definition.locations?.length > 0 && (
           <Card>
             <CardHeader>
