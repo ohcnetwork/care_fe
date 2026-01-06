@@ -399,7 +399,7 @@ export function EditInvoiceTable({
                 <TableHead className="border-r border-gray-200 font-semibold text-center min-w-[400px]">
                   <div className="flex items-center justify-center gap-2">
                     {t("discounts")}
-                    {globalDiscounts.length > 0 && (
+                    {globalDiscounts.length > 0 && chargeItems.length > 1 && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
