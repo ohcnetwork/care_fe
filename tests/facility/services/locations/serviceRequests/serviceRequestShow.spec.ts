@@ -134,53 +134,160 @@ test.describe("Service Request Show Page", () => {
   });
 
   test.describe("Specimens Section", () => {
-    test("should display specimens section header", async ({ page }) => {
+    test("should display all specimen details", async ({ page }) => {
       await expect(
         page.getByRole("heading", { name: /specimens/i }),
       ).toBeVisible();
-    });
 
-    test("should display print all QR codes button", async ({ page }) => {
-      // Verify print QR codes button is visible
-      const printButton = page.locator("button", {
-        has: page.locator("svg[class*='PrinterIcon']"),
-      });
+      for (const specimen of activityDefinitionMapping.specimens) {
+        await expect(
+          page.getByText(`Required: ${specimen.title}`),
+        ).toBeVisible();
 
-      const printButtonCount = await printButton.count();
-      if (printButtonCount > 0) {
-        await expect(printButton.first()).toBeVisible();
+        await expect(
+          page
+            .locator('[data-slot="card"]', {
+              hasText: `Required: ${specimen.title}`,
+            })
+            .locator('[data-slot="badge"]', {
+              hasText: /collection pending/i,
+            }),
+        ).toBeVisible();
+
+        await expect(
+          page
+            .locator('[data-slot="card"]', {
+              hasText: `Required: ${specimen.title}`,
+            })
+            .getByRole("button", { name: /collect specimen/i }),
+        ).toBeVisible();
       }
+
+      // Verify print all QR codes button is visible
+      await expect(
+        page
+          .locator("div", {
+            has: page.getByRole("heading", { name: /specimens/i }),
+          })
+          .locator('[data-slot="button"]', {
+            hasText: /print all qr codes/i,
+          }),
+      ).toBeVisible();
+
+      // Verify more options menu button is visible
+      const moreOptionsButton = page
+        .locator("div", {
+          has: page.getByRole("heading", { name: /specimens/i }),
+        })
+        .getByRole("button")
+        .filter({ has: page.locator("svg") })
+        .last();
+      await expect(moreOptionsButton).toBeVisible();
     });
 
-    test("should display specimen requirements based on activity definition", async ({
+    test("should display specimen collection instructions", async ({
       page,
     }) => {
-      // Check that specimen cards or information is displayed
-      const specimensSection = page.locator("div", {
-        has: page.getByRole("heading", { name: /specimens/i }),
+      // Find and click the first specimen card to expand it
+      const firstSpecimenTitle = activityDefinitionMapping.specimens[0].title;
+      const specimenCard = page.locator('[data-slot="card"]', {
+        hasText: `Required: ${firstSpecimenTitle}`,
       });
-      await expect(specimensSection).toBeVisible();
+      await expect(specimenCard).toBeVisible();
 
-      // Verify the section has content below the header
-      const sectionContent = specimensSection.locator(
-        "xpath=following-sibling::*",
+      // Click to expand the specimen card (it should be open by default for pending collection)
+      // Find and click the specimen collection instructions accordion
+      const instructionsButton = specimenCard.locator(
+        '[data-slot="accordion-trigger"]',
+        { hasText: /specimen collection instructions/i },
       );
-      const contentCount = await sectionContent.count();
-      expect(contentCount).toBeGreaterThanOrEqual(0);
-    });
+      await expect(instructionsButton).toBeVisible();
+      await instructionsButton.click();
 
-    test("should allow collecting specimens when not completed", async ({
-      page,
-    }) => {
-      // Look for collect/action buttons in specimens section
-      const specimensSection = page.locator("div.space-y-3");
+      // Wait for accordion to expand
+      await page.waitForTimeout(300);
 
-      // Check if there are any specimen workflow cards
-      const workflowCards = page.locator("div[class*='Card']");
-      const cardsCount = await workflowCards.count();
+      // Verify specimen collection section exists
+      await expect(
+        page.getByText(/specimen collection/i).first(),
+      ).toBeVisible();
 
-      // Verify we have some content in the specimens section
-      expect(cardsCount).toBeGreaterThan(0);
+      // Get first specimen definition data
+      const firstSpecimen = activityDefinitionMapping.specimens[0];
+
+      // Verify table headers using data-slot
+      const table = page.locator('[data-slot="table"]').first();
+      await expect(table.locator('[data-slot="table-head"]')).toContainText(
+        /field/i,
+      );
+      await expect(table.locator('[data-slot="table-head"]')).toContainText(
+        /details/i,
+      );
+
+      // Verify specimen collection details from mapping
+      await expect(page.getByText(/required_type/i)).toBeVisible();
+      if (firstSpecimen.typeCollected) {
+        await expect(page.getByText(firstSpecimen.typeCollected)).toBeVisible();
+      }
+
+      await expect(page.getByText(/required_method/i)).toBeVisible();
+      if (firstSpecimen.collectionMethod) {
+        await expect(
+          page.getByText(firstSpecimen.collectionMethod),
+        ).toBeVisible();
+      }
+
+      await expect(page.getByText(/patient_prep/i)).toBeVisible();
+      if (
+        firstSpecimen.patientPreparation &&
+        firstSpecimen.patientPreparation.length > 0
+      ) {
+        await expect(
+          page.getByText(firstSpecimen.patientPreparation[0]),
+        ).toBeVisible();
+      }
+
+      // Verify container details if available
+      if (firstSpecimen.container) {
+        await expect(page.getByText(/required container/i)).toBeVisible();
+
+        await expect(page.getByText(/container/i).first()).toBeVisible();
+        if (firstSpecimen.container.cap) {
+          await expect(
+            page.getByText(firstSpecimen.container.cap),
+          ).toBeVisible();
+        }
+
+        await expect(page.getByText(/capacity/i)).toBeVisible();
+        if (firstSpecimen.container.capacity) {
+          const capacityText = `${firstSpecimen.container.capacity.value} ${firstSpecimen.container.capacity.unit}`;
+          await expect(page.getByText(capacityText)).toBeVisible();
+        }
+
+        await expect(page.getByText(/min_volume/i)).toBeVisible();
+        if (firstSpecimen.container.minVolume) {
+          const minVolumeText = `${firstSpecimen.container.minVolume.value} ${firstSpecimen.container.minVolume.unit}`;
+          await expect(page.getByText(minVolumeText)).toBeVisible();
+        }
+
+        await expect(page.getByText(/preparation/i)).toBeVisible();
+        if (firstSpecimen.container.preparation) {
+          await expect(
+            page.getByText(firstSpecimen.container.preparation),
+          ).toBeVisible();
+        }
+      }
+
+      // Verify processing & storage details
+      await expect(
+        page.getByText(/required processing storage/i),
+      ).toBeVisible();
+      await expect(page.getByText(/retention/i)).toBeVisible();
+
+      if (firstSpecimen.retention) {
+        const retentionText = `${firstSpecimen.retention.value} ${firstSpecimen.retention.unit}`;
+        await expect(page.getByText(retentionText)).toBeVisible();
+      }
     });
   });
 
