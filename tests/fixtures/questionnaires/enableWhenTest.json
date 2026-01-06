@@ -296,7 +296,7 @@
       "link_id": "Q-021",
       "text": "Risk Score",
       "type": "integer",
-      "required": false,
+      "required": true,
       "questions": []
     },
     {
