@@ -28,7 +28,11 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import { usePermissions } from "@/context/PermissionContext";
 import { cn } from "@/lib/utils";
 import reportApi from "@/types/emr/report/reportApi";
-import { TemplateBaseRead, TemplateTypes } from "@/types/emr/template/template";
+import {
+  TemplateBaseRead,
+  TemplateType,
+  TemplateTypes,
+} from "@/types/emr/template/template";
 import { toast } from "sonner";
 import TemplateCard from "./TemplateCard";
 
@@ -40,6 +44,7 @@ interface TemplateListProps {
   onSuccess?: () => void;
   showFilters?: boolean;
   className?: string;
+  reportType?: TemplateType;
 }
 
 export default function TemplateList({
@@ -50,6 +55,7 @@ export default function TemplateList({
   onSuccess,
   showFilters = true,
   className,
+  reportType,
 }: TemplateListProps) {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
@@ -62,12 +68,12 @@ export default function TemplateList({
   });
 
   const { data: templatesData, isLoading: isTemplatesLoading } = useQuery({
-    queryKey: ["templates", facilityId, qParams],
+    queryKey: ["templates", facilityId, qParams, reportType],
     queryFn: query(templateApi.listTemplates, {
       queryParams: {
         facility: facilityId,
         name: qParams.name,
-        template_type: qParams.template_type,
+        template_type: reportType || qParams.template_type,
         status: qParams.status,
         limit: RESULTS_PER_PAGE_LIMIT,
         offset: ((qParams.page ?? 1) - 1) * RESULTS_PER_PAGE_LIMIT,

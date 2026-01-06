@@ -207,7 +207,7 @@ export default function TemplateBuilder({
   const handleSaveTemplate = async () => {
     const formData = form.getValues();
     const templateData = {
-      template_type: template?.template_type || "discharge_summary",
+      template_type: formData.template_type,
       name: formData.name,
       slug_value: formData.slug_value,
       status: formData.status,
@@ -475,10 +475,7 @@ export default function TemplateBuilder({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t("report_type")}</FormLabel>
-                  <Select
-                    value={field.value || "discharge_summary"}
-                    onValueChange={field.onChange}
-                  >
+                  <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder={t("select_report_type")} />
