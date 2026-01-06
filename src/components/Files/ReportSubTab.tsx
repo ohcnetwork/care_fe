@@ -360,21 +360,23 @@ export function ReportSubTab({ associatingId, reportType }: ReportTabProps) {
             {t("refresh")}
           </Button>
         </div>
-        <TemplateReportSheet
-          facilityId={facility?.id || ""}
-          associatingId={associatingId}
-          permissions={facility?.permissions ?? []}
-          reportType={reportType}
-          trigger={
-            <Button variant="outline_primary">
-              <CareIcon icon="l-plus" className="mr-1" />
-              <span>{t("generate_report")}</span>
-            </Button>
-          }
-          onSuccess={() => {
-            refetch();
-          }}
-        />
+        {facility && (
+          <TemplateReportSheet
+            facilityId={facility.id}
+            associatingId={associatingId}
+            permissions={facility.permissions ?? []}
+            reportType={reportType}
+            trigger={
+              <Button variant="outline_primary">
+                <CareIcon icon="l-plus" className="mr-1" />
+                <span>{t("generate_report")}</span>
+              </Button>
+            }
+            onSuccess={() => {
+              refetch();
+            }}
+          />
+        )}
       </div>
 
       <FilterBadges
