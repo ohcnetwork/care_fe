@@ -290,7 +290,10 @@ export default function FacilityForm({
                       onValueChange={handleFeatureChange}
                       value={field.value?.map((val) => val.toString()) || []}
                       placeholder={t("select_facility_feature")}
-                      id="facility-features"
+                      selectionSummary={t("features_selected", {
+                        count: field.value?.length,
+                      })}
+                      translationBasekey="facility_feature"
                     />
                   </FormControl>
                   <FormMessage />
