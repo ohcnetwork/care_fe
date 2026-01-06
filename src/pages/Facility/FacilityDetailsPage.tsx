@@ -47,7 +47,6 @@ export function FacilityDetailsPage({ id }: Props) {
       pathParams: { facilityId: id },
       silent: true,
     }),
-
   });
 
   if (docError) {
