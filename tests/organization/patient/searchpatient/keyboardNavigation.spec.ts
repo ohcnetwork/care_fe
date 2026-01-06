@@ -1,10 +1,13 @@
 import { expect, test } from "@playwright/test";
+import { getFacilityId } from "tests/support/facilityId";
+
+const facilityId = getFacilityId();
 
 test.describe("Keyboard navigation in search patients", () => {
   test("keyboard navigation: arrow keys highlight, enter commits selection", async ({
     page,
   }) => {
-    await page.goto("/facility/:facilityId/patients");
+    await page.goto(`/facility/${facilityId}/patients`);
     await page.keyboard.press("Control+k");
     const commandItems = page.locator("[cmdk-item]");
     await expect(commandItems.first()).toBeVisible();
