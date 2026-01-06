@@ -37,16 +37,21 @@ import TemplateReportSheet from "@/pages/Encounters/TemplateBuilder/TemplateRepo
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
-import { ReportRead, ReportReadList } from "@/types/emr/report/report";
+import {
+  ReportRead,
+  ReportReadList,
+  ReportType,
+} from "@/types/emr/report/report";
 import { toast } from "sonner";
 
 interface ReportTabProps {
   encounter?: EncounterRead;
   patient?: PatientRead;
   associatingId: string;
+  reportType?: ReportType;
 }
 
-export function ReportSubTab({ encounter, associatingId }: ReportTabProps) {
+export function ReportSubTab({ associatingId, reportType }: ReportTabProps) {
   const { t } = useTranslation();
   const { facility } = useCurrentFacility();
   const { qParams, updateQuery, Pagination } = useFilters({
@@ -66,6 +71,7 @@ export function ReportSubTab({ encounter, associatingId }: ReportTabProps) {
     associatingId,
     enabled: true,
     qParams,
+    reportType,
   });
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -358,22 +364,20 @@ export function ReportSubTab({ encounter, associatingId }: ReportTabProps) {
             {t("refresh")}
           </Button>
         </div>
-        {encounter && (
-          <TemplateReportSheet
-            facilityId={encounter.facility?.id || ""}
-            associatingId={associatingId}
-            permissions={facility?.permissions ?? []}
-            trigger={
-              <Button variant="outline_primary">
-                <CareIcon icon="l-plus" className="mr-1" />
-                <span>{t("generate_report")}</span>
-              </Button>
-            }
-            onSuccess={() => {
-              refetch();
-            }}
-          />
-        )}
+        <TemplateReportSheet
+          facilityId={facility?.id || ""}
+          associatingId={associatingId}
+          permissions={facility?.permissions ?? []}
+          trigger={
+            <Button variant="outline_primary">
+              <CareIcon icon="l-plus" className="mr-1" />
+              <span>{t("generate_report")}</span>
+            </Button>
+          }
+          onSuccess={() => {
+            refetch();
+          }}
+        />
       </div>
 
       <FilterBadges
