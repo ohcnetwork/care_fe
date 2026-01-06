@@ -110,8 +110,6 @@ export const FilesTab = ({
 
         <TabsContent value="reports">
           <ReportSubTab
-            encounter={encounter}
-            patient={patient}
             associatingId={associatingId}
             reportType={
               type === FileType.PATIENT

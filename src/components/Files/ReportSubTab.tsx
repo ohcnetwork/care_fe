@@ -34,9 +34,7 @@ import useReportManager from "@/hooks/useReportManager";
 
 import queryClient from "@/Utils/request/queryClient";
 import TemplateReportSheet from "@/pages/Encounters/TemplateBuilder/TemplateReportSheet";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { PatientRead } from "@/types/emr/patient/patient";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
   ReportRead,
   ReportReadList,
@@ -45,15 +43,13 @@ import {
 import { toast } from "sonner";
 
 interface ReportTabProps {
-  encounter?: EncounterRead;
-  patient?: PatientRead;
   associatingId: string;
   reportType?: ReportType;
 }
 
 export function ReportSubTab({ associatingId, reportType }: ReportTabProps) {
   const { t } = useTranslation();
-  const { facility } = useCurrentFacility();
+  const { facility } = useCurrentFacilitySilently();
   const { qParams, updateQuery, Pagination } = useFilters({
     limit: 15,
     disableCache: true,
