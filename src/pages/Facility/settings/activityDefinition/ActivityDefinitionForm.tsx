@@ -61,6 +61,10 @@ import { SpecimenDefinitionStatus } from "@/types/emr/specimenDefinition/specime
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
 
+/**
+ * Form component for creating and editing Activity Definitions.
+ * Includes skeleton loading state during data fetch.
+ */
 export default function ActivityDefinitionForm({
   facilityId,
   activityDefinitionSlug,
