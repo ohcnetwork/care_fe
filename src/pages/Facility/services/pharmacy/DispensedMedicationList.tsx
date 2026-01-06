@@ -1,6 +1,9 @@
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
-import { createFilterConfig } from "@/components/ui/multi-filter/utils/Utils";
+import {
+  createFilterConfig,
+  getVariantColorClasses,
+} from "@/components/ui/multi-filter/utils/Utils";
 import {
   Select,
   SelectContent,
@@ -287,7 +290,7 @@ export default function DispensedMedicationList({
         Object.values(MedicationDispenseStatus).map((s) => ({
           value: s,
           label: t(s),
-          color: MEDICATION_DISPENSE_STATUS_COLORS[s],
+          color: getVariantColorClasses(MEDICATION_DISPENSE_STATUS_COLORS[s]),
         })),
       ),
     ],
@@ -479,32 +482,35 @@ export default function DispensedMedicationList({
                 patientId={patientId}
                 disabled={isUpdatingDispenseOrder}
               />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="border-gray-400 px-2">
-                    <CareIcon icon="l-ellipsis-v" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {Object.values(DispenseOrderStatus)
-                    .filter((status) => status !== dispenseOrder.status)
-                    .filter(
-                      (status) => status !== DispenseOrderStatus.completed,
-                    )
-                    .map((status) => (
-                      <DropdownMenuItem asChild key={status}>
-                        <Button
-                          variant="ghost"
-                          onClick={() => handleUpdateDispenseOrder(status)}
-                          className="w-full flex flex-row justify-stretch items-center"
-                          disabled={isUpdatingDispenseOrder}
-                        >
-                          {t(`mark_as_${status}`)}
-                        </Button>
-                      </DropdownMenuItem>
-                    ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {(dispenseOrder.status === DispenseOrderStatus.draft ||
+                dispenseOrder.status === DispenseOrderStatus.in_progress) && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="border-gray-400 px-2">
+                      <CareIcon icon="l-ellipsis-v" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {Object.values(DispenseOrderStatus)
+                      .filter((status) => status !== dispenseOrder.status)
+                      .filter(
+                        (status) => status !== DispenseOrderStatus.completed,
+                      )
+                      .map((status) => (
+                        <DropdownMenuItem asChild key={status}>
+                          <Button
+                            variant="ghost"
+                            onClick={() => handleUpdateDispenseOrder(status)}
+                            className="w-full flex flex-row justify-stretch items-center"
+                            disabled={isUpdatingDispenseOrder}
+                          >
+                            {t(`mark_as_${status}`)}
+                          </Button>
+                        </DropdownMenuItem>
+                      ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
           </div>
 

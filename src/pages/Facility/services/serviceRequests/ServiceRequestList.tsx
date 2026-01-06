@@ -26,7 +26,10 @@ import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { tagFilter } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
-import { createFilterConfig } from "@/components/ui/multi-filter/utils/Utils";
+import {
+  createFilterConfig,
+  getVariantColorClasses,
+} from "@/components/ui/multi-filter/utils/Utils";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import {
   Priority,
@@ -208,7 +211,7 @@ export default function ServiceRequestList({
         Object.values(Priority).map((p) => ({
           value: p,
           label: t(p),
-          color: SERVICE_REQUEST_PRIORITY_COLORS[p],
+          color: getVariantColorClasses(SERVICE_REQUEST_PRIORITY_COLORS[p]),
         })),
       ),
     ],
