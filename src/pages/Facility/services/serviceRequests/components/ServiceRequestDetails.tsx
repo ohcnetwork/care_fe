@@ -118,9 +118,6 @@ export function ServiceRequestDetails({
                 )}
               </div>
             </div>
-          </div>
-          <div className="border-l border-gray-200 mx-4" />
-          <div className="flex flex-col gap-6">
             <div>
               <div className="text-sm text-gray-600 mb-1">{t("specimen")}</div>
               <div className="font-sm font-normal flex flex-wrap gap-1">
@@ -134,6 +131,33 @@ export function ServiceRequestDetails({
                 </div>
                 <div className="font-semibold text-gray-700">
                   {request.body_site.display}
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="border-l border-gray-200 mx-4" />
+          <div className="flex flex-col gap-6">
+            {activityDefinition.healthcare_service && (
+              <div>
+                <div className="text-sm text-gray-600 mb-1">
+                  {t("healthcare_service")}
+                </div>
+                <div className="font-semibold text-gray-700">
+                  {activityDefinition.healthcare_service.name}
+                </div>
+              </div>
+            )}
+            {request.locations?.length > 0 && (
+              <div>
+                <div className="text-sm text-gray-600 mb-1">
+                  {t("locations")}
+                </div>
+                <div className="text-sm font-normal flex flex-wrap gap-1">
+                  {request.locations.map((location) => (
+                    <Badge key={location.id} variant="secondary">
+                      {location.name}
+                    </Badge>
+                  ))}
                 </div>
               </div>
             )}
