@@ -246,6 +246,21 @@ test.describe("Enable When Functionality Tests", () => {
     test("should show pregnancy question only for female gender", async ({
       page,
     }) => {
+      // Fill base fields first (age, smoking status, BMI)
+      await fillFormField(page, "Patient Age", "input", BASE_FORM_DATA.age);
+      await fillFormField(
+        page,
+        "Smoking Status",
+        "radio",
+        BASE_FORM_DATA.smokingStatus,
+      );
+      await fillFormField(
+        page,
+        "BMI (Body Mass Index)",
+        "input",
+        BASE_FORM_DATA.bmi,
+      );
+
       await checkVisibility(page, "Are you currently pregnant?", false);
 
       await fillFormField(page, "Gender", "radio", "male");
@@ -257,7 +272,6 @@ test.describe("Enable When Functionality Tests", () => {
       await fillFormField(page, "Gender", "radio", "other");
       await checkVisibility(page, "Are you currently pregnant?", false);
 
-      await fillBaseFields(page, { gender: "other" });
       await submitAndVerify(page, [
         BASE_FORM_DATA.age,
         "other",
@@ -580,6 +594,21 @@ test.describe("Enable When Functionality Tests", () => {
     test("should handle rapid visibility changes", async ({ page }) => {
       const pregnancyField = "Are you currently pregnant?";
 
+      // Fill base fields first
+      await fillFormField(page, "Patient Age", "input", BASE_FORM_DATA.age);
+      await fillFormField(
+        page,
+        "Smoking Status",
+        "radio",
+        BASE_FORM_DATA.smokingStatus,
+      );
+      await fillFormField(
+        page,
+        "BMI (Body Mass Index)",
+        "input",
+        BASE_FORM_DATA.bmi,
+      );
+
       await fillFormField(page, "Gender", "radio", "female");
       await checkVisibility(page, pregnancyField, true);
 
@@ -589,7 +618,9 @@ test.describe("Enable When Functionality Tests", () => {
       await fillFormField(page, "Gender", "radio", "female");
       await checkVisibility(page, pregnancyField, true);
 
-      await fillBaseFields(page, { gender: "other" });
+      await fillFormField(page, "Gender", "radio", "other");
+      await checkVisibility(page, pregnancyField, false);
+
       await submitAndVerify(page, [
         BASE_FORM_DATA.age,
         "other",
