@@ -157,7 +157,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("name")}</FormLabel>
+                <FormLabel aria-required>{t("name")}</FormLabel>
                 <FormControl>
                   <Input placeholder={t("enter_role_name")} {...field} />
                 </FormControl>
@@ -193,7 +193,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
               <Card className="flex flex-col min-h-80">
                 <CardHeader className="flex flex-col">
                   <div className="flex items-center justify-between">
-                    <CardTitle>{t("permissions")}</CardTitle>
+                    <CardTitle aria-required>{t("permissions")}</CardTitle>
 
                     <div className="flex gap-2">
                       <Button
