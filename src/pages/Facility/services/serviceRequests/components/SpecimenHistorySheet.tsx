@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
 
+import { EmptyState } from "@/components/ui/empty-state";
+
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -37,14 +39,11 @@ export function SpecimenHistorySheet({
         <ScrollArea className="h-[calc(100vh-8rem)] mt-6 pr-4">
           <div className="space-y-4">
             {specimens.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-64 text-center text-muted-foreground">
-                <p className="text-lg font-medium">
-                  {t("no_specimen_history")}
-                </p>
-                <p className="text-sm mt-1">
-                  {t("specimen_history_empty_description")}
-                </p>
-              </div>
+              <EmptyState
+                title={t("no_specimen_history")}
+                description={t("specimen_history_empty_description")}
+                className="h-64"
+              />
             ) : (
               specimens.map((specimen) => (
                 <Card key={specimen.id} className="shadow-sm">
