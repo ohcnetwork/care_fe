@@ -699,13 +699,21 @@ const PatientBasicsContent = ({
                     resource={TagResource.PATIENT}
                   />
                   {selectedTags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
+                    <ul
+                      className="flex flex-wrap gap-2 mt-2 list-none"
+                      aria-label={t("selected_tags")}
+                    >
                       {selectedTags.map((tag) => (
-                        <Badge key={tag.id} variant="secondary">
-                          {tag.display}
-                        </Badge>
+                        <li key={tag.id}>
+                          <Badge
+                            variant="secondary"
+                            aria-label={`${t(tag.category)}: ${tag.display}`}
+                          >
+                            {tag.display}
+                          </Badge>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
                   )}
                 </>
               </FormControl>
