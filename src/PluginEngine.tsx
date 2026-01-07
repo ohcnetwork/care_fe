@@ -4,7 +4,6 @@ import {
   PluginManifestWithMeta,
   SupportedPluginComponents,
 } from "@/pluginTypes";
-import { PlugConfig } from "@/types/plugConfig";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import {
   __federation_method_getRemote as getFederationRemote,
@@ -16,6 +15,7 @@ import React, { Suspense } from "react";
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import Loading from "@/components/Common/Loading";
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
+import { PlugConfig } from "@/types/plugConfig";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
 import query from "@/Utils/request/query";
 import { t } from "i18next";
@@ -101,12 +101,16 @@ export default function PluginEngine({
 }
 
 type PluginProps<K extends keyof SupportedPluginComponents> =
-  React.ComponentProps<SupportedPluginComponents[K]>;
+  React.ComponentProps<SupportedPluginComponents[K]> & {
+    __meta: PluginManifestWithMeta["meta"];
+  };
 
-export function PLUGIN_Component<K extends keyof SupportedPluginComponents>({
-  __name,
-  ...props
-}: { __name: K } & PluginProps<K>) {
+type PluginComponentProps = {
+  [K in keyof SupportedPluginComponents]: { __name: K } & PluginProps<K>;
+}[keyof SupportedPluginComponents];
+
+export function PLUGIN_Component(props: PluginComponentProps) {
+  const { __name, ...restProps } = props;
   const careApps = useCareApps();
 
   return (
@@ -116,17 +120,17 @@ export function PLUGIN_Component<K extends keyof SupportedPluginComponents>({
           return null;
         }
 
-        const Component = plugin.components?.[
-          __name
-        ] as React.ComponentType<unknown>;
-        const propsWithMeta = {
-          ...props,
-          __meta: plugin.meta,
-        };
-
+        const Component = plugin.components?.[__name] as React.ComponentType<
+          PluginProps<typeof __name>
+        >;
         if (!Component) {
           return null;
         }
+
+        const baseProps = {
+          ...restProps,
+          __meta: plugin.meta,
+        } as PluginProps<typeof __name>;
 
         return (
           <PluginErrorBoundary key={plugin.plugin} pluginName={plugin.plugin}>
@@ -142,8 +146,7 @@ export function PLUGIN_Component<K extends keyof SupportedPluginComponents>({
                 </div>
               }
             >
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <Component {...(propsWithMeta as any)} />
+              <Component {...baseProps} />
             </React.Suspense>
           </PluginErrorBoundary>
         );
