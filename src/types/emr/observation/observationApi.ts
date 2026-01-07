@@ -1,6 +1,5 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 
-import { PaginatedResponse } from "@/Utils/request/types";
 import {
   ObservationAnalyzeRequest,
   ObservationAnalyzeResponse,

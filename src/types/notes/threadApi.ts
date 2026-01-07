@@ -1,5 +1,4 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 import { NoteCreate, NoteRead } from "@/types/notes/messages";
 import { ThreadCreate, ThreadRead } from "@/types/notes/thread";
 
