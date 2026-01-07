@@ -72,7 +72,6 @@ import {
 import fileApi from "@/types/files/fileApi";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import React from "react";
 
 interface DiagnosticReportFormProps {
   patientId: string;
@@ -901,12 +900,10 @@ export function DiagnosticReportForm({
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <React.Fragment>
-            <PLUGIN_Component
-              __name="ServiceRequestAction"
-              serviceRequestId={serviceRequestId}
-            />
-          </React.Fragment>
+          <PLUGIN_Component
+            __name="ServiceRequestAction"
+            serviceRequestId={serviceRequestId}
+          />
           <CardContent className="px-2 bg-gray-100">
             {hasReport && fullReport ? (
               <div className="space-y-6">
