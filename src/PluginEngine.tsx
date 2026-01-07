@@ -127,7 +127,7 @@ export function PLUGIN_Component(props: PluginComponentProps) {
           return null;
         }
 
-        const baseProps = {
+        const propsWithMeta = {
           ...restProps,
           __meta: plugin.meta,
         } as PluginProps<typeof __name>;
@@ -146,7 +146,7 @@ export function PLUGIN_Component(props: PluginComponentProps) {
                 </div>
               }
             >
-              <Component {...baseProps} />
+              <Component {...propsWithMeta} />
             </React.Suspense>
           </PluginErrorBoundary>
         );
