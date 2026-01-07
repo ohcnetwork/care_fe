@@ -28,6 +28,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ConditionalRule, ExtensionFieldMetadata } from "@/Utils/schema/types";
 
 import { ArrayField } from "./ArrayField";
+import { AutocompleteField } from "./AutocompleteField";
 
 interface SchemaFieldProps<TFieldValues extends FieldValues> {
   /** Field metadata from JSON Schema */
@@ -163,6 +164,18 @@ export function SchemaField<TFieldValues extends FieldValues>({
           })}
         </div>
       </div>
+    );
+  }
+
+  // x-ui control: autocomplete - render as searchable select with API fetching
+  if (metadata.uiControl === "autocomplete" && metadata.uiMetadata) {
+    return (
+      <AutocompleteField
+        metadata={metadata}
+        control={control}
+        fieldPath={fieldPath}
+        className={className}
+      />
     );
   }
 
