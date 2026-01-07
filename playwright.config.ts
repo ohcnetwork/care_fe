@@ -83,7 +83,11 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      dependencies: ["setup-patient-account"],
+      dependencies: [
+        "setup-patient-account",
+        "setup-facility-admin",
+        "setup-nurse",
+      ],
     },
     // {
     //   name: "firefox",
