@@ -900,11 +900,11 @@ export function DiagnosticReportForm({
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <PLUGIN_Component
-            __name="ServiceRequestAction"
-            serviceRequestId={serviceRequestId}
-          />
           <CardContent className="px-2 bg-gray-100">
+            <PLUGIN_Component
+              __name="ServiceRequestAction"
+              serviceRequestId={serviceRequestId}
+            />
             {hasReport && fullReport ? (
               <div className="space-y-6">
                 {fullReport.status !== DiagnosticReportStatus.final &&
