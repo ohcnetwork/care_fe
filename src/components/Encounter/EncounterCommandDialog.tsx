@@ -373,8 +373,8 @@ export function EncounterCommandDialog({
               <CommandGroup heading={group.group} className="px-2">
                 {group.items.map((action) => (
                   <CommandItem
-                    key={action.id}
-                    value={`${action.id} ${action.label}`}
+                    key={`${group.group}-${action.id}`}
+                    value={`${group.group} ${action.id} ${action.label}`}
                     onSelect={() => handleSelect(action.id)}
                     className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
                     autoFocus={false}
