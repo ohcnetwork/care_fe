@@ -796,6 +796,7 @@
   "auto_maintained": "Auto maintained",
   "auto_refresh": "Auto Refresh",
   "auto_refresh_tooltip": "Automatically refreshes every {{interval}} seconds. Disable to pause live updates.",
+  "autocomplete_configuration_error": "Autocomplete Configuration Error",
   "autocomplete_options": "Autocomplete Options",
   "autofilled_fields": "Autofilled Fields",
   "availabilities": "Availabilities",

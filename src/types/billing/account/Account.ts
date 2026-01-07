@@ -40,6 +40,7 @@ export interface AccountBase {
   name: string;
   service_period: Period;
   description?: string;
+  extensions: Record<string, unknown>;
 }
 
 export interface AccountRead extends AccountBase {
