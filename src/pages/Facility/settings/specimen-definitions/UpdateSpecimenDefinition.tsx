@@ -7,8 +7,6 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
 
-import Page from "@/components/Common/Page";
-import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
 import { SpecimenDefinitionForm } from "./SpecimenDefinitionForm";
 
@@ -47,18 +45,7 @@ export function UpdateSpecimenDefinition({
     });
 
   if (isFetching) {
-    return (
-      <Page title={t("update_specimen_definition")} hideTitleOnPage>
-        <div className="container mx-auto max-w-3xl">
-          <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
-              {t("update_specimen_definition")}
-            </h1>
-          </div>
-          <FormSkeleton rows={10} />
-        </div>
-      </Page>
-    );
+    return <div>Loading...</div>;
   }
 
   if (!specimenDefinition) {
@@ -66,26 +53,22 @@ export function UpdateSpecimenDefinition({
   }
 
   return (
-    <Page title={t("update_specimen_definition")} hideTitleOnPage>
-      <div className="container mx-auto max-w-3xl">
-        <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">
-            {t("update_specimen_definition")}
-          </h1>
-        </div>
-        <SpecimenDefinitionForm
-          initialData={specimenDefinition}
-          onSubmit={(data) =>
-            updateSpecimenDefinition({
-              ...data,
-              patient_preparation:
-                data.patient_preparation?.filter((item) => item && item.code) ||
-                [],
-            })
-          }
-          isLoading={isUpdating}
-        />
-      </div>
-    </Page>
+    <div className="space-y-4">
+      <h1 className="text-2xl font-semibold">
+        {t("update_specimen_definition")}
+      </h1>
+      <SpecimenDefinitionForm
+        initialData={specimenDefinition}
+        onSubmit={(data) =>
+          updateSpecimenDefinition({
+            ...data,
+            patient_preparation:
+              data.patient_preparation?.filter((item) => item && item.code) ||
+              [],
+          })
+        }
+        isLoading={isUpdating}
+      />
+    </div>
   );
 }
