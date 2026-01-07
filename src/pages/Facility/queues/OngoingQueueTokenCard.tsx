@@ -132,12 +132,7 @@ export function OngoingQueueTokenCard({
                 />
 
                 <span className="text-base font-medium text-gray-700">
-                  {token.status === "IN_PROGRESS"
-                    ? t("now_serving")
-                    : token.status === "CREATED"
-                      ? t("called")
-                      : token.status}
-                  :
+                  {t(token.status.toLowerCase())}
                 </span>
 
                 <span className="text-lg font-extrabold text-black">
