@@ -54,23 +54,6 @@ export function OngoingQueueTokenCard({
     useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
-  const STATUS_CONFIG: Record<string, { label: string; dotClass: string }> = {
-    IN_PROGRESS: {
-      label: t("now_serving"),
-      dotClass: "bg-green-500 border-green-600",
-    },
-    CREATED: {
-      label: t("called"),
-      dotClass: "bg-blue-400 border-blue-500",
-    },
-  };
-
-  const getStatusLabel = (status: string): string =>
-    STATUS_CONFIG[status]?.label ?? status;
-
-  const getStatusDotClass = (status: string): string =>
-    STATUS_CONFIG[status]?.dotClass ?? "bg-gray-300 border-gray-400";
-
   const { mutate: updateToken } = useMutation({
     mutationFn: mutate(tokenApi.update, {
       pathParams: {
@@ -140,13 +123,21 @@ export function OngoingQueueTokenCard({
             {token ? (
               <div className="flex gap-2 items-center justify-center p-2 bg-gray-100 border border-gray-200 rounded-lg">
                 <span
-                  className={`w-2 h-2 rounded-full border ${getStatusDotClass(
-                    token.status,
-                  )}`}
+                  className={cn(
+                    "w-2 h-2 rounded-full border",
+                    token.status === "IN_PROGRESS" &&
+                      "bg-green-500 border-green-600",
+                    token.status === "CREATED" && "bg-blue-400 border-blue-500",
+                  )}
                 />
 
                 <span className="text-base font-medium text-gray-700">
-                  {getStatusLabel(token.status)}:
+                  {token.status === "IN_PROGRESS"
+                    ? t("now_serving")
+                    : token.status === "CREATED"
+                      ? t("called")
+                      : token.status}
+                  :
                 </span>
 
                 <span className="text-lg font-extrabold text-black">
