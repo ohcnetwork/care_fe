@@ -4,7 +4,6 @@ import {
   CreateServiceAccountResponse,
   CurrentUserRead,
   GenerateServiceAccountTokenResponse,
-  GetServiceAccountsResponse,
   UserCreate,
   UserRead,
   UserReadMinimal,
@@ -67,11 +66,6 @@ export default {
     method: HttpMethod.POST,
     TRes: Type<CreateServiceAccountResponse>(),
     TBody: Type<{ username: string; email: string }>(),
-  },
-  getServiceAccounts: {
-    path: "/api/v1/users/get_service_accounts/",
-    method: HttpMethod.GET,
-    TRes: Type<GetServiceAccountsResponse[]>(),
   },
   generateServiceAccountToken: {
     path: "/api/v1/users/{username}/generate_service_account_token/",

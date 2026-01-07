@@ -78,6 +78,10 @@ export const PERMISSION_RESCHEDULE_APPOINTMENT = "can_reschedule_booking";
 export const PERMISSION_CREATE_USER = "can_create_user";
 export const PERMISSION_LIST_USER = "can_list_user";
 
+// Service Account Permissions
+export const PERMISSION_CREATE_SERVICE_ACCOUNT = "can_create_service_account";
+export const PERMISSION_MANAGE_SERVICE_ACCOUNT = "can_manage_service_account";
+
 // Template Permissions
 export const PERMISSION_LIST_TEMPLATE = "can_read_template";
 export const PERMISSION_WRITE_TEMPLATE = "can_write_template";
@@ -221,6 +225,12 @@ export interface Permissions {
   canCreateUser: boolean;
   /** Permission slug: "can_list_user" */
   canListUsers: boolean;
+
+  // Service Account Permissions
+  /** Permission slug: "can_create_service_account" */
+  canCreateServiceAccount: boolean;
+  /** Permission slug: "can_manage_service_account" */
+  canManageServiceAccount: boolean;
 
   // Template Permissions
   /** Permission slug: "can_list_template" */
@@ -426,6 +436,16 @@ export function getPermissions(
     canCreateUser: hasPermission(PERMISSION_CREATE_USER, permissions),
     // Currently listed, but not used in BE
     canListUsers: hasPermission(PERMISSION_LIST_USER, permissions),
+
+    // Service Account
+    canCreateServiceAccount: hasPermission(
+      PERMISSION_CREATE_SERVICE_ACCOUNT,
+      permissions,
+    ),
+    canManageServiceAccount: hasPermission(
+      PERMISSION_MANAGE_SERVICE_ACCOUNT,
+      permissions,
+    ),
 
     // Template
     canListTemplate: hasPermission(PERMISSION_LIST_TEMPLATE, permissions),

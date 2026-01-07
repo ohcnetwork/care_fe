@@ -34,6 +34,8 @@ interface Props {
   open: boolean;
   setOpen: (open: boolean) => void;
   preSelectedUsername?: string;
+
+  isServiceAccount?: boolean;
 }
 
 export default function LinkFacilityUserSheet({
@@ -42,6 +44,7 @@ export default function LinkFacilityUserSheet({
   open,
   setOpen,
   preSelectedUsername,
+  isServiceAccount = false,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -118,6 +121,7 @@ export default function LinkFacilityUserSheet({
             placeholder={t("search_for_a_user")}
             noOptionsMessage="No users found"
             popoverClassName="w-full"
+            isServiceAccount={isServiceAccount}
           />
           {selectedUser && (
             <div className="space-y-4">

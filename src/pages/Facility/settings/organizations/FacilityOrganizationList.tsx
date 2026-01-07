@@ -23,6 +23,7 @@ import {
 } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
+import FacilityOrganizationServiceAccounts from "@/pages/Facility/settings/organizations/FacilityOrganizationServiceAccounts";
 import FacilityOrganizationUsers from "./FacilityOrganizationUsers";
 import FacilityOrganizationView from "./FacilityOrganizationView";
 import FacilityOrganizationNavbar from "./components/FacilityOrganizationNavbar";
@@ -103,6 +104,13 @@ export default function FacilityOrganizationList({
         : `/facility/${facilityId}/settings/departments`,
       title: t("departments_or_teams"),
       value: "departments",
+    },
+    {
+      path: organizationId
+        ? `/facility/${facilityId}/settings/departments/${organizationId}/service-accounts`
+        : `/facility/${facilityId}/settings/departments/service-accounts`,
+      title: t("service_accounts"),
+      value: "service-accounts",
     },
   ];
 
@@ -243,13 +251,19 @@ export default function FacilityOrganizationList({
                       facilityId={facilityId}
                       permissions={facility?.permissions ?? []}
                     />
-                  ) : (
+                  ) : currentTab === "departments" ? (
                     <FacilityOrganizationView
                       id={organizationId}
                       facilityId={facilityId}
                       permissions={facility?.permissions ?? []}
                     />
-                  )}
+                  ) : currentTab === "service-accounts" && organizationId ? (
+                    <FacilityOrganizationServiceAccounts
+                      organizationId={organizationId}
+                      facilityId={facilityId}
+                      permissions={facility?.permissions ?? []}
+                    />
+                  ) : null}
                 </div>
               </Page>
             </div>
