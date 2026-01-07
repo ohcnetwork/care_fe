@@ -2,20 +2,18 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 
-dotenv.config({ path: [".env.local", ".env"] });
-
 import {
+  ApiResult,
   type BaseConfig,
   LoaderResult,
   type ProcessedRow,
   colorize,
   createScriptConfig,
-  createSlug,
   ensureAuthentication,
   ensureChargeItemCategories,
+  generateHashSlug,
   getLogger,
   loadData,
-  makeApiCall,
   makeBatchApiCall,
   mergeConfigWithCli,
   normalizeTitle,
@@ -34,6 +32,11 @@ import {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const __rootDir = path.join(__dirname, "..");
+
+dotenv.config({
+  path: [path.join(__rootDir, ".env.local"), path.join(__rootDir, ".env")],
+});
 
 const logger = getLogger();
 
@@ -93,51 +96,23 @@ function getTaxComponents(taxRate?: string) {
 function processCsvData(rows: Record<string, string>[]): ChargeItemData[] {
   return rows.map((row) => {
     const basePrice = parseFloat(row["Base Price"].replace(/[^\d.-]/g, ""));
-    const slug_value = row.slug;
     const taxRate = row["Tax Rate"] || row["RATE"] || row["Tax"] || undefined;
+    const title = row["Service"] || row["title"];
+    const slug_value = generateHashSlug(normalizeTitle(title || ""));
 
     return {
-      title: row.Service,
+      title: title,
       basePrice: isNaN(basePrice) ? 0 : basePrice,
       slug_value: slug_value,
       taxRate: taxRate,
-      category: `f-${process.env.FACILITY_ID}-${createSlug(row.category || "service")}`,
-      description: row.description || `Service: ${row.Service}`,
+      category: row.category || "service",
+      description: row.description || `Service: ${title}`,
       status:
         (row.status as ChargeItemDefinitionStatus) ||
         ChargeItemDefinitionStatus.active,
     };
   });
 }
-
-// Function to upsert charge item definition
-async function upsertChargeItemDefinition(
-  data: ChargeItemData,
-  config: BaseConfig,
-): Promise<any> {
-  const chargeItemData: ChargeItemDefinitionCreate = {
-    title: data.title,
-    slug_value: data.slug_value,
-    status: data.status,
-    description: data.description,
-    category: data.category,
-    price_components: [
-      {
-        monetary_component_type: MonetaryComponentType.base,
-        amount: data.basePrice.toString(),
-        conditions: [],
-      },
-      ...getTaxComponents(data.taxRate),
-    ],
-  };
-
-  return await makeApiCall(
-    `/api/v1/facility/${config.facilityId}/charge_item_definition/upsert/`,
-    chargeItemData,
-    config,
-  );
-}
-// Main function
 
 async function mockInsert(config: BaseConfig): Promise<LoaderResult> {
   logger(colorize("Loading data...", 0));
@@ -153,7 +128,7 @@ async function mockInsert(config: BaseConfig): Promise<LoaderResult> {
   processedData = removeDuplicates(processedData);
 
   return {
-    successful: processedData.map((item) => item.slug_value),
+    successful: processedData as unknown as ApiResult<ChargeItemData>[],
     failed: [],
     results: processedData.map((item) => ({
       success: true,
@@ -198,9 +173,10 @@ async function main(configOverride?: Partial<BaseConfig>) {
     }
 
     // Ensure categories exist
+    const categoriesList = csvRows.map((item) => item.category);
     logger(colorize("Ensuring categories exist...", 0));
     const { successful, failed, categoryData } =
-      await ensureChargeItemCategories(csvRows, finalConfig);
+      await ensureChargeItemCategories(categoriesList, finalConfig);
     if (failed.length > 0) {
       logger(colorize("Failed to create categories:", 1));
       failed.forEach((category) => {
@@ -236,7 +212,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
           slug_value: item.slug_value,
           status: item.status,
           description: item.description,
-          category: item.category,
+          category: `f-${finalConfig.facilityId}-${generateHashSlug(normalizeTitle(`cid_${item.category}`))}`,
           price_components: [
             {
               monetary_component_type: MonetaryComponentType.base,
@@ -302,4 +278,4 @@ if (require.main === module) {
   main();
 }
 
-export { main, processCsvData, upsertChargeItemDefinition };
+export { main, processCsvData };

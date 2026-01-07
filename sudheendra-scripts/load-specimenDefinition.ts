@@ -7,17 +7,20 @@ import {
   SpecimenDefinitionCreate,
   SpecimenDefinitionStatus,
 } from "@/types/emr/specimenDefinition/specimenDefinition.js";
+import dotenv from "dotenv";
 import {
   type BaseConfig,
   type ProcessedRow,
   colorize,
   createScriptConfig,
   ensureAuthentication,
+  generateHashSlug,
   getLogger,
   loadData,
   makeApiCall,
   makeBatchApiCall,
   mergeConfigWithCli,
+  normalizeTitle,
   parseCliArgs,
   processApiResults,
   removeDuplicates,
@@ -27,6 +30,11 @@ import {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const __rootDir = path.join(__dirname, "..");
+
+dotenv.config({
+  path: [path.join(__rootDir, ".env.local"), path.join(__rootDir, ".env")],
+});
 
 const logger = getLogger();
 
@@ -134,7 +142,7 @@ function processCsvData(
 
     return {
       title: row.title,
-      slug_value: row.slug,
+      slug_value: generateHashSlug(normalizeTitle(row.title || "")),
       status:
         (row.status as SpecimenDefinitionStatus) ||
         SpecimenDefinitionStatus.active,
@@ -214,9 +222,9 @@ async function main(configOverride?: Partial<BaseConfig>) {
 
     // Create output data for CSV
     let outputData: ProcessedRow[] = processedData.map((item) => ({
-      Title: item.title,
-      Slug_value: item.slug_value,
-      Status: "Pending",
+      title: item.title,
+      slug_value: item.slug_value,
+      status: "Pending",
     }));
 
     // Upsert specimen definitions via API using batch processing

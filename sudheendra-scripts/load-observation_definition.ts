@@ -7,15 +7,17 @@ import {
   type ValidationRule,
   colorize,
   createScriptConfig,
-  createSlug,
   ensureAuthentication,
+  generateHashSlug,
   getAuthHeaders,
   getLogger,
   loadData,
   makeBatchApiCall,
   mergeConfigWithCli,
+  normalizeTitle,
   parseCliArgs,
   parseCode,
+  processApiResults,
   showCliHelp,
   validateRowCodes,
   writeOutputCsv,
@@ -82,11 +84,11 @@ interface ParsedObservationDefinition {
 }
 
 interface ProcessedRow {
-  Slug_value: string;
-  Title: string;
-  Status: string;
-  Errors?: string;
-  Code_Substitution?: string;
+  slug_value: string;
+  title: string;
+  status: string;
+  errors?: string;
+  code_substitution?: string;
 }
 
 // Remove duplicate constants - they're imported from types now
@@ -94,9 +96,13 @@ interface ProcessedRow {
 /**
  * Config
  */
-dotenv.config({ path: [".env.local", ".env"] });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const __rootDir = path.join(__dirname, "..");
+
+dotenv.config({
+  path: [path.join(__rootDir, ".env.local"), path.join(__rootDir, ".env")],
+});
 
 const logger = getLogger();
 
@@ -256,10 +262,9 @@ function createObservationDefinitionFromRow(
     row.body_site_display,
   );
   const method = parseCode(
-    row.method_system ||
-      "http://terminology.hl7.org/CodeSystem/observation-methods",
-    row.method_code,
-    row.method_display,
+    row.method_system || OBSERVATION_VALIDATION_RULES[1].defaultSystem,
+    row.method_code || OBSERVATION_VALIDATION_RULES[1].defaultCode,
+    row.method_display || OBSERVATION_VALIDATION_RULES[1].defaultDisplay,
   );
   const permittedUnit = parseCode(
     row.permitted_unit_system || "http://unitsofmeasure.org",
@@ -275,7 +280,7 @@ function createObservationDefinitionFromRow(
   const category = row.category || "laboratory";
 
   return {
-    slug_value: row.slug,
+    slug_value: generateHashSlug(normalizeTitle(row.title || "")),
     title: row.title,
     status,
     description: row.description,
@@ -409,7 +414,7 @@ async function mockInsert(config: BaseConfig) {
   const rows: CSVRow[] = rawRows.map((row) => row as unknown as CSVRow);
 
   return {
-    successful: rows.map((item) => item.slug),
+    successful: rows,
     failed: [],
     results: rows.map((item) => ({
       success: true,
@@ -538,11 +543,11 @@ async function main(configOverride?: Partial<BaseConfig>) {
     // Add invalid rows
     invalidRows.forEach(({ row, errors }) => {
       processedRows.push({
-        Slug_value: row.slug || createSlug(row.title),
-        Title: row.title || "UNKNOWN",
-        Status: "Validation Failed",
-        Errors: errors.join("; "),
-        Code_Substitution: substitutions.get(row.slug) || "",
+        slug_value: row.slug,
+        title: row.title || "UNKNOWN",
+        status: "Validation Failed",
+        errors: errors.join("; "),
+        code_substitution: substitutions.get(row.slug) || "",
       });
     });
 
@@ -564,11 +569,11 @@ async function main(configOverride?: Partial<BaseConfig>) {
       }
 
       processedRows.push({
-        Slug_value: result.item.slug_value,
-        Title: result.item.title,
-        Status: result.success ? "Success" : "Failed",
-        Errors: errorMessage,
-        Code_Substitution: substitutions.get(result.item.slug_value) || "",
+        slug_value: result.item.slug_value,
+        title: result.item.title,
+        status: result.success ? "Success" : "Failed",
+        errors: errorMessage,
+        code_substitution: substitutions.get(result.item.slug_value) || "",
       });
     });
 
@@ -580,7 +585,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
       OBSERVATION_VALIDATION_RULES.forEach((rule) => {
         const substitutionKey = `${rule.rowPrefix}_Substitution`;
         rowWithSubstitutions[substitutionKey] =
-          substitutions.get(`${row.Slug_value}.${rule.rowPrefix}`) || "";
+          substitutions.get(`${row.slug_value}.${rule.rowPrefix}`) || "";
       });
 
       return rowWithSubstitutions;
@@ -588,10 +593,10 @@ async function main(configOverride?: Partial<BaseConfig>) {
 
     // Create custom headers with substitution columns
     const customHeaders = [
-      "Slug_value",
-      "Title",
-      "Status",
-      "Errors",
+      "slug_value",
+      "title",
+      "status",
+      "errors",
       ...OBSERVATION_VALIDATION_RULES.map(
         (rule) => `${rule.rowPrefix}_Substitution`,
       ),
@@ -608,13 +613,13 @@ async function main(configOverride?: Partial<BaseConfig>) {
     logger(colorize(`Total processed: ${processedRows.length}`, 0));
     logger(
       colorize(
-        `Success: ${processedRows.filter((r: ProcessedRow) => r.Status === "Success").length}`,
+        `Success: ${processedRows.filter((r: ProcessedRow) => r.status === "Success").length}`,
         0,
       ),
     );
     logger(
       colorize(
-        `Failed: ${processedRows.filter((r: ProcessedRow) => r.Status !== "Success").length}`,
+        `Failed: ${processedRows.filter((r: ProcessedRow) => r.status !== "Success").length}`,
         1,
       ),
     );
@@ -631,13 +636,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
     }
 
     // Return results for use by other scripts
-    return {
-      successful: results
-        .filter((r) => r.success)
-        .map((r) => r.item.slug_value),
-      failed: results.filter((r) => !r.success).map((r) => r.item.slug_value),
-      results,
-    };
+    return processApiResults(results, "observation");
   } catch (err) {
     logger(colorize(`Error in main process: ${err}`, 1));
     throw err;

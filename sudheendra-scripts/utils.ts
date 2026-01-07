@@ -11,12 +11,18 @@ import {
 } from "@/types/base/resourceCategory/resourceCategory";
 import { addMinutes } from "date-fns";
 
-dotenv.config({ path: [".env.local", ".env"] });
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const __rootDir = path.join(__dirname, "..");
+
+dotenv.config({
+  path: [path.join(__rootDir, ".env.local"), path.join(__rootDir, ".env")],
+});
 
 export function normalizeTitle(title: string) {
+  if (!title) {
+    return "";
+  }
   // Clean up the title first
   let cleaned = title
     // Remove extra spaces
@@ -25,9 +31,11 @@ export function normalizeTitle(title: string) {
     .replace(/\s*\/\s*/g, "/")
     .replace(/\s*\(\s*/g, " (")
     .replace(/\s*\)\s*/g, ") ")
+    .replace(/\s*\[\s*/g, " [")
+    .replace(/\s*\]\s*/g, "] ")
     .replace(/\s*,\s*/g, ", ")
     .replace(/\s*\.\s*/g, ". ")
-    .replace(/\s*-\s*/g, "-")
+    .replace(/\s*-\s*/g, " - ")
     .replace(/\s*\+\s*/g, "+")
     // Trim extra spaces
     .trim();
@@ -103,6 +111,60 @@ export function normalizeTitle(title: string) {
       .replace(/\s+/g, " ")
       .trim()
   );
+}
+
+/**
+ * Normalize and format a service name with proper capitalization and facility markers.
+ * Combines title normalization with facility marker extraction and formatting.
+ *
+ * This function:
+ * 1. Normalizes the title (proper capitalization, spacing, abbreviations)
+ * 2. Fixes punctuation spacing
+ * 3. Extracts and formats facility markers (VI, SC, MV) at the end
+ *
+ * @param serviceName - The raw service name to format
+ * @returns Formatted service name with proper capitalization and markers
+ *
+ * @example
+ * normalizeAndFormatServiceName("x ray chest vi")
+ * // Returns: "X RAY Chest - [VI]"
+ *
+ * @example
+ * normalizeAndFormatServiceName("ct scan brain(mv)")
+ * // Returns: "CT Scan Brain - [MV]"
+ */
+export function normalizeAndFormatTitle(title: string): string {
+  if (!title) return "";
+
+  // Step 1: Normalize the title (capitalization, spacing, abbreviations)
+  let formatted = normalizeTitle(title);
+
+  // Step 2: Extract and format facility markers
+  // Regular expression to match facility markers in parentheses or brackets
+  // Matches: (VI), [VI], (MV), [MV], (SC), [SC], etc.
+  const markerPattern = /[\(\[]?\s*(VI|MV|SC|VIV|VIVID)\s*[\)\]]?$/i;
+  const match = formatted.match(markerPattern);
+
+  if (match) {
+    // Replace VIVID or VIV with VI
+    const marker = match[1]
+      .toUpperCase()
+      .replace("VIVID", "VI")
+      .replace("VIVI", "VI")
+      .replace("VIV", "VI");
+
+    // Remove the marker (with its brackets/parentheses) from the service name
+    let baseName = formatted
+      .substring(0, match.index)
+      .trim()
+      .replace(/\s*-\s*$/, ""); // Remove trailing hyphen if present
+
+    // Add hyphen before marker if not already there
+    return `${baseName} - [${marker}]`;
+  }
+
+  // No marker found, return formatted with normalized title and fixed spacing
+  return formatted;
 }
 
 /**
@@ -234,10 +296,10 @@ export interface ApiResult<T = any> {
   item: any;
 }
 
-export interface LoaderResult {
-  successful: string[];
-  failed: string[];
-  results: ApiResult[];
+export interface LoaderResult<T = any> {
+  successful: ApiResult<T>[];
+  failed: ApiResult<T>[];
+  results: ApiResult<T>[];
 }
 
 // Common configuration
@@ -269,6 +331,28 @@ export function createSlug(name: string): string {
     .padEnd(5, "-");
 }
 
+// Used for AD, Observation, Specimen and, Charge Item
+export function generateHashSlug(name: string): string {
+  if (!name) {
+    return "";
+  }
+
+  let slug = name.toLowerCase();
+  slug = slug.replace(/[^a-z0-9\s_-]/g, "");
+  slug = slug.replace(/\s+/g, "-");
+  slug = slug.replace(/-+/g, "-");
+  slug = slug.trim();
+  slug = slug.slice(0, 25);
+
+  if (slug.length < 25) {
+    const crypto = require("crypto");
+    const hashSuffix = crypto.createHash("sha256").update(slug).digest("hex");
+    const neededHash = 25 - slug.length - 1;
+    slug = slug + "-" + hashSuffix.slice(0, neededHash);
+  }
+
+  return slug;
+}
 /**
  * Batch an array into smaller arrays of a given size
  * @param array - The array to batch
@@ -951,12 +1035,8 @@ export function processApiResults<T>(
   results: ApiResult<T>[],
   itemName: string = "item",
 ): LoaderResult {
-  const successful = results
-    .filter((r) => r.success)
-    .map((r) => r.item.slug_value);
-  const failed = results
-    .filter((r) => !r.success)
-    .map((r) => r.item.slug_value);
+  const successful = results.filter((r) => r.success);
+  const failed = results.filter((r) => !r.success);
 
   // Log summary
   console.log(`\n=== ${itemName} Summary ===`);
@@ -1136,28 +1216,6 @@ export function createScriptConfig(
 // Category management functions
 
 /**
- * Extract unique categories from data rows
- * @param rows - Array of data rows
- * @param categoryField - Field name containing category data
- * @returns Array of unique category names
- */
-export function extractUniqueCategories(
-  rows: Record<string, string>[],
-  categoryField: string = "category",
-): string[] {
-  const categories = new Set<string>();
-
-  for (const row of rows) {
-    const category = row[categoryField];
-    if (category && category.trim()) {
-      categories.add(category.trim());
-    }
-  }
-
-  return Array.from(categories);
-}
-
-/**
  * Create resource categories via API
  * @param categories - Array of category names to create
  * @param resourceType - Type of resource these categories are for
@@ -1182,13 +1240,33 @@ export async function createResourceCategories(
     ),
   );
 
-  const categoryData: ResourceCategoryCreate[] = categories.map((category) => ({
-    title: normalizeTitle(category),
-    description: `Auto-generated category for ${category}`,
-    resource_type: resourceType,
-    resource_sub_type: ResourceCategorySubType.other,
-    slug_value: createSlug(category),
-  }));
+  const filteredCategories = categories.filter(
+    (category) => category.trim() !== "",
+  );
+  let resourceTypePrefix = "ad";
+  switch (resourceType) {
+    case ResourceCategoryResourceType.activity_definition:
+      resourceTypePrefix = "ad";
+      break;
+    case ResourceCategoryResourceType.charge_item_definition:
+      resourceTypePrefix = "cid";
+      break;
+    case ResourceCategoryResourceType.product_knowledge:
+      resourceTypePrefix = "pk";
+      break;
+  }
+
+  const categoryData: ResourceCategoryCreate[] = filteredCategories.map(
+    (category) => ({
+      title: normalizeTitle(category),
+      description: `Auto-generated category for ${category}`,
+      resource_type: resourceType,
+      resource_sub_type: ResourceCategorySubType.other,
+      slug_value: generateHashSlug(
+        normalizeTitle(`${resourceTypePrefix}_${category}`),
+      ),
+    }),
+  );
 
   // Use batch API call to create categories
   const results = await makeBatchApiCall(
@@ -1232,14 +1310,14 @@ export async function createResourceCategories(
  * @returns Object with successful and failed category slugs
  */
 export async function ensureActivityDefinitionCategories(
-  rows: Record<string, string>[],
+  categoriesList: string[],
   config: BaseConfig,
 ): Promise<{
   successful: string[];
   failed: string[];
   categoryData: ResourceCategoryCreate[];
 }> {
-  const categories = extractUniqueCategories(rows, "category");
+  const categories = Array.from(new Set(categoriesList));
   if (categories.length === 0) {
     return { successful: [], failed: [], categoryData: [] };
   }
@@ -1258,14 +1336,14 @@ export async function ensureActivityDefinitionCategories(
  * @returns Object with successful and failed category slugs
  */
 export async function ensureChargeItemCategories(
-  rows: Record<string, string>[],
+  categoriesList: string[],
   config: BaseConfig,
 ): Promise<{
   successful: string[];
   failed: string[];
   categoryData: ResourceCategoryCreate[];
 }> {
-  const categories = extractUniqueCategories(rows, "category");
+  const categories = Array.from(new Set(categoriesList));
   if (categories.length === 0) {
     return { successful: [], failed: [], categoryData: [] };
   }
@@ -1577,7 +1655,10 @@ export async function validateRowCodes(
   // Process each validation rule
   for (const rule of validationRules) {
     // Construct field names from rowPrefix
-    const fieldName = `${rule.rowPrefix}_value`;
+    const fieldName =
+      rule.rowPrefix === "code"
+        ? `${rule.rowPrefix}_value`
+        : `${rule.rowPrefix}_code`;
     const systemField = `${rule.rowPrefix}_system`;
     const displayField = `${rule.rowPrefix}_display`;
 
@@ -1600,6 +1681,7 @@ export async function validateRowCodes(
       //const displayValue = row[displayField] || rule.defaultDisplay;
       const regexMatch = codeValue?.match(/[0-9]{6,18}/g);
       const cleanedCodes = regexMatch?.join(",");
+      //console.log(fieldName, codeValue, systemValue, cleanedCodes);
 
       // Store the original cleaned codes for this row
       if (cleanedCodes) {
@@ -1619,6 +1701,8 @@ export async function validateRowCodes(
       }
     }
 
+    //console.log(codesToValidate);
+
     // Batch validate codes for this rule
     if (codesToValidate.length > 0) {
       logger(
@@ -1628,12 +1712,16 @@ export async function validateRowCodes(
         ),
       );
 
+      //console.log(codesToValidate);
+
       const validationResults = await batchValidateAndSubstituteCodes(
         codesToValidate,
         `${config.apiBaseUrl}${rule.valuesetUrl}`,
         config,
         batchSize,
       );
+
+      //console.log("results", validationResults);
 
       // Apply validation results - loop through each row that had codes
       for (let i = 0; i < validatedRows.length; i++) {
@@ -1677,6 +1765,7 @@ export async function validateRowCodes(
         // Update the row with validated codes only (no extra text)
         validatedRows[i] = {
           ...row,
+          [fieldName]: validatedCodes,
           [originalCodeField]: originalCleaned,
           [validatedCodeField]: validatedCodes,
           [displayField]: validatedCodesArray.every(
@@ -1708,6 +1797,9 @@ export async function validateRowCodes(
       }
     }
   }
+
+  //console.log(validatedRows);
+  //console.log(substitutions);
 
   return { validatedRows, substitutions };
 }

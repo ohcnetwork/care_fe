@@ -2,7 +2,6 @@ import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-dotenv.config({ path: [".env.local", ".env"] });
 
 // Import other loaders
 import { main as loadChargeItems } from "./load-chargeItem.js";
@@ -14,16 +13,15 @@ import {
   type ValidationRule,
   colorize,
   createScriptConfig,
-  createSlug,
   ensureActivityDefinitionCategories,
   ensureAuthentication,
-  fetchLocationData,
+  generateHashSlug,
   getAuthHeaders,
   getLogger,
   loadData,
-  makeApiCall,
   makeBatchApiCall,
   mergeConfigWithCli,
+  normalizeTitle,
   parseCliArgs,
   parseCode,
   processApiResults,
@@ -42,7 +40,12 @@ import {
 } from "@/types/emr/activityDefinition/activityDefinition";
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.join(path.dirname(__filename), "inputs");
+const __rootDir = path.join(__dirname, "..");
+
+dotenv.config({
+  path: [path.join(__rootDir, ".env.local"), path.join(__rootDir, ".env")],
+});
 
 const logger = getLogger();
 
@@ -55,9 +58,9 @@ interface ActivityData {
   classification: Classification;
   kind: Kind;
   category: string; // Category slug for creation
-  observation_slugs: string[];
-  specimen_slugs: string[];
-  charge_item_slugs: string[];
+  observations: string[];
+  specimens: string[];
+  chargeItems: string[];
   diagnostic_report_loinc_codes: Code[];
   code?: Code;
   body_site?: Code;
@@ -195,45 +198,43 @@ function createActivityDataFromRow(
 
   return {
     title: row.title,
-    slug_value: row.slug,
+    slug_value: generateHashSlug(normalizeTitle(row.title)),
     description: row.description,
     usage: row.usage || "",
     status: (row.status as Status) || Status.active,
     classification:
-      (row.classification as Classification) || Classification.laboratory,
+      (row.classification.toLowerCase() as Classification) ||
+      Classification.laboratory,
     kind: Kind.service_request,
-    category: `f-${config.facilityId}-${createSlug(row.category || "laboratory")}`,
-    observation_slugs: row.observation_slugs
+    category: row.category || "laboratory",
+    observations: row.observation_slugs
       ? row.observation_slugs
           .split(",")
           .map((s: string) => s.trim())
           .filter((s: string) => s)
-          .map((s: string) => `f-${config.facilityId}-${s}`)
       : [],
-    specimen_slugs: row.specimen_slugs
+    specimens: row.specimen_slugs
       ? row.specimen_slugs
           .split(",")
           .map((s: string) => s.trim())
           .filter((s: string) => s)
-          .map((s: string) => `f-${config.facilityId}-${s}`)
       : [],
-    charge_item_slugs: row.charge_item_slugs
+    chargeItems: row.charge_item_slugs
       ? row.charge_item_slugs
           .split(",")
           .map((s: string) => s.trim())
           .filter((s: string) => s)
-          .map((s: string) => `f-${config.facilityId}-${s}`)
       : [],
     diagnostic_report_loinc_codes: [], //diagnosticReportCodes,
     code: finalCode,
     body_site: bodySite || undefined,
     derived_from_uri: row.derived_from_uri || undefined,
-    locations: row.locations
+    /* locations: row.locations
       ? row.locations
           .split(",")
           .map((s: string) => s.trim())
           .filter((s: string) => s)
-      : [],
+      : [], */
   };
 }
 
@@ -262,7 +263,7 @@ async function processCsvData(
     }
   }
 
-  const locationData = await fetchLocationData(
+  /*   const locationData = await fetchLocationData(
     Array.from(new Set(results.map((result) => result.locations || []).flat())),
     config,
   );
@@ -280,81 +281,13 @@ async function processCsvData(
       }
     });
     result.locations = locationIds;
-  });
+  }); */
 
   return { data: results, substitutions };
 }
 
-// Function to check if dependencies are available
-function checkDependencies(
-  activity: ActivityData,
-  availableSlugs: {
-    observations: string[];
-    specimens: string[];
-    chargeItems: string[];
-  },
-): { available: boolean; missing: string[] } {
-  const missing: string[] = [];
-
-  // Check observation dependencies
-  for (const obsSlug of activity.observation_slugs) {
-    if (!availableSlugs.observations.includes(obsSlug)) {
-      missing.push(`observation:${obsSlug}`);
-    }
-  }
-
-  // Check specimen dependencies
-  for (const specSlug of activity.specimen_slugs) {
-    if (!availableSlugs.specimens.includes(specSlug)) {
-      missing.push(`specimen:${specSlug}`);
-    }
-  }
-
-  // Check charge item dependencies
-  for (const chargeSlug of activity.charge_item_slugs) {
-    if (!availableSlugs.chargeItems.includes(chargeSlug)) {
-      missing.push(`charge_item:${chargeSlug}`);
-    }
-  }
-
-  return {
-    available: missing.length === 0,
-    missing,
-  };
-}
-
-// Function to upsert activity definition
-async function upsertActivityDefinition(
-  data: ActivityData,
-  config: BaseConfig,
-): Promise<any> {
-  const activityData: ActivityDefinitionCreateSpec = {
-    title: data.title,
-    slug_value: data.slug_value,
-    description: data.description,
-    usage: data.usage,
-    status: data.status,
-    classification: data.classification,
-    kind: data.kind,
-    facility: config.facilityId,
-    category: data.category,
-    specimen_requirements: data.specimen_slugs,
-    charge_item_definitions: data.charge_item_slugs,
-    observation_result_requirements: data.observation_slugs,
-    locations: data.locations || [],
-    diagnostic_report_codes: data.diagnostic_report_loinc_codes,
-    code: data.code!,
-    body_site: data.body_site || null,
-    derived_from_uri: data.derived_from_uri || null,
-    healthcare_service: null,
-  };
-
-  return await makeApiCall(
-    `/api/v1/facility/${config.facilityId}/activity_definition/upsert/`,
-    activityData,
-    config,
-  );
-}
+// Removed checkDependencies function - dependency checking is now done inline
+// with selective filtering of missing dependencies rather than blocking entire activities
 
 // Main function
 async function main(configOverride?: Partial<BaseConfig>) {
@@ -451,10 +384,6 @@ async function main(configOverride?: Partial<BaseConfig>) {
       throw new Error("No valid rows found in CSV file");
     }
 
-    // Step 4: Ensure categories exist
-    logger(colorize("Ensuring categories exist...", 0));
-    await ensureActivityDefinitionCategories(csvRows, finalConfig);
-
     // Process data
     logger(colorize("Processing data...", 0));
     const { data: processedData, substitutions } = await processCsvData(
@@ -462,53 +391,108 @@ async function main(configOverride?: Partial<BaseConfig>) {
       finalConfig,
     );
 
+    const categoryData = processedData.map((item) => item.category);
+
+    // Step 4: Ensure categories exist
+    logger(colorize("Ensuring categories exist...", 0));
+    const categoryResults = await ensureActivityDefinitionCategories(
+      categoryData,
+      finalConfig,
+    );
+
+    // Create a map of category title -> slug for replacement
+    const categoryMap = new Map<string, string>();
+    categoryResults.categoryData.forEach((cat) => {
+      // Use the title as is for the map key
+      categoryMap.set(cat.title, cat.slug_value);
+    });
+
     // Remove duplicates
     const uniqueProcessedData = removeDuplicates(processedData);
 
+    // Replace category values with actual generated slugs
+    uniqueProcessedData.forEach((item) => {
+      const categorySlug = categoryMap.get(normalizeTitle(item.category));
+      if (categorySlug) {
+        item.category = categorySlug;
+      }
+    });
+
     // Create output data for CSV
     let outputData: ProcessedRow[] = uniqueProcessedData.map((item) => ({
-      Title: item.title,
-      Slug_value: item.slug_value,
-      Status: "Pending",
-      Code_Substitution: substitutions.get(item.slug_value) || "",
+      title: item.title,
+      slug_value: item.slug_value,
+      status: "Pending",
+      code_substitution: substitutions.get(item.slug_value) || "",
     }));
 
     // Step 4: Check dependencies and prepare for batch processing
     logger(colorize("Checking dependencies and preparing for upsert...", 0));
-    const validActivities: ActivityData[] = [];
+    const allActivities: ActivityData[] = [];
     const invalidActivities: { item: ActivityData; error: string }[] = [];
+    const activityWarnings: Map<string, string[]> = new Map();
 
     const availableSlugs = {
       observations: observationResults.successful.map(
-        (slug) => `f-${finalConfig.facilityId}-${slug}`,
+        (obs: any) => obs.item.slug_value,
       ),
       specimens: specimenResults.successful.map(
-        (slug) => `f-${finalConfig.facilityId}-${slug}`,
+        (spec: any) => spec.item.slug_value,
       ),
       chargeItems: chargeItemResults.successful.map(
-        (slug) => `f-${finalConfig.facilityId}-${slug}`,
+        (ci: any) => ci.item.slug_value,
       ),
+      categories: categoryResults.successful,
     };
 
     for (const item of uniqueProcessedData) {
-      // Check dependencies
-      const dependencyCheck = checkDependencies(item, availableSlugs);
+      const warnings: string[] = [];
 
-      if (!dependencyCheck.available) {
+      // Check if category is missing (critical - blocks creation)
+      if (!availableSlugs.categories.includes(item.category)) {
         invalidActivities.push({
           item,
-          error: `Missing dependencies: ${dependencyCheck.missing.join(", ")}`,
+          error: `Missing category: ${item.category}`,
         });
-      } else {
-        validActivities.push(item);
+        continue; // Skip this activity entirely
       }
+
+      // Check for missing dependencies (non-critical - just warnings)
+      const missingObservations = item.observations.filter(
+        (obs) => !availableSlugs.observations.includes(obs),
+      );
+      const missingSpecimens = item.specimens.filter(
+        (spec) => !availableSlugs.specimens.includes(spec),
+      );
+      const missingChargeItems = item.chargeItems.filter(
+        (ci) => !availableSlugs.chargeItems.includes(ci),
+      );
+      console.log(item.chargeItems.slice(0, 2));
+
+      if (missingObservations.length > 0) {
+        warnings.push(
+          `Missing observations: ${missingObservations.join(", ")}`,
+        );
+      }
+      if (missingSpecimens.length > 0) {
+        warnings.push(`Missing specimens: ${missingSpecimens.join(", ")}`);
+      }
+      if (missingChargeItems.length > 0) {
+        warnings.push(`Missing charge items: ${missingChargeItems.join(", ")}`);
+      }
+
+      if (warnings.length > 0) {
+        activityWarnings.set(item.slug_value, warnings);
+      }
+
+      allActivities.push(item);
     }
 
     // Step 5: Upsert activities using batch processing
     logger(colorize("Upserting activity definitions...", 0));
     const results = await makeBatchApiCall(
       `/api/v1/facility/${finalConfig.facilityId}/activity_definition/upsert/`,
-      validActivities.map(
+      allActivities.map(
         (
           item,
         ): ActivityDefinitionCreateSpec & { healthcare_service: null } => ({
@@ -520,10 +504,17 @@ async function main(configOverride?: Partial<BaseConfig>) {
           classification: item.classification,
           kind: item.kind,
           facility: finalConfig.facilityId,
-          category: item.category,
-          specimen_requirements: item.specimen_slugs,
-          charge_item_definitions: item.charge_item_slugs,
-          observation_result_requirements: item.observation_slugs,
+          category: `f-${finalConfig.facilityId}-${item.category}`,
+          // Only include dependencies that exist
+          specimen_requirements: item.specimens
+            .filter((spec) => availableSlugs.specimens.includes(spec))
+            .map((spec) => `f-${finalConfig.facilityId}-${spec}`),
+          charge_item_definitions: item.chargeItems
+            .filter((ci) => availableSlugs.chargeItems.includes(ci))
+            .map((ci) => `f-${finalConfig.facilityId}-${ci}`),
+          observation_result_requirements: item.observations
+            .filter((obs) => availableSlugs.observations.includes(obs))
+            .map((obs) => `f-${finalConfig.facilityId}-${obs}`),
           locations: item.locations || [],
           diagnostic_report_codes: item.diagnostic_report_loinc_codes,
           code: item.code!,
@@ -537,18 +528,47 @@ async function main(configOverride?: Partial<BaseConfig>) {
 
     // Combine results from invalid activities and batch processing
     const allResults = [
-      ...invalidActivities.map(({ item, error }) => ({
+      // Add results from API calls with warnings
+      ...results.map((result) => {
+        const warnings = activityWarnings.get(result.item.slug_value);
+        let errorMessage = result.error;
+
+        // Append warnings to error message if present
+        if (warnings && warnings.length > 0) {
+          const warningText = `Warnings: ${warnings.join("; ")}`;
+          if (errorMessage) {
+            if (typeof errorMessage === "string") {
+              errorMessage = { message: errorMessage + "; " + warningText };
+            } else if (errorMessage.message) {
+              errorMessage = {
+                message: errorMessage.message + "; " + warningText,
+              };
+            } else {
+              errorMessage = { message: warningText };
+            }
+          } else {
+            errorMessage = { message: warningText };
+          }
+        }
+
+        return {
+          success: result.success,
+          error: errorMessage,
+          item: result.item,
+        };
+      }),
+      // Add invalid activities that were blocked from API call
+      ...invalidActivities.map((invalid) => ({
         success: false,
-        error: { message: error },
-        item,
+        error: { message: invalid.error },
+        item: invalid.item,
       })),
-      ...results,
     ];
 
     // Update output data with status
     outputData = outputData.map((row) => {
       const result = allResults.find(
-        (r) => r.item.slug_value === row.Slug_value,
+        (r) => r.item.slug_value === row.slug_value,
       );
 
       // Handle error message properly - convert objects to strings
@@ -593,8 +613,8 @@ async function main(configOverride?: Partial<BaseConfig>) {
 
     // Create custom headers with substitution columns
     const customHeaders = [
-      "Title",
-      "Slug_value",
+      "title",
+      "slug_value",
       "Status",
       "Errors",
       ...ACTIVITY_VALIDATION_RULES.map(
@@ -628,4 +648,4 @@ if (require.main === module) {
   main();
 }
 
-export { main, processCsvData, upsertActivityDefinition };
+export { main, processCsvData };
