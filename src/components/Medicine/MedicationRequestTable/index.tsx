@@ -170,6 +170,7 @@ export default function MedicationRequestTable() {
             encounterId={encounterId}
             canAccess={canAccess}
             facilityId={facilityId}
+            canWrite={canWrite}
           />
         </TabsContent>
       </Tabs>

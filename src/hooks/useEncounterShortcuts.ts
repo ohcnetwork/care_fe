@@ -156,6 +156,12 @@ export function useEncounterShortcuts() {
       const handler = handlers[actionId];
       if (handler) {
         handler();
+        return;
+      }
+
+      if (actionId.startsWith("questionnaire-") && encounter) {
+        const slug = actionId.replace("questionnaire-", "");
+        navigate(buildEncounterUrl(`/questionnaire/${slug}`));
       }
     },
     [handlers],

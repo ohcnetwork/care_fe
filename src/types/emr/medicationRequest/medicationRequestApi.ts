@@ -1,5 +1,4 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
 
 export default {

@@ -11,6 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -29,7 +36,10 @@ import {
   SpecimenStatus,
 } from "@/types/emr/specimen/specimen";
 import specimenApi from "@/types/emr/specimen/specimenApi";
-import type { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
+import {
+  SPECIMEN_DEFINITION_UNITS_CODES,
+  type SpecimenDefinitionRead,
+} from "@/types/emr/specimenDefinition/specimenDefinition";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
@@ -54,6 +64,8 @@ export function SpecimenForm({
   const authUser = useAuthUser();
   const currentUserId = authUser.id;
   const queryClient = useQueryClient();
+  const defaultUnit =
+    specimenDefinition.type_tested?.container?.capacity?.unit ?? null;
 
   const [identifierMode, setIdentifierMode] = useState<"scan" | "generate">(
     "generate",
@@ -382,21 +394,38 @@ export function SpecimenForm({
                     )}
                   </div>
                   <div className="flex-1">
-                    <ValueSetSelect
-                      system="system-ucum-units"
-                      placeholder={t("unit")}
-                      onSelect={(code: Code | null) =>
-                        handleCollectionChange("quantity", {
-                          ...(specimenData.specimen.collection?.quantity ?? {}),
-                          value:
-                            specimenData.specimen.collection?.quantity?.value ??
-                            null,
-                          unit: code,
-                        })
+                    <Select
+                      value={
+                        specimenData.specimen.collection?.quantity?.unit
+                          ?.code ?? defaultUnit?.code
                       }
-                      value={specimenData.specimen.collection?.quantity?.unit}
+                      onValueChange={(code) => {
+                        const selectedUnit =
+                          SPECIMEN_DEFINITION_UNITS_CODES.find(
+                            (u) => u.code === code,
+                          );
+                        if (selectedUnit) {
+                          handleCollectionChange("quantity", {
+                            value:
+                              specimenData.specimen.collection?.quantity
+                                ?.value ?? null,
+                            unit: selectedUnit,
+                          });
+                        }
+                      }}
                       disabled={disableEdit}
-                    />
+                    >
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder={t("unit")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SPECIMEN_DEFINITION_UNITS_CODES.map((unit) => (
+                          <SelectItem key={unit.code} value={unit.code}>
+                            {unit.display}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     {errors.quantityUnit && (
                       <p className="text-sm text-red-600 mt-1">
                         {errors.quantityUnit}
