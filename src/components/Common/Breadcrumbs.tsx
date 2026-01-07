@@ -6,6 +6,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import useAppHistory from "@/hooks/useAppHistory";
+import { cn } from "@/lib/utils";
 import { Separator } from "@radix-ui/react-separator";
 import { ChevronLeft } from "lucide-react";
 import { navigate, usePath, usePathParams } from "raviger";
@@ -144,7 +145,7 @@ export function Breadcrumbs() {
             <ChevronLeft className="size-4" />
             <span
               onClick={() => navigate(to)}
-              className="text-sm text-gray-500 hover:cursor-pointer"
+              className="text-sm text-gray-800 hover:cursor-pointer underline font-semibold"
             >
               {t("back")}
             </span>
@@ -160,7 +161,12 @@ export function Breadcrumbs() {
             <BreadcrumbItem key={breadcrumb.href}>
               <BreadcrumbLink
                 onClick={() => navigate(breadcrumb.href)}
-                className="underline text-black hover:cursor-pointer"
+                className={cn(
+                  "underline hover:cursor-pointer",
+                  index === breadcrumbs.length - 1
+                    ? "text-gray-500"
+                    : "text-gray-700",
+                )}
               >
                 {t(breadcrumb.label)}
               </BreadcrumbLink>
