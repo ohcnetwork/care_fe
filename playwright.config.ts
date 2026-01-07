@@ -53,41 +53,11 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     // Setup projects
-    {
-      name: "setup-auth",
-      testMatch: /.*\/auth\.setup\.ts/,
-    },
-    {
-      name: "setup-facility-admin",
-      testMatch: /.*\/facilityAdmin\.setup\.ts/,
-    },
-    {
-      name: "setup-nurse",
-      testMatch: /.*\/nurse\.setup\.ts/,
-    },
-    {
-      name: "setup-facility",
-      testMatch: /.*\/facility\.setup\.ts/,
-      dependencies: ["setup-auth"],
-    },
-    {
-      name: "setup-patient",
-      testMatch: /.*\/patient\.setup\.ts/,
-      dependencies: ["setup-facility"],
-    },
-    {
-      name: "setup-patient-account",
-      testMatch: /.*\/patientAccount\.setup\.ts/,
-      dependencies: ["setup-patient"],
-    },
+    { name: "setup", testMatch: /.*\.setup\.ts/ },
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      dependencies: [
-        "setup-patient-account",
-        "setup-facility-admin",
-        "setup-nurse",
-      ],
+      dependencies: ["setup"],
     },
     // {
     //   name: "firefox",
