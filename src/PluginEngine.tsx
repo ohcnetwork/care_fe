@@ -102,7 +102,7 @@ export default function PluginEngine({
 
 type PluginProps<K extends keyof SupportedPluginComponents> =
   React.ComponentProps<SupportedPluginComponents[K]> & {
-    __meta: PluginManifestWithMeta["meta"];
+    __meta?: PluginManifestWithMeta["meta"];
   };
 
 type PluginComponentProps = {
