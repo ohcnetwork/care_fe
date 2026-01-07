@@ -118,6 +118,7 @@ export const ACTIVITY_DEFINITION_MAPPING = {
         ],
       },
     ],
+    locations: ["Bio-Chemistry Lab"],
   },
   "Lipid Panel": {
     slug: "lipid_panel",
@@ -169,6 +170,7 @@ export const ACTIVITY_DEFINITION_MAPPING = {
         ],
       },
     ],
+    locations: ["Bio-Chemistry Lab"],
   },
   "Complete Blood Count (CBC) Panel": {
     slug: "complete_blood_count",
@@ -264,6 +266,7 @@ export const ACTIVITY_DEFINITION_MAPPING = {
         ],
       },
     ],
+    locations: ["Bio-Chemistry Lab"],
   },
   "Fasting Blood Glucose": {
     slug: "fasting_glucose",
@@ -315,6 +318,7 @@ export const ACTIVITY_DEFINITION_MAPPING = {
         ],
       },
     ],
+    locations: ["Bio-Chemistry Lab"],
   },
 } as const;
 
