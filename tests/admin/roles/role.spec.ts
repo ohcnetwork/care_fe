@@ -37,28 +37,24 @@ test.describe("Admin Roles Management", () => {
     ).toContainText("At least one permission is required");
   });
 
-  test("Create Role with all permissions and verify in list", async ({
-    page,
-  }) => {
+  test("Create Role with all permissions and verify", async ({ page }) => {
     const roleName = faker.person.jobTitle();
     const description = faker.lorem.sentence();
     await createRole(page, roleName, description);
     const tableBody = page.locator('[data-slot="table-body"]');
 
     // verify role in the list
-
     await page.getByRole("textbox", { name: /Search Roles/i }).fill(roleName);
     await expect(tableBody).toContainText(roleName);
   });
 
-  test("Create Role with all permissions and edit", async ({ page }) => {
+  test("Edit Role and verify", async ({ page }) => {
     const roleName = faker.person.jobTitle();
     const description = faker.lorem.sentence();
     await createRole(page, roleName, description);
     const tableBody = page.locator('[data-slot="table-body"]');
 
     // edit role name
-
     const updatedRoleName = `${roleName} - updated`;
     await page.getByRole("textbox", { name: /Search Roles/i }).fill(roleName);
     await page.getByRole("button", { name: /Edit/i }).first().click();
@@ -67,7 +63,6 @@ test.describe("Admin Roles Management", () => {
     await page.getByRole("button", { name: /Update Role/i }).click();
 
     // verify toast message
-
     await expectToast(page, "Role updated successfully");
 
     // verify in the list
@@ -75,5 +70,26 @@ test.describe("Admin Roles Management", () => {
       .getByRole("textbox", { name: /Search Roles/i })
       .fill(updatedRoleName);
     await expect(tableBody).toContainText(updatedRoleName);
+  });
+
+  test("Clone Role and verify", async ({ page }) => {
+    const roleName = faker.person.jobTitle();
+    const description = faker.lorem.sentence();
+    const clonedRoleName = `${roleName} Copy`;
+    const tableBody = page.locator('[data-slot="table-body"]');
+    await createRole(page, roleName, description);
+
+    await page.getByRole("textbox", { name: /Search Roles/i }).fill(roleName);
+    await page.getByRole("button", { name: /Clone/i }).first().click();
+    await page.getByRole("button", { name: /Create Role/i }).click();
+
+    // verify toast message
+    await expectToast(page, "Role created successfully");
+
+    // verify cloned role in the list
+    await page
+      .getByRole("textbox", { name: /Search Roles/i })
+      .fill(clonedRoleName);
+    await expect(tableBody).toContainText(clonedRoleName);
   });
 });
