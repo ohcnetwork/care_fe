@@ -295,27 +295,23 @@ export default function TreatmentSummary({
 
               {/* Right Column */}
               <div className="space-y-3">
-                {encounter?.patient &&
-                  "instance_identifiers" in encounter.patient &&
-                  encounter.patient.instance_identifiers
-                    .filter(
-                      ({ config }) =>
-                        config.config.use === PatientIdentifierUse.official,
-                    )
-                    .map((identifier) => (
-                      <div
-                        key={identifier.config.id}
-                        className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center"
-                      >
-                        <span className="text-gray-600">
-                          {identifier.config.config.display}
-                        </span>
-                        <span className="text-gray-600">:</span>
-                        <span className="font-semibold ml-2">
-                          {identifier.value}
-                        </span>
-                      </div>
-                    ))}
+                {encounter?.patient?.instance_identifiers
+                  ?.filter(
+                    ({ config }) =>
+                      config.config.use === PatientIdentifierUse.official,
+                  )
+                  .map((identifier) => (
+                    <div
+                      key={identifier.config.id}
+                      className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center"
+                    >
+                      <span className="text-gray-600">
+                        {identifier.config.config.display}
+                      </span>
+                      <span className="text-gray-600">:</span>
+                      <span className="font-semibold">{identifier.value}</span>
+                    </div>
+                  ))}
 
                 <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
                   <span className="text-gray-600">{t("mobile_number")}</span>
