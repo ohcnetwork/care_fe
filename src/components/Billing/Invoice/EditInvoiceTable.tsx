@@ -1,12 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { Plus, X } from "lucide-react";
+import { ChevronDown, Plus, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,6 +39,7 @@ import {
 } from "@/components/ui/table";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   conditionSchema,
   getConditionDiscriminatorValue,
@@ -69,11 +77,11 @@ const priceComponentSchema = z.object({
       display: z.string(),
     })
     .optional(),
-  factor: z.number().gt(0).max(100).optional(),
+  factor: z.number().min(0).max(100).optional(),
   amount: z
     .string()
-    .refine((val) => !val || Number(val) > 0, {
-      message: "Amount must be greater than 0",
+    .refine((val) => !val || Number(val) >= 0, {
+      message: "Amount must be a valid number",
     })
     .optional(),
   conditions: z.array(conditionSchema).optional(),
@@ -122,6 +130,7 @@ export function EditInvoiceTable({
   enableShortcut,
 }: EditInvoiceTableProps) {
   const { t } = useTranslation();
+  const { facility } = useCurrentFacility();
   useShortcutSubContext("facility:billing:invoice:show");
 
   const getDiscountComponentKey = (
@@ -248,25 +257,27 @@ export function EditInvoiceTable({
     );
   };
 
+  // Get discounts from facility settings
+  const globalDiscounts = [
+    ...(facility?.discount_monetary_components || []),
+    ...(facility?.instance_discount_monetary_components || []),
+  ].filter((d) => d != null);
+
   const handleDiscountComponentChange = (
     itemIndex: number,
     discountIndex: number,
     componentKey: string,
   ) => {
-    const chargeItem = chargeItems[itemIndex];
-    if (!chargeItem) return;
-
-    const availableDiscounts = getComponentsFromChargeItem(
-      chargeItem.charge_item_definition,
-      MonetaryComponentType.discount,
-    );
-    const selectedComponent = availableDiscounts.find(
+    const selectedComponent = globalDiscounts.find(
       (c) => getDiscountComponentKey(c) === componentKey,
     );
 
     if (selectedComponent) {
       form.setValue(`items.${itemIndex}.discounts.${discountIndex}`, {
         ...selectedComponent,
+        amount: selectedComponent.amount
+          ? String(selectedComponent.amount)
+          : undefined,
         conditions:
           selectedComponent.conditions?.map((condition) => ({
             ...condition,
@@ -304,6 +315,54 @@ export function EditInvoiceTable({
     }
   };
 
+  const handleApplyGlobalDiscount = (discountKey: string) => {
+    const items = form.getValues("items");
+
+    // Find the discount definition from the global discounts
+    const discountDefinition = globalDiscounts.find(
+      (d) => getDiscountComponentKey(d) === discountKey,
+    );
+
+    if (!discountDefinition) return;
+
+    items.forEach((item, itemIndex) => {
+      const currentDiscounts = item.discounts || [];
+      // Check if this discount is already applied
+      const existingIndex = currentDiscounts.findIndex(
+        (d) => getDiscountComponentKey(d) === discountKey,
+      );
+
+      if (existingIndex === -1) {
+        // Add the discount if not already present
+        const newDiscount = {
+          ...discountDefinition,
+          amount: discountDefinition.amount
+            ? String(discountDefinition.amount)
+            : undefined,
+          conditions:
+            discountDefinition.conditions?.map((condition) => ({
+              ...condition,
+              _conditionType: getConditionDiscriminatorValue(
+                condition.metric,
+                condition.operation,
+              ),
+            })) || [],
+        };
+        form.setValue(`items.${itemIndex}.discounts`, [
+          ...currentDiscounts,
+          newDiscount,
+        ]);
+      }
+    });
+  };
+
+  const handleClearAllDiscounts = () => {
+    const items = form.getValues("items");
+    items.forEach((_, itemIndex) => {
+      form.setValue(`items.${itemIndex}.discounts`, []);
+    });
+  };
+
   if (chargeItems.length === 0) {
     return <div>{t("no_charge_items_found")}</div>;
   }
@@ -335,7 +394,46 @@ export function EditInvoiceTable({
                   {t("quantity")}
                 </TableHead>
                 <TableHead className="border-r border-gray-200 font-semibold text-center min-w-[400px]">
-                  {t("discounts")}
+                  <div className="flex items-center justify-center gap-2">
+                    {t("discounts")}
+                    {globalDiscounts.length > 0 && chargeItems.length > 1 && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-xs"
+                          >
+                            {t("apply_to_all")}
+                            <ChevronDown className="h-3 w-3 ml-1" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {globalDiscounts.map((discount) => {
+                            const key = getDiscountComponentKey(discount);
+                            return (
+                              <DropdownMenuItem
+                                key={key}
+                                onClick={() =>
+                                  key && handleApplyGlobalDiscount(key)
+                                }
+                              >
+                                {discount.code?.display} @{" "}
+                                <MonetaryDisplay {...discount} />
+                              </DropdownMenuItem>
+                            );
+                          })}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={handleClearAllDiscounts}
+                            className="text-destructive"
+                          >
+                            {t("clear_all")}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </div>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -390,13 +488,14 @@ export function EditInvoiceTable({
                   </TableCell>
                   <TableCell className="border-r border-gray-200 font-medium text-gray-950 text-sm min-w-[400px]">
                     {(() => {
-                      const chargeItem = chargeItems[index];
-                      const availableDiscounts = getComponentsFromChargeItem(
-                        chargeItem.charge_item_definition,
-                        MonetaryComponentType.discount,
-                      );
+                      const hasAppliedDiscounts =
+                        item.discounts && item.discounts.length > 0;
 
-                      if (availableDiscounts.length === 0) {
+                      // Show "no discounts" only if no global discounts available AND no discounts applied
+                      if (
+                        globalDiscounts.length === 0 &&
+                        !hasAppliedDiscounts
+                      ) {
                         return (
                           <div className="text-sm text-gray-500 py-2">
                             {t("no_discounts")}
@@ -408,8 +507,7 @@ export function EditInvoiceTable({
                         item.discounts?.some((d) => !d.code) || false;
 
                       const hasMoreDiscountsToAdd =
-                        (item.discounts?.length || 0) <
-                        availableDiscounts.length;
+                        (item.discounts?.length || 0) < globalDiscounts.length;
 
                       return (
                         <div className="space-y-2">
@@ -425,13 +523,6 @@ export function EditInvoiceTable({
                                   control={form.control}
                                   name={`items.${index}.discounts.${discountIndex}.code`}
                                   render={() => {
-                                    const chargeItem = chargeItems[index];
-                                    const availableDiscounts =
-                                      getComponentsFromChargeItem(
-                                        chargeItem.charge_item_definition,
-                                        MonetaryComponentType.discount,
-                                      );
-
                                     const selectedDiscountKeys =
                                       item.discounts
                                         ?.filter(
@@ -441,7 +532,7 @@ export function EditInvoiceTable({
                                         .filter((key) => key) || [];
 
                                     const filteredDiscounts =
-                                      availableDiscounts.filter((component) => {
+                                      globalDiscounts.filter((component) => {
                                         const key =
                                           getDiscountComponentKey(component);
                                         return (
@@ -453,7 +544,7 @@ export function EditInvoiceTable({
                                     const currentKey =
                                       getDiscountComponentKey(discount);
                                     const currentDiscount =
-                                      availableDiscounts.find(
+                                      globalDiscounts.find(
                                         (c) =>
                                           getDiscountComponentKey(c) ===
                                           currentKey,

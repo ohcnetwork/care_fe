@@ -71,6 +71,8 @@ import {
 } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
 
+import { PLUGIN_Component } from "@/PluginEngine";
+
 interface DiagnosticReportFormProps {
   patientId: string;
   facilityId: string;
@@ -899,6 +901,10 @@ export function DiagnosticReportForm({
 
         <CollapsibleContent>
           <CardContent className="px-2 bg-gray-100">
+            <PLUGIN_Component
+              __name="ServiceRequestAction"
+              serviceRequestId={serviceRequestId}
+            />
             {hasReport && fullReport ? (
               <div className="space-y-6">
                 {fullReport.status !== DiagnosticReportStatus.final &&

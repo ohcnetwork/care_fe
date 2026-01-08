@@ -146,7 +146,7 @@ function ServiceRequestForm({
   const { t } = useTranslation();
 
   const renderInfoSection = () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-4 gap-y-2 w-full">
+    <div className="flex flex-wrap gap-x-5 gap-y-2 w-full">
       <div className="flex items-center gap-2">
         <span className="font-medium text-sm text-gray-700">
           {t("status")}:
@@ -175,11 +175,12 @@ function ServiceRequestForm({
         </span>
         <Badge
           variant="outline"
-          className="bg-green-50 text-green-700 border-green-200"
+          className="bg-green-50 text-green-700 border-green-200 whitespace-nowrap"
         >
           {t(serviceRequest.service_request.category)}
         </Badge>
       </div>
+
       {serviceRequest.service_request.do_not_perform && (
         <div className="flex items-center gap-2">
           <span className="font-medium text-sm text-gray-700">
@@ -193,9 +194,22 @@ function ServiceRequestForm({
           </Badge>
         </div>
       )}
+      {activityDefinition?.healthcare_service && (
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-sm text-gray-700">
+            {t("healthcare_service")}:
+          </span>
+          <Badge
+            variant="outline"
+            className="bg-indigo-50 text-indigo-700 border-indigo-200 whitespace-nowrap"
+          >
+            {activityDefinition.healthcare_service.name}
+          </Badge>
+        </div>
+      )}
       {activityDefinition?.locations &&
         activityDefinition.locations.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap col-span-1 sm:col-span-2 xl:col-span-4">
+          <div className="flex items-center gap-2 flex-wrap w-full">
             <span className="font-medium text-sm text-gray-700">
               {t("locations")}:
             </span>
