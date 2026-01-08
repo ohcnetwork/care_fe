@@ -78,6 +78,10 @@ export type PatientInfoCardActionsComponentType = React.FC<{
   className?: string;
 }>;
 
+export type ServiceRequestComponentType = React.FC<{
+  serviceRequestId: string;
+}>;
+
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
@@ -92,6 +96,7 @@ export type SupportedPluginComponents = {
   InvoiceRecordPaymentOptions: InvoiceRecordPaymentOptionsComponentType;
   PatientSearchActions: PatientSearchActionsComponentType;
   PatientInfoCardActions: PatientInfoCardActionsComponentType;
+  ServiceRequestAction: ServiceRequestComponentType;
 };
 
 // Create a type for lazy-loaded components
