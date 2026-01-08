@@ -1,6 +1,18 @@
 import { LocalStorageKeys } from "@/common/constants";
 
-import { QueryParams } from "@/Utils/request/types";
+import { HttpMethod, QueryParams, Type } from "@/Utils/request/types";
+
+export const API = <TResponse, TBody = undefined>(
+  route: `${HttpMethod} ${string}`,
+) => {
+  const [method, path] = route.split(" ") as [HttpMethod, string];
+  return {
+    path,
+    method,
+    TRes: Type<TResponse>(),
+    TBody: Type<TBody>(),
+  };
+};
 
 export function makeUrl(
   path: string,

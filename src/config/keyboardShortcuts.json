@@ -91,7 +91,8 @@
     { "key": "shift+1", "action": "switch-to-invoices-tab", "description": "Switch to Invoices Tab", "when": "always" },
     { "key": "shift+2", "action": "switch-to-charge-items-tab", "description": "Switch to Charge Items Tab", "when": "always" },
     { "key": "shift+3", "action": "switch-to-payments-tab", "description": "Switch to Payments Tab", "when": "always" },
-    { "key": "shift+4", "action": "switch-to-bed-charge-items-tab", "description": "Switch to Bed Charge Items Tab", "when": "always" }
+    { "key": "shift+4", "action": "switch-to-reports-tab", "description": "Switch to Reports Tab", "when": "always" },
+    { "key": "shift+5", "action": "switch-to-bed-charge-items-tab", "description": "Switch to Bed Charge Items Tab", "when": "always" }
   ],
 
   "facility:payment": [
