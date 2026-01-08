@@ -32,6 +32,7 @@ import roleApi from "@/types/emr/role/roleApi";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useInView } from "react-intersection-observer";
+import { toast } from "sonner";
 
 interface RoleFormProps {
   role: RoleRead | null;
@@ -94,6 +95,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
   const createRoleMutation = useMutation({
     mutationFn: mutate(roleApi.createRole),
     onSuccess: () => {
+      toast.success(t("role_created_successfully"));
       queryClient.invalidateQueries({ queryKey: ["roles"] });
       onSuccess();
     },
@@ -104,6 +106,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
       pathParams: { external_id: role?.id || "" },
     }),
     onSuccess: () => {
+      toast.success(t("role_updated_successfully"));
       queryClient.invalidateQueries({ queryKey: ["roles"] });
       onSuccess();
     },
@@ -124,13 +127,14 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
   };
 
   const handlePermissionToggle = (permissionSlug: string) => {
+    const currentPermissions = form.getValues("permissions");
     form.setValue(
       "permissions",
-      form.getValues("permissions").includes(permissionSlug)
+      currentPermissions.includes(permissionSlug)
         ? form
             .getValues("permissions")
             .filter((slug) => slug !== permissionSlug)
-        : [...form.getValues("permissions"), permissionSlug],
+        : [...currentPermissions, permissionSlug],
       {
         shouldValidate: true,
         shouldDirty: true,
@@ -193,7 +197,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
               <Card className="flex flex-col min-h-80">
                 <CardHeader className="flex flex-col">
                   <div className="flex items-center justify-between">
-                    <CardTitle aria-required>{t("permissions")}</CardTitle>
+                    <CardTitle>{t("permissions")}</CardTitle>
 
                     <div className="flex gap-2">
                       <Button

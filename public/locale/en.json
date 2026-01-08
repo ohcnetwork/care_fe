@@ -4456,6 +4456,8 @@
   "revoked_on": "Revoked On",
   "right": "Right",
   "role": "Role",
+  "role_created_successfully": "Role created successfully",
+  "role_updated_successfully": "Role updated successfully",
   "roles": "Roles",
   "room_apt": "Room/Apt & Time",
   "root": "Root",
