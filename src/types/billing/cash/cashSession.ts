@@ -48,8 +48,6 @@ export interface OpenSessionRequest {
 // Request to close a session
 export interface CloseSessionRequest {
   counter_x_care_id: string;
-  declared_amount: number;
-  denominations?: Record<string, number>;
 }
 
 // Response wrapper for single session

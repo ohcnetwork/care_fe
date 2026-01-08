@@ -1,24 +1,16 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { z } from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Sheet,
   SheetContent,
@@ -27,23 +19,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Switch } from "@/components/ui/switch";
 
-import { SessionData } from "@/types/billing/cash/cashSession";
+import { CounterData, SessionData } from "@/types/billing/cash/cashSession";
 import cashSessionApi from "@/types/billing/cash/cashSessionApi";
 import mutate from "@/Utils/request/mutate";
-
-import DenominationInput from "./DenominationInput";
-
-const formSchema = z.object({
-  declared_amount: z.coerce
-    .number()
-    .min(0, "Declared amount must be 0 or more"),
-  use_denominations: z.boolean(),
-  denominations: z.record(z.string(), z.number()).optional(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import query from "@/Utils/request/query";
 
 interface CloseSessionSheetProps {
   open: boolean;
@@ -51,7 +31,10 @@ interface CloseSessionSheetProps {
   facilityId: string;
   session: SessionData;
   onSessionClosed: () => void;
+  onTransferClick?: () => void;
 }
+
+type CloseAction = "close_with_balance" | "transfer_all";
 
 export default function CloseSessionSheet({
   open,
@@ -59,25 +42,38 @@ export default function CloseSessionSheet({
   facilityId,
   session,
   onSessionClosed,
+  onTransferClick,
 }: CloseSessionSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [denominations, setDenominations] = useState<Record<string, number>>(
-    {},
-  );
+  const [acknowledgedLiability, setAcknowledgedLiability] = useState(false);
+  const [selectedAction, setSelectedAction] =
+    useState<CloseAction>("transfer_all");
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      declared_amount: session.expected_amount,
-      use_denominations: false,
-      denominations: {},
-    },
+  const hasBalance = session.expected_amount > 0;
+  const hasPendingOutgoing = session.pending_outgoing_count > 0;
+  const hasPendingIncoming = session.pending_incoming_count > 0;
+  const hasPendingTransfers = hasPendingOutgoing || hasPendingIncoming;
+
+  // Get all counters to show transfer options
+  const { data: countersResponse } = useQuery({
+    queryKey: ["cash-counters", facilityId],
+    queryFn: query(cashSessionApi.listCounters, {
+      pathParams: { facilityId: facilityId },
+    }),
+    enabled: open && hasBalance,
   });
 
-  const useDenominations = form.watch("use_denominations");
-  const declaredAmount = form.watch("declared_amount");
-  const difference = declaredAmount - session.expected_amount;
+  // Find available destinations for transfer
+  const availableDestinations =
+    countersResponse?.counters?.filter(
+      (c) =>
+        c.open_sessions.length > 0 &&
+        !c.open_sessions.some((s) => s.session_id === session.id),
+    ) ?? [];
+
+  const hasMainCash = availableDestinations.some((c) => c.is_main_cash);
+  const hasOtherSessions = availableDestinations.length > 0;
 
   const { mutate: closeSession, isPending } = useMutation({
     mutationFn: mutate(cashSessionApi.closeSession, {
@@ -90,8 +86,8 @@ export default function CloseSessionSheet({
       });
       queryClient.invalidateQueries({ queryKey: ["cash-session-current"] });
       queryClient.invalidateQueries({ queryKey: ["cash-sessions"] });
-      form.reset();
-      setDenominations({});
+      setAcknowledgedLiability(false);
+      setSelectedAction("transfer_all");
       onSessionClosed();
     },
     onError: () => {
@@ -99,12 +95,15 @@ export default function CloseSessionSheet({
     },
   });
 
-  const onSubmit = (values: FormValues) => {
+  const handleClose = () => {
     closeSession({
       counter_x_care_id: session.counter_x_care_id,
-      declared_amount: values.declared_amount,
-      denominations: values.use_denominations ? denominations : undefined,
     });
+  };
+
+  const handleTransferAndClose = () => {
+    onOpenChange(false);
+    onTransferClick?.();
   };
 
   const formatCurrency = (amount: number) => {
@@ -115,182 +114,303 @@ export default function CloseSessionSheet({
     }).format(amount);
   };
 
-  // Calculate denomination total
-  //   const denominationTotal = Object.entries(denominations).reduce(
-  //     (sum, [denom, count]) => sum + parseInt(denom) * count,
-  //     0,
-  //   );
-
-  // Update declared amount when denominations change
-  const handleDenominationChange = (
-    newDenominations: Record<string, number>,
-  ) => {
-    setDenominations(newDenominations);
-    if (useDenominations) {
-      const total = Object.entries(newDenominations).reduce(
-        (sum, [denom, count]) => sum + parseInt(denom) * count,
-        0,
-      );
-      form.setValue("declared_amount", total);
-    }
-  };
+  const canClose =
+    !hasBalance ||
+    (selectedAction === "close_with_balance" && acknowledgedLiability);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-lg overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>{t("close_session")}</SheetTitle>
+          <SheetTitle className="flex items-center gap-2">
+            <CareIcon icon="l-times-circle" className="size-5 text-red-500" />
+            {t("close_session")}
+          </SheetTitle>
           <SheetDescription>
             {t("close_session_description", { counter: session.counter_name })}
           </SheetDescription>
         </SheetHeader>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6 py-6"
+        <div className="space-y-6 py-6">
+          {/* Current Balance Display */}
+          <div
+            className={`rounded-lg p-4 ${
+              hasBalance
+                ? "bg-amber-50 border border-amber-200"
+                : "bg-green-50 border border-green-200"
+            }`}
           >
-            {/* Expected Amount Info */}
-            <div className="rounded-lg bg-gray-50 p-4">
-              <p className="text-sm text-gray-500">{t("expected_amount")}</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {formatCurrency(session.expected_amount)}
+            <p className="text-sm text-gray-600">{t("current_balance")}</p>
+            <p
+              className={`text-2xl font-bold ${
+                hasBalance ? "text-amber-700" : "text-green-700"
+              }`}
+            >
+              {formatCurrency(session.expected_amount)}
+            </p>
+            {!hasBalance && (
+              <p className="text-sm text-green-600 mt-1 flex items-center gap-1">
+                <CareIcon icon="l-check-circle" className="size-4" />
+                {t("no_outstanding_balance")}
               </p>
-            </div>
-
-            {/* Use Denominations Toggle */}
-            <FormField
-              control={form.control}
-              name="use_denominations"
-              render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border p-3">
-                  <div>
-                    <FormLabel className="text-base">
-                      {t("enter_denominations")}
-                    </FormLabel>
-                    <p className="text-sm text-gray-500">
-                      {t("enter_denominations_description")}
-                    </p>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            {/* Denomination Input */}
-            {useDenominations && (
-              <DenominationInput
-                value={denominations}
-                onChange={handleDenominationChange}
-              />
             )}
+          </div>
 
-            {/* Declared Amount (manual entry when not using denominations) */}
-            {!useDenominations && (
-              <FormField
-                control={form.control}
-                name="declared_amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("declared_amount")}</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                          {t("currency_symbol")}
-                        </span>
-                        <Input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          {...field}
-                          className="pl-8"
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
+          {/* Pending Transfers Warning */}
+          {hasPendingTransfers && (
+            <Alert variant="destructive">
+              <CareIcon icon="l-exclamation-triangle" className="size-4" />
+              <AlertTitle>{t("pending_transfers_exist")}</AlertTitle>
+              <AlertDescription className="space-y-2">
+                <p>{t("pending_transfers_warning")}</p>
+                <ul className="list-disc list-inside text-sm space-y-1">
+                  {hasPendingOutgoing && (
+                    <li>
+                      {t("pending_outgoing_transfers", {
+                        count: session.pending_outgoing_count,
+                      })}
+                    </li>
+                  )}
+                  {hasPendingIncoming && (
+                    <li>
+                      {t("pending_incoming_transfers", {
+                        count: session.pending_incoming_count,
+                      })}
+                    </li>
+                  )}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
 
-            {/* Difference Alert */}
-            {difference !== 0 && (
-              <Alert variant={difference > 0 ? "default" : "destructive"}>
-                <CareIcon
-                  icon={difference > 0 ? "l-arrow-up" : "l-arrow-down"}
-                  className="size-4"
-                />
-                <AlertTitle>
-                  {difference > 0 ? t("cash_surplus") : t("cash_shortage")}
-                </AlertTitle>
+          {/* If balance exists, show options */}
+          {hasBalance && (
+            <>
+              {/* Warning about liability */}
+              <Alert variant="destructive">
+                <CareIcon icon="l-exclamation-triangle" className="size-4" />
+                <AlertTitle>{t("balance_liability_warning_title")}</AlertTitle>
                 <AlertDescription>
-                  {t("difference_amount", {
-                    amount: formatCurrency(Math.abs(difference)),
+                  {t("balance_liability_warning_description", {
+                    amount: formatCurrency(session.expected_amount),
                   })}
                 </AlertDescription>
               </Alert>
-            )}
 
-            {/* Summary */}
-            <div className="space-y-2 rounded-lg border p-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">{t("expected_amount")}</span>
-                <span className="font-medium">
-                  {formatCurrency(session.expected_amount)}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">{t("declared_amount")}</span>
-                <span className="font-medium">
-                  {formatCurrency(declaredAmount)}
-                </span>
-              </div>
-              <div className="flex justify-between border-t pt-2">
-                <span className="font-medium">{t("difference")}</span>
-                <span
-                  className={`font-bold ${
-                    difference > 0
-                      ? "text-green-600"
-                      : difference < 0
-                        ? "text-red-600"
-                        : "text-gray-900"
-                  }`}
+              {/* Action Selection */}
+              <div className="space-y-4">
+                <Label className="text-base font-medium">
+                  {t("how_to_handle_balance")}
+                </Label>
+                <RadioGroup
+                  value={selectedAction}
+                  onValueChange={(value) =>
+                    setSelectedAction(value as CloseAction)
+                  }
+                  className="space-y-3"
                 >
-                  {difference > 0 ? "+" : ""}
-                  {formatCurrency(difference)}
-                </span>
+                  {/* Transfer option - recommended */}
+                  {hasOtherSessions && (
+                    <label className="flex items-start gap-3 rounded-lg border-2 border-primary/50 bg-primary/5 p-4 cursor-pointer hover:bg-primary/10 transition-colors">
+                      <RadioGroupItem value="transfer_all" className="mt-1" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">
+                            {t("transfer_balance_first")}
+                          </span>
+                          <Badge variant="primary" className="text-xs">
+                            {t("recommended")}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {hasMainCash
+                            ? t("transfer_to_main_cash_description")
+                            : t("transfer_to_other_session_description")}
+                        </p>
+                        {/* Show available destinations */}
+                        <div className="mt-3 space-y-1">
+                          <p className="text-xs text-gray-500 font-medium">
+                            {t("available_destinations")}:
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {availableDestinations
+                              .slice(0, 3)
+                              .map((counter: CounterData) => (
+                                <Badge
+                                  key={counter.id}
+                                  variant={
+                                    counter.is_main_cash
+                                      ? "primary"
+                                      : "secondary"
+                                  }
+                                  className="text-xs"
+                                >
+                                  {counter.name}
+                                  {counter.is_main_cash &&
+                                    ` (${t("main_cash")})`}
+                                </Badge>
+                              ))}
+                            {availableDestinations.length > 3 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{availableDestinations.length - 3} {t("more")}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </label>
+                  )}
+
+                  {/* Close with balance - not recommended */}
+                  <label className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50/50 p-4 cursor-pointer hover:bg-red-50 transition-colors">
+                    <RadioGroupItem
+                      value="close_with_balance"
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-red-700">
+                          {t("close_with_outstanding_balance")}
+                        </span>
+                        <Badge variant="destructive" className="text-xs">
+                          {t("not_recommended")}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-red-600 mt-1">
+                        {t("close_with_balance_warning")}
+                      </p>
+                    </div>
+                  </label>
+                </RadioGroup>
+              </div>
+
+              {/* Liability acknowledgment for closing with balance */}
+              {selectedAction === "close_with_balance" && (
+                <div className="space-y-4">
+                  <Alert className="bg-red-50 border-red-300">
+                    <CareIcon
+                      icon="l-exclamation-circle"
+                      className="size-4 text-red-600"
+                    />
+                    <AlertTitle className="text-red-800">
+                      {t("liability_acknowledgment_required")}
+                    </AlertTitle>
+                    <AlertDescription className="text-red-700">
+                      <ul className="list-disc list-inside space-y-1 mt-2">
+                        <li>{t("liability_point_1")}</li>
+                        <li>{t("liability_point_2")}</li>
+                        <li>{t("liability_point_3")}</li>
+                      </ul>
+                    </AlertDescription>
+                  </Alert>
+
+                  <div className="flex items-start gap-3 rounded-lg border-2 border-red-300 p-4 bg-red-50">
+                    <Checkbox
+                      id="acknowledge-liability"
+                      checked={acknowledgedLiability}
+                      onCheckedChange={(checked) =>
+                        setAcknowledgedLiability(checked === true)
+                      }
+                    />
+                    <Label
+                      htmlFor="acknowledge-liability"
+                      className="text-sm text-red-800 cursor-pointer leading-relaxed"
+                    >
+                      {t("acknowledge_liability_checkbox", {
+                        amount: formatCurrency(session.expected_amount),
+                      })}
+                    </Label>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* No balance - simple close */}
+          {!hasBalance && !hasPendingTransfers && (
+            <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+              <div className="flex items-center gap-2 text-green-700">
+                <CareIcon icon="l-check-circle" className="size-5" />
+                <span className="font-medium">{t("ready_to_close")}</span>
+              </div>
+              <p className="text-sm text-green-600 mt-1">
+                {t("no_balance_close_description")}
+              </p>
+            </div>
+          )}
+
+          {/* Session Summary */}
+          <div className="rounded-lg border bg-gray-50 p-4 space-y-3">
+            <h4 className="font-medium text-gray-900">
+              {t("session_summary")}
+            </h4>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <span className="text-gray-500">{t("opening_balance")}</span>
+                <p className="font-medium">
+                  {formatCurrency(session.opening_balance)}
+                </p>
+              </div>
+              <div>
+                <span className="text-gray-500">{t("payments_collected")}</span>
+                <p className="font-medium">{session.payment_count}</p>
+              </div>
+              <div>
+                <span className="text-gray-500">{t("current_balance")}</span>
+                <p
+                  className={`font-medium ${hasBalance ? "text-amber-600" : "text-green-600"}`}
+                >
+                  {formatCurrency(session.expected_amount)}
+                </p>
               </div>
             </div>
+          </div>
+        </div>
 
-            <SheetFooter className="gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                {t("cancel")}
-              </Button>
-              <Button type="submit" variant="destructive" disabled={isPending}>
-                {isPending ? (
-                  <>
-                    <CareIcon
-                      icon="l-spinner"
-                      className="mr-2 size-4 animate-spin"
-                    />
-                    {t("closing")}
-                  </>
-                ) : (
-                  t("close_session")
-                )}
-              </Button>
-            </SheetFooter>
-          </form>
-        </Form>
+        <SheetFooter className="gap-2 flex-col sm:flex-row">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="w-full sm:w-auto"
+          >
+            {t("cancel")}
+          </Button>
+
+          {hasBalance && selectedAction === "transfer_all" ? (
+            <Button
+              type="button"
+              onClick={handleTransferAndClose}
+              className="w-full sm:w-auto"
+            >
+              <CareIcon icon="l-exchange" className="mr-2 size-4" />
+              {t("transfer_funds")}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant={hasBalance ? "destructive" : "default"}
+              onClick={handleClose}
+              disabled={isPending || !canClose || hasPendingTransfers}
+              className="w-full sm:w-auto"
+            >
+              {isPending ? (
+                <>
+                  <CareIcon
+                    icon="l-spinner"
+                    className="mr-2 size-4 animate-spin"
+                  />
+                  {t("closing")}
+                </>
+              ) : (
+                <>
+                  <CareIcon icon="l-times-circle" className="mr-2 size-4" />
+                  {t("close_session")}
+                </>
+              )}
+            </Button>
+          )}
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );
