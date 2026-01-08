@@ -1,7 +1,6 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import {
-  CreateServiceAccountResponse,
   CurrentUserRead,
   GenerateServiceAccountTokenResponse,
   UserCreate,
@@ -60,12 +59,6 @@ export default {
     method: HttpMethod.DELETE,
     TRes: Type<void>(),
     TBody: Type<void>(),
-  },
-  createServiceAccount: {
-    path: "/api/v1/users/create_service_account/",
-    method: HttpMethod.POST,
-    TRes: Type<CreateServiceAccountResponse>(),
-    TBody: Type<{ username: string; email: string }>(),
   },
   generateServiceAccountToken: {
     path: "/api/v1/users/{username}/generate_service_account_token/",

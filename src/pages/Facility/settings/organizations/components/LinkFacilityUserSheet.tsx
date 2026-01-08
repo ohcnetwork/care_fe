@@ -55,6 +55,9 @@ export default function LinkFacilityUserSheet({
     queryKey: ["user", preSelectedUsername],
     queryFn: query(UserApi.get, {
       pathParams: { username: preSelectedUsername || "" },
+      queryParams: {
+        is_service_account: isServiceAccount,
+      },
     }),
     enabled: !!preSelectedUsername,
   });

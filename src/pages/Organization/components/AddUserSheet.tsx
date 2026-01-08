@@ -21,6 +21,7 @@ interface AddUserSheetProps {
   setOpen: (open: boolean) => void;
   onUserCreated?: (user: UserReadMinimal) => void;
   organizationId?: string;
+  isServiceAccount?: boolean;
 }
 
 export default function AddUserSheet({
@@ -28,6 +29,7 @@ export default function AddUserSheet({
   setOpen,
   onUserCreated,
   organizationId,
+  isServiceAccount = false,
 }: AddUserSheetProps) {
   const { t } = useTranslation();
   return (
@@ -50,6 +52,7 @@ export default function AddUserSheet({
               onUserCreated?.(user);
             }}
             organizationId={organizationId}
+            isServiceAccount={isServiceAccount}
           />
         </div>
       </SheetContent>

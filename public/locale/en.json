@@ -4919,6 +4919,7 @@
   "serial_number_mode_user": "User entered",
   "service": "Service",
   "service_account": "Service Account",
+  "service_account_added_successfully": "Service account created successfully",
   "service_account_token": "Service Account Token",
   "service_accounts": "Service accounts",
   "service_available_locations": "Locations where this service is available",

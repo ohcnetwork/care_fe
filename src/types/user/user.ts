@@ -63,12 +63,7 @@ export interface UserUpdate extends Omit<UserBase, "id"> {
 export interface UserCreate extends UserUpdate {
   password?: string;
   email: string;
-}
-
-export interface CreateServiceAccountResponse {
-  id: string;
-  username: string;
-  is_service_account: boolean;
+  is_service_account?: boolean;
 }
 
 export interface GetServiceAccountsResponse {

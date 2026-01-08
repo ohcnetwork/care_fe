@@ -34,6 +34,7 @@ interface Props {
   open: boolean;
   setOpen: (open: boolean) => void;
   preSelectedUsername?: string;
+  isServiceAccount?: boolean;
 }
 
 export default function LinkUserSheet({
@@ -41,6 +42,7 @@ export default function LinkUserSheet({
   open,
   setOpen,
   preSelectedUsername,
+  isServiceAccount = false,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -51,6 +53,9 @@ export default function LinkUserSheet({
     queryKey: ["user", preSelectedUsername],
     queryFn: query(UserApi.get, {
       pathParams: { username: preSelectedUsername || "" },
+      queryParams: {
+        is_service_account: isServiceAccount,
+      },
     }),
     enabled: !!preSelectedUsername,
   });
@@ -117,6 +122,7 @@ export default function LinkUserSheet({
             placeholder={t("search_for_a_user")}
             noOptionsMessage={t("no_users_found")}
             popoverClassName="w-full"
+            isServiceAccount={isServiceAccount}
           />
           {selectedUser && (
             <div className="space-y-4">

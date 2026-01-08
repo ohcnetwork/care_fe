@@ -115,6 +115,12 @@ export default function OrganizationLayout({
         org.org_type === OrgType.GOVT &&
         hasPermission("can_read_facility", org.permissions),
     },
+    {
+      url: `${baseUrl}/${id}/service-accounts`,
+      name: "Service Accounts",
+      icon: <CareIcon icon="d-people" />,
+      visibility: hasPermission("can_list_organization_users", org.permissions),
+    },
     ...organizationTabs.map((tab) => ({
       url: `${baseUrl}/${id}/${tab.slug}`,
       name: tab.name,
