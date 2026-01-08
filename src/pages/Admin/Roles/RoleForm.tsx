@@ -46,14 +46,6 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
   const [searchPermission, setSearchPermission] = useState("");
   const isEditMode = Boolean(role?.id);
 
-  useEffect(() => {
-    form.reset({
-      name: role?.name || "",
-      description: role?.description || "",
-      permissions: role?.permissions.map((p: Permission) => p.slug) || [],
-    });
-  }, [role]);
-
   const formSchema = z.object({
     name: z.string().trim().min(1, t("field_required")),
     description: z.string().optional(),
@@ -70,6 +62,14 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
       permissions: role?.permissions.map((p: Permission) => p.slug) || [],
     },
   });
+
+  useEffect(() => {
+    form.reset({
+      name: role?.name || "",
+      description: role?.description || "",
+      permissions: role?.permissions.map((p: Permission) => p.slug) || [],
+    });
+  }, [role, form]);
 
   const getQueryParams = (pageParam: number, name: string) => ({
     limit: String(PAGE_LIMIT),

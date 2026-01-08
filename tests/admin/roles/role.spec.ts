@@ -75,7 +75,7 @@ test.describe("Admin Roles Management", () => {
   test("Clone Role and verify", async ({ page }) => {
     const roleName = faker.person.jobTitle();
     const description = faker.lorem.sentence();
-    const clonedRoleName = `${roleName} Copy`;
+    const clonedRoleName = `${roleName} (Copy)`;
     const tableBody = page.locator('[data-slot="table-body"]');
     await createRole(page, roleName, description);
 
