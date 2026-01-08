@@ -46,6 +46,14 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
   const [searchPermission, setSearchPermission] = useState("");
   const isEditMode = Boolean(role?.id);
 
+  useEffect(() => {
+    form.reset({
+      name: role?.name || "",
+      description: role?.description || "",
+      permissions: role?.permissions.map((p: Permission) => p.slug) || [],
+    });
+  }, [role]);
+
   const formSchema = z.object({
     name: z.string().trim().min(1, t("field_required")),
     description: z.string().optional(),
@@ -131,9 +139,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
     form.setValue(
       "permissions",
       currentPermissions.includes(permissionSlug)
-        ? form
-            .getValues("permissions")
-            .filter((slug) => slug !== permissionSlug)
+        ? currentPermissions.filter((slug) => slug !== permissionSlug)
         : [...currentPermissions, permissionSlug],
       {
         shouldValidate: true,

@@ -3,7 +3,7 @@ import { expect, Page, test } from "@playwright/test";
 import { getFieldErrorMessage } from "tests/helper/error";
 import { expectToast } from "tests/helper/ui";
 
-test.use({ storageState: "tests/.auth/admin.json" });
+test.use({ storageState: "tests/.auth/user.json" });
 
 async function createRole(page: Page, roleName: string, description?: string) {
   await page.getByRole("button", { name: /Add Role/i }).click();
@@ -12,10 +12,7 @@ async function createRole(page: Page, roleName: string, description?: string) {
     await page.getByPlaceholder("Enter role description").fill(description);
   }
   // select all permissions
-  await page
-    .locator('div[data-slot="card"]')
-    .getByLabel("Select all permissions")
-    .click();
+  await page.getByRole("button", { name: "Select All" }).click();
   await page.getByRole("button", { name: /Create Role/i }).click();
 
   // verify toast message
@@ -51,17 +48,19 @@ test.describe("Admin Roles Management", () => {
     const roleName = faker.person.jobTitle();
     const description = faker.lorem.sentence();
     await createRole(page, roleName, description);
+    const tableBody = page.locator('[data-slot="table-body"]');
 
     // verify role in the list
 
     await page.getByRole("textbox", { name: /Search Roles/i }).fill(roleName);
-    await expect(page.getByText(roleName)).toBeVisible();
+    await expect(tableBody).toContainText(roleName);
   });
 
   test("Create Role with all permissions and edit", async ({ page }) => {
     const roleName = faker.person.jobTitle();
     const description = faker.lorem.sentence();
     await createRole(page, roleName, description);
+    const tableBody = page.locator('[data-slot="table-body"]');
 
     // edit role name
 
@@ -80,6 +79,6 @@ test.describe("Admin Roles Management", () => {
     await page
       .getByRole("textbox", { name: /Search Roles/i })
       .fill(updatedRoleName);
-    await expect(page.getByText(updatedRoleName)).toBeVisible();
+    await expect(tableBody).toContainText(updatedRoleName);
   });
 });
