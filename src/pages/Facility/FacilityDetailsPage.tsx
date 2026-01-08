@@ -15,7 +15,6 @@ import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
 import useAppHistory from "@/hooks/useAppHistory";
 import useFilters from "@/hooks/useFilters";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 
@@ -41,9 +40,9 @@ export function FacilityDetailsPage({ id }: Props) {
   });
 
   const { data: docResponse, error: docError } = useQuery({
-    queryKey: [routes.getScheduleAbleFacilityUsers, id],
-    queryFn: query(routes.getScheduleAbleFacilityUsers, {
-      pathParams: { facility_id: id },
+    queryKey: [publicFacilityApi.listSchedulableUsers, id],
+    queryFn: query(publicFacilityApi.listSchedulableUsers, {
+      pathParams: { facilityId: id },
       silent: true,
     }),
   });
