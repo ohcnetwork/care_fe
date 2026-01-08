@@ -809,30 +809,46 @@ export default function MedicationBillForm({ patientId }: Props) {
   });
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     const fetchMissingInventories = async () => {
       for (const [productKnowledgeId, inventories] of Object.entries(
         productKnowledgeInventoriesMap,
       )) {
         if (inventories) continue;
 
-        const inventoriesResponse = await query(inventoryApi.list, {
-          pathParams: { facilityId, locationId },
-          queryParams: {
-            limit: 100,
-            product_knowledge: productKnowledgeId,
-            net_content_gt: 0,
-            include_children: true,
-          },
-        })({ signal: new AbortController().signal });
+        try {
+          const inventoriesResponse = await query(inventoryApi.list, {
+            pathParams: { facilityId, locationId },
+            queryParams: {
+              limit: 100,
+              product_knowledge: productKnowledgeId,
+              net_content_gt: 0,
+              include_children: true,
+            },
+          })({ signal: abortController.signal });
 
-        setProductKnowledgeInventoriesMap((prev) => ({
-          ...prev,
-          [productKnowledgeId]: inventoriesResponse.results || [],
-        }));
+          if (!abortController.signal.aborted) {
+            setProductKnowledgeInventoriesMap((prev) => ({
+              ...prev,
+              [productKnowledgeId]: inventoriesResponse.results || [],
+            }));
+          }
+        } catch (error) {
+          // Ignore abort errors
+          if (error instanceof Error && error.name !== "AbortError") {
+            // Handle real errors if needed
+            console.error("Error fetching inventories:", error);
+          }
+        }
       }
     };
 
     fetchMissingInventories();
+
+    return () => {
+      abortController.abort();
+    };
   }, [productKnowledgeInventoriesMap, facilityId, locationId]);
 
   const medications = useMemo(

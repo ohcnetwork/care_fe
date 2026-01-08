@@ -363,7 +363,7 @@ export function NoteManager({
     isFetchingNextPage,
   } = useInfiniteQuery<PaginatedResponse<NoteRead>>({
     queryKey: ["messages", selectedThread],
-    queryFn: async ({ pageParam = 0 }) => {
+    queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query(threadApi.listNotes, {
         pathParams: {
           patientId,
@@ -373,7 +373,7 @@ export function NoteManager({
           limit: String(MESSAGES_LIMIT),
           offset: String(pageParam),
         },
-      })({ signal: new AbortController().signal });
+      })({ signal });
       return response;
     },
     initialPageParam: 0,

@@ -1,5 +1,5 @@
 import { navigate } from "raviger";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -29,6 +29,16 @@ export function QRScanDialog({
   const [showSuccess, setShowSuccess] = useState(false);
   const [specimenData, setSpecimenData] = useState<any>(null);
   const [lastScannedId, setLastScannedId] = useState("");
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   async function handleScanSuccess(scannedId: string) {
     setLastScannedId(scannedId);
@@ -41,9 +51,15 @@ export function QRScanDialog({
       return;
     }
 
+    // Abort any previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
     // Full API mode - make API call and return specimen object
     setLoading(true);
-    const signal = new AbortController().signal;
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
 
     try {
       let result;
@@ -58,12 +74,18 @@ export function QRScanDialog({
         })({ signal });
       }
 
-      setSpecimenData(result);
-      setShowSuccess(true);
-    } catch {
-      toast.error(t("specimen_not_found"));
+      if (!signal.aborted) {
+        setSpecimenData(result);
+        setShowSuccess(true);
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name !== "AbortError") {
+        toast.error(t("specimen_not_found"));
+      }
     } finally {
-      setLoading(false);
+      if (!signal.aborted) {
+        setLoading(false);
+      }
     }
   }
 

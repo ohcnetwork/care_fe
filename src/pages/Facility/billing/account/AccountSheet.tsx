@@ -148,7 +148,7 @@ export function AccountSheet({
           patient: data.patient?.id || patientId!,
           extensions: extensions.prepareForSubmit(data.extensions),
         },
-      })({ signal: new AbortController().signal }),
+      })(),
     onSuccess: () => {
       onOpenChange(false);
       queryClient.invalidateQueries({ queryKey: ["accounts"] });

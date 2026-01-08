@@ -176,6 +176,8 @@ export default function DispenseDrawer({
   }, [open, form]);
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     const fetchMissingInventories = async () => {
       const missingInventories = Object.entries(
         productKnowledgeInventoriesMap,
@@ -183,34 +185,50 @@ export default function DispenseDrawer({
 
       if (missingInventories.length === 0) return;
 
-      const promises = missingInventories.map(async ([productKnowledgeId]) => {
-        const inventoriesResponse = await query(inventoryApi.list, {
-          pathParams: { facilityId, locationId: currentLocation.id },
-          queryParams: {
-            limit: 100,
-            product_knowledge: productKnowledgeId,
-            net_content_gt: 0,
+      try {
+        const promises = missingInventories.map(
+          async ([productKnowledgeId]) => {
+            const inventoriesResponse = await query(inventoryApi.list, {
+              pathParams: { facilityId, locationId: currentLocation.id },
+              queryParams: {
+                limit: 100,
+                product_knowledge: productKnowledgeId,
+                net_content_gt: 0,
+              },
+            })({ signal: abortController.signal });
+
+            return {
+              productKnowledgeId,
+              inventories: inventoriesResponse.results || [],
+            };
           },
-        })({ signal: new AbortController().signal });
+        );
 
-        return {
-          productKnowledgeId,
-          inventories: inventoriesResponse.results || [],
-        };
-      });
+        const results = await Promise.all(promises);
 
-      const results = await Promise.all(promises);
-
-      setProductKnowledgeInventoriesMap((prev) => {
-        const updated = { ...prev };
-        results.forEach(({ productKnowledgeId, inventories }) => {
-          updated[productKnowledgeId] = inventories;
-        });
-        return updated;
-      });
+        if (!abortController.signal.aborted) {
+          setProductKnowledgeInventoriesMap((prev) => {
+            const updated = { ...prev };
+            results.forEach(({ productKnowledgeId, inventories }) => {
+              updated[productKnowledgeId] = inventories;
+            });
+            return updated;
+          });
+        }
+      } catch (error) {
+        // Ignore abort errors
+        if (error instanceof Error && error.name !== "AbortError") {
+          // Handle real errors if needed
+          console.error("Error fetching inventories:", error);
+        }
+      }
     };
 
     fetchMissingInventories();
+
+    return () => {
+      abortController.abort();
+    };
   }, [productKnowledgeInventoriesMap, facilityId, currentLocation.id]);
 
   // Auto-select single lot if only one inventory is available

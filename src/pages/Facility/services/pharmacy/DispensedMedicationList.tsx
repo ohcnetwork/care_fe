@@ -332,7 +332,7 @@ export default function DispensedMedicationList({
   }, [response?.results]);
 
   const { mutate: completeMedications, isPending } = useMutation({
-    mutationFn: async ({ signal }: { signal: AbortSignal }) => {
+    mutationFn: async () => {
       if (!response?.results) return;
 
       const selectedDispenses = response.results.filter((med) =>
@@ -350,9 +350,8 @@ export default function DispensedMedicationList({
       );
 
       return query(medicationDispenseApi.upsert, {
-        signal,
         body: { datapoints: updates },
-      })({ signal });
+      })();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });
@@ -444,9 +443,7 @@ export default function DispensedMedicationList({
             (status === MedicationDispenseStatus.preparation ||
               status === MedicationDispenseStatus.in_progress) && (
               <Button
-                onClick={() =>
-                  completeMedications({ signal: new AbortController().signal })
-                }
+                onClick={() => completeMedications()}
                 disabled={isPending}
               >
                 {t("complete_dispense")}

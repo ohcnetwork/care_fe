@@ -71,7 +71,7 @@ export default function TagConfigView({
       const queryFn = query(tagConfigApi.retrieve, {
         pathParams: { external_id: child.id! },
       });
-      const childData = await queryFn({ signal: new AbortController().signal });
+      const childData = await queryFn();
 
       // Then update with archived status
       return mutate(tagConfigApi.update, {
