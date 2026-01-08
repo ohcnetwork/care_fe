@@ -29,11 +29,6 @@ test.describe("Admin Roles Management", () => {
   }) => {
     const roleName = faker.person.jobTitle();
     await page.getByRole("button", { name: /Add Role/i }).click();
-
-    // verify create button is disabled initially
-    await expect(
-      page.getByRole("button", { name: /Create Role/i }),
-    ).toBeDisabled();
     await page.getByPlaceholder("Enter role name").fill(roleName);
     await page.getByRole("button", { name: /Create Role/i }).click();
     // verify form validation

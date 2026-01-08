@@ -313,7 +313,10 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
           >
             {t("cancel")}
           </Button>
-          <Button type="submit" disabled={isLoading || !form.formState.isDirty}>
+          <Button
+            type="submit"
+            disabled={isLoading || (isEditMode && !form.formState.isDirty)}
+          >
             {isLoading
               ? t("saving")
               : isEditMode
