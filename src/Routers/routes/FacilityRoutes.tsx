@@ -12,6 +12,7 @@ import AccountList from "@/pages/Facility/billing/account/AccountList";
 import AccountShow from "@/pages/Facility/billing/account/AccountShow";
 import CreateInvoicePage from "@/pages/Facility/billing/account/CreateInvoice";
 import { PrintChargeItems } from "@/pages/Facility/billing/account/components/PrintChargeItems";
+import CashManagementPage from "@/pages/Facility/billing/cash/CashManagementPage";
 import InvoiceList from "@/pages/Facility/billing/invoice/InvoiceList";
 import InvoiceShow from "@/pages/Facility/billing/invoice/InvoiceShow";
 import PrintInvoice from "@/pages/Facility/billing/invoice/PrintInvoice";
@@ -175,6 +176,9 @@ const FacilityRoutes: AppRoutes = {
       facilityId={facilityId}
       paymentReconciliationId={paymentReconciliationId}
     />
+  ),
+  "/facility/:facilityId/billing/cash": ({ facilityId }) => (
+    <CashManagementPage facilityId={facilityId} />
   ),
   "/facility/:facilityId/template": ({ facilityId }) => (
     <TemplatePage facilityId={facilityId} />

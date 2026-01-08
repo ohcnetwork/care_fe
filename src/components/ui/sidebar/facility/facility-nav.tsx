@@ -119,6 +119,10 @@ function generateFacilityLinks(
           name: t("payments"),
           url: `${baseUrl}/billing/payments`,
         },
+        {
+          name: t("cash_management"),
+          url: `${baseUrl}/billing/cash`,
+        },
       ],
     },
     {
