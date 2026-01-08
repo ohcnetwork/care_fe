@@ -351,7 +351,7 @@ export default function DispensedMedicationList({
 
       return query(medicationDispenseApi.upsert, {
         body: { datapoints: updates },
-      })();
+      })({ signal: new AbortController().signal });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });
