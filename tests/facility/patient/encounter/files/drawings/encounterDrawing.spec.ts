@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { format, subDays } from "date-fns";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -19,7 +19,7 @@ test.describe("Encounter Drawing Management", () => {
     );
   });
 
-  async function navigateToEncounterDrawings(page: any) {
+  async function navigateToEncounterDrawings(page: Page) {
     // Open the first available encounter
     await page.getByRole("button", { name: "View Encounter" }).first().click();
 
