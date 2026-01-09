@@ -2474,6 +2474,7 @@
   "help_unconfirmed": "There is not sufficient diagnostic and/or clinical evidence to treat this as a confirmed condition.",
   "hey_user": "Hey {{user}} 👋",
   "hide": "Hide",
+  "hide_category_grouping": "Hide Category Grouping",
   "hide_note": "Hide note",
   "hide_notes": "Hide notes",
   "high": "High",

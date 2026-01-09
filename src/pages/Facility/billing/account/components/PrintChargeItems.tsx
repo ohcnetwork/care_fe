@@ -1,14 +1,16 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Loading from "@/components/Common/Loading";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import query from "@/Utils/request/query";
-import { formatPatientAge } from "@/Utils/utils";
+import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -26,6 +28,7 @@ import {
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import patientApi from "@/types/emr/patient/patientApi";
+import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 interface DetailRowProps {
@@ -39,7 +42,9 @@ const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
     <div className="flex">
       <span className="text-gray-600 w-32">{label}</span>
       <span className="text-gray-600">: </span>
-      <span className={`ml-1 ${isStrong ? "font-semibold" : ""}`}>
+      <span
+        className={`ml-1 whitespace-pre-wrap ${isStrong ? "font-semibold" : ""}`}
+      >
         {value || "-"}
       </span>
     </div>
@@ -53,6 +58,9 @@ export const PrintChargeItems = (props: {
   const { facilityId, accountId } = props;
   const { facility } = useCurrentFacility();
   const { t } = useTranslation();
+  const [hideCategories, setHideCategories] = useState(false);
+
+  const hideCategoryLabel = `${t("hide_category_grouping")}`;
 
   const { data: account } = useQuery({
     queryKey: ["account", accountId],
@@ -95,6 +103,16 @@ export const PrintChargeItems = (props: {
       title={t("charge_items")}
       disabled={!chargeItems?.results?.length}
     >
+      <div className="no-print mb-4 flex items-center gap-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <Switch
+          id="hide-categories"
+          checked={hideCategories}
+          onCheckedChange={setHideCategories}
+        />
+        <label htmlFor="hide-categories" className="cursor-pointer text-sm">
+          {hideCategoryLabel}
+        </label>
+      </div>
       <div className="md:p-2 max-w-4xl mx-auto">
         <div>
           <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
@@ -121,7 +139,7 @@ export const PrintChargeItems = (props: {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 mb-8">
+          <div className="grid md:grid-cols-2 print:grid-cols-2 gap-x-12 gap-y-6 mb-8">
             <div className="space-y-3">
               <DetailRow label={t("patient")} value={patient?.name} isStrong />
               <DetailRow
@@ -133,9 +151,31 @@ export const PrintChargeItems = (props: {
                 }
                 isStrong
               />
+              <DetailRow
+                label={`${t("address")}`}
+                value={patient?.address}
+                isStrong
+              />
             </div>
             <div className="space-y-3">
-              <DetailRow label={t("account")} value={account?.name} isStrong />
+              <DetailRow
+                label={`${t("date")}`}
+                value={formatDateTime(new Date(), "DD-MM-YYYY, hh:mm A")}
+                isStrong
+              />
+              {patient?.instance_identifiers
+                ?.filter(
+                  ({ config }) =>
+                    config.config.use === PatientIdentifierUse.official,
+                )
+                .map((identifier) => (
+                  <DetailRow
+                    key={identifier.config.id}
+                    label={identifier.config.config.display}
+                    value={identifier.value}
+                    isStrong
+                  />
+                ))}
               <DetailRow
                 label={t("mobile_number")}
                 value={patient && formatPhoneNumberIntl(patient.phone_number)}
@@ -153,8 +193,11 @@ export const PrintChargeItems = (props: {
                 <Table className="w-full">
                   <TableHeader>
                     <TableRow className="bg-transparent hover:bg-transparent border-b-gray-200">
-                      <TableHead className="h-auto py-1 pl-2 pr-2 text-black text-left w-16">
-                        {t("sno")}
+                      <TableHead className="h-auto py-1 pl-2 pr-2 text-black text-left w-24">
+                        {t("date")}
+                      </TableHead>
+                      <TableHead className="h-auto py-1 pl-2 pr-2 text-black text-left w-24">
+                        {t("invoice_number")}
                       </TableHead>
                       <TableHead className="h-auto py-1 pl-2 pr-2 text-black text-left">
                         {t("description")}
@@ -198,23 +241,24 @@ export const PrintChargeItems = (props: {
                       const sortedCategories = Object.keys(groups).sort();
 
                       const rows: React.ReactNode[] = [];
-                      let globalIndex = 1;
 
                       sortedCategories.forEach((categoryTitle) => {
-                        // Add category header
-                        rows.push(
-                          <TableRow
-                            key={`category-${categoryTitle}`}
-                            className="bg-transparent"
-                          >
-                            <TableCell
-                              colSpan={5}
-                              className="text-left font-semibold capitalize bg-gray-50"
+                        // Add category header (only if not hiding categories)
+                        if (!hideCategories) {
+                          rows.push(
+                            <TableRow
+                              key={`category-${categoryTitle}`}
+                              className="bg-transparent"
                             >
-                              {categoryTitle}
-                            </TableCell>
-                          </TableRow>,
-                        );
+                              <TableCell
+                                colSpan={7}
+                                className="text-left font-semibold capitalize bg-gray-50"
+                              >
+                                {categoryTitle}
+                              </TableCell>
+                            </TableRow>,
+                          );
+                        }
 
                         const items: ChargeItemRead[] =
                           groups[categoryTitle] ?? [];
@@ -231,7 +275,13 @@ export const PrintChargeItems = (props: {
                               className="bg-transparent hover:bg-transparent"
                             >
                               <TableCell className="text-left">
-                                {globalIndex++}
+                                {formatDateTime(
+                                  chargeItem.created_date,
+                                  "DD-MM-YY",
+                                )}
+                              </TableCell>
+                              <TableCell className="text-left">
+                                {chargeItem.paid_invoice?.number || "-"}
                               </TableCell>
                               <TableCell className="text-left">
                                 <div className="flex flex-col">
@@ -260,27 +310,32 @@ export const PrintChargeItems = (props: {
                           );
                         });
 
-                        // Add category subtotal
-                        const categoryTotal = items
-                          .reduce(
-                            (sum: number, item: ChargeItemRead) =>
-                              sum + Number(item.total_price ?? 0),
-                            0,
-                          )
-                          .toFixed(2);
-                        rows.push(
-                          <TableRow
-                            key={`subtotal-${categoryTitle}`}
-                            className="font-semibold bg-gray-50"
-                          >
-                            <TableCell colSpan={4} className="text-right pr-2">
-                              {t("total")}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <MonetaryDisplay amount={categoryTotal} />
-                            </TableCell>
-                          </TableRow>,
-                        );
+                        // Add category subtotal (only if not hiding categories)
+                        if (!hideCategories) {
+                          const categoryTotal = items
+                            .reduce(
+                              (sum: number, item: ChargeItemRead) =>
+                                sum + Number(item.total_price ?? 0),
+                              0,
+                            )
+                            .toFixed(2);
+                          rows.push(
+                            <TableRow
+                              key={`subtotal-${categoryTitle}`}
+                              className="font-semibold bg-gray-50"
+                            >
+                              <TableCell
+                                colSpan={5}
+                                className="text-right pr-2"
+                              >
+                                {t("total")}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <MonetaryDisplay amount={categoryTotal} />
+                              </TableCell>
+                            </TableRow>,
+                          );
+                        }
                       });
 
                       // Add grand total
@@ -289,7 +344,7 @@ export const PrintChargeItems = (props: {
                           key="grand-total"
                           className="bg-muted/30 font-semibold"
                         >
-                          <TableCell colSpan={4} className="text-right pr-2">
+                          <TableCell colSpan={5} className="text-right pr-2">
                             {t("net_total")}
                           </TableCell>
                           <TableCell className="text-right">
