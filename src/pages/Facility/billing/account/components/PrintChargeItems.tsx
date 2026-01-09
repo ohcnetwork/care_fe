@@ -19,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { paymentmethodMap } from "@/pages/Facility/billing/paymentReconciliation/PaymentsData";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import accountApi from "@/types/billing/account/accountApi";
@@ -27,6 +28,11 @@ import {
   ChargeItemStatus,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import {
+  PaymentReconciliationRead,
+  PaymentReconciliationStatus,
+} from "@/types/billing/paymentReconciliation/paymentReconciliation";
+import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import patientApi from "@/types/emr/patient/patientApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -59,8 +65,10 @@ export const PrintChargeItems = (props: {
   const { facility } = useCurrentFacility();
   const { t } = useTranslation();
   const [hideCategories, setHideCategories] = useState(false);
+  const [hidePaymentTypeGrouping, setHidePaymentTypeGrouping] = useState(false);
 
   const hideCategoryLabel = `${t("hide_category_grouping")}`;
+  const hidePaymentTypeLabel = `${t("hide_payment_type_grouping")}`;
 
   const { data: account } = useQuery({
     queryKey: ["account", accountId],
@@ -88,11 +96,29 @@ export const PrintChargeItems = (props: {
     }),
   });
 
-  if (isLoading) return <Loading />;
+  const { data: paymentsResponse, isLoading: isLoadingPayments } = useQuery({
+    queryKey: ["payments", accountId],
+    queryFn: query.paginated(
+      paymentReconciliationApi.listPaymentReconciliation,
+      {
+        pathParams: { facilityId },
+        queryParams: {
+          account: accountId,
+          ordering: "-payment_datetime",
+        },
+        pageSize: 100,
+      },
+    ),
+  });
+
+  const payments =
+    (paymentsResponse?.results as PaymentReconciliationRead[]) || [];
+
+  if (isLoading || isLoadingPayments) return <Loading />;
 
   if (!chargeItems?.results) {
     return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
+      <div className="flex h-[200px] items-center justify-center  border-2 border-dashed p-4 text-gray-500 border-gray-200">
         {t("no_charge_items_found_for_this_account")}
       </div>
     );
@@ -103,15 +129,33 @@ export const PrintChargeItems = (props: {
       title={t("charge_items")}
       disabled={!chargeItems?.results?.length}
     >
-      <div className="no-print mb-4 flex items-center gap-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <Switch
-          id="hide-categories"
-          checked={hideCategories}
-          onCheckedChange={setHideCategories}
-        />
-        <label htmlFor="hide-categories" className="cursor-pointer text-sm">
-          {hideCategoryLabel}
-        </label>
+      <div className="no-print mb-4 flex justify-between items-center gap-2 p-4 bg-gray-50  border rounded-md border-gray-200">
+        <div className="gap-2 flex items-center">
+          <Switch
+            id="hide-categories"
+            checked={hideCategories}
+            onCheckedChange={setHideCategories}
+          />
+          <label htmlFor="hide-categories" className="cursor-pointer text-sm">
+            {hideCategoryLabel}
+          </label>
+        </div>
+
+        {payments.length > 0 && (
+          <div className="gap-2 flex items-center">
+            <Switch
+              id="hide-payment-type-grouping"
+              checked={hidePaymentTypeGrouping}
+              onCheckedChange={setHidePaymentTypeGrouping}
+            />
+            <label
+              htmlFor="hide-payment-type-grouping"
+              className="cursor-pointer text-sm"
+            >
+              {hidePaymentTypeLabel}
+            </label>
+          </div>
+        )}
       </div>
       <div className="md:p-2 max-w-4xl mx-auto">
         <div>
@@ -133,9 +177,6 @@ export const PrintChargeItems = (props: {
                   )}
                 </div>
               )}
-              <h2 className="text-gray-500 uppercase text-sm tracking-wide mt-4 font-semibold">
-                {t("charge_items")}
-              </h2>
             </div>
           </div>
 
@@ -185,30 +226,25 @@ export const PrintChargeItems = (props: {
           </div>
 
           {chargeItems?.results && chargeItems?.results?.length > 0 && (
-            <div className="mt-4">
-              <p className="text-base font-semibold mb-2">
-                {t("charge_items")}
-              </p>
-              <div className="overflow-hidden rounded-lg border border-gray-200">
+            <div className="mt-2">
+              <div className="overflow-hidden  border rounded-md border-gray-200">
                 <Table className="w-full">
                   <TableHeader>
                     <TableRow className="bg-transparent hover:bg-transparent border-b-gray-200">
-                      <TableHead className="h-auto py-1 pl-2 pr-2 text-black text-left w-24">
-                        {t("date")}
+                      <TableHead className="font-bold">{t("date")}</TableHead>
+                      <TableHead className="font-bold w-24">
+                        {t("invoice_no")}
                       </TableHead>
-                      <TableHead className="h-auto py-1 pl-2 pr-2 text-black text-left w-24">
-                        {t("invoice_number")}
+                      <TableHead className="font-bold w-24">
+                        {t("title")}
                       </TableHead>
-                      <TableHead className="h-auto py-1 pl-2 pr-2 text-black text-left">
-                        {t("description")}
-                      </TableHead>
-                      <TableHead className="h-auto py-1 pl-2 pr-2 text-black text-right w-28">
+                      <TableHead className="font-bold text-center w-28">
                         {t("rate")}
                       </TableHead>
-                      <TableHead className="h-auto py-1 pl-2 pr-2 text-black text-right w-24">
+                      <TableHead className="font-bold text-right w-24">
                         {t("quantity")}
                       </TableHead>
-                      <TableHead className="h-auto py-1 pl-2 pr-2 text-black text-right w-32">
+                      <TableHead className="font-bold text-right w-32">
                         {t("amount")}
                       </TableHead>
                     </TableRow>
@@ -252,7 +288,7 @@ export const PrintChargeItems = (props: {
                             >
                               <TableCell
                                 colSpan={7}
-                                className="text-left font-semibold capitalize bg-gray-50"
+                                className="font-semibold capitalize bg-gray-50"
                               >
                                 {categoryTitle}
                               </TableCell>
@@ -274,16 +310,16 @@ export const PrintChargeItems = (props: {
                               key={chargeItem.id}
                               className="bg-transparent hover:bg-transparent"
                             >
-                              <TableCell className="text-left">
+                              <TableCell>
                                 {formatDateTime(
                                   chargeItem.created_date,
-                                  "DD-MM-YY",
+                                  "DD/MM/YY",
                                 )}
                               </TableCell>
-                              <TableCell className="text-left">
+                              <TableCell>
                                 {chargeItem.paid_invoice?.number || "-"}
                               </TableCell>
-                              <TableCell className="text-left">
+                              <TableCell>
                                 <div className="flex flex-col">
                                   <span className="font-medium">
                                     {chargeItem.title}
@@ -365,6 +401,205 @@ export const PrintChargeItems = (props: {
                   </TableBody>
                 </Table>
               </div>
+            </div>
+          )}
+
+          {payments.length > 0 && (
+            <div className="mt-8">
+              <h2 className="text-xl font-semibold mb-4 border-b pb-2 border-gray-200">
+                {t("payment_details")}
+              </h2>
+              <div className="overflow-hidden  border rounded-md border-gray-200">
+                <Table className="w-full">
+                  <TableHeader>
+                    <TableRow className="bg-gray-50">
+                      <TableHead className="font-bold w-32">
+                        {t("date")}
+                      </TableHead>
+                      {hidePaymentTypeGrouping && (
+                        <TableHead className="font-bold w-32">
+                          {t("type")}
+                        </TableHead>
+                      )}
+                      <TableHead className="font-bold w-32">
+                        {t("method")}
+                      </TableHead>
+                      <TableHead className="font-bold text-right w-32">
+                        {t("amount")}
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {(() => {
+                      const validPayments = payments.filter(
+                        (payment) =>
+                          payment.status === PaymentReconciliationStatus.active,
+                      );
+
+                      const paymentGroups = validPayments.reduce(
+                        (
+                          acc: Record<string, PaymentReconciliationRead[]>,
+                          payment: PaymentReconciliationRead,
+                        ) => {
+                          const type = payment.reconciliation_type;
+                          const list = acc[type] ?? [];
+                          list.push(payment);
+                          acc[type] = list;
+                          return acc;
+                        },
+                        {} as Record<string, PaymentReconciliationRead[]>,
+                      );
+
+                      const sortedTypes = Object.keys(paymentGroups).sort();
+
+                      const rows: React.ReactNode[] = [];
+
+                      sortedTypes.forEach((paymentType) => {
+                        // Add payment type header (only if not hiding grouping)
+                        if (!hidePaymentTypeGrouping) {
+                          rows.push(
+                            <TableRow
+                              key={`payment-type-${paymentType}`}
+                              className="bg-transparent"
+                            >
+                              <TableCell
+                                colSpan={3}
+                                className="text-left font-semibold capitalize bg-gray-50"
+                              >
+                                {t(paymentType)}
+                              </TableCell>
+                            </TableRow>,
+                          );
+                        }
+
+                        const paymentsOfType: PaymentReconciliationRead[] =
+                          paymentGroups[paymentType] ?? [];
+                        paymentsOfType.forEach(
+                          (payment: PaymentReconciliationRead) => {
+                            rows.push(
+                              <TableRow
+                                key={payment.id}
+                                className="bg-transparent hover:bg-transparent"
+                              >
+                                <TableCell>
+                                  {payment.payment_datetime
+                                    ? formatDateTime(
+                                        payment.payment_datetime,
+                                        "DD-MM-YY",
+                                      )
+                                    : "-"}
+                                </TableCell>
+                                {hidePaymentTypeGrouping && (
+                                  <TableCell className="text-left capitalize">
+                                    {t(payment.reconciliation_type)}
+                                  </TableCell>
+                                )}
+                                <TableCell>
+                                  {paymentmethodMap[payment.method]}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <MonetaryDisplay amount={payment.amount} />
+                                </TableCell>
+                              </TableRow>,
+                            );
+                          },
+                        );
+
+                        // Add payment type subtotal (only if not hiding grouping)
+                        if (!hidePaymentTypeGrouping) {
+                          const typeTotal = paymentsOfType
+                            .reduce(
+                              (
+                                sum: number,
+                                payment: PaymentReconciliationRead,
+                              ) => sum + Number(payment.amount ?? 0),
+                              0,
+                            )
+                            .toFixed(2);
+                          rows.push(
+                            <TableRow
+                              key={`subtotal-${paymentType}`}
+                              className="font-semibold bg-gray-50"
+                            >
+                              <TableCell
+                                colSpan={2}
+                                className="text-right pr-2"
+                              >
+                                {t("total")}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <MonetaryDisplay amount={typeTotal} />
+                              </TableCell>
+                            </TableRow>,
+                          );
+                        }
+                      });
+
+                      // Add grand total
+                      rows.push(
+                        <TableRow
+                          key="grand-total"
+                          className="bg-muted/30 font-semibold"
+                        >
+                          <TableCell
+                            colSpan={hidePaymentTypeGrouping ? 3 : 2}
+                            className="text-right pr-2"
+                          >
+                            {t("total_paid")}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <MonetaryDisplay
+                              amount={validPayments
+                                .reduce(
+                                  (sum, payment) =>
+                                    sum + Number(payment.amount ?? 0),
+                                  0,
+                                )
+                                .toFixed(2)}
+                            />
+                          </TableCell>
+                        </TableRow>,
+                      );
+
+                      return rows;
+                    })()}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          )}
+
+          {/* Account Summary Section */}
+          {account && (
+            <div className="overflow-hidden border rounded-md border-gray-200 mt-8">
+              <Table className="w-full border-0">
+                <TableHeader>
+                  <TableRow className="bg-gray-50 divide-x">
+                    <TableHead className="text-center font-bold">
+                      {t("billed_gross")}
+                    </TableHead>
+                    <TableHead className="text-center font-bold">
+                      {t("total_paid")}
+                    </TableHead>
+                    <TableHead className="text-center font-bold">
+                      {t("amount_due")}
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow className="bg-transparent hover:bg-transparent divide-x">
+                    <TableCell className="text-center">
+                      <MonetaryDisplay amount={account.total_gross} />
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <MonetaryDisplay amount={account.total_paid} />
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <MonetaryDisplay amount={account.total_balance} />
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
             </div>
           )}
         </div>
