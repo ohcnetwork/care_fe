@@ -447,7 +447,7 @@ export function MedicationRequestQuestion({
         confirmText={t("remove")}
         variant="destructive"
       />
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap">
         <QuestionLabel question={question} />
         <HistoricalRecordSelector<
           MedicationRequestRead | MedicationStatementRead
