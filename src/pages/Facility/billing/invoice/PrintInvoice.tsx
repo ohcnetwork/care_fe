@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/table";
 
 import { cn } from "@/lib/utils";
-import { paymentmethodMap } from "@/pages/Facility/billing/paymentReconciliation/PaymentsData";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
@@ -31,6 +30,7 @@ import {
 } from "@/types/billing/chargeItem/chargeItem";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
+import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import { getPartialId } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
@@ -518,7 +518,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                             : "-"}
                         </TableCell>
                         <TableCell className={cn(tableCellClass, "text-left")}>
-                          {paymentmethodMap[payment.method]}
+                          {PAYMENT_RECONCILIATION_METHOD_MAP[payment.method]}
                         </TableCell>
                         <TableCell className={tableCellClass}>
                           {payment.reference_number}

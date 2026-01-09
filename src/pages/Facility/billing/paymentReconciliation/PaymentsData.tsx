@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { EyeIcon } from "lucide-react";
 import { Link } from "raviger";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -14,12 +14,10 @@ import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import {
@@ -36,14 +34,23 @@ import useFilters from "@/hooks/useFilters";
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import query from "@/Utils/request/query";
+import UserSelector from "@/components/Common/UserSelector";
+import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import {
+  paymentMethodFilter,
+  paymentStatusFilter,
+  paymentTypeFilter,
+} from "@/components/ui/multi-filter/filterConfigs";
+import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
+import {
+  PAYMENT_RECONCILIATION_METHOD_MAP,
   PAYMENT_RECONCILIATION_STATUS_COLORS,
-  PaymentReconciliationPaymentMethod,
   PaymentReconciliationRead,
-  PaymentReconciliationStatus,
   PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import { UserReadMinimal } from "@/types/user/user";
+import userApi from "@/types/user/userApi";
 
 const typeMap: Record<PaymentReconciliationType, string> = {
   payment: "Payment",
@@ -58,19 +65,6 @@ const SORT_OPTIONS = {
   created_date: "sort_by_oldest_created",
 };
 
-export const paymentmethodMap: Record<
-  PaymentReconciliationPaymentMethod,
-  string
-> = {
-  cash: "Cash",
-  ccca: "Credit Card",
-  cchk: "Credit Check",
-  cdac: "Credit Account",
-  chck: "Check",
-  ddpo: "Direct Deposit",
-  debc: "Debit Card",
-};
-
 export default function PaymentsData({
   facilityId,
   accountId,
@@ -79,6 +73,9 @@ export default function PaymentsData({
   accountId?: string;
 }) {
   const { t } = useTranslation();
+  const [createdBy, setCreatedBy] = useState<UserReadMinimal | undefined>(
+    undefined,
+  );
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: RESULTS_PER_PAGE_LIMIT,
     disableCache: true,
@@ -87,6 +84,28 @@ export default function PaymentsData({
   useEffect(() => {
     updateQuery({ ordering: "-payment_datetime" });
   }, []);
+
+  // Resolve created_by_username from URL to user object
+  const { data: selectedUser } = useQuery({
+    queryKey: ["user", qParams.created_by_username],
+    queryFn: query(userApi.get, {
+      pathParams: { username: qParams.created_by_username },
+    }),
+    enabled: !!qParams.created_by_username && !createdBy,
+  });
+
+  useEffect(() => {
+    if (selectedUser && qParams.created_by_username) {
+      setCreatedBy(selectedUser);
+      updateQuery({ created_by: selectedUser.id });
+    }
+  }, [selectedUser]);
+
+  useEffect(() => {
+    if (createdBy && !qParams.created_by) {
+      setCreatedBy(undefined);
+    }
+  }, [qParams.created_by]);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["payments", accountId, qParams],
@@ -98,92 +117,58 @@ export default function PaymentsData({
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         status: qParams.status,
         reconciliation_type: qParams.reconciliation_type,
+        method: qParams.method,
         ordering: qParams.ordering,
+        created_by: qParams.created_by,
       },
     }),
   });
 
   const payments = (response?.results as PaymentReconciliationRead[]) || [];
 
+  const filters = [
+    paymentStatusFilter("status"),
+    paymentTypeFilter("reconciliation_type"),
+    paymentMethodFilter("method"),
+  ];
+
+  const onFilterUpdate = (query: Record<string, unknown>) => {
+    updateQuery(query);
+  };
+
+  const {
+    selectedFilters,
+    handleFilterChange,
+    handleOperationChange,
+    handleClearAll,
+    handleClearFilter,
+  } = useMultiFilterState(filters, onFilterUpdate, {
+    ...qParams,
+    status: qParams.status ? [qParams.status] : undefined,
+    reconciliation_type: qParams.reconciliation_type
+      ? [qParams.reconciliation_type]
+      : undefined,
+    method: qParams.method ? [qParams.method] : undefined,
+  });
+
   return (
     <>
-      <div className="flex w-full flex-col items-center my-4 gap-2 md:flex-row md:flex-wrap md:gap-y-4 md:justify-start lg:flex-nowrap lg:justify-between">
-        <div className="flex w-full flex-col items-center gap-3 md:flex-row md:flex-wrap md:gap-y-4">
-          <Tabs
-            defaultValue={qParams.status ?? "all"}
-            onValueChange={(value) =>
-              updateQuery({ status: value === "all" ? undefined : value })
-            }
-            className="hidden sm:flex"
-          >
-            <TabsList>
-              <TabsTrigger value="all">{t("all_status")}</TabsTrigger>
-              {Object.values(PaymentReconciliationStatus).map((status) => (
-                <TabsTrigger key={status} value={status}>
-                  {t(status)}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-          <Select
-            defaultValue={qParams.status ?? "all"}
-            onValueChange={(value) =>
-              updateQuery({ status: value === "all" ? undefined : value })
-            }
-          >
-            <SelectTrigger className="sm:hidden border-gray-400 text-gray-950 rounded-sm">
-              <SelectValue placeholder={t("filter_by_status")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="all">{t("all")}</SelectItem>
-                {Object.values(PaymentReconciliationStatus).map((status) => (
-                  <SelectItem key={status} value={status}>
-                    {t(status)}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-
-          <Tabs
-            defaultValue={qParams.reconciliation_type ?? "all"}
-            onValueChange={(value) =>
-              updateQuery({
-                reconciliation_type: value === "all" ? undefined : value,
-              })
-            }
-            className="hidden sm:flex"
-          >
-            <TabsList>
-              <TabsTrigger value="all">{t("all_type")}</TabsTrigger>
-              {Object.values(PaymentReconciliationType).map((type) => (
-                <TabsTrigger key={type} value={type}>
-                  {t(typeMap[type])}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-          <Select
-            defaultValue={qParams.status ?? "all"}
-            onValueChange={(value) =>
-              updateQuery({ status: value === "all" ? undefined : value })
-            }
-          >
-            <SelectTrigger className="sm:hidden border-gray-400 text-gray-950 rounded-sm">
-              <SelectValue placeholder={t("filter_by_type")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="all">{t("all")}</SelectItem>
-                {Object.values(PaymentReconciliationType).map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {t(typeMap[type])}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+      <div className="flex flex-col justify-between gap-3 w-full my-2">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 w-full">
+          <div className="w-full sm:w-fit">
+            <UserSelector
+              selected={createdBy}
+              onChange={(user) => {
+                setCreatedBy(user);
+                updateQuery({
+                  created_by: user.id,
+                  created_by_username: user.username,
+                });
+              }}
+              placeholder={t("filter_by_user")}
+              facilityId={facilityId}
+            />
+          </div>
           <div className="w-full sm:w-fit">
             <Select
               value={qParams.ordering || ""}
@@ -194,7 +179,7 @@ export default function PaymentsData({
               <SelectTrigger className="border-gray-400 text-gray-950 rounded-sm">
                 <SelectValue placeholder={t("sort_by")} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent align="end">
                 {Object.entries(SORT_OPTIONS).map(([value, text]) => (
                   <SelectItem key={text} value={value}>
                     {t(text)}
@@ -203,6 +188,19 @@ export default function PaymentsData({
               </SelectContent>
             </Select>
           </div>
+        </div>
+        <div className="flex flex-col sm:flex-row">
+          <MultiFilter
+            selectedFilters={selectedFilters}
+            onFilterChange={handleFilterChange}
+            onOperationChange={handleOperationChange}
+            onClearAll={handleClearAll}
+            onClearFilter={handleClearFilter}
+            className="flex sm:flex-row flex-wrap sm:items-center"
+            triggerButtonClassName="self-start sm:self-center"
+            clearAllButtonClassName="self-start"
+            facilityId={facilityId}
+          />
         </div>
       </div>
       {isLoading ? (
@@ -278,7 +276,9 @@ export default function PaymentsData({
                     )}
                   </TableCell>
                   <TableCell>{typeMap[payment.reconciliation_type]}</TableCell>
-                  <TableCell>{paymentmethodMap[payment.method]}</TableCell>
+                  <TableCell>
+                    {PAYMENT_RECONCILIATION_METHOD_MAP[payment.method]}
+                  </TableCell>
                   <TableCell>
                     <MonetaryDisplay
                       amount={String(
