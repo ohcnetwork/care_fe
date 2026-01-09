@@ -33,6 +33,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import query from "@/Utils/request/query";
+import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import {
   ServiceRequestApplyActivityDefinitionSpec as BaseServiceRequestApplyActivityDefinitionSpec,
   Intent,
@@ -42,6 +43,7 @@ import {
 } from "@/types/emr/serviceRequest/serviceRequest";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import { Question } from "@/types/questionnaire/question";
 import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
 
 // Extend the base type to use UserReadMinimal for requester
@@ -68,6 +70,7 @@ interface ServiceRequestQuestionProps {
   ) => void;
   disabled?: boolean;
   errors?: QuestionValidationError[];
+  question: Question;
 }
 
 const SERVICE_REQUEST_FIELDS = {
@@ -462,6 +465,7 @@ export function ServiceRequestQuestion({
   facilityId,
   encounterId,
   errors,
+  question,
 }: ServiceRequestQuestionProps) {
   const { t } = useTranslation();
   const currentUser = useAuthUser() as CurrentUserRead;
@@ -631,6 +635,7 @@ export function ServiceRequestQuestion({
 
   return (
     <div className="space-y-4">
+      <QuestionLabel question={question} />
       {serviceRequests.map((serviceRequest, index) => (
         <ServiceRequestForm
           key={`${serviceRequest.service_request.code.code}-${index}`}
