@@ -356,6 +356,27 @@ export const getExistingChargeItemDefinitionSlugs = async (progress?: {
   );
 };
 
+export const getExistingChargeItemDefinitionsByResourceCategorySlug = async (
+  resourceCategorySlug: string,
+  progress?: {
+    tree: ProgressTree;
+    node: ProgressNode;
+  },
+) => {
+  return getExistingPaginatedData<
+    ChargeItemDefinitionBase,
+    ChargeItemDefinitionBase
+  >(
+    `/api/v1/facility/${FACILITY_ID}/charge_item_definition/`,
+    {
+      category: resourceCategorySlug,
+      status: ChargeItemDefinitionStatus.active,
+    },
+    (item) => item,
+    progress,
+  );
+};
+
 export const getExistingProduct = async (progress?: {
   tree: ProgressTree;
   node: ProgressNode;

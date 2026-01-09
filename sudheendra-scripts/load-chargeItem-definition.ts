@@ -10,7 +10,10 @@ import {
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { createHash } from "crypto";
 import dotenv from "dotenv";
-import { getExistingChargeItemDefinitionSlugs } from "sudheendra-scripts/inventory-from-db/utils";
+import {
+  getExistingChargeItemDefinitionsByResourceCategorySlug,
+  getExistingChargeItemDefinitionSlugs,
+} from "sudheendra-scripts/inventory-from-db/utils";
 import {
   createSlug,
   fetchCsvFromGoogleSheet,
@@ -90,7 +93,23 @@ const creatChargeItemDefinition = async (
     const slug = createChargeItemDefinitionSlug(title);
 
     if (existingSlugs.includes(slug)) {
-      console.log(`Skipping "${title}" - already exists with slug: ${slug}`);
+      const response = await request(
+        `/api/v1/facility/${facilityId}/charge_item_definition/${slug}/`,
+        "PUT",
+        {
+          title,
+          slug_value: slug,
+          status: ChargeItemDefinitionStatus.active,
+          category: resourceCategorySlug,
+          price_components: [
+            {
+              monetary_component_type: MonetaryComponentType.base,
+              amount: price,
+            },
+          ],
+        } as ChargeItemDefinitionCreate,
+      );
+      console.log(`Updated charge item definition: ${title}`);
       continue;
     }
 
@@ -117,12 +136,39 @@ const creatChargeItemDefinition = async (
   }
 };
 
+const retireChargeItemDefinition = async (
+  facilityId: string,
+  resourceCategorySlug: string,
+) => {
+  const existingChargeItemDefinitions =
+    await getExistingChargeItemDefinitionsByResourceCategorySlug(
+      resourceCategorySlug,
+    );
+  for (const chargeItemDefinition of existingChargeItemDefinitions) {
+    await request(
+      `/api/v1/facility/${facilityId}/charge_item_definition/${chargeItemDefinition.slug}/`,
+      "PUT",
+      {
+        title: chargeItemDefinition.title,
+        slug_value: chargeItemDefinition.slug_config.slug_value,
+        status: ChargeItemDefinitionStatus.retired,
+        category: resourceCategorySlug,
+        price_components: chargeItemDefinition.price_components,
+      } as ChargeItemDefinitionCreate,
+    );
+    console.log(
+      `Retired charge item definition: ${chargeItemDefinition.title}`,
+    );
+  }
+};
+
 async function main() {
   const { facilityId, googleSheetId, sheetName, sheetTitle } = getConfig();
   const csvData = await fetchCsvFromGoogleSheet(googleSheetId, sheetName);
   const datapoints = transformCsvToObjects(csvData, headerMap);
   await createResourceCategory(facilityId, sheetTitle);
   const resourceCategorySlug = `f-${facilityId}-${createSlug(sheetTitle)}`;
+  await retireChargeItemDefinition(facilityId, resourceCategorySlug);
 
   await creatChargeItemDefinition(facilityId, resourceCategorySlug, datapoints);
 }
