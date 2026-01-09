@@ -2,7 +2,6 @@ import { AppRoutes } from "@/Routers/AppRouter";
 import OrganizationFacilities from "@/pages/Organization/OrganizationFacilities";
 import OrganizationIndex from "@/pages/Organization/OrganizationIndex";
 import OrganizationPatients from "@/pages/Organization/OrganizationPatients";
-import OrganizationServiceAccounts from "@/pages/Organization/OrganizationServiceAccounts";
 import OrganizationUsers from "@/pages/Organization/OrganizationUsers";
 import OrganizationView from "@/pages/Organization/OrganizationView";
 
@@ -14,8 +13,8 @@ const OrganizationRoutes: AppRoutes = {
   "/organization/:id/facilities": ({ id }) => (
     <OrganizationFacilities id={id} />
   ),
-  "/organization/:id/service-accounts": ({ id }) => (
-    <OrganizationServiceAccounts id={id} />
+  "/organization/:id/service_accounts": ({ id }) => (
+    <OrganizationUsers id={id} isServiceAccount={true} />
   ),
   "/organization/:navOrganizationId/children/:id": ({
     navOrganizationId,
@@ -35,12 +34,13 @@ const OrganizationRoutes: AppRoutes = {
   }) => (
     <OrganizationFacilities id={id} navOrganizationId={navOrganizationId} />
   ),
-  "/organization/:navOrganizationId/children/:id/service-accounts": ({
+  "/organization/:navOrganizationId/children/:id/service_accounts": ({
     navOrganizationId,
     id,
   }) => (
-    <OrganizationServiceAccounts
+    <OrganizationUsers
       id={id}
+      isServiceAccount={true}
       navOrganizationId={navOrganizationId}
     />
   ),

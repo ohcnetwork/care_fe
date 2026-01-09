@@ -27,9 +27,14 @@ import OrganizationLayout from "./components/OrganizationLayout";
 interface Props {
   id: string;
   navOrganizationId?: string;
+  isServiceAccount?: boolean;
 }
 
-export default function OrganizationUsers({ id, navOrganizationId }: Props) {
+export default function OrganizationUsers({
+  id,
+  navOrganizationId,
+  isServiceAccount = false,
+}: Props) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
@@ -93,6 +98,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
         page: qParams.page,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        is_service_account: isServiceAccount,
       },
     }),
     enabled: !!id,
@@ -105,10 +111,12 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
   return (
     <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
       {({ orgPermissions }) => {
-        const { canCreateUser, canManageOrganizationUsers } = getPermissions(
-          hasPermission,
-          orgPermissions,
-        );
+        const {
+          canCreateUser,
+          canManageOrganizationUsers,
+          canCreateServiceAccount,
+          canManageServiceAccount,
+        } = getPermissions(hasPermission, orgPermissions);
         return (
           <div className="space-y-6">
             <div className="justify-between items-center flex flex-wrap">
@@ -121,7 +129,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                 />
               </div>
               <div className="gap-2 flex flex-wrap mt-2">
-                {canCreateUser && (
+                {(canCreateUser || canCreateServiceAccount) && (
                   <AddUserSheet
                     open={openAddUserSheet}
                     setOpen={(open) => {
@@ -131,6 +139,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                       updateQuery({ sheet: "link", username: user.username });
                     }}
                     organizationId={id}
+                    isServiceAccount={isServiceAccount}
                   />
                 )}
                 {canManageOrganizationUsers && (
@@ -141,6 +150,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                       updateQuery({ sheet: open ? "link" : "", username: "" });
                     }}
                     preSelectedUsername={qParams.username}
+                    isServiceAccount={isServiceAccount}
                   />
                 )}
               </div>
@@ -172,7 +182,8 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                       user={userRole.user}
                       roleName={userRole.role.name}
                       actions={
-                        canManageOrganizationUsers && (
+                        canManageOrganizationUsers &&
+                        !isServiceAccount && (
                           <EditUserRoleSheet
                             organizationId={id}
                             userRole={userRole}
@@ -184,6 +195,8 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                           />
                         )
                       }
+                      isServiceAccount={isServiceAccount}
+                      canManageServiceAccount={canManageServiceAccount}
                     />
                   ))
                 )}

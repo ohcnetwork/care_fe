@@ -37,6 +37,7 @@ import {
   OrgType,
 } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
+import { Users } from "lucide-react";
 
 interface Props {
   // NavOrganizationId is used to show the organization switcher in the sidebar, it may not the parent organization
@@ -116,9 +117,9 @@ export default function OrganizationLayout({
         hasPermission("can_read_facility", org.permissions),
     },
     {
-      url: `${baseUrl}/${id}/service-accounts`,
-      name: "Service Accounts",
-      icon: <CareIcon icon="d-people" />,
+      url: `${baseUrl}/${id}/service_accounts`,
+      name: t("service_accounts"),
+      icon: <Users className="size-3" />,
       visibility: hasPermission("can_list_organization_users", org.permissions),
     },
     ...organizationTabs.map((tab) => ({

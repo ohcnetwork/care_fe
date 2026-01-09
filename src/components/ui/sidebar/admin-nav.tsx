@@ -72,11 +72,6 @@ function generateAdminLinks(
       url: `${baseUrl}/apps`,
       icon: <CareIcon icon="l-apps" />,
     },
-    {
-      name: "Service Accounts",
-      url: `${baseUrl}/service_accounts`,
-      icon: <CareIcon icon="l-user-plus" />,
-    },
     ...pluginNavItems,
   ];
 

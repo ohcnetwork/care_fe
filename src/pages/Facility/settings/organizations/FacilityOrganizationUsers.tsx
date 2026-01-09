@@ -29,12 +29,15 @@ interface Props {
   id: string;
   facilityId: string;
   permissions: string[];
+
+  isServiceAccount?: boolean;
 }
 
 export default function FacilityOrganizationUsers({
   id,
   facilityId,
   permissions,
+  isServiceAccount = false,
 }: Props) {
   const [sheetState, setSheetState] = useState<{
     sheet: string;
@@ -62,6 +65,7 @@ export default function FacilityOrganizationUsers({
         search_text: qParams.search || undefined,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
+        is_service_account: isServiceAccount,
       },
     }),
     enabled: !!id,
@@ -73,10 +77,12 @@ export default function FacilityOrganizationUsers({
     return null;
   }
 
-  const { canManageFacilityOrganizationUsers, canCreateUser } = getPermissions(
-    hasPermission,
-    permissions,
-  );
+  const {
+    canManageFacilityOrganizationUsers,
+    canCreateUser,
+    canCreateServiceAccount,
+    canManageServiceAccount,
+  } = getPermissions(hasPermission, permissions);
 
   const { isGeoAdmin } = getPermissions(
     hasPermission,
@@ -101,7 +107,7 @@ export default function FacilityOrganizationUsers({
           />
         </div>
         <div className="flex gap-2 w-full md:w-auto justify-end">
-          {(isGeoAdmin || canCreateUser) && (
+          {(isGeoAdmin || canCreateUser || canCreateServiceAccount) && (
             <AddUserSheet
               open={openAddUserSheet}
               setOpen={(open) => {
@@ -110,6 +116,7 @@ export default function FacilityOrganizationUsers({
               onUserCreated={(user) => {
                 setSheetState({ sheet: "link", username: user.username });
               }}
+              isServiceAccount={isServiceAccount}
             />
           )}
           {(isGeoAdmin || canManageFacilityOrganizationUsers) && (
@@ -124,6 +131,7 @@ export default function FacilityOrganizationUsers({
                 });
               }}
               preSelectedUsername={sheetState.username}
+              isServiceAccount={isServiceAccount}
             />
           )}
         </div>
@@ -150,7 +158,8 @@ export default function FacilityOrganizationUsers({
                   roleName={userRole.role.name}
                   facility={facilityId}
                   actions={
-                    (isGeoAdmin || canManageFacilityOrganizationUsers) && (
+                    (isGeoAdmin || canManageFacilityOrganizationUsers) &&
+                    !isServiceAccount && (
                       <EditFacilityUserRoleSheet
                         facilityId={facilityId}
                         organizationId={id}
@@ -163,6 +172,8 @@ export default function FacilityOrganizationUsers({
                       />
                     )
                   }
+                  isServiceAccount={isServiceAccount}
+                  canManageServiceAccount={canManageServiceAccount}
                 />
               ))
             )}

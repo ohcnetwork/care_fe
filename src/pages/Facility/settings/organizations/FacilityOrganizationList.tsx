@@ -23,7 +23,6 @@ import {
 } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
-import FacilityOrganizationServiceAccounts from "@/pages/Facility/settings/organizations/FacilityOrganizationServiceAccounts";
 import FacilityOrganizationUsers from "./FacilityOrganizationUsers";
 import FacilityOrganizationView from "./FacilityOrganizationView";
 import FacilityOrganizationNavbar from "./components/FacilityOrganizationNavbar";
@@ -106,11 +105,9 @@ export default function FacilityOrganizationList({
       value: "departments",
     },
     {
-      path: organizationId
-        ? `/facility/${facilityId}/settings/departments/${organizationId}/service-accounts`
-        : `/facility/${facilityId}/settings/departments/service-accounts`,
+      path: `/facility/${facilityId}/settings/departments/${organizationId}/service_accounts`,
       title: t("service_accounts"),
-      value: "service-accounts",
+      value: "service_accounts",
     },
   ];
 
@@ -245,25 +242,22 @@ export default function FacilityOrganizationList({
                   </>
                 )}
                 <div className="mt-4">
-                  {currentTab === "users" && organizationId ? (
+                  {(currentTab === "users" ||
+                    currentTab === "service_accounts") &&
+                  organizationId ? (
                     <FacilityOrganizationUsers
                       id={organizationId}
                       facilityId={facilityId}
                       permissions={facility?.permissions ?? []}
+                      isServiceAccount={currentTab === "service_accounts"}
                     />
-                  ) : currentTab === "departments" ? (
+                  ) : (
                     <FacilityOrganizationView
                       id={organizationId}
                       facilityId={facilityId}
                       permissions={facility?.permissions ?? []}
                     />
-                  ) : currentTab === "service-accounts" && organizationId ? (
-                    <FacilityOrganizationServiceAccounts
-                      organizationId={organizationId}
-                      facilityId={facilityId}
-                      permissions={facility?.permissions ?? []}
-                    />
-                  ) : null}
+                  )}
                 </div>
               </Page>
             </div>
