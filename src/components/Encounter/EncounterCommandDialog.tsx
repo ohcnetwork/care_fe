@@ -1,3 +1,4 @@
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import {
   CommandDialog,
   CommandEmpty,
@@ -67,7 +68,7 @@ export function EncounterCommandDialog({
 
   const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
 
-  const { data: questionnaires } = useQuery({
+  const { data: questionnaires, isLoading } = useQuery({
     queryKey: ["questionnaires", search, "encounter"],
     queryFn: query.debounced(questionnaireApi.list, {
       queryParams: {
@@ -310,7 +311,14 @@ export function EncounterCommandDialog({
         ],
       },
     ],
-    [t, questionnaireOptions, questionnaires, search, getShortcutDisplay],
+    [
+      t,
+      questionnaireOptions,
+      questionnaires,
+      search,
+      getShortcutDisplay,
+      isLoading,
+    ],
   );
 
   const findRecentActions = useCallback(
@@ -367,7 +375,15 @@ export function EncounterCommandDialog({
           />
         </div>
         <CommandList className="h-[80vh] max-h-[80vh] w-full">
-          <CommandEmpty>{t("no_results")}</CommandEmpty>
+          <CommandEmpty>
+            {isLoading && search.length > 0 ? (
+              <div className="space-y-2">
+                <CardListSkeleton count={3} />
+              </div>
+            ) : (
+              t("no_results")
+            )}
+          </CommandEmpty>
           {encounterActions.map((group) => (
             <div key={group.group}>
               <CommandGroup heading={group.group} className="px-2">

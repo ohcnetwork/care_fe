@@ -110,6 +110,8 @@ test.describe("Admin Roles Management", () => {
       .getByRole("textbox", { name: /Search Roles/i })
       .fill(updatedRoleName);
     await expect(tableBody).toContainText(updatedRoleName);
+
+    // verify unchecked permission
     await page.getByRole("button", { name: /Edit/i }).click();
     await page.getByPlaceholder("Search permissions").fill(uncheckedPermission);
     await page
