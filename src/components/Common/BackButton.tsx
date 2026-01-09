@@ -1,15 +1,16 @@
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
 import useAppHistory from "@/hooks/useAppHistory";
-import { t } from "i18next";
 
 type BackButtonProps = {
   to?: string;
 } & React.ComponentProps<typeof Button>;
 
 export default function BackButton({ to, ...props }: BackButtonProps) {
+  const { t } = useTranslation();
   const { history } = useAppHistory();
 
   const backUrl = history[1] || to;
@@ -19,14 +20,8 @@ export default function BackButton({ to, ...props }: BackButtonProps) {
   }
 
   return (
-    <Button
-      variant="outline"
-      data-shortcut-id="go-back"
-      asChild
-      {...props}
-      aria-label={t("back_button")}
-    >
-      <Link basePath="/" href={backUrl}>
+    <Button variant="outline" data-shortcut-id="go-back" asChild {...props}>
+      <Link basePath="/" href={backUrl} aria-label={t("back_to_previous_page")}>
         {props.children}
       </Link>
     </Button>
