@@ -266,7 +266,7 @@ export default function LocationForm({
 
   if (locationId && isLoading) {
     return (
-      <output className="p-4" aria-live="polite" aria-label={t("loading")}>
+      <output className="p-4">
         <span className="sr-only">{t("loading")}</span>
         <FormSkeleton rows={6} />
       </output>
