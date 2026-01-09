@@ -411,7 +411,7 @@ export default function QuestionnaireEditor({
   const { mutate: importQuestionnaire, isPending: isImporting } = useMutation({
     mutationFn: async (url: string) => {
       const response = await fetch(url);
-      if (!response.ok) throw new Error("Failed to fetch questionnaire");
+      if (!response.ok) throw new Error("Unable to fetch the questionnaire");
       return response.json();
     },
     onSuccess: (data) => {
