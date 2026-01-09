@@ -20,6 +20,7 @@ import {
   FilterValues,
   Operation,
   createFilterConfig,
+  getVariantColorClasses,
 } from "./utils/Utils";
 
 import {
@@ -221,7 +222,7 @@ export const accountBillingStatusFilter = (
     Object.values(AccountBillingStatus).map((value) => ({
       value: value,
       label: t(value),
-      color: ACCOUNT_BILLING_STATUS_COLORS[value],
+      color: getVariantColorClasses(ACCOUNT_BILLING_STATUS_COLORS[value]),
     })),
     {
       renderSelected: (selected: FilterValues) => {
@@ -243,7 +244,6 @@ export const accountBillingStatusFilter = (
       getOperations: () => customOperations || [{ label: "is" }],
       mode,
       icon: <CircleDashed className="w-4 h-4" />,
-      showColorIndicators: false,
     },
   );
 
@@ -259,7 +259,7 @@ export const accountStatusFilter = (
     Object.values(AccountStatus).map((value) => ({
       value: value,
       label: t(value),
-      color: ACCOUNT_STATUS_COLORS[value],
+      color: getVariantColorClasses(ACCOUNT_STATUS_COLORS[value]),
     })),
     {
       renderSelected: (selected: FilterValues) => {
@@ -280,7 +280,6 @@ export const accountStatusFilter = (
       getOperations: () => customOperations || [{ label: "is" }],
       mode,
       icon: <CircleDashed className="w-4 h-4" />,
-      showColorIndicators: false,
     },
   );
 
@@ -296,7 +295,7 @@ export const invoiceStatusFilter = (
     Object.values(InvoiceStatus).map((value) => ({
       value: value,
       label: t(value),
-      color: INVOICE_STATUS_COLORS[value],
+      color: getVariantColorClasses(INVOICE_STATUS_COLORS[value]),
     })),
     {
       renderSelected: (selected: FilterValues) => {
@@ -317,7 +316,6 @@ export const invoiceStatusFilter = (
       getOperations: () => customOperations || [{ label: "is" }],
       mode,
       icon: <CircleDashed className="size-4" />,
-      showColorIndicators: false,
     },
   );
 
@@ -333,7 +331,9 @@ export const paymentStatusFilter = (
     Object.values(PaymentReconciliationStatus).map((value) => ({
       value: value,
       label: t(value),
-      color: PAYMENT_RECONCILIATION_STATUS_COLORS[value],
+      color: getVariantColorClasses(
+        PAYMENT_RECONCILIATION_STATUS_COLORS[value],
+      ),
     })),
     {
       renderSelected: (selected: FilterValues) => {
@@ -412,7 +412,10 @@ export const paymentMethodFilter = (
       renderSelected: (selected: FilterValues) => {
         const selectedStatus = selected as string[];
         if (typeof selectedStatus[0] === "string") {
-          const option = selectedStatus[0];
+          const option =
+            PAYMENT_RECONCILIATION_METHOD_MAP[
+              selectedStatus[0] as PaymentReconciliationPaymentMethod
+            ];
           return (
             <GenericSelectedBadge
               selectedValue={option}
