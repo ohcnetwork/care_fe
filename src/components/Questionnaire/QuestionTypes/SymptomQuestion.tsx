@@ -799,7 +799,7 @@ export function SymptomQuestion({
 
   return (
     <div className="space-y-2">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap">
         <QuestionLabel question={question} />
         <HistoricalRecordSelector<SymptomRequest>
           title={t("past_symptoms")}
