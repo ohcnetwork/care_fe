@@ -332,7 +332,11 @@ export function createSlug(name: string): string {
 }
 
 // Used for AD, Observation, Specimen and, Charge Item
-export function generateHashSlug(name: string): string {
+export function generateHashSlug(
+  name: string,
+  maxLength = 25,
+  disablePadding = false,
+): string {
   if (!name) {
     return "";
   }
@@ -342,12 +346,12 @@ export function generateHashSlug(name: string): string {
   slug = slug.replace(/\s+/g, "-");
   slug = slug.replace(/-+/g, "-");
   slug = slug.trim();
-  slug = slug.slice(0, 25);
+  slug = slug.slice(0, maxLength);
 
-  if (slug.length < 25) {
+  if (slug.length < maxLength && !disablePadding) {
     const crypto = require("crypto");
     const hashSuffix = crypto.createHash("sha256").update(slug).digest("hex");
-    const neededHash = 25 - slug.length - 1;
+    const neededHash = maxLength - slug.length - 1;
     slug = slug + "-" + hashSuffix.slice(0, neededHash);
   }
 
@@ -1060,14 +1064,12 @@ export function processApiResults<T>(
 // Function to handle "already exists" errors in catch blocks
 export function handleApiError(error: any, item: any): ApiResult {
   if (error.isAlreadyExists) {
-    //console.log(`Already exists: ${item.title || item.slug} (${item.slug})`);
     return {
       success: true,
       data: { message: "Already exists" },
       item,
     };
   } else {
-    //console.log(`Error: ${JSON.stringify(error)}`);
     return {
       success: false,
       error,
@@ -1681,7 +1683,6 @@ export async function validateRowCodes(
       //const displayValue = row[displayField] || rule.defaultDisplay;
       const regexMatch = codeValue?.match(/[0-9]{6,18}/g);
       const cleanedCodes = regexMatch?.join(",");
-      //console.log(fieldName, codeValue, systemValue, cleanedCodes);
 
       // Store the original cleaned codes for this row
       if (cleanedCodes) {
@@ -1701,8 +1702,6 @@ export async function validateRowCodes(
       }
     }
 
-    //console.log(codesToValidate);
-
     // Batch validate codes for this rule
     if (codesToValidate.length > 0) {
       logger(
@@ -1712,16 +1711,12 @@ export async function validateRowCodes(
         ),
       );
 
-      //console.log(codesToValidate);
-
       const validationResults = await batchValidateAndSubstituteCodes(
         codesToValidate,
         `${config.apiBaseUrl}${rule.valuesetUrl}`,
         config,
         batchSize,
       );
-
-      //console.log("results", validationResults);
 
       // Apply validation results - loop through each row that had codes
       for (let i = 0; i < validatedRows.length; i++) {
@@ -1735,6 +1730,7 @@ export async function validateRowCodes(
         const originalCodesArray = originalCleaned.split(",");
         const validatedCodesArray: string[] = [];
         const invalidSubstitutions: string[] = [];
+        const rowSlug = generateHashSlug(normalizeTitle(row.title));
 
         // Look up each code's validation result
         for (const originalCode of originalCodesArray) {
@@ -1750,8 +1746,8 @@ export async function validateRowCodes(
         // Build the substitution messages
         if (invalidSubstitutions.length > 0) {
           substitutions.set(
-            `${row.slug}.${rule.rowPrefix}`,
-            invalidSubstitutions.join(", "),
+            `${rowSlug}`,
+            `${rule.rowPrefix}: ${invalidSubstitutions.join(", ")}`,
           );
         }
 
@@ -1780,12 +1776,13 @@ export async function validateRowCodes(
     // Handle empty codes by setting defaults
     for (let i = 0; i < validatedRows.length; i++) {
       const row = validatedRows[i];
+      const rowSlug = generateHashSlug(normalizeTitle(row.title));
       const codeValue = row[`validated_${fieldName}`];
 
       if (!codeValue || codeValue.trim() === "") {
         substitutions.set(
-          `${row.slug}.${rule.rowPrefix}`,
-          `(empty) -> ${rule.defaultCode}`,
+          `${rowSlug}`,
+          `(empty) ${rule.rowPrefix} -> ${rule.defaultCode}`,
         );
 
         validatedRows[i] = {
@@ -1797,9 +1794,6 @@ export async function validateRowCodes(
       }
     }
   }
-
-  //console.log(validatedRows);
-  //console.log(substitutions);
 
   return { validatedRows, substitutions };
 }

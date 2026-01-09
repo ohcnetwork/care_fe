@@ -577,33 +577,17 @@ async function main(configOverride?: Partial<BaseConfig>) {
       });
     });
 
-    // Add substitution data to each row
-    const outputDataWithSubstitutions = processedRows.map((row) => {
-      const rowWithSubstitutions: Record<string, any> = { ...row };
-
-      // Add substitution columns for each validation rule
-      OBSERVATION_VALIDATION_RULES.forEach((rule) => {
-        const substitutionKey = `${rule.rowPrefix}_Substitution`;
-        rowWithSubstitutions[substitutionKey] =
-          substitutions.get(`${row.slug_value}.${rule.rowPrefix}`) || "";
-      });
-
-      return rowWithSubstitutions;
-    });
-
     // Create custom headers with substitution columns
     const customHeaders = [
       "slug_value",
       "title",
       "status",
       "errors",
-      ...OBSERVATION_VALIDATION_RULES.map(
-        (rule) => `${rule.rowPrefix}_Substitution`,
-      ),
+      "code_substitution",
     ];
 
     await writeOutputCsv(
-      outputDataWithSubstitutions,
+      processedRows as any,
       finalConfig.outputFile,
       customHeaders,
     );

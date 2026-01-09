@@ -148,11 +148,7 @@ const ACTIVITY_VALIDATION_RULES: ValidationRule[] = [
 ];
 
 // Helper function to create ActivityData from a row with validated code
-function createActivityDataFromRow(
-  row: Record<string, string>,
-  validatedCode: Code | null,
-  config: BaseConfig,
-): ActivityData {
+function createActivityDataFromRow(row: Record<string, string>): ActivityData {
   // Create code from validated row data
   const finalCode = {
     system: row.code_system || ACTIVITY_VALIDATION_RULES[0].defaultSystem,
@@ -196,15 +192,32 @@ function createActivityDataFromRow(
     }
   }
 
+  let classification: Classification = Classification.laboratory;
+  switch (row.classification.toLowerCase()) {
+    case "laboratory":
+      classification = Classification.laboratory;
+      break;
+    case "imaging":
+      classification = Classification.imaging;
+      break;
+    case "surgical procedure":
+      classification = Classification.surgical_procedure;
+      break;
+    case "counselling":
+      classification = Classification.counselling;
+      break;
+    default:
+      classification = Classification.laboratory;
+      break;
+  }
+
   return {
     title: row.title,
     slug_value: generateHashSlug(normalizeTitle(row.title)),
     description: row.description,
     usage: row.usage || "",
     status: (row.status as Status) || Status.active,
-    classification:
-      (row.classification.toLowerCase() as Classification) ||
-      Classification.laboratory,
+    classification: classification,
     kind: Kind.service_request,
     category: row.category || "laboratory",
     observations: row.observation_slugs
@@ -254,7 +267,7 @@ async function processCsvData(
   const results: ActivityData[] = [];
   for (const row of validatedRows) {
     try {
-      const activityData = createActivityDataFromRow(row, null, config);
+      const activityData = createActivityDataFromRow(row);
       results.push(activityData);
     } catch (error: any) {
       logger(
@@ -467,7 +480,6 @@ async function main(configOverride?: Partial<BaseConfig>) {
       const missingChargeItems = item.chargeItems.filter(
         (ci) => !availableSlugs.chargeItems.includes(ci),
       );
-      console.log(item.chargeItems.slice(0, 2));
 
       if (missingObservations.length > 0) {
         warnings.push(
@@ -590,26 +602,11 @@ async function main(configOverride?: Partial<BaseConfig>) {
         ...row,
         Status: result?.success ? "Success" : "Failed",
         Errors: errorMessage,
-        Code_Substitution: row.Code_Substitution, // Preserve substitution info
       };
     });
 
     // Write output CSV with dynamic substitution columns
     logger(colorize("Writing output CSV...", 0));
-
-    // Add substitution data to each row
-    const outputDataWithSubstitutions = outputData.map((row) => {
-      const rowWithSubstitutions: Record<string, any> = { ...row };
-
-      // Add substitution columns for each validation rule
-      ACTIVITY_VALIDATION_RULES.forEach((rule) => {
-        const substitutionKey = `${rule.rowPrefix}_Substitution`;
-        rowWithSubstitutions[substitutionKey] =
-          substitutions.get(`${row.Slug_value}.${rule.rowPrefix}`) || "";
-      });
-
-      return rowWithSubstitutions;
-    });
 
     // Create custom headers with substitution columns
     const customHeaders = [
@@ -617,16 +614,10 @@ async function main(configOverride?: Partial<BaseConfig>) {
       "slug_value",
       "Status",
       "Errors",
-      ...ACTIVITY_VALIDATION_RULES.map(
-        (rule) => `${rule.rowPrefix}_Substitution`,
-      ),
+      "code_substitution",
     ];
 
-    await writeOutputCsv(
-      outputDataWithSubstitutions,
-      finalConfig.outputFile,
-      customHeaders,
-    );
+    await writeOutputCsv(outputData, finalConfig.outputFile, customHeaders);
 
     // Process and return results
     return processApiResults(allResults, "activity");
