@@ -667,27 +667,11 @@ export async function clickTabOrMenuItem(
   }
 
   // If not visible as a tab, it might be in a dropdown menu
-  // Look for a menu trigger button (usually has a chevron or more icon)
-  // Try multiple strategies to find the menu trigger
-  let menuTrigger = page
-    .locator("button")
-    .filter({ hasText: /more|menu|⋯/i })
+  // Look for a menu trigger button using the data-slot attribute
+  const menuTrigger = page
+    .locator('[data-slot="dropdown-menu-trigger"]')
     .first();
-
-  let isMenuTriggerVisible = await menuTrigger.isVisible().catch(() => false);
-
-  if (!isMenuTriggerVisible) {
-    // Try finding button with chevron/more icons
-    menuTrigger = page
-      .locator("button")
-      .filter({
-        has: page.locator(
-          "svg.lucide-more-horizontal, svg.lucide-chevron-down",
-        ),
-      })
-      .first();
-    isMenuTriggerVisible = await menuTrigger.isVisible().catch(() => false);
-  }
+  const isMenuTriggerVisible = await menuTrigger.isVisible().catch(() => false);
 
   if (isMenuTriggerVisible) {
     await menuTrigger.click();
@@ -699,15 +683,7 @@ export async function clickTabOrMenuItem(
     return;
   }
 
-  // Fallback: try to find as menuitem directly (menu might already be open)
-  const menuItem = page.getByRole("menuitem", { name: tabName });
-  const isMenuItemVisible = await menuItem.isVisible().catch(() => false);
-
-  if (isMenuItemVisible) {
-    await menuItem.click();
-    return;
-  }
-
-  // If all else fails, try clicking by text (less reliable but works as fallback)
-  await page.getByText(tabName).click();
+  throw new Error(
+    `Tab "${tabName}" not found as visible tab or in dropdown menu`,
+  );
 }
