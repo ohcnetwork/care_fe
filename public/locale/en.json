@@ -5079,7 +5079,7 @@
   "specimen_generate_failed": "Failed to generate barcode",
   "specimen_generating": "Generating barcode...",
   "specimen_history": "Specimen History",
-  "specimen_history_empty_description": "No specimens have been recorded for this patient yet.",
+  "specimen_history_empty_description": "No specimens have been recorded for this service request yet.",
   "specimen_id": "Specimen ID",
   "specimen_identification": "Sample Identification",
   "specimen_not_found": "Specimen not found",
