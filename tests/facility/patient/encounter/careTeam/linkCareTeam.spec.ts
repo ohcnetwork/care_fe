@@ -17,9 +17,10 @@ const openCareTeamDialog = async (page: Page) => {
 test.describe("Manage care team for an encounter", () => {
   let facilityId: string;
   let selectedRole: string;
+  let selectedUsername: string;
 
-  const username = "care-fac-admin";
-  const roles = [
+  const TEST_USERNAMES = ["care-admin", "care-fac-admin", "administrator_2_0"];
+  const TEST_ROLES = [
     "Primary healthcare service",
     "Acupuncturist",
     "Orthotist and prosthetist",
@@ -27,7 +28,8 @@ test.describe("Manage care team for an encounter", () => {
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
-    selectedRole = faker.helpers.arrayElement(roles);
+    selectedUsername = faker.helpers.arrayElement(TEST_USERNAMES);
+    selectedRole = faker.helpers.arrayElement(TEST_ROLES);
     const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
     const createdDateBefore = format(new Date(), "yyyy-MM-dd");
     await page.goto(
@@ -41,10 +43,22 @@ test.describe("Manage care team for an encounter", () => {
       await test.step("Cleanup: Remove added member", async () => {
         try {
           const dialog = page.getByRole("dialog", { name: "Manage Care Team" });
-          const removeButton = dialog
+
+          const isDialogVisible = await dialog.isVisible().catch(() => false);
+          if (!isDialogVisible) {
+            return;
+          }
+
+          const removableMembers = dialog
             .locator("button")
-            .filter({ has: page.locator("svg.lucide-x") })
-            .last();
+            .filter({ has: page.locator("svg.lucide-x") });
+          const removableCount = await removableMembers.count();
+
+          if (removableCount === 0) {
+            return;
+          }
+
+          const removeButton = removableMembers.last();
           await removeButton.click();
           await page.getByRole("button", { name: "Remove" }).click();
           await expectToast(page, /removed successfully/i);
@@ -72,8 +86,8 @@ test.describe("Manage care team for an encounter", () => {
           .filter({ hasText: "Select Member" });
         await expect(memberSelector).toBeEnabled();
         await memberSelector.click();
-        await page.getByPlaceholder("Search").fill(username);
-        await page.getByText(username).click();
+        await page.getByPlaceholder("Search").fill(selectedUsername);
+        await page.getByText(selectedUsername).click();
       });
 
       await test.step("Select role", async () => {
@@ -106,8 +120,8 @@ test.describe("Manage care team for an encounter", () => {
           .getByRole("combobox")
           .filter({ hasText: "Select Member" });
         await memberSelector.click();
-        await page.getByPlaceholder("Search").fill(username);
-        await page.getByText(username).click();
+        await page.getByPlaceholder("Search").fill(selectedUsername);
+        await page.getByText(selectedUsername).click();
 
         await page
           .getByRole("combobox")
@@ -125,8 +139,8 @@ test.describe("Manage care team for an encounter", () => {
           .getByRole("combobox")
           .filter({ hasText: "Select Member" });
         await memberSelector.click();
-        await page.getByPlaceholder("Search").fill(username);
-        await page.getByText(username).click();
+        await page.getByPlaceholder("Search").fill(selectedUsername);
+        await page.getByText(selectedUsername).click();
 
         await page
           .getByRole("combobox")
@@ -168,8 +182,8 @@ test.describe("Manage care team for an encounter", () => {
         .filter({ hasText: "Select Member" });
       await expect(memberSelector).toBeEnabled();
       await memberSelector.click();
-      await page.getByPlaceholder("Search").fill(username);
-      await page.getByText(username).click();
+      await page.getByPlaceholder("Search").fill(selectedUsername);
+      await page.getByText(selectedUsername).click();
 
       await page
         .getByRole("combobox")
@@ -190,7 +204,7 @@ test.describe("Manage care team for an encounter", () => {
       await openCareTeamDialog(page);
 
       const dialog = page.getByRole("dialog", { name: "Manage Care Team" });
-      await expect(dialog.getByText(username)).not.toBeVisible();
+      await expect(dialog.getByText(selectedUsername)).not.toBeVisible();
       await expect(dialog.getByText(selectedRole)).not.toBeVisible();
     });
   });
@@ -212,8 +226,8 @@ test.describe("Manage care team for an encounter", () => {
         .filter({ hasText: "Select Member" });
       await expect(memberSelector).toBeEnabled();
       await memberSelector.click();
-      await page.getByPlaceholder("Search").fill(username);
-      await page.getByText(username).click();
+      await page.getByPlaceholder("Search").fill(selectedUsername);
+      await page.getByText(selectedUsername).click();
     });
 
     await test.step("Verify Add button is still disabled", async () => {
