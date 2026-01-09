@@ -66,9 +66,11 @@ export const PrintChargeItems = (props: {
   const { t } = useTranslation();
   const [hideCategories, setHideCategories] = useState(false);
   const [hidePaymentTypeGrouping, setHidePaymentTypeGrouping] = useState(false);
+  const [summaryMode, setSummaryMode] = useState(false);
 
   const hideCategoryLabel = `${t("hide_category_grouping")}`;
   const hidePaymentTypeLabel = `${t("hide_payment_type_grouping")}`;
+  const summaryLabel = `${t("summary")}`;
 
   const { data: account } = useQuery({
     queryKey: ["account", accountId],
@@ -132,29 +134,47 @@ export const PrintChargeItems = (props: {
       <div className="no-print mb-4 flex justify-between items-center gap-2 p-4 bg-gray-50  border rounded-md border-gray-200">
         <div className="gap-2 flex items-center">
           <Switch
-            id="hide-categories"
-            checked={hideCategories}
-            onCheckedChange={setHideCategories}
+            id="summary-mode"
+            checked={summaryMode}
+            onCheckedChange={setSummaryMode}
           />
-          <label htmlFor="hide-categories" className="cursor-pointer text-sm">
-            {hideCategoryLabel}
+          <label htmlFor="summary-mode" className="cursor-pointer text-sm">
+            {summaryLabel}
           </label>
         </div>
 
-        {payments.length > 0 && (
-          <div className="gap-2 flex items-center">
-            <Switch
-              id="hide-payment-type-grouping"
-              checked={hidePaymentTypeGrouping}
-              onCheckedChange={setHidePaymentTypeGrouping}
-            />
-            <label
-              htmlFor="hide-payment-type-grouping"
-              className="cursor-pointer text-sm"
-            >
-              {hidePaymentTypeLabel}
-            </label>
-          </div>
+        {!summaryMode && (
+          <>
+            <div className="gap-2 flex items-center">
+              <Switch
+                id="hide-categories"
+                checked={hideCategories}
+                onCheckedChange={setHideCategories}
+              />
+              <label
+                htmlFor="hide-categories"
+                className="cursor-pointer text-sm"
+              >
+                {hideCategoryLabel}
+              </label>
+            </div>
+
+            {payments.length > 0 && (
+              <div className="gap-2 flex items-center">
+                <Switch
+                  id="hide-payment-type-grouping"
+                  checked={hidePaymentTypeGrouping}
+                  onCheckedChange={setHidePaymentTypeGrouping}
+                />
+                <label
+                  htmlFor="hide-payment-type-grouping"
+                  className="cursor-pointer text-sm"
+                >
+                  {hidePaymentTypeLabel}
+                </label>
+              </div>
+            )}
+          </>
         )}
       </div>
       <div className="md:p-2 max-w-4xl mx-auto">
@@ -231,22 +251,37 @@ export const PrintChargeItems = (props: {
                 <Table className="w-full">
                   <TableHeader>
                     <TableRow className="bg-transparent hover:bg-transparent border-b-gray-200">
-                      <TableHead className="font-bold">{t("date")}</TableHead>
-                      <TableHead className="font-bold w-24">
-                        {t("invoice_no")}
-                      </TableHead>
-                      <TableHead className="font-bold w-24">
-                        {t("title")}
-                      </TableHead>
-                      <TableHead className="font-bold text-center w-28">
-                        {t("rate")}
-                      </TableHead>
-                      <TableHead className="font-bold text-right w-24">
-                        {t("quantity")}
-                      </TableHead>
-                      <TableHead className="font-bold text-right w-32">
-                        {t("amount")}
-                      </TableHead>
+                      {summaryMode ? (
+                        <>
+                          <TableHead className="font-bold" colSpan={5}>
+                            {t("category")}
+                          </TableHead>
+                          <TableHead className="font-bold text-right w-32">
+                            {t("amount")}
+                          </TableHead>
+                        </>
+                      ) : (
+                        <>
+                          <TableHead className="font-bold">
+                            {t("date")}
+                          </TableHead>
+                          <TableHead className="font-bold w-24">
+                            {t("invoice_no")}
+                          </TableHead>
+                          <TableHead className="font-bold w-24">
+                            {t("title")}
+                          </TableHead>
+                          <TableHead className="font-bold text-center w-28">
+                            {t("rate")}
+                          </TableHead>
+                          <TableHead className="font-bold text-right w-24">
+                            {t("quantity")}
+                          </TableHead>
+                          <TableHead className="font-bold text-right w-32">
+                            {t("amount")}
+                          </TableHead>
+                        </>
+                      )}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -279,98 +314,120 @@ export const PrintChargeItems = (props: {
                       const rows: React.ReactNode[] = [];
 
                       sortedCategories.forEach((categoryTitle) => {
-                        // Add category header (only if not hiding categories)
-                        if (!hideCategories) {
+                        const items: ChargeItemRead[] =
+                          groups[categoryTitle] ?? [];
+                        const categoryTotal = items
+                          .reduce(
+                            (sum: number, item: ChargeItemRead) =>
+                              sum + Number(item.total_price ?? 0),
+                            0,
+                          )
+                          .toFixed(2);
+
+                        if (summaryMode) {
+                          // In summary mode, show only category with total
                           rows.push(
                             <TableRow
                               key={`category-${categoryTitle}`}
-                              className="bg-transparent"
-                            >
-                              <TableCell
-                                colSpan={7}
-                                className="font-semibold capitalize bg-gray-50"
-                              >
-                                {categoryTitle}
-                              </TableCell>
-                            </TableRow>,
-                          );
-                        }
-
-                        const items: ChargeItemRead[] =
-                          groups[categoryTitle] ?? [];
-                        items.forEach((chargeItem: ChargeItemRead) => {
-                          const unitPrice =
-                            chargeItem.unit_price_components.find(
-                              (c) =>
-                                c.monetary_component_type ===
-                                MonetaryComponentType.base,
-                            )?.amount;
-                          rows.push(
-                            <TableRow
-                              key={chargeItem.id}
                               className="bg-transparent hover:bg-transparent"
-                            >
-                              <TableCell>
-                                {formatDateTime(
-                                  chargeItem.created_date,
-                                  "DD/MM/YY",
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                {chargeItem.paid_invoice?.number || "-"}
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex flex-col">
-                                  <span className="font-medium">
-                                    {chargeItem.title}
-                                  </span>
-                                  {chargeItem.description && (
-                                    <span className="text-xs text-gray-600 whitespace-pre-wrap">
-                                      {chargeItem.description}
-                                    </span>
-                                  )}
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <MonetaryDisplay amount={unitPrice} />
-                              </TableCell>
-                              <TableCell className="text-right">
-                                {Math.floor(Number(chargeItem.quantity))}
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <MonetaryDisplay
-                                  amount={chargeItem.total_price}
-                                />
-                              </TableCell>
-                            </TableRow>,
-                          );
-                        });
-
-                        // Add category subtotal (only if not hiding categories)
-                        if (!hideCategories) {
-                          const categoryTotal = items
-                            .reduce(
-                              (sum: number, item: ChargeItemRead) =>
-                                sum + Number(item.total_price ?? 0),
-                              0,
-                            )
-                            .toFixed(2);
-                          rows.push(
-                            <TableRow
-                              key={`subtotal-${categoryTitle}`}
-                              className="font-semibold bg-gray-50"
                             >
                               <TableCell
                                 colSpan={5}
-                                className="text-right pr-2"
+                                className="font-semibold capitalize"
                               >
-                                {t("total")}
+                                {categoryTitle}
                               </TableCell>
-                              <TableCell className="text-right">
+                              <TableCell className="text-right font-semibold">
                                 <MonetaryDisplay amount={categoryTotal} />
                               </TableCell>
                             </TableRow>,
                           );
+                        } else {
+                          // Normal mode - show header, items, and subtotal
+                          // Add category header (only if not hiding categories)
+                          if (!hideCategories) {
+                            rows.push(
+                              <TableRow
+                                key={`category-${categoryTitle}`}
+                                className="bg-transparent"
+                              >
+                                <TableCell
+                                  colSpan={7}
+                                  className="font-semibold capitalize bg-gray-50"
+                                >
+                                  {categoryTitle}
+                                </TableCell>
+                              </TableRow>,
+                            );
+                          }
+
+                          items.forEach((chargeItem: ChargeItemRead) => {
+                            const unitPrice =
+                              chargeItem.unit_price_components.find(
+                                (c) =>
+                                  c.monetary_component_type ===
+                                  MonetaryComponentType.base,
+                              )?.amount;
+                            rows.push(
+                              <TableRow
+                                key={chargeItem.id}
+                                className="bg-transparent hover:bg-transparent"
+                              >
+                                <TableCell>
+                                  {formatDateTime(
+                                    chargeItem.created_date,
+                                    "DD/MM/YY",
+                                  )}
+                                </TableCell>
+                                <TableCell>
+                                  {chargeItem.paid_invoice?.number || "-"}
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">
+                                      {chargeItem.title}
+                                    </span>
+                                    {chargeItem.description && (
+                                      <span className="text-xs text-gray-600 whitespace-pre-wrap">
+                                        {chargeItem.description}
+                                      </span>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <MonetaryDisplay amount={unitPrice} />
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  {Math.floor(Number(chargeItem.quantity))}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <MonetaryDisplay
+                                    amount={chargeItem.total_price}
+                                  />
+                                </TableCell>
+                              </TableRow>,
+                            );
+                          });
+
+                          // Add category subtotal (only if not hiding categories)
+                          if (!hideCategories) {
+                            rows.push(
+                              <TableRow
+                                key={`subtotal-${categoryTitle}`}
+                                className="font-semibold bg-gray-50"
+                              >
+                                <TableCell
+                                  colSpan={5}
+                                  className="text-right pr-2"
+                                >
+                                  {t("total")}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <MonetaryDisplay amount={categoryTotal} />
+                                </TableCell>
+                              </TableRow>,
+                            );
+                          }
                         }
                       });
 
@@ -413,20 +470,33 @@ export const PrintChargeItems = (props: {
                 <Table className="w-full">
                   <TableHeader>
                     <TableRow className="bg-gray-50">
-                      <TableHead className="font-bold w-32">
-                        {t("date")}
-                      </TableHead>
-                      {hidePaymentTypeGrouping && (
-                        <TableHead className="font-bold w-32">
-                          {t("type")}
-                        </TableHead>
+                      {summaryMode ? (
+                        <>
+                          <TableHead className="font-bold" colSpan={2}>
+                            {t("type")}
+                          </TableHead>
+                          <TableHead className="font-bold text-right w-32">
+                            {t("amount")}
+                          </TableHead>
+                        </>
+                      ) : (
+                        <>
+                          <TableHead className="font-bold w-32">
+                            {t("date")}
+                          </TableHead>
+                          {hidePaymentTypeGrouping && (
+                            <TableHead className="font-bold w-32">
+                              {t("type")}
+                            </TableHead>
+                          )}
+                          <TableHead className="font-bold w-32">
+                            {t("method")}
+                          </TableHead>
+                          <TableHead className="font-bold text-right w-32">
+                            {t("amount")}
+                          </TableHead>
+                        </>
                       )}
-                      <TableHead className="font-bold w-32">
-                        {t("method")}
-                      </TableHead>
-                      <TableHead className="font-bold text-right w-32">
-                        {t("amount")}
-                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -455,83 +525,103 @@ export const PrintChargeItems = (props: {
                       const rows: React.ReactNode[] = [];
 
                       sortedTypes.forEach((paymentType) => {
-                        // Add payment type header (only if not hiding grouping)
-                        if (!hidePaymentTypeGrouping) {
+                        const paymentsOfType: PaymentReconciliationRead[] =
+                          paymentGroups[paymentType] ?? [];
+                        const typeTotal = paymentsOfType
+                          .reduce(
+                            (sum: number, payment: PaymentReconciliationRead) =>
+                              sum + Number(payment.amount ?? 0),
+                            0,
+                          )
+                          .toFixed(2);
+
+                        if (summaryMode) {
+                          // In summary mode, show only payment type with total
                           rows.push(
                             <TableRow
                               key={`payment-type-${paymentType}`}
-                              className="bg-transparent"
-                            >
-                              <TableCell
-                                colSpan={3}
-                                className="text-left font-semibold capitalize bg-gray-50"
-                              >
-                                {t(paymentType)}
-                              </TableCell>
-                            </TableRow>,
-                          );
-                        }
-
-                        const paymentsOfType: PaymentReconciliationRead[] =
-                          paymentGroups[paymentType] ?? [];
-                        paymentsOfType.forEach(
-                          (payment: PaymentReconciliationRead) => {
-                            rows.push(
-                              <TableRow
-                                key={payment.id}
-                                className="bg-transparent hover:bg-transparent"
-                              >
-                                <TableCell>
-                                  {payment.payment_datetime
-                                    ? formatDateTime(
-                                        payment.payment_datetime,
-                                        "DD-MM-YY",
-                                      )
-                                    : "-"}
-                                </TableCell>
-                                {hidePaymentTypeGrouping && (
-                                  <TableCell className="text-left capitalize">
-                                    {t(payment.reconciliation_type)}
-                                  </TableCell>
-                                )}
-                                <TableCell>
-                                  {paymentmethodMap[payment.method]}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  <MonetaryDisplay amount={payment.amount} />
-                                </TableCell>
-                              </TableRow>,
-                            );
-                          },
-                        );
-
-                        // Add payment type subtotal (only if not hiding grouping)
-                        if (!hidePaymentTypeGrouping) {
-                          const typeTotal = paymentsOfType
-                            .reduce(
-                              (
-                                sum: number,
-                                payment: PaymentReconciliationRead,
-                              ) => sum + Number(payment.amount ?? 0),
-                              0,
-                            )
-                            .toFixed(2);
-                          rows.push(
-                            <TableRow
-                              key={`subtotal-${paymentType}`}
-                              className="font-semibold bg-gray-50"
+                              className="bg-transparent hover:bg-transparent"
                             >
                               <TableCell
                                 colSpan={2}
-                                className="text-right pr-2"
+                                className="font-semibold capitalize"
                               >
-                                {t("total")}
+                                {t(paymentType)}
                               </TableCell>
-                              <TableCell className="text-right">
+                              <TableCell className="text-right font-semibold">
                                 <MonetaryDisplay amount={typeTotal} />
                               </TableCell>
                             </TableRow>,
                           );
+                        } else {
+                          // Normal mode - show header, items, and subtotal
+                          // Add payment type header (only if not hiding grouping)
+                          if (!hidePaymentTypeGrouping) {
+                            rows.push(
+                              <TableRow
+                                key={`payment-type-${paymentType}`}
+                                className="bg-transparent"
+                              >
+                                <TableCell
+                                  colSpan={3}
+                                  className="text-left font-semibold capitalize bg-gray-50"
+                                >
+                                  {t(paymentType)}
+                                </TableCell>
+                              </TableRow>,
+                            );
+                          }
+
+                          paymentsOfType.forEach(
+                            (payment: PaymentReconciliationRead) => {
+                              rows.push(
+                                <TableRow
+                                  key={payment.id}
+                                  className="bg-transparent hover:bg-transparent"
+                                >
+                                  <TableCell>
+                                    {payment.payment_datetime
+                                      ? formatDateTime(
+                                          payment.payment_datetime,
+                                          "DD-MM-YY",
+                                        )
+                                      : "-"}
+                                  </TableCell>
+                                  {hidePaymentTypeGrouping && (
+                                    <TableCell className="text-left capitalize">
+                                      {t(payment.reconciliation_type)}
+                                    </TableCell>
+                                  )}
+                                  <TableCell>
+                                    {paymentmethodMap[payment.method]}
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    <MonetaryDisplay amount={payment.amount} />
+                                  </TableCell>
+                                </TableRow>,
+                              );
+                            },
+                          );
+
+                          // Add payment type subtotal (only if not hiding grouping)
+                          if (!hidePaymentTypeGrouping) {
+                            rows.push(
+                              <TableRow
+                                key={`subtotal-${paymentType}`}
+                                className="font-semibold bg-gray-50"
+                              >
+                                <TableCell
+                                  colSpan={2}
+                                  className="text-right pr-2"
+                                >
+                                  {t("total")}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <MonetaryDisplay amount={typeTotal} />
+                                </TableCell>
+                              </TableRow>,
+                            );
+                          }
                         }
                       });
 
