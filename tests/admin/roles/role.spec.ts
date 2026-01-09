@@ -22,8 +22,7 @@ async function createRole(
     .waitFor({ state: "visible" });
 
   if (permissions) {
-    for (let i = 0; i < permissions.length; i++) {
-      const permission = permissions[i];
+    for (const permission of permissions) {
       await page.getByPlaceholder("Search permissions").fill(permission);
       await page
         .getByRole("button", { name: "Select All" })
@@ -73,8 +72,7 @@ test.describe("Admin Roles Management", () => {
 
     // verify five random permissions are checked
     await page.getByRole("button", { name: /Edit/i }).click();
-    for (let i = 0; i < randomPermissions.length; i++) {
-      const permission = randomPermissions[i];
+    for (const permission of randomPermissions) {
       await page.getByPlaceholder("Search permissions").fill(permission);
       await page
         .getByRole("button", { name: "Select All" })
@@ -145,8 +143,7 @@ test.describe("Admin Roles Management", () => {
 
     // verify three random permissions are checked
     await page.getByRole("button", { name: /Edit/i }).click();
-    for (let i = 0; i < randomPermissions.length; i++) {
-      const permission = randomPermissions[i];
+    for (const permission of randomPermissions) {
       await page.getByPlaceholder("Search permissions").fill(permission);
       await page
         .getByRole("button", { name: "Select All" })
