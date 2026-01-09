@@ -1,6 +1,18 @@
 import { LocalStorageKeys } from "@/common/constants";
 
-import { QueryParams } from "@/Utils/request/types";
+import { HttpMethod, QueryParams, Type } from "@/Utils/request/types";
+
+export const API = <TResponse, TBody = undefined>(
+  route: `${HttpMethod} ${string}`,
+) => {
+  const [method, path] = route.split(" ") as [HttpMethod, string];
+  return {
+    path,
+    method,
+    TRes: Type<TResponse>(),
+    TBody: Type<TBody>(),
+  };
+};
 
 export function makeUrl(
   path: string,
@@ -77,10 +89,12 @@ export async function getResponseBody<TData>(res: Response): Promise<TData> {
     return null as TData;
   }
 
-  const isJson = res.headers.get("content-type")?.includes("application/json");
-  const isImage = res.headers.get("content-type")?.includes("image");
+  const contentType = res.headers.get("content-type") || "";
+  const isJson = contentType.includes("application/json");
+  const isBinary =
+    contentType.includes("image") || contentType.includes("application/pdf");
 
-  if (isImage) {
+  if (isBinary) {
     return (await res.blob()) as TData;
   }
 

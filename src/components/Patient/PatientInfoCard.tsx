@@ -5,7 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { PatientHoverCard } from "@/pages/Facility/services/serviceRequests/PatientHoverCard";
-import { PatientRead } from "@/types/emr/patient/patient";
+import {
+  PatientListRead,
+  PatientRead,
+  PublicPatientRead,
+} from "@/types/emr/patient/patient";
 import {
   getTagHierarchyDisplay,
   TagConfig,
@@ -22,7 +26,7 @@ export const PatientInfoCard = ({
   tagEntityType,
   tagEntityId,
 }: {
-  patient: PatientRead;
+  patient: PublicPatientRead | PatientListRead | PatientRead;
   tags: TagConfig[];
   facilityId: string;
   onTagsUpdate: () => void;
@@ -35,7 +39,7 @@ export const PatientInfoCard = ({
   return (
     <>
       <Card className="bg-white shadow-sm rounded-md">
-        <CardHeader className="pb-4 flex flex-row items-center justify-between px-2">
+        <CardHeader className="pb-4 flex flex-col sm:flex-row sm:items-center justify-between px-2">
           <div className="space-y-4">
             <PatientHoverCard patient={patient} facilityId={facilityId} />
           </div>

@@ -1,5 +1,4 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 
 import {
   ServiceRequestApplyActivityDefinitionSpec,
@@ -21,6 +20,16 @@ export default {
     path: "/api/v1/facility/{facilityId}/service_request/{serviceRequestId}/",
     method: HttpMethod.GET,
     TRes: Type<ServiceRequestReadSpec>(),
+  },
+  cancelServiceRequest: {
+    path: "/api/v1/facility/{facilityId}/service_request/{serviceRequestId}/cancel/",
+    method: HttpMethod.POST,
+    TRes: Type<void>(),
+  },
+  completeServiceRequest: {
+    path: "/api/v1/facility/{facilityId}/service_request/{serviceRequestId}/complete/",
+    method: HttpMethod.POST,
+    TRes: Type<void>(),
   },
   createServiceRequest: {
     path: "/api/v1/facility/{facilityId}/service_request/",

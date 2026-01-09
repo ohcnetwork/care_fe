@@ -106,8 +106,6 @@ export function useEncounterShortcuts() {
         ),
       "treatment-summary": () =>
         navigate(buildEncounterUrl("/treatment_summary")),
-      "discharge-summary": () =>
-        navigate(buildEncounterUrl("/files?file=discharge_summary")),
       "encounter-overview": () => navigate(buildEncounterUrl("/updates")),
       "add-questionnaire": () => {
         document.dispatchEvent(new CustomEvent("open-forms-dialog"));
@@ -158,6 +156,12 @@ export function useEncounterShortcuts() {
       const handler = handlers[actionId];
       if (handler) {
         handler();
+        return;
+      }
+
+      if (actionId.startsWith("questionnaire-") && encounter) {
+        const slug = actionId.replace("questionnaire-", "");
+        navigate(buildEncounterUrl(`/questionnaire/${slug}`));
       }
     },
     [handlers],

@@ -423,7 +423,8 @@ function MedicationCommandItem({
   return (
     <CommandItem
       key={item.id}
-      value={isCategory ? item.title : item.name}
+      value={item.id}
+      content={isCategory ? item.title : item.name}
       onSelect={handleSelect}
       className="cursor-pointer p-3 hover:bg-gray-50"
     >
@@ -523,7 +524,15 @@ export function MedicationValueSetSelectTabContent({
                 )}
               </CommandEmpty>
 
-              {!search && (
+              {search ? (
+                <MedicationCommandGroup
+                  items={products}
+                  onProductSelect={(product) => {
+                    onProductSelect(product);
+                    onOpenChange(false);
+                  }}
+                />
+              ) : (
                 <>
                   <MedicationCommandGroup
                     items={categories}
@@ -540,16 +549,6 @@ export function MedicationValueSetSelectTabContent({
                     />
                   )}
                 </>
-              )}
-
-              {search && (
-                <MedicationCommandGroup
-                  items={products}
-                  onProductSelect={(product) => {
-                    onProductSelect(product);
-                    onOpenChange(false);
-                  }}
-                />
               )}
             </CommandList>
           </Command>

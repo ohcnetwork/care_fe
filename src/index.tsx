@@ -19,7 +19,7 @@ declare global {
 }
 
 // Expose Environment variable to window object for use in plugins
-window.CARE_API_URL = import.meta.env.REACT_CARE_API_URL;
+window.CARE_API_URL = careConfig.apiUrl;
 window.__CORE_ENV__ = careConfig;
 
 if ("serviceWorker" in navigator) {

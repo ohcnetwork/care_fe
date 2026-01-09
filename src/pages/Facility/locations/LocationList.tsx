@@ -6,7 +6,7 @@ import { useLocationState } from "@/hooks/useLocationState";
 import query from "@/Utils/request/query";
 import LocationContent from "@/pages/Facility/locations/LocationContent";
 import LocationNavbar from "@/pages/Facility/locations/LocationNavbar";
-import { LocationList as LocationListType } from "@/types/location/location";
+import { LocationRead as LocationListType } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 export default function LocationList({

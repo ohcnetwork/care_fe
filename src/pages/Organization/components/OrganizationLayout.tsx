@@ -29,6 +29,7 @@ import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
+import { useCareApps } from "@/hooks/useCareApps";
 import OrganizationLayoutSkeleton from "@/pages/Organization/components/OrganizationLayoutSkeleton";
 import {
   Organization,
@@ -55,6 +56,11 @@ export default function OrganizationLayout({
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const careApps = useCareApps();
+
+  const organizationTabs = careApps.flatMap(
+    (c) => (!c.isLoading && c.organizationTabs) || [],
+  );
 
   const baseUrl = navOrganizationId
     ? `/organization/${navOrganizationId}/children`
@@ -109,6 +115,14 @@ export default function OrganizationLayout({
         org.org_type === OrgType.GOVT &&
         hasPermission("can_read_facility", org.permissions),
     },
+    ...organizationTabs.map((tab) => ({
+      url: `${baseUrl}/${id}/${tab.slug}`,
+      name: tab.name,
+      icon: tab.icon,
+      visibility:
+        org.org_type === OrgType.GOVT &&
+        hasPermission("can_read_facility", org.permissions),
+    })),
   ];
 
   const visibleNavItems = navItems.filter((item) => item.visibility);

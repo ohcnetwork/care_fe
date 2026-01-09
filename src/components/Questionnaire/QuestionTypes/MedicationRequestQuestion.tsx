@@ -68,7 +68,6 @@ import {
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
-import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
@@ -208,12 +207,6 @@ export function MedicationRequestQuestion({
     (questionnaireResponse.values?.[0]?.value as MedicationRequestCreate[]) ||
     [];
 
-  const [alternateIdentifier, _setAlternateIdentifier] = useState<string>(
-    `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`,
-  );
-
-  console.log("alternateIdentifier", alternateIdentifier);
-
   const { data: patientMedications } = useQuery({
     queryKey: ["medication_requests", patientId, encounterId],
     queryFn: query(medicationRequestApi.list, {
@@ -258,15 +251,9 @@ export function MedicationRequestQuestion({
   const [newMedicationInSheet, setNewMedicationInSheet] =
     useState<MedicationRequestCreate | null>(null);
 
-  const createPrescriptionObject = {
-    status: PrescriptionStatus.active,
-    alternate_identifier: alternateIdentifier,
-  };
-
   const handleAddMedication = (medication: Code) => {
     const initialDetails: MedicationRequestCreate = {
       ...parseMedicationStringToRequest(currentUser, medication),
-      create_prescription: createPrescriptionObject,
       authored_on: new Date().toISOString(),
       requester: currentUser,
     };
@@ -287,7 +274,6 @@ export function MedicationRequestQuestion({
         undefined,
         productKnowledge,
       ),
-      create_prescription: createPrescriptionObject,
       authored_on: new Date().toISOString(),
       requester: currentUser,
     };
@@ -337,14 +323,12 @@ export function MedicationRequestQuestion({
           requested_product: requested_product?.id,
           requested_product_internal: requested_product,
           requester: request.requester || currentUser,
-          create_prescription: createPrescriptionObject,
           medication: requested_product?.id ? null : request.medication,
         } as MedicationRequestCreate;
       } else {
         const statement = record as MedicationStatementRead;
         return {
           ...parseMedicationStringToRequest(currentUser, statement.medication),
-          create_prescription: createPrescriptionObject,
           authored_on: new Date().toISOString(),
           note: statement.note,
           requester: currentUser,
@@ -522,7 +506,11 @@ export function MedicationRequestQuestion({
               },
             ],
             queryKey: ["medication_requests", patientId],
-            queryFn: async (limit: number, offset: number) => {
+            queryFn: async (
+              limit: number,
+              offset: number,
+              signal: AbortSignal,
+            ) => {
               const response = await query(medicationRequestApi.list, {
                 pathParams: { patientId },
                 queryParams: {
@@ -531,7 +519,7 @@ export function MedicationRequestQuestion({
                   status:
                     "active,on_hold,draft,unknown,ended,completed,cancelled",
                 },
-              })({ signal: new AbortController().signal });
+              })({ signal });
               return response;
             },
           },
@@ -578,7 +566,11 @@ export function MedicationRequestQuestion({
               },
             ],
             queryKey: ["medication_statements", patientId],
-            queryFn: async (limit: number, offset: number) => {
+            queryFn: async (
+              limit: number,
+              offset: number,
+              signal: AbortSignal,
+            ) => {
               const response = await query(medicationStatementApi.list, {
                 pathParams: { patientId },
                 queryParams: {
@@ -587,7 +579,7 @@ export function MedicationRequestQuestion({
                   status:
                     "active,on_hold,completed,stopped,unknown,not_taken,intended",
                 },
-              })({ signal: new AbortController().signal });
+              })({ signal });
               return response;
             },
           },

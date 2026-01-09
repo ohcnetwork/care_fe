@@ -1,4 +1,5 @@
 import { PatientRead } from "@/types/emr/patient/patient";
+import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { Period } from "@/types/questionnaire/base";
 
 export enum AccountStatus {
@@ -39,6 +40,7 @@ export interface AccountBase {
   name: string;
   service_period: Period;
   description?: string;
+  extensions: Record<string, unknown>;
 }
 
 export interface AccountRead extends AccountBase {
@@ -49,6 +51,7 @@ export interface AccountRead extends AccountBase {
   total_paid: string;
   total_balance: string;
   created_date: string;
+  tags: TagConfig[];
 }
 
 export interface AccountUpdate extends AccountBase {

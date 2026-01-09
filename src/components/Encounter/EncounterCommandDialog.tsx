@@ -1,3 +1,4 @@
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import {
   CommandDialog,
   CommandEmpty,
@@ -18,7 +19,6 @@ import {
   CheckCircle2,
   Component,
   Edit,
-  FileText,
   HistoryIcon,
   MapPin,
   NotebookPen,
@@ -29,9 +29,12 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { PLUGIN_Component } from "@/PluginEngine";
+import query from "@/Utils/request/query";
 import { useCareApps } from "@/hooks/useCareApps";
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
+import questionnaireApi from "@/types/questionnaire/questionnaireApi";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 interface ActionItem {
@@ -61,7 +64,28 @@ export function EncounterCommandDialog({
   trigger,
 }: EncounterCommandDialogProps) {
   const { t } = useTranslation();
+  const [search, setSearch] = useState("");
+
   const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
+
+  const { data: questionnaires, isLoading } = useQuery({
+    queryKey: ["questionnaires", search, "encounter"],
+    queryFn: query.debounced(questionnaireApi.list, {
+      queryParams: {
+        title: search,
+        status: "active",
+        subject_type: "encounter",
+      },
+    }),
+    enabled: !!search,
+  });
+
+  useEffect(() => {
+    if (!open) {
+      setSearch("");
+    }
+  }, [open]);
+
   const getShortcutDisplay = useEncounterShortcutDisplays();
   const { handleAction } = useEncounterShortcuts();
 
@@ -207,23 +231,6 @@ export function EncounterCommandDialog({
         ],
       },
       {
-        group: t("available_reports"),
-        items: [
-          {
-            id: "treatment-summary",
-            label: t("treatment_summary"),
-            shortcut: getShortcutDisplay("treatment-summary"),
-            icon: <FileText />,
-          },
-          {
-            id: "discharge-summary",
-            label: t("discharge_summary"),
-            shortcut: getShortcutDisplay("discharge-summary"),
-            icon: <FileText />,
-          },
-        ],
-      },
-      {
         group: t("go_to"),
         items: [
           {
@@ -291,7 +298,11 @@ export function EncounterCommandDialog({
       {
         group: t("questionnaire"),
         items: [
-          ...(questionnaireOptions?.results || []).map((option) => ({
+          ...(
+            (search.length > 0
+              ? questionnaires?.results
+              : questionnaireOptions?.results) || []
+          ).map((option) => ({
             id: `questionnaire-${option.slug}`,
             label: option.title,
             icon: <NotebookPen />,
@@ -300,7 +311,14 @@ export function EncounterCommandDialog({
         ],
       },
     ],
-    [t, questionnaireOptions, getShortcutDisplay],
+    [
+      t,
+      questionnaireOptions,
+      questionnaires,
+      search,
+      getShortcutDisplay,
+      isLoading,
+    ],
   );
 
   const findRecentActions = useCallback(
@@ -339,6 +357,8 @@ export function EncounterCommandDialog({
     [handleAction, onOpenChange, addRecentAction],
   );
 
+  const careApps = useCareApps();
+
   return (
     <>
       {trigger}
@@ -351,17 +371,26 @@ export function EncounterCommandDialog({
           <CommandInput
             placeholder={t("search_encounter_command")}
             className="border-none focus:ring-0 text-base sm:text-sm"
+            onValueChange={setSearch}
           />
         </div>
         <CommandList className="h-[80vh] max-h-[80vh] w-full">
-          <CommandEmpty>{t("no_results")}</CommandEmpty>
+          <CommandEmpty>
+            {isLoading && search.length > 0 ? (
+              <div className="space-y-2">
+                <CardListSkeleton count={3} />
+              </div>
+            ) : (
+              t("no_results")
+            )}
+          </CommandEmpty>
           {encounterActions.map((group) => (
             <div key={group.group}>
               <CommandGroup heading={group.group} className="px-2">
                 {group.items.map((action) => (
                   <CommandItem
-                    key={action.id}
-                    value={action.id}
+                    key={`${group.group}-${action.id}`}
+                    value={`${group.group} ${action.id} ${action.label}`}
                     onSelect={() => handleSelect(action.id)}
                     className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
                     autoFocus={false}
@@ -380,8 +409,9 @@ export function EncounterCommandDialog({
               <CommandSeparator />
             </div>
           ))}
-          {useCareApps().some(
-            (plugin) => plugin.components?.EncounterActions,
+          {careApps.some(
+            (plugin) =>
+              !plugin.isLoading && plugin.components?.EncounterActions,
           ) && (
             <CommandGroup heading={t("plugin_actions")} className="px-0">
               <PLUGIN_Component

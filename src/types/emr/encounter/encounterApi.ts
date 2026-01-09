@@ -1,20 +1,24 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 
-import { EncounterCreate, EncounterEdit, EncounterRead } from "./encounter";
+import {
+  EncounterCreate,
+  EncounterEdit,
+  EncounterListRead,
+  EncounterRead,
+} from "@/types/emr/encounter/encounter";
 
 export default {
   // Encounter CRUD Operations
   list: {
     path: "/api/v1/encounter/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<EncounterRead>>(),
+    TRes: Type<PaginatedResponse<EncounterListRead>>(),
   },
   create: {
     path: "/api/v1/encounter/",
     method: HttpMethod.POST,
-    TRes: Type<EncounterRead>(),
     TBody: Type<EncounterCreate>(),
+    TRes: Type<EncounterRead>(),
   },
   get: {
     path: "/api/v1/encounter/{id}/",
@@ -26,6 +30,11 @@ export default {
     method: HttpMethod.PUT,
     TRes: Type<EncounterRead>(),
     TBody: Type<EncounterEdit>(),
+  },
+  restart: {
+    path: "/api/v1/encounter/{id}/restart/",
+    method: HttpMethod.POST,
+    TRes: Type<EncounterRead>(),
   },
 
   // Organization Management
@@ -40,13 +49,6 @@ export default {
     method: HttpMethod.DELETE,
     TRes: Type<EncounterRead>(),
     TBody: Type<{ organization: string }>(),
-  },
-
-  // Discharge Summary
-  generateDischargeSummary: {
-    path: "/api/v1/encounter/{encounterId}/generate_discharge_summary/",
-    method: HttpMethod.POST,
-    TRes: Type<{ detail: string }>(),
   },
 
   // Tag-related endpoints

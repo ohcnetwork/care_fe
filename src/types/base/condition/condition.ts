@@ -130,6 +130,13 @@ export const conditionSchema = z.discriminatedUnion("_conditionType", [
   }),
 ]) as z.ZodType<ConditionForm>;
 
+export function getConditionDiscriminatorValue(
+  metric: string,
+  operation: ConditionOperation,
+) {
+  return `${metric}_${operation}`;
+}
+
 export function ConditionOperationSummary({
   condition,
 }: {
