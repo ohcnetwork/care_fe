@@ -667,19 +667,21 @@ export async function clickTabOrMenuItem(
   }
 
   // If not visible as a tab, it might be in a dropdown menu
-  // Look for a menu trigger button using the data-slot attribute
-  const menuTrigger = page
+  const moreButton = page
     .locator('[data-slot="dropdown-menu-trigger"]')
+    .filter({ hasText: /more/i })
     .first();
-  const isMenuTriggerVisible = await menuTrigger.isVisible().catch(() => false);
 
-  if (isMenuTriggerVisible) {
-    await menuTrigger.click();
+  const isMoreButtonVisible = await moreButton.isVisible().catch(() => false);
+
+  if (isMoreButtonVisible) {
+    await moreButton.click();
+
     // Wait for menu to open
     const menu = page.locator('[role="menu"]').first();
     await menu.waitFor({ state: "visible" });
 
-    // Wait for the specific menu item to appear and be interactive
+    // Look for the specific menu item
     const menuItem = page.getByRole("menuitem", { name: tabName });
     await menuItem.waitFor({ state: "visible" });
     await menuItem.scrollIntoViewIfNeeded();
