@@ -53,8 +53,8 @@ export function generateServiceRequestTestData(
     return {
       ...data,
       bodySite: faker.helpers.arrayElement(BODY_SITES),
-      patientInstruction: faker.lorem.sentence(),
-      notes: faker.lorem.sentence(),
+      patientInstruction: `Instruction: ${faker.lorem.sentence()}`,
+      notes: `Note: ${faker.lorem.sentence()}`,
       requestor: faker.helpers.arrayElement(KNOWN_USERNAMES),
     };
   }
