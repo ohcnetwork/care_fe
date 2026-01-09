@@ -59,7 +59,9 @@ test.describe("Admin Roles Management", () => {
     ).toContainText("At least one permission is required");
   });
 
-  test("create Role with all permissions and verify", async ({ page }) => {
+  test("creates a role with all permissions and verifies assigned permissions", async ({
+    page,
+  }) => {
     const roleName = faker.person.jobTitle();
     const description = faker.lorem.sentence();
     const randomPermissions = faker.helpers.arrayElements(permissions, 5);
@@ -81,7 +83,9 @@ test.describe("Admin Roles Management", () => {
     }
   });
 
-  test("edit Role and verify", async ({ page }) => {
+  test("updates an existing role by removing a permission and verifies the change", async ({
+    page,
+  }) => {
     const roleName = faker.person.jobTitle();
     const description = faker.lorem.sentence();
     const uncheckedPermission = faker.helpers.arrayElement(permissions);
@@ -122,7 +126,9 @@ test.describe("Admin Roles Management", () => {
     ).not.toBeChecked();
   });
 
-  test("clone Role and verify", async ({ page }) => {
+  test("clones an existing role and verifies newly added permissions", async ({
+    page,
+  }) => {
     const roleName = faker.person.jobTitle();
     const description = faker.lorem.sentence();
     const randomPermissions = faker.helpers.arrayElements(permissions, 3);
