@@ -6,7 +6,12 @@ import { expectToast } from "tests/helper/ui";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-async function createRole(page: Page, roleName: string, description?: string) {
+async function createRole(
+  page: Page,
+  roleName: string,
+  description?: string,
+  permissions?: string[],
+) {
   await page.getByRole("button", { name: /Add Role/i }).click();
   await page.getByPlaceholder("Enter role name").fill(roleName);
   if (description) {
@@ -15,8 +20,21 @@ async function createRole(page: Page, roleName: string, description?: string) {
   await page
     .getByRole("button", { name: "Select All" })
     .waitFor({ state: "visible" });
-  // select all permissions
-  await page.getByRole("button", { name: "Select All" }).click();
+
+  if (permissions) {
+    for (let i = 0; i < permissions.length; i++) {
+      const permission = permissions[i];
+      await page.getByPlaceholder("Search permissions").fill(permission);
+      await page
+        .getByRole("button", { name: "Select All" })
+        .waitFor({ state: "visible" });
+      await page.getByLabel(permission).first().check();
+    }
+  } else {
+    // select all permissions
+    await page.getByRole("button", { name: "Select All" }).click();
+  }
+
   await page.getByRole("button", { name: /Create Role/i }).click();
 
   // verify toast message
@@ -107,9 +125,10 @@ test.describe("Admin Roles Management", () => {
   test("clone Role and verify", async ({ page }) => {
     const roleName = faker.person.jobTitle();
     const description = faker.lorem.sentence();
+    const randomPermissions = faker.helpers.arrayElements(permissions, 3);
     const clonedRoleName = `${roleName} (Copy)`;
     const tableBody = page.locator('[data-slot="table-body"]');
-    await createRole(page, roleName, description);
+    await createRole(page, roleName, description, randomPermissions);
 
     await page.getByRole("textbox", { name: /Search Roles/i }).fill(roleName);
     await page.getByRole("button", { name: /Clone/i }).click();
@@ -123,5 +142,16 @@ test.describe("Admin Roles Management", () => {
       .getByRole("textbox", { name: /Search Roles/i })
       .fill(clonedRoleName);
     await expect(tableBody).toContainText(clonedRoleName);
+
+    // verify three random permissions are checked
+    await page.getByRole("button", { name: /Edit/i }).click();
+    for (let i = 0; i < randomPermissions.length; i++) {
+      const permission = randomPermissions[i];
+      await page.getByPlaceholder("Search permissions").fill(permission);
+      await page
+        .getByRole("button", { name: "Select All" })
+        .waitFor({ state: "visible" });
+      await expect(page.getByLabel(permission).first()).toBeChecked();
+    }
   });
 });
