@@ -676,10 +676,14 @@ export async function clickTabOrMenuItem(
   if (isMenuTriggerVisible) {
     await menuTrigger.click();
     // Wait for menu to open
-    await page.locator('[role="menu"]').waitFor({ state: "visible" });
+    const menu = page.locator('[role="menu"]').first();
+    await menu.waitFor({ state: "visible" });
 
-    // Click the menu item
-    await page.getByRole("menuitem", { name: tabName }).click();
+    // Wait for the specific menu item to appear and be interactive
+    const menuItem = page.getByRole("menuitem", { name: tabName });
+    await menuItem.waitFor({ state: "visible" });
+    await menuItem.scrollIntoViewIfNeeded();
+    await menuItem.click();
     return;
   }
 
