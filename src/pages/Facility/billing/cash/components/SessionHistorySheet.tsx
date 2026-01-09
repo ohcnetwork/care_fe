@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
+import { History } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -73,7 +72,7 @@ export default function SessionHistorySheet({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="outline">
-          <CareIcon icon="l-history" className="mr-2 size-4" />
+          <History className="mr-2 size-4" />
           {t("session_history")}
         </Button>
       </SheetTrigger>
@@ -92,10 +91,7 @@ export default function SessionHistorySheet({
             </div>
           ) : sessions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <CareIcon
-                icon="l-history"
-                className="size-12 text-gray-300 mb-4"
-              />
+              <History className="size-12 text-gray-300 mb-4" />
               <p className="text-gray-500">{t("no_past_sessions")}</p>
             </div>
           ) : (

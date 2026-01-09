@@ -123,6 +123,7 @@ export default function ActiveSessionCard({
         facilityId={facilityId}
         session={session}
         onSessionClosed={() => setIsCloseSheetOpen(false)}
+        onTransferClick={() => setIsTransferSheetOpen(true)}
       />
 
       <CreateTransferSheet

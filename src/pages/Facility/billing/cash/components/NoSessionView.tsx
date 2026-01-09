@@ -23,7 +23,7 @@ export default function NoSessionView({
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   return (
-    <div className="py-8">
+    <div className="py-2">
       <EmptyState
         icon={
           <CareIcon icon="l-money-bill" className="text-primary-500 size-8" />

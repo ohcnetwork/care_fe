@@ -60,6 +60,10 @@ export default function CashManagementPage({
   return (
     <Page title={t("cash_management")}>
       <div className="mx-auto max-w-4xl space-y-6 py-4">
+        <div className="flex justify-end">
+          <SessionHistorySheet facilityId={facilityId} userId={user.id} />
+        </div>
+
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -74,9 +78,6 @@ export default function CashManagementPage({
               facilityId={facilityId}
               session={currentSession}
             />
-            <div className="flex justify-end">
-              <SessionHistorySheet facilityId={facilityId} userId={user.id} />
-            </div>
           </>
         ) : (
           <NoSessionView facilityId={facilityId} counters={counters} />

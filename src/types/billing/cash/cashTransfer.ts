@@ -32,11 +32,13 @@ export interface CreateTransferRequest {
 // Request to accept a transfer
 export interface AcceptTransferRequest {
   counter_x_care_id: string;
+  session_id: string;
 }
 
 // Request to reject a transfer
 export interface RejectTransferRequest {
   counter_x_care_id: string;
+  session_id: string;
   reason?: string;
 }
 
