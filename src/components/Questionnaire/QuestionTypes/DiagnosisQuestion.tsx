@@ -546,7 +546,7 @@ export function DiagnosisQuestion({
         sortedDiagnoses.length > 0 ? "md:max-w-fit" : "max-w-4xl",
       )}
     >
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap">
         <QuestionLabel question={question} />
         <HistoricalRecordSelector<DiagnosisRequest>
           title={t("past_diagnoses")}
