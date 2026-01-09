@@ -11,6 +11,7 @@ async function createRole(page: Page, roleName: string, description?: string) {
   if (description) {
     await page.getByPlaceholder("Enter role description").fill(description);
   }
+  await page.waitForLoadState("networkidle");
   // select all permissions
   await page.getByRole("button", { name: "Select All" }).click();
   await page.getByRole("button", { name: /Create Role/i }).click();
