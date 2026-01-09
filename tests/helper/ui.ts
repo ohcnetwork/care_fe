@@ -470,8 +470,9 @@ export async function selectFromDefinitionCategoryPicker(
     await categoryItem.waitFor({ state: "visible" });
     await categoryItem.click();
 
-    // Wait for navigation to complete
-    await page.waitForTimeout(300);
+    // Wait for navigation to complete - wait for new options to load after category click
+    const items = scope.getByRole("option");
+    await items.first().waitFor({ state: "attached" });
   }
 
   // If search is provided, use search to filter items
@@ -481,8 +482,9 @@ export async function selectFromDefinitionCategoryPicker(
     await input.fill("");
     await input.fill(search);
 
-    // Wait for search results to load
-    await page.waitForTimeout(500);
+    // Wait for search results to load - options will be updated after input change
+    const items = scope.getByRole("option");
+    await items.first().waitFor({ state: "attached" });
   }
 
   // Wait for items to load
