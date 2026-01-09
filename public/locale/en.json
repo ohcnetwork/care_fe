@@ -3338,6 +3338,8 @@
   "no_payments": "No payments",
   "no_payments_description": "No payments found",
   "no_payments_recorded": "No payments recorded",
+  "no_permission_to_view_clinical_data": "You do not have permission to view clinical data for this encounter",
+  "no_permission_to_view_clinical_data_description": "Contact your administrator to grant you access.",
   "no_permission_to_view_page": "You do not have permissions to view this page",
   "no_plots_configured": "No plots configured",
   "no_policy_added": "No Insurance Policy Added",
