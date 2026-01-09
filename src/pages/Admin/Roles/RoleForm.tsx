@@ -63,7 +63,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
       description: role?.description || "",
       permissions: role?.permissions.map((p: Permission) => p.slug) || [],
     });
-  }, [role, form]);
+  }, [role]);
 
   const { data: permissionsList, isLoading: permissionsLoading } = useQuery({
     queryKey: ["permissions", searchPermission],

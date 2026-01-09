@@ -12,7 +12,9 @@ async function createRole(page: Page, roleName: string, description?: string) {
   if (description) {
     await page.getByPlaceholder("Enter role description").fill(description);
   }
-  await page.waitForLoadState("networkidle");
+  await page
+    .getByRole("button", { name: "Select All" })
+    .waitFor({ state: "visible" });
   // select all permissions
   await page.getByRole("button", { name: "Select All" }).click();
   await page.getByRole("button", { name: /Create Role/i }).click();
@@ -26,23 +28,24 @@ test.describe("Admin Roles Management", () => {
     await page.goto("/admin/rbac/roles");
   });
 
-  test("Create role without permissions and verify validation message", async ({
+  test("should show validation error when creating role without required fields", async ({
     page,
   }) => {
-    const roleName = faker.person.jobTitle();
     await page.getByRole("button", { name: /Add Role/i }).click();
-    await page.getByPlaceholder("Enter role name").fill(roleName);
     await page.getByRole("button", { name: /Create Role/i }).click();
-    // verify form validation
+    // verify form validations
     await expect(
-      getFieldErrorMessage(page.getByLabel(/permissions.*\*/i)),
+      getFieldErrorMessage(page.getByPlaceholder("Enter role name")),
+    ).toContainText("This field is required");
+    await expect(
+      getFieldErrorMessage(page.locator('div[data-slot="card"]')),
     ).toContainText("At least one permission is required");
   });
 
-  test("Create Role with all permissions and verify", async ({ page }) => {
+  test("create Role with all permissions and verify", async ({ page }) => {
     const roleName = faker.person.jobTitle();
     const description = faker.lorem.sentence();
-    const fake5permissions = faker.helpers.arrayElements(permissions, 5);
+    const randomPermissions = faker.helpers.arrayElements(permissions, 5);
     await createRole(page, roleName, description);
     const tableBody = page.locator('[data-slot="table-body"]');
 
@@ -52,15 +55,17 @@ test.describe("Admin Roles Management", () => {
 
     // verify five random permissions are checked
     await page.getByRole("button", { name: /Edit/i }).click();
-    for (let i = 0; i < fake5permissions.length; i++) {
-      const permission = fake5permissions[i];
+    for (let i = 0; i < randomPermissions.length; i++) {
+      const permission = randomPermissions[i];
       await page.getByPlaceholder("Search permissions").fill(permission);
-      await page.waitForLoadState("networkidle");
+      await page
+        .getByRole("button", { name: "Select All" })
+        .waitFor({ state: "visible" });
       await expect(page.getByLabel(permission).first()).toBeChecked();
     }
   });
 
-  test("Edit Role and verify", async ({ page }) => {
+  test("edit Role and verify", async ({ page }) => {
     const roleName = faker.person.jobTitle();
     const description = faker.lorem.sentence();
     const uncheckedPermission = faker.helpers.arrayElement(permissions);
@@ -74,7 +79,9 @@ test.describe("Admin Roles Management", () => {
     await page.getByPlaceholder("Enter role name").fill(updatedRoleName);
 
     await page.getByPlaceholder("Search permissions").fill(uncheckedPermission);
-    await page.waitForLoadState("networkidle");
+    await page
+      .getByRole("button", { name: "Select All" })
+      .waitFor({ state: "visible" });
     await page.getByLabel(uncheckedPermission).first().uncheck();
 
     await page.getByRole("button", { name: /Update Role/i }).click();
@@ -89,13 +96,15 @@ test.describe("Admin Roles Management", () => {
     await expect(tableBody).toContainText(updatedRoleName);
     await page.getByRole("button", { name: /Edit/i }).click();
     await page.getByPlaceholder("Search permissions").fill(uncheckedPermission);
-    await page.waitForLoadState("networkidle");
+    await page
+      .getByRole("button", { name: "Select All" })
+      .waitFor({ state: "visible" });
     await expect(
       page.getByLabel(uncheckedPermission).first(),
     ).not.toBeChecked();
   });
 
-  test("Clone Role and verify", async ({ page }) => {
+  test("clone Role and verify", async ({ page }) => {
     const roleName = faker.person.jobTitle();
     const description = faker.lorem.sentence();
     const clonedRoleName = `${roleName} (Copy)`;
