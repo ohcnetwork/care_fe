@@ -224,21 +224,57 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
     setWaveform([]);
   };
 
+  // Recorder-change effect: handles cleanup when recorder changes
+  // Note: React runs all effect cleanups on unmount, so we guard against
+  // running this cleanup on unmount since the unmount-only effect handles it
+  useEffect(() => {
+    if (!recorder) {
+      return;
+    }
+
+    return () => {
+      // Skip cleanup on unmount - the unmount-only effect handles it
+      if (isUnmountingRef.current) {
+        return;
+      }
+
+      // Only stop recorder and tracks, don't set isUnmountingRef
+      // Listener removal is handled by the main recorder effect cleanup
+      try {
+        if (recorder.state !== "inactive") {
+          recorder.stop();
+        }
+        if (recorder.stream) {
+          recorder.stream.getTracks().forEach((track) => track.stop());
+        }
+      } catch {
+        // Ignore errors during cleanup
+      }
+    };
+  }, [recorder]);
+
   // Unmount-only effect: handles final cleanup when component unmounts
+  // Registered after recorder-change effect so its cleanup runs first on unmount
+  // and sets isUnmountingRef before recorder-change cleanup executes
   useEffect(() => {
     return () => {
+      // Set flag immediately so recorder-change cleanup can detect unmount
       isUnmountingRef.current = true;
 
       const cleanup = async () => {
         // Remove listener before stopping to prevent state updates
         // Use recorderRef to access the latest recorder instance
-        if (recorderRef.current && handleDataRef.current) {
+        if (recorderRef.current) {
           try {
-            recorderRef.current.removeEventListener(
-              "dataavailable",
-              handleDataRef.current,
-            );
+            // Only remove listener if handleDataRef exists
+            if (handleDataRef.current) {
+              recorderRef.current.removeEventListener(
+                "dataavailable",
+                handleDataRef.current,
+              );
+            }
 
+            // Always stop recorder and tracks if recorder exists
             if (recorderRef.current.state !== "inactive") {
               recorderRef.current.stop();
             }
@@ -260,28 +296,6 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
       void cleanup();
     };
   }, []); // Empty dependency array for unmount-only cleanup
-
-  // Recorder-change effect: handles cleanup when recorder changes (not on unmount)
-  useEffect(() => {
-    if (!recorder) {
-      return;
-    }
-
-    return () => {
-      // Only stop recorder and tracks, don't set isUnmountingRef
-      // Listener removal is handled by the main recorder effect cleanup
-      try {
-        if (recorder.state !== "inactive") {
-          recorder.stop();
-        }
-        if (recorder.stream) {
-          recorder.stream.getTracks().forEach((track) => track.stop());
-        }
-      } catch {
-        // Ignore errors during cleanup
-      }
-    };
-  }, [recorder]);
 
   return {
     audioURL,
