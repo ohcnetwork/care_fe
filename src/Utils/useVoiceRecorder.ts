@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
@@ -8,9 +8,16 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
   const [blob, setBlob] = useState<Blob | null>(null);
   const [waveform, setWaveform] = useState<number[]>([]); // Decibel waveform
 
-  let audioContext: AudioContext | null = null;
-  let analyser: AnalyserNode | null = null;
-  let source: MediaStreamAudioSourceNode | null = null;
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const animationFrameIdRef = useRef<number | null>(null);
+  const audioURLRef = useRef<string>("");
+  const isRecordingRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    isRecordingRef.current = isRecording;
+  }, [isRecording]);
 
   useEffect(() => {
     if (!isRecording && recorder && audioURL) {
@@ -48,13 +55,15 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
     } else {
       recorder.stream.getTracks().forEach((i) => i.stop());
       recorder.stop();
-      if (audioContext) {
-        audioContext.close();
-      }
+      cleanupAudioResources();
     }
 
     const handleData = (e: BlobEvent) => {
+      if (audioURLRef.current) {
+        URL.revokeObjectURL(audioURLRef.current);
+      }
       const url = URL.createObjectURL(e.data);
+      audioURLRef.current = url;
       setAudioURL(url);
       const blob = new Blob([e.data], { type: "audio/mpeg" });
       setBlob(blob);
@@ -63,39 +72,78 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
     recorder.addEventListener("dataavailable", handleData);
     return () => {
       recorder.removeEventListener("dataavailable", handleData);
-      if (audioContext) {
-        audioContext.close();
-      }
+      cleanupAudioResources();
     };
   }, [recorder, isRecording]);
 
+  const cleanupAudioResources = (): void => {
+    if (animationFrameIdRef.current !== null) {
+      cancelAnimationFrame(animationFrameIdRef.current);
+      animationFrameIdRef.current = null;
+    }
+    if (sourceRef.current) {
+      try {
+        sourceRef.current.disconnect();
+      } catch {
+        // Ignore if already disconnected
+      }
+      sourceRef.current = null;
+    }
+    if (analyserRef.current) {
+      try {
+        analyserRef.current.disconnect();
+      } catch {
+        // Ignore if already disconnected
+      }
+      analyserRef.current = null;
+    }
+    if (audioContextRef.current) {
+      try {
+        audioContextRef.current.close();
+      } catch {
+        // Ignore if already closed
+      }
+      audioContextRef.current = null;
+    }
+    if (audioURLRef.current) {
+      URL.revokeObjectURL(audioURLRef.current);
+      audioURLRef.current = "";
+    }
+  };
+
   const setupAudioAnalyser = () => {
-    let animationFrameId: number;
-    audioContext = new (
+    cleanupAudioResources();
+
+    if (!recorder?.stream) {
+      return;
+    }
+
+    audioContextRef.current = new (
       window.AudioContext || (window as any).webkitAudioContext
     )();
-    analyser = audioContext.createAnalyser();
-    analyser.fftSize = 32;
-    const bufferLength = analyser.frequencyBinCount;
+    analyserRef.current = audioContextRef.current.createAnalyser();
+    analyserRef.current.fftSize = 32;
+    const bufferLength = analyserRef.current.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
 
-    source = audioContext.createMediaStreamSource(
-      recorder?.stream as MediaStream,
+    sourceRef.current = audioContextRef.current.createMediaStreamSource(
+      recorder.stream,
     );
-    source.connect(analyser);
+    sourceRef.current.connect(analyserRef.current);
 
-    const updateWaveform = () => {
-      if (isRecording) {
-        analyser?.getByteFrequencyData(dataArray);
+    const updateWaveform = (): void => {
+      if (isRecordingRef.current && analyserRef.current) {
+        analyserRef.current.getByteFrequencyData(dataArray);
         const normalizedWaveform = Array.from(dataArray).map((value) =>
           Math.min(100, (value / 255) * 100),
         );
         setWaveform(normalizedWaveform);
-        animationFrameId = requestAnimationFrame(updateWaveform);
+        animationFrameIdRef.current = requestAnimationFrame(updateWaveform);
       } else {
-        cancelAnimationFrame(animationFrameId);
-        source?.disconnect();
-        analyser?.disconnect();
+        if (animationFrameIdRef.current !== null) {
+          cancelAnimationFrame(animationFrameIdRef.current);
+          animationFrameIdRef.current = null;
+        }
       }
     };
 
@@ -112,10 +160,30 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
   };
 
   const resetRecording = () => {
+    if (audioURLRef.current) {
+      URL.revokeObjectURL(audioURLRef.current);
+      audioURLRef.current = "";
+    }
     setAudioURL("");
     setBlob(null);
     setWaveform([]);
   };
+
+  useEffect(() => {
+    return () => {
+      cleanupAudioResources();
+      if (recorder) {
+        try {
+          recorder.stream.getTracks().forEach((track) => track.stop());
+          if (recorder.state !== "inactive") {
+            recorder.stop();
+          }
+        } catch {
+          // Ignore errors during cleanup
+        }
+      }
+    };
+  }, [recorder]);
 
   return {
     audioURL,
