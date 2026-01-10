@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { Box, ChevronLeft, Edit, Hash, Truck } from "lucide-react";
 import { Link } from "raviger";
 import { useState } from "react";
@@ -59,7 +64,7 @@ import query from "@/Utils/request/query";
 
 interface AllSupplyDeliveriesProps {
   facilityId: string;
-  requestOrderId: string;
+  deliverOrderIds: string[];
   selectedProductKnowledge?: ProductKnowledgeBase;
   internal: boolean;
   isRequester: boolean;
@@ -67,7 +72,7 @@ interface AllSupplyDeliveriesProps {
 
 function AllSupplyDeliveriesComponent({
   facilityId,
-  requestOrderId,
+  deliverOrderIds,
   selectedProductKnowledge,
   internal,
   isRequester,
@@ -85,27 +90,33 @@ function AllSupplyDeliveriesComponent({
         }),
   };
 
-  const { data: allSupplyDeliveries, isLoading: isLoadingAllSupplyDeliveries } =
-    useQuery({
-      queryKey: ["allSupplyDeliveries", requestOrderId, qParams],
-      queryFn: query.paginated(supplyDeliveryApi.listSupplyDelivery, {
-        queryParams: {
-          facility: facilityId,
-          request_order: requestOrderId,
-          ...qParams,
-        },
-      }),
-      enabled: !!requestOrderId,
+  const { data: allSupplyDeliveries, loading: isLoadingAllSupplyDeliveries } =
+    useQueries({
+      queries: deliverOrderIds.map((deliverOrderId) => ({
+        queryKey: ["allSupplyDeliveries", deliverOrderId, qParams],
+        queryFn: query(supplyDeliveryApi.listSupplyDelivery, {
+          queryParams: {
+            order: deliverOrderId,
+            facility: facilityId,
+            ...qParams,
+          },
+        }),
+      })),
+      combine: (results) => {
+        return {
+          data: results.map((result) => result.data?.results || []).flat(),
+          loading: results.some((result) => result.isLoading),
+        };
+      },
     });
 
   return (
     <div className="space-y-4 max-h-[68vh] overflow-y-auto px-4 pt-4">
       {isLoadingAllSupplyDeliveries ? (
         <TableSkeleton count={3} />
-      ) : allSupplyDeliveries?.results &&
-        allSupplyDeliveries.results.length > 0 ? (
+      ) : allSupplyDeliveries && allSupplyDeliveries.length > 0 ? (
         <SupplyDeliveryTable
-          deliveries={allSupplyDeliveries.results}
+          deliveries={allSupplyDeliveries}
           internal={internal}
           isRequester={isRequester}
         />
@@ -744,7 +755,9 @@ export function RequestOrderShow({
                     </div>
                     <AllSupplyDeliveriesComponent
                       facilityId={facilityId}
-                      requestOrderId={requestOrderId}
+                      deliverOrderIds={deliveryOrders.map(
+                        (deliveryOrder) => deliveryOrder.id,
+                      )}
                       internal={internal}
                       selectedProductKnowledge={selectedProductKnowledge}
                       isRequester={isRequester}
