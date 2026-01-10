@@ -158,7 +158,9 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
     return () => {
       recorder.removeEventListener("dataavailable", handleData);
       void cleanupAudioResources();
-      revokeAudioURL();
+      // Note: revokeAudioURL() is not called here to avoid race condition
+      // when handleData creates a new URL and setRecorder(null) triggers this cleanup.
+      // URL revocation is handled in: handleData (replaces old), resetRecording, and unmount effect.
     };
   }, [recorder, isRecording]);
 
