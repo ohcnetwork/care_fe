@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
+// Extend Window interface for Safari webkitAudioContext support
+declare global {
+  interface Window {
+    webkitAudioContext?: typeof AudioContext;
+  }
+}
+
 const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
   const [audioURL, setAudioURL] = useState("");
   const [isRecording, setIsRecording] = useState(false);
@@ -118,9 +125,11 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
       return;
     }
 
-    audioContextRef.current = new (
-      window.AudioContext || (window as any).webkitAudioContext
-    )();
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) {
+      return;
+    }
+    audioContextRef.current = new AudioContextClass();
     analyserRef.current = audioContextRef.current.createAnalyser();
     analyserRef.current.fftSize = 32;
     const bufferLength = analyserRef.current.frequencyBinCount;
