@@ -23,16 +23,17 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
   const isRecordingRef = useRef<boolean>(false);
   const isUnmountingRef = useRef<boolean>(false);
   const handleDataRef = useRef<((e: BlobEvent) => void) | null>(null);
+  const cleanupPromiseRef = useRef<Promise<void> | null>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
 
   useEffect(() => {
     isRecordingRef.current = isRecording;
   }, [isRecording]);
 
+  // Sync recorderRef with recorder state for unmount cleanup
   useEffect(() => {
-    if (!isRecording && recorder && audioURL) {
-      setRecorder(null);
-    }
-  }, [isRecording, recorder, audioURL]);
+    recorderRef.current = recorder;
+  }, [recorder]);
 
   const revokeAudioURL = (): void => {
     if (audioURLRef.current) {
@@ -42,34 +43,47 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
   };
 
   const cleanupAudioResources = async (): Promise<void> => {
-    if (animationFrameIdRef.current !== null) {
-      cancelAnimationFrame(animationFrameIdRef.current);
-      animationFrameIdRef.current = null;
+    // If cleanup is already in progress, wait for it to complete
+    if (cleanupPromiseRef.current) {
+      await cleanupPromiseRef.current;
+      return;
     }
-    if (sourceRef.current) {
-      try {
-        sourceRef.current.disconnect();
-      } catch {
-        // Ignore if already disconnected
+
+    // Create and store cleanup promise to prevent concurrent cleanups
+    const cleanupPromise = (async (): Promise<void> => {
+      if (animationFrameIdRef.current !== null) {
+        cancelAnimationFrame(animationFrameIdRef.current);
+        animationFrameIdRef.current = null;
       }
-      sourceRef.current = null;
-    }
-    if (analyserRef.current) {
-      try {
-        analyserRef.current.disconnect();
-      } catch {
-        // Ignore if already disconnected
+      if (sourceRef.current) {
+        try {
+          sourceRef.current.disconnect();
+        } catch {
+          // Ignore if already disconnected
+        }
+        sourceRef.current = null;
       }
-      analyserRef.current = null;
-    }
-    if (audioContextRef.current) {
-      try {
-        await audioContextRef.current.close();
-      } catch {
-        // Ignore if already closed
+      if (analyserRef.current) {
+        try {
+          analyserRef.current.disconnect();
+        } catch {
+          // Ignore if already disconnected
+        }
+        analyserRef.current = null;
       }
-      audioContextRef.current = null;
-    }
+      if (audioContextRef.current) {
+        try {
+          await audioContextRef.current.close();
+        } catch {
+          // Ignore if already closed
+        }
+        audioContextRef.current = null;
+      }
+    })();
+
+    cleanupPromiseRef.current = cleanupPromise;
+    await cleanupPromise;
+    cleanupPromiseRef.current = null;
   };
 
   useEffect(() => {
@@ -107,6 +121,10 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
       setAudioURL(url);
       const blob = new Blob([e.data], { type: "audio/mpeg" });
       setBlob(blob);
+      // Clear recorder after data is available and recording has stopped
+      if (!isRecordingRef.current) {
+        setRecorder(null);
+      }
     };
 
     // Store reference for cleanup
@@ -116,14 +134,19 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
     recorder.addEventListener("dataavailable", handleData);
 
     if (isRecording) {
-      try {
-        recorder.start();
-        setupAudioAnalyser();
-      } catch (error) {
-        // Handle start errors (e.g., already started, no stream)
-        console.error("Failed to start recorder:", error);
-        setIsRecording(false);
-      }
+      const initializeRecording = async () => {
+        try {
+          // Wait for any pending cleanup before starting
+          await cleanupAudioResources();
+          recorder.start();
+          await setupAudioAnalyser();
+        } catch (error) {
+          // Handle start errors (e.g., already started, no stream)
+          console.error("Failed to start recorder:", error);
+          setIsRecording(false);
+        }
+      };
+      void initializeRecording();
     } else {
       // Correct order: stop recorder first, then stop tracks
       recorder.stop();
@@ -139,10 +162,13 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
     };
   }, [recorder, isRecording]);
 
-  const setupAudioAnalyser = () => {
-    void cleanupAudioResources();
+  const setupAudioAnalyser = async (): Promise<void> => {
+    // Wait for cleanup to complete before creating new resources
+    await cleanupAudioResources();
 
-    if (!recorder?.stream) {
+    // Use recorderRef to ensure we have the latest recorder instance
+    const currentRecorder = recorderRef.current;
+    if (!currentRecorder?.stream) {
       return;
     }
 
@@ -157,7 +183,7 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
     const dataArray = new Uint8Array(bufferLength);
 
     sourceRef.current = audioContextRef.current.createMediaStreamSource(
-      recorder.stream,
+      currentRecorder.stream,
     );
     sourceRef.current.connect(analyserRef.current);
 
@@ -196,24 +222,28 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
     setWaveform([]);
   };
 
+  // Unmount-only effect: handles final cleanup when component unmounts
   useEffect(() => {
     return () => {
       isUnmountingRef.current = true;
 
       const cleanup = async () => {
         // Remove listener before stopping to prevent state updates
-        if (recorder && handleDataRef.current) {
+        // Use recorderRef to access the latest recorder instance
+        if (recorderRef.current && handleDataRef.current) {
           try {
-            recorder.removeEventListener(
+            recorderRef.current.removeEventListener(
               "dataavailable",
               handleDataRef.current,
             );
 
-            if (recorder.state !== "inactive") {
-              recorder.stop();
+            if (recorderRef.current.state !== "inactive") {
+              recorderRef.current.stop();
             }
-            if (recorder.stream) {
-              recorder.stream.getTracks().forEach((track) => track.stop());
+            if (recorderRef.current.stream) {
+              recorderRef.current.stream
+                .getTracks()
+                .forEach((track) => track.stop());
             }
           } catch {
             // Ignore errors during cleanup
@@ -226,6 +256,28 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
       };
 
       void cleanup();
+    };
+  }, []); // Empty dependency array for unmount-only cleanup
+
+  // Recorder-change effect: handles cleanup when recorder changes (not on unmount)
+  useEffect(() => {
+    if (!recorder) {
+      return;
+    }
+
+    return () => {
+      // Only stop recorder and tracks, don't set isUnmountingRef
+      // Listener removal is handled by the main recorder effect cleanup
+      try {
+        if (recorder.state !== "inactive") {
+          recorder.stop();
+        }
+        if (recorder.stream) {
+          recorder.stream.getTracks().forEach((track) => track.stop());
+        }
+      } catch {
+        // Ignore errors during cleanup
+      }
     };
   }, [recorder]);
 
