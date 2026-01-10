@@ -25,6 +25,41 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
     }
   }, [isRecording, recorder, audioURL]);
 
+  const cleanupAudioResources = (): void => {
+    if (animationFrameIdRef.current !== null) {
+      cancelAnimationFrame(animationFrameIdRef.current);
+      animationFrameIdRef.current = null;
+    }
+    if (sourceRef.current) {
+      try {
+        sourceRef.current.disconnect();
+      } catch {
+        // Ignore if already disconnected
+      }
+      sourceRef.current = null;
+    }
+    if (analyserRef.current) {
+      try {
+        analyserRef.current.disconnect();
+      } catch {
+        // Ignore if already disconnected
+      }
+      analyserRef.current = null;
+    }
+    if (audioContextRef.current) {
+      try {
+        audioContextRef.current.close();
+      } catch {
+        // Ignore if already closed
+      }
+      audioContextRef.current = null;
+    }
+    if (audioURLRef.current) {
+      URL.revokeObjectURL(audioURLRef.current);
+      audioURLRef.current = "";
+    }
+  };
+
   useEffect(() => {
     const initializeRecorder = async () => {
       try {
@@ -75,41 +110,6 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
       cleanupAudioResources();
     };
   }, [recorder, isRecording]);
-
-  const cleanupAudioResources = (): void => {
-    if (animationFrameIdRef.current !== null) {
-      cancelAnimationFrame(animationFrameIdRef.current);
-      animationFrameIdRef.current = null;
-    }
-    if (sourceRef.current) {
-      try {
-        sourceRef.current.disconnect();
-      } catch {
-        // Ignore if already disconnected
-      }
-      sourceRef.current = null;
-    }
-    if (analyserRef.current) {
-      try {
-        analyserRef.current.disconnect();
-      } catch {
-        // Ignore if already disconnected
-      }
-      analyserRef.current = null;
-    }
-    if (audioContextRef.current) {
-      try {
-        audioContextRef.current.close();
-      } catch {
-        // Ignore if already closed
-      }
-      audioContextRef.current = null;
-    }
-    if (audioURLRef.current) {
-      URL.revokeObjectURL(audioURLRef.current);
-      audioURLRef.current = "";
-    }
-  };
 
   const setupAudioAnalyser = () => {
     cleanupAudioResources();
