@@ -8,7 +8,6 @@ import { z } from "zod";
 export enum ConditionOperation {
   equality = "equality",
   in_range = "in_range",
-  intersects_any = "intersects_any",
   has_tag = "has_tag",
 }
 
