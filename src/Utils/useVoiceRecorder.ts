@@ -225,8 +225,7 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
   };
 
   // Recorder-change effect: handles cleanup when recorder changes
-  // Note: React runs all effect cleanups on unmount, so we guard against
-  // running this cleanup on unmount since the unmount-only effect handles it
+
   useEffect(() => {
     if (!recorder) {
       return;
