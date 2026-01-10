@@ -21,6 +21,8 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
   const animationFrameIdRef = useRef<number | null>(null);
   const audioURLRef = useRef<string>("");
   const isRecordingRef = useRef<boolean>(false);
+  const isUnmountingRef = useRef<boolean>(false);
+  const handleDataRef = useRef<((e: BlobEvent) => void) | null>(null);
 
   useEffect(() => {
     isRecordingRef.current = isRecording;
@@ -32,7 +34,14 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
     }
   }, [isRecording, recorder, audioURL]);
 
-  const cleanupAudioResources = (): void => {
+  const revokeAudioURL = (): void => {
+    if (audioURLRef.current) {
+      URL.revokeObjectURL(audioURLRef.current);
+      audioURLRef.current = "";
+    }
+  };
+
+  const cleanupAudioResources = async (): Promise<void> => {
     if (animationFrameIdRef.current !== null) {
       cancelAnimationFrame(animationFrameIdRef.current);
       animationFrameIdRef.current = null;
@@ -55,15 +64,11 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
     }
     if (audioContextRef.current) {
       try {
-        audioContextRef.current.close();
+        await audioContextRef.current.close();
       } catch {
         // Ignore if already closed
       }
       audioContextRef.current = null;
-    }
-    if (audioURLRef.current) {
-      URL.revokeObjectURL(audioURLRef.current);
-      audioURLRef.current = "";
     }
   };
 
@@ -91,19 +96,12 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
       return;
     }
 
-    if (isRecording) {
-      recorder.start();
-      setupAudioAnalyser();
-    } else {
-      recorder.stream.getTracks().forEach((i) => i.stop());
-      recorder.stop();
-      cleanupAudioResources();
-    }
-
     const handleData = (e: BlobEvent) => {
-      if (audioURLRef.current) {
-        URL.revokeObjectURL(audioURLRef.current);
+      // Prevent state updates after unmount
+      if (isUnmountingRef.current) {
+        return;
       }
+      revokeAudioURL();
       const url = URL.createObjectURL(e.data);
       audioURLRef.current = url;
       setAudioURL(url);
@@ -111,15 +109,38 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
       setBlob(blob);
     };
 
+    // Store reference for cleanup
+    handleDataRef.current = handleData;
+
+    // Attach listener before stopping to ensure we capture the data
     recorder.addEventListener("dataavailable", handleData);
+
+    if (isRecording) {
+      try {
+        recorder.start();
+        setupAudioAnalyser();
+      } catch (error) {
+        // Handle start errors (e.g., already started, no stream)
+        console.error("Failed to start recorder:", error);
+        setIsRecording(false);
+      }
+    } else {
+      // Correct order: stop recorder first, then stop tracks
+      recorder.stop();
+      if (recorder.stream) {
+        recorder.stream.getTracks().forEach((track) => track.stop());
+      }
+      void cleanupAudioResources();
+    }
     return () => {
       recorder.removeEventListener("dataavailable", handleData);
-      cleanupAudioResources();
+      void cleanupAudioResources();
+      revokeAudioURL();
     };
   }, [recorder, isRecording]);
 
   const setupAudioAnalyser = () => {
-    cleanupAudioResources();
+    void cleanupAudioResources();
 
     if (!recorder?.stream) {
       return;
@@ -169,10 +190,7 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
   };
 
   const resetRecording = () => {
-    if (audioURLRef.current) {
-      URL.revokeObjectURL(audioURLRef.current);
-      audioURLRef.current = "";
-    }
+    revokeAudioURL();
     setAudioURL("");
     setBlob(null);
     setWaveform([]);
@@ -180,17 +198,34 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
 
   useEffect(() => {
     return () => {
-      cleanupAudioResources();
-      if (recorder) {
-        try {
-          recorder.stream.getTracks().forEach((track) => track.stop());
-          if (recorder.state !== "inactive") {
-            recorder.stop();
+      isUnmountingRef.current = true;
+
+      const cleanup = async () => {
+        // Remove listener before stopping to prevent state updates
+        if (recorder && handleDataRef.current) {
+          try {
+            recorder.removeEventListener(
+              "dataavailable",
+              handleDataRef.current,
+            );
+
+            if (recorder.state !== "inactive") {
+              recorder.stop();
+            }
+            if (recorder.stream) {
+              recorder.stream.getTracks().forEach((track) => track.stop());
+            }
+          } catch {
+            // Ignore errors during cleanup
           }
-        } catch {
-          // Ignore errors during cleanup
         }
-      }
+
+        // Await cleanup to handle async AudioContext.close()
+        await cleanupAudioResources();
+        revokeAudioURL();
+      };
+
+      void cleanup();
     };
   }, [recorder]);
 
