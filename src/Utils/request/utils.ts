@@ -1,7 +1,11 @@
 import { LocalStorageKeys } from "@/common/constants";
 
 import { HttpMethod, QueryParams, Type } from "@/Utils/request/types";
-const VALID_HTTP_METHODS = Object.values(HttpMethod);
+
+const VALID_HTTP_METHODS = new Set<string>(
+  Object.values(HttpMethod).filter((v) => typeof v === "string"),
+);
+
 export const API = <TResponse, TBody = undefined>(
   route: `${HttpMethod} ${string}`,
 ) => {
@@ -15,7 +19,7 @@ export const API = <TResponse, TBody = undefined>(
 
   const [method, path] = parts;
 
-  if (!VALID_HTTP_METHODS.includes(method as HttpMethod)) {
+  if (!VALID_HTTP_METHODS.has(method)) {
     throw new Error(`Invalid HTTP method "${method}" in API route "${route}".`);
   }
 
@@ -23,15 +27,15 @@ export const API = <TResponse, TBody = undefined>(
     throw new Error(`API route path cannot be empty in "${route}".`);
   }
 
-  if (!path.startsWith("/")) {
+  if (!path.startsWith("/") || path.startsWith("//")) {
     throw new Error(
-      `Invalid API route path "${path}". Path must start with "/".`,
+      `Invalid API route path "${path}". Path must start with a single "/".`,
     );
   }
-
+  const httpMethod = method as HttpMethod;
   return {
     path,
-    method: method as HttpMethod,
+    method: httpMethod,
     TRes: Type<TResponse>(),
     TBody: Type<TBody>(),
   };
