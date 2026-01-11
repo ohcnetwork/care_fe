@@ -5,10 +5,35 @@ import { HttpMethod, QueryParams, Type } from "@/Utils/request/types";
 export const API = <TResponse, TBody = undefined>(
   route: `${HttpMethod} ${string}`,
 ) => {
-  const [method, path] = route.split(" ") as [HttpMethod, string];
+  const parts = route.trim().split(/\s+/);
+
+  if (parts.length !== 2) {
+    throw new Error(
+      `Invalid API route "${route}". Expected format: "METHOD PATH".`,
+    );
+  }
+
+  const [method, path] = parts;
+
+  const validMethods = Object.values(HttpMethod);
+
+  if (!validMethods.includes(method as HttpMethod)) {
+    throw new Error(`Invalid HTTP method "${method}" in API route "${route}".`);
+  }
+
+  if (!path || path.trim().length === 0) {
+    throw new Error(`API route path cannot be empty in "${route}".`);
+  }
+
+  if (!path.startsWith("/")) {
+    throw new Error(
+      `Invalid API route path "${path}". Path must start with "/".`,
+    );
+  }
+
   return {
     path,
-    method,
+    method: method as HttpMethod,
     TRes: Type<TResponse>(),
     TBody: Type<TBody>(),
   };
