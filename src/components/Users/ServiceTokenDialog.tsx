@@ -120,14 +120,15 @@ export default function ServiceTokenDialog({
                 </div>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 variant="secondary"
                 onClick={handleRevokeToken}
                 className="w-full justify-center items-center"
               >
                 <ShieldAlertIcon className="mr-2 size-4" />
-                {t("revoke_token")}
+                <span className="hidden sm:inline">{t("revoke_token")}</span>
+                <span className="sm:hidden">{t("revoke")}</span>
               </Button>
               <Button
                 variant="outline"
@@ -136,7 +137,12 @@ export default function ServiceTokenDialog({
                 className="w-full justify-center items-center"
               >
                 <KeyRoundIcon className="mr-2 size-4" />
-                {isGenerating ? t("generating") : t("generate_token")}
+                <span className="hidden sm:inline">
+                  {isGenerating ? t("generating") : t("generate_token")}
+                </span>
+                <span className="sm:hidden">
+                  {isGenerating ? t("generating") : t("generate")}
+                </span>
               </Button>
             </div>
           </div>
