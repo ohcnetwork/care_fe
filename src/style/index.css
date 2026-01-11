@@ -275,7 +275,13 @@
     /* Base page settings with auto size for responsive scaling */
     @page {
       size: auto; /* Auto size allows content to adapt to paper size */
-      margin: 0.5in; /* Consistent margins for all orientations */
+      margin: 0.5in 0.5in 0.75in 0.5in; /* Extra bottom margin for page numbers */
+
+      @bottom-center {
+        content: "Page " counter(page) " of " counter(pages);
+        font-size: 10pt;
+        color: #666;
+      }
     }
 
     /* Portrait orientation specific settings */
