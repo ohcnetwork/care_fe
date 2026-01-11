@@ -96,20 +96,20 @@ export function ResourceCategoryForm({
     enabled: isEditing && !!categorySlug,
   });
 
-  // Update form when category data loads
+  // Update form when sheet opens - handles both create and edit modes
   useEffect(() => {
-    if (categoryData) {
+    if (!isOpen) return;
+
+    if (isEditing && categoryData) {
+      // Edit mode: populate form with existing data
       form.reset({
         title: categoryData.title,
         slug_value: categoryData.slug_config.slug_value,
         description: categoryData.description || "",
         resource_sub_type: categoryData.resource_sub_type,
       });
-    }
-  }, [categoryData, form]);
-
-  useEffect(() => {
-    if (!isOpen) {
+    } else if (!isEditing) {
+      // Create mode: reset to empty defaults
       form.reset({
         title: "",
         slug_value: "",
@@ -117,7 +117,7 @@ export function ResourceCategoryForm({
         resource_sub_type: ResourceCategorySubType.other,
       });
     }
-  }, [isOpen, form]);
+  }, [isOpen, isEditing, categoryData, form]);
 
   // Auto-generate slug from name when creating new category
   useEffect(() => {
@@ -259,6 +259,7 @@ export function ResourceCategoryForm({
                           .replace(/[^a-z0-9_-]/g, "");
                         form.setValue("slug_value", sanitizedValue, {
                           shouldValidate: true,
+                          shouldDirty: true,
                         });
                       }}
                     />
