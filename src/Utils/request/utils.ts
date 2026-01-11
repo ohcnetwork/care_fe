@@ -21,7 +21,7 @@ export const API = <TResponse, TBody = undefined>(
     throw new Error(`Invalid HTTP method "${method}" in API route "${route}".`);
   }
 
-  if (!path || path.trim().length === 0) {
+  if (!path || path.length === 0) {
     throw new Error(`API route path cannot be empty in "${route}".`);
   }
 
