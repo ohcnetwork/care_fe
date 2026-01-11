@@ -162,7 +162,7 @@ export default function UserSelector({
     isFetchingNextPage,
     isFetching,
   } = useInfiniteQuery({
-    queryKey: ["users", facilityId, search, organizationId],
+    queryKey: ["users", facilityId, search, organizationId, isServiceAccount],
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query.debounced(
         facilityId

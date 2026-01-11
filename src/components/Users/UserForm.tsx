@@ -187,9 +187,6 @@ export default function UserForm({
     queryKey: ["user", existingUsername],
     queryFn: query(userApi.get, {
       pathParams: { username: existingUsername! },
-      queryParams: {
-        is_service_account: isServiceAccount,
-      },
     }),
     enabled: !!existingUsername,
   });
@@ -263,7 +260,11 @@ export default function UserForm({
     mutationKey: ["create_user"],
     mutationFn: mutate(userApi.create),
     onSuccess: (resp: UserReadMinimal) => {
-      toast.success(t("user_added_successfully"));
+      toast.success(
+        isServiceAccount
+          ? t("service_account_added_successfully")
+          : t("user_added_successfully"),
+      );
       queryClient.invalidateQueries({
         queryKey: ["facilityUsers"],
       });
@@ -274,9 +275,6 @@ export default function UserForm({
         queryKey: ["facilityOrganizationUsers"],
       });
       onSubmitSuccess?.(resp);
-    },
-    onError: (error) => {
-      toast.error(error?.message ?? t("user_add_error"));
     },
   });
 
@@ -365,14 +363,24 @@ export default function UserForm({
             name="user_type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel aria-required>{t("user_type")}</FormLabel>
+                <FormLabel aria-required>
+                  {isServiceAccount
+                    ? t("service_account_type")
+                    : t("user_type")}
+                </FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger ref={field.ref}>
-                      <SelectValue placeholder={t("select_user_type")} />
+                      <SelectValue
+                        placeholder={
+                          isServiceAccount
+                            ? t("select_service_account_type")
+                            : t("select_user_type")
+                        }
+                      />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -848,7 +856,9 @@ export default function UserForm({
               : t("creating")
             : isEditMode
               ? t("update_user")
-              : t("create_user")}
+              : isServiceAccount
+                ? t("create_service_account")
+                : t("create_user")}
         </Button>
       </form>
     </Form>

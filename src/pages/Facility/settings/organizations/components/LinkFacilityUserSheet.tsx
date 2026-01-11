@@ -55,9 +55,6 @@ export default function LinkFacilityUserSheet({
     queryKey: ["user", preSelectedUsername],
     queryFn: query(UserApi.get, {
       pathParams: { username: preSelectedUsername || "" },
-      queryParams: {
-        is_service_account: isServiceAccount,
-      },
     }),
     enabled: !!preSelectedUsername,
   });
@@ -78,7 +75,11 @@ export default function LinkFacilityUserSheet({
       queryClient.invalidateQueries({
         queryKey: ["facilityOrganizationUsers", facilityId, organizationId],
       });
-      toast.success(t("user_added_to_organization_successfully"));
+      toast.success(
+        isServiceAccount
+          ? t("service_account_added_to_organization_successfully")
+          : t("user_added_to_organization_successfully"),
+      );
       setOpen(false);
       setSelectedUser(undefined);
       setSelectedRole(undefined);
@@ -87,7 +88,11 @@ export default function LinkFacilityUserSheet({
 
   const handleAddUser = () => {
     if (!selectedUser || !selectedRole) {
-      toast.error(t("please_select_user_and_role"));
+      toast.error(
+        isServiceAccount
+          ? t("please_select_service_account_and_role")
+          : t("please_select_user_and_role"),
+      );
       return;
     }
 
@@ -107,22 +112,36 @@ export default function LinkFacilityUserSheet({
       <SheetTrigger asChild>
         <Button>
           <CareIcon icon="l-plus" className="mr-2 size-4" />
-          {t("link_user")}
+          {isServiceAccount ? t("link_service_account") : t("link_user")}
         </Button>
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-md overflow-y-auto p-8">
         <SheetHeader>
-          <SheetTitle>{t("link_user_to_facility")}</SheetTitle>
+          <SheetTitle>
+            {isServiceAccount
+              ? t("link_service_account_to_facility")
+              : t("link_user_to_facility")}
+          </SheetTitle>
           <SheetDescription>
-            {t("link_user_to_facility_description")}
+            {isServiceAccount
+              ? t("link_service_account_to_facility_description")
+              : t("link_user_to_facility_description")}
           </SheetDescription>
         </SheetHeader>
         <div className="space-y-6 py-4 min-h-full">
           <UserSelector
             selected={selectedUser}
             onChange={handleUserChange}
-            placeholder={t("search_for_a_user")}
-            noOptionsMessage="No users found"
+            placeholder={
+              isServiceAccount
+                ? t("search_for_a_service_account")
+                : t("search_for_a_user")
+            }
+            noOptionsMessage={
+              isServiceAccount
+                ? t("no_service_accounts_found")
+                : t("no_users_found")
+            }
             popoverClassName="w-full"
             isServiceAccount={isServiceAccount}
           />
@@ -153,7 +172,9 @@ export default function LinkFacilityUserSheet({
                   </div>
                   <div>
                     <span className="text-sm text-gray-500">
-                      {t("user_type")}
+                      {isServiceAccount
+                        ? t("service_account_type")
+                        : t("user_type")}
                     </span>
                     <p className="text-sm font-medium">
                       {selectedUser.user_type}

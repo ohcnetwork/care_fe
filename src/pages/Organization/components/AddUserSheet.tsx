@@ -37,13 +37,21 @@ export default function AddUserSheet({
       <SheetTrigger asChild>
         <Button variant="outline">
           <CareIcon icon="l-plus" className="mr-2 size-4" />
-          {t("add_user")}
+          {isServiceAccount ? t("add_service_account") : t("add_user")}
         </Button>
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>{t("add_new_user")}</SheetTitle>
-          <SheetDescription>{t("create_user_and_add_to_org")}</SheetDescription>
+          <SheetTitle>
+            {isServiceAccount
+              ? t("add_new_service_account")
+              : t("add_new_user")}
+          </SheetTitle>
+          <SheetDescription>
+            {isServiceAccount
+              ? t("create_service_account_and_add_to_org")
+              : t("create_user_and_add_to_org")}
+          </SheetDescription>
         </SheetHeader>
         <div className="mt-6">
           <UserForm

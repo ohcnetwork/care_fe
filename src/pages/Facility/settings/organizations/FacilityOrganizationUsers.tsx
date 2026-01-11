@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import ServiceTokenDialog from "@/components/Users/ServiceTokenDialog";
 import { UserCard } from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
@@ -22,6 +23,7 @@ import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrgani
 import { OrganizationUserRole } from "@/types/organization/organization";
 
 import useAuthUser from "@/hooks/useAuthUser";
+import { UserReadMinimal } from "@/types/user/user";
 import EditFacilityUserRoleSheet from "./components/EditFacilityUserRoleSheet";
 import LinkFacilityUserSheet from "./components/LinkFacilityUserSheet";
 
@@ -46,6 +48,10 @@ export default function FacilityOrganizationUsers({
     sheet: "",
     username: "",
   });
+  const [selectedUser, setSelectedUser] = useState<UserReadMinimal | null>(
+    null,
+  );
+  const [showTokenDialog, setShowTokenDialog] = useState(false);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 12,
     disableCache: true,
@@ -58,7 +64,13 @@ export default function FacilityOrganizationUsers({
   const openLinkUserSheet = sheetState.sheet === "link";
 
   const { data: users, isLoading: isLoadingUsers } = useQuery({
-    queryKey: ["facilityOrganizationUsers", facilityId, id, qParams],
+    queryKey: [
+      "facilityOrganizationUsers",
+      facilityId,
+      id,
+      qParams,
+      isServiceAccount,
+    ],
     queryFn: query.debounced(facilityOrganizationApi.listUsers, {
       pathParams: { facilityId, organizationId: id },
       queryParams: {
@@ -157,23 +169,40 @@ export default function FacilityOrganizationUsers({
                   user={userRole.user}
                   roleName={userRole.role.name}
                   facility={facilityId}
-                  actions={
-                    (isGeoAdmin || canManageFacilityOrganizationUsers) &&
-                    !isServiceAccount && (
+                  editRoleAction={
+                    (isGeoAdmin || canManageFacilityOrganizationUsers) && (
                       <EditFacilityUserRoleSheet
                         facilityId={facilityId}
                         organizationId={id}
                         userRole={userRole}
                         trigger={
-                          <Button variant="outline" size="sm">
-                            <span>{t("edit_role")}</span>
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className="underline text-gray-500"
+                          >
+                            <span>{t("edit")}</span>
                           </Button>
                         }
                       />
                     )
                   }
+                  actions={
+                    isServiceAccount &&
+                    canManageServiceAccount && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedUser(userRole.user);
+                          setShowTokenDialog(true);
+                        }}
+                      >
+                        <span>{t("manage_token")}</span>
+                      </Button>
+                    )
+                  }
                   isServiceAccount={isServiceAccount}
-                  canManageServiceAccount={canManageServiceAccount}
                 />
               ))
             )}
@@ -186,6 +215,19 @@ export default function FacilityOrganizationUsers({
               </div>
             )}
         </div>
+      )}
+
+      {selectedUser && (
+        <ServiceTokenDialog
+          user={selectedUser}
+          open={showTokenDialog}
+          onOpenChange={(open) => {
+            setShowTokenDialog(open);
+            if (!open) {
+              setSelectedUser(null);
+            }
+          }}
+        />
       )}
     </div>
   );

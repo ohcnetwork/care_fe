@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 
@@ -8,7 +8,10 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import ServiceTokenDialog from "@/components/Users/ServiceTokenDialog";
 import { UserCard } from "@/components/Users/UserListAndCard";
+
+import { UserReadMinimal } from "@/types/user/user";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -35,6 +38,10 @@ export default function OrganizationUsers({
   navOrganizationId,
   isServiceAccount = false,
 }: Props) {
+  const [selectedUser, setSelectedUser] = useState<UserReadMinimal | null>(
+    null,
+  );
+  const [showTokenDialog, setShowTokenDialog] = useState(false);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
@@ -89,6 +96,7 @@ export default function OrganizationUsers({
       qParams.name,
       qParams.phone_number,
       qParams.page,
+      isServiceAccount,
     ],
     queryFn: query.debounced(organizationApi.listUsers, {
       pathParams: { id },
@@ -109,103 +117,143 @@ export default function OrganizationUsers({
   }
 
   return (
-    <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
-      {({ orgPermissions }) => {
-        const {
-          canCreateUser,
-          canManageOrganizationUsers,
-          canCreateServiceAccount,
-          canManageServiceAccount,
-        } = getPermissions(hasPermission, orgPermissions);
-        return (
-          <div className="space-y-6">
-            <div className="justify-between items-center flex flex-wrap">
-              <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
-                <EntityBadge
-                  title={t("users")}
-                  count={users?.count}
-                  isFetching={isFetchingUsers}
-                  translationParams={{ entity: "User" }}
+    <>
+      <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
+        {({ orgPermissions }) => {
+          const {
+            canCreateUser,
+            canManageOrganizationUsers,
+            canCreateServiceAccount,
+            canManageServiceAccount,
+          } = getPermissions(hasPermission, orgPermissions);
+          return (
+            <div className="space-y-6">
+              <div className="justify-between items-center flex flex-wrap">
+                <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
+                  <EntityBadge
+                    title={
+                      isServiceAccount ? t("service_accounts") : t("users")
+                    }
+                    count={users?.count}
+                    isFetching={isFetchingUsers}
+                    translationParams={{
+                      entity: isServiceAccount
+                        ? t("service_account")
+                        : t("user"),
+                    }}
+                  />
+                </div>
+                <div className="gap-2 flex flex-wrap mt-2">
+                  {(canCreateUser || canCreateServiceAccount) && (
+                    <AddUserSheet
+                      open={openAddUserSheet}
+                      setOpen={(open) => {
+                        updateQuery({ sheet: open ? "add" : "" });
+                      }}
+                      onUserCreated={(user) => {
+                        updateQuery({ sheet: "link", username: user.username });
+                      }}
+                      organizationId={id}
+                      isServiceAccount={isServiceAccount}
+                    />
+                  )}
+                  {canManageOrganizationUsers && (
+                    <LinkUserSheet
+                      organizationId={id}
+                      open={openLinkUserSheet}
+                      setOpen={(open) => {
+                        updateQuery({
+                          sheet: open ? "link" : "",
+                          username: "",
+                        });
+                      }}
+                      preSelectedUsername={qParams.username}
+                      isServiceAccount={isServiceAccount}
+                    />
+                  )}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <SearchInput
+                  options={searchOptions}
+                  onSearch={handleSearch}
+                  onFieldChange={handleFieldChange}
+                  className="w-full"
                 />
               </div>
-              <div className="gap-2 flex flex-wrap mt-2">
-                {(canCreateUser || canCreateServiceAccount) && (
-                  <AddUserSheet
-                    open={openAddUserSheet}
-                    setOpen={(open) => {
-                      updateQuery({ sheet: open ? "add" : "" });
-                    }}
-                    onUserCreated={(user) => {
-                      updateQuery({ sheet: "link", username: user.username });
-                    }}
-                    organizationId={id}
-                    isServiceAccount={isServiceAccount}
-                  />
-                )}
-                {canManageOrganizationUsers && (
-                  <LinkUserSheet
-                    organizationId={id}
-                    open={openLinkUserSheet}
-                    setOpen={(open) => {
-                      updateQuery({ sheet: open ? "link" : "", username: "" });
-                    }}
-                    preSelectedUsername={qParams.username}
-                    isServiceAccount={isServiceAccount}
-                  />
-                )}
-              </div>
+              {isFetchingUsers ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                  <CardGridSkeleton count={6} />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {users?.results?.length === 0 ? (
+                    <Card className="col-span-full">
+                      <CardContent className="p-6 text-center text-gray-500">
+                        {t("no_users_found")}
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    users?.results?.map((userRole) => (
+                      <UserCard
+                        key={userRole.user.id}
+                        user={userRole.user}
+                        roleName={userRole.role.name}
+                        editRoleAction={
+                          canManageOrganizationUsers && (
+                            <EditUserRoleSheet
+                              organizationId={id}
+                              userRole={userRole}
+                              trigger={
+                                <Button
+                                  variant="link"
+                                  size="sm"
+                                  className="underline text-gray-500"
+                                >
+                                  <span>{t("edit")}</span>
+                                </Button>
+                              }
+                            />
+                          )
+                        }
+                        actions={
+                          isServiceAccount &&
+                          canManageServiceAccount && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedUser(userRole.user);
+                                setShowTokenDialog(true);
+                              }}
+                            >
+                              <span>{t("manage_token")}</span>
+                            </Button>
+                          )
+                        }
+                        isServiceAccount={isServiceAccount}
+                      />
+                    ))
+                  )}
+                </div>
+              )}
+              <Pagination totalCount={users?.count || 0} />
             </div>
-            <div className="flex gap-2">
-              <SearchInput
-                options={searchOptions}
-                onSearch={handleSearch}
-                onFieldChange={handleFieldChange}
-                className="w-full"
-              />
-            </div>
-            {isFetchingUsers ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                <CardGridSkeleton count={6} />
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                {users?.results?.length === 0 ? (
-                  <Card className="col-span-full">
-                    <CardContent className="p-6 text-center text-gray-500">
-                      {t("no_users_found")}
-                    </CardContent>
-                  </Card>
-                ) : (
-                  users?.results?.map((userRole) => (
-                    <UserCard
-                      key={userRole.user.id}
-                      user={userRole.user}
-                      roleName={userRole.role.name}
-                      actions={
-                        canManageOrganizationUsers &&
-                        !isServiceAccount && (
-                          <EditUserRoleSheet
-                            organizationId={id}
-                            userRole={userRole}
-                            trigger={
-                              <Button variant="outline" size="sm">
-                                <span>{t("edit_role")}</span>
-                              </Button>
-                            }
-                          />
-                        )
-                      }
-                      isServiceAccount={isServiceAccount}
-                      canManageServiceAccount={canManageServiceAccount}
-                    />
-                  ))
-                )}
-              </div>
-            )}
-            <Pagination totalCount={users?.count || 0} />
-          </div>
-        );
-      }}
-    </OrganizationLayout>
+          );
+        }}
+      </OrganizationLayout>
+      {selectedUser && (
+        <ServiceTokenDialog
+          user={selectedUser}
+          open={showTokenDialog}
+          onOpenChange={(open) => {
+            setShowTokenDialog(open);
+            if (!open) {
+              setSelectedUser(null);
+            }
+          }}
+        />
+      )}
+    </>
   );
 }
