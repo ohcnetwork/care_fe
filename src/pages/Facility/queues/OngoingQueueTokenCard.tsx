@@ -31,7 +31,7 @@ import {
   RotateCcw,
   TicketCheck,
 } from "lucide-react";
-import { Link } from "raviger";
+import { Link, usePath } from "raviger";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -51,6 +51,7 @@ export function OngoingQueueTokenCard({
   const contextMenuTriggerRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const { resourceType, resourceId } = useScheduleResourceFromPath();
+  const sourceUrl = usePath();
 
   const [showAssignToServicePointDialog, setShowAssignToServicePointDialog] =
     useState(false);
@@ -105,6 +106,9 @@ export function OngoingQueueTokenCard({
                           token_id: token.id,
                           resource_type: resourceType,
                           resource_id: resourceId,
+                          source_url: sourceUrl
+                            ? `source_url=${sourceUrl}`
+                            : "",
                         },
                       ).toString()}`
                     : "#"

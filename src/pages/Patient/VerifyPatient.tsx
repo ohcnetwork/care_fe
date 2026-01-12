@@ -8,6 +8,7 @@ import {
   Ticket,
 } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
@@ -22,6 +23,7 @@ import {
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import CreateTokenForm from "@/components/Tokens/CreateTokenForm";
 import PatientTokensList from "@/components/Tokens/PatientTokensList";
+import TokenViewModal from "@/components/Tokens/TokenViewModal";
 import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import PatientHomeTabs from "./home/PatientHomeTabs";
 
@@ -58,6 +60,7 @@ export default function VerifyPatient() {
   const { t } = useTranslation();
   const [qParams] = useQueryParams();
   const queryClient = useQueryClient();
+  const [showTokenModal, setShowTokenModal] = useState(false);
 
   const {
     phone_number,
@@ -94,6 +97,14 @@ export default function VerifyPatient() {
     enabled: !!(phone_number && year_of_birth && partial_id),
   });
 
+  const isFromQueue = !!qParams.source_url;
+
+  useEffect(() => {
+    if (isFromQueue && token_id && patientData) {
+      setShowTokenModal(true);
+    }
+  }, [isFromQueue, token_id, patientData]);
+
   if (isVerifyingPatient || !facility) {
     return (
       <div className="space-y-4 md:max-w-5xl mx-auto">
@@ -113,7 +124,7 @@ export default function VerifyPatient() {
         </Alert>
       ) : patientData ? (
         <div className="space-y-5 md:max-w-5xl mx-auto">
-          {queue_id && (
+          {isFromQueue && queue_id && (
             <BackButton
               to={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resource_type as SchedulableResourceType]}/${resource_id}/queues/${queue_id}`}
             >
@@ -221,6 +232,16 @@ export default function VerifyPatient() {
               )}
             </div>
           </div>
+
+          {isFromQueue && token_id && (
+            <TokenViewModal
+              open={showTokenModal}
+              onOpenChange={setShowTokenModal}
+              patientId={patientData.id}
+              facility={facility}
+              tokenId={token_id}
+            />
+          )}
         </div>
       ) : (
         isError && (
