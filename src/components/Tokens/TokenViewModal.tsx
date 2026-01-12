@@ -91,7 +91,10 @@ export default function TokenViewModal({
                 <Button
                   variant="primary"
                   className="w-full flex items-center justify-center gap-2 font-semibold"
-                  onClick={() => setShowServicepointDialog(true)}
+                  onClick={() => {
+                    setShowServicepointDialog(true);
+                    onOpenChange(false);
+                  }}
                 >
                   {t("mark_as_in_service")}
                 </Button>
