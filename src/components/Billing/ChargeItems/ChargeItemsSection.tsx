@@ -10,6 +10,7 @@ import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/
 import AddMultipleChargeItemsSheet from "@/pages/Facility/services/serviceRequests/components/AddMultipleChargeItemsSheet";
 import { ChargeItemCard } from "@/pages/Facility/services/serviceRequests/components/ChargeItemCard";
 
+import { ResourceCategorySubType } from "@/types/base/resourceCategory/resourceCategory";
 import {
   AccountBillingStatus,
   AccountStatus,
@@ -179,6 +180,7 @@ export function ChargeItemsSection({
             queryKey: ["chargeItems", facilityId, resourceId],
           });
         }}
+        resourceSubType={ResourceCategorySubType.other}
       />
     </>
   );
