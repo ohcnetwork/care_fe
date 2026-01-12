@@ -35,7 +35,6 @@ import { usePermissions } from "@/context/PermissionContext";
 
 import BackButton from "@/components/Common/BackButton";
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
-import { resourceTypeToResourcePathSlug } from "@/components/Schedule/useScheduleResource";
 import { Badge } from "@/components/ui/badge";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
@@ -46,7 +45,6 @@ import {
   Appointment,
   APPOINTMENT_STATUS_COLORS,
   formatScheduleResourceName,
-  SchedulableResourceType,
   UpcomingAppointmentStatuses,
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
@@ -62,15 +60,8 @@ export default function VerifyPatient() {
   const queryClient = useQueryClient();
   const [showTokenModal, setShowTokenModal] = useState(false);
 
-  const {
-    phone_number,
-    year_of_birth,
-    partial_id,
-    queue_id,
-    token_id,
-    resource_type,
-    resource_id,
-  } = qParams;
+  const { phone_number, year_of_birth, partial_id, queue_id, token_id } =
+    qParams;
   const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
   const { hasPermission } = usePermissions();
@@ -97,7 +88,14 @@ export default function VerifyPatient() {
     enabled: !!(phone_number && year_of_birth && partial_id),
   });
 
-  const isFromQueue = !!qParams.source_url;
+  const isFromQueue = (() => {
+    if (!qParams.source_url) return false;
+    const queueUrlPattern =
+      /\/facility\/[a-f0-9-]+\/(practitioner|locations|services)\/[a-f0-9-]+\/queues\/[a-f0-9-]+\/ongoing/;
+    return queueUrlPattern.test(qParams.source_url);
+  })();
+
+  console.log("isFromQueue", isFromQueue);
 
   useEffect(() => {
     if (isFromQueue && token_id && patientData) {
@@ -125,9 +123,7 @@ export default function VerifyPatient() {
       ) : patientData ? (
         <div className="space-y-5 md:max-w-5xl mx-auto">
           {isFromQueue && queue_id && (
-            <BackButton
-              to={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resource_type as SchedulableResourceType]}/${resource_id}/queues/${queue_id}`}
-            >
+            <BackButton to={qParams.source_url ?? ""}>
               <ArrowLeft />
               {t("queue")}
             </BackButton>
@@ -237,8 +233,8 @@ export default function VerifyPatient() {
             <TokenViewModal
               open={showTokenModal}
               onOpenChange={setShowTokenModal}
-              patientId={patientData.id}
               facility={facility}
+              queueId={queue_id}
               tokenId={token_id}
             />
           )}

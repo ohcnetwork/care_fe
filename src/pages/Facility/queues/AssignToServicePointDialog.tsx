@@ -2,45 +2,66 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import {
-  renderTokenNumber,
-  TokenRead,
-  TokenStatus,
-} from "@/types/tokens/token/token";
+import { SchedulableResourceType } from "@/types/scheduling/schedule";
+import { TokenRead, TokenStatus } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
+import { TokenSubQueueStatus } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
+import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import mutate from "@/Utils/request/mutate";
-import { DialogDescription } from "@radix-ui/react-dialog";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import query from "@/Utils/request/query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UserCheck } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { usePreferredServicePointCategory } from "./usePreferredServicePointCategory";
-import { useQueueServicePoints } from "./useQueueServicePoints";
 
-export function AssignToServicePointDialog({
+export const AssignToServicePointDialog = ({
   open,
   onOpenChange,
+  facilityId,
+  resourceType,
+  resourceId,
   token,
+  status,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  facilityId: string;
+  resourceType: SchedulableResourceType;
+  resourceId: string;
   token: TokenRead;
-}) {
+  status: TokenStatus;
+}) => {
   const { t } = useTranslation();
-  const { facilityId } = useCurrentFacility();
   const queryClient = useQueryClient();
-  const [selectedSubQueueId, setSelectedSubQueueId] = useState<string>("");
-  const { assignedServicePoints } = useQueueServicePoints();
-  const { preferredServicePointCategories } = usePreferredServicePointCategory({
-    facilityId,
+
+  const [selectedSubQueueId, setSelectedSubQueueId] = useState<string>(
+    token.sub_queue?.id ?? "",
+  );
+
+  useEffect(() => {
+    if (open) {
+      setSelectedSubQueueId(token.sub_queue?.id ?? "");
+    }
+  }, [open, token.sub_queue?.id]);
+
+  const { data: subQueues } = useQuery({
+    queryKey: ["servicePoints", facilityId],
+    queryFn: query(tokenSubQueueApi.list, {
+      pathParams: { facility_id: facilityId },
+      queryParams: {
+        resource_type: resourceType,
+        resource_id: resourceId,
+        limit: 100, // We are assuming that a resource will not have more than 100 sub-queues
+        status: TokenSubQueueStatus.ACTIVE,
+      },
+    }),
   });
 
   const { mutate: updateToken, isPending } = useMutation({
@@ -53,10 +74,13 @@ export function AssignToServicePointDialog({
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["infinite-tokens", facilityId, token.queue.id],
+        queryKey: ["infinite-tokens", facilityId, token?.queue.id],
       });
       queryClient.invalidateQueries({
-        queryKey: ["token-queue-summary", facilityId, token.queue.id],
+        queryKey: ["tokens", token?.patient?.id, facilityId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["token-queue-summary", facilityId, token?.queue.id],
       });
       toast.success(t("token_assigned_to_service_point"));
       onOpenChange(false);
@@ -67,22 +91,18 @@ export function AssignToServicePointDialog({
     if (selectedSubQueueId) {
       updateToken({
         sub_queue: selectedSubQueueId,
-        status: TokenStatus.CREATED,
+        status: status,
         note: token.note,
       });
     }
   };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle>{t("select_service_point")}</DialogTitle>
           <DialogDescription className="text-sm text-gray-600">
-            {t("choose_service_point_to_call_patient", {
-              patientName: token.patient?.name,
-              tokenNumber: renderTokenNumber(token),
-            })}
+            {t("choose_service_point_to_call_patient")}
           </DialogDescription>
         </DialogHeader>
 
@@ -90,37 +110,35 @@ export function AssignToServicePointDialog({
           value={selectedSubQueueId}
           onValueChange={setSelectedSubQueueId}
         >
-          {assignedServicePoints.map((subQueue) => (
+          {subQueues?.results.map((subQueue) => (
             <div
               key={subQueue.id}
               className={cn(
-                "flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer",
-                subQueue.id === token.sub_queue?.id && "hidden",
+                "flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors",
               )}
-              onClick={() => setSelectedSubQueueId(subQueue.id)}
             >
-              <RadioGroupItem value={subQueue.id} id={subQueue.id} />
-              <Label
+              <RadioGroupItem
+                value={subQueue.id}
+                id={subQueue.id}
+                key={subQueue.id}
+              />
+              <label
                 htmlFor={subQueue.id}
                 className="flex-1 text-sm font-medium cursor-pointer"
               >
                 {subQueue.name}
-              </Label>
-              <span className="text-sm text-gray-600">
-                {preferredServicePointCategories?.[subQueue.id]?.name ??
-                  t("all")}
-              </span>
+              </label>
             </div>
           ))}
-          {assignedServicePoints.length === 0 && (
-            <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 bg-gray-50 cursor-not-allowed">
+          {subQueues?.results.length === 0 && (
+            <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
               <RadioGroupItem value="none" id="none" disabled />
-              <Label
+              <label
                 htmlFor="none"
-                className="flex-1 text-sm font-medium text-gray-500 cursor-not-allowed"
+                className="flex-1 text-sm font-medium cursor-pointer"
               >
                 {t("no_service_points_available")}
-              </Label>
+              </label>
             </div>
           )}
         </RadioGroup>
@@ -131,10 +149,12 @@ export function AssignToServicePointDialog({
             disabled={!selectedSubQueueId || isPending}
           >
             <UserCheck className="size-4 mr-2" />
-            {t("call_patient")}
+            {status === TokenStatus.IN_PROGRESS
+              ? t("mark_as_in_service")
+              : t("call_patient")}
           </Button>
         </div>
       </DialogContent>
     </Dialog>
   );
-}
+};

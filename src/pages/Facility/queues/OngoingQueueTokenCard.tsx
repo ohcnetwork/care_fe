@@ -31,7 +31,7 @@ import {
   RotateCcw,
   TicketCheck,
 } from "lucide-react";
-import { Link, usePath } from "raviger";
+import { Link, useFullPath } from "raviger";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -50,8 +50,8 @@ export function OngoingQueueTokenCard({
   const { t } = useTranslation();
   const contextMenuTriggerRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  const sourceUrl = useFullPath();
   const { resourceType, resourceId } = useScheduleResourceFromPath();
-  const sourceUrl = usePath();
 
   const [showAssignToServicePointDialog, setShowAssignToServicePointDialog] =
     useState(false);
@@ -104,11 +104,7 @@ export function OngoingQueueTokenCard({
                           partial_id: token.patient.id.slice(0, 5),
                           queue_id: token.queue.id,
                           token_id: token.id,
-                          resource_type: resourceType,
-                          resource_id: resourceId,
-                          source_url: sourceUrl
-                            ? `source_url=${sourceUrl}`
-                            : "",
+                          source_url: sourceUrl ?? "",
                         },
                       ).toString()}`
                     : "#"
@@ -283,6 +279,10 @@ export function OngoingQueueTokenCard({
             open={showAssignToServicePointDialog}
             onOpenChange={setShowAssignToServicePointDialog}
             token={token}
+            status={TokenStatus.CREATED}
+            facilityId={facilityId}
+            resourceType={resourceType}
+            resourceId={resourceId}
           />
           <CancelTokenDialog
             open={showCancelDialog}

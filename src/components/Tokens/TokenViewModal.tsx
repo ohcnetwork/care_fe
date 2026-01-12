@@ -5,49 +5,48 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ServicepointDialog } from "@/pages/Facility/queues/ServicepointDialog";
+import { AssignToServicePointDialog } from "@/pages/Facility/queues/AssignToServicePointDialog";
 import { TokenCard } from "@/pages/Facility/queues/TokenCard";
+import { getTokenStatus } from "@/pages/Facility/queues/utils";
 import { FacilityRead } from "@/types/facility/facility";
 import { formatScheduleResourceName } from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApi";
 import {
   renderTokenNumber,
   TOKEN_STATUS_COLORS,
   TokenRetrieve,
   TokenStatus,
 } from "@/types/tokens/token/token";
+import tokenApi from "@/types/tokens/token/tokenApi";
 import query from "@/Utils/request/query";
 
 interface TokenViewModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  patientId: string;
   facility: FacilityRead;
+  queueId: string;
   tokenId: string;
 }
 
 export default function TokenViewModal({
   open,
   onOpenChange,
-  patientId,
   facility,
+  queueId,
   tokenId,
 }: TokenViewModalProps) {
   const { t } = useTranslation();
   const [showServicepointDialog, setShowServicepointDialog] = useState(false);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["tokens", patientId, facility.id],
-    queryFn: query(scheduleApis.appointments.get_tokens, {
-      pathParams: { patientId },
-      queryParams: {
-        facility: facility.id,
-        limit: 50,
+  const { data: token, isLoading } = useQuery({
+    queryKey: ["token", facility.id, queueId, tokenId],
+    queryFn: query(tokenApi.get, {
+      pathParams: {
+        facility_id: facility.id,
+        queue_id: queueId,
+        id: tokenId,
       },
     }),
   });
-
-  const token = data?.results?.find((t) => t.id === tokenId);
 
   if (isLoading || !token) {
     return null;
@@ -71,7 +70,7 @@ export default function TokenViewModal({
                 variant={TOKEN_STATUS_COLORS[token.status]}
                 className="px-2 py-1 mr-7 mb-5 rounded-sm shrink-0"
               >
-                {t(token.status.toLowerCase())}
+                {getTokenStatus({ token })}
               </Badge>
             </div>
 
@@ -105,10 +104,11 @@ export default function TokenViewModal({
       </Dialog>
 
       {token && (
-        <ServicepointDialog
+        <AssignToServicePointDialog
           open={showServicepointDialog}
           onOpenChange={setShowServicepointDialog}
           token={token}
+          status={TokenStatus.IN_PROGRESS}
           facilityId={facility.id}
           resourceType={token.resource_type}
           resourceId={token.resource.id}

@@ -14,8 +14,9 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
-import { ServicepointDialog } from "@/pages/Facility/queues/ServicepointDialog";
+import { AssignToServicePointDialog } from "@/pages/Facility/queues/AssignToServicePointDialog";
 import { TokenCard } from "@/pages/Facility/queues/TokenCard";
+import { getTokenStatus } from "@/pages/Facility/queues/utils";
 import { FacilityRead } from "@/types/facility/facility";
 import { formatScheduleResourceName } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
@@ -74,8 +75,6 @@ export default function PatientTokensList({
   });
 
   const tokens = data?.results || [];
-
-  const orderedTokens = tokens.filter((token) => token.id === tokenId);
 
   const toggleTokenExpansion = (tokenId: string) => {
     const newExpanded = new Set(expandedTokens);
@@ -139,7 +138,8 @@ export default function PatientTokensList({
       )}
 
       {[
-        ...orderedTokens,
+        // ordered by selected token first, then by created date
+        ...tokens.filter((token) => token.id === tokenId),
         ...tokens.filter((token) => token.id !== tokenId),
       ].map((token) => {
         const isExpanded = expandedTokens.has(token.id);
@@ -182,7 +182,7 @@ export default function PatientTokensList({
                       variant={TOKEN_STATUS_COLORS[token.status]}
                       className="px-1.5 rounded-sm ml-2 whitespace-nowrap flex-shrink-0"
                     >
-                      {t(token.status.toLowerCase())}
+                      {getTokenStatus({ token })}
                     </Badge>
                     {isExpanded ? (
                       <ChevronsDownUp className="size-4 shrink-0" />
@@ -218,10 +218,11 @@ export default function PatientTokensList({
                         </Button>
                       </div>
                     )}
-                    <ServicepointDialog
+                    <AssignToServicePointDialog
                       open={showServicepointDialog}
                       onOpenChange={setShowServicepointDialog}
                       token={token}
+                      status={TokenStatus.CREATED}
                       facilityId={facility.id}
                       resourceType={token.resource_type}
                       resourceId={token.resource.id}
