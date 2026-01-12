@@ -100,23 +100,21 @@ export function ResourceCategoryForm({
   useEffect(() => {
     if (!isOpen) return;
 
-    if (isEditing && categoryData) {
-      // Edit mode: populate form with existing data
-      form.reset({
-        title: categoryData.title,
-        slug_value: categoryData.slug_config.slug_value,
-        description: categoryData.description || "",
-        resource_sub_type: categoryData.resource_sub_type,
-      });
-    } else if (!isEditing) {
-      // Create mode: reset to empty defaults
-      form.reset({
-        title: "",
-        slug_value: "",
-        description: "",
-        resource_sub_type: ResourceCategorySubType.other,
-      });
-    }
+    form.reset(
+      isEditing && categoryData
+        ? {
+            title: categoryData.title,
+            slug_value: categoryData.slug_config.slug_value,
+            description: categoryData.description || "",
+            resource_sub_type: categoryData.resource_sub_type,
+          }
+        : {
+            title: "",
+            slug_value: "",
+            description: "",
+            resource_sub_type: ResourceCategorySubType.other,
+          },
+    );
   }, [isOpen, isEditing, categoryData, form]);
 
   // Auto-generate slug from name when creating new category
