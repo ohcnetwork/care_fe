@@ -1,3 +1,4 @@
+import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trash2Icon } from "lucide-react";
@@ -34,6 +35,7 @@ import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPick
 import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
 import LocationMultiSelect from "@/components/Location/LocationMultiSelect";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
+import { HealthcareServiceSelector } from "@/pages/Facility/services/HealthcareServiceSelector";
 
 import { CodeSchema } from "@/types/base/code/code";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
@@ -57,6 +59,7 @@ import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefini
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 import { SpecimenDefinitionStatus } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
+import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
 
 export default function ActivityDefinitionForm({
   facilityId,
@@ -91,11 +94,7 @@ export default function ActivityDefinitionForm({
               {t("edit_activity_definition")}
             </h1>
           </div>
-          <div className="flex items-center justify-center rounded-lg border border-gray-200 bg-white p-8">
-            <div className="text-center">
-              <div className="mb-2 text-sm text-gray-500">{t("loading")}</div>
-            </div>
-          </div>
+          <FormSkeleton rows={10} />
         </div>
       </Page>
     );
@@ -136,7 +135,7 @@ function ActivityDefinitionFormContent({
     status: z.nativeEnum(Status),
     classification: z.nativeEnum(Classification),
     kind: z.nativeEnum(Kind),
-    healthcare_service: z.string().nullable(),
+    healthcare_service: z.custom<HealthcareServiceReadSpec>().nullable(),
     code: CodeSchema,
     body_site: CodeSchema.nullable(),
     diagnostic_report_codes: z.array(CodeSchema).default([]),
@@ -247,7 +246,7 @@ function ActivityDefinitionFormContent({
             code: existingData.code,
             body_site: existingData.body_site,
             diagnostic_report_codes: existingData.diagnostic_report_codes || [],
-            healthcare_service: existingData.healthcare_service?.id || null,
+            healthcare_service: existingData.healthcare_service || null,
             specimen_requirements:
               existingData.specimen_requirements?.map((s) => ({
                 value: s.slug,
@@ -394,6 +393,7 @@ function ActivityDefinitionFormContent({
         (item) => item.slug,
       ),
       locations: data.locations.map((loc) => loc.id),
+      healthcare_service: data.healthcare_service?.id || null,
     };
 
     if (isEditMode && activityDefinitionSlug) {
@@ -894,6 +894,31 @@ function ActivityDefinitionFormContent({
                           title: item.title,
                           slug: item.slug,
                         })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-gray-200 shadow-sm p-4">
+                    <FormLabel>{t("healthcare_service")}</FormLabel>
+                    <div className="mt-2">
+                      <FormField
+                        control={form.control}
+                        name="healthcare_service"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <HealthcareServiceSelector
+                                facilityId={facilityId}
+                                selected={field.value}
+                                onSelect={(service) => {
+                                  field.onChange(service);
+                                }}
+                                clearSelection
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
                     </div>
                   </div>

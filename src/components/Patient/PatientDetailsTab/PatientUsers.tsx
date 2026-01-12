@@ -174,7 +174,8 @@ export function AddUserSheet({
 
   const handleAddUser = async () => {
     if (!selectedUser || !selectedRole) {
-      toast.error(t("please_select_both_user_and_role"));
+      toast.error(t("please_select_user_and_role"));
+
       return;
     }
 

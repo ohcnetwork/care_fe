@@ -1,6 +1,6 @@
 import { differenceInMinutes, format, subDays } from "date-fns";
 import { CalendarDays, CalendarOff } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import query from "@/Utils/request/query";
@@ -195,94 +195,94 @@ const AppointmentTable = ({
           <TableHead className="w-30 border-y bg-gray-100 text-gray-700 text-sm">
             {t("resource")}
           </TableHead>
-          <TableHead className="w-14 border-y bg-gray-100 text-gray-700 text-sm">
+          <TableHead className="w-14 border-y bg-gray text-gray-700 text-sm">
             {t("status")}
           </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody className="bg-white">
         {appointments.map((appointment) => (
-          <TableRow
+          <Link
             key={appointment.id}
-            className="shadow bg-white space-y-3 rounded-lg cursor-pointer"
-            onClick={() =>
-              navigate(
-                `/facility/${appointment.facility.id}/patient/${patientId}/appointments/${appointment.id}`,
-              )
-            }
+            href={`/facility/${appointment.facility.id}/patient/${patientId}/appointments/${appointment.id}`}
+            className="contents"
           >
-            <TableCell className="p-4">
-              <div className="flex gap-2 items-start justify-start">
-                <CalendarDays size={16} className="mt-1" />
+            <TableRow className="shadow bg-white space-y-3 rounded-lg cursor-pointer hover:bg-gray-50">
+              <TableCell className="p-4">
+                <div className="flex gap-2 items-start justify-start">
+                  <CalendarDays size={16} className="mt-1" />
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-950">
+                      {format(
+                        appointment.token_slot.start_datetime,
+                        "EEE, dd MMM",
+                      )}
+                    </span>
+                    <span className="text-sm text-gray-600 font-medium">
+                      {appointment.token_slot.availability.name}
+                    </span>
+                  </div>
+                </div>
+              </TableCell>
+
+              <TableCell>
                 <div className="flex flex-col">
                   <span className="font-medium text-gray-950">
-                    {format(
-                      appointment.token_slot.start_datetime,
-                      "EEE, dd MMM",
-                    )}
+                    {format(appointment.token_slot.start_datetime, "hh:mm a")} -{" "}
+                    {format(appointment.token_slot.end_datetime, "hh:mm a")}
                   </span>
                   <span className="text-sm text-gray-600 font-medium">
-                    {appointment.token_slot.availability.name}
+                    {t("duration")}:{" "}
+                    {differenceInMinutes(
+                      appointment.token_slot.end_datetime,
+                      appointment.token_slot.start_datetime,
+                    )}{" "}
+                    {t("minutes")}
                   </span>
                 </div>
-              </div>
-            </TableCell>
+              </TableCell>
 
-            <TableCell>
-              <div className="flex flex-col">
-                <span className="font-medium text-gray-950">
-                  {format(appointment.token_slot.start_datetime, "hh:mm a")} -{" "}
-                  {format(appointment.token_slot.end_datetime, "hh:mm a")}
-                </span>
-                <span className="text-sm text-gray-600 font-medium">
-                  {t("duration")}:{" "}
-                  {differenceInMinutes(
-                    appointment.token_slot.end_datetime,
-                    appointment.token_slot.start_datetime,
-                  )}{" "}
-                  {t("minutes")}
-                </span>
-              </div>
-            </TableCell>
-
-            <TableCell>
-              <div className="px-2 py-1">
-                <div className="flex flex-col gap-1">
-                  <div className="flex flex-row gap-1">
-                    <ScheduleResourceIcon
-                      resource={appointment}
-                      className="size-5"
-                    />
-                    <div className="flex items-center justify-center gap-2">
-                      <span className="text-sm font-medium text-gray-950">
-                        {formatScheduleResourceName(appointment)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {showFacilityInfo && (
-                    <div className="flex gap-1 items-center">
-                      <Avatar
-                        name={appointment.facility.name}
+              <TableCell>
+                <div className="px-2 py-1">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex flex-row gap-1">
+                      <ScheduleResourceIcon
+                        resource={appointment}
                         className="size-5"
                       />
-                      <span className="text-sm font-medium text-gray-950">
-                        {appointment.facility.name}
-                      </span>
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="text-sm font-medium text-gray-950">
+                          {formatScheduleResourceName(appointment)}
+                        </span>
+                      </div>
                     </div>
-                  )}
-                </div>
-              </div>
-            </TableCell>
 
-            <TableCell>
-              <div className="flex flex-row items-start justify-start">
-                <Badge variant={APPOINTMENT_STATUS_COLORS[appointment.status]}>
-                  {t(appointment.status)}
-                </Badge>
-              </div>
-            </TableCell>
-          </TableRow>
+                    {showFacilityInfo && (
+                      <div className="flex gap-1 items-center">
+                        <Avatar
+                          name={appointment.facility.name}
+                          className="size-5"
+                        />
+                        <span className="text-sm font-medium text-gray-950">
+                          {appointment.facility.name}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </TableCell>
+
+              <TableCell>
+                <div className="flex flex-row items-start justify-start">
+                  <Badge
+                    variant={APPOINTMENT_STATUS_COLORS[appointment.status]}
+                  >
+                    {t(appointment.status)}
+                  </Badge>
+                </div>
+              </TableCell>
+            </TableRow>
+          </Link>
         ))}
       </TableBody>
     </Table>

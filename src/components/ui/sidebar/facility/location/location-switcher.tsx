@@ -126,9 +126,9 @@ export function LocationSelectorDialog({
   onLocationSelect?: (location: LocationRead) => void;
 }) {
   const { t } = useTranslation();
-  const shortcuts = useShortcutSubContext(
-    open ? "patient:search:-global" : undefined,
-  );
+  useShortcutSubContext(open ? "patient:search:-global" : undefined, {
+    ignoreInputFields: open,
+  });
   const [locationLevel, setLocationLevel] = useState<LocationRead[]>([]);
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -136,15 +136,6 @@ export function LocationSelectorDialog({
   const path = usePath();
   const subPath =
     path?.match(/\/facility\/[^/]+\/locations\/[^/]+\/(.*)/)?.[1] || "";
-
-  useEffect(() => {
-    if (open) {
-      shortcuts.setIgnoreInputFields(true);
-    }
-    return () => {
-      shortcuts.setIgnoreInputFields(false);
-    };
-  }, [open, shortcuts]);
 
   const currentParentId = locationLevel.length
     ? locationLevel[locationLevel.length - 1].id

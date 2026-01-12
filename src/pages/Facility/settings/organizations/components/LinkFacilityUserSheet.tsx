@@ -72,7 +72,7 @@ export default function LinkFacilityUserSheet({
       queryClient.invalidateQueries({
         queryKey: ["facilityOrganizationUsers", facilityId, organizationId],
       });
-      toast.success("User added to organization successfully");
+      toast.success(t("user_added_to_organization_successfully"));
       setOpen(false);
       setSelectedUser(undefined);
       setSelectedRole(undefined);
@@ -81,7 +81,8 @@ export default function LinkFacilityUserSheet({
 
   const handleAddUser = () => {
     if (!selectedUser || !selectedRole) {
-      toast.error(t("please_select_both_user_and_role"));
+      toast.error(t("please_select_user_and_role"));
+
       return;
     }
 
