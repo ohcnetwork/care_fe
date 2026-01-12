@@ -92,6 +92,8 @@ export interface ChargeItemRead extends ChargeItemBase {
   charge_item_definition: ChargeItemDefinitionBase;
   service_resource: ChargeItemServiceResource;
   service_resource_id?: string;
+  created_date: string;
+  modified_date: string;
 }
 
 export interface ChargeItemBatchResponse {

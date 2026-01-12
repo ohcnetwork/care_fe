@@ -1,15 +1,16 @@
+import { PluginManifestWithMeta } from "@/pluginTypes";
 import { CableIcon, Loader2Icon } from "lucide-react";
 import { Suspense, createContext, useContext } from "react";
 
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import OrganizationLayout from "@/pages/Organization/components/OrganizationLayout";
-import { PluginManifest } from "@/pluginTypes";
 import { PlugConfig } from "@/types/plugConfig";
 import { t } from "i18next";
 
 export type CareAppsContextType = Array<
-  PlugConfig & (({ isLoading: false } & PluginManifest) | { isLoading: true })
+  PlugConfig &
+    (({ isLoading: false } & PluginManifestWithMeta) | { isLoading: true })
 >;
 
 export const CareAppsContext = createContext<CareAppsContextType | null>(null);

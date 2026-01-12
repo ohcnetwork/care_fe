@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { ArrowLeft, MoreVertical, Printer } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -19,6 +20,7 @@ import { FileListTable } from "@/components/Files/FileListTable";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { formatName } from "@/Utils/utils";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
 import { ObservationHistorySheet } from "@/pages/Facility/services/serviceRequests/components/ObservationHistorySheet";
@@ -139,6 +141,18 @@ export default function DiagnosticReportView({
                     {t(report.status)}
                   </Badge>
                 </div>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-gray-500">
+                  {t("report_date")}
+                </div>
+                <div>{format(new Date(report.created_date), "dd-MM-yyyy")}</div>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-gray-500">
+                  {t("requested_by")}
+                </div>
+                <div>{formatName(report.requester)}</div>
               </div>
               {report.note && (
                 <div className="col-span-full">
