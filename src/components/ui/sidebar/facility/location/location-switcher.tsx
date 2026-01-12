@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, MapPinIcon } from "lucide-react";
+import { Loader2, MapPinIcon, X } from "lucide-react";
 import { navigate, usePath } from "raviger";
 import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -271,7 +271,7 @@ export function LocationSelectorDialog({
           <DialogTitle>{getCurrentLocation()}</DialogTitle>
         </DialogHeader>
         {locationLevel.length > 0 && (
-          <div className="flex flex-row justify-between gap-1 bg-gray-100 p-1">
+          <div className="flex flex-row justify-between gap-1 bg-gray-100 p-1 overflow-auto">
             <div className="flex flex-row gap-1 items-center">
               {locationLevel.map((level, index) => (
                 <>
@@ -301,28 +301,26 @@ export function LocationSelectorDialog({
             </div>
             <div className="flex flex-row gap-2">
               <Button
-                variant="link"
+                variant="ghost"
                 size="icon"
-                className="p-2 w-full"
                 onClick={() => {
                   setLocationLevel([]);
                   setSearchValue("");
                   setCurrentPage(1);
                 }}
+                aria-label={t("clear")}
               >
-                <CareIcon icon="l-multiply" />
-                <span>{t("clear")}</span>
+                <X />
               </Button>
               <Button
                 variant="primary"
-                size="icon"
-                className="p-2 w-full"
                 onClick={() =>
                   handleConfirmSelection(
                     locationLevel[locationLevel.length - 1],
                   )
                 }
               >
+                <span>{t("select")}</span>
                 <ShortcutBadge actionId="submit-action" />
               </Button>
             </div>
