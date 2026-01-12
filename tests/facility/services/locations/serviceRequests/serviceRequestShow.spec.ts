@@ -148,6 +148,56 @@ test.describe("Service Request Show Page", () => {
         page.getByRole("button", { name: /create invoice/i }),
       ).toBeVisible();
     });
+
+    test("should display total price and price breakdown in popover", async ({
+      page,
+    }) => {
+      await page
+        .locator('[data-slot="popover-trigger"]', {
+          has: page.locator("svg.lucide-info"),
+        })
+        .first()
+        .click();
+
+      const popover = page.locator('[data-slot="popover-content"]');
+      await expect(popover).toBeVisible();
+
+      await expect(
+        popover.getByText(/component wise breakdown/i),
+      ).toBeVisible();
+
+      await expect(popover.getByText(/base amount/i)).toBeVisible();
+      const firstChargeItem = activityDefinitionMapping.chargeItems[0];
+      await expect(
+        popover.getByText(String(firstChargeItem.basePrice)),
+      ).toBeVisible();
+
+      if (firstChargeItem.discounts?.length) {
+        for (const discount of firstChargeItem.discounts) {
+          // Find the row containing this discount's display name, then verify the factor within it
+          const discountRow = popover.locator("div.flex.justify-between", {
+            has: page.getByText(discount.display, { exact: true }),
+          });
+          await expect(discountRow).toBeVisible();
+          await expect(
+            discountRow.locator(`[data-factor="${discount.factor}"]`),
+          ).toBeVisible();
+        }
+      }
+
+      if (firstChargeItem.taxes?.length) {
+        for (const tax of firstChargeItem.taxes) {
+          // Find the row containing this tax's display name, then verify the factor within it
+          const taxRow = popover.locator("div.flex.justify-between", {
+            has: page.getByText(tax.display, { exact: true }),
+          });
+          await expect(taxRow).toBeVisible();
+          await expect(
+            taxRow.locator(`[data-factor="${tax.factor}"]`),
+          ).toBeVisible();
+        }
+      }
+    });
   });
 
   test.describe("Specimens Section", () => {
