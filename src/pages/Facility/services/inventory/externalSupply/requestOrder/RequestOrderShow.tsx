@@ -91,9 +91,20 @@ function AllSupplyDeliveriesComponent({
         }),
   };
 
-  const deliveryQueries = useQueries({
+  const {
+    data: allSupplyDeliveries,
+    isLoading: isLoadingAllSupplyDeliveries,
+    isError: hasQueryError,
+    hasPartialError,
+  } = useQueries({
     queries: deliveryOrderIds.map((id) => ({
-      queryKey: ["supplyDeliveries", id, qParams],
+      queryKey: [
+        "supplyDeliveries",
+        id,
+        facilityId,
+        internal,
+        selectedProductKnowledge?.id,
+      ],
       queryFn: query.paginated(supplyDeliveryApi.listSupplyDelivery, {
         queryParams: {
           facility: facilityId,
@@ -101,42 +112,70 @@ function AllSupplyDeliveriesComponent({
           ...qParams,
         },
       }),
+      enabled: deliveryOrderIds.length > 0,
     })),
-  });
+    combine: (results) => {
+      const seen = new Set<string>();
+      const combinedDeliveries: SupplyDeliveryRead[] = [];
 
-  const isLoadingAllSupplyDeliveries = deliveryQueries.some((q) => q.isLoading);
-
-  const allSupplyDeliveries = useMemo(() => {
-    const seen = new Set<string>();
-    const result: SupplyDeliveryRead[] = [];
-    const flatDeliveries = deliveryQueries.flatMap(
-      (q) => q.data?.results || [],
-    );
-    for (const item of flatDeliveries) {
-      if (!seen.has(item.id)) {
-        seen.add(item.id);
-        result.push(item);
+      for (const res of results) {
+        if (res.data?.results) {
+          for (const item of res.data.results) {
+            if (!seen.has(item.id)) {
+              seen.add(item.id);
+              combinedDeliveries.push(item);
+            }
+          }
+        }
       }
-    }
-    return result;
-  }, [deliveryQueries]);
+
+      return {
+        data: combinedDeliveries,
+        isLoading: results.some((r) => r.isLoading),
+        isError: results.length > 0 && results.every((r) => r.isError),
+        hasPartialError:
+          results.some((r) => r.isError) && !results.every((r) => r.isError),
+      };
+    },
+  });
 
   return (
     <div className="space-y-4 max-h-[68vh] overflow-y-auto px-4 pt-4">
-      {isLoadingAllSupplyDeliveries ? (
-        <TableSkeleton count={3} />
-      ) : allSupplyDeliveries.length > 0 ? (
-        <SupplyDeliveryTable
-          deliveries={allSupplyDeliveries}
-          internal={internal}
-          isRequester={isRequester}
-        />
+      {hasQueryError ? (
+        <div
+          className="text-red-500 text-center py-4"
+          role="alert"
+          aria-live="assertive"
+        >
+          {t("error_loading_deliveries")}
+        </div>
       ) : (
-        <EmptyState
-          icon={<Truck className="text-primary size-5" />}
-          title={t("no_deliveries_found")}
-          description={t("deliveries_will_appear_here")}
-        />
+        <>
+          {hasPartialError && allSupplyDeliveries.length > 0 && (
+            <div
+              className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4"
+              role="alert"
+            >
+              <p className="font-bold">{t("warning")}</p>
+              <p>{t("some_deliveries_failed_to_load")}</p>
+            </div>
+          )}
+          {isLoadingAllSupplyDeliveries ? (
+            <TableSkeleton count={3} />
+          ) : allSupplyDeliveries.length > 0 ? (
+            <SupplyDeliveryTable
+              deliveries={allSupplyDeliveries}
+              internal={internal}
+              isRequester={isRequester}
+            />
+          ) : (
+            <EmptyState
+              icon={<Truck className="text-primary size-5" />}
+              title={t("no_deliveries_found")}
+              description={t("deliveries_will_appear_here")}
+            />
+          )}
+        </>
       )}
     </div>
   );
@@ -208,7 +247,10 @@ export function RequestOrderShow({
       enabled: !!requestOrderId,
     });
 
-  const deliveryOrders = deliveryOrdersData?.results || [];
+  const deliveryOrders = useMemo(
+    () => deliveryOrdersData?.results || [],
+    [deliveryOrdersData?.results],
+  );
 
   const deliveryOrderIds = useMemo(
     () => deliveryOrders.map((delivery) => delivery.id),
