@@ -94,7 +94,10 @@ export function useExtensionSchemas(): UseExtensionSchemasReturn {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["extensions"],
     queryFn: query(extensionsAPI.list),
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours
+    meta: {
+      persist: true,
+    },
   });
 
   const getConfigs = useCallback(
