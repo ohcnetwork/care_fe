@@ -61,6 +61,7 @@ import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { formatName } from "@/Utils/utils";
 
 import BackButton from "@/components/Common/BackButton";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -121,6 +122,7 @@ function PriceComponentRow({
           <TableCell className="text-right">
             <MonetaryDisplay {...component} />
           </TableCell>
+          <TableCell></TableCell>
           <TableCell className="text-right">
             {component.monetary_component_type ===
             MonetaryComponentType.discount
@@ -459,6 +461,9 @@ export function CreateInvoicePage({
                       <TableHead className="border-y bg-gray-100 text-gray-700 text-right">
                         {t("unit_price")} ({getCurrencySymbol()})
                       </TableHead>
+                      <TableHead className="border bg-gray-100 text-gray-700">
+                        {t("performer")}
+                      </TableHead>
                       <TableHead className="border rounded-tr-md bg-gray-100 text-gray-700 text-right font-semibold">
                         {t("amount")} ({getCurrencySymbol()})
                       </TableHead>
@@ -519,6 +524,9 @@ export function CreateInvoicePage({
                           </TableCell>
                           <TableCell className="font-medium text-base border-y text-gray-950 text-right">
                             <MonetaryDisplay amount={baseAmount} />
+                          </TableCell>
+                          <TableCell className="font-medium text-base border-y text-gray-950">
+                            {formatName(item.performer_actor)}
                           </TableCell>
                           <TableCell className="border-y border-r p-0 overflow-hidden rounded-tr-md">
                             <div className="bg-gray-100 border border-white rounded-md p-4 text-right font-semibold text-base text-gray-950">
