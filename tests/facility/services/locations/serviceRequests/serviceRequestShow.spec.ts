@@ -136,6 +136,7 @@ test.describe("Service Request Show Page", () => {
 
       for (const chargeItem of activityDefinitionMapping.chargeItems) {
         await expect(page.getByText(chargeItem.title)).toBeVisible();
+        await expect(page.getByText(chargeItem.totalPrice)).toBeVisible();
       }
 
       await expect(page.getByText(/billable/i)).toBeVisible();
@@ -166,35 +167,48 @@ test.describe("Service Request Show Page", () => {
         popover.getByText(/component wise breakdown/i),
       ).toBeVisible();
 
-      await expect(popover.getByText(/base amount/i)).toBeVisible();
       const firstChargeItem = activityDefinitionMapping.chargeItems[0];
+
+      const baseAmountRow = popover.locator("div.flex.justify-between", {
+        has: page.getByText(/base amount/i),
+      });
       await expect(
-        popover.getByText(String(firstChargeItem.basePrice)),
+        baseAmountRow.locator(`[data-amount="${firstChargeItem.basePrice}"]`),
       ).toBeVisible();
 
       if (firstChargeItem.discounts?.length) {
         for (const discount of firstChargeItem.discounts) {
-          // Find the row containing this discount's display name, then verify the factor within it
           const discountRow = popover.locator("div.flex.justify-between", {
             has: page.getByText(discount.display, { exact: true }),
           });
-          await expect(discountRow).toBeVisible();
           await expect(
             discountRow.locator(`[data-factor="${discount.factor}"]`),
-          ).toBeVisible();
+          ).toContainText(`${discount.factor}%`);
+          await expect(
+            discountRow.locator(
+              `[data-amount="${(firstChargeItem.basePrice * discount.factor) / 100}"]`,
+            ),
+          ).toContainText(
+            `₹${((firstChargeItem.basePrice * discount.factor) / 100).toFixed(2)}`,
+          );
         }
       }
 
       if (firstChargeItem.taxes?.length) {
         for (const tax of firstChargeItem.taxes) {
-          // Find the row containing this tax's display name, then verify the factor within it
           const taxRow = popover.locator("div.flex.justify-between", {
             has: page.getByText(tax.display, { exact: true }),
           });
-          await expect(taxRow).toBeVisible();
           await expect(
             taxRow.locator(`[data-factor="${tax.factor}"]`),
-          ).toBeVisible();
+          ).toContainText(`${tax.factor}%`);
+          await expect(
+            taxRow.locator(
+              `[data-amount="${(firstChargeItem.basePrice * tax.factor) / 100}"]`,
+            ),
+          ).toContainText(
+            `₹${((firstChargeItem.basePrice * tax.factor) / 100).toFixed(2)}`,
+          );
         }
       }
     });
@@ -204,30 +218,25 @@ test.describe("Service Request Show Page", () => {
     test("should display specimen collection instructions", async ({
       page,
     }) => {
-      // Scope to Specimens section to avoid picking unrelated cards
       const specimensSection = page.locator("div", {
         has: page.getByRole("heading", { name: /specimens/i }),
       });
 
-      // Locate the first specimen card using its title within the card title, not the full "Required:" text
-      const firstSpecimenTitle = activityDefinitionMapping.specimens[0].title;
       const specimenCard = specimensSection
         .locator('[data-slot="card"]', {
           has: page.locator('[data-slot="card-title"]', {
-            hasText: new RegExp(firstSpecimenTitle, "i"),
+            hasText: activityDefinitionMapping.specimens[0].title,
           }),
         })
         .first();
       await expect(specimenCard).toBeVisible();
 
-      // Expand the instructions accordion for this specimen card
       await specimenCard
         .locator('[data-slot="accordion-trigger"]', {
           hasText: /specimen collection instructions/i,
         })
         .click();
 
-      // Verify the visible "Specimen Collection" section inside this card only
       await expect(
         specimenCard
           .locator('[data-slot="accordion-content"]')
@@ -254,7 +263,7 @@ test.describe("Service Request Show Page", () => {
       await expect(specimenCard.getByText(/required type/i)).toBeVisible();
       if (firstSpecimen.typeCollected) {
         await expect(
-          specimenCard.getByText(firstSpecimen.typeCollected),
+          specimenCard.getByText(firstSpecimen.typeCollected, { exact: true }),
         ).toBeVisible();
       }
 
@@ -275,7 +284,6 @@ test.describe("Service Request Show Page", () => {
         ).toBeVisible();
       }
 
-      // Verify container details if available
       if (firstSpecimen.container) {
         await expect(
           specimenCard.getByText(/required container/i),
@@ -290,78 +298,99 @@ test.describe("Service Request Show Page", () => {
           ).toBeVisible();
         }
 
-        await expect(specimenCard.getByText(/capacity/i)).toBeVisible();
+        if (firstSpecimen.container.capacity) {
+          const capacityRow = specimenCard.locator('[data-slot="table-row"]', {
+            has: page.locator('[data-slot="table-head"]', {
+              hasText: /^capacity$/i,
+            }),
+          });
+          await expect(capacityRow).toContainText(
+            String(firstSpecimen.container.capacity.value),
+          );
+          await expect(capacityRow).toContainText(
+            firstSpecimen.container.capacity.unit,
+          );
+        }
 
         await expect(specimenCard.getByText(/min\.?\s*volume/i)).toBeVisible();
 
-        await expect(specimenCard.getByText(/preparation/i)).toBeVisible();
+        if (firstSpecimen.container.minVolume) {
+          const minVolumeRow = specimenCard.locator('[data-slot="table-row"]', {
+            has: page.locator('[data-slot="table-head"]', {
+              hasText: /min\.?\s*volume/i,
+            }),
+          });
+          await expect(minVolumeRow).toContainText(
+            String(firstSpecimen.container.minVolume.value),
+          );
+          await expect(minVolumeRow).toContainText(
+            firstSpecimen.container.minVolume.unit,
+          );
+        }
+
+        if (firstSpecimen.container.preparation) {
+          const preparationRow = specimenCard.locator(
+            '[data-slot="table-row"]',
+            {
+              has: page.locator('[data-slot="table-head"]', {
+                hasText: /^preparation$/i,
+              }),
+            },
+          );
+          await expect(preparationRow).toContainText(
+            firstSpecimen.container.preparation,
+          );
+        }
       }
 
       await expect(
         specimenCard.getByText(/required processing.*storage/i),
       ).toBeVisible();
-      await expect(specimenCard.getByText(/retention/i)).toBeVisible();
+
+      const retentionRow = specimenCard.locator('[data-slot="table-row"]', {
+        has: page.locator('[data-slot="table-head"]', {
+          hasText: /^retention$/i,
+        }),
+      });
+      await expect(retentionRow).toContainText(
+        String(firstSpecimen.retention.value),
+      );
+      await expect(retentionRow).toContainText(firstSpecimen.retention.unit);
     });
   });
 
   test.describe("Test Results Section", () => {
-    test("should display test results section when observation requirements exist", async ({
+    test("should display test results section with disabled controls when specimen not collected", async ({
       page,
     }) => {
-      // Wait for test results heading
-      const testResultsHeading = page.getByRole("heading", {
-        name: /test results/i,
-      });
-
-      // Test results section may or may not be visible depending on activity definition
-      const headingCount = await testResultsHeading.count();
-      if (headingCount > 0) {
-        await expect(testResultsHeading).toBeVisible();
-      }
-    });
-
-    test("should display diagnostic report form when no final report exists", async ({
-      page,
-    }) => {
-      // Check if the test results section exists
-      const testResultsSection = page.locator("div.space-y-3", {
-        has: page.getByRole("heading", { name: /test results/i }),
-      });
-
-      const sectionCount = await testResultsSection.count();
-      if (sectionCount > 0) {
-        // Verify the section is visible
-        await expect(testResultsSection).toBeVisible();
-      }
-    });
-
-    test("should show observation history dropdown menu", async ({ page }) => {
-      // Look for the more options button in test results section
-      const moreButton = page
+      const testResultsSection = page
         .locator("div", {
           has: page.getByRole("heading", { name: /test results/i }),
         })
-        .locator("button[role='button']", {
-          has: page.locator("svg"),
-        });
+        .first();
+      await expect(testResultsSection).toBeVisible();
 
-      const buttonCount = await moreButton.count();
-      if (buttonCount > 0) {
-        await expect(moreButton.first()).toBeVisible();
-      }
-    });
-
-    test("should display diagnostic report review when report exists", async ({
-      page,
-    }) => {
-      // Check if diagnostic report section exists (may not exist for new service requests)
-      const diagnosticSection = page.locator("div", {
-        hasText: /diagnostic/i,
+      const testResultsCard = testResultsSection.locator('[data-slot="card"]', {
+        has: page.locator('[data-slot="card-title"]', {
+          hasText: /test results entry/i,
+        }),
       });
 
-      const sectionCount = await diagnosticSection.count();
-      // This is conditional as new service requests won't have reports yet
-      expect(sectionCount).toBeGreaterThanOrEqual(0);
+      await expect(
+        testResultsCard.getByText(/please collect the required specimen/i),
+      ).toBeVisible();
+
+      const diagnosticReportSelector = testResultsCard.locator(
+        '[data-slot="select-trigger"]',
+      );
+      await expect(diagnosticReportSelector).toBeVisible();
+      await expect(diagnosticReportSelector).toBeDisabled();
+
+      const createReportButton = testResultsCard.getByRole("button", {
+        name: /create report/i,
+      });
+      await expect(createReportButton).toBeVisible();
+      await expect(createReportButton).toBeDisabled();
     });
   });
 
