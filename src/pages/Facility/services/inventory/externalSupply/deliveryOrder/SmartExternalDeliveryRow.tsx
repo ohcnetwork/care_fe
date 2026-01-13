@@ -321,7 +321,7 @@ export function SmartExternalDeliveryRow({
             markAsEdited();
           }}
           disabled={!productKnowledge}
-          className="w-full w-[7rem]"
+          className="w-[7rem]"
         />
       </TableCell>
 
@@ -338,7 +338,7 @@ export function SmartExternalDeliveryRow({
             markAsEdited();
           }}
           disabled={!productKnowledge}
-          className="w-full w-[5rem]"
+          className="w-[5rem]"
         />
       </TableCell>
 
@@ -355,7 +355,7 @@ export function SmartExternalDeliveryRow({
                   min={1}
                   {...field}
                   onChange={(e) => field.onChange(parseInt(e.target.value))}
-                  className="w-full w-[8rem]"
+                  className="w-[8rem]"
                   disabled
                 />
               </FormControl>

@@ -236,8 +236,9 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
   // Calculate base price from MRP when tax inclusive is enabled
   useEffect(() => {
     if (isTaxInclusive && mrpValue > 0) {
-      const calculatedBasePrice =
-        mrpValue / (1 + totalTaxFactor / 100) / packSize;
+      let calculatedBasePrice = mrpValue / (1 + totalTaxFactor / 100);
+      if (packSize && packQuantity && packSize > 0)
+        calculatedBasePrice = calculatedBasePrice / packSize;
       const roundedBasePrice = Math.round(calculatedBasePrice * 100) / 100;
       setField("unit_price", roundedBasePrice);
     }
