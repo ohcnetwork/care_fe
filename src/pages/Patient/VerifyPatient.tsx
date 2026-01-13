@@ -95,8 +95,6 @@ export default function VerifyPatient() {
     return queueUrlPattern.test(qParams.source_url);
   })();
 
-  console.log("isFromQueue", isFromQueue);
-
   useEffect(() => {
     if (isFromQueue && token_id && patientData) {
       setShowTokenModal(true);
