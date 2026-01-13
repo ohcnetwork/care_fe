@@ -2575,7 +2575,7 @@ export const DispensedItemsSheet = ({
         facility: facilityId,
         location: locationId,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
     }),
     enabled: open && !!medicationRequestId,

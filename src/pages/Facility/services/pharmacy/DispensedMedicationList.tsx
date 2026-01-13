@@ -303,7 +303,7 @@ export default function DispensedMedicationList({
       queryParams: {
         location: locationId,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         status: status ?? qParams.status,
         patient: patientId,
       },

@@ -57,7 +57,7 @@ export default function MedicationDispenseHistory({
         priority: qParams.priority,
         encounter_class: qParams.category,
         limit: qParams.limit,
-        offset: ((qParams.page ?? 1) - 1) * (qParams.limit ?? 14),
+        offset: ((qParams.page || 1) - 1) * (qParams.limit ?? 14),
         status:
           qParams.exclude_status === "history"
             ? "completed,cancelled,entered_in_error,stopped,declined"

@@ -95,7 +95,7 @@ export default function PaymentsData({
       queryParams: {
         account: accountId,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         status: qParams.status,
         reconciliation_type: qParams.reconciliation_type,
         ordering: qParams.ordering,

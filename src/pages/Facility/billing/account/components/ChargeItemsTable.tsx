@@ -131,7 +131,7 @@ export function ChargeItemsTable({
         account: accountId,
         status: qParams.charge_item_status,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
     }),
   }) as {

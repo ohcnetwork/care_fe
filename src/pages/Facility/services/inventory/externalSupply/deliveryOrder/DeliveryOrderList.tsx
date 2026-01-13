@@ -93,7 +93,7 @@ export function DeliveryOrderList({
       queryParams: {
         ...(isRequester ? { destination: locationId } : { origin: locationId }),
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         status: effectiveStatus,
         origin_isnull: !internal,
         supplier: qParams.supplier,

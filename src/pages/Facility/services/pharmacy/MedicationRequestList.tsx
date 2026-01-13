@@ -115,7 +115,7 @@ export default function MedicationRequestList({
         tags: qParams.tags,
         tags_behavior: qParams.tags_behavior,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
     }),
   });

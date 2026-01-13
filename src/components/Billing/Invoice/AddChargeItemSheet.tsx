@@ -95,7 +95,7 @@ export default function AddChargeItemSheet({
       pathParams: { facilityId },
       queryParams: {
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         account: accountId,
         title: qParams.search,
         status: "billable",
