@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { useMediaStream } from "@/hooks/useMediaStream";
@@ -129,6 +129,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
         side="bottom"
         className="[&>button:first-of-type]:hidden h-[100vh] w-full p-0"
       >
+        <SheetTitle className="sr-only">{t("camera")}</SheetTitle>
         <div className="relative h-full">
           {!previewImage ? (
             <div className="h-full">
