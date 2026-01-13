@@ -114,9 +114,7 @@ export function AccountSheet({
     entityType: ExtensionEntityType.account,
     schemaType: "write",
     form: methods,
-    existingData: initialValues?.extensions as
-      | Record<string, Record<string, unknown>>
-      | undefined,
+    existingData: initialValues?.extensions,
   });
 
   // Reset form when initialValues changes
