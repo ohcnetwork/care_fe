@@ -40,7 +40,7 @@ const extractPathParams = (path: string) => {
     };
   }
 
-  throw new Error("'useCurrentFacility' must be used within a facility route");
+  throw new Error("'useScheduleResource' must be used within a facility route");
 };
 
 export function useScheduleResourceFromPath() {

@@ -6,11 +6,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
-import { TokenRead, TokenStatus } from "@/types/tokens/token/token";
+import {
+  renderTokenNumber,
+  TokenRead,
+  TokenStatus,
+} from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
+import { TokenCategoryRead } from "@/types/tokens/tokenCategory/tokenCategory";
 import { TokenSubQueueStatus } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
 import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import mutate from "@/Utils/request/mutate";
@@ -29,6 +35,7 @@ export const AssignToServicePointDialog = ({
   resourceId,
   token,
   status,
+  preferredServicePointCategories,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -37,6 +44,11 @@ export const AssignToServicePointDialog = ({
   resourceId: string;
   token: TokenRead;
   status: TokenStatus;
+  preferredServicePointCategories?:
+    | {
+        [k: string]: TokenCategoryRead | undefined;
+      }
+    | undefined;
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -102,7 +114,10 @@ export const AssignToServicePointDialog = ({
         <DialogHeader>
           <DialogTitle>{t("select_service_point")}</DialogTitle>
           <DialogDescription className="text-sm text-gray-600">
-            {t("choose_service_point_to_call_patient")}
+            {t("choose_service_point_to_call_patient", {
+              patientName: token.patient?.name,
+              tokenNumber: renderTokenNumber(token),
+            })}
           </DialogDescription>
         </DialogHeader>
 
@@ -114,20 +129,28 @@ export const AssignToServicePointDialog = ({
             <div
               key={subQueue.id}
               className={cn(
-                "flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors",
+                "flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer",
+                subQueue.id === token.sub_queue?.id && "hidden",
               )}
+              onClick={() => setSelectedSubQueueId(subQueue.id)}
             >
               <RadioGroupItem
                 value={subQueue.id}
                 id={subQueue.id}
                 key={subQueue.id}
               />
-              <label
+              <Label
                 htmlFor={subQueue.id}
                 className="flex-1 text-sm font-medium cursor-pointer"
               >
                 {subQueue.name}
-              </label>
+              </Label>
+              {preferredServicePointCategories && (
+                <span className="text-sm text-gray-600">
+                  {preferredServicePointCategories?.[subQueue.id]?.name ??
+                    t("all")}
+                </span>
+              )}
             </div>
           ))}
           {subQueues?.results.length === 0 && (

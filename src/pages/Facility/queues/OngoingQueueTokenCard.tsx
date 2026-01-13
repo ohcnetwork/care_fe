@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { AssignToServicePointDialog } from "@/pages/Facility/queues/AssignToServicePointDialog";
 import { CancelTokenDialog } from "@/pages/Facility/queues/CancelTokenDialog";
+import { usePreferredServicePointCategory } from "@/pages/Facility/queues/usePreferredServicePointCategory";
 import {
   renderTokenNumber,
   TokenRead,
@@ -52,6 +53,9 @@ export function OngoingQueueTokenCard({
   const queryClient = useQueryClient();
   const sourceUrl = useFullPath();
   const { resourceType, resourceId } = useScheduleResourceFromPath();
+  const { preferredServicePointCategories } = usePreferredServicePointCategory({
+    facilityId,
+  });
 
   const [showAssignToServicePointDialog, setShowAssignToServicePointDialog] =
     useState(false);
@@ -283,6 +287,7 @@ export function OngoingQueueTokenCard({
             facilityId={facilityId}
             resourceType={resourceType}
             resourceId={resourceId}
+            preferredServicePointCategories={preferredServicePointCategories}
           />
           <CancelTokenDialog
             open={showCancelDialog}
