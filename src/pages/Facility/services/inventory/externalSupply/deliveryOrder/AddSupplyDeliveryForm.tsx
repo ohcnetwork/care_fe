@@ -87,6 +87,8 @@ const supplyDeliveryItemSchema = z.object({
     .refine((val) => !isNaN(val) && val > 0, {
       message: "Quantity must be at least 1",
     }),
+  supplied_item_pack_quantity: z.number().optional(),
+  supplied_item_pack_size: z.number().optional(),
   product_knowledge: z
     .custom<ProductKnowledgeBase>()
     .refine((data) => data?.slug, {
@@ -486,6 +488,8 @@ export function AddSupplyDeliveryForm({
       supplied_item_type: suppliedItemType,
       supplied_item_condition: SupplyDeliveryCondition.normal,
       supplied_item_quantity: item.supplied_item_quantity,
+      supplied_item_pack_quantity: item.supplied_item_pack_quantity,
+      supplied_item_pack_size: item.supplied_item_pack_size,
       ...(origin
         ? { supplied_inventory_item: item.supplied_inventory_item }
         : { supplied_item: productId }),
@@ -627,8 +631,17 @@ export function AddSupplyDeliveryForm({
                                 <TableHead className="min-w-[140px] text-xs font-semibold text-center">
                                   {t("category")}
                                 </TableHead>
+                                <TableHead className="w-[7rem] text-xs font-semibold">
+                                  {t("pack_qty")}
+                                </TableHead>
+                                <TableHead className="w-[5rem] text-xs font-semibold">
+                                  {t("pack_size")}
+                                </TableHead>
+                                <TableHead className="w-[8rem] text-xs font-semibold">
+                                  {t("qty")}
+                                </TableHead>
                                 <TableHead className="min-w-[100px] text-xs font-semibold">
-                                  {t("base_price")}
+                                  {t("item_price")}
                                 </TableHead>
                                 {informationalCodes.map((code) => (
                                   <TableHead
@@ -638,9 +651,7 @@ export function AddSupplyDeliveryForm({
                                     {code.display}
                                   </TableHead>
                                 ))}
-                                <TableHead className="min-w-[70px] text-xs font-semibold">
-                                  {t("qty")}
-                                </TableHead>
+
                                 <TableHead className="min-w-[120px] text-xs font-semibold">
                                   {t("tax")}
                                 </TableHead>
