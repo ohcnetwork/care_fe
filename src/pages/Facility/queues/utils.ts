@@ -1,10 +1,11 @@
-import { TokenStatus } from "@/types/tokens/token/token";
+import { TokenRead, TokenStatus } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import { TokenQueueSummary } from "@/types/tokens/tokenQueue/tokenQueue";
 import query from "@/Utils/request/query";
 import careConfig from "@careConfig";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
+
 export function getTokenQueueStatusCount(
   summary: TokenQueueSummary,
   ...statuses: TokenStatus[]
@@ -51,4 +52,14 @@ export function useTokenListInfiniteQuery({
         ? careConfig.appointmentAndQueueRefreshInterval
         : false,
   });
+}
+
+export function getTokenStatus({ token }: { token: TokenRead }): string {
+  if (token.status === TokenStatus.CREATED && token?.sub_queue?.id) {
+    return "called";
+  }
+  if (token.status === TokenStatus.CREATED) {
+    return "waiting";
+  }
+  return token.status.toLowerCase();
 }

@@ -35,7 +35,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
-import { useTokenListInfiniteQuery } from "./utils";
+import { getTokenStatus, useTokenListInfiniteQuery } from "./utils";
 
 export function OngoingQueueTokenCard({
   facilityId,
@@ -126,13 +126,18 @@ export function OngoingQueueTokenCard({
                   className={cn(
                     "w-2 h-2 rounded-full border",
                     token.status === "IN_PROGRESS" &&
-                      "bg-green-500 border-green-600",
-                    token.status === "CREATED" && "bg-blue-400 border-blue-500",
+                      "bg-green-200 border-green-500",
+                    token.status === "UNFULFILLED" &&
+                      "bg-orange-200 border-orange-500",
+                    token.status === "CREATED" &&
+                      (token.sub_queue
+                        ? "bg-indigo-200 border-indigo-500"
+                        : "bg-pink-200 border-pink-500"),
                   )}
                 />
 
-                <span className="text-base font-medium text-gray-700">
-                  {t(token.status.toLowerCase())}
+                <span className="text-base font-medium text-black">
+                  {t(`token_status__${getTokenStatus({ token })}`)}:
                 </span>
 
                 <span className="text-lg font-extrabold text-black">
