@@ -43,6 +43,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import {
+  getExtensionFieldsWithOwner,
+  processExtensions,
+} from "@/hooks/useExtensions";
+import useExtensionSchemas from "@/hooks/useExtensionSchemas";
 import { SmartExternalDeliveryRow } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/SmartExternalDeliveryRow";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
@@ -56,6 +61,7 @@ import {
   ChargeItemDefinitionStatus,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
+import { ExtensionEntityType } from "@/types/extensions/extensions";
 import {
   ProductCreate,
   ProductRead,
@@ -76,8 +82,6 @@ import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { extractSchemaInfo } from "@/Utils/schema/extensionSchema";
-import { JSONSchema2020 } from "@/Utils/schema/types";
 
 const supplyDeliveryItemSchema = z.object({
   supplied_inventory_item: z.string().optional(),
@@ -87,6 +91,8 @@ const supplyDeliveryItemSchema = z.object({
     .refine((val) => !isNaN(val) && val > 0, {
       message: "Quantity must be at least 1",
     }),
+  supplied_item_pack_quantity: z.number().optional(),
+  supplied_item_pack_size: z.number().optional(),
   product_knowledge: z
     .custom<ProductKnowledgeBase>()
     .refine((data) => data?.slug, {
@@ -145,17 +151,26 @@ export function AddSupplyDeliveryForm({
 
   // Get facility data from hook
   const { facility } = useCurrentFacility();
+  const { getExtensions } = useExtensionSchemas();
 
   const informationalCodes = facility?.instance_informational_codes || [];
 
-  // Get extensions schema from facility
-  const extensionsSchema: JSONSchema2020 | undefined =
-    facility?.extensions_schema_supply_delivery;
+  // Get extensions from API
+  const allExtensions = getExtensions(
+    ExtensionEntityType.supply_delivery,
+    "write",
+  );
 
-  // Extract extension field metadata for table headers
-  const { fieldMetadata: extensionFields } = useMemo(
-    () => extractSchemaInfo(extensionsSchema),
-    [extensionsSchema],
+  // Process extensions for form rendering (includes owner, defaults, fieldMetadata)
+  const processedExtensions = useMemo(
+    () => processExtensions(allExtensions),
+    [allExtensions],
+  );
+
+  // Get extension field metadata with owner info for table headers
+  const extensionFields = useMemo(
+    () => getExtensionFieldsWithOwner(allExtensions),
+    [allExtensions],
   );
 
   // Default values for a new empty item row
@@ -486,6 +501,8 @@ export function AddSupplyDeliveryForm({
       supplied_item_type: suppliedItemType,
       supplied_item_condition: SupplyDeliveryCondition.normal,
       supplied_item_quantity: item.supplied_item_quantity,
+      supplied_item_pack_quantity: item.supplied_item_pack_quantity,
+      supplied_item_pack_size: item.supplied_item_pack_size,
       ...(origin
         ? { supplied_inventory_item: item.supplied_inventory_item }
         : { supplied_item: productId }),
@@ -627,8 +644,17 @@ export function AddSupplyDeliveryForm({
                                 <TableHead className="min-w-[140px] text-xs font-semibold text-center">
                                   {t("category")}
                                 </TableHead>
+                                <TableHead className="w-[7rem] text-xs font-semibold">
+                                  {t("pack_qty")}
+                                </TableHead>
+                                <TableHead className="w-[5rem] text-xs font-semibold">
+                                  {t("pack_size")}
+                                </TableHead>
+                                <TableHead className="w-[8rem] text-xs font-semibold">
+                                  {t("qty")}
+                                </TableHead>
                                 <TableHead className="min-w-[100px] text-xs font-semibold">
-                                  {t("base_price")}
+                                  {t("item_price")}
                                 </TableHead>
                                 {informationalCodes.map((code) => (
                                   <TableHead
@@ -638,15 +664,13 @@ export function AddSupplyDeliveryForm({
                                     {code.display}
                                   </TableHead>
                                 ))}
-                                <TableHead className="min-w-[70px] text-xs font-semibold">
-                                  {t("qty")}
-                                </TableHead>
+
                                 <TableHead className="min-w-[120px] text-xs font-semibold">
                                   {t("tax")}
                                 </TableHead>
                                 {extensionFields.map((field) => (
                                   <TableHead
-                                    key={field.name}
+                                    key={`${field.owner}-${field.name}`}
                                     className="min-w-[100px] text-xs font-semibold"
                                   >
                                     {field.label}
@@ -790,7 +814,7 @@ export function AddSupplyDeliveryForm({
                                 onProductSelectOpened={() =>
                                   setNewlyAddedRowIndex(null)
                                 }
-                                extensionsSchema={extensionsSchema}
+                                processedExtensions={processedExtensions}
                                 onRemove={() => remove(index)}
                               />
                             ),
