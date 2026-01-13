@@ -115,7 +115,7 @@ export function ResourceCategoryForm({
             resource_sub_type: ResourceCategorySubType.other,
           },
     );
-  }, [isOpen, isEditing, categoryData, form]);
+  }, [isOpen, isEditing, categoryData]);
 
   // Auto-generate slug from name when creating new category
   useEffect(() => {
