@@ -326,10 +326,10 @@ export function LocationSelectorDialog({
             </div>
           </div>
         )}
-        <Command className="pt-3 pb-2" shouldFilter={false}>
+        <Command className="pt-3" shouldFilter={false}>
           <div className="border border-gray-200">
             <CommandInput
-              className="border-0 ring-0"
+              className="border-0 ring-0 sm:text-sm text-base"
               placeholder={t("search")}
               onValueChange={(value) => {
                 setSearchValue(value);
@@ -339,7 +339,6 @@ export function LocationSelectorDialog({
               autoFocus
             />
             <CommandList
-              className="max-h-[calc(100vh-30rem)]"
               onWheel={(e) => {
                 e.stopPropagation();
               }}
@@ -369,7 +368,7 @@ export function LocationSelectorDialog({
             </CommandList>
           </div>
         </Command>
-        <div className="flex w-full justify-center mt-4">
+        <div className="flex w-full justify-center">
           <PaginationComponent
             cPage={currentPage}
             defaultPerPage={resultsPerPage}
