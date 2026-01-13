@@ -5,12 +5,12 @@ import { useTranslation } from "react-i18next";
 import { Button, buttonVariants } from "@/components/ui/button";
 
 import { cn } from "@/lib/utils";
-import { EncounterTags } from "@/pages/Encounters/tabs/overview/summary-panel-details-tab/encounter-tags";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { Account } from "./summary-panel-details-tab/account";
 import { DepartmentsAndTeams } from "./summary-panel-details-tab/department-and-team";
 import { DischargeDetails } from "./summary-panel-details-tab/discharge-summary";
+import { EncounterTags } from "./summary-panel-details-tab/encounter-tags";
 import { HospitalizationDetails } from "./summary-panel-details-tab/hospitalisation";
 import { Locations } from "./summary-panel-details-tab/locations";
 import { ManageCareTeam } from "./summary-panel-details-tab/manage-care-team";
