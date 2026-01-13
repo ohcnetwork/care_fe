@@ -19,6 +19,7 @@ import medicationStatementApi from "@/types/emr/medicationStatement/medicationSt
 import patientApi from "@/types/emr/patient/patientApi";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import symptomApi from "@/types/emr/symptom/symptomApi";
+import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import query from "@/Utils/request/query";
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
@@ -294,6 +295,24 @@ export default function TreatmentSummary({
 
               {/* Right Column */}
               <div className="space-y-3">
+                {encounter?.patient?.instance_identifiers
+                  ?.filter(
+                    ({ config }) =>
+                      config.config.use === PatientIdentifierUse.official,
+                  )
+                  .map((identifier) => (
+                    <div
+                      key={identifier.config.id}
+                      className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center"
+                    >
+                      <span className="text-gray-600">
+                        {identifier.config.config.display}
+                      </span>
+                      <span className="text-gray-600">:</span>
+                      <span className="font-semibold">{identifier.value}</span>
+                    </div>
+                  ))}
+
                 <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
                   <span className="text-gray-600">{t("mobile_number")}</span>
                   <span className="text-gray-600">:</span>

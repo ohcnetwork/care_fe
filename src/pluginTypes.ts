@@ -9,6 +9,7 @@ import {
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
+import { PlugConfigMeta } from "@/types/plugConfig";
 import { UserReadMinimal } from "@/types/user/user";
 import { LazyExoticComponent, ReactNode } from "react";
 import { UseFormReturn } from "react-hook-form";
@@ -78,6 +79,10 @@ export type PatientInfoCardActionsComponentType = React.FC<{
   className?: string;
 }>;
 
+export type ServiceRequestComponentType = React.FC<{
+  serviceRequestId: string;
+}>;
+
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
@@ -92,6 +97,7 @@ export type SupportedPluginComponents = {
   InvoiceRecordPaymentOptions: InvoiceRecordPaymentOptionsComponentType;
   PatientSearchActions: PatientSearchActionsComponentType;
   PatientInfoCardActions: PatientInfoCardActionsComponentType;
+  ServiceRequestAction: ServiceRequestComponentType;
 };
 
 // Create a type for lazy-loaded components
@@ -142,6 +148,10 @@ export type PluginManifest = {
     LazyComponent<React.FC<PluginEncounterTabProps>>
   >;
   devices?: readonly PluginDeviceManifest[];
+};
+
+export type PluginManifestWithMeta = PluginManifest & {
+  meta: PlugConfigMeta;
 };
 
 export { pluginMap };

@@ -201,7 +201,7 @@ export default function LocationForm({
     },
   });
 
-  const { mutate: submitBatch } = useMutation({
+  const { mutate: submitBatch, isPending: isBatchPending } = useMutation({
     mutationFn: mutate(batchApi.batchRequest),
     onSuccess: (data: BatchRequestResponse) => {
       toast.success(
@@ -548,11 +548,12 @@ export default function LocationForm({
           type="submit"
           disabled={
             isPending ||
+            isBatchPending ||
             !form.formState.isValid ||
             (!!location?.id && !form.formState.isDirty)
           }
         >
-          {isPending ? (
+          {isPending || isBatchPending ? (
             <>{isEditMode ? t("updating") : t("creating")}</>
           ) : (
             <>{isEditMode ? t("update") : t("create")}</>

@@ -16,7 +16,10 @@ import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { ChargeItemDefinitionDrawer } from "@/components/Common/ChargeItemDefinitionDrawer";
-import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
+import {
+  ResourceCategoryResourceType,
+  ResourceCategorySubType,
+} from "@/types/base/resourceCategory/resourceCategory";
 import {
   ChargeItemDefinitionBase,
   ChargeItemDefinitionRead,
@@ -41,6 +44,7 @@ interface ChargeItemDefinitionPickerProps {
   showCopyButton?: boolean;
   categorySlug?: string;
   allowMultiple?: boolean;
+  resourceSubType?: ResourceCategorySubType;
 }
 
 export function ChargeItemDefinitionPicker({
@@ -53,6 +57,7 @@ export function ChargeItemDefinitionPicker({
   showCreateButton = false,
   showCopyButton = false,
   categorySlug,
+  resourceSubType,
   allowMultiple = false,
 }: ChargeItemDefinitionPickerProps) {
   const { t } = useTranslation();
@@ -165,6 +170,7 @@ export function ChargeItemDefinitionPicker({
             queryFn: chargeItemDefinitionApi.listChargeItemDefinition,
             pathParams: { facilityId },
           }}
+          resourceSubType={resourceSubType}
           translationBaseKey="charge_item_definition"
         />
       </div>

@@ -34,6 +34,7 @@ import { ChargeItemDefinitionPicker } from "@/components/Common/ChargeItemDefini
 import { useIsMobile } from "@/hooks/use-mobile";
 
 import mutate from "@/Utils/request/mutate";
+import { ResourceCategorySubType } from "@/types/base/resourceCategory/resourceCategory";
 import {
   ApplyChargeItemDefinitionRequest,
   ChargeItemServiceResource,
@@ -173,6 +174,9 @@ export default function AddMultipleChargeItemsSheet({
               }
               setSelectedDefinition(selectedDef as ChargeItemDefinitionBase);
             }}
+            resourceSubType={
+              ResourceCategorySubType.charge_item_definition_location_bed_charges
+            }
             placeholder={t("select_charge_item_definitions")}
             className="w-full"
             disabled={disabled}
