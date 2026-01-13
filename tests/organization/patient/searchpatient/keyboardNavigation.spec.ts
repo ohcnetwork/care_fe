@@ -15,8 +15,7 @@ test.describe("Keyboard navigation in search patients", () => {
     const commandItems = page.locator("[cmdk-item]");
     await expect(commandItems.first()).toBeVisible();
 
-    const itemCount = await commandItems.count();
-    expect(itemCount).toBeGreaterThanOrEqual(2);
+    await expect(commandItems).toHaveCount(2, { timeout: 5000 });
 
     await page.keyboard.press("ArrowDown");
     await expect(commandItems.nth(1)).toHaveAttribute("data-selected", "true");
@@ -39,8 +38,7 @@ test.describe("Keyboard navigation in search patients", () => {
     const commandItems = page.locator("[cmdk-item]");
     await expect(commandItems.first()).toBeVisible();
 
-    const itemCount = await commandItems.count();
-    expect(itemCount).toBeGreaterThanOrEqual(2);
+    await expect(commandItems).toHaveCount(2, { timeout: 5000 });
 
     await page.keyboard.press("ArrowDown");
     await expect(commandItems.nth(1)).toHaveAttribute("data-selected", "true");
