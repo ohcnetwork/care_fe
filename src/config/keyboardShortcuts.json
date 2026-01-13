@@ -80,8 +80,7 @@
     { "key": "r", "action": "record-payment", "description": "Record Payment", "when": "always" },
     { "key": "p", "action": "print-invoice", "description": "Print Invoice", "when": "always" },
     { "key": "s", "action": "navigate-to-source", "description": "Navigate to Source", "when": "always" },
-    { "key": "v", "action": "view-invoice-payment", "description": "View Invoice", "when": "always" },
-    { "key": "a", "action": "view-account", "description": "View Account", "when": "always" }
+    { "key": "v", "action": "view-invoice-payment", "description": "View Invoice", "when": "always" }
   ],
 
   "facility:account:show": [
@@ -92,7 +91,8 @@
     { "key": "shift+1", "action": "switch-to-invoices-tab", "description": "Switch to Invoices Tab", "when": "always" },
     { "key": "shift+2", "action": "switch-to-charge-items-tab", "description": "Switch to Charge Items Tab", "when": "always" },
     { "key": "shift+3", "action": "switch-to-payments-tab", "description": "Switch to Payments Tab", "when": "always" },
-    { "key": "shift+4", "action": "switch-to-bed-charge-items-tab", "description": "Switch to Bed Charge Items Tab", "when": "always" }
+    { "key": "shift+4", "action": "switch-to-reports-tab", "description": "Switch to Reports Tab", "when": "always" },
+    { "key": "shift+5", "action": "switch-to-bed-charge-items-tab", "description": "Switch to Bed Charge Items Tab", "when": "always" }
   ],
 
   "facility:payment": [
@@ -116,7 +116,10 @@
     { "key": "l", "action": "load-from-order", "description": "Load from Order", "when": "always" }
   ],
   "facility:service": [
-    { "key": "s", "action": "scan-button", "description": "Scan the QR code", "when": "always" }
+    { "key": "s", "action": "scan-button", "description": "Scan the QR code", "when": "always" },
+    { "key": "c", "action": "collect-specimen", "description": "Collect Specimen", "when": "always" },
+    { "key": "m", "action": "mark-as-complete", "description": "Mark as Complete", "when": "always" },
+    { "key": "r", "action": "view-report", "description": "View Report", "when": "always" }
   ],
 
   "encounter": [

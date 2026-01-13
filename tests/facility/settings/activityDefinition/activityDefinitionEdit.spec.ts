@@ -9,6 +9,7 @@ import {
   expectToast,
   getCardByTitle,
   selectFromCategoryPicker,
+  selectFromCommand,
   selectFromLocationMultiSelect,
   selectFromRequirements,
   selectFromValueSet,
@@ -95,6 +96,12 @@ test.describe("activity definition edit", () => {
     ).toBeVisible();
 
     await expect(
+      page.getByRole("combobox").filter({
+        hasText: createdAD.healthcareService!,
+      }),
+    ).toBeVisible();
+
+    await expect(
       page
         .locator("div.rounded-lg")
         .filter({ has: page.locator("label", { hasText: /^locations$/i }) })
@@ -177,6 +184,14 @@ test.describe("activity definition edit", () => {
       closeAfterSelect: true,
     });
 
+    const healthcareServiceTrigger = page
+      .getByRole("combobox")
+      .filter({ hasText: /select.*healthcare service/i });
+    await selectFromCommand(page, healthcareServiceTrigger, {
+      search: "main pharmacy",
+      itemIndex: 0,
+    });
+
     const locationsTrigger = page
       .getByRole("combobox")
       .filter({ hasText: /select.*location/i });
@@ -237,6 +252,10 @@ test.describe("activity definition edit", () => {
       getCardByTitle(page, "Charge Item Definitions")
         .getByText(updatedData.chargeItem!)
         .first(),
+    ).toBeVisible();
+
+    await expect(
+      getCardByTitle(page, "Healthcare Service").getByText("main pharmacy"),
     ).toBeVisible();
 
     await expect(

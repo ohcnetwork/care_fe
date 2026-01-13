@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -37,6 +37,7 @@ import {
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
+import { extractSchemaInfo } from "@/Utils/schema/extensionSchema";
 import { EllipsisVertical } from "lucide-react";
 
 interface SupplyDeliveryTableProps {
@@ -70,17 +71,25 @@ export function SupplyDeliveryTable({
 
   const informationalCodes = facility?.instance_informational_codes || [];
 
+  // Extract extension field metadata for table headers
+  const { fieldMetadata: extensionFields } = useMemo(
+    () => extractSchemaInfo(facility?.extensions_schema_supply_delivery),
+    [facility?.extensions_schema_supply_delivery],
+  );
+
   const { mutate: updateDeliveryStatus } = useMutation({
     mutationFn: ({
       deliveryId,
       status,
+      extensions,
     }: {
       deliveryId: string;
       status: SupplyDeliveryStatus;
+      extensions: Record<string, unknown>;
     }) => {
       return mutate(supplyDeliveryApi.updateSupplyDelivery, {
         pathParams: { supplyDeliveryId: deliveryId },
-      })({ status });
+      })({ status, extensions: extensions || {} });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
@@ -139,13 +148,15 @@ export function SupplyDeliveryTable({
           )}
           <TableHead>{t("item")}</TableHead>
           <TableHead>{t("requested_qty")}</TableHead>
+          <TableHead>{t("pack_qty")}</TableHead>
+          <TableHead>{t("pack_size")}</TableHead>
           <TableHead>
             {isRequester ? t("received_qty") : t("dispatched_qty")}
           </TableHead>
           <TableHead>
             {isRequester ? t("received_date") : t("dispatched_date")}
           </TableHead>
-          <TableHead>{t("base")}</TableHead>
+          <TableHead>{t("item_price")}</TableHead>
           {informationalCodes.map((code) => (
             <TableHead key={code.code}>{code.display}</TableHead>
           ))}
@@ -153,6 +164,9 @@ export function SupplyDeliveryTable({
           <TableHead>{t("disc")}</TableHead>
           <TableHead>{t("status")}</TableHead>
           <TableHead>{t("condition")}</TableHead>
+          {extensionFields.map((field) => (
+            <TableHead key={field.name}>{field.label}</TableHead>
+          ))}
           {showActionsColumn && <TableHead>{t("actions")}</TableHead>}
         </TableRow>
       </TableHeader>
@@ -183,6 +197,8 @@ export function SupplyDeliveryTable({
               </div>
             </TableCell>
             <TableCell>{delivery.supply_request?.quantity || "-"}</TableCell>
+            <TableCell>{delivery.supplied_item_pack_quantity || "-"}</TableCell>
+            <TableCell>{delivery.supplied_item_pack_size || "-"}</TableCell>
             <TableCell>{delivery.supplied_item_quantity}</TableCell>
             <TableCell>
               {delivery.created_date &&
@@ -260,6 +276,16 @@ export function SupplyDeliveryTable({
                 </Badge>
               )}
             </TableCell>
+            {extensionFields.map((field) => {
+              const value = (
+                delivery.extensions as Record<string, unknown> | undefined
+              )?.[field.name];
+              return (
+                <TableCell key={field.name}>
+                  {value !== undefined && value !== null ? String(value) : "-"}
+                </TableCell>
+              );
+            })}
             {showActionsColumn && (
               <TableCell>
                 {delivery.status === SupplyDeliveryStatus.in_progress && (
@@ -281,6 +307,7 @@ export function SupplyDeliveryTable({
                             updateDeliveryStatus({
                               deliveryId: delivery.id,
                               status: SupplyDeliveryStatus.entered_in_error,
+                              extensions: delivery.extensions,
                             })
                           }
                           className="w-full flex justify-stretch"
@@ -296,6 +323,7 @@ export function SupplyDeliveryTable({
                             updateDeliveryStatus({
                               deliveryId: delivery.id,
                               status: SupplyDeliveryStatus.abandoned,
+                              extensions: delivery.extensions,
                             })
                           }
                           className="w-full flex justify-stretch"

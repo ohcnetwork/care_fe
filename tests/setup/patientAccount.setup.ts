@@ -38,7 +38,9 @@ test("navigate to an patient - create and save account id", async ({
       // Generate random account name using faker
       const accountName = faker.finance.accountName();
 
-      await page.getByRole("textbox", { name: "Name *" }).fill(accountName);
+      await page
+        .getByRole("textbox", { name: "Name *" })
+        .pressSequentially(accountName);
       await page.getByRole("button", { name: "Create" }).click();
 
       await page.getByRole("button", { name: "Go to account" }).click();

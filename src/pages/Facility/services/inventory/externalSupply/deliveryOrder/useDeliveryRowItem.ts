@@ -50,6 +50,8 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
     batch_number: batchNumber,
     unit_price: unitPrice,
     supplied_item_quantity: quantity = 1,
+    supplied_item_pack_quantity: packQuantity = 1,
+    supplied_item_pack_size: packSize = 1,
     tax_components: taxComponents,
     discount_components: discountComponents,
     informational_components: informationalComponents,
@@ -81,6 +83,8 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
       discount_components: [],
       charge_item_category: undefined,
       is_manually_edited: false,
+      supplied_item_pack_quantity: undefined,
+      supplied_item_pack_size: undefined,
     };
 
     Object.entries(fieldsToReset).forEach(([field, value]) => {
@@ -232,11 +236,21 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
   // Calculate base price from MRP when tax inclusive is enabled
   useEffect(() => {
     if (isTaxInclusive && mrpValue > 0) {
-      const calculatedBasePrice = mrpValue / (1 + totalTaxFactor / 100);
+      let calculatedBasePrice = mrpValue / (1 + totalTaxFactor / 100);
+      if (packSize && packQuantity && packSize > 0)
+        calculatedBasePrice = calculatedBasePrice / packSize;
       const roundedBasePrice = Math.round(calculatedBasePrice * 100) / 100;
       setField("unit_price", roundedBasePrice);
     }
-  }, [isTaxInclusive, mrpValue, totalTaxFactor, setField]);
+  }, [isTaxInclusive, mrpValue, totalTaxFactor, packSize, setField]);
+
+  // Auto-calculate quantity when pack quantity or pack size changes
+  useEffect(() => {
+    if (packQuantity && packSize && packQuantity > 0 && packSize > 0) {
+      const calculatedQuantity = packQuantity * packSize;
+      setField("supplied_item_quantity", calculatedQuantity);
+    }
+  }, [packQuantity, packSize, setField]);
 
   // Update informational component
   const updateInformationalComponent = useCallback(
@@ -265,6 +279,8 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
     batchNumber,
     unitPrice,
     quantity,
+    packQuantity,
+    packSize,
     taxComponents,
     discountComponents,
     informationalComponents,
