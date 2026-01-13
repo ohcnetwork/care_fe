@@ -31,8 +31,12 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
-import { getExtensionProps, useExtensions } from "@/hooks/useExtensions";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import {
+  ExtensionEntityType,
+  getCombinedExtensionProps,
+  useEntityExtensions,
+  useExtensionSchemas,
+} from "@/hooks/useExtensions";
 import {
   ACCOUNT_STATUS_COLORS,
   AccountBillingStatus,
@@ -75,11 +79,14 @@ export function AccountSheet({
 }: AccountSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const { facility } = useCurrentFacility();
+  const { getExtensions } = useExtensionSchemas();
 
   const ext = useMemo(
-    () => getExtensionProps(facility?.extensions_schema_account),
-    [facility?.extensions_schema_account],
+    () =>
+      getCombinedExtensionProps(
+        getExtensions(ExtensionEntityType.account, "write"),
+      ),
+    [getExtensions],
   );
 
   const formSchema = useMemo(
@@ -103,10 +110,13 @@ export function AccountSheet({
     },
   });
 
-  const extensions = useExtensions({
-    schema: facility?.extensions_schema_account,
+  const extensions = useEntityExtensions({
+    entityType: ExtensionEntityType.account,
+    schemaType: "write",
     form: methods,
-    existingData: initialValues?.extensions,
+    existingData: initialValues?.extensions as
+      | Record<string, Record<string, unknown>>
+      | undefined,
   });
 
   // Reset form when initialValues changes
@@ -146,7 +156,9 @@ export function AccountSheet({
             start: new Date().toISOString(),
           },
           patient: data.patient?.id || patientId!,
-          extensions: extensions.prepareForSubmit(data.extensions),
+          extensions: extensions.prepareForSubmit(
+            data.extensions as Record<string, Record<string, unknown>>,
+          ),
         },
       })({ signal: new AbortController().signal }),
     onSuccess: () => {
@@ -160,7 +172,9 @@ export function AccountSheet({
 
   const onSubmit = (values: FormValues) => {
     const { extensions: formExtensions, ...restData } = values;
-    const cleanedExtensions = extensions.prepareForSubmit(formExtensions);
+    const cleanedExtensions = extensions.prepareForSubmit(
+      formExtensions as Record<string, Record<string, unknown>>,
+    );
 
     if (isEdit && initialValues?.id) {
       updateMutation.mutate({ ...values, id: initialValues.id });

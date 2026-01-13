@@ -24,9 +24,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  getExtensionFieldsWithOwner,
+  getExtensionValue,
+} from "@/hooks/useExtensions";
+import useExtensionSchemas from "@/hooks/useExtensionSchemas";
 import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import { ExtensionEntityType } from "@/types/extensions/extensions";
 import { DeliveryOrderStatus } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import {
   SUPPLY_DELIVERY_CONDITION_COLORS,
@@ -37,7 +43,6 @@ import {
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
-import { extractSchemaInfo } from "@/Utils/schema/extensionSchema";
 import { EllipsisVertical } from "lucide-react";
 
 interface SupplyDeliveryTableProps {
@@ -68,13 +73,20 @@ export function SupplyDeliveryTable({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { facility } = useCurrentFacility();
+  const { getExtensions } = useExtensionSchemas();
 
   const informationalCodes = facility?.instance_informational_codes || [];
 
-  // Extract extension field metadata for table headers
-  const { fieldMetadata: extensionFields } = useMemo(
-    () => extractSchemaInfo(facility?.extensions_schema_supply_delivery),
-    [facility?.extensions_schema_supply_delivery],
+  // Get extensions and extract field metadata with owner info for table headers
+  const allExtensions = getExtensions(
+    ExtensionEntityType.supply_delivery,
+    "read",
+  );
+
+  // Get field metadata with owner info for reading namespaced values
+  const extensionFields = useMemo(
+    () => getExtensionFieldsWithOwner(allExtensions),
+    [allExtensions],
   );
 
   const { mutate: updateDeliveryStatus } = useMutation({
@@ -163,7 +175,9 @@ export function SupplyDeliveryTable({
           <TableHead>{t("status")}</TableHead>
           <TableHead>{t("condition")}</TableHead>
           {extensionFields.map((field) => (
-            <TableHead key={field.name}>{field.label}</TableHead>
+            <TableHead key={`${field.owner}-${field.name}`}>
+              {field.label}
+            </TableHead>
           ))}
           {showActionsColumn && <TableHead>{t("actions")}</TableHead>}
         </TableRow>
@@ -273,11 +287,13 @@ export function SupplyDeliveryTable({
               )}
             </TableCell>
             {extensionFields.map((field) => {
-              const value = (
-                delivery.extensions as Record<string, unknown> | undefined
-              )?.[field.name];
+              const value = getExtensionValue(
+                delivery.extensions as Record<string, Record<string, unknown>>,
+                field.owner,
+                field.name,
+              );
               return (
-                <TableCell key={field.name}>
+                <TableCell key={`${field.owner}-${field.name}`}>
                   {value !== undefined && value !== null ? String(value) : "-"}
                 </TableCell>
               );
