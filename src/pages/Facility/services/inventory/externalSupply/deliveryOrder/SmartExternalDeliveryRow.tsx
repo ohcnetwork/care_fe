@@ -85,6 +85,8 @@ export function SmartExternalDeliveryRow({
     suppliedItem,
     batchNumber,
     unitPrice,
+    packQuantity,
+    packSize,
     taxComponents,
     discountComponents,
     informationalComponents,
@@ -309,7 +311,64 @@ export function SmartExternalDeliveryRow({
         )}
       </TableCell>
 
-      {/* Base Price */}
+      {/* Pack Quantity */}
+      <TableCell className="align-top p-2">
+        <Input
+          type="number"
+          min={1}
+          value={packQuantity || ""}
+          placeholder="0"
+          onChange={(e) => {
+            const value = parseInt(e.target.value) || undefined;
+            setField("supplied_item_pack_quantity", value);
+            markAsEdited();
+          }}
+          disabled={!productKnowledge}
+          className="w-[7rem]"
+        />
+      </TableCell>
+
+      {/* Pack Size */}
+      <TableCell className="align-top p-2">
+        <Input
+          type="number"
+          min={1}
+          value={packSize || ""}
+          placeholder="0"
+          onChange={(e) => {
+            const value = parseInt(e.target.value) || undefined;
+            setField("supplied_item_pack_size", value);
+            markAsEdited();
+          }}
+          disabled={!productKnowledge}
+          className="w-[5rem]"
+        />
+      </TableCell>
+
+      {/* Quantity */}
+      <TableCell className="align-top p-2">
+        <FormField
+          control={form.control}
+          name={`items.${index}.supplied_item_quantity`}
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  type="number"
+                  min={1}
+                  {...field}
+                  onChange={(e) => field.onChange(parseInt(e.target.value))}
+                  className="w-[8rem]"
+                  disabled
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </TableCell>
+
+      {/* Item Price */}
       <TableCell className="align-top p-2!">
         <div className="flex flex-col gap-1">
           <div className="flex items-center">
@@ -380,28 +439,6 @@ export function SmartExternalDeliveryRow({
           </TableCell>
         );
       })}
-
-      {/* Quantity */}
-      <TableCell className="align-top p-2">
-        <FormField
-          control={form.control}
-          name={`items.${index}.supplied_item_quantity`}
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input
-                  type="number"
-                  min={1}
-                  {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value))}
-                  className="w-full min-w-[70px]"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </TableCell>
 
       {/* Taxes */}
       <TableCell className="align-top p-2">
