@@ -34,6 +34,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   ExtensionEntityType,
   getCombinedExtensionProps,
+  NamespacedExtensionData,
   useEntityExtensions,
   useExtensionSchemas,
 } from "@/hooks/useExtensions";
@@ -155,7 +156,7 @@ export function AccountSheet({
           },
           patient: data.patient?.id || patientId!,
           extensions: extensions.prepareForSubmit(
-            data.extensions as Record<string, Record<string, unknown>>,
+            data.extensions as NamespacedExtensionData,
           ),
         },
       })({ signal: new AbortController().signal }),
@@ -171,7 +172,7 @@ export function AccountSheet({
   const onSubmit = (values: FormValues) => {
     const { extensions: formExtensions, ...restData } = values;
     const cleanedExtensions = extensions.prepareForSubmit(
-      formExtensions as Record<string, Record<string, unknown>>,
+      formExtensions as NamespacedExtensionData,
     );
 
     if (isEdit && initialValues?.id) {

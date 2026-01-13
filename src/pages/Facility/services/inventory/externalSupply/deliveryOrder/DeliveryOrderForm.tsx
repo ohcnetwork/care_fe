@@ -30,6 +30,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   ExtensionEntityType,
   getCombinedExtensionProps,
+  NamespacedExtensionData,
   useEntityExtensions,
   useExtensionSchemas,
 } from "@/hooks/useExtensions";
@@ -252,7 +253,7 @@ export default function DeliveryOrderForm({
   function onSubmit(data: FormValues) {
     const { extensions: formExtensions, ...restData } = data;
     const cleanedExtensions = extensions.prepareForSubmit(
-      formExtensions as Record<string, Record<string, unknown>>,
+      formExtensions as NamespacedExtensionData,
     );
 
     if (isEditMode && deliveryOrderId) {

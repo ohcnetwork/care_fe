@@ -27,6 +27,7 @@ import {
 import {
   getExtensionFieldsWithOwner,
   getExtensionValue,
+  NamespacedExtensionData,
 } from "@/hooks/useExtensions";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
 import { cn } from "@/lib/utils";
@@ -292,7 +293,7 @@ export function SupplyDeliveryTable({
             </TableCell>
             {extensionFields.map((field) => {
               const value = getExtensionValue(
-                delivery.extensions as Record<string, Record<string, unknown>>,
+                delivery.extensions as NamespacedExtensionData,
                 field.owner,
                 field.name,
               );
