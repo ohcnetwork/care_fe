@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import { Check, Loader2, LocateFixed, Trash2, XIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -147,8 +147,6 @@ export default function DispenseDrawer({
 
   const [isLocationSelectorOpen, setIsLocationSelectorOpen] = useState(false);
   const [isLocationWarningOpen, setIsLocationWarningOpen] = useState(false);
-  const [productKnowledgeInventoriesMap, setProductKnowledgeInventoriesMap] =
-    useState<Record<string, InventoryRead[] | undefined>>({});
 
   const formSchema = useMemo(() => createFormSchema(), []);
 
@@ -164,6 +162,52 @@ export default function DispenseDrawer({
     name: "items",
   });
 
+  // Get unique product knowledge IDs from form fields
+  const productKnowledgeIds = useMemo(() => {
+    return Array.from(
+      new Set(
+        fields
+          .map((field) => field.productKnowledge?.id)
+          .filter((id): id is string => !!id),
+      ),
+    );
+  }, [fields]);
+
+  // Fetch inventories for all product knowledge IDs using useQueries
+  const inventoryQueries = useQueries({
+    queries: productKnowledgeIds.map((productKnowledgeId) => ({
+      queryKey: [
+        "inventory",
+        facilityId,
+        currentLocation.id,
+        productKnowledgeId,
+      ],
+      queryFn: query(inventoryApi.list, {
+        pathParams: { facilityId, locationId: currentLocation.id },
+        queryParams: {
+          limit: 100,
+          product_knowledge: productKnowledgeId,
+          net_content_gt: 0,
+        },
+      }),
+      enabled: !!facilityId && !!currentLocation.id && !!productKnowledgeId,
+    })),
+  });
+
+  // Transform query results into the map format
+  const productKnowledgeInventoriesMap = useMemo(() => {
+    const map: Record<string, InventoryRead[] | undefined> = {};
+    productKnowledgeIds.forEach((id, index) => {
+      const queryResult = inventoryQueries[index];
+      if (queryResult.isSuccess) {
+        map[id] = queryResult.data?.results || [];
+      } else if (queryResult.isLoading) {
+        map[id] = undefined;
+      }
+    });
+    return map;
+  }, [productKnowledgeIds, inventoryQueries]);
+
   useEffect(() => {
     form.clearErrors();
     form.trigger();
@@ -174,62 +218,6 @@ export default function DispenseDrawer({
       form.reset({ items: [] });
     }
   }, [open, form]);
-
-  useEffect(() => {
-    const abortController = new AbortController();
-
-    const fetchMissingInventories = async () => {
-      const missingInventories = Object.entries(
-        productKnowledgeInventoriesMap,
-      ).filter(([, inventories]) => !inventories);
-
-      if (missingInventories.length === 0) return;
-
-      try {
-        const promises = missingInventories.map(
-          async ([productKnowledgeId]) => {
-            const inventoriesResponse = await query(inventoryApi.list, {
-              pathParams: { facilityId, locationId: currentLocation.id },
-              queryParams: {
-                limit: 100,
-                product_knowledge: productKnowledgeId,
-                net_content_gt: 0,
-              },
-            })({ signal: abortController.signal });
-
-            return {
-              productKnowledgeId,
-              inventories: inventoriesResponse.results || [],
-            };
-          },
-        );
-
-        const results = await Promise.all(promises);
-
-        if (!abortController.signal.aborted) {
-          setProductKnowledgeInventoriesMap((prev) => {
-            const updated = { ...prev };
-            results.forEach(({ productKnowledgeId, inventories }) => {
-              updated[productKnowledgeId] = inventories;
-            });
-            return updated;
-          });
-        }
-      } catch (error) {
-        // Ignore abort errors
-        if (error instanceof Error && error.name !== "AbortError") {
-          // Handle real errors if needed
-          console.error("Error fetching inventories:", error);
-        }
-      }
-    };
-
-    fetchMissingInventories();
-
-    return () => {
-      abortController.abort();
-    };
-  }, [productKnowledgeInventoriesMap, facilityId, currentLocation.id]);
 
   // Auto-select single lot if only one inventory is available
   useEffect(() => {
@@ -302,7 +290,6 @@ export default function DispenseDrawer({
     (newLocation: LocationRead) => {
       setCurrentLocation(newLocation);
       setIsLocationSelectorOpen(false);
-      setProductKnowledgeInventoriesMap({});
       form.reset({ items: [] });
     },
     [form],
@@ -588,11 +575,6 @@ export default function DispenseDrawer({
                               },
                             ],
                           });
-
-                          setProductKnowledgeInventoriesMap((prev) => ({
-                            [product.id]: undefined,
-                            ...prev,
-                          }));
                         }}
                         className="text-primary-800 border-primary-600"
                         placeholder={t("add_item")}
@@ -881,11 +863,6 @@ export default function DispenseDrawer({
                               },
                             ],
                           });
-
-                          setProductKnowledgeInventoriesMap((prev) => ({
-                            [product.id]: undefined,
-                            ...prev,
-                          }));
                         }}
                         className="text-primary-800 border-primary-600"
                         placeholder={t("add_item")}
