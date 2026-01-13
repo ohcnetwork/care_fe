@@ -43,6 +43,7 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   calculateSlotDuration,
   getSlotsPerSession,
@@ -92,6 +93,7 @@ export default function CreateScheduleTemplateSheet({
           message: t("schedule_creation_for_past_validation_error"),
         }),
       valid_to: z.date({ required_error: t("field_required") }),
+      is_public: z.boolean(),
 
       weekdays: z
         .array(z.number() as unknown as z.ZodType<DayOfWeek>)
@@ -182,6 +184,7 @@ export default function CreateScheduleTemplateSheet({
       valid_from: undefined,
       valid_to: undefined,
       weekdays: [],
+      is_public: false,
       availabilities: [
         {
           name: "",
@@ -219,6 +222,7 @@ export default function CreateScheduleTemplateSheet({
       name: values.name,
       resource_type: resourceType,
       resource_id: resourceId,
+      is_public: values.is_public,
       availabilities: values.availabilities.map(
         (availability) =>
           ({
@@ -392,6 +396,29 @@ export default function CreateScheduleTemplateSheet({
                 </div>
               </div>
 
+              <FormField
+                control={form.control}
+                name="is_public"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4 bg-white">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none -mt-1">
+                      <FormLabel className="text-base">
+                        {t("make_template_public")}
+                      </FormLabel>
+                      <p className="text-sm text-gray-500">
+                        {t("make_template_public_description")}
+                      </p>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <div className="space-y-4">
                 {form.watch("availabilities")?.map((_, index) => (
                   <div
