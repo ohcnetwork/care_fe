@@ -419,7 +419,7 @@ export function SpecimenForm({
                           });
                         }
                       }}
-                      disabled={disableEdit || !!defaultUnit}
+                      disabled={disableEdit}
                     >
                       <SelectTrigger className="h-9">
                         <SelectValue placeholder={t("unit")} />
