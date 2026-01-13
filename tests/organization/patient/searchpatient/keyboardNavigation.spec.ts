@@ -14,10 +14,10 @@ test.describe("Keyboard navigation in search patients", () => {
 
     const commandItems = page.locator("[cmdk-item]");
     await expect(commandItems.first()).toBeVisible();
-
     await expect(commandItems).toHaveCount(2, { timeout: 5000 });
 
     await page.keyboard.press("ArrowDown");
+    await expect(commandItems.nth(0)).toHaveAttribute("data-selected", "false");
     await expect(commandItems.nth(1)).toHaveAttribute("data-selected", "true");
 
     const highlightedText = await commandItems.nth(1).innerText();
@@ -26,8 +26,9 @@ test.describe("Keyboard navigation in search patients", () => {
     await expect(commandItems).toHaveCount(0);
 
     await page.keyboard.press("Control+k");
-    const selectedButton = page.getByTestId("selected-option-button");
-    await expect(selectedButton).toContainText(highlightedText);
+    await expect(page.getByTestId("selected-option-button")).toContainText(
+      highlightedText,
+    );
   });
 
   test("keyboard navigation: ArrowUp moves highlight back and commits selection", async ({
@@ -37,13 +38,11 @@ test.describe("Keyboard navigation in search patients", () => {
 
     const commandItems = page.locator("[cmdk-item]");
     await expect(commandItems.first()).toBeVisible();
-
     await expect(commandItems).toHaveCount(2, { timeout: 5000 });
 
     await page.keyboard.press("ArrowDown");
-    await expect(commandItems.nth(1)).toHaveAttribute("data-selected", "true");
-
     await page.keyboard.press("ArrowUp");
+    await expect(commandItems.nth(0)).toHaveAttribute("data-selected", "false");
     await expect(commandItems.nth(0)).toHaveAttribute("data-selected", "true");
 
     const highlightedText = await commandItems.nth(0).innerText();
@@ -52,7 +51,78 @@ test.describe("Keyboard navigation in search patients", () => {
     await expect(commandItems).toHaveCount(0);
 
     await page.keyboard.press("Control+k");
-    const selectedButton = page.getByTestId("selected-option-button");
-    await expect(selectedButton).toContainText(highlightedText);
+    await expect(page.getByTestId("selected-option-button")).toContainText(
+      highlightedText,
+    );
+  });
+
+  test("keyboard navigation: Home jumps to first item", async ({ page }) => {
+    await page.keyboard.press("Control+k");
+
+    const commandItems = page.locator("[cmdk-item]");
+    await expect(commandItems).toHaveCount(2, { timeout: 5000 });
+
+    await page.keyboard.press("End"); // move to last
+    await page.keyboard.press("Home"); // jump to first
+    await expect(commandItems.nth(0)).toHaveAttribute("data-selected", "true");
+  });
+
+  test("keyboard navigation: End jumps to last item", async ({ page }) => {
+    await page.keyboard.press("Control+k");
+
+    const commandItems = page.locator("[cmdk-item]");
+    await expect(commandItems).toHaveCount(2, { timeout: 5000 });
+
+    await page.keyboard.press("End");
+    await expect(commandItems.nth(1)).toHaveAttribute("data-selected", "true");
+  });
+
+  test("keyboard navigation: selection does not move past list boundaries", async ({
+    page,
+  }) => {
+    await page.keyboard.press("Control+k");
+
+    const commandItems = page.locator("[cmdk-item]");
+    await expect(commandItems).toHaveCount(2, { timeout: 5000 });
+
+    // At first item, ArrowUp should stay on first
+    await page.keyboard.press("ArrowUp");
+    await expect(commandItems.nth(0)).toHaveAttribute("data-selected", "true");
+
+    // Move to last
+    await page.keyboard.press("End");
+    await expect(commandItems.nth(1)).toHaveAttribute("data-selected", "true");
+
+    // ArrowDown should not go past last
+    await page.keyboard.press("ArrowDown");
+    await expect(commandItems.nth(1)).toHaveAttribute("data-selected", "true");
+  });
+
+  test("keyboard navigation: empty search results show no selectable items", async ({
+    page,
+  }) => {
+    // Type a query that yields no results
+    await page.keyboard.press("Control+k");
+    await page.locator("[cmdk-input]").fill("zzzzzz-not-a-patient");
+
+    const commandItems = page.locator("[cmdk-item]");
+    await expect(commandItems).toHaveCount(0);
+  });
+
+  test("keyboard navigation: single item remains selected", async ({
+    page,
+  }) => {
+    await page.keyboard.press("Control+k");
+    await page.locator("[cmdk-input]").fill("only");
+
+    const commandItems = page.locator("[cmdk-item]");
+    await expect(commandItems).toHaveCount(1);
+
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("ArrowUp");
+    await page.keyboard.press("Home");
+    await page.keyboard.press("End");
+
+    await expect(commandItems.nth(0)).toHaveAttribute("data-selected", "true");
   });
 });
