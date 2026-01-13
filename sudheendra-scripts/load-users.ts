@@ -99,9 +99,6 @@ async function createDepartmentUsers(
     const existingUser = await request<UserRead>(
       `/api/v1/users/${datapoint.userName}/`,
       "GET",
-      undefined,
-      undefined,
-      true,
     );
     if (existingUser) {
       logger(`User ${datapoint.userName} already exists`);
@@ -122,17 +119,17 @@ async function createDepartmentUsers(
       continue;
     }
     logger(`Created user ${datapoint.userName}`);
-    await request(
-      `/api/v1/facility/${facilityId}/organizations/${organizationId}/users/`,
-      "POST",
-      {
-        user: newUser.id,
-        role: roleId,
-      },
-    );
-    logger(
-      `Added user ${datapoint.userName} to organization ${organizationId}`,
-    );
+    // await request(
+    //   `/api/v1/facility/${facilityId}/organizations/${organizationId}/users/`,
+    //   "POST",
+    //   {
+    //     user: newUser.id,
+    //     role: roleId,
+    //   },
+    // );
+    // logger(
+    //   `Added user ${datapoint.userName} to organization ${organizationId}`,
+    // );
   }
 }
 

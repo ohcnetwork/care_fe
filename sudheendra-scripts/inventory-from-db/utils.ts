@@ -32,6 +32,7 @@ import {
   SupplyDeliveryStatus,
   SupplyDeliveryType,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
+import { UserRead } from "@/types/user/user";
 import { ProgressNode, ProgressTree } from "sudheendra-scripts/utils/progress";
 import itemsJson from "./data/ITEM.json";
 import pharmacyCategories from "./data/PHARM_CATEGORY.json";
@@ -306,6 +307,15 @@ export const getItemsToImport = <TExisting, TItem>(
   return importItems.filter((item) =>
     existingItems.every((existing) => !isSame(existing, item)),
   );
+};
+
+export const getExistingUsers = async () => {
+  const users = await getExistingPaginatedData<
+    UserRead,
+    { id: string; username: string }
+  >(`/api/v1/users/`, {}, (user) => ({ id: user.id, username: user.username }));
+
+  return new Map(users.map((user) => [user.username, user]));
 };
 
 export const getExistingLocations = async (progress?: {
