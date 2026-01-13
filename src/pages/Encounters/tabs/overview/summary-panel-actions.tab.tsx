@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Button, buttonVariants } from "@/components/ui/button";
 
 import { cn } from "@/lib/utils";
+import { EncounterTags } from "@/pages/Encounters/tabs/overview/summary-panel-details-tab/encounter-tags";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { Account } from "./summary-panel-details-tab/account";
@@ -95,6 +96,7 @@ export const SummaryPanelActionsTab = () => {
         </div>
         <div className="flex xl:hidden flex-col space-y-2 mt-3">
           <Account />
+          <EncounterTags />
           <Locations />
           <ManageCareTeam />
           <DepartmentsAndTeams />
