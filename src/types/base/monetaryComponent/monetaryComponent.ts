@@ -15,6 +15,7 @@ export interface MonetaryComponent {
   code?: Code;
   factor?: number;
   amount?: string;
+  tax_included_amount?: string;
   conditions?: Condition[];
 }
 

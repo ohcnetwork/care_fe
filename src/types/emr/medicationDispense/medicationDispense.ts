@@ -186,8 +186,8 @@ export interface MedicationDispenseCreate extends Omit<
   location?: string;
   authorizing_request: string | null;
   item: string;
-  quantity: number;
-  days_supply: number;
+  quantity: string;
+  days_supply: string;
   fully_dispensed: boolean;
   create_dispense_order: MedicationDispenseOrderCreate;
 }
@@ -204,7 +204,7 @@ export interface MedicationDispenseRead extends MedicationDispenseBase {
   charge_item: ChargeItemRead;
   created_date: string;
   location: LocationRead;
-  quantity: number;
+  quantity: string;
 }
 
 export interface MedicationDispenseSummary {

@@ -460,7 +460,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
               {/* Net Amount */}
               <div className="flex w-64 justify-between">
                 <span className="text-gray-500">{t("net_amount")}</span>
-                <MonetaryDisplay amount={String(invoice.total_net)} />
+                <MonetaryDisplay amount={invoice.total_net} />
               </div>
 
               <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
@@ -468,7 +468,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
               {/* Total */}
               <div className="flex w-64 justify-between font-semibold">
                 <span>{t("total")}</span>
-                <MonetaryDisplay amount={String(invoice.total_gross)} />
+                <MonetaryDisplay amount={invoice.total_gross} />
               </div>
               <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
             </div>
@@ -540,7 +540,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                 {/* Total Received */}
                 <div className="flex w-64 justify-between font-semibold">
                   <span>{t("total_received")}</span>
-                  <MonetaryDisplay amount={String(invoice.total_payments)} />
+                  <MonetaryDisplay amount={invoice.total_payments} />
                 </div>
                 <div className="p-1 border-b-2 border-dashed border-gray-200 w-full" />
               </div>

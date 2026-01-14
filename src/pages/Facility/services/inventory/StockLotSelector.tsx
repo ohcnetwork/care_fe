@@ -157,7 +157,7 @@ export default function StockLotSelector({
                       <Badge
                         variant={
                           selectedInventory?.status === "active" &&
-                          selectedInventory?.net_content > 0
+                          parseFloat(selectedInventory?.net_content || "0") > 0
                             ? "primary"
                             : "destructive"
                         }
@@ -242,7 +242,8 @@ export default function StockLotSelector({
                       </Badge>
                       <Badge
                         variant={
-                          inv.status === "active" && inv.net_content > 0
+                          inv.status === "active" &&
+                          parseFloat(inv.net_content) > 0
                             ? "primary"
                             : "destructive"
                         }

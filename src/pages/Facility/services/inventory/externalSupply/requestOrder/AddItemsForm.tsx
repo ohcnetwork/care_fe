@@ -85,7 +85,7 @@ export function AddItemsForm({
       const promises = requests.map((request) =>
         mutate(supplyRequestApi.createSupplyRequest)({
           item: request.item.id,
-          quantity: request.quantity,
+          quantity: String(request.quantity),
           status: SupplyRequestStatus.active,
           order: requestOrderId,
         }),

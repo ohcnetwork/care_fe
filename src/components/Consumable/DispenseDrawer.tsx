@@ -364,13 +364,13 @@ export default function DispenseDrawer({
           const inventory = inventoryList.find(
             (inv) => inv.id === lot.selectedInventoryId,
           );
-          if (inventory && lot.quantity > inventory.net_content) {
+          if (inventory && lot.quantity > parseFloat(inventory.net_content)) {
             toast.error(
               t("quantity_exceeds_available_stock", {
                 item: item.productKnowledge.name,
                 lot: inventory.product.batch?.lot_number || "N/A",
                 requested: lot.quantity,
-                available: inventory.net_content,
+                available: parseFloat(inventory.net_content),
               }),
             );
             hasErrors = true;
@@ -422,8 +422,8 @@ export default function DispenseDrawer({
             location: currentLocation.id,
             authorizing_request: null,
             item: selectedInventory.id,
-            quantity: lot.quantity,
-            days_supply: 1,
+            quantity: String(lot.quantity),
+            days_supply: "1",
             fully_dispensed: true,
             create_dispense_order: {
               alternate_identifier: alternateIdentifier,

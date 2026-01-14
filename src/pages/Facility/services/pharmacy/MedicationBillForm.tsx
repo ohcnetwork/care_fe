@@ -1114,12 +1114,12 @@ export default function MedicationBillForm({ patientId }: Props) {
         const inventory = inventoryList.find(
           (inv) => inv.id === lot.selectedInventoryId,
         );
-        if (inventory && lot.quantity > inventory.net_content) {
+        if (inventory && lot.quantity > parseFloat(inventory.net_content)) {
           medsWithInsufficientStock.push({
             name: effectiveProductKnowledge.name,
             lot: inventory.product.batch?.lot_number || "N/A",
             requested: lot.quantity,
-            available: inventory.net_content,
+            available: parseFloat(inventory.net_content),
           });
         }
       });
@@ -1178,8 +1178,8 @@ export default function MedicationBillForm({ patientId }: Props) {
           location: locationId,
           authorizing_request: medication?.id ?? null,
           item: selectedInventory.id,
-          quantity: lot.quantity,
-          days_supply: item.daysSupply,
+          quantity: String(lot.quantity),
+          days_supply: String(item.daysSupply),
           fully_dispensed: item.fully_dispensed,
           create_dispense_order: {
             alternate_identifier: alternateIdentifier,

@@ -178,7 +178,8 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                   <TableCell
                     className={cn(
                       "font-medium",
-                      inventory.net_content < 10 && "text-yellow-600",
+                      parseFloat(inventory.net_content) < 10 &&
+                        "text-yellow-600",
                     )}
                   >
                     {inventory.net_content}

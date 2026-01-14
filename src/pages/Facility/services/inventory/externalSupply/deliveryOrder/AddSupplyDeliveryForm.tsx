@@ -291,7 +291,7 @@ export function AddSupplyDeliveryForm({
     );
     const itemsFromRequests = selectedRequests?.map((request) => ({
       supplied_inventory_item: undefined,
-      supplied_item_quantity: request.quantity,
+      supplied_item_quantity: parseFloat(request.quantity),
       supplied_item_pack_quantity: 1,
       supplied_item_pack_size: 1,
       product_knowledge: request.item,
@@ -504,7 +504,7 @@ export function AddSupplyDeliveryForm({
       status: SupplyDeliveryStatus.in_progress,
       supplied_item_type: suppliedItemType,
       supplied_item_condition: SupplyDeliveryCondition.normal,
-      supplied_item_quantity: item.supplied_item_quantity,
+      supplied_item_quantity: String(item.supplied_item_quantity),
       supplied_item_pack_quantity: item.supplied_item_pack_quantity,
       supplied_item_pack_size: item.supplied_item_pack_size,
       ...(origin

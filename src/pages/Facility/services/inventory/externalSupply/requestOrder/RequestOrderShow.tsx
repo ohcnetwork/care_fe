@@ -242,7 +242,7 @@ export function RequestOrderShow({
           (acc[
             delivery.supplied_inventory_item?.product?.product_knowledge?.id ||
               ""
-          ]?.quantity || 0) + delivery.supplied_item_quantity,
+          ]?.quantity || 0) + parseFloat(delivery.supplied_item_quantity),
         product: delivery.supplied_inventory_item?.product,
       };
       return acc;
@@ -260,7 +260,8 @@ export function RequestOrderShow({
       return {
         ...supplyRequest,
         dispatched_quantity: dispatchedQuantity,
-        remaining_quantity: supplyRequest.quantity - dispatchedQuantity,
+        remaining_quantity:
+          parseFloat(supplyRequest.quantity) - dispatchedQuantity,
       };
     },
   );

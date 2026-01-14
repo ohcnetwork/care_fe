@@ -312,7 +312,7 @@ export function PaymentReconciliationSheet({
                   <div className="flex text-sm justify-center text-gray-700">
                     {t("invoice_total")}:
                     <p className="font-bold ml-1">
-                      <MonetaryDisplay amount={String(invoice.total_gross)} />
+                      <MonetaryDisplay amount={invoice.total_gross} />
                     </p>
                   </div>
                 )}
@@ -324,9 +324,7 @@ export function PaymentReconciliationSheet({
                         {t("payment_received")}
                       </p>
                       <p className="text-3xl font-bold text-gray-900">
-                        <MonetaryDisplay
-                          amount={String(invoice.total_payments)}
-                        />
+                        <MonetaryDisplay amount={invoice.total_payments} />
                       </p>
                     </>
                   ) : (
