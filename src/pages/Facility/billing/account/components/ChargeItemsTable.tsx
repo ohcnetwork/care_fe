@@ -60,6 +60,7 @@ import {
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -87,6 +88,7 @@ function PriceComponentRow({ label, components }: PriceComponentRowProps) {
             <TableCell>
               <MonetaryDisplay {...component} />
             </TableCell>
+            <TableCell></TableCell>
             <TableCell></TableCell>
             <TableCell></TableCell>
             <TableCell></TableCell>
@@ -275,6 +277,9 @@ export function ChargeItemsTable({
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
                   {t("total")}
                 </TableHead>
+                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
+                  {t("performer")}
+                </TableHead>
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-[120px]">
                   {t("status")}
                 </TableHead>
@@ -346,6 +351,9 @@ export function ChargeItemsTable({
                     </TableCell>
                     <TableCell className="border-x p-3 text-gray-950 font-medium">
                       <MonetaryDisplay amount={item.total_price} />
+                    </TableCell>
+                    <TableCell className="border-x p-3 text-gray-950">
+                      {formatName(item.performer_actor)}
                     </TableCell>
                     <TableCell className="border-x p-3 text-gray-950">
                       <div className="flex items-center gap-1">

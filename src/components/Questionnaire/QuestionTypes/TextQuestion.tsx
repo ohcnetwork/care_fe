@@ -1,6 +1,8 @@
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+import { TemplateSelector } from "@/components/Questionnaire/QuestionTypes/TemplateSelector";
+
 import type {
   QuestionnaireResponse,
   ResponseValue,
@@ -43,6 +45,29 @@ export function TextQuestion({
     );
   };
 
+  const handleAddTemplates = (contents: string[]) => {
+    clearError();
+    const newValues = [...questionnaireResponse.values];
+
+    // Append to the first value (index 0)
+    const currentValue = newValues[0]?.value?.toString() || "";
+    const appendedContent = contents.join("\n");
+    const newValue = currentValue
+      ? `${currentValue} ${appendedContent}`
+      : appendedContent;
+
+    newValues[0] = {
+      type: "string",
+      value: newValue,
+    };
+
+    updateQuestionnaireResponseCB(
+      newValues,
+      questionnaireResponse.question_id,
+      questionnaireResponse.note,
+    );
+  };
+
   return (
     <>
       {question.type === "text" ? (
@@ -57,6 +82,13 @@ export function TextQuestion({
           type="text"
           value={questionnaireResponse.values[index]?.value?.toString() || ""}
           onChange={(e) => handleChange(e.target.value)}
+          disabled={disabled}
+        />
+      )}
+      {index === 0 && question.templates && (
+        <TemplateSelector
+          templates={question.templates}
+          onAddTemplates={handleAddTemplates}
           disabled={disabled}
         />
       )}
