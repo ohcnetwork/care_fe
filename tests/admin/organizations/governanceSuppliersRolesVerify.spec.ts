@@ -172,12 +172,8 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
     // Assert tree panel is visible
     await expect(treePanel).toBeVisible();
 
-    // Look for expand/collapse buttons - they contain ChevronRight or ChevronDown icons
-    // The button is a variant="ghost" size="icon" button
-    const expandButtons = page
-      .locator('button[class*="h-6 w-6"]')
-      .filter({ has: page.locator("svg") })
-      .first();
+    // Look for expand/collapse button using stable data-testid selector
+    const expandButtons = page.getByTestId("org-tree-toggle").first();
 
     // Assert expand button is visible
     await expect(expandButtons).toBeVisible({ timeout: 5000 });
@@ -219,59 +215,62 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
       .filter({ hasNot: page.getByText("No Organizations Found") });
     const cardCount = await organizationCards.count();
 
-    if (cardCount > 0) {
-      // Get the first organization card
-      const firstCard = organizationCards.first();
-      await expect(firstCard).toBeVisible();
-
-      // Click on "See Details" to navigate to a child organization
-      const seeDetailsLink = firstCard.getByRole("link", {
-        name: /see details/i,
-      });
-      await expect(seeDetailsLink).toBeVisible();
-
-      await seeDetailsLink.click();
-      await page.waitForLoadState("domcontentloaded");
-      // Wait for breadcrumb to be visible as indicator that child page is loaded
-      const breadcrumb = page.locator('[class*="Breadcrumb"]');
-      await breadcrumb.waitFor({ state: "visible" });
-
-      // Verify we're on a child organization page (URL should have an ID)
-      await expect(page).toHaveURL(/.*\/admin\/organizations\/govt\/.+/);
-
-      // Verify breadcrumb is visible
-      await expect(breadcrumb).toBeVisible();
-
-      // Verify breadcrumb contains "organizations" link
-      const organizationsLink = breadcrumb.getByRole("link", {
-        name: /organizations/i,
-      });
-      await expect(organizationsLink).toBeVisible();
-
-      // Verify breadcrumb shows current organization name (if hierarchical)
-      const breadcrumbItems = breadcrumb.locator("span, button");
-      const breadcrumbText = await breadcrumbItems
-        .allTextContents()
-        .then((texts) => texts.join(" "))
-        .catch(() => "");
-
-      // Breadcrumb should contain organization-related text
-      expect(breadcrumbText.toLowerCase()).toContain("organization");
-
-      // Click on organizations link in breadcrumb
-      await organizationsLink.click();
-      await page.waitForLoadState("domcontentloaded");
-      // Wait for search input to be visible as indicator that list page is loaded
-      const searchInput = page.getByRole("textbox", {
-        name: "Search by department/team name",
-      });
-      await searchInput.waitFor({ state: "visible" });
-
-      // Verify we navigated back to the list page
-      await expect(page).toHaveURL(/.*\/admin\/organizations\/govt$/);
-
-      // Verify we're back on the list view (search input should be visible)
-      await expect(searchInput).toBeVisible();
+    if (cardCount === 0) {
+      test.skip(true, "No organizations available for govt org tests");
+      return;
     }
+
+    // Get the first organization card
+    const firstCard = organizationCards.first();
+    await expect(firstCard).toBeVisible();
+
+    // Click on "See Details" to navigate to a child organization
+    const seeDetailsLink = firstCard.getByRole("link", {
+      name: /see details/i,
+    });
+    await expect(seeDetailsLink).toBeVisible();
+
+    await seeDetailsLink.click();
+    await page.waitForLoadState("domcontentloaded");
+    // Wait for breadcrumb to be visible as indicator that child page is loaded
+    const breadcrumb = page.locator('[class*="Breadcrumb"]');
+    await breadcrumb.waitFor({ state: "visible" });
+
+    // Verify we're on a child organization page (URL should have an ID)
+    await expect(page).toHaveURL(/.*\/admin\/organizations\/govt\/.+/);
+
+    // Verify breadcrumb is visible
+    await expect(breadcrumb).toBeVisible();
+
+    // Verify breadcrumb contains "organizations" link
+    const organizationsLink = breadcrumb.getByRole("link", {
+      name: /organizations/i,
+    });
+    await expect(organizationsLink).toBeVisible();
+
+    // Verify breadcrumb shows current organization name (if hierarchical)
+    const breadcrumbItems = breadcrumb.locator("span, button");
+    const breadcrumbText = await breadcrumbItems
+      .allTextContents()
+      .then((texts) => texts.join(" "))
+      .catch(() => "");
+
+    // Breadcrumb should contain organization-related text
+    expect(breadcrumbText.toLowerCase()).toContain("organization");
+
+    // Click on organizations link in breadcrumb
+    await organizationsLink.click();
+    await page.waitForLoadState("domcontentloaded");
+    // Wait for search input to be visible as indicator that list page is loaded
+    const searchInput = page.getByRole("textbox", {
+      name: "Search by department/team name",
+    });
+    await searchInput.waitFor({ state: "visible" });
+
+    // Verify we navigated back to the list page
+    await expect(page).toHaveURL(/.*\/admin\/organizations\/govt$/);
+
+    // Verify we're back on the list view (search input should be visible)
+    await expect(searchInput).toBeVisible();
   });
 });

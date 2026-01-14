@@ -60,6 +60,7 @@ function OrganizationTreeNode({
             variant="ghost"
             size="icon"
             className="h-6 w-6"
+            data-testid="org-tree-toggle"
             onClick={(e) => {
               e.stopPropagation();
               onToggleExpand(organization.id);
