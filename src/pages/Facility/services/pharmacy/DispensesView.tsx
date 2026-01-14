@@ -189,7 +189,7 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
 
       <DispensedMedicationList
         facilityId={facilityId}
-        patientId={dispenseOrder.patient.id}
+        patient={dispenseOrder.patient}
         locationId={locationId}
         status={medicationDispenseStatus}
         dispenseOrder={dispenseOrder}

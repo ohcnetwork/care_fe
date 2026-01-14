@@ -61,6 +61,7 @@ import {
   DispenseOrderStatus,
 } from "@/types/emr/dispenseOrder/dispenseOrder";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
+import { PatientListRead } from "@/types/emr/patient/patient";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -253,7 +254,7 @@ function MedicationTable({ facilityId, medications }: MedicationTableProps) {
 
 interface Props {
   facilityId: string;
-  patientId: string;
+  patient: PatientListRead;
   locationId: string;
   status: MedicationDispenseStatus | undefined;
   dispenseOrder: DispenseOrderRead;
@@ -263,7 +264,7 @@ interface Props {
 
 export default function DispensedMedicationList({
   facilityId,
-  patientId,
+  patient,
   locationId,
   status,
   dispenseOrder,
@@ -312,11 +313,11 @@ export default function DispensedMedicationList({
   });
 
   const { data: account } = useQuery({
-    queryKey: ["accounts", patientId],
+    queryKey: ["accounts", patient.id],
     queryFn: query(accountApi.listAccount, {
       pathParams: { facilityId },
       queryParams: {
-        patient: patientId,
+        patient: patient.id,
         limit: 1,
         offset: 0,
         status: AccountStatus.active,
@@ -455,7 +456,7 @@ export default function DispensedMedicationList({
             <div className="flex items-center gap-2">
               <Button variant="outline" asChild className="w-full">
                 <Link
-                  href={`/facility/${facilityId}/locations/${locationId}/medication_requests/?patient_external_id=${patientId}`}
+                  href={`/facility/${facilityId}/locations/${locationId}/medication_requests/?patient_external_id=${patient.id}&patient_name=${encodeURIComponent(patient.name || "")}`}
                   basePath="/"
                 >
                   <PillIcon className="size-4" />
@@ -479,7 +480,7 @@ export default function DispensedMedicationList({
                 )}
               <ViewDefaultAccountButton
                 facilityId={facilityId}
-                patientId={patientId}
+                patientId={patient.id}
                 disabled={isUpdatingDispenseOrder}
               />
               {(dispenseOrder.status === DispenseOrderStatus.draft ||

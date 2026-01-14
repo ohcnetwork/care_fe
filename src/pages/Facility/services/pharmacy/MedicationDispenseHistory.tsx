@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRightSquare } from "lucide-react";
-import { navigate, useQueryParams } from "raviger";
+import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -30,7 +30,6 @@ import {
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
-import { useEffect } from "react";
 
 export default function MedicationDispenseHistory({
   facilityId,
@@ -40,7 +39,6 @@ export default function MedicationDispenseHistory({
   locationId: string;
 }) {
   const { t } = useTranslation();
-  const [{ patientId }] = useQueryParams();
   const { qParams, Pagination, updateQuery, resultsPerPage } = useFilters({
     limit: 14,
     disableCache: true,
@@ -62,12 +60,6 @@ export default function MedicationDispenseHistory({
       },
     }),
   });
-
-  useEffect(() => {
-    if (patientId) {
-      updateQuery({ patientId: patientId });
-    }
-  }, [patientId]);
 
   const DISPENSE_STATUS_OPTIONS = {
     pending: {
