@@ -181,7 +181,7 @@
     "lint-staged": "^15.2.10",
     "local-cypress": "^1.2.6",
     "marked": "^15.0.0",
-    "prettier": "^3.3.3",
+    "prettier": "^3.7.4",
     "prettier-plugin-organize-imports": "^4.2.0",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "snyk": "^1.1294.0",
