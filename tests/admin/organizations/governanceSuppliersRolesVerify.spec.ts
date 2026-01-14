@@ -129,7 +129,7 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
     }
 
     // Test 2: Search for a non-existent organization
-    // Use a guaranteed-nonexistent term to make the empty-state assertion deterministic
+    // Use a highly-unlikely-to-exist term (UUID generated via faker.string.uuid()) to make the empty-state assertion deterministic
     const searchTerm = `NonExistent_${faker.string.uuid()}`;
     await searchInput.fill(searchTerm);
 
@@ -222,6 +222,10 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
     const firstCard = organizationCards.first();
     await expect(firstCard).toBeVisible();
 
+    // Store the org name before navigating
+    const orgNameElement = firstCard.getByRole("heading", { level: 3 });
+    const orgName = await orgNameElement.textContent();
+
     // Click on "See Details" to navigate to a child organization
     const seeDetailsLink = firstCard.getByRole("link", {
       name: /see details/i,
@@ -246,15 +250,10 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
     });
     await expect(organizationsLink).toBeVisible();
 
-    // Verify breadcrumb shows current organization name (if hierarchical)
-    const breadcrumbItems = breadcrumb.locator("span, button");
-    const breadcrumbText = await breadcrumbItems
-      .allTextContents()
-      .then((texts) => texts.join(" "))
-      .catch(() => "");
-
-    // Breadcrumb should contain organization-related text
-    expect(breadcrumbText.toLowerCase()).toContain("organization");
+    // Verify breadcrumb shows current organization name
+    if (orgName) {
+      await expect(breadcrumb.getByText(orgName.trim())).toBeVisible();
+    }
 
     // Click on organizations link in breadcrumb
     await organizationsLink.click();
