@@ -733,6 +733,9 @@ export const PrintChargeItems = (props: {
                             <TableHead className="text-right font-bold">
                               {t("amount_due")}
                             </TableHead>
+                            <TableHead className="text-center font-bold">
+                              {t("total_billable")}
+                            </TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody className="[&_tr]:border-1 [&_td]:p-0.5">
@@ -745,6 +748,11 @@ export const PrintChargeItems = (props: {
                             </TableCell>
                             <TableCell className="text-right">
                               <MonetaryDisplay amount={account.total_balance} />
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <MonetaryDisplay
+                                amount={account.total_billable_charge_items}
+                              />
                             </TableCell>
                           </TableRow>
                         </TableBody>

@@ -5414,6 +5414,8 @@
   "total_balance": "Total Balance",
   "total_base_price": "Total Base price",
   "total_beds": "Total Beds",
+  "total_billable": "Total Billable",
+  "total_billable_charge_items_description": "Total Pending Billable Charge Items",
   "total_billed_before_adjustments": "Total Billed Before Adjustments",
   "total_discounts": "Total discounts",
   "total_gross": "Total Gross",
