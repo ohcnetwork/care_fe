@@ -40,7 +40,9 @@ import { LocalStorageKeys } from "@/common/constants";
 import FiltersCache from "@/Utils/FiltersCache";
 import ViewCache from "@/Utils/ViewCache";
 import mutate from "@/Utils/request/mutate";
+import { clearQueryPersistenceCache } from "@/Utils/request/queryClient";
 import { HTTPError } from "@/Utils/request/types";
+import { invalidateAllLocationCaches } from "@/atoms/location-atom";
 import authApi from "@/types/auth/authApi";
 import { TokenData } from "@/types/otp/otp";
 import otpApi from "@/types/otp/otpApi";
@@ -206,18 +208,18 @@ const Login = (props: LoginProps) => {
 
   // Login form validation
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value, name } = e.target;
+    const { value } = e.target;
+    const name = e.target.name as "username" | "password";
     const fieldValue = { ...form };
     const errorField = { ...errors };
 
-    if (name === "username" || name === "password") {
-      if (errorField[name]) {
-        errorField[name] = null;
-        setErrors(errorField);
-      }
-      fieldValue[name] = name === "username" ? value.toLowerCase() : value;
-      setForm(fieldValue);
+    if (errorField[name]) {
+      errorField[name] = null;
+      setErrors(errorField);
     }
+
+    fieldValue[name] = name === "username" ? value.toLowerCase() : value;
+    setForm(fieldValue);
   };
 
   const validateData = (): LoginForm | false => {
@@ -253,6 +255,8 @@ const Login = (props: LoginProps) => {
     if (!validated) return;
 
     FiltersCache.invalidateAll();
+    invalidateAllLocationCaches();
+    clearQueryPersistenceCache();
     try {
       await signIn(validated);
     } catch (error) {
@@ -262,9 +266,9 @@ const Login = (props: LoginProps) => {
     }
   };
 
-  const validateForgetData = () => {
+  const validateForgetData = (): LoginForm | false => {
     let hasError = false;
-    const err = Object.assign({}, errors);
+    const err: LoginFormErrors = { ...errors };
 
     if (
       !form.username ||
