@@ -291,45 +291,43 @@ export function ManageQueuePage({
 
 function QueueManagementSkeleton() {
   return (
-    <Page title=" " hideTitleOnPage>
-      <div className="flex flex-col gap-6">
-        {/* Header Section */}
-        <div className="flex justify-between gap-3">
-          <div className="flex gap-2 items-center">
-            <Skeleton className="size-10 rounded-md" />
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-6 w-48" />
-              <Skeleton className="h-4 w-32" />
-            </div>
-          </div>
-          <div className="flex gap-5 items-center">
-            <div className="hidden sm:flex items-center gap-2">
-              <Skeleton className="h-5 w-10 rounded-full" />
-              <Skeleton className="h-4 w-24" />
-            </div>
-            <Skeleton className="size-10 rounded-md" />
+    <div className="flex flex-col gap-6">
+      {/* Header Section */}
+      <div className="flex justify-between gap-3">
+        <div className="flex gap-2 items-center">
+          <Skeleton className="size-10 rounded-md" />
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-32" />
           </div>
         </div>
-
-        {/* Tabs Section */}
-        <div className="flex flex-col gap-4">
-          <div className="flex gap-4 border-b">
-            <Skeleton className="h-10 w-32 mb-[-1px]" />
-            <Skeleton className="h-10 w-32 mb-[-1px]" />
+        <div className="flex gap-5 items-center">
+          <div className="hidden sm:flex items-center gap-2">
+            <Skeleton className="h-5 w-10 rounded-full" />
+            <Skeleton className="h-4 w-24" />
           </div>
+          <Skeleton className="size-10 rounded-md" />
+        </div>
+      </div>
 
-          {/* Content Area */}
-          <div className="space-y-4">
-            <Skeleton className="h-12 w-full rounded-lg" />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Skeleton className="h-64 w-full rounded-lg" />
-              <Skeleton className="h-64 w-full rounded-lg" />
-              <Skeleton className="h-64 w-full rounded-lg" />
-            </div>
+      {/* Tabs Section */}
+      <div className="flex flex-col gap-4">
+        <div className="flex gap-4 border-b">
+          <Skeleton className="h-10 w-32 mb-[-1px]" />
+          <Skeleton className="h-10 w-32 mb-[-1px]" />
+        </div>
+
+        {/* Content Area */}
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-full rounded-lg" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Skeleton className="h-64 w-full rounded-lg" />
+            <Skeleton className="h-64 w-full rounded-lg" />
+            <Skeleton className="h-64 w-full rounded-lg" />
           </div>
         </div>
       </div>
-    </Page>
+    </div>
   );
 }
 
