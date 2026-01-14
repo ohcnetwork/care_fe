@@ -27,9 +27,14 @@ import { Textarea } from "@/components/ui/textarea";
 import BackButton from "@/components/Common/BackButton";
 import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
-import { getExtensionProps, useExtensions } from "@/hooks/useExtensions";
+import {
+  ExtensionEntityType,
+  getCombinedExtensionProps,
+  NamespacedExtensionData,
+  useEntityExtensions,
+  useExtensionSchemas,
+} from "@/hooks/useExtensions";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import {
@@ -75,7 +80,8 @@ export default function DeliveryOrderForm({
   deliveryOrderId,
 }: Props) {
   const { t } = useTranslation();
-  const { facility, isFacilityLoading } = useCurrentFacility();
+  const { getExtensions, isLoading: isExtensionsLoading } =
+    useExtensionSchemas();
   const isEditMode = Boolean(deliveryOrderId);
   const [qParams] = useQueryParams();
   const supplyOrderId = qParams.supplyOrder;
@@ -137,8 +143,11 @@ export default function DeliveryOrderForm({
     deliveryFromLocations?.map((l) => ({ label: l.name, value: l.id })) || [];
 
   const ext = useMemo(
-    () => getExtensionProps(facility?.extensions_schema_supply_delivery_order),
-    [facility?.extensions_schema_supply_delivery_order],
+    () =>
+      getCombinedExtensionProps(
+        getExtensions(ExtensionEntityType.supply_delivery_order, "write"),
+      ),
+    [getExtensions],
   );
 
   const formSchema = useMemo(
@@ -163,10 +172,13 @@ export default function DeliveryOrderForm({
     },
   });
 
-  const extensions = useExtensions({
-    schema: facility?.extensions_schema_supply_delivery_order,
+  const extensions = useEntityExtensions({
+    entityType: ExtensionEntityType.supply_delivery_order,
+    schemaType: "write",
     form,
-    existingData: existingData?.extensions,
+    existingData: existingData?.extensions as
+      | Record<string, Record<string, unknown>>
+      | undefined,
   });
 
   useEffect(() => {
@@ -240,7 +252,9 @@ export default function DeliveryOrderForm({
 
   function onSubmit(data: FormValues) {
     const { extensions: formExtensions, ...restData } = data;
-    const cleanedExtensions = extensions.prepareForSubmit(formExtensions);
+    const cleanedExtensions = extensions.prepareForSubmit(
+      formExtensions as NamespacedExtensionData,
+    );
 
     if (isEditMode && deliveryOrderId) {
       updateDeliveryOrder({
@@ -269,7 +283,7 @@ export default function DeliveryOrderForm({
   const isPending = isCreating || isUpdating;
 
   if (
-    isFacilityLoading ||
+    isExtensionsLoading ||
     (isEditMode && isFetching) ||
     (!isEditMode && supplyOrderId && isFetchingSupplyOrder)
   ) {
