@@ -311,23 +311,6 @@ export function SmartExternalDeliveryRow({
         )}
       </TableCell>
 
-      {/* Pack Quantity */}
-      <TableCell className="align-top p-2">
-        <Input
-          type="number"
-          min={1}
-          value={packQuantity || ""}
-          placeholder="0"
-          onChange={(e) => {
-            const value = parseInt(e.target.value) || undefined;
-            setField("supplied_item_pack_quantity", value);
-            markAsEdited();
-          }}
-          disabled={!productKnowledge}
-          className="w-[7rem]"
-        />
-      </TableCell>
-
       {/* Pack Size */}
       <TableCell className="align-top p-2">
         <Input
@@ -342,6 +325,23 @@ export function SmartExternalDeliveryRow({
           }}
           disabled={!productKnowledge}
           className="w-[5rem]"
+        />
+      </TableCell>
+
+      {/* Pack Quantity */}
+      <TableCell className="align-top p-2">
+        <Input
+          type="number"
+          min={1}
+          value={packQuantity || ""}
+          placeholder="0"
+          onChange={(e) => {
+            const value = parseInt(e.target.value) || undefined;
+            setField("supplied_item_pack_quantity", value);
+            markAsEdited();
+          }}
+          disabled={!productKnowledge}
+          className="w-[7rem]"
         />
       </TableCell>
 
@@ -468,12 +468,12 @@ export function SmartExternalDeliveryRow({
         </span>
       </TableCell>
 
-      {/* Extension Fields - each field in its own column, owner-namespaced */}
+      {/* Extension Fields - each field in its own column, name-namespaced */}
       {extensionsWithFields.flatMap(
         ({ config, fieldMetadata, conditionalRules }) =>
           fieldMetadata.map((fieldMeta) => (
             <TableCell
-              key={`${config.owner}-${fieldMeta.name}`}
+              key={`${config.name}-${fieldMeta.name}`}
               className="align-top"
             >
               <SchemaField
@@ -484,7 +484,7 @@ export function SmartExternalDeliveryRow({
                   required: false, // Hide asterisk - shown in table header
                 }}
                 control={form.control}
-                basePath={`items.${index}.extensions.${config.owner}`}
+                basePath={`items.${index}.extensions.${config.name}`}
                 className="min-w-[100px] [&_input]:h-9 gap-0"
                 conditionalRules={conditionalRules}
               />

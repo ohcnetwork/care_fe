@@ -44,7 +44,7 @@ import {
 } from "@/components/ui/table";
 
 import {
-  getExtensionFieldsWithOwner,
+  getExtensionFieldsWithName,
   processExtensions,
 } from "@/hooks/useExtensions";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
@@ -167,9 +167,9 @@ export function AddSupplyDeliveryForm({
     [allExtensions],
   );
 
-  // Get extension field metadata with owner info for table headers
+  // Get extension field metadata with extension name for table headers
   const extensionFields = useMemo(
-    () => getExtensionFieldsWithOwner(allExtensions),
+    () => getExtensionFieldsWithName(allExtensions),
     [allExtensions],
   );
 
@@ -179,6 +179,8 @@ export function AddSupplyDeliveryForm({
       product_knowledge: {} as ProductKnowledgeBase,
       supplied_inventory_item: "",
       supplied_item_quantity: 1,
+      supplied_item_pack_quantity: 1,
+      supplied_item_pack_size: 1,
       supplied_item: undefined,
       supply_request: undefined,
       _is_inward_stock: !origin,
@@ -290,6 +292,8 @@ export function AddSupplyDeliveryForm({
     const itemsFromRequests = selectedRequests?.map((request) => ({
       supplied_inventory_item: undefined,
       supplied_item_quantity: request.quantity,
+      supplied_item_pack_quantity: 1,
+      supplied_item_pack_size: 1,
       product_knowledge: request.item,
       supplied_item: undefined,
       supply_request: request,
@@ -644,11 +648,11 @@ export function AddSupplyDeliveryForm({
                                 <TableHead className="min-w-[140px] text-xs font-semibold text-center">
                                   {t("category")}
                                 </TableHead>
-                                <TableHead className="w-[7rem] text-xs font-semibold">
-                                  {t("pack_qty")}
-                                </TableHead>
                                 <TableHead className="w-[5rem] text-xs font-semibold">
                                   {t("pack_size")}
+                                </TableHead>
+                                <TableHead className="w-[7rem] text-xs font-semibold">
+                                  {t("pack_qty")}
                                 </TableHead>
                                 <TableHead className="w-[8rem] text-xs font-semibold">
                                   {t("qty")}
@@ -670,7 +674,7 @@ export function AddSupplyDeliveryForm({
                                 </TableHead>
                                 {extensionFields.map((field) => (
                                   <TableHead
-                                    key={`${field.owner}-${field.name}`}
+                                    key={`${field.extensionName}-${field.name}`}
                                     className="min-w-[100px] text-xs font-semibold"
                                   >
                                     {field.label}
