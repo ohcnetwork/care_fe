@@ -311,18 +311,17 @@ export default function useFileUpload(
 
     setUploading(false);
 
-    // If any files failed to upload, throw an error
+    // If any files failed to upload, set error state
     if (errors.length > 0) {
       setFiles(errors);
       setUploadFileNames(errors?.map((f) => f.name) ?? []);
       setError(t("file_error__network"));
       setCameraModalOpen(false);
-      throw new Error(t("file_error__network"));
+    } else {
+      // Clear files on successful upload
+      clearFiles();
+      setCameraModalOpen(false);
     }
-
-    // Clear files on successful upload
-    clearFiles();
-    setCameraModalOpen(false);
   };
 
   const clearFiles = () => {
