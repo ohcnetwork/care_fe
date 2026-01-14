@@ -8,7 +8,7 @@ import {
 import { TokenData } from "@/types/otp/otp";
 import { CurrentUserRead } from "@/types/user/user";
 
-interface AuthContextType {
+export interface AuthContextType {
   user: CurrentUserRead | undefined;
   signIn: (creds: LoginRequest) => Promise<LoginResponse>;
   verifyMFA: (data: MfaLoginRequest) => Promise<LoginResponse>;
@@ -20,6 +20,7 @@ interface AuthContextType {
 }
 
 export const AuthUserContext = createContext<AuthContextType | null>(null);
+window.AuthUserContext = AuthUserContext;
 
 export const useAuthContext = () => {
   const ctx = useContext(AuthUserContext);
