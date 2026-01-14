@@ -62,12 +62,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       address: z.string().min(1, t("field_required")),
       age: z.string().optional(),
       date_of_birth: z.string().optional(),
-      pincode: z
-        .string()
-        .min(1, t("field_required"))
-        .refine((val) => validators().pincode.safeParse(val).success, {
-          message: t("invalid_pincode"),
-        }),
+      pincode: validators().pincode,
       geo_organization: z.string().min(1, t("organization_required")),
       ageInputType: z.enum(["age", "date_of_birth"]),
     })
@@ -152,37 +147,21 @@ export function PatientRegistration(props: PatientRegistrationProps) {
     },
   });
 
-  const onSubmit = form.handleSubmit(
-    (data) => {
-      const formattedData = {
-        name: data.name,
-        gender: data.gender,
-        address: data.address || "",
-        date_of_birth:
-          data.ageInputType === "date_of_birth"
-            ? dateQueryString(data.date_of_birth)
-            : undefined,
-        age: data.ageInputType === "age" ? Number(data.age) : undefined,
-        pincode: Number(data.pincode),
-        geo_organization: data.geo_organization,
-      };
-      createPatient(formattedData);
-    },
-    () => {
-      requestAnimationFrame(() => {
-        const firstInvalidField = document.querySelector(
-          '[aria-invalid="true"]',
-        ) as HTMLElement | null;
-
-        firstInvalidField?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-
-        firstInvalidField?.focus();
-      });
-    },
-  );
+  const onSubmit = form.handleSubmit((data) => {
+    const formattedData = {
+      name: data.name,
+      gender: data.gender,
+      address: data.address || "",
+      date_of_birth:
+        data.ageInputType === "date_of_birth"
+          ? dateQueryString(data.date_of_birth)
+          : undefined,
+      age: data.ageInputType === "age" ? Number(data.age) : undefined,
+      pincode: Number(data.pincode),
+      geo_organization: data.geo_organization,
+    };
+    createPatient(formattedData);
+  });
 
   // TODO: Use useBlocker hook after switching to tanstack router
   // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
@@ -374,12 +353,15 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                     <FormControl>
                       <Input
                         {...field}
-                        onChange={(e) => {
-                          field.onChange(e.target.value);
-                        }}
+                        type="number"
                         inputMode="numeric"
                         pattern="[0-9]*"
-                        type="text"
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(
+                            value === "" ? undefined : Number(value),
+                          );
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
