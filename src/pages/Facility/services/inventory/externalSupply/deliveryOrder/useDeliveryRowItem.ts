@@ -83,8 +83,8 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
       discount_components: [],
       charge_item_category: undefined,
       is_manually_edited: false,
-      supplied_item_pack_quantity: undefined,
-      supplied_item_pack_size: undefined,
+      supplied_item_pack_quantity: 1,
+      supplied_item_pack_size: 1,
     };
 
     Object.entries(fieldsToReset).forEach(([field, value]) => {
