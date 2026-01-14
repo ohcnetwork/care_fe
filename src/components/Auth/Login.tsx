@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import careConfig from "@careConfig";
 import { useMutation } from "@tanstack/react-query";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
@@ -7,8 +8,6 @@ import ReCaptcha from "react-google-recaptcha";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
-
-import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -42,12 +41,10 @@ import FiltersCache from "@/Utils/FiltersCache";
 import ViewCache from "@/Utils/ViewCache";
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
-import { invalidateAllLocationCaches } from "@/atoms/location-atom";
 import authApi from "@/types/auth/authApi";
 import { TokenData } from "@/types/otp/otp";
 import otpApi from "@/types/otp/otpApi";
 
-import { clearQueryPersistenceCache } from "@/Utils/request/queryClient";
 import { AuthHero } from "./AuthHero";
 
 interface OtpLoginData {
@@ -77,6 +74,17 @@ interface LoginProps {
   forgot?: boolean;
 }
 
+interface LoginForm {
+  username: string;
+  password: string;
+  "g-recaptcha-response"?: string;
+}
+
+interface LoginFormErrors {
+  username?: string | null;
+  password?: string | null;
+}
+
 const Login = (props: LoginProps) => {
   const { signIn, patientLogin, isAuthenticating } = useAuthContext();
   const {
@@ -88,16 +96,16 @@ const Login = (props: LoginProps) => {
     resendOtpTimeout,
     disablePatientLogin,
   } = careConfig;
-  const initForm: any = {
+  const initForm: LoginForm = {
     username: "",
     password: "",
   };
   const { forgot } = props;
   const [params, setQueryParams] = useQueryParams();
   const { mode } = params;
-  const initErr: any = {};
-  const [form, setForm] = useState(initForm);
-  const [errors, setErrors] = useState(initErr);
+  const initErr: LoginFormErrors = {};
+  const [form, setForm] = useState<LoginForm>(initForm);
+  const [errors, setErrors] = useState<LoginFormErrors>(initErr);
   const [isCaptchaEnabled, setCaptcha] = useState(false);
   const { t } = useTranslation();
   const [forgotPassword, setForgotPassword] = useState(forgot);
@@ -135,7 +143,7 @@ const Login = (props: LoginProps) => {
       setOtpError("");
       toast.success(t("send_otp_success"));
     },
-    onError: (error: any) => {
+    onError: (error: Error & { data?: OtpError[] }) => {
       const errors = error?.data || [];
       if (Array.isArray(errors) && errors.length > 0) {
         const firstError = errors[0] as OtpError;
@@ -167,7 +175,7 @@ const Login = (props: LoginProps) => {
         patientLogin(tokenData, `/patient/home`);
       }
     },
-    onError: (error: any) => {
+    onError: (error: Error & { cause?: { errors?: OtpValidationError[] } }) => {
       let errorMessage = "invalid_otp";
       if (
         error.cause &&
@@ -197,40 +205,40 @@ const Login = (props: LoginProps) => {
   });
 
   // Login form validation
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name } = e.target;
-    const fieldValue = Object.assign({}, form);
-    const errorField = Object.assign({}, errors);
-    if (errorField[name]) {
-      errorField[name] = null;
-      setErrors(errorField);
+    const fieldValue = { ...form };
+    const errorField = { ...errors };
+
+    if (name === "username" || name === "password") {
+      if (errorField[name]) {
+        errorField[name] = null;
+        setErrors(errorField);
+      }
+      fieldValue[name] = name === "username" ? value.toLowerCase() : value;
+      setForm(fieldValue);
     }
-    fieldValue[name] = value;
-    if (name === "username") {
-      fieldValue[name] = value.toLowerCase();
-    }
-    setForm(fieldValue);
   };
 
-  const validateData = () => {
+  const validateData = (): LoginForm | false => {
     let hasError = false;
-    const err = Object.assign({}, errors);
-    Object.keys(form).forEach((key) => {
-      if (
-        typeof form[key] === "string" &&
-        key !== "password" &&
-        key !== "confirm"
-      ) {
-        if (!form[key].match(/\w/)) {
-          hasError = true;
-          err[key] = "field_required";
-        }
-      }
-      if (!form[key]) {
-        hasError = true;
-        err[key] = "field_required";
-      }
-    });
+    const err: LoginFormErrors = { ...errors };
+
+    // Validate username
+    if (
+      !form.username ||
+      (typeof form.username === "string" && !form.username.match(/\w/))
+    ) {
+      hasError = true;
+      err.username = "field_required";
+    }
+
+    // Validate password
+    if (!form.password) {
+      hasError = true;
+      err.password = "field_required";
+    }
+
     if (hasError) {
       setErrors(err);
       return false;
@@ -245,8 +253,6 @@ const Login = (props: LoginProps) => {
     if (!validated) return;
 
     FiltersCache.invalidateAll();
-    invalidateAllLocationCaches();
-    clearQueryPersistenceCache();
     try {
       await signIn(validated);
     } catch (error) {
@@ -260,13 +266,10 @@ const Login = (props: LoginProps) => {
     let hasError = false;
     const err = Object.assign({}, errors);
 
-    if (typeof form.username === "string") {
-      if (!form.username.match(/\w/)) {
-        hasError = true;
-        err.username = "field_required";
-      }
-    }
-    if (!form.username) {
+    if (
+      !form.username ||
+      (typeof form.username === "string" && !form.username.match(/\w/))
+    ) {
       hasError = true;
       err.username = "field_required";
     }
@@ -285,9 +288,9 @@ const Login = (props: LoginProps) => {
     submitForgetPassword(valid);
   };
 
-  const onCaptchaChange = (value: any) => {
+  const onCaptchaChange = (value: string | null) => {
     if (value && isCaptchaEnabled) {
-      const formCaptcha = { ...form };
+      const formCaptcha: LoginForm = { ...form };
       formCaptcha["g-recaptcha-response"] = value;
       setForm(formCaptcha);
     }
