@@ -171,20 +171,43 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
     // Assert tree panel is visible
     await expect(treePanel).toBeVisible();
 
-    // Look for expand/collapse button using stable data-testid selector
-    const expandButtons = page.getByTestId("org-tree-toggle").first();
+    // Wait for organizations to load by waiting for at least one tree node to appear
+    const treeNodes = treePanel.getByTestId("org-tree-node");
+    await expect(treeNodes.first()).toBeVisible({ timeout: 10000 });
+
+    // Check if any organization has children (toggle button exists)
+    const expandButtons = page.getByTestId("org-tree-toggle");
+    const toggleCount = await expandButtons.count();
+
+    if (toggleCount === 0) {
+      test.skip(
+        true,
+        "No organizations with children available for tree expand/collapse test",
+      );
+      return;
+    }
+
+    // Get the first expand button
+    const firstExpandButton = expandButtons.first();
 
     // Assert expand button is visible
-    await expect(expandButtons).toBeVisible({ timeout: 5000 });
+    await expect(firstExpandButton).toBeVisible({ timeout: 5000 });
 
     // Locate child container to verify state changes using stable data-testid
-    const childContainer = treePanel.getByTestId("org-tree-children").first();
+    // Find the org-tree-node that contains the first expand button, then find its child container
+    const nodeWithButton = treePanel
+      .getByTestId("org-tree-node")
+      .filter({ has: firstExpandButton })
+      .first();
+    const childContainer = nodeWithButton
+      .getByTestId("org-tree-children")
+      .first();
 
     // Verify initial collapsed state: child container should not be visible
     await expect(childContainer).not.toBeVisible();
 
     // Click to expand
-    await expandButtons.click();
+    await firstExpandButton.click();
 
     // Verify expansion by checking for child elements (this confirms the icon changed to expanded state)
     await expect(childContainer).toBeVisible({ timeout: 5000 });
@@ -196,7 +219,7 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
     await expect(childNodes.first()).toBeVisible();
 
     // Click to collapse
-    await expandButtons.click();
+    await firstExpandButton.click();
 
     // Assert the childContainer collapsed (no longer visible) - this confirms the icon changed back to collapsed state
     await expect(childContainer).not.toBeVisible({ timeout: 5000 });
