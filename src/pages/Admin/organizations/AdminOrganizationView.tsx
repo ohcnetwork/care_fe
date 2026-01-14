@@ -63,16 +63,19 @@ function OrganizationCard({
   const canDelete = parentId ? true : !org.has_children;
 
   return (
-    <Card key={org.id}>
+    <Card key={org.id} data-testid="org-card">
       <CardContent className="p-4">
         <div className="space-y-4">
           <div className="flex items-center justify-between flex-wrap">
             <div className="space-y-1 mb-2">
-              <h3 className="text-lg font-semibold">{org.name}</h3>
+              <h3 className="text-lg font-semibold" data-testid="org-name">
+                {org.name}
+              </h3>
               <div className="flex items-center gap-2 capitalize">
                 <Badge
                   variant="indigo"
                   className=" border border-transparent py-1"
+                  data-testid="org-badge"
                 >
                   {org.org_type}
                 </Badge>
