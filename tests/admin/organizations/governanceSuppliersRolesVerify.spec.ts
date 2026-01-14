@@ -47,15 +47,16 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
       await test.step(`Verify cards for ${type} organizations`, async () => {
         await navigateToOrganizationType(page, type);
 
-        // Check if there are organization cards or empty state
+        // Wait for loading to complete - check for either cards or empty state
         const emptyState = page.getByText("No Organizations Found");
         const cards = page.getByTestId("org-card");
 
-        // Wait for either cards or empty state
+        // Wait for either cards or empty state to appear (loading skeleton should be gone)
         const firstCard = cards.first();
-        const hasCards = await firstCard.isVisible().catch(() => false);
+        try {
+          // Try to wait for cards first with a timeout
+          await expect(firstCard).toBeVisible({ timeout: 10000 });
 
-        if (hasCards) {
           // Verify card structure
           const orgName = firstCard.getByRole("heading", { level: 3 });
           await expect(orgName).toBeVisible();
@@ -67,9 +68,10 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
             name: /see details/i,
           });
           await expect(seeDetailsButton).toBeVisible();
-        } else {
-          // Verify empty state is shown
-          await expect(emptyState).toBeVisible({ timeout: 5000 });
+        } catch {
+          // If cards don't appear, wait for and verify empty state is shown
+          // Empty state appears after loading completes - wait with longer timeout
+          await expect(emptyState).toBeVisible({ timeout: 15000 });
         }
       });
     }
