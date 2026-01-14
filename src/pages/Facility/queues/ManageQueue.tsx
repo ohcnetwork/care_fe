@@ -197,7 +197,11 @@ export function ManageQueuePage({
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  aria-label={t("settings")}
+                >
                   <SettingsIcon />
                 </Button>
               </DropdownMenuTrigger>

@@ -383,6 +383,7 @@ export default function ServiceRequestShow({
                         variant="outline"
                         className="border-gray-400 px-2"
                         disabled={isCancellingServiceRequest}
+                        aria-label={t("open_menu")}
                       >
                         <CareIcon icon="l-ellipsis-v" />
                       </Button>

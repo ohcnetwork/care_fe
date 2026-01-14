@@ -167,7 +167,7 @@ export function EditChargeItemSheet({
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         {trigger || (
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" aria-label={t("edit")}>
             <PencilIcon className="h-4 w-4" />
           </Button>
         )}

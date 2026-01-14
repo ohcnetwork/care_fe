@@ -46,7 +46,7 @@ export const LoginHeader = () => {
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" aria-label={t("user_menu")}>
                 <Avatar name={"User"} className="size-7 rounded-full" />
               </Button>
             </DropdownMenuTrigger>
