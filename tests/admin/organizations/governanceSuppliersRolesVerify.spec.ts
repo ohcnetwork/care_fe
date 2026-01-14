@@ -51,27 +51,24 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
         const emptyState = page.getByText("No Organizations Found");
         const cards = page.getByTestId("org-card");
 
-        // Wait for either cards or empty state to appear (whichever comes first)
-        try {
-          // Try to wait for cards first
-          const firstCard = cards.first();
-          await expect(firstCard).toBeVisible({ timeout: 5000 });
+        // Wait for either cards or empty state
+        const firstCard = cards.first();
+        const hasCards = await firstCard.isVisible().catch(() => false);
 
-          // Verify card contains organization name (h3 element)
+        if (hasCards) {
+          // Verify card structure
           const orgName = firstCard.getByRole("heading", { level: 3 });
           await expect(orgName).toBeVisible();
 
-          // Verify card contains organization type badge
           const badge = firstCard.getByTestId("org-badge");
           await expect(badge).toBeVisible();
 
-          // Verify card contains "See Details" button/link
           const seeDetailsButton = firstCard.getByRole("link", {
             name: /see details/i,
           });
           await expect(seeDetailsButton).toBeVisible();
-        } catch {
-          // If cards don't appear, verify empty state is shown
+        } else {
+          // Verify empty state is shown
           await expect(emptyState).toBeVisible({ timeout: 5000 });
         }
       });
