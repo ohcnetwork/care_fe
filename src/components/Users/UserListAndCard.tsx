@@ -17,6 +17,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import { formatName, isUserOnline } from "@/Utils/utils";
 import { UserReadMinimal } from "@/types/user/user";
+import { Bot } from "lucide-react";
 
 interface UserCardProps {
   user: UserReadMinimal;
@@ -42,7 +43,12 @@ export const UserStatusIndicator = ({
 
   return (
     <span className={cn(addPadding ? "px-3 py-1" : "py-px", className)}>
-      {isUserOnline(user) || isAuthUser ? (
+      {user.is_service_account ? (
+        <Badge variant="secondary" className="whitespace-nowrap">
+          <Bot className="size-4" />
+          <span>{t("service_account")}</span>
+        </Badge>
+      ) : isUserOnline(user) || isAuthUser ? (
         <Badge variant="primary" className="whitespace-nowrap">
           <span className="inline-block size-2 shrink-0 rounded-full bg-green-500" />
           <span>{t("online")}</span>

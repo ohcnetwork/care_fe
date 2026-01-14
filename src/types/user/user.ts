@@ -28,6 +28,7 @@ export interface UserReadMinimal extends UserBase {
   profile_picture_url: string;
   mfa_enabled: boolean;
   deleted: boolean;
+  is_service_account: boolean;
 }
 
 export interface UserRead extends UserReadMinimal {
