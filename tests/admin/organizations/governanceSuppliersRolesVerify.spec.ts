@@ -230,7 +230,7 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
     await seeDetailsLink.click();
     await page.waitForLoadState("domcontentloaded");
     // Wait for breadcrumb to be visible as indicator that child page is loaded
-    const breadcrumb = page.locator('[class*="Breadcrumb"]');
+    const breadcrumb = page.getByTestId("org-breadcrumb");
     await breadcrumb.waitFor({ state: "visible" });
 
     // Verify we're on a child organization page (URL should have an ID)

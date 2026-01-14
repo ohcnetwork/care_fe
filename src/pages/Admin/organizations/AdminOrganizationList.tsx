@@ -136,7 +136,10 @@ export default function AdminOrganizationList({
               <div className="space-y-3 sm:space-y-4 rounded-lg md:shadow-lg overflow-hidden md:bg-white">
                 {organizationId && (
                   <div className="md:pt-4 flex items-center mx-auto max-w-4xl">
-                    <Breadcrumb className="md:px-5 md:pt-5">
+                    <Breadcrumb
+                      className="md:px-5 md:pt-5"
+                      data-testid="org-breadcrumb"
+                    >
                       <BreadcrumbList>
                         <BreadcrumbItem>
                           <BreadcrumbLink
