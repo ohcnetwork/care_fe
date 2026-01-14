@@ -56,6 +56,7 @@ import {
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
 import queryClient from "@/Utils/request/queryClient";
+import { formatName } from "@/Utils/utils";
 import AddMultipleChargeItemsSheet from "@/pages/Facility/services/serviceRequests/components/AddMultipleChargeItemsSheet";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { LocationAssociationRead } from "@/types/location/association";
@@ -111,7 +112,7 @@ function LocationGroupRow({
     <TableRow className="bg-gray-50 border-b-2 border-gray-200 shadow-md">
       <TableCell
         className="border-x p-4 font-semibold text-gray-900"
-        colSpan={8}
+        colSpan={9}
       >
         <div className="flex items-center justify-between">
           <div className="gap-2">
@@ -373,6 +374,9 @@ export function BedChargeItemsTable({
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
                   {t("total")}
                 </TableHead>
+                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
+                  {t("performer")}
+                </TableHead>
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-[120px]">
                   {t("status")}
                 </TableHead>
@@ -384,7 +388,7 @@ export function BedChargeItemsTable({
             <TableBody className="bg-white">
               {!locationHistory.length ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-gray-500">
+                  <TableCell colSpan={9} className="text-center text-gray-500">
                     {t("no_locations")}
                   </TableCell>
                 </TableRow>
@@ -402,7 +406,7 @@ export function BedChargeItemsTable({
                       ? [
                           <TableRow key={`${location.id}-no-items`}>
                             <TableCell
-                              colSpan={8}
+                              colSpan={9}
                               className="text-center text-gray-500 py-4"
                             >
                               {t("no_charge_items_for_location")}
@@ -464,6 +468,9 @@ export function BedChargeItemsTable({
                               </TableCell>
                               <TableCell className="border-x p-3 text-gray-950 font-medium">
                                 <MonetaryDisplay amount={item.total_price} />
+                              </TableCell>
+                              <TableCell className="border-x p-3 text-gray-950 font-semibold">
+                                {formatName(item.performer_actor)}
                               </TableCell>
                               <TableCell className="border-x p-3 text-gray-950">
                                 <div className="flex items-center space-x-2">
@@ -562,7 +569,6 @@ export function BedChargeItemsTable({
                               <TableCell className="text-gray-950">
                                 {t("total")}
                               </TableCell>
-                              <TableCell></TableCell>
                               <TableCell className="p-3">
                                 <MonetaryDisplay amount={item.total_price} />
                               </TableCell>
@@ -576,7 +582,7 @@ export function BedChargeItemsTable({
                               key={`${item.id}-empty`}
                               className="bg-muted"
                             >
-                              <TableCell colSpan={8}></TableCell>
+                              <TableCell colSpan={9}></TableCell>
                             </TableRow>
                           );
 

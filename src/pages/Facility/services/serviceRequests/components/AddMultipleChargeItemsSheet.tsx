@@ -30,6 +30,7 @@ import {
 
 import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPriceDisplay";
 import { ChargeItemDefinitionPicker } from "@/components/Common/ChargeItemDefinitionPicker";
+import UserSelector from "@/components/Common/UserSelector";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -44,6 +45,7 @@ import {
   ChargeItemDefinitionBase,
   ChargeItemDefinitionRead,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface AddMultipleChargeItemsSheetProps {
   open: boolean;
@@ -59,6 +61,7 @@ interface AddMultipleChargeItemsSheetProps {
 
 interface ApplyChargeItemDefinitionRequestWithObject extends ApplyChargeItemDefinitionRequest {
   charge_item_definition_object: ChargeItemDefinitionRead;
+  performer_actor_object?: UserReadMinimal;
 }
 
 export default function AddMultipleChargeItemsSheet({
@@ -140,6 +143,19 @@ export default function AddMultipleChargeItemsSheet({
     );
   };
 
+  const handleUpdatePerformer = (
+    index: number,
+    user: UserReadMinimal | undefined,
+  ) => {
+    setSelectedItems(
+      selectedItems.map((item, i) =>
+        i === index
+          ? { ...item, performer_actor: user?.id, performer_actor_object: user }
+          : item,
+      ),
+    );
+  };
+
   const handleSubmit = () => {
     if (selectedItems.length === 0) {
       toast.error(t("please_select_at_least_one_item"));
@@ -148,8 +164,11 @@ export default function AddMultipleChargeItemsSheet({
 
     applyChargeItems({
       requests: selectedItems.map(
-        ({ charge_item_definition_object: _discard, ...charge_item }) =>
-          charge_item,
+        ({
+          charge_item_definition_object: _discard,
+          performer_actor_object: _discardPerformer,
+          ...charge_item
+        }) => charge_item,
       ),
     });
   };
@@ -206,6 +225,18 @@ export default function AddMultipleChargeItemsSheet({
                       >
                         <Trash2Icon className="h-4 w-4" />
                       </Button>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-sm text-gray-500">
+                        {t("performer")}
+                      </label>
+                      <UserSelector
+                        selected={item.performer_actor_object}
+                        onChange={(user) => handleUpdatePerformer(index, user)}
+                        facilityId={facilityId}
+                        placeholder={t("select_performer")}
+                      />
                     </div>
 
                     {/* Quantity and Price */}
@@ -269,6 +300,7 @@ export default function AddMultipleChargeItemsSheet({
                     <TableHead>{t("name")}</TableHead>
                     <TableHead>{t("quantity")}</TableHead>
                     <TableHead>{t("price")}</TableHead>
+                    <TableHead>{t("performer")}</TableHead>
                     <TableHead className="w-[100px]"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -317,6 +349,16 @@ export default function AddMultipleChargeItemsSheet({
                             </Popover>
                           )}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <UserSelector
+                          selected={item.performer_actor_object}
+                          onChange={(user) =>
+                            handleUpdatePerformer(index, user)
+                          }
+                          facilityId={facilityId}
+                          placeholder={t("select_performer")}
+                        />
                       </TableCell>
                       <TableCell>
                         <Button
