@@ -85,9 +85,16 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   const quickRegistration =
     careConfig.patientRegistration.minimalPatientRegistration;
 
+  const [openSections, setOpenSections] = useState<string[]>(
+    quickRegistration
+      ? ["patient-basics"]
+      : ["patient-basics", "additional-details"],
+  );
+
   const form = useForm({
     resolver: zodResolver(getFormSchema(t)),
     mode: "onSubmit",
+    shouldFocusError: true,
     defaultValues: {
       is_deceased: false,
       deceased_datetime: null,
@@ -103,6 +110,29 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
       _selected_levels: [],
     },
   });
+
+  useEffect(() => {
+    const hasErrors = Object.keys(form.formState.errors).length > 0;
+    if (!hasErrors) {
+      return;
+    }
+
+    // Ensure both sections are open so all field errors are visible.
+    setOpenSections(["patient-basics", "additional-details"]);
+
+    requestAnimationFrame(() => {
+      const firstInvalidField = document.querySelector(
+        '[aria-invalid="true"]',
+      ) as HTMLElement | null;
+
+      firstInvalidField?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+
+      firstInvalidField?.focus();
+    });
+  }, [form.formState.errors]);
 
   const patientQuery = useQuery({
     queryKey: ["patient", patientId],
@@ -281,7 +311,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
       permanent_address: values.permanent_address_same_as_address
         ? values.address
         : values.permanent_address,
-      pincode: values.pincode,
+      pincode: values.pincode ? Number(values.pincode) : undefined,
 
       deceased_datetime: values.is_deceased ? values.deceased_datetime : null,
 
@@ -303,6 +333,24 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     } else {
       updatePatient(basePayload);
     }
+  }
+
+  function onInvalid() {
+    // Ensure error messages are visible even if accordion sections are collapsed.
+    setOpenSections(["patient-basics", "additional-details"]);
+
+    requestAnimationFrame(() => {
+      const firstInvalidField = document.querySelector(
+        '[aria-invalid="true"]',
+      ) as HTMLElement | null;
+
+      firstInvalidField?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+
+      firstInvalidField?.focus();
+    });
   }
 
   const pageTitle = !patientId
@@ -330,15 +378,12 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <form noValidate onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
             <Accordion
               type="multiple"
               className="flex flex-col gap-6"
-              defaultValue={
-                quickRegistration
-                  ? ["patient-basics"]
-                  : ["patient-basics", "additional-details"]
-              }
+              value={openSections}
+              onValueChange={setOpenSections}
             >
               <PLUGIN_Component
                 __name="PatientRegistrationForm"
@@ -384,7 +429,10 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
               <div className="max-w-2xl mx-auto flex justify-end">
                 <Button
                   variant="primary_gradient"
-                  disabled={!form.formState.isDirty || isPending}
+                  type="submit"
+                  disabled={
+                    isPending || (!!patientId && !form.formState.isDirty)
+                  }
                 >
                   <CheckIcon />
                   {patientId ? t("update") : t("register_patient")}
@@ -819,7 +867,7 @@ const AdditionalDetailsContent = ({
           control={form.control}
           name="geo_organization"
           render={({ field }) => (
-            <FormItem className="contents">
+            <FormItem>
               <FormControl>
                 <GovtOrganizationSelector
                   {...field}
@@ -830,7 +878,7 @@ const AdditionalDetailsContent = ({
                   onChange={field.onChange}
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="mt-1" />
             </FormItem>
           )}
         />
@@ -1045,12 +1093,22 @@ const getFormSchema = (t: TFunction) => {
           message: t("field_required"),
           path: ["age_or_dob"],
         });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("field_required"),
+          path: ["date_of_birth"],
+        });
       }
       if (data.age_or_dob === "age" && !data.age) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: t("field_required"),
           path: ["age_or_dob"],
+        });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("field_required"),
+          path: ["age"],
         });
       }
 

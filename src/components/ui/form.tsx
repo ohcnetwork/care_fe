@@ -10,6 +10,7 @@ import {
   useFormContext,
   useFormState,
 } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -140,7 +141,19 @@ function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
 
 function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
   const { error, formMessageId } = useFormField();
-  const body = error ? String(error?.message ?? "") : props.children;
+  const { t } = useTranslation();
+
+  let body: React.ReactNode = props.children;
+
+  if (error) {
+    const rawMessage = String(error?.message ?? "").trim();
+    const base =
+      !rawMessage || rawMessage.toLowerCase() === "required"
+        ? t("field_required")
+        : rawMessage;
+
+    body = base.endsWith(".") ? base : `${base}.`;
+  }
 
   if (!body) {
     return null;

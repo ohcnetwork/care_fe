@@ -2589,6 +2589,7 @@
   "invalid_password": "Password doesn't meet the requirements",
   "invalid_password_reset_link": "Invalid password reset link",
   "invalid_patient_data": "Invalid Patient Data",
+  "invalid_pincode": "Please enter a valid PIN code.",
   "invalid_qr_code": "Invalid QR code",
   "invalid_quantity": "Please enter a valid quantity",
   "invalid_regex": "Invalid regular expression pattern.",

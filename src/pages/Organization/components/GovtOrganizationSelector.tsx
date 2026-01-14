@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 
 import { FilterState } from "@/hooks/useFilters";
 import { useGovtOrganizationLevel } from "@/hooks/useGovtOrganizationLevel";
+import { cn } from "@/lib/utils";
 
 import { Organization } from "@/types/organization/organization";
 
@@ -71,7 +72,9 @@ function OrganizationLevelSelect({
 
   return (
     <div className="mt-2">
-      <Label className="mb-2">
+      <Label
+        className={cn("mb-2", isError && "text-red-500 dark:text-red-900")}
+      >
         {t(
           currentLevel
             ? `SYSTEM__govt_org_type__${currentLevel.metadata?.govt_org_type}`
@@ -118,7 +121,7 @@ export default function GovtOrganizationSelector({
       onChange("");
       return;
     }
-  }, [selectedLevels]);
+  }, [selectedLevels, onChange, required, requiredDepth]);
 
   useEffect(() => {
     if (selected && selected.length > 0) {
