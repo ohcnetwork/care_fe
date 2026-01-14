@@ -80,11 +80,13 @@ export const PrintChargeItems = (props: {
   const [hidePaymentTypeGrouping, setHidePaymentTypeGrouping] = useState(false);
   const [summaryMode, setSummaryMode] = useState(false);
   const [hideHeader, setHideHeader] = useState(false);
+  const [preserveHeaderSpace, setPreserveHeaderSpace] = useState(true);
 
   const hideCategoryLabel = `${t("hide_category_grouping")}`;
   const hidePaymentTypeLabel = `${t("hide_payment_type_grouping")}`;
   const summaryLabel = `${t("summary")}`;
   const hideHeaderLabel = `${t("hide_header")}`;
+  const preserveHeaderSpaceLabel = `${t("preserve_header_space")}`;
 
   const { data: account } = useQuery({
     queryKey: ["account", accountId],
@@ -165,6 +167,22 @@ export const PrintChargeItems = (props: {
           </label>
         </div>
 
+        {hideHeader && (
+          <div className="gap-2 flex items-center">
+            <Switch
+              id="preserve-header-space"
+              checked={preserveHeaderSpace}
+              onCheckedChange={setPreserveHeaderSpace}
+            />
+            <label
+              htmlFor="preserve-header-space"
+              className="cursor-pointer text-sm"
+            >
+              {preserveHeaderSpaceLabel}
+            </label>
+          </div>
+        )}
+
         {!summaryMode && (
           <>
             <div className="gap-2 flex items-center">
@@ -202,515 +220,561 @@ export const PrintChargeItems = (props: {
       <PrintPreview
         title={t("charge_items")}
         disabled={!chargeItems?.results?.length}
+        className="print:pt-0"
       >
         <div className="md:p-2 max-w-4xl mx-auto bg-white">
-          <div>
-            {!hideHeader && (
-              <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
-                <img
-                  src={careConfig.mainLogo?.dark}
-                  alt="Care Logo"
-                  className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2"
-                />
-                <div className="text-center sm:text-left sm:order-1">
-                  <h1 className="text-3xl font-semibold">{facility?.name}</h1>
-                  {facility?.address && (
-                    <div className="text-gray-500 whitespace-pre-wrap break-words text-sm">
-                      {facility.address}
-                      {facility.phone_number && (
-                        <p className="text-gray-500 text-sm">
-                          {facility.phone_number}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            <div className="grid md:grid-cols-2 print:grid-cols-2 gap-x-8 gap-y-4 mb-4 text-xs">
-              <div className="space-y-1">
-                <DetailRow
-                  label={t("name")}
-                  value={patient?.name}
-                  width="w-16"
-                />
-                <DetailRow
-                  label={`${t("age")} / ${t("sex")}`}
-                  value={
-                    patient
-                      ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
-                      : undefined
-                  }
-                  width="w-16"
-                />
-                <DetailRow
-                  label={`${t("address")}`}
-                  value={patient?.address}
-                  width="w-16"
-                />
-              </div>
-              <div className="space-y-1">
-                <DetailRow
-                  label={`${t("date")}`}
-                  value={formatDateTime(new Date(), "DD-MM-YYYY")}
-                  width="w-24"
-                />
-                {patient?.instance_identifiers
-                  ?.filter(
-                    ({ config }) =>
-                      config.config.use === PatientIdentifierUse.official,
-                  )
-                  .map((identifier) => (
-                    <DetailRow
-                      key={identifier.config.id}
-                      label={identifier.config.config.display}
-                      value={identifier.value}
-                      width="w-24"
-                    />
-                  ))}
-                <DetailRow
-                  label={t("mobile_number")}
-                  value={patient && formatPhoneNumberIntl(patient.phone_number)}
-                  width="w-24"
-                />
-              </div>
-            </div>
-
-            {chargeItems?.results && chargeItems?.results?.length > 0 && (
-              <div className="text-sm">
-                <div className="overflow-hidden">
-                  <Table className="w-full [&_th]:text-xs [&_td]:text-xs">
-                    <TableHeader className="[&_tr]:border-y [&_th]:p-0.5 [&_th]:h-auto">
-                      <TableRow className="bg-transparent hover:bg-transparent">
-                        {summaryMode ? (
-                          <>
-                            <TableHead className="font-bold" colSpan={5}>
-                              {t("category")}
-                            </TableHead>
-                            <TableHead className="font-bold text-right w-32">
-                              {t("amount")}
-                            </TableHead>
-                          </>
-                        ) : (
-                          <>
-                            <TableHead className="font-bold w-10">
-                              {t("date")}
-                            </TableHead>
-                            <TableHead className="font-bold w-10">
-                              {t("invoice")}
-                            </TableHead>
-                            <TableHead className="font-bold w-24">
-                              {t("title")}
-                            </TableHead>
-                            <TableHead className="font-bold text-right w-10">
-                              {t("rate")}
-                            </TableHead>
-                            <TableHead className="font-bold text-right w-10">
-                              {t("qty")}
-                            </TableHead>
-                            <TableHead className="font-bold text-right w-10">
-                              {t("amount")}
-                            </TableHead>
-                          </>
+          <table className="w-full border-collapse">
+            <thead>
+              <tr>
+                <th className="p-0 font-normal text-left">
+                  {hideHeader && preserveHeaderSpace ? (
+                    <div className="mb-4 pb-2 border-b border-gray-200 h-20" />
+                  ) : !hideHeader ? (
+                    <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
+                      <img
+                        src={careConfig.mainLogo?.dark}
+                        alt="Care Logo"
+                        className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2"
+                      />
+                      <div className="text-center sm:text-left sm:order-1">
+                        <h1 className="text-3xl font-semibold">
+                          {facility?.name}
+                        </h1>
+                        {facility?.address && (
+                          <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
+                            {facility.address}
+                            {facility.phone_number && (
+                              <p className="text-gray-500 text-sm">
+                                {facility.phone_number}
+                              </p>
+                            )}
+                          </div>
                         )}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody className="[&_tr]:border-0 [&_td]:p-0.5">
-                      {(() => {
-                        // Group charge items by category, excluding entered_in_error items
-                        const validItems = chargeItems.results.filter(
-                          (item) =>
-                            item.status !== ChargeItemStatus.entered_in_error,
-                        );
+                      </div>
+                    </div>
+                  ) : null}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="p-0 align-top">
+                  <div className="grid md:grid-cols-2 print:grid-cols-2 gap-x-8 gap-y-4 mb-4 text-xs">
+                    <div className="space-y-1">
+                      <DetailRow
+                        label={t("name")}
+                        value={patient?.name}
+                        width="w-16"
+                      />
+                      <DetailRow
+                        label={`${t("age")} / ${t("sex")}`}
+                        value={
+                          patient
+                            ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
+                            : undefined
+                        }
+                        width="w-16"
+                      />
+                      <DetailRow
+                        label={`${t("address")}`}
+                        value={patient?.address}
+                        width="w-16"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <DetailRow
+                        label={`${t("date")}`}
+                        value={formatDateTime(new Date(), "DD-MM-YYYY")}
+                        width="w-24"
+                      />
+                      {patient?.instance_identifiers
+                        ?.filter(
+                          ({ config }) =>
+                            config.config.use === PatientIdentifierUse.official,
+                        )
+                        .map((identifier) => (
+                          <DetailRow
+                            key={identifier.config.id}
+                            label={identifier.config.config.display}
+                            value={identifier.value}
+                            width="w-24"
+                          />
+                        ))}
+                      <DetailRow
+                        label={t("mobile_number")}
+                        value={
+                          patient && formatPhoneNumberIntl(patient.phone_number)
+                        }
+                        width="w-24"
+                      />
+                    </div>
+                  </div>
 
-                        const groups = validItems.reduce(
-                          (
-                            acc: Record<string, ChargeItemRead[]>,
-                            item: ChargeItemRead,
-                          ) => {
-                            const categoryTitle =
-                              item.charge_item_definition?.category?.title ||
-                              t("uncategorized");
-                            const list = acc[categoryTitle] ?? [];
-                            list.push(item);
-                            acc[categoryTitle] = list;
-                            return acc;
-                          },
-                          {} as Record<string, ChargeItemRead[]>,
-                        );
+                  {chargeItems?.results && chargeItems?.results?.length > 0 && (
+                    <div className="text-sm">
+                      <div className="overflow-hidden">
+                        <Table className="w-full [&_th]:text-xs [&_td]:text-xs">
+                          <TableHeader className="[&_tr]:border-y [&_th]:p-0.5 [&_th]:h-auto">
+                            <TableRow className="bg-transparent hover:bg-transparent">
+                              {summaryMode ? (
+                                <>
+                                  <TableHead className="font-bold" colSpan={5}>
+                                    {t("category")}
+                                  </TableHead>
+                                  <TableHead className="font-bold text-right w-32">
+                                    {t("amount")}
+                                  </TableHead>
+                                </>
+                              ) : (
+                                <>
+                                  <TableHead className="font-bold w-10">
+                                    {t("date")}
+                                  </TableHead>
+                                  <TableHead className="font-bold w-10">
+                                    {t("invoice")}
+                                  </TableHead>
+                                  <TableHead className="font-bold w-24">
+                                    {t("title")}
+                                  </TableHead>
+                                  <TableHead className="font-bold text-right w-10">
+                                    {t("rate")}
+                                  </TableHead>
+                                  <TableHead className="font-bold text-right w-10">
+                                    {t("qty")}
+                                  </TableHead>
+                                  <TableHead className="font-bold text-right w-10">
+                                    {t("amount")}
+                                  </TableHead>
+                                </>
+                              )}
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody className="[&_tr]:border-0 [&_td]:p-0.5">
+                            {(() => {
+                              // Group charge items by category, excluding entered_in_error items
+                              const validItems = chargeItems.results.filter(
+                                (item) =>
+                                  item.status !==
+                                  ChargeItemStatus.entered_in_error,
+                              );
 
-                        // Sort categories alphabetically
-                        const sortedCategories = Object.keys(groups).sort();
+                              const groups = validItems.reduce(
+                                (
+                                  acc: Record<string, ChargeItemRead[]>,
+                                  item: ChargeItemRead,
+                                ) => {
+                                  const categoryTitle =
+                                    item.charge_item_definition?.category
+                                      ?.title || t("uncategorized");
+                                  const list = acc[categoryTitle] ?? [];
+                                  list.push(item);
+                                  acc[categoryTitle] = list;
+                                  return acc;
+                                },
+                                {} as Record<string, ChargeItemRead[]>,
+                              );
 
-                        const rows: React.ReactNode[] = [];
+                              // Sort categories alphabetically
+                              const sortedCategories =
+                                Object.keys(groups).sort();
 
-                        sortedCategories.forEach((categoryTitle) => {
-                          const items: ChargeItemRead[] =
-                            groups[categoryTitle] ?? [];
-                          const categoryTotal = items
-                            .reduce(
-                              (sum: number, item: ChargeItemRead) =>
-                                sum + Number(item.total_price ?? 0),
-                              0,
-                            )
-                            .toFixed(2);
+                              const rows: React.ReactNode[] = [];
 
-                          if (summaryMode) {
-                            // In summary mode, show only category with total
-                            rows.push(
-                              <TableRow
-                                key={`category-${categoryTitle}`}
-                                className="bg-transparent hover:bg-transparent"
-                              >
-                                <TableCell
-                                  colSpan={5}
-                                  className="font-semibold capitalize"
-                                >
-                                  {categoryTitle}
-                                </TableCell>
-                                <TableCell className="text-right font-semibold">
-                                  <MonetaryDisplay amount={categoryTotal} />
-                                </TableCell>
-                              </TableRow>,
-                            );
-                          } else {
-                            // Normal mode - show header, items, and subtotal
-                            // Add category header (only if not hiding categories)
-                            if (!hideCategories) {
+                              sortedCategories.forEach((categoryTitle) => {
+                                const items: ChargeItemRead[] =
+                                  groups[categoryTitle] ?? [];
+                                const categoryTotal = items
+                                  .reduce(
+                                    (sum: number, item: ChargeItemRead) =>
+                                      sum + Number(item.total_price ?? 0),
+                                    0,
+                                  )
+                                  .toFixed(2);
+
+                                if (summaryMode) {
+                                  // In summary mode, show only category with total
+                                  rows.push(
+                                    <TableRow
+                                      key={`category-${categoryTitle}`}
+                                      className="bg-transparent hover:bg-transparent"
+                                    >
+                                      <TableCell
+                                        colSpan={5}
+                                        className="font-semibold capitalize"
+                                      >
+                                        {categoryTitle}
+                                      </TableCell>
+                                      <TableCell className="text-right font-semibold">
+                                        <MonetaryDisplay
+                                          amount={categoryTotal}
+                                        />
+                                      </TableCell>
+                                    </TableRow>,
+                                  );
+                                } else {
+                                  // Normal mode - show header, items, and subtotal
+                                  // Add category header (only if not hiding categories)
+                                  if (!hideCategories) {
+                                    rows.push(
+                                      <TableRow
+                                        key={`category-${categoryTitle}`}
+                                        className="font-bold hover:bg-transparent"
+                                      >
+                                        <TableCell
+                                          colSpan={5}
+                                          className="capitalize"
+                                        >
+                                          {categoryTitle}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                          <MonetaryDisplay
+                                            amount={categoryTotal}
+                                          />
+                                        </TableCell>
+                                      </TableRow>,
+                                    );
+                                  }
+
+                                  items.forEach(
+                                    (chargeItem: ChargeItemRead) => {
+                                      const unitPrice =
+                                        chargeItem.unit_price_components.find(
+                                          (c) =>
+                                            c.monetary_component_type ===
+                                            MonetaryComponentType.base,
+                                        )?.amount;
+                                      rows.push(
+                                        <TableRow
+                                          key={chargeItem.id}
+                                          className="bg-transparent hover:bg-transparent"
+                                        >
+                                          <TableCell className="w-10 text-left">
+                                            {formatDateTime(
+                                              chargeItem.created_date,
+                                              "DD/MM/YY",
+                                            )}
+                                          </TableCell>
+                                          <TableCell className="w-10 text-left">
+                                            {chargeItem.paid_invoice?.number ||
+                                              "-"}
+                                          </TableCell>
+                                          <TableCell>
+                                            <div className="flex flex-col">
+                                              <span className="font-medium">
+                                                {chargeItem.title}
+                                              </span>
+                                            </div>
+                                          </TableCell>
+                                          <TableCell className="text-right w-10">
+                                            <MonetaryDisplay
+                                              amount={unitPrice}
+                                            />
+                                          </TableCell>
+                                          <TableCell className="text-right w-10">
+                                            {Math.floor(
+                                              Number(chargeItem.quantity),
+                                            )}
+                                          </TableCell>
+                                          <TableCell className="text-right w-10">
+                                            <MonetaryDisplay
+                                              amount={chargeItem.total_price}
+                                            />
+                                          </TableCell>
+                                        </TableRow>,
+                                      );
+                                    },
+                                  );
+                                }
+                              });
+
+                              // Add grand total
                               rows.push(
                                 <TableRow
-                                  key={`category-${categoryTitle}`}
-                                  className="font-bold hover:bg-transparent"
+                                  key="grand-total"
+                                  className="bg-muted/30 font-semibold"
                                 >
-                                  <TableCell colSpan={5} className="capitalize">
-                                    {categoryTitle}
+                                  <TableCell
+                                    colSpan={5}
+                                    className="text-right pr-2"
+                                  >
+                                    {t("net_total")}
                                   </TableCell>
                                   <TableCell className="text-right">
-                                    <MonetaryDisplay amount={categoryTotal} />
-                                  </TableCell>
-                                </TableRow>,
-                              );
-                            }
-
-                            items.forEach((chargeItem: ChargeItemRead) => {
-                              const unitPrice =
-                                chargeItem.unit_price_components.find(
-                                  (c) =>
-                                    c.monetary_component_type ===
-                                    MonetaryComponentType.base,
-                                )?.amount;
-                              rows.push(
-                                <TableRow
-                                  key={chargeItem.id}
-                                  className="bg-transparent hover:bg-transparent"
-                                >
-                                  <TableCell className="w-10 text-left">
-                                    {formatDateTime(
-                                      chargeItem.created_date,
-                                      "DD/MM/YY",
-                                    )}
-                                  </TableCell>
-                                  <TableCell className="w-10 text-left">
-                                    {chargeItem.paid_invoice?.number || "-"}
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="flex flex-col">
-                                      <span className="font-medium">
-                                        {chargeItem.title}
-                                      </span>
-                                      {chargeItem.description && (
-                                        <span className="text-xs text-gray-600 whitespace-pre-wrap">
-                                          {chargeItem.description}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </TableCell>
-                                  <TableCell className="text-right w-10">
-                                    <MonetaryDisplay amount={unitPrice} />
-                                  </TableCell>
-                                  <TableCell className="text-right w-10">
-                                    {Math.floor(Number(chargeItem.quantity))}
-                                  </TableCell>
-                                  <TableCell className="text-right w-10">
                                     <MonetaryDisplay
-                                      amount={chargeItem.total_price}
+                                      amount={validItems
+                                        .reduce(
+                                          (sum, item) =>
+                                            sum + Number(item.total_price ?? 0),
+                                          0,
+                                        )
+                                        .toFixed(2)}
                                     />
                                   </TableCell>
                                 </TableRow>,
                               );
-                            });
-                          }
-                        });
+                              return rows;
+                            })()}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
+                  )}
 
-                        // Add grand total
-                        rows.push(
-                          <TableRow
-                            key="grand-total"
-                            className="bg-muted/30 font-semibold"
-                          >
-                            <TableCell colSpan={5} className="text-right pr-2">
-                              {t("net_total")}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <MonetaryDisplay
-                                amount={validItems
+                  {payments.length > 0 && (
+                    <div className="mt-4">
+                      <hr className="border-gray-300 py-2" />
+                      <h2 className="text-sm font-semibold mb-1">
+                        {t("payment_details")}
+                      </h2>
+                      <div className="overflow-hidden">
+                        <Table className="w-full [&_th]:text-xs [&_td]:text-xs [&_tr]:text-xs">
+                          <TableHeader className="[&_tr]:border-y [&_th]:p-0.5 [&_th]:h-auto">
+                            <TableRow className="bg-transparent hover:bg-transparent">
+                              {summaryMode ? (
+                                <>
+                                  <TableHead className="font-bold" colSpan={2}>
+                                    {t("type")}
+                                  </TableHead>
+                                  <TableHead className="font-bold text-right w-32">
+                                    {t("amount")}
+                                  </TableHead>
+                                </>
+                              ) : (
+                                <>
+                                  <TableHead className="font-bold w-10">
+                                    {t("date")}
+                                  </TableHead>
+                                  {hidePaymentTypeGrouping && (
+                                    <TableHead className="font-bold w-10">
+                                      {t("type")}
+                                    </TableHead>
+                                  )}
+                                  <TableHead className="font-bold w-32">
+                                    {t("method")}
+                                  </TableHead>
+                                  <TableHead className="font-bold text-right w-32">
+                                    {t("amount")}
+                                  </TableHead>
+                                </>
+                              )}
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody className="[&_tr]:border-0 [&_td]:p-0.5">
+                            {(() => {
+                              const validPayments = payments.filter(
+                                (payment) =>
+                                  payment.status ===
+                                  PaymentReconciliationStatus.active,
+                              );
+
+                              const paymentGroups = validPayments.reduce(
+                                (
+                                  acc: Record<
+                                    string,
+                                    PaymentReconciliationRead[]
+                                  >,
+                                  payment: PaymentReconciliationRead,
+                                ) => {
+                                  const type = payment.reconciliation_type;
+                                  const list = acc[type] ?? [];
+                                  list.push(payment);
+                                  acc[type] = list;
+                                  return acc;
+                                },
+                                {} as Record<
+                                  string,
+                                  PaymentReconciliationRead[]
+                                >,
+                              );
+
+                              const sortedTypes =
+                                Object.keys(paymentGroups).sort();
+
+                              const rows: React.ReactNode[] = [];
+
+                              sortedTypes.forEach((paymentType) => {
+                                const paymentsOfType: PaymentReconciliationRead[] =
+                                  paymentGroups[paymentType] ?? [];
+                                const typeTotal = paymentsOfType
                                   .reduce(
-                                    (sum, item) =>
-                                      sum + Number(item.total_price ?? 0),
+                                    (
+                                      sum: number,
+                                      payment: PaymentReconciliationRead,
+                                    ) => sum + Number(payment.amount ?? 0),
                                     0,
                                   )
-                                  .toFixed(2)}
-                              />
-                            </TableCell>
-                          </TableRow>,
-                        );
-                        return rows;
-                      })()}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-            )}
+                                  .toFixed(2);
 
-            {payments.length > 0 && (
-              <div className="mt-4">
-                <hr className="border-gray-300 py-2" />
-                <h2 className="text-sm font-semibold mb-1">
-                  {t("payment_details")}
-                </h2>
-                <div className="overflow-hidden">
-                  <Table className="w-full [&_th]:text-xs [&_td]:text-xs [&_tr]:text-xs">
-                    <TableHeader className="[&_tr]:border-y [&_th]:p-0.5 [&_th]:h-auto">
-                      <TableRow className="bg-transparent hover:bg-transparent">
-                        {summaryMode ? (
-                          <>
-                            <TableHead className="font-bold" colSpan={2}>
-                              {t("type")}
-                            </TableHead>
-                            <TableHead className="font-bold text-right w-32">
-                              {t("amount")}
-                            </TableHead>
-                          </>
-                        ) : (
-                          <>
-                            <TableHead className="font-bold w-10">
-                              {t("date")}
-                            </TableHead>
-                            {hidePaymentTypeGrouping && (
-                              <TableHead className="font-bold w-10">
-                                {t("type")}
-                              </TableHead>
-                            )}
-                            <TableHead className="font-bold w-32">
-                              {t("method")}
-                            </TableHead>
-                            <TableHead className="font-bold text-right w-32">
-                              {t("amount")}
-                            </TableHead>
-                          </>
-                        )}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody className="[&_tr]:border-0 [&_td]:p-0.5">
-                      {(() => {
-                        const validPayments = payments.filter(
-                          (payment) =>
-                            payment.status ===
-                            PaymentReconciliationStatus.active,
-                        );
+                                if (summaryMode) {
+                                  // In summary mode, show only payment type with total
+                                  rows.push(
+                                    <TableRow
+                                      key={`payment-type-${paymentType}`}
+                                      className="bg-transparent hover:bg-transparent"
+                                    >
+                                      <TableCell
+                                        colSpan={2}
+                                        className="font-semibold capitalize"
+                                      >
+                                        {t(paymentType)}
+                                      </TableCell>
+                                      <TableCell className="text-right font-semibold">
+                                        <MonetaryDisplay amount={typeTotal} />
+                                      </TableCell>
+                                    </TableRow>,
+                                  );
+                                } else {
+                                  // Normal mode - show header, items, and subtotal
+                                  // Add payment type header (only if not hiding grouping)
+                                  if (!hidePaymentTypeGrouping) {
+                                    rows.push(
+                                      <TableRow
+                                        key={`payment-type-${paymentType}`}
+                                        className="font-semibold hover:bg-transparent"
+                                      >
+                                        <TableCell
+                                          colSpan={2}
+                                          className="capitalize"
+                                        >
+                                          {t(paymentType)}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                          <MonetaryDisplay amount={typeTotal} />
+                                        </TableCell>
+                                      </TableRow>,
+                                    );
+                                  }
 
-                        const paymentGroups = validPayments.reduce(
-                          (
-                            acc: Record<string, PaymentReconciliationRead[]>,
-                            payment: PaymentReconciliationRead,
-                          ) => {
-                            const type = payment.reconciliation_type;
-                            const list = acc[type] ?? [];
-                            list.push(payment);
-                            acc[type] = list;
-                            return acc;
-                          },
-                          {} as Record<string, PaymentReconciliationRead[]>,
-                        );
+                                  paymentsOfType.forEach(
+                                    (payment: PaymentReconciliationRead) => {
+                                      rows.push(
+                                        <TableRow
+                                          key={payment.id}
+                                          className="bg-transparent hover:bg-transparent"
+                                        >
+                                          <TableCell>
+                                            {payment.payment_datetime
+                                              ? formatDateTime(
+                                                  payment.payment_datetime,
+                                                  "DD-MM-YY",
+                                                )
+                                              : "-"}
+                                          </TableCell>
+                                          {hidePaymentTypeGrouping && (
+                                            <TableCell className="text-left capitalize">
+                                              {t(payment.reconciliation_type)}
+                                            </TableCell>
+                                          )}
+                                          <TableCell>
+                                            {paymentmethodMap[payment.method]}
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            <MonetaryDisplay
+                                              amount={payment.amount}
+                                            />
+                                          </TableCell>
+                                        </TableRow>,
+                                      );
+                                    },
+                                  );
+                                }
+                              });
 
-                        const sortedTypes = Object.keys(paymentGroups).sort();
-
-                        const rows: React.ReactNode[] = [];
-
-                        sortedTypes.forEach((paymentType) => {
-                          const paymentsOfType: PaymentReconciliationRead[] =
-                            paymentGroups[paymentType] ?? [];
-                          const typeTotal = paymentsOfType
-                            .reduce(
-                              (
-                                sum: number,
-                                payment: PaymentReconciliationRead,
-                              ) => sum + Number(payment.amount ?? 0),
-                              0,
-                            )
-                            .toFixed(2);
-
-                          if (summaryMode) {
-                            // In summary mode, show only payment type with total
-                            rows.push(
-                              <TableRow
-                                key={`payment-type-${paymentType}`}
-                                className="bg-transparent hover:bg-transparent"
-                              >
-                                <TableCell
-                                  colSpan={2}
-                                  className="font-semibold capitalize"
-                                >
-                                  {t(paymentType)}
-                                </TableCell>
-                                <TableCell className="text-right font-semibold">
-                                  <MonetaryDisplay amount={typeTotal} />
-                                </TableCell>
-                              </TableRow>,
-                            );
-                          } else {
-                            // Normal mode - show header, items, and subtotal
-                            // Add payment type header (only if not hiding grouping)
-                            if (!hidePaymentTypeGrouping) {
+                              // Add grand total
                               rows.push(
                                 <TableRow
-                                  key={`payment-type-${paymentType}`}
-                                  className="font-semibold hover:bg-transparent"
+                                  key="grand-total"
+                                  className="bg-muted/30 font-semibold"
                                 >
-                                  <TableCell colSpan={2} className="capitalize">
-                                    {t(paymentType)}
+                                  <TableCell
+                                    colSpan={
+                                      hidePaymentTypeGrouping && !summaryMode
+                                        ? 3
+                                        : 2
+                                    }
+                                    className="text-right pr-2"
+                                  >
+                                    {t("total_paid")}
                                   </TableCell>
                                   <TableCell className="text-right">
-                                    <MonetaryDisplay amount={typeTotal} />
+                                    <MonetaryDisplay
+                                      amount={validPayments
+                                        .reduce(
+                                          (sum, payment) =>
+                                            sum + Number(payment.amount ?? 0),
+                                          0,
+                                        )
+                                        .toFixed(2)}
+                                    />
                                   </TableCell>
                                 </TableRow>,
                               );
-                            }
 
-                            paymentsOfType.forEach(
-                              (payment: PaymentReconciliationRead) => {
-                                rows.push(
-                                  <TableRow
-                                    key={payment.id}
-                                    className="bg-transparent hover:bg-transparent"
-                                  >
-                                    <TableCell>
-                                      {payment.payment_datetime
-                                        ? formatDateTime(
-                                            payment.payment_datetime,
-                                            "DD-MM-YY",
-                                          )
-                                        : "-"}
-                                    </TableCell>
-                                    {hidePaymentTypeGrouping && (
-                                      <TableCell className="text-left capitalize">
-                                        {t(payment.reconciliation_type)}
-                                      </TableCell>
-                                    )}
-                                    <TableCell>
-                                      {paymentmethodMap[payment.method]}
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                      <MonetaryDisplay
-                                        amount={payment.amount}
-                                      />
-                                    </TableCell>
-                                  </TableRow>,
-                                );
-                              },
-                            );
-                          }
-                        });
+                              return rows;
+                            })()}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
+                  )}
 
-                        // Add grand total
-                        rows.push(
-                          <TableRow
-                            key="grand-total"
-                            className="bg-muted/30 font-semibold"
-                          >
-                            <TableCell
-                              colSpan={hidePaymentTypeGrouping ? 3 : 2}
-                              className="text-right pr-2"
-                            >
+                  {/* Account Summary Section */}
+                  {account && (
+                    <div className="overflow-hidden mt-4">
+                      <Table className="w-full border-1 [&_th]:text-xs [&_td]:text-xs">
+                        <TableHeader className="[&_tr]:border-1 [&_th]:p-0.5 [&_th]:h-auto">
+                          <TableRow className="bg-transparent hover:bg-transparent">
+                            <TableHead className="text-center font-bold">
+                              {t("billed_gross")}
+                            </TableHead>
+                            <TableHead className="text-center font-bold">
                               {t("total_paid")}
+                            </TableHead>
+                            <TableHead className="text-right font-bold">
+                              {t("amount_due")}
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody className="[&_tr]:border-1 [&_td]:p-0.5">
+                          <TableRow className="bg-transparent hover:bg-transparent">
+                            <TableCell className="text-center">
+                              <MonetaryDisplay amount={account.total_gross} />
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <MonetaryDisplay amount={account.total_paid} />
                             </TableCell>
                             <TableCell className="text-right">
-                              <MonetaryDisplay
-                                amount={validPayments
-                                  .reduce(
-                                    (sum, payment) =>
-                                      sum + Number(payment.amount ?? 0),
-                                    0,
-                                  )
-                                  .toFixed(2)}
-                              />
+                              <MonetaryDisplay amount={account.total_balance} />
                             </TableCell>
-                          </TableRow>,
-                        );
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
 
-                        return rows;
-                      })()}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-            )}
-
-            {/* Account Summary Section */}
-            {account && (
-              <div className="overflow-hidden mt-4">
-                <Table className="w-full border-1 [&_th]:text-xs [&_td]:text-xs">
-                  <TableHeader className="[&_tr]:border-1 [&_th]:p-0.5 [&_th]:h-auto">
-                    <TableRow className="bg-transparent hover:bg-transparent">
-                      <TableHead className="text-center font-bold">
-                        {t("billed_gross")}
-                      </TableHead>
-                      <TableHead className="text-center font-bold">
-                        {t("total_paid")}
-                      </TableHead>
-                      <TableHead className="text-right font-bold">
-                        {t("amount_due")}
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody className="[&_tr]:border-1 [&_td]:p-0.5">
-                    <TableRow className="bg-transparent hover:bg-transparent">
-                      <TableCell className="text-center">
-                        <MonetaryDisplay amount={account.total_gross} />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <MonetaryDisplay amount={account.total_paid} />
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <MonetaryDisplay amount={account.total_balance} />
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-
-            {/* Footer Section */}
-            <div className="mt-4 pt-2 border-t border-gray-200 text-sm text-gray-600">
-              <div className="flex justify-between items-center">
-                <div className="text-xs">
-                  <span className="font-medium text-xs">
-                    {t("prepared_by")}:{" "}
-                  </span>
-                  <span>{currentUser.username}</span>
-                </div>
-                <div className="text-xs">
-                  <span className="font-medium text-xs">
-                    {t("generated_on")}{" "}
-                  </span>
-                  <span>
-                    {formatDateTime(new Date(), "DD-MM-YYYY, hh:mm A")}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+                  {/* Footer Section */}
+                  <div className="mt-4 pt-2 border-t border-gray-200 text-sm text-gray-600">
+                    <div className="flex justify-between items-center">
+                      <div className="text-xs">
+                        <span className="font-medium text-xs">
+                          {t("prepared_by")}:{" "}
+                        </span>
+                        <span>{currentUser.username}</span>
+                      </div>
+                      <div className="text-xs">
+                        <span className="font-medium text-xs">
+                          {t("generated_on")}{" "}
+                        </span>
+                        <span>
+                          {formatDateTime(new Date(), "DD-MM-YYYY, hh:mm A")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </PrintPreview>
     </div>

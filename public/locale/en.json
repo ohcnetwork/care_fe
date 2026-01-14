@@ -3964,6 +3964,7 @@
   "prescriptions__route": "Route",
   "prescriptions__start_date": "Prescribed On",
   "present_health": "Present Health",
+  "preserve_header_space": "Preserve Header Space",
   "preset_deleted": "Preset deleted",
   "preset_name_placeholder": "Specify an identifiable name for the new preset",
   "preset_updated": "Preset updated",
