@@ -18,7 +18,7 @@ interface LocalStorageItem {
  * Global setup that runs once before all tests.
  * Refreshes authentication tokens to ensure they're valid for the test run.
  */
-async function globalSetup(config: FullConfig) {
+async function globalSetup(_config: FullConfig) {
   const authFile = path.join(__dirname, ".auth/user.json");
 
   // Check if auth file exists

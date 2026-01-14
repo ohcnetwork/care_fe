@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { ChevronDown, Plus, X } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -38,6 +39,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import UserSelector from "@/components/Common/UserSelector";
+
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
@@ -56,6 +59,7 @@ import {
   PriceComponentType,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { UserReadMinimal } from "@/types/user/user";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
@@ -132,6 +136,26 @@ export function EditInvoiceTable({
   const { t } = useTranslation();
   const { facility } = useCurrentFacility();
   useShortcutSubContext("facility:billing:invoice:show");
+
+  const [performers, setPerformers] = useState<
+    Record<string, UserReadMinimal | undefined>
+  >(() => {
+    const initial: Record<string, UserReadMinimal | undefined> = {};
+    chargeItems.forEach((item) => {
+      initial[item.id] = item.performer_actor;
+    });
+    return initial;
+  });
+
+  const handlePerformerChange = (
+    chargeItemId: string,
+    user: UserReadMinimal | undefined,
+  ) => {
+    setPerformers((prev) => ({
+      ...prev,
+      [chargeItemId]: user,
+    }));
+  };
 
   const getDiscountComponentKey = (
     component: MonetaryComponent | undefined,
@@ -224,6 +248,7 @@ export function EditInvoiceTable({
         }),
       ],
       description: item.description || undefined,
+      performer_actor: performers[item.id]?.id,
     }));
 
     updateChargeItems({ datapoints: updates });
@@ -377,23 +402,18 @@ export function EditInvoiceTable({
         onSubmit={form.handleSubmit(onSubmit, onError)}
         className="space-y-4"
       >
-        <div className="rounded-t-sm border border-gray-300 overflow-x-auto">
-          <Table>
+        <div>
+          <Table className="border">
             <TableHeader>
-              <TableRow className="border-b border-gray-200">
-                <TableHead className="border-r border-gray-200 font-semibold text-center sticky left-0 bg-white w-12">
-                  #
-                </TableHead>
-                <TableHead className="border-r border-gray-200 font-semibold text-center sticky left-8 bg-white min-w-[200px]">
-                  {t("item")}
-                </TableHead>
-                <TableHead className="border-r border-gray-200 font-semibold text-center min-w-[150px]">
+              <TableRow className="divide-x font-semibold">
+                <TableHead className="w-12">#</TableHead>
+                <TableHead>{t("item")}</TableHead>
+                <TableHead>{t("performer")}</TableHead>
+                <TableHead className="min-w-[150px]">
                   {t("unit_price")} ({getCurrencySymbol()})
                 </TableHead>
-                <TableHead className="border-r border-gray-200 font-semibold text-center min-w-[100px]">
-                  {t("quantity")}
-                </TableHead>
-                <TableHead className="border-r border-gray-200 font-semibold text-center min-w-[400px]">
+                <TableHead className="min-w-[100px]">{t("quantity")}</TableHead>
+                <TableHead>
                   <div className="flex items-center justify-center gap-2">
                     {t("discounts")}
                     {globalDiscounts.length > 0 && chargeItems.length > 1 && (
@@ -439,14 +459,21 @@ export function EditInvoiceTable({
             </TableHeader>
             <TableBody>
               {form.watch("items").map((item, index) => (
-                <TableRow key={item.id} className="border-b border-gray-200">
-                  <TableCell className="border-r border-gray-200 font-medium text-gray-950 text-sm text-center sticky left-0 bg-white w-12">
-                    {index + 1}
+                <TableRow
+                  key={item.id}
+                  className="divide-x font-medium text-gray-950"
+                >
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{item.title}</TableCell>
+                  <TableCell>
+                    <UserSelector
+                      selected={performers[item.id]}
+                      onChange={(user) => handlePerformerChange(item.id, user)}
+                      facilityId={facilityId}
+                      placeholder={t("select_performer")}
+                    />
                   </TableCell>
-                  <TableCell className="border-r border-gray-200 font-medium text-gray-950 text-sm sticky left-8 bg-white min-w-[200px]">
-                    {item.title}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-200 font-medium text-gray-950 text-sm min-w-[150px]">
+                  <TableCell>
                     <FormField
                       control={form.control}
                       name={`items.${index}.baseAmount`}
@@ -467,7 +494,7 @@ export function EditInvoiceTable({
                       )}
                     />
                   </TableCell>
-                  <TableCell className="border-r border-gray-200 font-medium text-gray-950 text-sm min-w-[100px]">
+                  <TableCell>
                     <FormField
                       control={form.control}
                       name={`items.${index}.quantity`}
@@ -486,7 +513,7 @@ export function EditInvoiceTable({
                       )}
                     />
                   </TableCell>
-                  <TableCell className="border-r border-gray-200 font-medium text-gray-950 text-sm min-w-[400px]">
+                  <TableCell className="border-r border-gray-200 font-medium text-gray-950 text-sm ">
                     {(() => {
                       const hasAppliedDiscounts =
                         item.discounts && item.discounts.length > 0;
@@ -624,7 +651,7 @@ export function EditInvoiceTable({
                                       : String(discount?.amount ?? "0");
 
                                     return (
-                                      <FormItem className="flex-1">
+                                      <FormItem className="flex-1 min-w-20">
                                         <FormControl>
                                           <MonetaryAmountInput
                                             hideCurrency={true}

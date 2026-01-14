@@ -1,3 +1,4 @@
+import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trash2Icon } from "lucide-react";
@@ -93,11 +94,7 @@ export default function ActivityDefinitionForm({
               {t("edit_activity_definition")}
             </h1>
           </div>
-          <div className="flex items-center justify-center rounded-lg border border-gray-200 bg-white p-8">
-            <div className="text-center">
-              <div className="mb-2 text-sm text-gray-500">{t("loading")}</div>
-            </div>
-          </div>
+          <FormSkeleton rows={10} />
         </div>
       </Page>
     );
