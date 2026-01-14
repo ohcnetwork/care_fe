@@ -2,6 +2,12 @@ import { cn } from "@/lib/utils";
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
+import {
+  BedAvailableSelected,
+  BedAvailableUnselected,
+  BedUnavailableSelected,
+  BedUnavailableUnselected,
+} from "@/CAREUI/icons/CustomIcons";
 import { LocationRead } from "@/types/location/location";
 
 interface BedListingProps {
@@ -62,19 +68,17 @@ export function BedListing({
             </div>
             <div className="flex flex-col items-center">
               <div className="relative">
-                <img
-                  src={
-                    isAvailable
-                      ? isSelected
-                        ? "/images/bed-available-selected.svg"
-                        : "/images/bed-available.svg"
-                      : isSelected
-                        ? "/images/bed-unavailable-selected.svg"
-                        : "/images/bed-unavailable.svg"
-                  }
-                  alt="Bed"
-                  className="size-10 mt-4"
-                />
+                {isAvailable ? (
+                  isSelected ? (
+                    <BedAvailableSelected className="size-10 mt-4" />
+                  ) : (
+                    <BedAvailableUnselected className="size-10 mt-4" />
+                  )
+                ) : isSelected ? (
+                  <BedUnavailableSelected className="size-10 mt-4" />
+                ) : (
+                  <BedUnavailableUnselected className="size-10 mt-4" />
+                )}
               </div>
               <p className="text-xs text-center font-medium mt-2">{bed.name}</p>
             </div>

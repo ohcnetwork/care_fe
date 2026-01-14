@@ -664,6 +664,9 @@ export function InvoiceShow({
                     <TableHead className={cn(tableHeadClass, "text-left")}>
                       {t("item")}
                     </TableHead>
+                    <TableHead className={cn(tableHeadClass, "text-left")}>
+                      {t("performer")}
+                    </TableHead>
                     <TableHead className={tableHeadClass}>
                       {t("mrp")} ({getCurrencySymbol()})
                     </TableHead>
@@ -701,8 +704,8 @@ export function InvoiceShow({
                       <TableCell
                         colSpan={
                           invoice?.status === InvoiceStatus.draft
-                            ? 8 + getApplicableTaxColumns(invoice).length
-                            : 7 + getApplicableTaxColumns(invoice).length
+                            ? 9 + getApplicableTaxColumns(invoice).length
+                            : 8 + getApplicableTaxColumns(invoice).length
                         }
                         className="text-center text-gray-500"
                       >
@@ -734,6 +737,9 @@ export function InvoiceShow({
                             className={cn(tableCellClass, "font-medium")}
                           >
                             {item.title}
+                          </TableCell>
+                          <TableCell className={cn(tableCellClass)}>
+                            {formatName(item.performer_actor)}
                           </TableCell>
                           <TableCell
                             className={cn(tableCellClass, "text-right")}
