@@ -111,29 +111,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     },
   });
 
-  useEffect(() => {
-    const hasErrors = Object.keys(form.formState.errors).length > 0;
-    if (!hasErrors) {
-      return;
-    }
-
-    // Ensure both sections are open so all field errors are visible.
-    setOpenSections(["patient-basics", "additional-details"]);
-
-    requestAnimationFrame(() => {
-      const firstInvalidField = document.querySelector(
-        '[aria-invalid="true"]',
-      ) as HTMLElement | null;
-
-      firstInvalidField?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-
-      firstInvalidField?.focus();
-    });
-  }, [form.formState.errors]);
-
   const patientQuery = useQuery({
     queryKey: ["patient", patientId],
     queryFn: query(patientApi.get, {
