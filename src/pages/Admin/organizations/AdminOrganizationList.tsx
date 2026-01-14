@@ -117,6 +117,7 @@ export default function AdminOrganizationList({
               minSize={15}
               maxSize={30}
               className="h-full hidden md:block"
+              data-testid="org-tree-panel"
             >
               <AdminOrganizationNavbar
                 organizationType={organizationType}

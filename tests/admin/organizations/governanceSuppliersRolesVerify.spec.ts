@@ -158,9 +158,9 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
   test("should expand and collapse organization tree", async ({ page }) => {
     await navigateToOrganizationType(page, "govt");
 
-    // Get the ResizablePanel locator (treePanel) - tree is in the first ResizablePanel
+    // Get the ResizablePanel locator (treePanel) using stable data-testid
     // The tree is hidden on mobile (md:block), so skip test if not visible
-    const treePanel = page.locator('[class*="ResizablePanel"]').first();
+    const treePanel = page.getByTestId("org-tree-panel").first();
     const isTreeVisible = await treePanel.isVisible().catch(() => false);
 
     if (!isTreeVisible) {
@@ -177,8 +177,8 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
     // Assert expand button is visible
     await expect(expandButtons).toBeVisible({ timeout: 5000 });
 
-    // Locate child container to verify state changes
-    const childContainer = treePanel.locator("div.pl-2").first();
+    // Locate child container to verify state changes using stable data-testid
+    const childContainer = treePanel.getByTestId("org-tree-children").first();
 
     // Verify initial collapsed state: child container should not be visible
     await expect(childContainer).not.toBeVisible();
@@ -189,9 +189,8 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
     // Verify expansion by checking for child elements (this confirms the icon changed to expanded state)
     await expect(childContainer).toBeVisible({ timeout: 5000 });
 
-    // Verify at least one child organization node is visible
-    // Child nodes are OrganizationTreeNode components with indentation
-    const childNodes = childContainer.locator('div[style*="padding-left"]');
+    // Verify at least one child organization node is visible using stable data-testid
+    const childNodes = childContainer.getByTestId("org-tree-node");
     const childCount = await childNodes.count();
     expect(childCount).toBeGreaterThan(0);
     await expect(childNodes.first()).toBeVisible();

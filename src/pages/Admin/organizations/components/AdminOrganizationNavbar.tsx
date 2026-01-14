@@ -47,7 +47,7 @@ function OrganizationTreeNode({
   });
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1" data-testid="org-tree-node">
       <div
         className={cn(
           "flex items-center py-1 px-2 rounded-md cursor-pointer hover:bg-gray-100",
@@ -90,7 +90,7 @@ function OrganizationTreeNode({
         </div>
       </div>
       {isExpanded && children?.results && children.results.length > 0 && (
-        <div className="pl-2">
+        <div className="pl-2" data-testid="org-tree-children">
           {children.results.map((child) => (
             <OrganizationTreeNode
               key={child.id}
