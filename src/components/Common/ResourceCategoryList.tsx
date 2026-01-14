@@ -220,7 +220,7 @@ export function ResourceCategoryList({
         facilityId,
         categorySlug,
         qParams.searchCategory,
-        qParams.page || "1",
+        qParams.page || 1,
       ],
       queryFn: query.debounced(resourceCategoryApi.list, {
         pathParams: { facilityId },
