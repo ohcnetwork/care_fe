@@ -357,6 +357,78 @@ test.describe("Service Request Show Page", () => {
       );
       await expect(retentionRow).toContainText(firstSpecimen.retention.unit);
     });
+
+    test("should create draft specimen on clicking collect specimen button", async ({
+      page,
+    }) => {
+      const specimensSection = page.locator("div", {
+        has: page.getByRole("heading", { name: /specimens/i }),
+      });
+
+      const specimenCard = specimensSection
+        .locator('[data-slot="card"]')
+        .filter({
+          has: page.locator('[data-slot="badge"]', {
+            hasText: /collection pending/i,
+          }),
+        })
+        .first();
+      await expect(specimenCard).toBeVisible();
+
+      await expect(
+        specimenCard.locator('[data-slot="badge"]', {
+          hasText: /collection pending/i,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        specimenCard.locator('[data-slot="badge"]', {
+          hasText: /draft/i,
+        }),
+      ).not.toBeVisible();
+
+      await specimenCard
+        .getByRole("button", { name: /collect specimen/i })
+        .click();
+
+      // Verify the SpecimenForm opens (card with "Collect Specimen:" title)
+      const specimenFormCard = page.locator('[data-slot="card"]', {
+        has: page.locator('[data-slot="card-title"]', {
+          hasText: /collect specimen:/i,
+        }),
+      });
+      await expect(specimenFormCard).toBeVisible();
+
+      await expect(
+        specimenFormCard.getByText(/sample identification/i),
+      ).toBeVisible();
+
+      await expect(
+        specimenFormCard.getByText(/QR code generated successfully/i),
+      ).toBeVisible();
+
+      await specimenFormCard
+        .locator("button", {
+          has: page.locator("svg[class*='l-arrow-left']"),
+        })
+        .click();
+
+      await expect(specimenFormCard).not.toBeVisible();
+
+      await expect(
+        specimensSection
+          .locator('[data-slot="card"]')
+          .filter({
+            has: page.locator('[data-slot="badge"]', { hasText: /^draft$/i }),
+          })
+          .filter({
+            has: page.locator('[data-slot="badge"]', {
+              hasText: /collection pending/i,
+            }),
+          })
+          .first(),
+      ).toBeVisible();
+    });
   });
 
   test.describe("Test Results Section", () => {
@@ -391,6 +463,31 @@ test.describe("Service Request Show Page", () => {
       });
       await expect(createReportButton).toBeVisible();
       await expect(createReportButton).toBeDisabled();
+    });
+
+    test("should show observation history sheet with no deleted observations", async ({
+      page,
+    }) => {
+      const testResultsHeader = page.locator("div.flex.items-center", {
+        has: page.getByRole("heading", { name: /test results/i }),
+      });
+
+      await testResultsHeader
+        .locator('[data-slot="dropdown-menu-trigger"]')
+        .click();
+
+      await page
+        .getByRole("menuitem", { name: /view observation history/i })
+        .click();
+
+      const sheet = page.locator('[data-slot="sheet-content"]');
+      await expect(sheet).toBeVisible();
+
+      await expect(
+        sheet.getByText(/observation history/i).first(),
+      ).toBeVisible();
+
+      await expect(sheet.getByText(/no deleted observation\b/i)).toBeVisible();
     });
   });
 
