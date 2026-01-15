@@ -1,3 +1,4 @@
+import { useMutation } from "@tanstack/react-query";
 import {
   CopyIcon,
   KeyRoundIcon,
@@ -8,9 +9,6 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { useMutation } from "@tanstack/react-query";
-
-import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,25 +18,22 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
+
+import mutate from "@/Utils/request/mutate";
 import {
   GenerateServiceAccountTokenResponse,
-  UserReadMinimal,
+  UserRead,
 } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
 
-import mutate from "@/Utils/request/mutate";
-
-interface ServiceTokenDialogProps {
-  user: UserReadMinimal;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+interface ServiceTokenSectionProps {
+  userData: UserRead;
 }
 
-export default function ServiceTokenDialog({
-  user,
-  open,
-  onOpenChange,
-}: ServiceTokenDialogProps) {
+export default function ServiceTokenSection({
+  userData,
+}: ServiceTokenSectionProps) {
   const { t } = useTranslation();
   const [generatedToken, setGeneratedToken] = useState<string | null>(null);
   const [showTokenDialog, setShowTokenDialog] = useState(false);
@@ -46,7 +41,7 @@ export default function ServiceTokenDialog({
 
   const { mutate: generateToken, isPending: isGenerating } = useMutation({
     mutationFn: mutate(userApi.generateServiceAccountToken, {
-      pathParams: { username: user.username },
+      pathParams: { username: userData.username },
     }),
     onSuccess: (data: GenerateServiceAccountTokenResponse) => {
       setGeneratedToken(data.token);
@@ -57,7 +52,7 @@ export default function ServiceTokenDialog({
 
   const { mutate: revokeToken, isPending: isRevoking } = useMutation({
     mutationFn: mutate(userApi.revokeServiceAccountToken, {
-      pathParams: { username: user.username },
+      pathParams: { username: userData.username },
     }),
     onSuccess: () => {
       toast.success(t("token_revoked_successfully"));
@@ -67,11 +62,6 @@ export default function ServiceTokenDialog({
 
   const handleGenerateToken = () => {
     generateToken({});
-  };
-
-  const handleRevokeToken = () => {
-    setShowRevokeDialog(true);
-    setShowTokenDialog(false);
   };
 
   const handleCopyToken = () => {
@@ -84,70 +74,46 @@ export default function ServiceTokenDialog({
   const handleCloseTokenDialog = () => {
     setShowTokenDialog(false);
     setGeneratedToken(null);
-    onOpenChange(false);
-  };
-
-  const handleClose = () => {
-    onOpenChange(false);
-    setGeneratedToken(null);
-    setShowTokenDialog(false);
-    setShowRevokeDialog(false);
   };
 
   return (
     <>
-      <Dialog open={open && !showTokenDialog} onOpenChange={handleClose}>
-        <DialogContent className="max-w-md w-[95%] rounded-md">
-          <DialogHeader className="-mb-2">
-            <DialogTitle className="text-xl font-bold text-gray-900">
-              {t("manage_token")}
-            </DialogTitle>
-            <DialogDescription className="text-sm">
-              {t("manage_service_account_token_for")} {user.username}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-3">
-            <div className="rounded-lg bg-amber-50 border border-amber-200 p-3">
-              <div className="flex gap-2">
-                <TriangleAlert className="size-5 text-amber-600 shrink-0 mt-0.5" />
-                <div className="text-sm text-amber-800">
-                  <p className="font-medium mb-1">{t("caution")}</p>
-                  <ul className="text-xs space-y-1 list-disc list-inside">
-                    <li>{t("token_generate_caution_1")}</li>
-                    <li>{t("token_generate_caution_2")}</li>
-                    <li>{t("token_generate_caution_3")}</li>
-                  </ul>
-                </div>
+      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-white">
+        <div className="space-y-4">
+          <div className="rounded-lg bg-amber-50 border border-amber-200 p-3">
+            <div className="flex gap-2">
+              <TriangleAlert className="size-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="text-sm text-amber-800">
+                <p className="font-medium mb-1">{t("caution")}</p>
+                <ul className="text-xs space-y-1 list-disc list-inside">
+                  <li>{t("token_generate_caution_1")}</li>
+                  <li>{t("token_generate_caution_2")}</li>
+                  <li>{t("token_generate_caution_3")}</li>
+                </ul>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Button
-                variant="secondary"
-                onClick={handleRevokeToken}
-                className="w-full justify-center items-center"
-              >
-                <ShieldAlertIcon className="mr-2 size-4" />
-                <span className="hidden sm:inline">{t("revoke_token")}</span>
-                <span className="sm:hidden">{t("revoke")}</span>
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleGenerateToken}
-                disabled={isGenerating}
-                className="w-full justify-center items-center"
-              >
-                <KeyRoundIcon className="mr-2 size-4" />
-                <span className="hidden sm:inline">
-                  {isGenerating ? t("generating") : t("generate_token")}
-                </span>
-                <span className="sm:hidden">
-                  {isGenerating ? t("generating") : t("generate")}
-                </span>
-              </Button>
-            </div>
           </div>
-        </DialogContent>
-      </Dialog>
+          <div className="flex flex-col sm:flex-row justify-end gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => setShowRevokeDialog(true)}
+              className="justify-center items-center"
+            >
+              <ShieldAlertIcon className="mr-2 size-4" />
+              {t("revoke_token")}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleGenerateToken}
+              disabled={isGenerating}
+              className="justify-center items-center"
+            >
+              <KeyRoundIcon className="mr-2 size-4" />
+              {isGenerating ? t("generating") : t("generate_token")}
+            </Button>
+          </div>
+        </div>
+      </div>
 
       <Dialog open={showTokenDialog} onOpenChange={handleCloseTokenDialog}>
         <DialogContent className="max-w-md w-[95%] rounded-md">
@@ -206,13 +172,13 @@ export default function ServiceTokenDialog({
           <div className="space-y-2">
             <p>
               {t("revoke_token_confirmation", {
-                username: user.username,
+                username: userData.username,
               })}
             </p>
             <p className="text-sm text-gray-600">{t("revoke_token_warning")}</p>
           </div>
         }
-        variant={"destructive"}
+        variant="destructive"
         confirmText={isRevoking ? t("revoking") : t("revoke")}
         disabled={isRevoking}
         onConfirm={() => revokeToken({})}

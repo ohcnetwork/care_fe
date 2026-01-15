@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 
@@ -8,10 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
-import ServiceTokenDialog from "@/components/Users/ServiceTokenDialog";
 import { UserCard } from "@/components/Users/UserListAndCard";
-
-import { UserReadMinimal } from "@/types/user/user";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -38,10 +35,6 @@ export default function OrganizationUsers({
   navOrganizationId,
   isServiceAccount = false,
 }: Props) {
-  const [selectedUser, setSelectedUser] = useState<UserReadMinimal | null>(
-    null,
-  );
-  const [showTokenDialog, setShowTokenDialog] = useState(false);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
@@ -124,7 +117,6 @@ export default function OrganizationUsers({
             canCreateUser,
             canManageOrganizationUsers,
             canCreateServiceAccount,
-            canManageServiceAccount,
           } = getPermissions(hasPermission, orgPermissions);
           return (
             <div className="space-y-6">
@@ -216,21 +208,6 @@ export default function OrganizationUsers({
                             />
                           )
                         }
-                        actions={
-                          isServiceAccount &&
-                          canManageServiceAccount && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedUser(userRole.user);
-                                setShowTokenDialog(true);
-                              }}
-                            >
-                              <span>{t("manage_token")}</span>
-                            </Button>
-                          )
-                        }
                         isServiceAccount={isServiceAccount}
                       />
                     ))
@@ -242,18 +219,6 @@ export default function OrganizationUsers({
           );
         }}
       </OrganizationLayout>
-      {selectedUser && (
-        <ServiceTokenDialog
-          user={selectedUser}
-          open={showTokenDialog}
-          onOpenChange={(open) => {
-            setShowTokenDialog(open);
-            if (!open) {
-              setSelectedUser(null);
-            }
-          }}
-        />
-      )}
     </>
   );
 }
