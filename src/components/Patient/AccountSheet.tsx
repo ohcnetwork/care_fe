@@ -14,7 +14,10 @@ import {
 } from "@/components/ui/sheet";
 
 import query from "@/Utils/request/query";
+import { getPermissions } from "@/common/Permissions";
+import { usePermissions } from "@/context/PermissionContext";
 import AccountSheet from "@/pages/Facility/billing/account/AccountSheet";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   AccountBillingStatus,
   AccountRead,
@@ -26,13 +29,11 @@ import { EncounterRead } from "@/types/emr/encounter/encounter";
 interface AccountSheetButtonProps {
   encounter: EncounterRead;
   trigger: React.ReactNode;
-  canWrite: boolean;
 }
 
 export function AccountSheetButton({
   encounter,
   trigger,
-  canWrite,
 }: AccountSheetButtonProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -40,6 +41,13 @@ export function AccountSheetButton({
   const [createAccountOpen, setCreateAccountOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<AccountRead | null>(
     null,
+  );
+
+  const { facility } = useCurrentFacility();
+  const { hasPermission } = usePermissions();
+  const { canCreateAccount, canUpdateAccount } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
   );
 
   const {
@@ -109,7 +117,7 @@ export function AccountSheetButton({
                     <ExternalLink className="size-4" />
                     {t("more_details")}
                   </Button>
-                  {canWrite && (
+                  {canUpdateAccount && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -135,7 +143,7 @@ export function AccountSheetButton({
                   <p className="text-gray-500 mb-4">
                     {t("no_active_account_found")}
                   </p>
-                  {canWrite && (
+                  {canCreateAccount && (
                     <Button
                       onClick={handleCreateAccountClick}
                       variant="outline"
@@ -249,6 +257,16 @@ export function AccountSheetButton({
                           </span>
                           <span className="font-medium text-green-600">
                             <MonetaryDisplay amount={accounts[0].total_paid} />
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">
+                            {t("total_billable")}
+                          </span>
+                          <span className="font-medium">
+                            <MonetaryDisplay
+                              amount={accounts[0].total_billable_charge_items}
+                            />
                           </span>
                         </div>
                       </div>

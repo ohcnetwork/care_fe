@@ -5,12 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { Time } from "@/Utils/types";
 import { formatName } from "@/Utils/utils";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { PatientRead, PublicPatientRead } from "@/types/emr/patient/patient";
+import { EncounterListRead } from "@/types/emr/encounter/encounter";
+import {
+  PatientListRead,
+  PublicPatientRead,
+} from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 import { buildLocationHierarchy } from "@/types/location/utils";
 import { TokenRead } from "@/types/tokens/token/token";
 import { UserReadMinimal } from "@/types/user/user";
@@ -50,6 +53,7 @@ export interface ScheduleTemplate {
   charge_item_definition: ChargeItemDefinitionRead;
   revisit_charge_item_definition: ChargeItemDefinitionRead;
   revisit_allowed_days: number;
+  is_public: boolean;
 }
 
 type ScheduleAvailabilityBase = {
@@ -76,6 +80,7 @@ export interface ScheduleTemplateCreateRequest {
   availabilities: ScheduleAvailabilityBase[];
   resource_type: SchedulableResourceType;
   resource_id: string;
+  is_public: boolean;
 }
 export interface ScheduleTemplateSetChargeItemDefinitionRequest {
   charge_item_definition: string;
@@ -86,6 +91,7 @@ export interface ScheduleTemplateUpdateRequest {
   name: string;
   valid_from: string;
   valid_to: string;
+  is_public: boolean;
 }
 
 export type ScheduleAvailability = ScheduleAvailabilityBase & {
@@ -202,7 +208,7 @@ export const APPOINTMENT_STATUS_COLORS = {
 >;
 
 type LocationResource = {
-  resource: LocationList;
+  resource: LocationRead;
   resource_type: SchedulableResourceType.Location;
 };
 
@@ -233,7 +239,7 @@ export type AppointmentBase = {
 } & ScheduleResource;
 
 export type Appointment = AppointmentBase & {
-  patient: PatientRead;
+  patient: PatientListRead;
 };
 
 export type PublicAppointment = AppointmentBase & {
@@ -245,7 +251,7 @@ export type AppointmentRead = Appointment & {
   updated_by: UserReadMinimal | null;
   created_by: UserReadMinimal;
   modified_date: string;
-  associated_encounter?: EncounterRead;
+  associated_encounter?: EncounterListRead;
 };
 
 export interface AppointmentCreateRequest {

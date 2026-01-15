@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import careConfig from "@careConfig";
 
@@ -15,7 +15,7 @@ import {
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 import query from "@/Utils/request/query";
 
 import DispenseDrawer from "./DispenseDrawer";
@@ -29,7 +29,7 @@ export const DispenseButton = ({
   setOpen: (open: boolean) => void;
   facilityId: string;
 }) => {
-  const [location, setLocation] = useState<LocationList | undefined>(undefined);
+  const [location, setLocation] = useState<LocationRead | undefined>(undefined);
   const [showDrawer, setShowDrawer] = useState(false);
   const [isInvoiceSheetOpen, setIsInvoiceSheetOpen] = useState(false);
   const [extractedChargeItems, setExtractedChargeItems] = useState<
@@ -37,6 +37,7 @@ export const DispenseButton = ({
   >([]);
   const [accountId, setAccountId] = useState<string | undefined>(undefined);
   const { selectedEncounter } = useEncounter();
+  const queryClient = useQueryClient();
 
   const { refetch: refetchAccount } = useQuery({
     queryKey: ["accounts", selectedEncounter?.patient.id],
@@ -51,13 +52,13 @@ export const DispenseButton = ({
     enabled: !!facilityId && !!selectedEncounter?.patient.id,
   });
 
-  const handleLocationSelect = (selectedLocation: LocationList) => {
+  const handleLocationSelect = (selectedLocation: LocationRead) => {
     setLocation(selectedLocation);
     setOpen(false);
     setShowDrawer(true);
   };
 
-  const getLocationPath = (location: LocationList): string => {
+  const getLocationPath = (location: LocationRead): string => {
     const path = [location.name];
     let current = location.parent;
     while (current && current.id) {
@@ -106,16 +107,26 @@ export const DispenseButton = ({
           onDispenseComplete={async (chargeItems: ChargeItemRead[]) => {
             setShowDrawer(false);
 
-            if (!careConfig.enableAutoInvoiceAfterDispense) {
-              return;
-            }
-            setExtractedChargeItems(chargeItems);
-            const result = await refetchAccount();
-            const fetchedAccountId = result.data?.results?.[0]?.id;
+            queryClient.invalidateQueries({
+              queryKey: [
+                "medication_dispense",
+                selectedEncounter.patient.id,
+                selectedEncounter.id,
+              ],
+            });
 
-            if (fetchedAccountId) {
-              setAccountId(fetchedAccountId);
-              setIsInvoiceSheetOpen(true);
+            if (
+              careConfig.enableAutoInvoiceAfterDispense &&
+              chargeItems.length > 0
+            ) {
+              setExtractedChargeItems(chargeItems);
+              const result = await refetchAccount();
+              const fetchedAccountId = result.data?.results?.[0]?.id;
+
+              if (fetchedAccountId) {
+                setAccountId(fetchedAccountId);
+                setIsInvoiceSheetOpen(true);
+              }
             }
           }}
         />

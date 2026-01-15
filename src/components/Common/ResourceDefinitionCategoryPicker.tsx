@@ -44,6 +44,7 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import {
   ResourceCategoryParent,
   ResourceCategoryResourceType,
+  ResourceCategorySubType,
 } from "@/types/base/resourceCategory/resourceCategory";
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
 import { ProductKnowledgeType } from "@/types/inventory/productKnowledge/productKnowledge";
@@ -75,6 +76,7 @@ interface ResourceDefinitionCategoryPickerProps<T> {
   allowMultiple?: boolean;
   // Resource type specific props
   resourceType: ResourceCategoryResourceType;
+  resourceSubType?: ResourceCategorySubType;
   searchParamName?: string;
   listDefinitions: {
     queryFn: {
@@ -117,6 +119,7 @@ interface ResourceDefinitionCategoryPickerProps<T> {
   hideClearButton?: boolean;
   hideSelectedDisplay?: boolean;
   alignContent?: "start" | "center" | "end";
+  defaultOpen?: boolean;
 }
 
 export function ResourceDefinitionCategoryPicker<T>({
@@ -127,6 +130,7 @@ export function ResourceDefinitionCategoryPicker<T>({
   disabled = false,
   className,
   resourceType,
+  resourceSubType,
   searchParamName = "title",
   listDefinitions,
   translationBaseKey,
@@ -138,12 +142,13 @@ export function ResourceDefinitionCategoryPicker<T>({
   hideSelectedDisplay = false,
   hideClearButton = false,
   alignContent = "start",
+  defaultOpen = false,
 }: ResourceDefinitionCategoryPickerProps<T>) {
   const shouldHideClearButton = allowMultiple || hideClearButton;
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const isMobile = useBreakpoints({ default: true, sm: false });
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const [activeTab, setActiveTab] = useState("search");
   const [favSubTab, setFavSubTab] = useState("recent");
   const [breadcrumbs, setBreadcrumbs] = useState<CategoryBreadcrumb[]>([]);
@@ -156,12 +161,20 @@ export function ResourceDefinitionCategoryPicker<T>({
   // Fetch categories for current level
   const { data: categoriesResponse, isLoading: isLoadingCategories } = useQuery(
     {
-      queryKey: ["resourceCategories", facilityId, resourceType, currentParent],
+      queryKey: [
+        "resourceCategories",
+        facilityId,
+        resourceType,
+        resourceSubType,
+        currentParent,
+      ],
       queryFn: query(resourceCategoryApi.list, {
         pathParams: { facilityId },
         queryParams: {
           resource_type: resourceType,
           parent: currentParent || "",
+          limit: 100,
+          ...(resourceSubType ? { resource_sub_type: resourceSubType } : {}),
         },
       }),
     },

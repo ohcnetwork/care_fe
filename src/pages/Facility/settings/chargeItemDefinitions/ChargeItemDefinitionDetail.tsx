@@ -150,7 +150,7 @@ export function ChargeItemDefinitionDetail({
     <Page title={chargeItemDefinition.title} hideTitleOnPage={true}>
       <div className="container mx-auto max-w-3xl space-y-6">
         <BackButton
-          to={`/facility/${facilityId}/settings/charge_item_definitions/categories/${chargeItemDefinition.category.slug}`}
+          fallbackUrl={`/facility/${facilityId}/settings/charge_item_definitions/categories/${chargeItemDefinition.category.slug}`}
         >
           <ArrowLeft />
           {t("back")}

@@ -35,11 +35,15 @@ import { BedStatusLegend } from "@/components/Location/BedStatusLegend";
 import query from "@/Utils/request/query";
 import {
   LOCATION_TYPE_BADGE_COLORS,
-  LocationList,
+  LocationRead,
   LocationTypeIcons,
 } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
+import {
+  BedAvailableUnselected,
+  BedUnavailableUnselected,
+} from "@/CAREUI/icons/CustomIcons";
 import useCurrentFacility from "./utils/useCurrentFacility";
 
 interface BedAvailabilityDashboardProps {
@@ -57,7 +61,7 @@ interface WardStats extends BedStats {
   id: string;
   name: string;
   form: string;
-  beds: LocationList[];
+  beds: LocationRead[];
 }
 
 export default function BedAvailabilityDashboard({
@@ -502,15 +506,11 @@ function WardCard({ ward }: WardCardProps) {
                 >
                   <div className="flex items-center gap-3">
                     <div className="relative size-8">
-                      <img
-                        src={
-                          isOccupied
-                            ? "/images/bed-unavailable.svg"
-                            : "/images/bed-available.svg"
-                        }
-                        alt={isOccupied ? t("occupied") : t("available")}
-                        className="w-full h-full"
-                      />
+                      {isOccupied ? (
+                        <BedUnavailableUnselected className="w-full h-full" />
+                      ) : (
+                        <BedAvailableUnselected className="w-full h-full" />
+                      )}
                     </div>
                     <div>
                       <div className="font-medium">{bed.name}</div>

@@ -97,7 +97,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
   const { data: patientData } = useQuery({
     queryKey: ["patient", related_patient],
-    queryFn: query(patientApi.getPatient, {
+    queryFn: query(patientApi.get, {
       pathParams: { id: String(related_patient) },
     }),
     enabled: !!related_patient,

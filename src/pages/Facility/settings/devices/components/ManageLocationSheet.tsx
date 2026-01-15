@@ -27,7 +27,7 @@ import query from "@/Utils/request/query";
 import { DeviceLocationTimelineCard } from "@/pages/Facility/settings/devices/components/DeviceLocationTimelineCard";
 import { DeviceDetail } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 
 interface Props {
   facilityId: string;
@@ -42,7 +42,7 @@ export default function ManageLocationSheet({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [selectedLocation, setSelectedLocation] = useState<LocationList | null>(
+  const [selectedLocation, setSelectedLocation] = useState<LocationRead | null>(
     null,
   );
   const [open, setOpen] = useState(false);

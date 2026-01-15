@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -24,8 +24,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  getExtensionFieldsWithName,
+  getExtensionValue,
+  NamespacedExtensionData,
+} from "@/hooks/useExtensions";
+import useExtensionSchemas from "@/hooks/useExtensionSchemas";
 import { cn } from "@/lib/utils";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import { ExtensionEntityType } from "@/types/extensions/extensions";
 import { DeliveryOrderStatus } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import {
   SUPPLY_DELIVERY_CONDITION_COLORS,
@@ -65,18 +73,36 @@ export function SupplyDeliveryTable({
 }: SupplyDeliveryTableProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { facility } = useCurrentFacility();
+  const { getExtensions } = useExtensionSchemas();
+
+  const informationalCodes = facility?.instance_informational_codes || [];
+
+  // Get extensions and extract field metadata with owner info for table headers
+  const allExtensions = getExtensions(
+    ExtensionEntityType.supply_delivery,
+    "read",
+  );
+
+  // Get field metadata with extension name for reading namespaced values
+  const extensionFields = useMemo(
+    () => getExtensionFieldsWithName(allExtensions),
+    [allExtensions],
+  );
 
   const { mutate: updateDeliveryStatus } = useMutation({
     mutationFn: ({
       deliveryId,
       status,
+      extensions,
     }: {
       deliveryId: string;
       status: SupplyDeliveryStatus;
+      extensions: Record<string, unknown>;
     }) => {
       return mutate(supplyDeliveryApi.updateSupplyDelivery, {
         pathParams: { supplyDeliveryId: deliveryId },
-      })({ status });
+      })({ status, extensions: extensions || {} });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
@@ -135,17 +161,27 @@ export function SupplyDeliveryTable({
           )}
           <TableHead>{t("item")}</TableHead>
           <TableHead>{t("requested_qty")}</TableHead>
+          <TableHead>{t("pack_size")}</TableHead>
+          <TableHead>{t("pack_qty")}</TableHead>
           <TableHead>
             {isRequester ? t("received_qty") : t("dispatched_qty")}
           </TableHead>
           <TableHead>
             {isRequester ? t("received_date") : t("dispatched_date")}
           </TableHead>
-          <TableHead>{t("base")}</TableHead>
+          <TableHead>{t("item_price")}</TableHead>
+          {informationalCodes.map((code) => (
+            <TableHead key={code.code}>{code.display}</TableHead>
+          ))}
           <TableHead>{t("tax")}</TableHead>
           <TableHead>{t("disc")}</TableHead>
           <TableHead>{t("status")}</TableHead>
           <TableHead>{t("condition")}</TableHead>
+          {extensionFields.map((field) => (
+            <TableHead key={`${field.extensionName}-${field.name}`}>
+              {field.label}
+            </TableHead>
+          ))}
           {showActionsColumn && <TableHead>{t("actions")}</TableHead>}
         </TableRow>
       </TableHeader>
@@ -176,6 +212,8 @@ export function SupplyDeliveryTable({
               </div>
             </TableCell>
             <TableCell>{delivery.supply_request?.quantity || "-"}</TableCell>
+            <TableCell>{delivery.supplied_item_pack_size || "-"}</TableCell>
+            <TableCell>{delivery.supplied_item_pack_quantity || "-"}</TableCell>
             <TableCell>{delivery.supplied_item_quantity}</TableCell>
             <TableCell>
               {delivery.created_date &&
@@ -187,10 +225,26 @@ export function SupplyDeliveryTable({
                   delivery.supplied_inventory_item?.product.charge_item_definition?.price_components.filter(
                     (c) =>
                       c.monetary_component_type === MonetaryComponentType.base,
-                  )[0].amount
+                  )[0]?.amount
                 }
               />
             </TableCell>
+            {informationalCodes.map((code) => {
+              const informationalComponent =
+                delivery.supplied_inventory_item?.product.charge_item_definition?.price_components.find(
+                  (c) =>
+                    c.monetary_component_type ===
+                      MonetaryComponentType.informational &&
+                    c.code?.code === code.code,
+                );
+              return (
+                <TableCell key={code.code}>
+                  {informationalComponent?.amount && (
+                    <MonetaryDisplay amount={informationalComponent.amount} />
+                  )}
+                </TableCell>
+              );
+            })}
             <TableCell>
               <MonetaryDisplay
                 factor={
@@ -212,13 +266,11 @@ export function SupplyDeliveryTable({
                       MonetaryComponentType.discount,
                   );
 
-                return discountComponents && discountComponents.length
-                  ? discountComponents.map((component, index) => (
-                      <div key={index}>
-                        <MonetaryDisplay {...component} />
-                      </div>
-                    ))
-                  : "-";
+                return discountComponents?.map((component, index) => (
+                  <div key={index}>
+                    <MonetaryDisplay {...component} />
+                  </div>
+                ));
               })()}
             </TableCell>
             <TableCell>
@@ -239,6 +291,18 @@ export function SupplyDeliveryTable({
                 </Badge>
               )}
             </TableCell>
+            {extensionFields.map((field) => {
+              const value = getExtensionValue(
+                delivery.extensions as NamespacedExtensionData,
+                field.extensionName,
+                field.name,
+              );
+              return (
+                <TableCell key={`${field.extensionName}-${field.name}`}>
+                  {value !== undefined && value !== null ? String(value) : "-"}
+                </TableCell>
+              );
+            })}
             {showActionsColumn && (
               <TableCell>
                 {delivery.status === SupplyDeliveryStatus.in_progress && (
@@ -260,6 +324,7 @@ export function SupplyDeliveryTable({
                             updateDeliveryStatus({
                               deliveryId: delivery.id,
                               status: SupplyDeliveryStatus.entered_in_error,
+                              extensions: delivery.extensions,
                             })
                           }
                           className="w-full flex justify-stretch"
@@ -275,6 +340,7 @@ export function SupplyDeliveryTable({
                             updateDeliveryStatus({
                               deliveryId: delivery.id,
                               status: SupplyDeliveryStatus.abandoned,
+                              extensions: delivery.extensions,
                             })
                           }
                           className="w-full flex justify-stretch"

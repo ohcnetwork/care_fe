@@ -47,6 +47,7 @@ import authApi from "@/types/auth/authApi";
 import { TokenData } from "@/types/otp/otp";
 import otpApi from "@/types/otp/otpApi";
 
+import { clearQueryPersistenceCache } from "@/Utils/request/queryClient";
 import { AuthHero } from "./AuthHero";
 
 interface OtpLoginData {
@@ -245,6 +246,7 @@ const Login = (props: LoginProps) => {
 
     FiltersCache.invalidateAll();
     invalidateAllLocationCaches();
+    clearQueryPersistenceCache();
     try {
       await signIn(validated);
     } catch (error) {

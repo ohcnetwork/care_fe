@@ -5,15 +5,13 @@ import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import {
-  ObservationPlotConfig,
-  ObservationVisualizer,
-} from "@/components/Common/Charts/ObservationChart";
+import { ObservationVisualizer } from "@/components/Common/Charts/ObservationChart";
 import Loading from "@/components/Common/Loading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { ObservationPlotConfig } from "@/types/emr/observation/observation";
 
 type QueryParams = {
   plot: ObservationPlotConfig[number]["id"];
@@ -23,11 +21,7 @@ export const EncounterPlotsTab = () => {
   const { t } = useTranslation();
   const [qParams, setQParams] = useQueryParams<QueryParams>();
 
-  const {
-    patientId,
-    selectedEncounterId: encounterId,
-    canReadClinicalData: canAccess,
-  } = useEncounter();
+  const { patientId, selectedEncounterId: encounterId } = useEncounter();
 
   const plotColumns = useBreakpoints({ default: 1, lg: 2 });
 
@@ -72,7 +66,6 @@ export const EncounterPlotsTab = () => {
               encounterId={encounterId}
               codeGroups={tab.groups}
               gridCols={plotColumns}
-              canAccess={canAccess}
             />
           </TabsContent>
         ))}
