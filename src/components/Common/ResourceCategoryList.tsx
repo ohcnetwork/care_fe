@@ -307,7 +307,7 @@ export function ResourceCategoryList<
       itemSearchConfig?.queryKeyPrefix || "items",
       facilityId,
       qParams.searchCategory,
-      qParams.page ?? 1,
+      qParams.page || 1,
     ],
     queryFn: query.debounced(itemSearchConfig!.listItems.queryFn, {
       pathParams: { facilityId, ...itemSearchConfig?.listItems.pathParams },
