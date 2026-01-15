@@ -91,9 +91,9 @@ export default function UserSummaryTab({
           userData.created_by?.username === authUser.username && (
             <UserColumns
               heading={t("manage_token")}
-              note={
-                t("manage_service_account_token_for") + " " + userData.username
-              }
+              note={t("manage_service_account_token_for", {
+                username: userData.username,
+              })}
               Child={() => <ServiceTokenSection userData={userData} />}
               childProps={userColumnsData}
             />

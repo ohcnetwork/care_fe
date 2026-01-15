@@ -2913,7 +2913,7 @@
   "manage_product_knowledge": "Manage Product Knowledge",
   "manage_products": "Manage your product inventory",
   "manage_roles_and_permissions": "Manage Roles and Permissions",
-  "manage_service_account_token_for": "Manage service account token for",
+  "manage_service_account_token_for": "Manage service account token for {{username}}",
   "manage_service_accounts_description": "Manage service accounts",
   "manage_service_points": "Manage service points",
   "manage_service_requests": "View and manage service requests",
