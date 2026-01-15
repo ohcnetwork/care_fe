@@ -14,6 +14,7 @@ interface EditInvoiceDialogProps {
   facilityId: string;
   chargeItems: ChargeItemRead[];
   onSuccess: () => void;
+  title?: string;
 }
 
 export function EditInvoiceDialog({
@@ -22,13 +23,14 @@ export function EditInvoiceDialog({
   facilityId,
   chargeItems,
   onSuccess,
+  title,
 }: EditInvoiceDialogProps) {
   const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-full sm:max-w-6xl overflow-auto">
         <DialogHeader>
-          <DialogTitle>{t("edit_invoice_items")}</DialogTitle>
+          <DialogTitle>{title || t("edit_invoice_items")}</DialogTitle>
         </DialogHeader>
         <EditInvoiceTable
           facilityId={facilityId}

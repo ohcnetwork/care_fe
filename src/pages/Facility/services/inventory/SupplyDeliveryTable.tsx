@@ -161,8 +161,8 @@ export function SupplyDeliveryTable({
           )}
           <TableHead>{t("item")}</TableHead>
           <TableHead>{t("requested_qty")}</TableHead>
-          <TableHead>{t("pack_qty")}</TableHead>
           <TableHead>{t("pack_size")}</TableHead>
+          <TableHead>{t("pack_qty")}</TableHead>
           <TableHead>
             {isRequester ? t("received_qty") : t("dispatched_qty")}
           </TableHead>
@@ -212,8 +212,8 @@ export function SupplyDeliveryTable({
               </div>
             </TableCell>
             <TableCell>{delivery.supply_request?.quantity || "-"}</TableCell>
-            <TableCell>{delivery.supplied_item_pack_quantity || "-"}</TableCell>
             <TableCell>{delivery.supplied_item_pack_size || "-"}</TableCell>
+            <TableCell>{delivery.supplied_item_pack_quantity || "-"}</TableCell>
             <TableCell>{delivery.supplied_item_quantity}</TableCell>
             <TableCell>
               {delivery.created_date &&

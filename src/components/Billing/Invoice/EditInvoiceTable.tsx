@@ -501,13 +501,7 @@ export function EditInvoiceTable({
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              min="0"
-                              step="1"
-                              className="text-right"
-                            />
+                            <Input type="number" {...field} min="1" step="1" />
                           </FormControl>
                         </FormItem>
                       )}

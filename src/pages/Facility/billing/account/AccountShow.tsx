@@ -586,7 +586,7 @@ export function AccountShow({
             </div>
           </div>
 
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-6 border-b md:border-r border-gray-200">
             <div className="space-y-1">
               <p className="text-sm font-medium text-gray-500">
                 {t("billed_gross")}
@@ -598,6 +598,24 @@ export function AccountShow({
               </div>
               <p className="text-xs text-gray-500">
                 {t("total_billed_before_adjustments")}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex-1 p-6">
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-gray-500">
+                {t("total_billable")}
+              </p>
+              <div className="flex items-end">
+                <p className="text-3xl font-bold text-gray-900">
+                  <MonetaryDisplay
+                    amount={account.total_billable_charge_items}
+                  />
+                </p>
+              </div>
+              <p className="text-xs text-gray-500">
+                {t("total_billable_charge_items_description")}
               </p>
             </div>
           </div>

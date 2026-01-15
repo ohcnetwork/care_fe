@@ -27,12 +27,58 @@ import { ResourceCategoryForm } from "@/components/Common/ResourceCategoryForm";
 import useFilters from "@/hooks/useFilters";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
+  ResourceCategoryParent,
   ResourceCategoryRead,
   ResourceCategoryResourceType,
 } from "@/types/base/resourceCategory/resourceCategory";
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
 import query from "@/Utils/request/query";
 import queryClient from "@/Utils/request/queryClient";
+import { FileIcon } from "lucide-react";
+
+export interface BaseSearchableItem {
+  id: string;
+  slug: string;
+  title?: string;
+  name?: string;
+  category?: ResourceCategoryParent;
+}
+
+function ItemCard<T extends BaseSearchableItem>({
+  item,
+  onItemClick,
+}: {
+  item: T;
+  onItemClick: (item: T) => void;
+}) {
+  const displayTitle = item.title ?? item.name;
+  return (
+    <Card
+      className="hover:shadow-md transition-shadow cursor-pointer"
+      onClick={() => onItemClick(item)}
+    >
+      <CardContent className="py-2 px-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="shrink-0">
+              <div className="p-1 rounded bg-green-100 text-green-600">
+                <FileIcon className="h-6 w-4" />
+              </div>
+            </div>
+            <div className="flex flex-col">
+              <h3 className="text-base font-semibold text-gray-900 truncate">
+                {displayTitle}
+              </h3>
+              <span className="text-xs text-gray-500">
+                {item.category?.title}
+              </span>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 // Category card component for displaying individual categories
 function CategoryCard({
@@ -52,7 +98,7 @@ function CategoryCard({
       <CardContent className="py-2 px-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <div
                 className={`p-1 rounded ${
                   category.has_children
@@ -159,7 +205,23 @@ function ResourceCategoryBreadcrumb({
   );
 }
 
-interface ResourceCategoryListProps {
+interface ItemSearchConfig<T extends BaseSearchableItem> {
+  listItems: {
+    queryFn: {
+      path: string;
+      method: "GET";
+      TRes: { results: T[] };
+    };
+    pathParams?: Record<string, string>;
+    queryParams?: Record<string, unknown>;
+  };
+  searchParamName?: string;
+  queryKeyPrefix: string;
+}
+
+interface ResourceCategoryListProps<
+  T extends BaseSearchableItem = BaseSearchableItem,
+> {
   facilityId: string;
   categorySlug?: string;
   resourceType: ResourceCategoryResourceType;
@@ -171,9 +233,12 @@ interface ResourceCategoryListProps {
   createItemIcon?: "l-plus" | "l-file" | "l-folder-plus";
   allowCategoryCreate?: boolean;
   children?: React.ReactNode;
+  itemSearchConfig?: ItemSearchConfig<T>;
 }
 
-export function ResourceCategoryList({
+export function ResourceCategoryList<
+  T extends BaseSearchableItem = BaseSearchableItem,
+>({
   facilityId,
   categorySlug,
   resourceType,
@@ -185,7 +250,8 @@ export function ResourceCategoryList({
   createItemIcon = "l-plus",
   allowCategoryCreate = false,
   children,
-}: ResourceCategoryListProps) {
+  itemSearchConfig,
+}: ResourceCategoryListProps<T>) {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const { facility } = useCurrentFacility();
@@ -235,7 +301,29 @@ export function ResourceCategoryList({
     },
   );
 
+  const searchParamName = itemSearchConfig?.searchParamName || "title";
+  const { data: itemsResponse, isLoading: isLoadingItems } = useQuery({
+    queryKey: [
+      itemSearchConfig?.queryKeyPrefix || "items",
+      facilityId,
+      qParams.searchCategory,
+      qParams.page ?? 1,
+    ],
+    queryFn: query.debounced(itemSearchConfig!.listItems.queryFn, {
+      pathParams: { facilityId, ...itemSearchConfig?.listItems.pathParams },
+      queryParams: {
+        [searchParamName]: qParams.searchCategory,
+        limit: resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
+        ...itemSearchConfig?.listItems.queryParams,
+      },
+    }),
+    enabled: !!itemSearchConfig && !!qParams.searchCategory,
+  });
+
   const categories = categoriesResponse?.results || [];
+  const items = (itemsResponse?.results || []) as T[];
+  const isSearching = !!qParams.searchCategory;
   const isRootLevel = !categorySlug;
   const isLeafCategory = currentCategory && !currentCategory.has_children;
 
@@ -309,7 +397,7 @@ export function ResourceCategoryList({
             <CareIcon icon="l-search" className="size-5" />
           </span>
           <Input
-            placeholder={t("search_categories")}
+            placeholder={t("search")}
             value={qParams.searchCategory || ""}
             onChange={(e) =>
               updateQuery({ searchCategory: e.target.value || undefined })
@@ -319,9 +407,9 @@ export function ResourceCategoryList({
         </div>
       )}
 
-      {isLoadingCategories ? (
+      {isLoadingCategories || isLoadingItems ? (
         <TableSkeleton count={5} />
-      ) : isRootLevel && categories.length === 0 ? (
+      ) : isRootLevel && categories.length === 0 && items.length === 0 ? (
         <EmptyState
           icon={
             <CareIcon icon="l-folder-open" className="text-primary size-6" />
@@ -338,7 +426,12 @@ export function ResourceCategoryList({
       ) : (
         <>
           <div className="grid gap-2">
-            {/* Show categories only at root level or in parent categories */}
+            {/* Show categories */}
+            {categories.length > 0 && isSearching && (
+              <h3 className="text-sm font-medium text-gray-500 mt-2">
+                {t("categories")}
+              </h3>
+            )}
             {categories.map((category) => (
               <CategoryCard
                 key={category.id}
@@ -347,6 +440,21 @@ export function ResourceCategoryList({
                 onEdit={handleEditCategory}
               />
             ))}
+
+            {items.length > 0 && isSearching && itemSearchConfig && (
+              <>
+                <h3 className="text-sm font-medium text-gray-500 mt-4">
+                  {t("items")}
+                </h3>
+                {items.map((item) => (
+                  <ItemCard
+                    key={item.id}
+                    item={item}
+                    onItemClick={() => navigate(`${basePath}/${item.slug}`)}
+                  />
+                ))}
+              </>
+            )}
           </div>
 
           {/* Render children (like charge item list) only in leaf categories */}
