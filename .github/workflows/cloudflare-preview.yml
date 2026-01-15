@@ -49,20 +49,23 @@ jobs:
 
       - name: Comment PR with preview URL
         uses: actions/github-script@v7
-        if: steps.deploy.outputs.deployment-url
+        if: steps.deploy.outputs.pages-deployment-alias-url
         with:
           script: |
-            const deploymentUrl = '${{ steps.deploy.outputs.deployment-url }}';
+            const deploymentUrl = '${{ steps.deploy.outputs.pages-deployment-alias-url }}';
             const prNumber = context.payload.pull_request.number;
-            const commitSha = context.payload.pull_request.head.sha.substring(0, 7);
+
+            // Generate QR code URL for easy mobile access
+            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(deploymentUrl)}`;
 
             const commentBody = `### 🚀 Preview Deployment Ready!
 
-            | Name | Details |
-            |------|---------|
-            | 🔗 Preview URL | ${deploymentUrl} |
-            | 📝 Commit | \`${commitSha}\` |
-            | 🌐 Environment | \`pr-${prNumber}\` |
+            **🔗 Preview URL:** ${deploymentUrl}
+
+            **📱 Mobile Access:**
+            Scan the QR code below to open the preview on your mobile device.
+
+            ![QR Code](${qrCodeUrl})
 
             ---
             *This preview will be automatically updated when you push new commits to this PR.*`;
