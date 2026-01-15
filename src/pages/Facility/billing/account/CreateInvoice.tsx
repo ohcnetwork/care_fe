@@ -89,9 +89,8 @@ interface CreateInvoicePageProps {
   showHeader?: boolean;
   sourceUrl?: string;
   locationId?: string;
-  patientId?: string;
   disableCreateChargeItems?: boolean;
-  showDispenseNowButton?: boolean;
+  dispenseOrderId?: string;
 }
 
 interface PriceComponentRowProps {
@@ -147,9 +146,8 @@ export function CreateInvoicePage({
   showHeader = true,
   sourceUrl,
   locationId,
-  patientId,
   disableCreateChargeItems = false,
-  showDispenseNowButton = false,
+  dispenseOrderId,
 }: CreateInvoicePageProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -627,13 +625,13 @@ export function CreateInvoicePage({
             >
               <span className="underline">{t("cancel")}</span>
             </BackButton>
-            {showDispenseNowButton && (
+            {dispenseOrderId && (
               <Button
                 type="button"
                 variant="outline_primary"
                 onClick={() =>
                   navigate(
-                    `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation?payment_status=unpaid`,
+                    `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}?status=preparation&payment_status=unpaid`,
                   )
                 }
               >

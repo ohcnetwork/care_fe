@@ -71,6 +71,12 @@ import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/Prod
 import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
+  DispenseOrderBatchResponse,
+  DispenseOrderStatus,
+  extractDispenseOrderFromBatchResponse,
+} from "@/types/emr/dispenseOrder/dispenseOrder";
+import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
+import {
   isGreaterThan,
   isLessThanOrEqual,
   isZero,
@@ -242,6 +248,19 @@ export default function DispenseDrawer({
     });
   }, [productKnowledgeInventoriesMap, fields, form]);
 
+  const { mutate: updateDispenseOrder } = useMutation({
+    mutationFn: ({
+      dispenseOrderId,
+      status,
+    }: {
+      dispenseOrderId: string;
+      status: DispenseOrderStatus;
+    }) =>
+      mutate(dispenseOrderApi.update, {
+        pathParams: { facilityId, id: dispenseOrderId },
+      })({ status }),
+  });
+
   const { mutate: dispense, isPending } = useMutation({
     mutationFn: mutate(batchApi.batchRequest),
     onSuccess: (response) => {
@@ -253,6 +272,17 @@ export default function DispenseDrawer({
       const chargeItems = extractChargeItemsFromBatchResponse(
         response as ChargeItemBatchResponse,
       );
+
+      const dispenseOrder = extractDispenseOrderFromBatchResponse(
+        response as DispenseOrderBatchResponse,
+      );
+
+      if (dispenseOrder) {
+        updateDispenseOrder({
+          dispenseOrderId: dispenseOrder.id,
+          status: DispenseOrderStatus.completed,
+        });
+      }
 
       if (onDispenseComplete) {
         onDispenseComplete(chargeItems);

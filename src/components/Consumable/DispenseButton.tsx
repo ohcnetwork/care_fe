@@ -109,9 +109,9 @@ export const DispenseButton = ({
 
             queryClient.invalidateQueries({
               queryKey: [
-                "medication_dispense",
+                "dispenseOrders",
                 selectedEncounter.patient.id,
-                selectedEncounter.id,
+                facilityId,
               ],
             });
 
@@ -145,7 +145,6 @@ export const DispenseButton = ({
             `/encounter/${selectedEncounter.id}/updates`,
             facilityId,
           )}
-          patientId={selectedEncounter.patient.id}
         />
       )}
     </>
