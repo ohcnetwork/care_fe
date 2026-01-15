@@ -49,7 +49,10 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
 
         // Wait for loading to complete - check for either cards or empty state
         const emptyState = page.getByText("No Organizations Found");
-        const cards = page.getByTestId("org-card");
+        // Use data-slot selector to find organization cards
+        const cards = page.locator('[data-slot="card"]').filter({
+          has: page.getByRole("heading", { level: 3 }),
+        });
 
         // Wait for either cards or empty state to appear (loading skeleton should be gone)
         const firstCard = cards.first();
@@ -61,7 +64,8 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
           const orgName = firstCard.getByRole("heading", { level: 3 });
           await expect(orgName).toBeVisible();
 
-          const badge = firstCard.getByTestId("org-badge");
+          // Verify badge using data-slot selector
+          const badge = firstCard.locator('[data-slot="badge"]');
           await expect(badge).toBeVisible();
 
           const seeDetailsButton = firstCard.getByRole("link", {
@@ -84,7 +88,10 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
 
     // Get initial organization count (if any) - exclude empty state card
     const initialCards = page
-      .getByTestId("org-card")
+      .locator('[data-slot="card"]')
+      .filter({
+        has: page.getByRole("heading", { level: 3 }),
+      })
       .filter({ hasNot: page.getByText("No Organizations Found") });
     const initialCount = await initialCards.count();
 
@@ -121,7 +128,10 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
 
         // Verify filtered results are displayed (should show at least the matching org)
         const filteredCards = page
-          .getByTestId("org-card")
+          .locator('[data-slot="card"]')
+          .filter({
+            has: page.getByRole("heading", { level: 3 }),
+          })
           .filter({ hasNot: page.getByText("No Organizations Found") });
         const filteredCount = await filteredCards.count();
         expect(filteredCount).toBeGreaterThan(0);
@@ -147,7 +157,10 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
     if (initialCount > 0) {
       // Wait for the cards to reappear after clearing search
       const cardsAfterClear = page
-        .getByTestId("org-card")
+        .locator('[data-slot="card"]')
+        .filter({
+          has: page.getByRole("heading", { level: 3 }),
+        })
         .filter({ hasNot: page.getByText("No Organizations Found") });
       await expect(cardsAfterClear.first()).toBeVisible({ timeout: 5000 });
       const countAfterClear = await cardsAfterClear.count();
@@ -158,9 +171,9 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
   test("should expand and collapse organization tree", async ({ page }) => {
     await navigateToOrganizationType(page, "govt");
 
-    // Get the ResizablePanel locator (treePanel) using stable data-testid
+    // Get the ResizablePanel locator (treePanel) - tree is in the first ResizablePanel
     // The tree is hidden on mobile (md:block), so skip test if not visible
-    const treePanel = page.getByTestId("org-tree-panel").first();
+    const treePanel = page.locator('[data-slot="resizable-panel"]').first();
     const isTreeVisible = await treePanel.isVisible().catch(() => false);
 
     if (!isTreeVisible) {
@@ -171,12 +184,16 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
     // Assert tree panel is visible
     await expect(treePanel).toBeVisible();
 
-    // Wait for organizations to load by waiting for at least one tree node to appear
-    const treeNodes = treePanel.getByTestId("org-tree-node");
-    await expect(treeNodes.first()).toBeVisible({ timeout: 10000 });
+    // Wait for organizations to load by waiting for at least one organization name to appear
+    // Tree nodes contain organization names as text
+    const treeContent = treePanel.locator("div.space-y-1");
+    await expect(treeContent.first()).toBeVisible({ timeout: 10000 });
 
     // Check if any organization has children (toggle button exists)
-    const expandButtons = page.getByTestId("org-tree-toggle");
+    // Toggle buttons are icon buttons with chevron icons (ChevronRight or ChevronDown)
+    const expandButtons = treePanel
+      .getByRole("button")
+      .filter({ has: treePanel.locator("svg") });
     const toggleCount = await expandButtons.count();
 
     if (toggleCount === 0) {
@@ -193,15 +210,14 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
     // Assert expand button is visible
     await expect(firstExpandButton).toBeVisible({ timeout: 5000 });
 
-    // Locate child container to verify state changes using stable data-testid
-    // Find the org-tree-node that contains the first expand button, then find its child container
+    // Locate child container to verify state changes
+    // Child container is a div with pl-2 class that appears when expanded
+    // Find the parent node (div.space-y-1) that contains the button, then find its child container
     const nodeWithButton = treePanel
-      .getByTestId("org-tree-node")
+      .locator("div.space-y-1")
       .filter({ has: firstExpandButton })
       .first();
-    const childContainer = nodeWithButton
-      .getByTestId("org-tree-children")
-      .first();
+    const childContainer = nodeWithButton.locator("div.pl-2").first();
 
     // Verify initial collapsed state: child container should not be visible
     await expect(childContainer).not.toBeVisible();
@@ -212,8 +228,9 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
     // Verify expansion by checking for child elements (this confirms the icon changed to expanded state)
     await expect(childContainer).toBeVisible({ timeout: 5000 });
 
-    // Verify at least one child organization node is visible using stable data-testid
-    const childNodes = childContainer.getByTestId("org-tree-node");
+    // Verify at least one child organization node is visible
+    // Child nodes are OrganizationTreeNode components with indentation
+    const childNodes = childContainer.locator("div.space-y-1");
     const childCount = await childNodes.count();
     expect(childCount).toBeGreaterThan(0);
     await expect(childNodes.first()).toBeVisible();
@@ -232,7 +249,10 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
 
     // Check if there are any organization cards (exclude empty state)
     const organizationCards = page
-      .getByTestId("org-card")
+      .locator('[data-slot="card"]')
+      .filter({
+        has: page.getByRole("heading", { level: 3 }),
+      })
       .filter({ hasNot: page.getByText("No Organizations Found") });
     const cardCount = await organizationCards.count();
 
@@ -258,7 +278,7 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
     await seeDetailsLink.click();
     await page.waitForLoadState("domcontentloaded");
     // Wait for breadcrumb to be visible as indicator that child page is loaded
-    const breadcrumb = page.getByTestId("org-breadcrumb");
+    const breadcrumb = page.locator('[data-slot="breadcrumb"]');
     await breadcrumb.waitFor({ state: "visible" });
 
     // Verify we're on a child organization page (URL should have an ID)

@@ -47,7 +47,7 @@ function OrganizationTreeNode({
   });
 
   return (
-    <div className="space-y-1" data-testid="org-tree-node">
+    <div className="space-y-1">
       <div
         className={cn(
           "flex items-center py-1 px-2 rounded-md cursor-pointer hover:bg-gray-100",
@@ -60,7 +60,6 @@ function OrganizationTreeNode({
             variant="ghost"
             size="icon"
             className="h-6 w-6"
-            data-testid="org-tree-toggle"
             onClick={(e) => {
               e.stopPropagation();
               onToggleExpand(organization.id);
@@ -90,7 +89,7 @@ function OrganizationTreeNode({
         </div>
       </div>
       {isExpanded && children?.results && children.results.length > 0 && (
-        <div className="pl-2" data-testid="org-tree-children">
+        <div className="pl-2">
           {children.results.map((child) => (
             <OrganizationTreeNode
               key={child.id}
