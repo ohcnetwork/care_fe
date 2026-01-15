@@ -2628,7 +2628,7 @@ export const DispensedItemsSheet = ({
                           {item.item.product.product_knowledge.name}
                         </TableCell>
                         <TableCell>
-                          {item.charge_item.quantity}{" "}
+                          {item?.charge_item?.quantity}{" "}
                           {
                             item.dosage_instruction?.[0]?.dose_and_rate
                               ?.dose_quantity?.unit?.display
@@ -2654,7 +2654,7 @@ export const DispensedItemsSheet = ({
                         </TableCell>
                         <TableCell>
                           <MonetaryDisplay
-                            amount={item.charge_item.total_price}
+                            amount={item?.charge_item?.total_price}
                           />
                         </TableCell>
                       </TableRow>

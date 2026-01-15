@@ -246,7 +246,7 @@ export default function MedicationDispenseList({
     onSuccess: () => {
       toast.success(t("medication_request_status_updated_successfully"));
       queryClient.invalidateQueries({
-        queryKey: ["medication_requests", patientId],
+        queryKey: ["prescription", patientId, prescriptionId],
       });
     },
     onError: () => {
@@ -517,15 +517,9 @@ export default function MedicationDispenseList({
                       </div>
                       <MedicationTable
                         medications={groupedByDispense[key]}
-                        setDispensedMedicationId={
-                          prescription.status === PrescriptionStatus.active
-                            ? setDispensedMedicationId
-                            : undefined
-                        }
+                        setDispensedMedicationId={setDispensedMedicationId}
                         setMedicationToMarkComplete={
-                          prescription.status === PrescriptionStatus.active
-                            ? setMedicationToMarkComplete
-                            : undefined
+                          setMedicationToMarkComplete
                         }
                       />
                     </div>
@@ -551,16 +545,8 @@ export default function MedicationDispenseList({
                 </h2>
                 <MedicationTable
                   medications={filteredMedications}
-                  setDispensedMedicationId={
-                    prescription.status === PrescriptionStatus.active
-                      ? setDispensedMedicationId
-                      : undefined
-                  }
-                  setMedicationToMarkComplete={
-                    prescription.status === PrescriptionStatus.active
-                      ? setMedicationToMarkComplete
-                      : undefined
-                  }
+                  setDispensedMedicationId={setDispensedMedicationId}
+                  setMedicationToMarkComplete={setMedicationToMarkComplete}
                 />
                 {filteredMedications.length === 0 && (
                   <EmptyState
