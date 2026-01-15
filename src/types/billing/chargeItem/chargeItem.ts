@@ -5,6 +5,7 @@ import {
 } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum ChargeItemStatus {
   planned = "planned",
@@ -73,6 +74,7 @@ export interface ApplyChargeItemDefinitionRequest {
   patient?: string;
   service_resource?: ChargeItemServiceResource;
   service_resource_id?: string;
+  performer_actor?: string;
 }
 
 export interface ApplyMultipleChargeItemDefinitionRequest {
@@ -84,6 +86,7 @@ export interface ChargeItemUpdate extends Omit<
   "service_resource_id" | "service_resource" | "paid_invoice" | "total_price"
 > {
   account?: string;
+  performer_actor?: string;
 }
 
 export interface ChargeItemRead extends ChargeItemBase {
@@ -92,6 +95,7 @@ export interface ChargeItemRead extends ChargeItemBase {
   charge_item_definition: ChargeItemDefinitionBase;
   service_resource: ChargeItemServiceResource;
   service_resource_id?: string;
+  performer_actor?: UserReadMinimal;
   created_date: string;
   modified_date: string;
 }

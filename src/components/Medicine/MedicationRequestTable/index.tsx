@@ -5,6 +5,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import DispenseOrderListSelector from "@/components/Medicine/DispenseOrderListSelector";
 import { AdministrationTab } from "@/components/Medicine/MedicationAdministration/AdministrationTab";
 import { DispenseHistory } from "@/components/Medicine/MedicationRequestTable/DispenseHistory";
 import PrescriptionListSelector from "@/components/Medicine/PrescriptionListSelector";
@@ -63,6 +64,9 @@ export default function MedicationRequestTable() {
     facilityId,
   } = useEncounter();
   const [selectedPrescriptionId, setSelectedPrescriptionId] = useState<
+    string | undefined
+  >();
+  const [selectedDispenseOrderId, setSelectedDispenseOrderId] = useState<
     string | undefined
   >();
 
@@ -164,14 +168,31 @@ export default function MedicationRequestTable() {
           />
         </TabsContent>
 
-        <TabsContent value="dispense_history">
-          <DispenseHistory
-            patientId={patientId}
-            encounterId={encounterId}
-            canAccess={canAccess}
-            facilityId={facilityId}
-            canWrite={canWrite}
-          />
+        <TabsContent
+          value="dispense_history"
+          className="flex-1 flex flex-col overflow-hidden"
+        >
+          <div className="flex flex-1 flex-col lg:flex-row w-full gap-1 h-full">
+            <DispenseOrderListSelector
+              patientId={patientId}
+              facilityId={facilityId}
+              selectedDispenseOrderId={selectedDispenseOrderId}
+              onSelectDispenseOrder={(dispenseOrder) => {
+                setSelectedDispenseOrderId(dispenseOrder?.id);
+              }}
+            />
+
+            <div className="flex-1 w-full h-full overflow-auto">
+              <DispenseHistory
+                patientId={patientId}
+                encounterId={encounterId}
+                canAccess={canAccess}
+                facilityId={facilityId}
+                dispenseOrderId={selectedDispenseOrderId}
+                canWrite={canWrite}
+              />
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

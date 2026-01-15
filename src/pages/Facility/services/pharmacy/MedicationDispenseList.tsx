@@ -200,12 +200,14 @@ function MedicationTable({
 interface Props {
   facilityId: string;
   patientId: string;
+  patientName?: string;
   prescriptionId: string;
 }
 
 export default function MedicationDispenseList({
   facilityId,
   patientId,
+  patientName,
   prescriptionId,
 }: Props) {
   const { t } = useTranslation();
@@ -244,7 +246,7 @@ export default function MedicationDispenseList({
     onSuccess: () => {
       toast.success(t("medication_request_status_updated_successfully"));
       queryClient.invalidateQueries({
-        queryKey: ["medication_requests", patientId],
+        queryKey: ["prescription", patientId, prescriptionId],
       });
     },
     onError: () => {
@@ -373,7 +375,7 @@ export default function MedicationDispenseList({
               className="w-full sm:w-auto border-gray-400 font-semibold"
             >
               <Link
-                href={`/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation`}
+                href={`/facility/${facilityId}/locations/${locationId}/medication_dispense/?patientId=${patientId}&patient_name=${encodeURIComponent(patientName || "")}`}
                 basePath="/"
               >
                 {t("dispenses")}
@@ -515,15 +517,9 @@ export default function MedicationDispenseList({
                       </div>
                       <MedicationTable
                         medications={groupedByDispense[key]}
-                        setDispensedMedicationId={
-                          prescription.status === PrescriptionStatus.active
-                            ? setDispensedMedicationId
-                            : undefined
-                        }
+                        setDispensedMedicationId={setDispensedMedicationId}
                         setMedicationToMarkComplete={
-                          prescription.status === PrescriptionStatus.active
-                            ? setMedicationToMarkComplete
-                            : undefined
+                          setMedicationToMarkComplete
                         }
                       />
                     </div>
@@ -549,16 +545,8 @@ export default function MedicationDispenseList({
                 </h2>
                 <MedicationTable
                   medications={filteredMedications}
-                  setDispensedMedicationId={
-                    prescription.status === PrescriptionStatus.active
-                      ? setDispensedMedicationId
-                      : undefined
-                  }
-                  setMedicationToMarkComplete={
-                    prescription.status === PrescriptionStatus.active
-                      ? setMedicationToMarkComplete
-                      : undefined
-                  }
+                  setDispensedMedicationId={setDispensedMedicationId}
+                  setMedicationToMarkComplete={setMedicationToMarkComplete}
                 />
                 {filteredMedications.length === 0 && (
                   <EmptyState

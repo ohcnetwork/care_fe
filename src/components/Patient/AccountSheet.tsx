@@ -259,6 +259,16 @@ export function AccountSheetButton({
                             <MonetaryDisplay amount={accounts[0].total_paid} />
                           </span>
                         </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">
+                            {t("total_billable")}
+                          </span>
+                          <span className="font-medium">
+                            <MonetaryDisplay
+                              amount={accounts[0].total_billable_charge_items}
+                            />
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
