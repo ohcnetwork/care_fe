@@ -99,6 +99,26 @@ export function isGreaterThan(
 }
 
 /**
+ * Check if value is greater than or equal to comparison
+ */
+export function isGreaterThanOrEqual(
+  value: string | number | Decimal,
+  comparison: string | number | Decimal,
+): boolean {
+  return new Decimal(value).greaterThanOrEqualTo(comparison);
+}
+
+/**
+ * Check if value is less than or equal to comparison
+ */
+export function isLessThanOrEqual(
+  value: string | number | Decimal,
+  comparison: string | number | Decimal,
+): boolean {
+  return new Decimal(value).lessThanOrEqualTo(comparison);
+}
+
+/**
  * Check if value is less than comparison
  */
 export function isLessThan(
