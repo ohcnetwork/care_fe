@@ -95,7 +95,7 @@ const DispenseOrderContent = ({
                         : ""
                     }`
                   : frequency?.display || "-",
-                quantity: dispense.quantity?.toString() || "-",
+                quantity: dispense.quantity || "-",
                 lot_batch_number:
                   dispense.item.product.batch?.lot_number || "-",
                 expiry_date: dispense.item.product?.expiration_date
