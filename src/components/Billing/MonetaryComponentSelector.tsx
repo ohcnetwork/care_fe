@@ -472,7 +472,7 @@ export function MonetaryComponentSelector({
       )}
 
       {/* Trigger and Popover */}
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <Popover open={isOpen} onOpenChange={setIsOpen} modal>
         <PopoverTrigger asChild>{renderTrigger()}</PopoverTrigger>
 
         <PopoverContent
