@@ -192,32 +192,14 @@ function createActivityDataFromRow(row: Record<string, string>): ActivityData {
     }
   }
 
-  let classification: Classification = Classification.laboratory;
-  switch (row.classification.toLowerCase()) {
-    case "laboratory":
-      classification = Classification.laboratory;
-      break;
-    case "imaging":
-      classification = Classification.imaging;
-      break;
-    case "surgical procedure":
-      classification = Classification.surgical_procedure;
-      break;
-    case "counselling":
-      classification = Classification.counselling;
-      break;
-    default:
-      classification = Classification.laboratory;
-      break;
-  }
-
   return {
     title: row.title,
     slug_value: generateHashSlug(normalizeTitle(row.title)),
     description: row.description,
     usage: row.usage || "",
     status: (row.status as Status) || Status.active,
-    classification: classification,
+    classification:
+      (row.classification as Classification) || Classification.laboratory,
     kind: Kind.service_request,
     category: row.category || "laboratory",
     observations: row.observation_slugs
@@ -242,12 +224,12 @@ function createActivityDataFromRow(row: Record<string, string>): ActivityData {
     code: finalCode,
     body_site: bodySite || undefined,
     derived_from_uri: row.derived_from_uri || undefined,
-    /* locations: row.locations
+    locations: row.locations
       ? row.locations
           .split(",")
           .map((s: string) => s.trim())
           .filter((s: string) => s)
-      : [], */
+      : [],
   };
 }
 
