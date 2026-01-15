@@ -15,7 +15,7 @@ export default defineConfig({
   testDir: "./tests",
 
   timeout: 60000,
-  
+
   /* Global expect timeout */
   expect: {
     timeout: 10000,

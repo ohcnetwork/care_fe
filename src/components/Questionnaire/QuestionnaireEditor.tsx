@@ -98,6 +98,7 @@ import {
   Question,
   QuestionType,
   SUPPORTED_QUESTION_TYPES,
+  TemplateConfig,
 } from "@/types/questionnaire/question";
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
@@ -3191,6 +3192,84 @@ function QuestionEditor({
               </Button>
             </div>
           </div>
+
+          {(question.type === "string" || question.type === "text") && (
+            <div className="space-y-4">
+              <Label>{t("templates")}</Label>
+              <div className="space-y-2">
+                {question.templates?.map((template, idx) => (
+                  <div
+                    key={idx}
+                    className="flex flex-col gap-2 border border-gray-300 rounded-lg p-4"
+                  >
+                    <div className="flex flex-row items-center justify-between">
+                      <span className="text-sm text-gray-500">
+                        {t("template")} {idx + 1}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="self-end"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const newTemplates = [...(question.templates || [])];
+                          newTemplates.splice(idx, 1);
+                          updateField("templates", newTemplates);
+                        }}
+                      >
+                        <CareIcon icon="l-times" className="size-4" />
+                      </Button>
+                    </div>
+                    <Label>{t("name")}</Label>
+                    <Input
+                      value={template.name}
+                      onChange={(e) => {
+                        e.preventDefault();
+                        const newTemplates = [...(question.templates || [])];
+                        newTemplates[idx] = {
+                          ...template,
+                          name: e.target.value,
+                        };
+                        updateField("templates", newTemplates);
+                      }}
+                    />
+                    <Label>{t("content")}</Label>
+                    <Textarea
+                      value={template.content}
+                      onChange={(e) => {
+                        e.preventDefault();
+                        const newTemplates = [...(question.templates || [])];
+                        newTemplates[idx] = {
+                          ...template,
+                          content: e.target.value,
+                        };
+                        updateField("templates", newTemplates);
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const newTemplate: TemplateConfig = {
+                    name: "",
+                    content: "",
+                  };
+                  updateField("templates", [
+                    ...(question.templates || []),
+                    newTemplate,
+                  ]);
+                }}
+              >
+                <CareIcon icon="l-plus" className="mr-2 size-4" />
+                {t("add_template")}
+              </Button>
+            </div>
+          )}
         </div>
       </CollapsibleContent>
     </Collapsible>
