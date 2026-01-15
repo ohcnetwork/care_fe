@@ -311,23 +311,6 @@ export function SmartExternalDeliveryRow({
         )}
       </TableCell>
 
-      {/* Pack Quantity */}
-      <TableCell className="align-top p-2">
-        <Input
-          type="number"
-          min={1}
-          value={packQuantity || ""}
-          placeholder="0"
-          onChange={(e) => {
-            const value = parseInt(e.target.value) || undefined;
-            setField("supplied_item_pack_quantity", value);
-            markAsEdited();
-          }}
-          disabled={!productKnowledge}
-          className="w-[7rem]"
-        />
-      </TableCell>
-
       {/* Pack Size */}
       <TableCell className="align-top p-2">
         <Input
@@ -342,6 +325,23 @@ export function SmartExternalDeliveryRow({
           }}
           disabled={!productKnowledge}
           className="w-[5rem]"
+        />
+      </TableCell>
+
+      {/* Pack Quantity */}
+      <TableCell className="align-top p-2">
+        <Input
+          type="number"
+          min={1}
+          value={packQuantity || ""}
+          placeholder="0"
+          onChange={(e) => {
+            const value = parseInt(e.target.value) || undefined;
+            setField("supplied_item_pack_quantity", value);
+            markAsEdited();
+          }}
+          disabled={!productKnowledge}
+          className="w-[7rem]"
         />
       </TableCell>
 

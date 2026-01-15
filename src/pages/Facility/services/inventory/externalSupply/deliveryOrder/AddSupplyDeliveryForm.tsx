@@ -648,11 +648,11 @@ export function AddSupplyDeliveryForm({
                                 <TableHead className="min-w-[140px] text-xs font-semibold text-center">
                                   {t("category")}
                                 </TableHead>
-                                <TableHead className="w-[7rem] text-xs font-semibold">
-                                  {t("pack_qty")}
-                                </TableHead>
                                 <TableHead className="w-[5rem] text-xs font-semibold">
                                   {t("pack_size")}
+                                </TableHead>
+                                <TableHead className="w-[7rem] text-xs font-semibold">
+                                  {t("pack_qty")}
                                 </TableHead>
                                 <TableHead className="w-[8rem] text-xs font-semibold">
                                   {t("qty")}
