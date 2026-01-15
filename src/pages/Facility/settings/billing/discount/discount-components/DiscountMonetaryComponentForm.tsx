@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -52,9 +52,6 @@ export function DiscountMonetaryComponentForm({
   onSubmit,
 }: DiscountMonetaryComponentFormProps) {
   const { t } = useTranslation();
-  const [valueType, setValueType] = useState<"factor" | "amount">(
-    defaultValues?.factor != null ? "factor" : "amount",
-  );
 
   const formSchema = useMemo(
     () =>
@@ -66,21 +63,24 @@ export function DiscountMonetaryComponentForm({
           amount: zodDecimal({ min: 0 }).optional().nullable(),
           title: z.string().min(1, { message: t("field_required") }),
           conditions: z.array(conditionSchema).default([]),
+          _value_type: z.enum(["factor", "amount"]),
         })
-        .refine((data) => data.factor != null || data.amount != null, {
-          message: t("either_amount_or_factor_required"),
-          path: ["factor", "amount"],
-        })
-        .refine(
-          (data) => {
-            // If there's a code, it must have a display value
-            return data.code == null || data.code.display.length > 0;
-          },
-          {
-            message: t("display_text_is_required_for_custom_codes"),
-            path: ["code"],
-          },
-        ),
+        .superRefine((data, ctx) => {
+          if (data.factor == null && data.amount == null) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("either_amount_or_factor_required"),
+              path: ["_value_type"],
+            });
+          }
+          if (data.code != null && data.code.display.length === 0) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("display_text_is_required_for_custom_codes"),
+              path: ["code"],
+            });
+          }
+        }),
     [t],
   );
 
@@ -112,11 +112,12 @@ export function DiscountMonetaryComponentForm({
             condition.operation,
           ),
         })) || [],
+      _value_type: defaultValues?.factor != null ? "factor" : "amount",
     },
   });
 
   const handleValueTypeChange = (value: "factor" | "amount") => {
-    setValueType(value);
+    form.setValue("_value_type", value, { shouldDirty: true });
     if (value === "factor") {
       form.setValue("amount", null);
     } else {
@@ -124,7 +125,6 @@ export function DiscountMonetaryComponentForm({
     }
   };
 
-  // Handle condition changes
   const handleConditionsChange = (conditions: ConditionForm[]) => {
     form.setValue("conditions", conditions, {
       shouldValidate: true,
@@ -153,103 +153,101 @@ export function DiscountMonetaryComponentForm({
           )}
         />
 
-        <FormItem>
-          <FormLabel>{t("discount_factor_or_amount")}</FormLabel>
-          <div className="flex gap-1">
-            <div className="flex-2">
-              {valueType === "factor" ? (
-                <FormField
-                  control={form.control}
-                  name="factor"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <div className="relative">
-                          <Input
-                            type="number"
-                            min="0"
-                            max="100"
-                            step="0.01"
-                            {...field}
-                            value={field.value || ""}
-                            onChange={(e) =>
-                              field.onChange(e.target.value || null)
-                            }
-                            className="pr-8"
-                          />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
-                            %
-                          </span>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              ) : (
-                <FormField
-                  control={form.control}
-                  name="amount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm">
-                            ₹
-                          </span>
-                          <Input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(e.target.value || null)
-                            }
-                            value={field.value === null ? "" : field.value}
-                            className="pl-8"
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-            </div>
-            <FormField
-              control={form.control}
-              name="factor"
-              render={({ field: _field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Select
-                      value={valueType}
-                      onValueChange={handleValueTypeChange}
-                    >
-                      <SelectTrigger className="flex-1" ref={_field.ref}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="factor">{t("factor")}</SelectItem>
-                        <SelectItem value="amount">{t("amount")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <FormDescription>
-            {valueType === "factor"
-              ? t("discount_factor_description", {
-                  min: 0,
-                  max: 100,
-                })
-              : t("discount_amount_description")}
-          </FormDescription>
-          <FormMessage />
-        </FormItem>
+        <FormField
+          control={form.control}
+          name="_value_type"
+          render={({ field }) => {
+            const valueType = form.watch("_value_type");
+            return (
+              <FormItem>
+                <FormLabel>{t("discount_factor_or_amount")}</FormLabel>
+                <div className="flex gap-1">
+                  <div className="flex-2">
+                    {field.value === "factor" ? (
+                      <FormField
+                        control={form.control}
+                        name="factor"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <div className="relative">
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  {...field}
+                                  value={field.value || ""}
+                                  onChange={(e) =>
+                                    field.onChange(e.target.value || null)
+                                  }
+                                  className="pr-8"
+                                />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
+                                  %
+                                </span>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ) : (
+                      <FormField
+                        control={form.control}
+                        name="amount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm">
+                                  ₹
+                                </span>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  {...field}
+                                  onChange={(e) =>
+                                    field.onChange(e.target.value || null)
+                                  }
+                                  value={
+                                    field.value === null ? "" : field.value
+                                  }
+                                  className="pl-8"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                  </div>
+                  <Select
+                    value={valueType}
+                    onValueChange={handleValueTypeChange}
+                  >
+                    <SelectTrigger className="flex-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="factor">{t("factor")}</SelectItem>
+                      <SelectItem value="amount">{t("amount")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <FormDescription>
+                  {valueType === "factor"
+                    ? t("discount_factor_description", {
+                        min: 0,
+                        max: 100,
+                      })
+                    : t("discount_amount_description")}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
 
         <div className="space-y-2">
           <FormField
@@ -307,7 +305,6 @@ export function DiscountMonetaryComponentForm({
               }
               availableMetrics={availableMetrics}
               onChange={handleConditionsChange}
-              facilityId={facility?.id}
             />
           </CardContent>
         </Card>
