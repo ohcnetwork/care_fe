@@ -143,6 +143,13 @@ export function isPositive(value: string | number | Decimal): boolean {
 }
 
 /**
+ * Check if value is negative (< 0)
+ */
+export function isNegative(value: string | number | Decimal): boolean {
+  return new Decimal(value).isNegative() && !new Decimal(value).isZero();
+}
+
+/**
  * Convert to number (use sparingly, only for display/charting)
  */
 export function toNumber(value: string | number | Decimal): number {
@@ -170,17 +177,15 @@ export const zodDecimal = (options?: {
   max?: number;
   message?: string;
 }) =>
-  z.coerce
-    .number({
-      invalid_type_error: options?.message || "Must be a valid number",
-    })
-    .refine((val) => !isNaN(val), {
+  z
+    .string()
+    .refine((val) => !isNaN(Number(val)) && val.trim() !== "", {
       message: options?.message || "Must be a valid number",
     })
-    .refine((val) => options?.min === undefined || val >= options.min, {
+    .refine((val) => options?.min === undefined || Number(val) >= options.min, {
       message: `Must be at least ${options?.min}`,
     })
-    .refine((val) => options?.max === undefined || val <= options.max, {
+    .refine((val) => options?.max === undefined || Number(val) <= options.max, {
       message: `Must be at most ${options?.max}`,
     })
     .transform((val) => roundForApi(val));

@@ -18,6 +18,7 @@ import Loading from "@/components/Common/Loading";
 import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { EmptyState } from "@/components/ui/empty-state";
 
+import { roundForDisplay } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 import { InvoiceStatus } from "@/types/billing/invoice/invoice";
@@ -165,7 +166,9 @@ export function DispenseHistory({
                     {medication.item.product.product_knowledge.name}
                   </TableCell>
                   <TableCell className="text-gray-950">
-                    {dosage ? `${dosage.value} ${dosage.unit.display}` : "-"}
+                    {dosage
+                      ? `${roundForDisplay(dosage.value)} ${dosage.unit.display}`
+                      : "-"}
                   </TableCell>
                   <TableCell className="text-gray-950">
                     {instruction?.as_needed_boolean
@@ -177,7 +180,9 @@ export function DispenseHistory({
                       : frequency?.display || "-"}
                   </TableCell>
                   <TableCell className="text-gray-950 font-medium">
-                    {medication.quantity || "-"}
+                    {medication.quantity
+                      ? roundForDisplay(medication.quantity)
+                      : "-"}
                   </TableCell>
                   <TableCell className="text-gray-950 font-medium">
                     {medication.location.name}

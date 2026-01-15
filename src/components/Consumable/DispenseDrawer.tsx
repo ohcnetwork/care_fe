@@ -70,6 +70,13 @@ import {
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import {
+  isGreaterThan,
+  isLessThanOrEqual,
+  isZero,
+  roundForDisplay,
+  zodDecimal,
+} from "@/Utils/decimal";
 
 interface SelectedLocation {
   id: string;
@@ -89,10 +96,10 @@ interface Props {
 interface FormItemType {
   reference_id: string;
   productKnowledge: ProductKnowledgeBase;
-  quantity: number;
+  quantity: string;
   lots: Array<{
     selectedInventoryId: string;
-    quantity: number;
+    quantity: string;
   }>;
 }
 
@@ -102,11 +109,11 @@ const createFormSchema = () =>
       z.object({
         reference_id: z.string().uuid(),
         productKnowledge: z.any(),
-        quantity: z.number().min(1),
+        quantity: zodDecimal({ min: 1 }),
         lots: z.array(
           z.object({
             selectedInventoryId: z.string(),
-            quantity: z.number().min(1),
+            quantity: zodDecimal({ min: 1 }),
           }),
         ),
       }),
@@ -228,7 +235,7 @@ export default function DispenseDrawer({
         form.setValue(`items.${index}.lots`, [
           {
             selectedInventoryId: inventories[0].id,
-            quantity: 1,
+            quantity: "1",
           },
         ]);
       }
@@ -338,7 +345,7 @@ export default function DispenseDrawer({
 
       const itemsWithZeroQuantity = itemsInStock.filter((item) => {
         return item.lots.some(
-          (lot) => lot.selectedInventoryId.length > 0 && lot.quantity === 0,
+          (lot) => lot.selectedInventoryId.length > 0 && isZero(lot.quantity),
         );
       });
 
@@ -359,18 +366,19 @@ export default function DispenseDrawer({
           productKnowledgeInventoriesMap[item.productKnowledge.id] || [];
 
         for (const lot of item.lots) {
-          if (!lot.selectedInventoryId || lot.quantity <= 0) continue;
+          if (!lot.selectedInventoryId || isLessThanOrEqual(lot.quantity, 0))
+            continue;
 
           const inventory = inventoryList.find(
             (inv) => inv.id === lot.selectedInventoryId,
           );
-          if (inventory && lot.quantity > parseFloat(inventory.net_content)) {
+          if (inventory && isGreaterThan(lot.quantity, inventory.net_content)) {
             toast.error(
               t("quantity_exceeds_available_stock", {
                 item: item.productKnowledge.name,
                 lot: inventory.product.batch?.lot_number || "N/A",
                 requested: lot.quantity,
-                available: parseFloat(inventory.net_content),
+                available: roundForDisplay(inventory.net_content),
               }),
             );
             hasErrors = true;
@@ -422,7 +430,7 @@ export default function DispenseDrawer({
             location: currentLocation.id,
             authorizing_request: null,
             item: selectedInventory.id,
-            quantity: String(lot.quantity),
+            quantity: lot.quantity,
             days_supply: "1",
             fully_dispensed: true,
             create_dispense_order: {
@@ -562,11 +570,11 @@ export default function DispenseDrawer({
                           append({
                             reference_id: crypto.randomUUID(),
                             productKnowledge: product,
-                            quantity: 1,
+                            quantity: "1",
                             lots: [
                               {
                                 selectedInventoryId: "",
-                                quantity: 1,
+                                quantity: "1",
                               },
                             ],
                           });
@@ -855,11 +863,11 @@ export default function DispenseDrawer({
                           append({
                             reference_id: crypto.randomUUID(),
                             productKnowledge: product,
-                            quantity: 1,
+                            quantity: "1",
                             lots: [
                               {
                                 selectedInventoryId: "",
-                                quantity: 1,
+                                quantity: "1",
                               },
                             ],
                           });

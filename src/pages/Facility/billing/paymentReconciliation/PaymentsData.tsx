@@ -35,7 +35,6 @@ import useFilters from "@/hooks/useFilters";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
-import query from "@/Utils/request/query";
 import {
   PAYMENT_RECONCILIATION_STATUS_COLORS,
   PaymentReconciliationPaymentMethod,
@@ -44,6 +43,8 @@ import {
   PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import { multiply } from "@/Utils/decimal";
+import query from "@/Utils/request/query";
 
 const typeMap: Record<PaymentReconciliationType, string> = {
   payment: "Payment",
@@ -281,10 +282,9 @@ export default function PaymentsData({
                   <TableCell>{paymentmethodMap[payment.method]}</TableCell>
                   <TableCell>
                     <MonetaryDisplay
-                      amount={String(
-                        payment.is_credit_note
-                          ? -payment.amount
-                          : payment.amount,
+                      amount={multiply(
+                        payment.amount,
+                        payment.is_credit_note ? -1 : 1,
                       )}
                     />
                   </TableCell>

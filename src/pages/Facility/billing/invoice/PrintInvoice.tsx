@@ -34,6 +34,7 @@ import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import { getPartialId } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import { roundForDisplay } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 
 type PrintInvoiceProps = {
@@ -117,7 +118,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
             <div className="text-left">
               <h1 className="text-2xl font-medium">{facility.name}</h1>
               {facility.address && (
-                <div className="text-gray-500 whitespace-pre-wrap break-words text-sm">
+                <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
                   {facility.address}
                   {facility.phone_number && (
                     <p className="text-gray-500 text-sm">
@@ -280,7 +281,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                         <TableCell
                           className={cn(tableCellClass, "text-center")}
                         >
-                          {item.quantity}
+                          {roundForDisplay(item.quantity)}
                         </TableCell>
                         <TableCell className={cn(tableCellClass, "text-right")}>
                           <div className="flex flex-col items-end gap-0.5">

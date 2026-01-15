@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 
 import { MonetaryComponent } from "@/types/base/monetaryComponent/monetaryComponent";
+import { roundForDisplay } from "@/Utils/decimal";
+import Decimal from "decimal.js";
 
 // Currency configuration
 export const CURRENCY_CODE = "INR";
@@ -37,10 +39,14 @@ function MonetaryDisplay({
   fallback,
   hideCurrency = false,
   ...props
-}: Pick<MonetaryComponent, "amount" | "factor"> & {
+}: {
+  factor?: number;
+  amount?: string | number | Decimal;
   fallback?: React.ReactNode;
   hideCurrency?: boolean;
 } & React.ComponentProps<"data">) {
+  amount &&= roundForDisplay(amount);
+
   if ((amount ?? factor) == null) {
     return fallback ?? "-";
   }

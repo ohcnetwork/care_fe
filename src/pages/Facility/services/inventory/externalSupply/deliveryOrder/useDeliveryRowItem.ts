@@ -18,6 +18,7 @@ import { ProductRead } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
 import query from "@/Utils/request/query";
 
+import { roundForApi } from "@/Utils/decimal";
 import {
   SupplyDeliveryFormValues,
   SupplyDeliveryItemValues,
@@ -49,7 +50,7 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
     supplied_item: suppliedItem,
     batch_number: batchNumber,
     unit_price: unitPrice,
-    supplied_item_quantity: quantity = 1,
+    supplied_item_quantity: quantity = "1",
     supplied_item_pack_quantity: packQuantity,
     supplied_item_pack_size: packSize,
     tax_components: taxComponents,
@@ -248,7 +249,7 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
   useEffect(() => {
     if (packQuantity && packSize && packQuantity > 0 && packSize > 0) {
       const calculatedQuantity = packQuantity * packSize;
-      setField("supplied_item_quantity", calculatedQuantity);
+      setField("supplied_item_quantity", roundForApi(calculatedQuantity));
     }
   }, [packQuantity, packSize, setField]);
 

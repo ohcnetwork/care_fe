@@ -60,6 +60,7 @@ import {
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import { UserReadMinimal } from "@/types/user/user";
+import { zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
@@ -92,18 +93,8 @@ const priceComponentSchema = z.object({
 });
 
 const chargeItemBaseSchema = z.object({
-  baseAmount: z
-    .string()
-    .refine(
-      (val) => !isNaN(parseFloat(val)) && parseFloat(val) >= 0,
-      "Base amount must be a positive number",
-    ),
-  quantity: z
-    .string()
-    .refine(
-      (val) => !isNaN(parseFloat(val)) && parseFloat(val) >= 0,
-      "Quantity must be a positive number",
-    ),
+  baseAmount: zodDecimal({ min: 0 }),
+  quantity: zodDecimal({ min: 0 }),
   taxComponents: z.array(priceComponentSchema).optional(),
   discounts: z.array(priceComponentSchema).optional(),
 });
@@ -203,8 +194,8 @@ export function EditInvoiceTable({
           title: item.title,
           status: item.status as ChargeItemStatus,
           description: item.description || "",
-          baseAmount: String(baseComponent?.amount || "0"),
-          quantity: String(item.quantity),
+          baseAmount: baseComponent?.amount || "0",
+          quantity: item.quantity,
           taxComponents,
           discounts: discounts,
         };

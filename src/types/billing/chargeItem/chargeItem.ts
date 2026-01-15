@@ -91,7 +91,6 @@ export interface ChargeItemUpdate extends Omit<
 
 export interface ChargeItemRead extends ChargeItemBase {
   total_price_components: MonetaryComponent[];
-  total_price: string;
   charge_item_definition: ChargeItemDefinitionBase;
   service_resource: ChargeItemServiceResource;
   service_resource_id?: string;

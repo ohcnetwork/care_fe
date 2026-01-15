@@ -63,6 +63,7 @@ import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import { roundForDisplay } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./AddChargeItemsBillingSheet";
 import EditChargeItemSheet from "./EditChargeItemSheet";
@@ -258,7 +259,7 @@ export function ChargeItemsTable({
           <Table className="rounded-lg border shadow-sm w-full bg-white">
             <TableHeader className="bg-gray-100">
               <TableRow className="border-b">
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-[40px]"></TableHead>
+                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10"></TableHead>
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
                   {t("item")}
                 </TableHead>
@@ -347,7 +348,7 @@ export function ChargeItemsTable({
                       <MonetaryDisplay amount={baseAmount} />
                     </TableCell>
                     <TableCell className="border-x p-3 text-gray-950">
-                      {item.quantity}
+                      {roundForDisplay(item.quantity)}
                     </TableCell>
                     <TableCell className="border-x p-3 text-gray-950 font-medium">
                       <MonetaryDisplay amount={item.total_price} />

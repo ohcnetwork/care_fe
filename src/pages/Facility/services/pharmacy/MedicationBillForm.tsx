@@ -124,9 +124,21 @@ import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
+import {
+  add,
+  divide,
+  isGreaterThan,
+  isLessThanOrEqual,
+  isZero,
+  multiply,
+  roundForApi,
+  roundForDisplay,
+  zodDecimal,
+} from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import Decimal from "decimal.js";
 
 interface GroupedPrescription {
   [key: string]: {
@@ -139,20 +151,20 @@ interface Props {
   patientId: string;
 }
 
-function convertDurationToDays(value: number, unit: string): number {
+function convertDurationToDays(value: string, unit: string) {
   switch (unit) {
     case "h":
-      return Math.round(value / 24);
+      return divide(value, 24).round();
     case "d":
-      return value;
+      return new Decimal(value);
     case "wk":
-      return value * 7;
+      return multiply(value, 7);
     case "mo":
-      return value * 30; // approximating month as 30 days
+      return multiply(value, 30); // approximating month as 30 days
     case "a":
-      return value * 365; // approximating year as 365 days
+      return multiply(value, 365); // approximating year as 365 days
     default:
-      return value;
+      return new Decimal(value);
   }
 }
 
@@ -163,14 +175,14 @@ const formSchema = z.object({
       medication: z.any(),
       productKnowledge: z.any(),
       isSelected: z.boolean(),
-      daysSupply: z.number().min(1),
+      daysSupply: zodDecimal({ min: 1 }),
       fully_dispensed: z.boolean(),
       dosageInstructions: z.any().optional(),
       lots: z
         .array(
           z.object({
             selectedInventoryId: z.string().uuid(),
-            quantity: z.number().min(0),
+            quantity: zodDecimal({ min: 0 }),
           }),
         )
         .min(1),
@@ -235,7 +247,7 @@ const AddMedicationSheet = ({
           dose_and_rate: {
             type: "ordered",
             dose_quantity: {
-              value: 0,
+              value: "0",
               unit: selectedProduct.base_unit,
             },
           },
@@ -495,8 +507,10 @@ const AddMedicationSheet = ({
                               type="number"
                               min={0}
                               value={
-                                localDosageInstruction.timing.repeat
-                                  .bounds_duration?.value == 0
+                                isZero(
+                                  localDosageInstruction.timing.repeat
+                                    .bounds_duration.value,
+                                )
                                   ? ""
                                   : localDosageInstruction.timing.repeat
                                       .bounds_duration?.value
@@ -510,7 +524,7 @@ const AddMedicationSheet = ({
                                     repeat: {
                                       ...localDosageInstruction.timing.repeat,
                                       bounds_duration: {
-                                        value: Number(value),
+                                        value,
                                         unit: localDosageInstruction.timing
                                           .repeat.bounds_duration.unit,
                                       },
@@ -876,11 +890,13 @@ export default function MedicationBillForm({ patientId }: Props) {
             productKnowledge: medication.requested_product,
             medication,
             isSelected: true,
-            daysSupply: convertDurationToDays(
-              medication.dosage_instruction[0]?.timing?.repeat?.bounds_duration
-                ?.value || 0,
-              medication.dosage_instruction[0]?.timing?.repeat?.bounds_duration
-                ?.unit || "",
+            daysSupply: roundForApi(
+              convertDurationToDays(
+                medication.dosage_instruction[0]?.timing?.repeat
+                  ?.bounds_duration?.value || "0",
+                medication.dosage_instruction[0]?.timing?.repeat
+                  ?.bounds_duration?.unit || "",
+              ),
             ),
             fully_dispensed: true,
             dosageInstructions: medication.dosage_instruction,
@@ -902,16 +918,16 @@ export default function MedicationBillForm({ patientId }: Props) {
   function computeInitialQuantity(medication: MedicationRequestRead) {
     const instruction = medication.dosage_instruction[0];
     if (!instruction) {
-      return 0;
+      return "0";
     }
 
     if (instruction.as_needed_boolean) {
-      return 0;
+      return "0";
     }
 
     const doseValue = instruction.dose_and_rate?.dose_quantity?.value;
     if (!doseValue) {
-      return 0;
+      return "0";
     }
 
     const repeat = instruction.timing?.repeat;
@@ -919,24 +935,29 @@ export default function MedicationBillForm({ patientId }: Props) {
       return doseValue;
     }
 
-    const convertToHours = (value: number, unit: string) => {
+    const convertToHours = (value: string, unit: string) => {
       switch (unit) {
         case "h":
           return value;
         case "d":
-          return value * 24;
+          return multiply(value, 24);
         case "wk":
-          return value * 24 * 7;
+          return multiply(value, 24 * 7);
         case "mo":
-          return value * 24 * 30;
+          return multiply(value, 24 * 30);
         case "a":
-          return value * 24 * 365;
+          return multiply(value, 24 * 365);
         default:
           return 0;
       }
     };
 
-    const { frequency = 1, period = 1, period_unit, bounds_duration } = repeat;
+    const {
+      frequency = 1,
+      period = "1",
+      period_unit,
+      bounds_duration,
+    } = repeat;
 
     const totalDurationInHours = convertToHours(
       bounds_duration.value,
@@ -948,22 +969,25 @@ export default function MedicationBillForm({ patientId }: Props) {
       return doseValue;
     }
 
-    const doseIntervalInHours = periodInHours / frequency;
+    const doseIntervalInHours = divide(periodInHours, frequency);
 
-    if (doseIntervalInHours === 0) {
+    if (isZero(doseIntervalInHours)) {
       return doseValue;
     }
 
-    const numberOfDoses = Math.ceil(totalDurationInHours / doseIntervalInHours);
+    const numberOfDoses = divide(
+      totalDurationInHours,
+      doseIntervalInHours,
+    ).ceil();
 
     if (instruction.dose_and_rate?.dose_range) {
-      const lowDose = instruction.dose_and_rate.dose_range.low.value || 0;
-      const highDose = instruction.dose_and_rate.dose_range.high.value || 0;
-      const avgDose = (lowDose + highDose) / 2;
-      return Number((avgDose * numberOfDoses).toFixed(2));
+      const lowDose = instruction.dose_and_rate.dose_range.low.value || "0";
+      const highDose = instruction.dose_and_rate.dose_range.high.value || "0";
+      const avgDose = divide(add(lowDose, highDose), 2);
+      return roundForDisplay(multiply(avgDose, numberOfDoses));
     }
 
-    return Number((doseValue * numberOfDoses).toFixed(2));
+    return roundForDisplay(multiply(doseValue, numberOfDoses));
   }
 
   const { mutate: dispense, isPending } = useMutation({
@@ -1050,7 +1074,7 @@ export default function MedicationBillForm({ patientId }: Props) {
       return item.lots.every(
         (lot) =>
           !lot.quantity ||
-          lot.quantity === 0 ||
+          isZero(lot.quantity) ||
           !lot.selectedInventoryId ||
           !lot.selectedInventoryId.length,
       );
@@ -1067,8 +1091,8 @@ export default function MedicationBillForm({ patientId }: Props) {
       return;
     }
 
-    const medsWithInvalidDaysSupply = selectedItems.filter(
-      (item) => item.daysSupply <= 0,
+    const medsWithInvalidDaysSupply = selectedItems.filter((item) =>
+      isLessThanOrEqual(item.daysSupply, 0),
     );
 
     if (medsWithInvalidDaysSupply.length > 0) {
@@ -1100,8 +1124,8 @@ export default function MedicationBillForm({ patientId }: Props) {
     const medsWithInsufficientStock: {
       name: string;
       lot: string;
-      requested: number;
-      available: number;
+      requested: string;
+      available: string;
     }[] = [];
     selectedItems.forEach((item) => {
       const productKnowledge = item.productKnowledge;
@@ -1114,12 +1138,12 @@ export default function MedicationBillForm({ patientId }: Props) {
         const inventory = inventoryList.find(
           (inv) => inv.id === lot.selectedInventoryId,
         );
-        if (inventory && lot.quantity > parseFloat(inventory.net_content)) {
+        if (inventory && isGreaterThan(lot.quantity, inventory.net_content)) {
           medsWithInsufficientStock.push({
             name: effectiveProductKnowledge.name,
             lot: inventory.product.batch?.lot_number || "N/A",
             requested: lot.quantity,
-            available: parseFloat(inventory.net_content),
+            available: roundForDisplay(inventory.net_content),
           });
         }
       });
@@ -1178,8 +1202,8 @@ export default function MedicationBillForm({ patientId }: Props) {
           location: locationId,
           authorizing_request: medication?.id ?? null,
           item: selectedInventory.id,
-          quantity: String(lot.quantity),
-          days_supply: String(item.daysSupply),
+          quantity: lot.quantity,
+          days_supply: item.daysSupply,
           fully_dispensed: item.fully_dispensed,
           create_dispense_order: {
             alternate_identifier: alternateIdentifier,
@@ -1300,7 +1324,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                       className={cn(
                         "w-12",
                         tableHeaderClass,
-                        "rounded-l-lg border-y-1 border-l-1 border-gray-200 rounded-b-none border-b-0",
+                        "rounded-l-lg border-y border-l border-gray-200 rounded-b-none border-b-0",
                       )}
                     >
                       <FormField
@@ -1332,7 +1356,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                     <TableHead
                       className={cn(
                         tableHeaderClass,
-                        "border-y-1 border-r-none border-gray-200 rounded-b-none border-b-0",
+                        "border-y border-r-none border-gray-200 rounded-b-none border-b-0",
                       )}
                     >
                       {t("medicine")}
@@ -2216,11 +2240,13 @@ export default function MedicationBillForm({ patientId }: Props) {
                   );
 
                   if (dosageInstructions?.[0]) {
-                    const newDaysSupply = convertDurationToDays(
-                      dosageInstructions[0]?.timing?.repeat?.bounds_duration
-                        ?.value || 0,
-                      dosageInstructions[0]?.timing?.repeat?.bounds_duration
-                        ?.unit || "",
+                    const newDaysSupply = roundForApi(
+                      convertDurationToDays(
+                        dosageInstructions[0]?.timing?.repeat?.bounds_duration
+                          ?.value || "0",
+                        dosageInstructions[0]?.timing?.repeat?.bounds_duration
+                          ?.unit || "",
+                      ),
                     );
                     form.setValue(
                       `items.${editingItemIndex}.daysSupply`,
@@ -2276,11 +2302,13 @@ export default function MedicationBillForm({ patientId }: Props) {
               reference_id: crypto.randomUUID(),
               productKnowledge: product,
               isSelected: true,
-              daysSupply: convertDurationToDays(
-                dosageInstructions[0]?.timing?.repeat?.bounds_duration?.value ||
-                  0,
-                dosageInstructions[0]?.timing?.repeat?.bounds_duration?.unit ||
-                  "",
+              daysSupply: roundForApi(
+                convertDurationToDays(
+                  dosageInstructions[0]?.timing?.repeat?.bounds_duration
+                    ?.value || "0",
+                  dosageInstructions[0]?.timing?.repeat?.bounds_duration
+                    ?.unit || "",
+                ),
               ),
               fully_dispensed: true,
               dosageInstructions,
@@ -2325,7 +2353,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                 // Reset lots and quantity for the substituted item
                 form.setValue(
                   `items.${substitutingItemIndex}.lots`,
-                  [{ selectedInventoryId: "", quantity: 0 }],
+                  [{ selectedInventoryId: "", quantity: "0" }],
                   { shouldDirty: true, shouldTouch: true },
                 );
 
@@ -2352,7 +2380,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                   | undefined;
                 const initialQuantity = originalMedication
                   ? computeInitialQuantity(originalMedication)
-                  : 0;
+                  : "0";
                 form.setValue(
                   `items.${substitutingItemIndex}.lots`,
                   [{ selectedInventoryId: "", quantity: initialQuantity }],
@@ -2611,7 +2639,7 @@ export const DispensedItemsSheet = ({
                           {item.item.product.product_knowledge.name}
                         </TableCell>
                         <TableCell>
-                          {item.charge_item.quantity}{" "}
+                          {roundForDisplay(item.charge_item.quantity)}{" "}
                           {
                             item.dosage_instruction?.[0]?.dose_and_rate
                               ?.dose_quantity?.unit?.display

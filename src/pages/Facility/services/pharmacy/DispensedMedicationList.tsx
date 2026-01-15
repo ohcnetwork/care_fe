@@ -47,6 +47,7 @@ import ViewDefaultAccountButton from "@/pages/Facility/billing/account/ViewDefau
 import accountApi from "@/types/billing/account/accountApi";
 import { InvoiceStatus } from "@/types/billing/invoice/invoice";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
+import { roundForDisplay } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -165,7 +166,9 @@ function MedicationTable({
                   {medication.item.product.product_knowledge.name}
                 </TableCell>
                 <TableCell className={"text-gray-950"}>
-                  {dosage ? `${dosage.value} ${dosage.unit.display}` : "-"}
+                  {dosage
+                    ? `${roundForDisplay(dosage.value)} ${dosage.unit.display}`
+                    : "-"}
                 </TableCell>
                 <TableCell className={"text-gray-950"}>
                   {instruction?.as_needed_boolean
@@ -177,7 +180,9 @@ function MedicationTable({
                     : frequency?.display || "-"}
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
-                  {medication.quantity || "-"}
+                  {medication.quantity
+                    ? roundForDisplay(medication.quantity)
+                    : "-"}
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
                   {medication.item.location.name || "-"}

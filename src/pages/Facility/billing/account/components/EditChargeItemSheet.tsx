@@ -51,6 +51,7 @@ import {
   MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { isGreaterThan, roundForDisplay, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
@@ -58,11 +59,7 @@ const formSchema = z.object({
   title: z.string(),
   description: z.string().optional(),
   status: z.nativeEnum(ChargeItemStatus),
-  quantity: z
-    .string()
-    .refine((val) => !isNaN(Number(val)) && Number(val) >= 1, {
-      message: "Quantity must be at least 1",
-    }),
+  quantity: zodDecimal({ min: 1 }),
   note: z.string().optional(),
 });
 
@@ -118,7 +115,7 @@ export function EditChargeItemSheet({
   const getTotalComponentsByType = (type: MonetaryComponentType) => {
     return (
       item.total_price_components?.filter(
-        (c: any) => c.monetary_component_type === type,
+        (c) => c.monetary_component_type === type,
       ) || []
     );
   };
@@ -359,7 +356,7 @@ export function EditChargeItemSheet({
                       </div>
                     </div>
 
-                    {Number(item.quantity) > 1 && (
+                    {isGreaterThan(item.quantity, 1) && (
                       <div className="rounded-md border bg-card mt-4">
                         <div className="p-4 text-sm">
                           <div className="space-y-2">
@@ -367,7 +364,7 @@ export function EditChargeItemSheet({
                               <span className="font-medium">
                                 {t("quantity")}
                               </span>
-                              <span>{item.quantity}</span>
+                              <span>{roundForDisplay(item.quantity)}</span>
                             </div>
 
                             <Separator className="my-2" />

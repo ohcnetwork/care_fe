@@ -57,6 +57,7 @@ import {
   PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import { zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
@@ -128,23 +129,9 @@ const createFormSchema = () =>
         .refine((val) => new Date(val) <= new Date(), {
           message: t("payment_date_cannot_be_in_future"),
         }),
-      amount: z.string().refine(
-        (val) => {
-          const num = Number(val);
-          return !isNaN(num) && num > 0 && /^\d+(\.\d{0,2})?$/.test(val);
-        },
-        { message: t("enter_valid_amount") },
-      ),
-      tendered_amount: z.string().refine(
-        (val) => {
-          const num = Number(val);
-          return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
-        },
-        {
-          message: t("enter_valid_amount"),
-        },
-      ),
-      returned_amount: z.string().optional(),
+      amount: zodDecimal({ min: 0 }),
+      tendered_amount: zodDecimal({ min: 0 }),
+      returned_amount: zodDecimal({ min: 0 }).optional(),
       target_invoice: z.string().optional(),
       reference_number: z.string().optional(),
       authorization: z.string().optional(),
@@ -252,10 +239,6 @@ export function PaymentReconciliationSheet({
     // Convert form data to PaymentReconciliationCreate type
     const submissionData: PaymentReconciliationCreate = {
       ...data,
-      // Ensure amount strings are properly formatted
-      amount: Number(data.amount).toFixed(2),
-      tendered_amount: Number(data.tendered_amount).toFixed(2),
-      returned_amount: Number(data.returned_amount).toFixed(2),
       is_credit_note: isCreditNote,
       location: data.location,
     };

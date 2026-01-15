@@ -79,18 +79,14 @@ import {
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { SupplyRequestRead } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
+import { roundForDisplay, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
 const supplyDeliveryItemSchema = z.object({
   supplied_inventory_item: z.string().optional(),
-  supplied_item_quantity: z
-    .number()
-    .or(z.nan())
-    .refine((val) => !isNaN(val) && val > 0, {
-      message: "Quantity must be at least 1",
-    }),
+  supplied_item_quantity: zodDecimal({ min: 1 }),
   supplied_item_pack_quantity: z.number().optional(),
   supplied_item_pack_size: z.number().optional(),
   product_knowledge: z
@@ -178,7 +174,7 @@ export function AddSupplyDeliveryForm({
     (): SupplyDeliveryItemValues => ({
       product_knowledge: {} as ProductKnowledgeBase,
       supplied_inventory_item: "",
-      supplied_item_quantity: 1,
+      supplied_item_quantity: "1",
       supplied_item_pack_quantity: 1,
       supplied_item_pack_size: 1,
       supplied_item: undefined,
@@ -291,7 +287,7 @@ export function AddSupplyDeliveryForm({
     );
     const itemsFromRequests = selectedRequests?.map((request) => ({
       supplied_inventory_item: undefined,
-      supplied_item_quantity: parseFloat(request.quantity),
+      supplied_item_quantity: request.quantity,
       supplied_item_pack_quantity: 1,
       supplied_item_pack_size: 1,
       product_knowledge: request.item,
@@ -504,7 +500,7 @@ export function AddSupplyDeliveryForm({
       status: SupplyDeliveryStatus.in_progress,
       supplied_item_type: suppliedItemType,
       supplied_item_condition: SupplyDeliveryCondition.normal,
-      supplied_item_quantity: String(item.supplied_item_quantity),
+      supplied_item_quantity: item.supplied_item_quantity,
       supplied_item_pack_quantity: item.supplied_item_pack_quantity,
       supplied_item_pack_size: item.supplied_item_pack_size,
       ...(origin
@@ -648,13 +644,13 @@ export function AddSupplyDeliveryForm({
                                 <TableHead className="min-w-[140px] text-xs font-semibold text-center">
                                   {t("category")}
                                 </TableHead>
-                                <TableHead className="w-[5rem] text-xs font-semibold">
+                                <TableHead className="w-20 text-xs font-semibold">
                                   {t("pack_size")}
                                 </TableHead>
-                                <TableHead className="w-[7rem] text-xs font-semibold">
+                                <TableHead className="w-28 text-xs font-semibold">
                                   {t("pack_qty")}
                                 </TableHead>
-                                <TableHead className="w-[8rem] text-xs font-semibold">
+                                <TableHead className="w-32 text-xs font-semibold">
                                   {t("qty")}
                                 </TableHead>
                                 <TableHead className="min-w-[100px] text-xs font-semibold">
@@ -745,7 +741,7 @@ export function AddSupplyDeliveryForm({
                                                     {
                                                       selectedInventoryId:
                                                         field.value,
-                                                      quantity: 1,
+                                                      quantity: "1",
                                                     },
                                                   ]
                                                 : []
@@ -961,7 +957,8 @@ export function AddSupplyDeliveryForm({
                       </label>
                     </div>
                     <div className="text-sm font-medium">
-                      {request.quantity} {request.item.base_unit.display}
+                      {roundForDisplay(request.quantity)}{" "}
+                      {request.item.base_unit.display}
                     </div>
                   </div>
                 ))}
