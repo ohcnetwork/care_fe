@@ -1,18 +1,23 @@
+import careConfig from "@careConfig";
 import Decimal from "decimal.js";
 import { z } from "zod";
 
 // Configure Decimal.js to match backend settings
 // Backend uses: DecimalField(max_digits=20, decimal_places=6)
 Decimal.set({
-  precision: 20,
-  rounding: Decimal.ROUND_HALF_UP,
+  precision: careConfig.decimal.precision,
+  rounding: careConfig.decimal.rounding,
 });
 
-// Accounting display precision (matches backend ACCOUNTING_PRECISION)
-export const ACCOUNTING_PRECISION = 2;
+/**
+ * Accounting display precision (matches backend ACCOUNTING_PRECISION)
+ */
+export const ACCOUNTING_PRECISION = careConfig.decimal.accountingPrecision;
 
-// Internal calculation precision (matches backend DecimalField)
-export const INTERNAL_PRECISION = 6;
+/**
+ * Internal calculation precision (matches backend DecimalField)
+ */
+export const INTERNAL_PRECISION = careConfig.decimal.internalPrecision;
 
 /**
  * Create a Decimal from a string value (API response format)
