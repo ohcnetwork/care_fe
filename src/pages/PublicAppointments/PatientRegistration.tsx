@@ -356,10 +356,9 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                         inputMode="numeric"
                         pattern="[0-9]*"
                         onChange={(e) => {
-                          const value = e.target.value;
-                          field.onChange(
-                            value === "" ? undefined : Number(value),
-                          );
+                          const raw = e.target.value.trim();
+                          if (!/^\d*$/.test(raw)) return;
+                          field.onChange(raw === "" ? undefined : Number(raw));
                         }}
                       />
                     </FormControl>
