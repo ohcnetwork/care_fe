@@ -42,7 +42,7 @@ import {
   SupplyDeliveryStatus,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
-import { roundForDisplay } from "@/Utils/decimal";
+import { add, roundForDisplay } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { EllipsisVertical } from "lucide-react";
@@ -252,14 +252,17 @@ export function SupplyDeliveryTable({
             })}
             <TableCell>
               <MonetaryDisplay
-                factor={
-                  delivery.supplied_inventory_item?.product.charge_item_definition?.price_components
+                factor={add(
+                  ...(
+                    delivery.supplied_inventory_item?.product
+                      .charge_item_definition?.price_components || []
+                  )
                     .filter(
                       (c) =>
                         c.monetary_component_type === MonetaryComponentType.tax,
                     )
-                    .reduce((sum, c) => sum + (c.factor || 0), 0) || undefined
-                }
+                    .map((c) => c.factor || "0"),
+                )}
               />
             </TableCell>
             <TableCell>

@@ -100,7 +100,7 @@ const supplyDeliveryItemSchema = z.object({
   batch_number: z.string().optional(),
   expiry_date: z.string().optional(),
   charge_item_definition: z.object({ slug: z.string() }).optional(),
-  unit_price: z.number().optional(),
+  unit_price: zodDecimal({ min: 0 }).optional(),
   is_manually_edited: z.boolean().optional(),
   is_tax_inclusive: z.boolean().optional(),
   charge_item_category: z.string().optional(),
@@ -336,7 +336,7 @@ export function AddSupplyDeliveryForm({
     if (item.unit_price !== undefined) {
       components.push({
         monetary_component_type: MonetaryComponentType.base,
-        amount: item.unit_price.toString(),
+        amount: item.unit_price,
       });
     }
 
@@ -400,7 +400,7 @@ export function AddSupplyDeliveryForm({
               break;
             }
           }
-          if (item.unit_price === undefined || item.unit_price < 0) {
+          if (item.unit_price === undefined) {
             toast.error(t("unit_price_required_at_row", { row: index + 1 }));
             hasErrors = true;
             break;

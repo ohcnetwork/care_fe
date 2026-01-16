@@ -1,6 +1,7 @@
 import { CURRENCY_SYMBOL } from "@/components/ui/monetary-display";
 import { Code } from "@/types/base/code/code";
 import { Condition } from "@/types/base/condition/condition";
+import { isEqual } from "@/Utils/decimal";
 
 export enum MonetaryComponentType {
   base = "base",
@@ -13,7 +14,7 @@ export enum MonetaryComponentType {
 export interface MonetaryComponent {
   monetary_component_type: MonetaryComponentType;
   code?: Code;
-  factor?: number;
+  factor?: string;
   amount?: string;
   tax_included_amount?: string;
   conditions?: Condition[];
@@ -44,11 +45,8 @@ export function isPercentageBased(component: MonetaryComponent): boolean {
  * Get the numeric value of a monetary component
  * Returns the factor (percentage) or parsed amount (fixed)
  */
-export function getComponentNumericValue(component: MonetaryComponent): number {
-  if (component.factor != null) {
-    return component.factor;
-  }
-  return parseFloat(component.amount || "0") || 0;
+export function getComponentNumericValue(component: MonetaryComponent) {
+  return component.factor ?? component.amount ?? "0";
 }
 
 /**
@@ -87,10 +85,10 @@ export function isSameValue(
   b: MonetaryComponent,
 ): boolean {
   if (isPercentageBased(a) && isPercentageBased(b)) {
-    return a.factor === b.factor;
+    return isEqual(a.factor, b.factor);
   }
   if (!isPercentageBased(a) && !isPercentageBased(b)) {
-    return a.amount === b.amount;
+    return isEqual(a.amount, b.amount);
   }
   return false;
 }

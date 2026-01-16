@@ -72,9 +72,7 @@ function toMonetaryComponent(
     monetary_component_type: type,
     code: component.code,
     factor: isPercentageBased(component) ? component.factor : undefined,
-    amount: isPercentageBased(component)
-      ? undefined
-      : String(component.amount || 0),
+    amount: !isPercentageBased(component) ? component.amount : undefined,
     conditions: [],
   };
 }

@@ -62,6 +62,7 @@ import {
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import facilityApi from "@/types/facility/facilityApi";
+import { zodDecimal } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
@@ -73,7 +74,7 @@ const createPriceComponentSchema = (
   z.object({
     monetary_component_type: z.nativeEnum(MonetaryComponentType),
     code: CodeSchema.optional(),
-    factor: z.number().gt(0).max(100).optional(),
+    factor: zodDecimal({ min: 0, max: 100 }).optional(),
     amount: z
       .string()
       .refine((val) => !val || Number(val) > 0, {
@@ -377,11 +378,7 @@ export function ChargeItemDefinitionForm({
   const availableDiscounts = [
     ...facilityData.discount_monetary_components,
     ...facilityData.instance_discount_monetary_components,
-  ].map((component) => ({
-    ...component,
-    amount:
-      component?.amount != null ? String(component.amount) : component.amount,
-  }));
+  ];
   const availableTaxes = [...facilityData.instance_tax_monetary_components];
 
   const mrpCode = facilityData.instance_informational_codes.find(
@@ -421,7 +418,7 @@ export function ChargeItemDefinitionForm({
       ...component,
       monetary_component_type: type,
       factor: component.factor != null ? component.factor : undefined,
-      amount: component.factor != null ? undefined : String(component.amount),
+      amount: component.factor != null ? undefined : component.amount,
       conditions:
         component.conditions?.map((condition) => ({
           ...condition,

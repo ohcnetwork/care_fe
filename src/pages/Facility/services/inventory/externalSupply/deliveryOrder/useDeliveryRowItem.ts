@@ -18,7 +18,8 @@ import { ProductRead } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
 import query from "@/Utils/request/query";
 
-import { roundForApi } from "@/Utils/decimal";
+import { add, divide, roundForApi } from "@/Utils/decimal";
+import Decimal from "decimal.js";
 import {
   SupplyDeliveryFormValues,
   SupplyDeliveryItemValues,
@@ -78,7 +79,7 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
       batch_number: "",
       expiry_date: "",
       charge_item_definition: undefined,
-      unit_price: 0,
+      unit_price: "0",
       informational_components: [],
       tax_components: [],
       discount_components: [],
@@ -149,7 +150,7 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
           MonetaryComponentType.base,
         );
         if (baseComponents[0]?.amount) {
-          setField("unit_price", parseFloat(baseComponents[0].amount));
+          setField("unit_price", baseComponents[0].amount);
         }
 
         const informational = getComponentsFromChargeItem(
@@ -176,7 +177,7 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
           setField("discount_components", discounts);
         }
       } else {
-        setField("unit_price", 0);
+        setField("unit_price", "0");
       }
 
       setField("is_manually_edited", false);
@@ -230,17 +231,20 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
 
   // Total tax factor for tax-inclusive calculation
   const totalTaxFactor = useMemo(() => {
-    if (!taxComponents?.length) return 0;
-    return taxComponents.reduce((sum, tax) => sum + (tax.factor || 0), 0);
+    if (!taxComponents?.length) return new Decimal(0);
+    return add(...taxComponents.map((tax) => tax.factor || 0));
   }, [taxComponents]);
 
   // Calculate base price from MRP when tax inclusive is enabled
   useEffect(() => {
     if (isTaxInclusive && mrpValue > 0) {
-      let calculatedBasePrice = mrpValue / (1 + totalTaxFactor / 100);
+      let calculatedBasePrice = divide(
+        mrpValue,
+        add(1, divide(totalTaxFactor, 100)),
+      );
       if (packSize && packQuantity && packSize > 0)
-        calculatedBasePrice = calculatedBasePrice / packSize;
-      const roundedBasePrice = Math.round(calculatedBasePrice * 100) / 100;
+        calculatedBasePrice = divide(calculatedBasePrice, packSize);
+      const roundedBasePrice = roundForApi(calculatedBasePrice);
       setField("unit_price", roundedBasePrice);
     }
   }, [isTaxInclusive, mrpValue, totalTaxFactor, packSize, setField]);

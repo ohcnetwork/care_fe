@@ -357,8 +357,8 @@ export function SmartExternalDeliveryRow({
                   type="number"
                   min={1}
                   {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value))}
-                  className="w-[8rem]"
+                  onChange={(e) => field.onChange(e.target.value)}
+                  className="w-32"
                   disabled
                 />
               </FormControl>
@@ -382,7 +382,7 @@ export function SmartExternalDeliveryRow({
               value={unitPrice || ""}
               placeholder="0"
               onChange={(e) => {
-                setField("unit_price", parseFloat(e.target.value) || 0);
+                setField("unit_price", e.target.value);
                 markAsEdited();
               }}
               disabled={!productKnowledge || isTaxInclusive}

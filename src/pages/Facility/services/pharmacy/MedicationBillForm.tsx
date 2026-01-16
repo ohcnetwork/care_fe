@@ -2073,7 +2073,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                                               )
                                               .map((component) =>
                                                 component.factor
-                                                  ? `${component.factor}%`
+                                                  ? `${roundForDisplay(component.factor)}%`
                                                   : "--",
                                               )}
                                           </div>

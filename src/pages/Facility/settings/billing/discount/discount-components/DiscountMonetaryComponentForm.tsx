@@ -38,6 +38,7 @@ import {
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
+import { zodDecimal } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
 
@@ -61,7 +62,7 @@ export function DiscountMonetaryComponentForm({
         .object({
           monetary_component_type: z.literal(MonetaryComponentType.discount),
           code: CodeSchema.optional(),
-          factor: z.number().min(0).max(100).optional(),
+          factor: zodDecimal({ min: 0, max: 100 }).optional(),
           amount: z
             .string()
             .refine((val) => !val || Number(val) >= 0, {
@@ -168,14 +169,10 @@ export function DiscountMonetaryComponentForm({
                             max="100"
                             step="0.01"
                             {...field}
+                            value={field.value || ""}
                             onChange={(e) =>
-                              field.onChange(
-                                e.target.value
-                                  ? parseFloat(e.target.value)
-                                  : null,
-                              )
+                              field.onChange(e.target.value || null)
                             }
-                            value={field.value === null ? "" : field.value}
                             className="pr-8"
                           />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">

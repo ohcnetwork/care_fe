@@ -60,7 +60,7 @@ import {
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import { UserReadMinimal } from "@/types/user/user";
-import { zodDecimal } from "@/Utils/decimal";
+import { isPositive, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
@@ -82,7 +82,7 @@ const priceComponentSchema = z.object({
       display: z.string(),
     })
     .optional(),
-  factor: z.number().min(0).max(100).optional(),
+  factor: zodDecimal({ min: 0, max: 100 }).optional(),
   amount: z
     .string()
     .refine((val) => !val || Number(val) >= 0, {
@@ -234,7 +234,7 @@ export function EditInvoiceTable({
         ...(item.discounts || []).filter((discount) => {
           const hasAmount = discount.amount && parseFloat(discount.amount) > 0;
           const hasFactor =
-            discount.factor !== undefined && discount.factor > 0;
+            discount.factor !== undefined && isPositive(discount.factor);
           return hasAmount || hasFactor;
         }),
       ],
@@ -313,7 +313,10 @@ export function EditInvoiceTable({
   ) => {
     if (checked) {
       // Switch to percentage
-      form.setValue(`items.${itemIndex}.discounts.${discountIndex}.factor`, 0);
+      form.setValue(
+        `items.${itemIndex}.discounts.${discountIndex}.factor`,
+        "0",
+      );
       form.setValue(
         `items.${itemIndex}.discounts.${discountIndex}.amount`,
         undefined,
@@ -646,7 +649,7 @@ export function EditInvoiceTable({
                                               if (isPercentage) {
                                                 form.setValue(
                                                   `items.${index}.discounts.${discountIndex}.factor`,
-                                                  parseFloat(newValue) || 0,
+                                                  newValue,
                                                 );
                                               } else {
                                                 form.setValue(
