@@ -57,7 +57,12 @@ import {
   PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
-import { roundForApi, zodDecimal } from "@/Utils/decimal";
+import {
+  isGreaterThanOrEqual,
+  isPositive,
+  roundForApi,
+  zodDecimal,
+} from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import Decimal from "decimal.js";
@@ -144,7 +149,7 @@ const createFormSchema = () =>
         ? z.string().min(1)
         : z.string().optional(),
     })
-    .refine((data) => Number(data.tendered_amount) >= Number(data.amount), {
+    .refine((data) => isGreaterThanOrEqual(data.tendered_amount, data.amount), {
       message: t("tender_amount_cannot_be_less_than_payment_amount"),
       path: ["tendered_amount"],
     });
@@ -483,7 +488,7 @@ export function PaymentReconciliationSheet({
                     )}
                   />
 
-                  {Number(form.watch("returned_amount")) > 0 && (
+                  {isPositive(form.watch("returned_amount") || "0") && (
                     <div className="rounded-md bg-yellow-50 border border-yellow-500 p-2 mt-2">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-yellow-950">

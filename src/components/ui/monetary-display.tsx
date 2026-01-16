@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 import { Input } from "@/components/ui/input";
 
-import { roundForDisplay } from "@/Utils/decimal";
+import { roundForDisplay, toNumber } from "@/Utils/decimal";
 import Decimal from "decimal.js";
 
 // Currency configuration
@@ -51,9 +51,9 @@ function MonetaryDisplay({
     >
       {amount != null &&
         (hideCurrency
-          ? numberFormatterWithoutCurrency.format(Number(amount)).toString()
-          : numberFormatter.format(Number(amount)).toString())}
-      {factor != null && `${factor}%`}
+          ? numberFormatterWithoutCurrency.format(toNumber(amount)).toString()
+          : numberFormatter.format(toNumber(amount)).toString())}
+      {factor != null && `${roundForDisplay(factor)}%`}
     </data>
   );
 }

@@ -66,23 +66,6 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
 
-// Schema factory for a single price component
-const createPriceComponentSchema = (
-  t: (key: string, options?: Record<string, unknown>) => string,
-) =>
-  z.object({
-    monetary_component_type: z.nativeEnum(MonetaryComponentType),
-    code: CodeSchema.optional(),
-    factor: zodDecimal({ min: 0, max: 100 }).optional(),
-    amount: z
-      .string()
-      .refine((val) => !val || Number(val) > 0, {
-        message: t("must_be_greater_than_value", { value: 0 }),
-      })
-      .optional(),
-    conditions: z.array(conditionSchema),
-  });
-
 interface ChargeItemDefinitionFormProps {
   facilityId: string;
   initialData?: ChargeItemDefinitionRead;
@@ -135,7 +118,6 @@ export function ChargeItemDefinitionForm({
     queryFn: query(chargeItemDefinitionApi.listMetrics),
   });
 
-  const priceComponentSchema = createPriceComponentSchema(t);
   const createFormSchema = (
     t: (key: string, options?: Record<string, unknown>) => string,
   ) =>
@@ -167,25 +149,18 @@ export function ChargeItemDefinitionForm({
           },
           { message: t("invalid_url") },
         ),
-      base_price: z
-        .string()
-        .min(1, { message: t("base_price_is_required") })
-        .refine((val) => Number(val) > 0, {
-          message: t("must_be_greater_than_value", { value: 0 }),
+      base_price: zodDecimal({ min: 0 }),
+      mrp: zodDecimal({ min: 0 }).optional(),
+      purchase_price: zodDecimal({ min: 0 }).optional(),
+      price_components: z.array(
+        z.object({
+          monetary_component_type: z.nativeEnum(MonetaryComponentType),
+          code: CodeSchema.optional(),
+          factor: zodDecimal({ min: 0, max: 100 }).optional(),
+          amount: zodDecimal({ min: 0 }).optional(),
+          conditions: z.array(conditionSchema),
         }),
-      mrp: z
-        .string()
-        .optional()
-        .refine((val) => !val || Number(val) > 0, {
-          message: t("must_be_greater_than_value", { value: 0 }),
-        }),
-      purchase_price: z
-        .string()
-        .optional()
-        .refine((val) => !val || Number(val) > 0, {
-          message: t("must_be_greater_than_value", { value: 0 }),
-        }),
-      price_components: z.array(priceComponentSchema),
+      ),
     });
 
   const formSchema = createFormSchema(t);

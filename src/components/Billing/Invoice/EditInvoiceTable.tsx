@@ -83,12 +83,7 @@ const priceComponentSchema = z.object({
     })
     .optional(),
   factor: zodDecimal({ min: 0, max: 100 }).optional(),
-  amount: z
-    .string()
-    .refine((val) => !val || Number(val) >= 0, {
-      message: "Amount must be a valid number",
-    })
-    .optional(),
+  amount: zodDecimal({ min: 0 }).optional(),
   conditions: z.array(conditionSchema).optional(),
 });
 
