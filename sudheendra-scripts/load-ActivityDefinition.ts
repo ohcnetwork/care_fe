@@ -170,24 +170,14 @@ function createActivityDataFromRow(row: Record<string, string>): ActivityData {
       .filter((s: string) => s);
 
     for (const codeStr of codes) {
-      // Assuming format: "system|code|display" or just "code"
-      const parts = codeStr.split("|");
-      if (parts.length >= 2) {
+      // Default to LOINC system if no system specified
+      const code = parseCode("http://loinc.org", codeStr, codeStr);
+      if (code) {
         diagnosticReportCodes.push({
-          system: parts[0],
-          code: parts[1],
-          display: parts[2] || parts[1],
+          system: code.system,
+          code: code.code,
+          display: code.display,
         });
-      } else {
-        // Default to LOINC system if no system specified
-        const code = parseCode("http://loinc.org", codeStr, codeStr);
-        if (code) {
-          diagnosticReportCodes.push({
-            system: code.system,
-            code: code.code,
-            display: code.display,
-          });
-        }
       }
     }
   }
