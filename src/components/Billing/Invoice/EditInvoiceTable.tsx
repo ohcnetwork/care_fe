@@ -724,7 +724,7 @@ export function EditInvoiceTable({
           </Table>
         </div>
 
-        <div className="flex justify-end gap-2">
+        <div className="sticky bottom-0 bg-white p-4 flex justify-end gap-2 border-t">
           <Button type="button" variant="outline" onClick={onClose}>
             {t("cancel")}
             {enableShortcut && <ShortcutBadge actionId="cancel-action" />}
