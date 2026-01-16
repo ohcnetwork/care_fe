@@ -480,13 +480,7 @@ export function EditInvoiceTable({
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              value={field.value}
-                              min="1"
-                              step="1"
-                            />
+                            <Input type="number" {...field} min="1" step="1" />
                           </FormControl>
                         </FormItem>
                       )}
