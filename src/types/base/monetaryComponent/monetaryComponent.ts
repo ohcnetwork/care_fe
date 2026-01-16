@@ -1,7 +1,7 @@
 import { CURRENCY_SYMBOL } from "@/components/ui/monetary-display";
 import { Code } from "@/types/base/code/code";
 import { Condition } from "@/types/base/condition/condition";
-import { isEqual } from "@/Utils/decimal";
+import { isEqual, round } from "@/Utils/decimal";
 
 export enum MonetaryComponentType {
   base = "base",
@@ -58,8 +58,8 @@ export function formatComponentValue(
 ): string {
   const value = getComponentNumericValue(component);
   return isPercentageBased(component)
-    ? `${value}%`
-    : `${currencySymbol}${value}`;
+    ? `${round(value)}%`
+    : `${currencySymbol}${round(value)}`;
 }
 
 /**
