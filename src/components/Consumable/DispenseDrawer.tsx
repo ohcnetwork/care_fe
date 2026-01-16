@@ -805,7 +805,7 @@ export default function DispenseDrawer({
                                                 )
                                                 .map(
                                                   (c) =>
-                                                    `${c.code?.display || t("inr")} ${c.amount} `,
+                                                    `${c.code?.display || t("inr")} ${c.amount ? round(c.amount) : undefined} `,
                                                 )
                                                 .join(" ") || "-"}
                                             </div>

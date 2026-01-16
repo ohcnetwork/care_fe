@@ -38,7 +38,7 @@ import {
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
-import { zodDecimal } from "@/Utils/decimal";
+import { round, zodDecimal } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
 
@@ -101,8 +101,8 @@ export function DiscountMonetaryComponentForm({
     defaultValues: {
       monetary_component_type: MonetaryComponentType.discount,
       code: defaultValues?.code,
-      factor: defaultValues?.factor,
-      amount: defaultValues?.amount,
+      factor: defaultValues?.factor ? defaultValues.factor : undefined,
+      amount: defaultValues?.amount ? round(defaultValues?.amount) : undefined,
       title: defaultValues?.title || "",
       conditions: defaultValues?.conditions || [],
     },

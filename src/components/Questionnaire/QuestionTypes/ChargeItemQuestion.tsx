@@ -42,6 +42,7 @@ import {
   ResponseValue,
 } from "@/types/questionnaire/form";
 import { UserReadMinimal } from "@/types/user/user";
+import { round } from "@/Utils/decimal";
 
 interface ChargeItemQuestionProps {
   encounterId: string;
@@ -121,8 +122,10 @@ function ChargeItemForm({
         <div className="space-y-1">
           <div className="flex items-center gap-1">
             <span>
-              {chargeItem.charge_item_definition_object.price_components?.[0]
-                ?.amount || 0}{" "}
+              {round(
+                chargeItem.charge_item_definition_object.price_components?.[0]
+                  ?.amount || "0",
+              )}{" "}
               {chargeItem.charge_item_definition_object.price_components?.[0]
                 ?.code?.code || "INR"}
             </span>

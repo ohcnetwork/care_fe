@@ -25,6 +25,7 @@ import {
   ChargeItemDefinitionRead,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
+import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { ResourceDefinitionCategoryPicker } from "./ResourceDefinitionCategoryPicker";
 
@@ -281,7 +282,9 @@ export function ChargeItemDefinitionPicker({
                           )}
                           {definition.price_components?.[0] && (
                             <div className="text-xs mt-0.5">
-                              {definition.price_components[0].amount}{" "}
+                              {definition.price_components[0].amount
+                                ? round(definition.price_components[0].amount)
+                                : undefined}{" "}
                               {definition.price_components[0].code?.code ||
                                 "INR"}
                             </div>

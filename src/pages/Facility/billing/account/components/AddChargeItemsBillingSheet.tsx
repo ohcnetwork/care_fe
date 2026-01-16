@@ -42,6 +42,7 @@ import {
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import { UserReadMinimal } from "@/types/user/user";
+import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
@@ -206,8 +207,10 @@ export default function AddChargeItemsBillingSheet({
                             </label>
                             <div className="flex items-center gap-1">
                               <span>
-                                {item.charge_item_definition_object
-                                  .price_components?.[0]?.amount || 0}{" "}
+                                {round(
+                                  item.charge_item_definition_object
+                                    .price_components?.[0]?.amount || "0",
+                                )}{" "}
                                 {item.charge_item_definition_object
                                   .price_components?.[0]?.code?.code || "INR"}
                               </span>
@@ -283,8 +286,10 @@ export default function AddChargeItemsBillingSheet({
                           <TableCell>
                             <div className="flex items-center gap-1">
                               <span>
-                                {item.charge_item_definition_object
-                                  .price_components?.[0]?.amount || 0}{" "}
+                                {round(
+                                  item.charge_item_definition_object
+                                    .price_components?.[0]?.amount || 0,
+                                )}{" "}
                                 {item.charge_item_definition_object
                                   .price_components?.[0]?.code?.code || "INR"}
                               </span>
