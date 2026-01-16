@@ -854,6 +854,7 @@
   "base_dosage": "Dosage",
   "base_price": "Base Price",
   "base_price_explanation": "The starting point for pricing calculation",
+  "base_price_is_required": "Base price is required",
   "base_unit": "Base Unit",
   "base_unit_is_required": "Base unit is required",
   "basic_details_of_the_activity": "Enter the basic details of the activity",

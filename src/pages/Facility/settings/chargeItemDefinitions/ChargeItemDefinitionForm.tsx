@@ -149,7 +149,7 @@ export function ChargeItemDefinitionForm({
           },
           { message: t("invalid_url") },
         ),
-      base_price: zodDecimal({ min: 0 }),
+      base_price: zodDecimal({ min: 0, message: t("base_price_is_required") }),
       mrp: zodDecimal({ min: 0 }).optional().nullable(),
       purchase_price: zodDecimal({ min: 0 }).optional().nullable(),
       price_components: z.array(
@@ -658,7 +658,7 @@ export function ChargeItemDefinitionForm({
                               {...field}
                               value={field.value || ""}
                               onChange={(e) =>
-                                field.onChange(e.target.value || null)
+                                field.onChange(e.target.value || "")
                               }
                               placeholder="0.00"
                             />
