@@ -89,6 +89,19 @@ export function compare(
 }
 
 /**
+ * Compare two decimal values for equality
+ */
+export function isEqual(
+  a: string | number | Decimal | null | undefined,
+  b: string | number | Decimal | null | undefined,
+): boolean {
+  if (a == null || b == null) {
+    return a === b;
+  }
+  return new Decimal(a).equals(b);
+}
+
+/**
  * Check if value is greater than comparison
  */
 export function isGreaterThan(
