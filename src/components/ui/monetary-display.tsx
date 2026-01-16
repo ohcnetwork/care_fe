@@ -30,8 +30,8 @@ function MonetaryDisplay({
   hideCurrency = false,
   ...props
 }: {
-  factor?: string | number | Decimal;
-  amount?: string | number | Decimal;
+  factor?: string | number | Decimal | null;
+  amount?: string | number | Decimal | null;
   fallback?: React.ReactNode;
   hideCurrency?: boolean;
 } & React.ComponentProps<"data">) {

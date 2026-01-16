@@ -49,42 +49,24 @@ export default function ChargeItemPriceDisplay({
   );
 
   const baseAmount = baseComponents[0]?.amount || "0";
-  const mrpAmount = mrpComponents[0]?.amount || undefined;
-  const purchasePriceAmount = purchasePriceComponents[0]?.amount || undefined;
+  const mrpAmount = mrpComponents[0]?.amount;
+  const purchasePriceAmount = purchasePriceComponents[0]?.amount;
 
   const renderComponentValue = (
     component: MonetaryComponent,
     prefix: string,
   ) => {
-    const hasAmount =
-      component.amount !== undefined && component.amount !== null;
-    const hasFactor =
-      component.factor !== undefined && component.factor !== null;
-
-    if (hasAmount && hasFactor) {
-      return (
-        <span>
-          {prefix}
-          <MonetaryDisplay amount={component.amount} /> (
-          <MonetaryDisplay factor={component.factor} />)
-        </span>
-      );
-    } else if (hasAmount) {
-      return (
-        <span>
-          {prefix}
-          <MonetaryDisplay amount={component.amount} />
-        </span>
-      );
-    } else if (hasFactor) {
-      return (
-        <span>
-          {prefix}
-          <MonetaryDisplay factor={component.factor} />
-        </span>
-      );
+    if (!component.amount && !component.factor) {
+      return null;
     }
-    return null;
+
+    return (
+      <span>
+        {prefix}
+        {component.amount && <MonetaryDisplay amount={component.amount} />}
+        {component.factor && <MonetaryDisplay factor={component.factor} />}
+      </span>
+    );
   };
 
   return (

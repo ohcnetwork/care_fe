@@ -82,8 +82,8 @@ const priceComponentSchema = z.object({
       display: z.string(),
     })
     .optional(),
-  factor: zodDecimal({ min: 0, max: 100 }).optional(),
-  amount: zodDecimal({ min: 0 }).optional(),
+  factor: zodDecimal({ min: 0, max: 100 }).optional().nullable(),
+  amount: zodDecimal({ min: 0 }).optional().nullable(),
   conditions: z.array(conditionSchema).optional(),
 });
 
@@ -225,7 +225,7 @@ export function EditInvoiceTable({
         ...(item.discounts || []).filter((discount) => {
           const hasAmount = discount.amount && parseFloat(discount.amount) > 0;
           const hasFactor =
-            discount.factor !== undefined && isPositive(discount.factor);
+            discount.factor != null && isPositive(discount.factor);
           return hasAmount || hasFactor;
         }),
       ],
@@ -371,14 +371,13 @@ export function EditInvoiceTable({
     return <div>{t("no_charge_items_found")}</div>;
   }
 
-  const onError = () => {
-    toast.error(t("invalid_value"));
-  };
-
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit, onError)}
+        onSubmit={form.handleSubmit(onSubmit, (errors) => {
+          console.log(form.getValues());
+          console.log(errors);
+        })}
         className="space-y-4"
       >
         <div>

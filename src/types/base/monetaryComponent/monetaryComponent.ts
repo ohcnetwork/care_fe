@@ -14,8 +14,8 @@ export enum MonetaryComponentType {
 export interface MonetaryComponent {
   monetary_component_type: MonetaryComponentType;
   code?: Code;
-  factor?: string;
-  amount?: string;
+  factor?: string | null;
+  amount?: string | null;
   tax_included_amount?: string;
   conditions?: Condition[];
 }
