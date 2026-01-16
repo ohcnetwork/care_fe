@@ -94,7 +94,7 @@ const priceComponentSchema = z.object({
 
 const chargeItemBaseSchema = z.object({
   baseAmount: zodDecimal({ min: 0 }),
-  quantity: zodDecimal({ min: 0 }),
+  quantity: zodDecimal({ min: 1 }),
   taxComponents: z.array(priceComponentSchema).optional(),
   discounts: z.array(priceComponentSchema).optional(),
 });

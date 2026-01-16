@@ -756,7 +756,7 @@ export default function MedicationBillForm({ patientId }: Props) {
   });
 
   const tableHeaderClass =
-    "px-4 py-3 border-r font-medium border-y-1 border-r-none border-gray-200 rounded-b-none border-b-0";
+    "px-4 py-3 border-r font-medium border-y-1 border-r-0 border-gray-200 rounded-b-none border-b-0";
   const tableCellClass = "px-4 py-4 border-r";
 
   const form = useForm<FormValues>({
@@ -943,7 +943,7 @@ export default function MedicationBillForm({ patientId }: Props) {
     const convertToHours = (value: string, unit: string) => {
       switch (unit) {
         case "h":
-          return value;
+          return new Decimal(value);
         case "d":
           return multiply(value, 24);
         case "wk":
@@ -1374,7 +1374,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                     <TableHead
                       className={cn(
                         tableHeaderClass,
-                        "border-y border-r-none border-gray-200 rounded-b-none border-b-0",
+                        "border-y border-r-0 border-gray-200 rounded-b-none border-b-0",
                       )}
                     >
                       {t("medicine")}
