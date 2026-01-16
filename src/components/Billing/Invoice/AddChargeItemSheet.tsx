@@ -34,7 +34,7 @@ import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryCo
 import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
-import { roundForDisplay } from "@/Utils/decimal";
+import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -236,9 +236,7 @@ export default function AddChargeItemSheet({
                             />
                           </TableCell>
                           <TableCell>{item.title}</TableCell>
-                          <TableCell>
-                            {roundForDisplay(item.quantity)}
-                          </TableCell>
+                          <TableCell>{round(item.quantity)}</TableCell>
                           <TableCell>
                             <MonetaryDisplay
                               amount={getBaseComponent(item)?.amount || "0"}

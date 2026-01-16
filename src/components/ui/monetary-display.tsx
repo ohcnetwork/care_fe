@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 import { Input } from "@/components/ui/input";
 
-import { roundForDisplay, toNumber } from "@/Utils/decimal";
+import { ACCOUNTING_PRECISION, round, toNumber } from "@/Utils/decimal";
 import Decimal from "decimal.js";
 
 // Currency configuration
@@ -35,7 +35,7 @@ function MonetaryDisplay({
   fallback?: React.ReactNode;
   hideCurrency?: boolean;
 } & React.ComponentProps<"data">) {
-  amount &&= roundForDisplay(amount);
+  amount &&= round(amount);
 
   if ((amount ?? factor) == null) {
     return fallback ?? "-";
@@ -53,7 +53,7 @@ function MonetaryDisplay({
         (hideCurrency
           ? numberFormatterWithoutCurrency.format(toNumber(amount)).toString()
           : numberFormatter.format(toNumber(amount)).toString())}
-      {factor != null && `${roundForDisplay(factor)}%`}
+      {factor != null && `${round(factor)}%`}
     </data>
   );
 }
@@ -64,10 +64,12 @@ function MonetaryAmountInput({
 }: React.ComponentProps<typeof Input> & {
   hideCurrency?: boolean;
 }) {
+  const pattern = `^\\d*\\.?\\d{0,${ACCOUNTING_PRECISION}}$`;
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Allow empty value, numbers with up to 2 decimal places
-    if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
+    // Allow empty value, numbers with up to ACCOUNTING_PRECISION decimal places
+    if (value === "" || new RegExp(pattern).test(value)) {
       props.onChange?.(e);
     }
   };
@@ -82,8 +84,8 @@ function MonetaryAmountInput({
       <Input
         type="text"
         inputMode="decimal"
-        pattern="^\d*\.?\d{0,2}$"
-        placeholder="0.00"
+        pattern={pattern}
+        placeholder={`0.${"0".repeat(ACCOUNTING_PRECISION)}`}
         data-care-input="monetary-amount"
         {...props}
         onChange={handleChange}

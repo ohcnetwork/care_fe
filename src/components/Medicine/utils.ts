@@ -2,13 +2,7 @@ import {
   DoseRange,
   MedicationRequestDosageInstruction,
 } from "@/types/emr/medicationRequest/medicationRequest";
-import {
-  add,
-  divide,
-  isZero,
-  multiply,
-  roundForDisplay,
-} from "@/Utils/decimal";
+import { add, divide, isZero, multiply, round } from "@/Utils/decimal";
 import Decimal from "decimal.js";
 
 // Helper function to format dosage in Rx style
@@ -17,9 +11,9 @@ export function formatDosage(instruction: MedicationRequestDosageInstruction) {
 
   const { dose_range, dose_quantity } = instruction.dose_and_rate;
   if (dose_range) {
-    return `${roundForDisplay(dose_range.low.value)} ${dose_range.low.unit.display} -> ${roundForDisplay(dose_range.high.value)} ${dose_range.high.unit.display}`;
+    return `${round(dose_range.low.value)} ${dose_range.low.unit.display} -> ${round(dose_range.high.value)} ${dose_range.high.unit.display}`;
   } else if (dose_quantity) {
-    return `${roundForDisplay(dose_quantity.value)} ${dose_quantity.unit.display}`;
+    return `${round(dose_quantity.value)} ${dose_quantity.unit.display}`;
   }
   return "";
 }
@@ -48,7 +42,7 @@ export function formatSig(instruction: MedicationRequestDosageInstruction) {
 
 export function formatDoseRange(range?: DoseRange): string {
   if (!range?.high?.value) return "";
-  return `${roundForDisplay(range.low.value)} → ${roundForDisplay(range.high?.value)} ${range.high?.unit?.display}`;
+  return `${round(range.low.value)} → ${round(range.high?.value)} ${range.high?.unit?.display}`;
 }
 
 const convertToHours = (value: string, unit: string) => {
@@ -85,7 +79,7 @@ export function formatTotalUnits(
     const dose = instruction.dose_and_rate?.dose_quantity?.value;
     const doseUnit =
       instruction.dose_and_rate?.dose_quantity?.unit?.display || unitText;
-    return dose ? `${roundForDisplay(dose)} ${doseUnit} (PRN)` : "PRN";
+    return dose ? `${round(dose)} ${doseUnit} (PRN)` : "PRN";
   }
 
   const doseValue = instruction.dose_and_rate?.dose_quantity?.value;
@@ -95,7 +89,7 @@ export function formatTotalUnits(
 
   const repeat = instruction.timing?.repeat;
   if (!repeat?.bounds_duration || !repeat.period_unit) {
-    return `${roundForDisplay(doseValue)} ${unitText}`;
+    return `${round(doseValue)} ${unitText}`;
   }
 
   const { frequency = 1, period = "1", period_unit, bounds_duration } = repeat;
@@ -107,13 +101,13 @@ export function formatTotalUnits(
   const periodInHours = convertToHours(period, period_unit);
 
   if (isZero(periodInHours)) {
-    return `${roundForDisplay(doseValue)} ${unitText}`;
+    return `${round(doseValue)} ${unitText}`;
   }
 
   const doseIntervalInHours = divide(periodInHours, frequency);
 
   if (isZero(doseIntervalInHours)) {
-    return `${roundForDisplay(doseValue)} ${unitText}`;
+    return `${round(doseValue)} ${unitText}`;
   }
 
   const numberOfDoses = divide(
@@ -126,11 +120,11 @@ export function formatTotalUnits(
     const highDose = instruction.dose_and_rate.dose_range.high.value || "0";
     const avgDose = divide(add(lowDose, highDose), 2);
     const totalQuantity = multiply(avgDose, numberOfDoses);
-    return `${roundForDisplay(totalQuantity)} ${unitText} (tapered)`;
+    return `${round(totalQuantity)} ${unitText} (tapered)`;
   }
 
   const totalQuantity = multiply(doseValue, numberOfDoses);
   const doseUnit =
     instruction.dose_and_rate?.dose_quantity?.unit?.display || unitText;
-  return `${roundForDisplay(totalQuantity)} ${doseUnit}`;
+  return `${round(totalQuantity)} ${doseUnit}`;
 }

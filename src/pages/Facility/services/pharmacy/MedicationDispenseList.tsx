@@ -47,7 +47,7 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 
-import { roundForDisplay } from "@/Utils/decimal";
+import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { formatDateTime, formatName } from "@/Utils/utils";
@@ -138,7 +138,7 @@ function MedicationTable({
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
                   {dosage
-                    ? `${roundForDisplay(dosage.value)} ${dosage.unit.display}`
+                    ? `${round(dosage.value)} ${dosage.unit.display}`
                     : formatDoseRange(instruction?.dose_and_rate?.dose_range)}
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">

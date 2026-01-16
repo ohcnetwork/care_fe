@@ -60,7 +60,7 @@ import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paym
 import {
   isGreaterThanOrEqual,
   isPositive,
-  roundForApi,
+  round,
   zodDecimal,
 } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -191,7 +191,7 @@ export function PaymentReconciliationSheet({
       // For cash payments, calculate change to return
       form.setValue(
         "returned_amount",
-        roundForApi(Decimal.max(0, tenderedAmount || "0").minus(amount || "0")),
+        round(Decimal.max(0, tenderedAmount || "0").minus(amount || "0")),
       );
     } else {
       // For non-cash payments, tendered amount equals payment amount and returned is 0

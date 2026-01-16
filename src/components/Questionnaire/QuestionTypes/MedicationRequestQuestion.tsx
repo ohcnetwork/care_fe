@@ -77,13 +77,13 @@ import {
   validateFields,
 } from "@/types/questionnaire/validation";
 import { UserReadMinimal } from "@/types/user/user";
-import { isZero, roundForDisplay } from "@/Utils/decimal";
+import { isZero, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 
 function formatDoseRange(range?: DoseRange): string {
   if (!range?.high?.value) return "";
-  return `${roundForDisplay(range.low?.value)} → ${roundForDisplay(range.high?.value)} ${range.high?.unit?.display}`;
+  return `${round(range.low?.value)} → ${round(range.high?.value)} ${range.high?.unit?.display}`;
 }
 
 interface MedicationRequestQuestionProps {
@@ -742,7 +742,7 @@ export function MedicationRequestQuestion({
                                     <div className="text-sm mt-1 text-gray-600">
                                       {dosageInstruction?.dose_and_rate
                                         ?.dose_quantity &&
-                                        `${roundForDisplay(dosageInstruction.dose_and_rate.dose_quantity.value)} ${dosageInstruction.dose_and_rate.dose_quantity.unit?.display || ""}`}
+                                        `${round(dosageInstruction.dose_and_rate.dose_quantity.value)} ${dosageInstruction.dose_and_rate.dose_quantity.unit?.display || ""}`}
 
                                       {dosageInstruction?.dose_and_rate
                                         ?.dose_range &&

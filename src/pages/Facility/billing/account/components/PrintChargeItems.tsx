@@ -39,7 +39,7 @@ import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paym
 import patientApi from "@/types/emr/patient/patientApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
-import { add, roundForDisplay } from "@/Utils/decimal";
+import { add, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 
@@ -469,9 +469,7 @@ export const PrintChargeItems = (props: {
                                             />
                                           </TableCell>
                                           <TableCell className="text-right w-10">
-                                            {roundForDisplay(
-                                              chargeItem.quantity,
-                                            )}
+                                            {round(chargeItem.quantity)}
                                           </TableCell>
                                           <TableCell className="text-right w-10">
                                             <MonetaryDisplay

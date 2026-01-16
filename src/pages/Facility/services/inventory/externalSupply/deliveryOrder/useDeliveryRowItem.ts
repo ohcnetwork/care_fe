@@ -18,7 +18,7 @@ import { ProductRead } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
 import query from "@/Utils/request/query";
 
-import { add, divide, roundForApi } from "@/Utils/decimal";
+import { add, divide, round } from "@/Utils/decimal";
 import Decimal from "decimal.js";
 import {
   SupplyDeliveryFormValues,
@@ -244,8 +244,7 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
       );
       if (packSize && packQuantity && packSize > 0)
         calculatedBasePrice = divide(calculatedBasePrice, packSize);
-      const roundedBasePrice = roundForApi(calculatedBasePrice);
-      setField("unit_price", roundedBasePrice);
+      setField("unit_price", round(calculatedBasePrice));
     }
   }, [isTaxInclusive, mrpValue, totalTaxFactor, packSize, setField]);
 
@@ -253,7 +252,7 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
   useEffect(() => {
     if (packQuantity && packSize && packQuantity > 0 && packSize > 0) {
       const calculatedQuantity = packQuantity * packSize;
-      setField("supplied_item_quantity", roundForApi(calculatedQuantity));
+      setField("supplied_item_quantity", round(calculatedQuantity));
     }
   }, [packQuantity, packSize, setField]);
 

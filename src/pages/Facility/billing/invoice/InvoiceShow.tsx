@@ -77,7 +77,7 @@ import patientApi from "@/types/emr/patient/patientApi";
 import facilityApi from "@/types/facility/facilityApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import dayjs from "@/Utils/dayjs";
-import { add, roundForDisplay } from "@/Utils/decimal";
+import { add, round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -754,7 +754,7 @@ export function InvoiceShow({
                           <TableCell
                             className={cn(tableCellClass, "text-center")}
                           >
-                            {roundForDisplay(item.quantity)}
+                            {round(item.quantity)}
                           </TableCell>
                           <TableCell
                             className={cn(tableCellClass, "text-right")}

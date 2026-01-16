@@ -42,7 +42,7 @@ import {
   SupplyDeliveryStatus,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
-import { add, roundForDisplay } from "@/Utils/decimal";
+import { add, round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { EllipsisVertical } from "lucide-react";
@@ -214,7 +214,7 @@ export function SupplyDeliveryTable({
             </TableCell>
             <TableCell>
               {delivery.supply_request
-                ? roundForDisplay(delivery.supply_request.quantity)
+                ? round(delivery.supply_request.quantity)
                 : "-"}
             </TableCell>
             <TableCell>{delivery.supplied_item_pack_size || "-"}</TableCell>

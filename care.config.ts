@@ -269,13 +269,6 @@ const careConfig = {
       : 20,
 
     /**
-     * Internal calculation precision (decimal_places in backend)
-     */
-    internalPrecision: env.REACT_DECIMAL_INTERNAL_PRECISION
-      ? parseInt(env.REACT_DECIMAL_INTERNAL_PRECISION, 10)
-      : 6,
-
-    /**
      * Accounting display precision
      * Matches backend `ACCOUNTING_PRECISION` config
      */

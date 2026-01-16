@@ -52,7 +52,7 @@ import {
   MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
-import { isGreaterThan, roundForDisplay, zodDecimal } from "@/Utils/decimal";
+import { isGreaterThan, round, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { formatName } from "@/Utils/utils";
@@ -384,7 +384,7 @@ export function EditChargeItemSheet({
                               <span className="font-medium">
                                 {t("quantity")}
                               </span>
-                              <span>{roundForDisplay(item.quantity)}</span>
+                              <span>{round(item.quantity)}</span>
                             </div>
 
                             <Separator className="my-2" />

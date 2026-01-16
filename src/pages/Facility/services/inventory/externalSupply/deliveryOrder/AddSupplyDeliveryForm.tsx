@@ -79,7 +79,7 @@ import {
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { SupplyRequestRead } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
-import { roundForDisplay, zodDecimal } from "@/Utils/decimal";
+import { round, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -957,8 +957,7 @@ export function AddSupplyDeliveryForm({
                       </label>
                     </div>
                     <div className="text-sm font-medium">
-                      {roundForDisplay(request.quantity)}{" "}
-                      {request.item.base_unit.display}
+                      {round(request.quantity)} {request.item.base_unit.display}
                     </div>
                   </div>
                 ))}

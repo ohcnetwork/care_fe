@@ -80,7 +80,7 @@ import {
   isGreaterThan,
   isLessThanOrEqual,
   isZero,
-  roundForDisplay,
+  round,
   zodDecimal,
 } from "@/Utils/decimal";
 
@@ -408,7 +408,7 @@ export default function DispenseDrawer({
                 item: item.productKnowledge.name,
                 lot: inventory.product.batch?.lot_number || "N/A",
                 requested: lot.quantity,
-                available: roundForDisplay(inventory.net_content),
+                available: round(inventory.net_content),
               }),
             );
             hasErrors = true;

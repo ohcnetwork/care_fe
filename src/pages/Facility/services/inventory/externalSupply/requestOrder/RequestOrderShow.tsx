@@ -53,7 +53,7 @@ import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { SUPPLY_REQUEST_STATUS_COLORS } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
-import { add, isPositive, roundForDisplay, subtract } from "@/Utils/decimal";
+import { add, isPositive, round, subtract } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -643,12 +643,10 @@ export function RequestOrderShow({
                                         {supplyRequest.item.name}
                                       </TableCell>
                                       <TableCell>
-                                        {roundForDisplay(
-                                          supplyRequest.quantity,
-                                        )}
+                                        {round(supplyRequest.quantity)}
                                       </TableCell>
                                       <TableCell>
-                                        {roundForDisplay(
+                                        {round(
                                           supplyRequest.dispatched_quantity,
                                         )}
                                       </TableCell>
@@ -661,7 +659,7 @@ export function RequestOrderShow({
                                             : "text-green-500",
                                         )}
                                       >
-                                        {roundForDisplay(
+                                        {round(
                                           supplyRequest.remaining_quantity,
                                         )}
                                       </TableCell>

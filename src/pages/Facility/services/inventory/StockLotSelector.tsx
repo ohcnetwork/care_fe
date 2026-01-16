@@ -19,7 +19,7 @@ import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryCo
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
-import { isPositive, roundForDisplay } from "@/Utils/decimal";
+import { isPositive, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 
 export interface SelectedLot {
@@ -165,7 +165,7 @@ export default function StockLotSelector({
                         className="border-none rounded-sm"
                       >
                         {selectedInventory && (
-                          <>{roundForDisplay(selectedInventory.net_content)} </>
+                          <>{round(selectedInventory.net_content)} </>
                         )}
                         {selectedInventory?.product.product_knowledge.base_unit
                           .display || t("units")}
@@ -250,7 +250,7 @@ export default function StockLotSelector({
                             : "destructive"
                         }
                       >
-                        {roundForDisplay(inv.net_content)}{" "}
+                        {round(inv.net_content)}{" "}
                         {inv.product.product_knowledge.base_unit.display ||
                           t("units")}
                       </Badge>

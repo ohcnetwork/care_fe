@@ -1,5 +1,5 @@
 import { Condition, conditionSchema } from "@/types/base/condition/condition";
-import { roundForDisplay } from "@/Utils/decimal";
+import { round } from "@/Utils/decimal";
 import { t } from "i18next";
 import { z } from "zod";
 
@@ -135,13 +135,13 @@ export const getRangeSummary = (range: NumericRange) => {
   if (!range.min) {
     return t("observation_interpretation_range_max_only", {
       display: range.interpretation.display,
-      max: roundForDisplay(range.max!),
+      max: round(range.max!),
     });
   }
   if (!range.max) {
     return t("observation_interpretation_range_min_only", {
       display: range.interpretation.display,
-      min: roundForDisplay(range.min),
+      min: round(range.min),
     });
   }
   return t("observation_interpretation_range_between", {

@@ -135,8 +135,7 @@ import {
   isLessThanOrEqual,
   isZero,
   multiply,
-  roundForApi,
-  roundForDisplay,
+  round,
   zodDecimal,
 } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -895,7 +894,7 @@ export default function MedicationBillForm({ patientId }: Props) {
             productKnowledge: medication.requested_product,
             medication,
             isSelected: true,
-            daysSupply: roundForApi(
+            daysSupply: round(
               convertDurationToDays(
                 medication.dosage_instruction[0]?.timing?.repeat
                   ?.bounds_duration?.value || "0",
@@ -989,10 +988,10 @@ export default function MedicationBillForm({ patientId }: Props) {
       const lowDose = instruction.dose_and_rate.dose_range.low.value || "0";
       const highDose = instruction.dose_and_rate.dose_range.high.value || "0";
       const avgDose = divide(add(lowDose, highDose), 2);
-      return roundForDisplay(multiply(avgDose, numberOfDoses));
+      return round(multiply(avgDose, numberOfDoses));
     }
 
-    return roundForDisplay(multiply(doseValue, numberOfDoses));
+    return round(multiply(doseValue, numberOfDoses));
   }
 
   const { mutate: dispense, isPending } = useMutation({
@@ -1161,7 +1160,7 @@ export default function MedicationBillForm({ patientId }: Props) {
             name: effectiveProductKnowledge.name,
             lot: inventory.product.batch?.lot_number || "N/A",
             requested: lot.quantity,
-            available: roundForDisplay(inventory.net_content),
+            available: round(inventory.net_content),
           });
         }
       });
@@ -2073,7 +2072,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                                               )
                                               .map((component) =>
                                                 component.factor
-                                                  ? `${roundForDisplay(component.factor)}%`
+                                                  ? `${round(component.factor)}%`
                                                   : "--",
                                               )}
                                           </div>
@@ -2257,7 +2256,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                   );
 
                   if (dosageInstructions?.[0]) {
-                    const newDaysSupply = roundForApi(
+                    const newDaysSupply = round(
                       convertDurationToDays(
                         dosageInstructions[0]?.timing?.repeat?.bounds_duration
                           ?.value || "0",
@@ -2319,7 +2318,7 @@ export default function MedicationBillForm({ patientId }: Props) {
               reference_id: crypto.randomUUID(),
               productKnowledge: product,
               isSelected: true,
-              daysSupply: roundForApi(
+              daysSupply: round(
                 convertDurationToDays(
                   dosageInstructions[0]?.timing?.repeat?.bounds_duration
                     ?.value || "0",
@@ -2656,7 +2655,7 @@ export const DispensedItemsSheet = ({
                           {item.item.product.product_knowledge.name}
                         </TableCell>
                         <TableCell>
-                          {roundForDisplay(item.charge_item.quantity)}{" "}
+                          {round(item.charge_item.quantity)}{" "}
                           {
                             item.dosage_instruction?.[0]?.dose_and_rate
                               ?.dose_quantity?.unit?.display

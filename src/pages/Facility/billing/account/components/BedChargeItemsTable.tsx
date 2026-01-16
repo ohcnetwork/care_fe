@@ -55,7 +55,7 @@ import {
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
-import { roundForDisplay } from "@/Utils/decimal";
+import { round } from "@/Utils/decimal";
 import queryClient from "@/Utils/request/queryClient";
 import { formatName } from "@/Utils/utils";
 import AddMultipleChargeItemsSheet from "@/pages/Facility/services/serviceRequests/components/AddMultipleChargeItemsSheet";
@@ -463,7 +463,7 @@ export function BedChargeItemsTable({
                                 />
                               </TableCell>
                               <TableCell className="border-x p-3 text-gray-950">
-                                {roundForDisplay(item.quantity)}
+                                {round(item.quantity)}
                               </TableCell>
                               <TableCell className="border-x p-3 text-gray-950 font-medium">
                                 <MonetaryDisplay amount={item.total_price} />

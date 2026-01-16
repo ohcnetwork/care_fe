@@ -40,7 +40,7 @@ import {
   SPECIMEN_DEFINITION_UNITS_CODES,
   type SpecimenDefinitionRead,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
-import { isNegative, roundForDisplay } from "@/Utils/decimal";
+import { isNegative, round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
@@ -516,7 +516,7 @@ export function SpecimenForm({
                       <span className="text-gray-600">
                         {t("container_capacity")}:{" "}
                       </span>
-                      {roundForDisplay(
+                      {round(
                         specimenDefinition.type_tested.container.capacity.value,
                       )}{" "}
                       {
@@ -534,7 +534,7 @@ export function SpecimenForm({
                         .string ||
                         (specimenDefinition.type_tested.container.minimum_volume
                           .quantity &&
-                          `${roundForDisplay(specimenDefinition.type_tested.container.minimum_volume.quantity.value)} ${specimenDefinition.type_tested.container.minimum_volume.quantity.unit.display}`)}
+                          `${round(specimenDefinition.type_tested.container.minimum_volume.quantity.value)} ${specimenDefinition.type_tested.container.minimum_volume.quantity.unit.display}`)}
                     </div>
                   )}
                   {specimenDefinition.type_tested.container.preparation && (

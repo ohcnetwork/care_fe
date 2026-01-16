@@ -24,7 +24,7 @@ import {
 
 import useFilters from "@/hooks/useFilters";
 
-import { isLessThan, roundForDisplay } from "@/Utils/decimal";
+import { isLessThan, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
@@ -183,7 +183,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                         "text-yellow-600",
                     )}
                   >
-                    {roundForDisplay(inventory.net_content)}
+                    {round(inventory.net_content)}
                   </TableCell>
                   <TableCell className="font-medium">
                     <Badge variant={ACCOUNT_STATUS_COLORS[inventory.status]}>

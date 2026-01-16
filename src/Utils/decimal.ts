@@ -15,11 +15,6 @@ Decimal.set({
 export const ACCOUNTING_PRECISION = careConfig.decimal.accountingPrecision;
 
 /**
- * Internal calculation precision (matches backend DecimalField)
- */
-export const INTERNAL_PRECISION = careConfig.decimal.internalPrecision;
-
-/**
  * Create a Decimal from a string value (API response format)
  */
 export function decimal(value: string | number | Decimal): Decimal {
@@ -66,15 +61,8 @@ export function divide(
 /**
  * Round to accounting precision (for display)
  */
-export function roundForDisplay(value: string | number | Decimal): string {
+export function round(value: string | number | Decimal): string {
   return new Decimal(value).toFixed(ACCOUNTING_PRECISION);
-}
-
-/**
- * Round to internal precision (for API submission)
- */
-export function roundForApi(value: string | number | Decimal): string {
-  return new Decimal(value).toFixed(INTERNAL_PRECISION);
 }
 
 /**
@@ -201,4 +189,4 @@ export const zodDecimal = (options?: {
     .refine((val) => options?.max === undefined || Number(val) <= options.max, {
       message: `Must be at most ${options?.max}`,
     })
-    .transform((val) => roundForApi(val));
+    .transform(round);

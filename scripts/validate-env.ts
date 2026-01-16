@@ -154,7 +154,6 @@ const envSchema = z
     REACT_AUTO_REFRESH_INTERVAL: numberAsString.optional(),
     REACT_AUTO_REFRESH_BY_DEFAULT: booleanAsStringSchema.optional(),
     REACT_DECIMAL_PRECISION: numberAsString.optional(),
-    REACT_DECIMAL_INTERNAL_PRECISION: numberAsString.optional(),
     REACT_ACCOUNTING_PRECISION: numberAsString.optional(),
     REACT_DECIMAL_ROUNDING_METHOD: z
       .string()

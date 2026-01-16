@@ -57,7 +57,7 @@ import observationDefinitionApi from "@/types/emr/observationDefinition/observat
 import { SpecimenDefinitionStatus } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
-import { roundForDisplay } from "@/Utils/decimal";
+import { round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
@@ -266,7 +266,7 @@ function ActivityDefinitionFormContent({
                     value:
                       s.type_tested?.container?.minimum_volume?.string ||
                       (s.type_tested?.container?.minimum_volume?.quantity
-                        ? `${roundForDisplay(s.type_tested.container.minimum_volume.quantity.value)} ${s.type_tested.container.minimum_volume.quantity.unit.display}`
+                        ? `${round(s.type_tested.container.minimum_volume.quantity.value)} ${s.type_tested.container.minimum_volume.quantity.unit.display}`
                         : undefined),
                   },
                   {
@@ -772,7 +772,7 @@ function ActivityDefinitionFormContent({
                                     ?.string ??
                                   (spec.type_tested?.container?.minimum_volume
                                     ?.quantity
-                                    ? `${roundForDisplay(spec.type_tested.container.minimum_volume.quantity.value)} ${spec.type_tested.container.minimum_volume.quantity.unit.display}`
+                                    ? `${round(spec.type_tested.container.minimum_volume.quantity.value)} ${spec.type_tested.container.minimum_volume.quantity.unit.display}`
                                     : undefined),
                               },
                               {

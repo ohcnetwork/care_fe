@@ -20,7 +20,7 @@ import {
   SpecimenDefinitionStatus,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
-import { roundForDisplay } from "@/Utils/decimal";
+import { round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
@@ -80,7 +80,7 @@ export function SpecimenDefinitionDetail({
     quantity: { value: string | null; unit: Code | null } | null,
   ) => {
     if (!quantity?.value || !quantity?.unit?.display) return "-";
-    return `${roundForDisplay(quantity.value)} ${quantity.unit.display}`;
+    return `${round(quantity.value)} ${quantity.unit.display}`;
   };
 
   const formatDuration = (duration: DurationSpec | null | undefined) => {

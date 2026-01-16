@@ -24,7 +24,7 @@ import PrintTable from "@/components/Common/PrintTable";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { MedicationAdministrationRead } from "@/types/emr/medicationAdministration/medicationAdministration";
 import medicationAdministrationApi from "@/types/emr/medicationAdministration/medicationAdministrationApi";
-import { roundForDisplay } from "@/Utils/decimal";
+import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import {
   formatName,
@@ -408,7 +408,7 @@ const MedicationAdministrationTable = ({
         <p className="text-sm flex items-center justify-center gap-1 flex-wrap">
           <span>
             {administration.dosage?.dose &&
-              roundForDisplay(administration.dosage.dose.value)}{" "}
+              round(administration.dosage.dose.value)}{" "}
             {administration.dosage?.dose?.unit.display ??
               administration.dosage?.dose?.unit.code}
           </span>

@@ -22,7 +22,7 @@ import {
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-import { add, roundForDisplay } from "@/Utils/decimal";
+import { add, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 
 interface Props {
@@ -165,7 +165,7 @@ export default function AppointmentPrint(props: Props) {
                               </Label>
                             </div>
                             <p className="text-xs text-gray-600">
-                              {t("qty")}: {roundForDisplay(item.quantity)}
+                              {t("qty")}: {round(item.quantity)}
                             </p>
                           </div>
                           <div className="text-right">
