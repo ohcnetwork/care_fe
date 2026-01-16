@@ -322,7 +322,7 @@ export function MedicationRequestQuestion({
           ...request,
           requested_product: requested_product?.id,
           requested_product_internal: requested_product,
-          requester: request.requester || currentUser,
+          requester: currentUser,
           medication: requested_product?.id ? null : request.medication,
         } as MedicationRequestCreate;
       } else {
@@ -476,17 +476,17 @@ export function MedicationRequestQuestion({
                 },
               },
               {
-                key: "created_by",
+                key: "requester",
                 label: t("prescribed_by"),
-                render: (created_by) => (
+                render: (requester) => (
                   <div className="flex items-center gap-2">
                     <Avatar
-                      imageUrl={created_by?.profile_picture_url}
-                      name={formatName(created_by, true)}
+                      imageUrl={requester?.profile_picture_url}
+                      name={formatName(requester, true)}
                       className="size-6 rounded-full"
                     />
                     <span className="text-sm truncate">
-                      {formatName(created_by)}
+                      {formatName(requester)}
                     </span>
                   </div>
                 ),

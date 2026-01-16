@@ -8,7 +8,7 @@ import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import { UserReadMinimal } from "@/types/user/user";
 
 export enum ChargeItemStatus {
-  planned = "planned",
+  // planned = "planned",
   billable = "billable",
   not_billable = "not_billable",
   aborted = "aborted",
@@ -18,7 +18,7 @@ export enum ChargeItemStatus {
 }
 
 export const CHARGE_ITEM_STATUS_COLORS = {
-  planned: "blue",
+  // planned: "blue",
   billable: "indigo",
   not_billable: "yellow",
   aborted: "destructive",

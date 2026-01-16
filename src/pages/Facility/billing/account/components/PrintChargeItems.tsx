@@ -21,8 +21,8 @@ import {
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { paymentmethodMap } from "@/pages/Facility/billing/paymentReconciliation/PaymentsData";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import accountApi from "@/types/billing/account/accountApi";
@@ -666,7 +666,11 @@ export const PrintChargeItems = (props: {
                                             </TableCell>
                                           )}
                                           <TableCell>
-                                            {paymentmethodMap[payment.method]}
+                                            {
+                                              PAYMENT_RECONCILIATION_METHOD_MAP[
+                                                payment.method
+                                              ]
+                                            }
                                           </TableCell>
                                           <TableCell className="text-right">
                                             <MonetaryDisplay

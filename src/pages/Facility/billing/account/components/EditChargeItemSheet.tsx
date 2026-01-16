@@ -281,7 +281,8 @@ export function EditChargeItemSheet({
                               min={1}
                               {...field}
                               disabled={
-                                item.status !== ChargeItemStatus.planned
+                                item.status === ChargeItemStatus.billed ||
+                                item.status === ChargeItemStatus.paid
                               }
                             />
                           </FormControl>
@@ -298,21 +299,22 @@ export function EditChargeItemSheet({
                       <h3 className="text-sm font-medium">
                         {t("pricing_details")}
                       </h3>
-                      {(item.status === ChargeItemStatus.planned ||
-                        item.status === ChargeItemStatus.billable) && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="border-gray-400 gap-1"
-                          onClick={() => {
-                            setIsEditDialogOpen(true);
-                          }}
-                        >
-                          <CareIcon icon="l-edit" className="size-4" />
-                          {t("edit")}
-                          <ShortcutBadge actionId="edit-account" />
-                        </Button>
-                      )}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-gray-400 gap-1"
+                        onClick={() => {
+                          setIsEditDialogOpen(true);
+                        }}
+                        disabled={
+                          item.status === ChargeItemStatus.billed ||
+                          item.status === ChargeItemStatus.paid
+                        }
+                      >
+                        <CareIcon icon="l-edit" className="size-4" />
+                        {t("edit")}
+                        <ShortcutBadge actionId="edit-account" />
+                      </Button>
                     </div>
 
                     <div className="rounded-md border bg-card">

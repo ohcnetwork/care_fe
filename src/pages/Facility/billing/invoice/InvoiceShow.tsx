@@ -45,6 +45,7 @@ import {
   BadgeCheck,
   ChevronDown,
   ChevronLeft,
+  EyeIcon,
   FileCheck,
   PrinterIcon,
   ReceiptText,
@@ -65,13 +66,13 @@ import { Separator } from "@/components/ui/separator";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { useCareApps } from "@/hooks/useCareApps";
 import { cn } from "@/lib/utils";
-import { paymentmethodMap } from "@/pages/Facility/billing/paymentReconciliation/PaymentsData";
 import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
+import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import { getPartialId } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import facilityApi from "@/types/facility/facilityApi";
@@ -1056,7 +1057,7 @@ export function InvoiceShow({
                             <TableCell
                               className={cn(tableCellClass, "font-medium")}
                             >
-                              <span className="flex justify-between items-center">
+                              <span className="flex justify-between items-center flex-wrap gap-2">
                                 {payment.payment_datetime
                                   ? format(
                                       new Date(payment.payment_datetime),
@@ -1064,27 +1065,48 @@ export function InvoiceShow({
                                     )
                                   : "-"}
 
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-gray-800 font-semibold text-xs p-2"
-                                  onClick={() => {
-                                    navigate(
-                                      `/facility/${facilityId}/billing/payments/${payment.id}/print`,
-                                    );
-                                  }}
-                                >
-                                  <>
-                                    <PrinterIcon className="size-3" />
-                                    {t("print")}
-                                  </>
-                                </Button>
+                                <div className="flex gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-gray-800 font-semibold text-xs p-2"
+                                    onClick={() => {
+                                      navigate(
+                                        `/facility/${facilityId}/billing/payments/${payment.id}`,
+                                      );
+                                    }}
+                                  >
+                                    <>
+                                      <EyeIcon className="size-3" />
+                                      {t("view")}
+                                    </>
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-gray-800 font-semibold text-xs p-2"
+                                    onClick={() => {
+                                      navigate(
+                                        `/facility/${facilityId}/billing/payments/${payment.id}/print`,
+                                      );
+                                    }}
+                                  >
+                                    <>
+                                      <PrinterIcon className="size-3" />
+                                      {t("print")}
+                                    </>
+                                  </Button>
+                                </div>
                               </span>
                             </TableCell>
                             <TableCell
                               className={cn(tableCellClass, "text-left")}
                             >
-                              {paymentmethodMap[payment.method]}
+                              {
+                                PAYMENT_RECONCILIATION_METHOD_MAP[
+                                  payment.method
+                                ]
+                              }
                             </TableCell>
                             <TableCell className={tableCellClass}>
                               {payment.reference_number}
