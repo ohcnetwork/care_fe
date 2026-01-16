@@ -34,7 +34,6 @@ import UserSelector from "@/components/Common/UserSelector";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
-import mutate from "@/Utils/request/mutate";
 import { ResourceCategorySubType } from "@/types/base/resourceCategory/resourceCategory";
 import {
   ApplyChargeItemDefinitionRequest,
@@ -46,6 +45,8 @@ import {
   ChargeItemDefinitionRead,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { UserReadMinimal } from "@/types/user/user";
+import { round } from "@/Utils/decimal";
+import mutate from "@/Utils/request/mutate";
 
 interface AddMultipleChargeItemsSheetProps {
   open: boolean;
@@ -262,8 +263,10 @@ export default function AddMultipleChargeItemsSheet({
                         </label>
                         <div className="flex items-center gap-1">
                           <span>
-                            {item.charge_item_definition_object
-                              .price_components?.[0]?.amount || 0}{" "}
+                            {round(
+                              item.charge_item_definition_object
+                                .price_components?.[0]?.amount || 0,
+                            )}{" "}
                             {item.charge_item_definition_object
                               .price_components?.[0]?.code?.code || "INR"}
                           </span>
@@ -324,8 +327,10 @@ export default function AddMultipleChargeItemsSheet({
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <span>
-                            {item.charge_item_definition_object
-                              .price_components?.[0]?.amount || 0}{" "}
+                            {round(
+                              item.charge_item_definition_object
+                                .price_components?.[0]?.amount || 0,
+                            )}{" "}
                             {item.charge_item_definition_object
                               .price_components?.[0]?.code?.code || "INR"}
                           </span>

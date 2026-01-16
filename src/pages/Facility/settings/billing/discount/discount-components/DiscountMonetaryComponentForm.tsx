@@ -38,7 +38,7 @@ import {
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
-import { zodDecimal } from "@/Utils/decimal";
+import { round, zodDecimal } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
 
@@ -62,8 +62,8 @@ export function DiscountMonetaryComponentForm({
         .object({
           monetary_component_type: z.literal(MonetaryComponentType.discount),
           code: CodeSchema.optional(),
-          factor: zodDecimal({ min: 0, max: 100 }).optional(),
-          amount: zodDecimal({ min: 0 }).optional(),
+          factor: zodDecimal({ min: 0, max: 100 }).optional().nullable(),
+          amount: zodDecimal({ min: 0 }).optional().nullable(),
           title: z.string().min(1, { message: t("field_required") }),
           conditions: z.array(conditionSchema).default([]),
         })
@@ -101,8 +101,8 @@ export function DiscountMonetaryComponentForm({
     defaultValues: {
       monetary_component_type: MonetaryComponentType.discount,
       code: defaultValues?.code,
-      factor: defaultValues?.factor,
-      amount: defaultValues?.amount,
+      factor: defaultValues?.factor ? round(defaultValues.factor) : null,
+      amount: defaultValues?.amount ? round(defaultValues.amount) : null,
       title: defaultValues?.title || "",
       conditions: defaultValues?.conditions || [],
     },
@@ -111,9 +111,9 @@ export function DiscountMonetaryComponentForm({
   const handleValueTypeChange = (value: "factor" | "amount") => {
     setValueType(value);
     if (value === "factor") {
-      form.setValue("amount", undefined);
+      form.setValue("amount", null);
     } else {
-      form.setValue("factor", undefined);
+      form.setValue("factor", null);
     }
   };
 
