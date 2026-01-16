@@ -18,6 +18,7 @@ export const numberFormatter = new Intl.NumberFormat("en-IN", {
 
 export const numberFormatterWithoutCurrency = new Intl.NumberFormat("en-IN", {
   style: "decimal",
+  minimumFractionDigits: ACCOUNTING_PRECISION,
 });
 
 // Helper function to get currency symbol

@@ -239,7 +239,7 @@ export function EditInvoiceTable({
   };
 
   const handleBaseAmountChange = (index: number, value: string) => {
-    form.setValue(`items.${index}.baseAmount`, round(value));
+    form.setValue(`items.${index}.baseAmount`, value);
   };
 
   const handleAddDiscount = (itemIndex: number) => {
@@ -376,10 +376,9 @@ export function EditInvoiceTable({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit, (errors) => {
-          console.log(form.getValues());
-          console.log(errors);
-        })}
+        onSubmit={form.handleSubmit(onSubmit, () =>
+          toast.error(t("invalid_value")),
+        )}
         className="space-y-4"
       >
         <div>
