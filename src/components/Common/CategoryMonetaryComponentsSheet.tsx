@@ -27,6 +27,7 @@ import {
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import facilityApi from "@/types/facility/facilityApi";
+import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -96,12 +97,21 @@ export function CategoryMonetaryComponentsSheet({
 
   useEffect(() => {
     if (isOpen && configuredMonetaryComponents) {
-      const discounts = configuredMonetaryComponents.filter(
-        (c) => c.monetary_component_type === MonetaryComponentType.discount,
-      );
-      const taxes = configuredMonetaryComponents.filter(
-        (c) => c.monetary_component_type === MonetaryComponentType.tax,
-      );
+      const discounts = configuredMonetaryComponents
+        .filter(
+          (c) => c.monetary_component_type === MonetaryComponentType.discount,
+        )
+        .map((component) => ({
+          ...component,
+          amount: component.amount ? round(component.amount) : component.amount,
+          factor: component.factor ? round(component.factor) : component.factor,
+        }));
+      const taxes = configuredMonetaryComponents
+        .filter((c) => c.monetary_component_type === MonetaryComponentType.tax)
+        .map((component) => ({
+          ...component,
+          factor: component.factor ? round(component.factor) : component.factor,
+        }));
       setSelectedDiscounts(discounts);
       setSelectedTaxes(taxes);
     } else if (isOpen) {
@@ -136,13 +146,23 @@ export function CategoryMonetaryComponentsSheet({
         ...component,
         amount:
           component?.amount != null
-            ? String(component.amount)
+            ? round(component.amount)
             : component.amount,
+        factor:
+          component?.factor != null
+            ? round(component.factor)
+            : component.factor,
       }))
     : [];
 
   const availableTaxes = facilityData
-    ? [...facilityData.instance_tax_monetary_components]
+    ? [...facilityData.instance_tax_monetary_components].map((component) => ({
+        ...component,
+        factor:
+          component?.factor != null
+            ? round(component.factor)
+            : component.factor,
+      }))
     : [];
 
   return (
