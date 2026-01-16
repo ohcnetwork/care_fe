@@ -43,6 +43,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
+import { Avatar } from "@/components/Common/Avatar";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
   ChargeItemRead,
@@ -53,6 +54,7 @@ import {
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
+import { formatName } from "@/Utils/utils";
 
 const formSchema = z.object({
   title: z.string(),
@@ -91,14 +93,17 @@ export function EditChargeItemSheet({
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+  });
+
+  useEffect(() => {
+    form.reset({
       title: item.title,
       description: item.description || undefined,
       status: item.status,
       quantity: item.quantity,
       note: item.note || undefined,
-    },
-  });
+    });
+  }, [item, form]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -173,14 +178,14 @@ export function EditChargeItemSheet({
         )}
       </SheetTrigger>
       <SheetContent className="sm:max-w-md md:max-w-lg">
-        <SheetHeader>
+        <SheetHeader className="border-b">
           <SheetTitle>{t("edit_charge_item")}</SheetTitle>
           <SheetDescription>
             {t("edit_charge_item_description")}
           </SheetDescription>
         </SheetHeader>
 
-        <ScrollArea className="h-[calc(100vh-4rem)] scroll-y-auto py-2 px-4 border rounded-md mt-2">
+        <ScrollArea className="h-[calc(100vh-4rem)] scroll-y-auto pb-3 pr-4">
           <div className="space-y-6 py-6">
             <Form {...form}>
               <form
@@ -219,6 +224,21 @@ export function EditChargeItemSheet({
                       </FormItem>
                     )}
                   />
+                  {item.performer_actor && (
+                    <div className="space-y-2">
+                      <FormLabel>{t("performer")}</FormLabel>
+                      <div className="flex items-center gap-2 p-3 rounded-md border">
+                        <Avatar
+                          imageUrl={item.performer_actor.profile_picture_url}
+                          name={formatName(item.performer_actor)}
+                          className="size-7 rounded-full"
+                        />
+                        <span className="text-sm font-semibold">
+                          {formatName(item.performer_actor)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
@@ -484,6 +504,7 @@ export function EditChargeItemSheet({
             queryKey: ["chargeItems", accountId],
           });
         }}
+        title={t("edit_charge_item")}
       />
     </Sheet>
   );

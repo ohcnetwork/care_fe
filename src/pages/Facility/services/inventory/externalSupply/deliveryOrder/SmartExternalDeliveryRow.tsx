@@ -36,14 +36,13 @@ import { MonetaryComponentSelector } from "@/components/Billing/MonetaryComponen
 import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPicker";
 import { SchemaField } from "@/components/Extensions/SchemaField";
 import { CURRENCY_SYMBOL } from "@/components/ui/monetary-display";
+import { ProcessedExtension } from "@/hooks/useExtensions";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ProductRead } from "@/types/inventory/product/product";
-import { extractSchemaInfo } from "@/Utils/schema/extensionSchema";
-import { JSONSchema2020 } from "@/Utils/schema/types";
 
 import { SupplyDeliveryFormValues } from "./AddSupplyDeliveryForm";
 import { useDeliveryRowItem } from "./useDeliveryRowItem";
@@ -54,7 +53,8 @@ interface Props {
   informationalCodes: Code[];
   autoOpenProductSelect?: boolean;
   onProductSelectOpened?: () => void;
-  extensionsSchema?: JSONSchema2020;
+  /** All processed extensions with owner and schema info */
+  processedExtensions: ProcessedExtension[];
   onRemove?: () => void;
 }
 
@@ -64,17 +64,20 @@ export function SmartExternalDeliveryRow({
   informationalCodes,
   autoOpenProductSelect = false,
   onProductSelectOpened,
-  extensionsSchema,
+  processedExtensions,
   onRemove,
 }: Props) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
   const [batchSelectorOpen, setBatchSelectorOpen] = useState(false);
 
-  // Extract extension field metadata from schema
-  const { fieldMetadata: extensionFields, conditionalRules } = useMemo(
-    () => extractSchemaInfo(extensionsSchema),
-    [extensionsSchema],
+  // Filter extensions that have fields to render
+  const extensionsWithFields = useMemo(
+    () =>
+      processedExtensions.filter(
+        ({ fieldMetadata }) => fieldMetadata.length > 0,
+      ),
+    [processedExtensions],
   );
 
   const {
@@ -82,6 +85,8 @@ export function SmartExternalDeliveryRow({
     suppliedItem,
     batchNumber,
     unitPrice,
+    packQuantity,
+    packSize,
     taxComponents,
     discountComponents,
     informationalComponents,
@@ -306,7 +311,64 @@ export function SmartExternalDeliveryRow({
         )}
       </TableCell>
 
-      {/* Base Price */}
+      {/* Pack Size */}
+      <TableCell className="align-top p-2">
+        <Input
+          type="number"
+          min={1}
+          value={packSize || ""}
+          placeholder="0"
+          onChange={(e) => {
+            const value = parseInt(e.target.value) || undefined;
+            setField("supplied_item_pack_size", value);
+            markAsEdited();
+          }}
+          disabled={!productKnowledge}
+          className="w-[5rem]"
+        />
+      </TableCell>
+
+      {/* Pack Quantity */}
+      <TableCell className="align-top p-2">
+        <Input
+          type="number"
+          min={1}
+          value={packQuantity || ""}
+          placeholder="0"
+          onChange={(e) => {
+            const value = parseInt(e.target.value) || undefined;
+            setField("supplied_item_pack_quantity", value);
+            markAsEdited();
+          }}
+          disabled={!productKnowledge}
+          className="w-[7rem]"
+        />
+      </TableCell>
+
+      {/* Quantity */}
+      <TableCell className="align-top p-2">
+        <FormField
+          control={form.control}
+          name={`items.${index}.supplied_item_quantity`}
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  type="number"
+                  min={1}
+                  {...field}
+                  onChange={(e) => field.onChange(parseInt(e.target.value))}
+                  className="w-[8rem]"
+                  disabled
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </TableCell>
+
+      {/* Item Price */}
       <TableCell className="align-top p-2!">
         <div className="flex flex-col gap-1">
           <div className="flex items-center">
@@ -378,28 +440,6 @@ export function SmartExternalDeliveryRow({
         );
       })}
 
-      {/* Quantity */}
-      <TableCell className="align-top p-2">
-        <FormField
-          control={form.control}
-          name={`items.${index}.supplied_item_quantity`}
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input
-                  type="number"
-                  min={1}
-                  {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value))}
-                  className="w-full min-w-[70px]"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </TableCell>
-
       {/* Taxes */}
       <TableCell className="align-top p-2">
         <MonetaryComponentSelector
@@ -428,28 +468,35 @@ export function SmartExternalDeliveryRow({
         </span>
       </TableCell>
 
-      {/* Extension Fields - each field in its own column */}
-      {extensionFields.map((fieldMeta) => (
-        <TableCell key={fieldMeta.name} className="align-top">
-          <SchemaField
-            metadata={{
-              ...fieldMeta,
-              label: "",
-              description: undefined,
-              required: false, // Hide asterisk - shown in table header
-            }}
-            control={form.control}
-            basePath={`items.${index}.extensions`}
-            className="min-w-[100px] [&_input]:h-9 gap-0"
-            conditionalRules={conditionalRules}
-          />
-          {fieldMeta.description && (
-            <p className="text-[10px] text-muted-foreground mt-1">
-              {fieldMeta.description}
-            </p>
-          )}
-        </TableCell>
-      ))}
+      {/* Extension Fields - each field in its own column, name-namespaced */}
+      {extensionsWithFields.flatMap(
+        ({ config, fieldMetadata, conditionalRules }) =>
+          fieldMetadata.map((fieldMeta) => (
+            <TableCell
+              key={`${config.name}-${fieldMeta.name}`}
+              className="align-top"
+            >
+              <SchemaField
+                metadata={{
+                  ...fieldMeta,
+                  label: "",
+                  description: undefined,
+                  required: false, // Hide asterisk - shown in table header
+                }}
+                control={form.control}
+                basePath={`items.${index}.extensions.${config.name}`}
+                className="min-w-[100px] [&_input]:h-9 gap-0"
+                conditionalRules={conditionalRules}
+              />
+              {fieldMeta.description && (
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  {fieldMeta.description}
+                </p>
+              )}
+            </TableCell>
+          )),
+      )}
+
       <TableCell>
         <Button
           type="button"

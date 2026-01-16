@@ -495,6 +495,7 @@ export function SchemaField<TFieldValues extends FieldValues>({
               <Input
                 type="number"
                 inputMode={metadata.type === "integer" ? "numeric" : "decimal"}
+                step={metadata.type === "integer" ? 1 : "0.01"}
                 min={metadata.minimum}
                 max={metadata.maximum}
                 disabled={metadata.readOnly}

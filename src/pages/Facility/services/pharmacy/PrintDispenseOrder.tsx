@@ -1,0 +1,291 @@
+import careConfig from "@careConfig";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
+
+import PrintPreview from "@/CAREUI/misc/PrintPreview";
+
+import Loading from "@/components/Common/Loading";
+import PrintTable from "@/components/Common/PrintTable";
+
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { formatPatientAge } from "@/Utils/utils";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { DispenseOrderRead } from "@/types/emr/dispenseOrder/dispenseOrder";
+import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
+import {
+  MedicationDispenseRead,
+  MedicationDispenseStatus,
+} from "@/types/emr/medicationDispense/medicationDispense";
+import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
+import { PatientRead } from "@/types/emr/patient/patient";
+import patientApi from "@/types/emr/patient/patientApi";
+
+interface DetailRowProps {
+  label: string;
+  value?: string | null;
+  isStrong?: boolean;
+}
+
+const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
+  return (
+    <div className="flex">
+      <span className="text-gray-600 w-32">{label}</span>
+      <span className="text-gray-600">: </span>
+      <span className={`ml-1 ${isStrong ? "font-semibold" : ""}`}>
+        {value || "-"}
+      </span>
+    </div>
+  );
+};
+
+interface DispenseOrderContentProps {
+  dispenseOrder: DispenseOrderRead;
+  dispenses: MedicationDispenseRead[];
+}
+
+const DispenseOrderContent = ({
+  dispenseOrder,
+  dispenses,
+}: DispenseOrderContentProps) => {
+  const { t } = useTranslation();
+
+  return (
+    <div>
+      {/* Dispense Order Header */}
+      <div className="mb-4">
+        <div className="text-2xl font-semibold mb-2 flex items-end gap-4">
+          <p>{dispenseOrder.name}</p>
+        </div>
+        {dispenseOrder.note && (
+          <p className="text-sm text-gray-600">{dispenseOrder.note}</p>
+        )}
+      </div>
+
+      {/* Dispenses Table */}
+      {dispenses && dispenses.length > 0 && (
+        <div className="mt-4">
+          <p className="text-base font-semibold mb-2">
+            {t("medication_dispenses")}
+          </p>
+          <PrintTable
+            headers={[
+              { key: "medicine" },
+              { key: "dosage" },
+              { key: "frequency" },
+              { key: "quantity" },
+              { key: "lot_batch_number" },
+              { key: "expiry_date" },
+              { key: "prepared_date" },
+            ]}
+            rows={dispenses.map((dispense) => {
+              const instruction = dispense.dosage_instruction[0] ?? {};
+              const frequency = instruction?.timing?.code;
+              const dosage = instruction?.dose_and_rate?.dose_quantity;
+
+              return {
+                medicine: dispense.item.product.product_knowledge.name,
+                dosage: dosage ? `${dosage.value} ${dosage.unit.display}` : "-",
+                frequency: instruction?.as_needed_boolean
+                  ? `${t("as_needed_prn")} ${
+                      instruction?.as_needed_for?.display
+                        ? `(${instruction.as_needed_for.display})`
+                        : ""
+                    }`
+                  : frequency?.display || "-",
+                quantity: dispense.quantity?.toString() || "-",
+                lot_batch_number:
+                  dispense.item.product.batch?.lot_number || "-",
+                expiry_date: dispense.item.product?.expiration_date
+                  ? format(
+                      new Date(dispense.item.product.expiration_date),
+                      "dd/MM/yyyy",
+                    )
+                  : "-",
+                prepared_date: new Date(
+                  dispense.when_prepared,
+                ).toLocaleDateString(),
+              };
+            })}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
+interface DispenseOrderPreviewProps {
+  dispenseOrder: DispenseOrderRead;
+  dispenses: MedicationDispenseRead[];
+  patient: PatientRead;
+}
+
+const DispenseOrderPreview = ({
+  dispenseOrder,
+  dispenses,
+  patient,
+}: DispenseOrderPreviewProps) => {
+  const { t } = useTranslation();
+  const { facility } = useCurrentFacility();
+
+  return (
+    <PrintPreview
+      title={`${t("dispense_order")} - ${patient.name}`}
+      disabled={!dispenses?.length}
+    >
+      <div className="md:p-2 max-w-4xl mx-auto">
+        <div>
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
+            <img
+              src={careConfig.mainLogo?.dark}
+              alt="Care Logo"
+              className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2"
+            />
+            <div className="text-center sm:text-left sm:order-1">
+              <h1 className="text-3xl font-semibold">{facility?.name}</h1>
+              {facility?.address && (
+                <div className="text-gray-500 whitespace-pre-wrap break-words text-sm">
+                  {facility.address}
+                  {facility.phone_number && (
+                    <p className="text-gray-500 text-sm">
+                      {facility.phone_number}
+                    </p>
+                  )}
+                </div>
+              )}
+              <h2 className="mt-2 text-gray-500 uppercase text-sm tracking-wide font-semibold">
+                {t("dispense_order")}
+              </h2>
+            </div>
+          </div>
+
+          {/* Patient Details */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 mb-8">
+            <div className="space-y-3">
+              <DetailRow label={t("patient")} value={patient.name} isStrong />
+              <DetailRow
+                label={`${t("age")} / ${t("sex")}`}
+                value={
+                  patient
+                    ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
+                    : undefined
+                }
+                isStrong
+              />
+              <DetailRow
+                label={t("status")}
+                value={t(`dispense_order_status__${dispenseOrder.status}`)}
+                isStrong
+              />
+            </div>
+            <div className="space-y-3">
+              <DetailRow
+                label={t("date")}
+                value={format(new Date(), "dd MMM yyyy, EEEE")}
+                isStrong
+              />
+              <DetailRow
+                label={t("mobile_number")}
+                value={patient && formatPhoneNumberIntl(patient.phone_number)}
+                isStrong
+              />
+              <DetailRow
+                label={t("location")}
+                value={dispenseOrder.location.name}
+                isStrong
+              />
+            </div>
+          </div>
+
+          <DispenseOrderContent
+            dispenseOrder={dispenseOrder}
+            dispenses={dispenses}
+          />
+
+          {/* Footer */}
+          <div className="mt-8 pt-2 text-[10px] text-gray-500 flex justify-between flex-wrap">
+            <p>
+              {t("generated_on")} {format(new Date(), "PPP 'at' p")}
+            </p>
+            <p>{t("computer_generated_document")}</p>
+          </div>
+        </div>
+      </div>
+    </PrintPreview>
+  );
+};
+
+interface PrintDispenseOrderProps {
+  facilityId: string;
+  dispenseOrderId: string;
+  locationId: string;
+}
+
+export const PrintDispenseOrder = ({
+  facilityId,
+  dispenseOrderId,
+  locationId,
+}: PrintDispenseOrderProps) => {
+  const { t } = useTranslation();
+
+  const { data: dispenseOrder, isLoading: isLoadingOrder } = useQuery({
+    queryKey: ["dispenseOrder", facilityId, dispenseOrderId],
+    queryFn: query(dispenseOrderApi.get, {
+      pathParams: { facilityId, id: dispenseOrderId },
+    }),
+    enabled: !!dispenseOrderId,
+  });
+
+  const { data: patient, isLoading: isLoadingPatient } = useQuery({
+    queryKey: ["patient", dispenseOrder?.patient.id],
+    queryFn: query(patientApi.get, {
+      pathParams: { id: dispenseOrder?.patient.id ?? "" },
+    }),
+    enabled: !!dispenseOrder?.patient.id,
+  });
+
+  const { data: medicationDispenses, isLoading: isLoadingDispenses } = useQuery<
+    PaginatedResponse<MedicationDispenseRead>
+  >({
+    queryKey: ["medicationDispenses", dispenseOrderId, locationId],
+    queryFn: query(medicationDispenseApi.list, {
+      queryParams: {
+        order: dispenseOrderId,
+        location: locationId,
+        status: MedicationDispenseStatus.completed,
+      },
+    }),
+    enabled: !!dispenseOrderId,
+  });
+
+  if (isLoadingOrder || isLoadingPatient || isLoadingDispenses) {
+    return <Loading />;
+  }
+
+  if (!dispenseOrder || !patient) {
+    return (
+      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
+        {t("dispense_order_not_found")}
+      </div>
+    );
+  }
+
+  if (!medicationDispenses?.results?.length) {
+    return (
+      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
+        {t("no_medication_dispenses_found")}
+      </div>
+    );
+  }
+
+  return (
+    <DispenseOrderPreview
+      dispenseOrder={dispenseOrder}
+      dispenses={medicationDispenses.results}
+      patient={patient}
+    />
+  );
+};

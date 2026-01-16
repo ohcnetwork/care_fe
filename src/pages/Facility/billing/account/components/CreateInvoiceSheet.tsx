@@ -23,9 +23,8 @@ interface CreateInvoiceSheetProps {
   onSuccess?: () => void;
   sourceUrl?: string;
   locationId?: string;
-  patientId?: string;
   disableCreateChargeItems?: boolean;
-  showDispenseNowButton?: boolean;
+  dispenseOrderId?: string;
 }
 
 export function CreateInvoiceSheet({
@@ -38,9 +37,8 @@ export function CreateInvoiceSheet({
   onSuccess,
   sourceUrl,
   locationId,
-  patientId,
   disableCreateChargeItems = false,
-  showDispenseNowButton = false,
+  dispenseOrderId,
 }: CreateInvoiceSheetProps) {
   const { t } = useTranslation();
 
@@ -62,9 +60,8 @@ export function CreateInvoiceSheet({
             showHeader={false}
             sourceUrl={sourceUrl}
             locationId={locationId}
-            patientId={patientId}
             disableCreateChargeItems={disableCreateChargeItems}
-            showDispenseNowButton={showDispenseNowButton}
+            dispenseOrderId={dispenseOrderId}
           />
         </ScrollArea>
       </SheetContent>
