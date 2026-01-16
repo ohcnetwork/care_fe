@@ -19,7 +19,6 @@ import productApi from "@/types/inventory/product/productApi";
 import query from "@/Utils/request/query";
 
 import { add, divide, round } from "@/Utils/decimal";
-import Decimal from "decimal.js";
 import {
   SupplyDeliveryFormValues,
   SupplyDeliveryItemValues,
@@ -229,10 +228,10 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
     return mrpComponent?.amount ? parseFloat(mrpComponent.amount) : 0;
   }, [informationalComponents]);
 
-  // Total tax factor for tax-inclusive calculation
+  // Total tax factor for tax-inclusive calculation (as string to avoid referential equality issues)
   const totalTaxFactor = useMemo(() => {
-    if (!taxComponents?.length) return new Decimal(0);
-    return add(...taxComponents.map((tax) => tax.factor || 0));
+    if (!taxComponents?.length) return "0";
+    return add(...taxComponents.map((tax) => tax.factor || 0)).toString();
   }, [taxComponents]);
 
   // Calculate base price from MRP when tax inclusive is enabled
@@ -244,9 +243,21 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
       );
       if (packSize && packQuantity && packSize > 0)
         calculatedBasePrice = divide(calculatedBasePrice, packSize);
-      setField("unit_price", round(calculatedBasePrice));
+      const newUnitPrice = round(calculatedBasePrice);
+      // Only update if value actually changed to prevent infinite loops
+      if (newUnitPrice !== unitPrice) {
+        setField("unit_price", newUnitPrice);
+      }
     }
-  }, [isTaxInclusive, mrpValue, totalTaxFactor, packSize, setField]);
+  }, [
+    isTaxInclusive,
+    mrpValue,
+    totalTaxFactor,
+    packSize,
+    packQuantity,
+    unitPrice,
+    setField,
+  ]);
 
   // Auto-calculate quantity when pack quantity or pack size changes
   useEffect(() => {
