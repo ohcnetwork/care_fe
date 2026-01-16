@@ -482,7 +482,7 @@ export function EditInvoiceTable({
                             <Input
                               type="number"
                               {...field}
-                              value={round(field.value)}
+                              value={field.value}
                               min="1"
                               step="1"
                             />
