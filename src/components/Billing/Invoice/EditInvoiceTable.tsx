@@ -60,7 +60,7 @@ import {
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import { UserReadMinimal } from "@/types/user/user";
-import { isPositive, zodDecimal } from "@/Utils/decimal";
+import { isPositive, round, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
@@ -171,6 +171,8 @@ export function EditInvoiceTable({
 
         const discounts = discountComponents.map((component) => ({
           ...component,
+          factor: component.factor ? round(component.factor) : component.factor,
+          amount: component.amount ? round(component.amount) : component.amount,
           conditions: component.conditions?.map((condition) => ({
             ...condition,
             _conditionType: getConditionDiscriminatorValue(
@@ -185,8 +187,8 @@ export function EditInvoiceTable({
           title: item.title,
           status: item.status as ChargeItemStatus,
           description: item.description || "",
-          baseAmount: baseComponent?.amount || "0",
-          quantity: item.quantity,
+          baseAmount: round(baseComponent?.amount || "0"),
+          quantity: round(item.quantity),
           taxComponents,
           discounts: discounts,
         };
@@ -237,7 +239,7 @@ export function EditInvoiceTable({
   };
 
   const handleBaseAmountChange = (index: number, value: string) => {
-    form.setValue(`items.${index}.baseAmount`, value);
+    form.setValue(`items.${index}.baseAmount`, round(value));
   };
 
   const handleAddDiscount = (itemIndex: number) => {

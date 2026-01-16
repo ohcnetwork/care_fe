@@ -61,7 +61,7 @@ import {
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import facilityApi from "@/types/facility/facilityApi";
-import { zodDecimal } from "@/Utils/decimal";
+import { round, zodDecimal } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
@@ -150,14 +150,14 @@ export function ChargeItemDefinitionForm({
           { message: t("invalid_url") },
         ),
       base_price: zodDecimal({ min: 0 }),
-      mrp: zodDecimal({ min: 0 }).optional(),
-      purchase_price: zodDecimal({ min: 0 }).optional(),
+      mrp: zodDecimal({ min: 0 }).optional().nullable(),
+      purchase_price: zodDecimal({ min: 0 }).optional().nullable(),
       price_components: z.array(
         z.object({
           monetary_component_type: z.nativeEnum(MonetaryComponentType),
           code: CodeSchema.optional(),
-          factor: zodDecimal({ min: 0, max: 100 }).optional(),
-          amount: zodDecimal({ min: 0 }).optional(),
+          factor: zodDecimal({ min: 0, max: 100 }).optional().nullable(),
+          amount: zodDecimal({ min: 0 }).optional().nullable(),
           conditions: z.array(conditionSchema),
         }),
       ),
@@ -196,15 +196,17 @@ export function ChargeItemDefinitionForm({
       derived_from_uri: initialData?.derived_from_uri || undefined,
 
       // Base price
-      base_price:
-        initialData?.price_components
-          .find((c) => c.monetary_component_type === MonetaryComponentType.base)
-          ?.amount?.toString() || "",
+      base_price: round(
+        initialData?.price_components.find(
+          (c) => c.monetary_component_type === MonetaryComponentType.base,
+        )?.amount || "0",
+      ),
 
       // MRP and Purchase Price
-      mrp: mrpComponent?.amount?.toString() || "",
-      purchase_price: purchasePriceComponent?.amount?.toString() || "",
-
+      mrp: mrpComponent?.amount ? round(mrpComponent.amount) : null,
+      purchase_price: purchasePriceComponent?.amount
+        ? round(purchasePriceComponent.amount)
+        : null,
       // Price components (excluding base price, MRP, and Purchase Price components)
       price_components:
         initialData?.price_components
@@ -216,6 +218,12 @@ export function ChargeItemDefinitionForm({
           )
           .map((component) => ({
             ...component,
+            amount: component.amount
+              ? round(component.amount)
+              : component.amount,
+            factor: component.factor
+              ? round(component.factor)
+              : component.factor,
             conditions:
               component.conditions?.map((condition) => ({
                 ...condition,
@@ -391,8 +399,6 @@ export function ChargeItemDefinitionForm({
     const newSelectedComponents = selectedComponents.map((component) => ({
       ...component,
       monetary_component_type: type,
-      factor: component.factor != null ? component.factor : undefined,
-      amount: component.factor != null ? undefined : component.amount,
       conditions:
         component.conditions?.map((condition) => ({
           ...condition,
@@ -650,8 +656,10 @@ export function ChargeItemDefinitionForm({
                           <FormControl>
                             <MonetaryAmountInput
                               {...field}
-                              value={field.value ?? "0"}
-                              onChange={(e) => field.onChange(e.target.value)}
+                              value={field.value || ""}
+                              onChange={(e) =>
+                                field.onChange(e.target.value || null)
+                              }
                               placeholder="0.00"
                             />
                           </FormControl>
@@ -675,8 +683,10 @@ export function ChargeItemDefinitionForm({
                       <FormControl>
                         <MonetaryAmountInput
                           {...field}
-                          value={field.value ?? "0"}
-                          onChange={(e) => field.onChange(e.target.value)}
+                          value={field.value || ""}
+                          onChange={(e) =>
+                            field.onChange(e.target.value || null)
+                          }
                           placeholder="0.00"
                         />
                       </FormControl>
@@ -698,8 +708,10 @@ export function ChargeItemDefinitionForm({
                       <FormControl>
                         <MonetaryAmountInput
                           {...field}
-                          value={field.value ?? "0"}
-                          onChange={(e) => field.onChange(e.target.value)}
+                          value={field.value || ""}
+                          onChange={(e) =>
+                            field.onChange(e.target.value || null)
+                          }
                           placeholder="0.00"
                         />
                       </FormControl>
