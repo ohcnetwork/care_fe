@@ -101,8 +101,8 @@ export function DiscountMonetaryComponentForm({
     defaultValues: {
       monetary_component_type: MonetaryComponentType.discount,
       code: defaultValues?.code,
-      factor: defaultValues?.factor ? defaultValues.factor : undefined,
-      amount: defaultValues?.amount ? round(defaultValues?.amount) : undefined,
+      factor: defaultValues?.factor ? round(defaultValues.factor) : null,
+      amount: defaultValues?.amount ? round(defaultValues.amount) : null,
       title: defaultValues?.title || "",
       conditions: defaultValues?.conditions || [],
     },
