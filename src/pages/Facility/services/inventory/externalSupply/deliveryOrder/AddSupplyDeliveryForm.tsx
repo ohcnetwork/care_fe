@@ -179,8 +179,8 @@ export function AddSupplyDeliveryForm({
       product_knowledge: {} as ProductKnowledgeBase,
       supplied_inventory_item: "",
       supplied_item_quantity: 1,
-      supplied_item_pack_quantity: 1,
-      supplied_item_pack_size: 1,
+      supplied_item_pack_quantity: origin ? undefined : 1,
+      supplied_item_pack_size: origin ? undefined : 1,
       supplied_item: undefined,
       supply_request: undefined,
       _is_inward_stock: !origin,
@@ -292,8 +292,8 @@ export function AddSupplyDeliveryForm({
     const itemsFromRequests = selectedRequests?.map((request) => ({
       supplied_inventory_item: undefined,
       supplied_item_quantity: request.quantity,
-      supplied_item_pack_quantity: 1,
-      supplied_item_pack_size: 1,
+      supplied_item_pack_quantity: origin ? undefined : 1,
+      supplied_item_pack_size: origin ? undefined : 1,
       product_knowledge: request.item,
       supplied_item: undefined,
       supply_request: request,
@@ -505,11 +505,13 @@ export function AddSupplyDeliveryForm({
       supplied_item_type: suppliedItemType,
       supplied_item_condition: SupplyDeliveryCondition.normal,
       supplied_item_quantity: item.supplied_item_quantity,
-      supplied_item_pack_quantity: item.supplied_item_pack_quantity,
-      supplied_item_pack_size: item.supplied_item_pack_size,
       ...(origin
         ? { supplied_inventory_item: item.supplied_inventory_item }
-        : { supplied_item: productId }),
+        : {
+            supplied_item: productId,
+            supplied_item_pack_quantity: item.supplied_item_pack_quantity,
+            supplied_item_pack_size: item.supplied_item_pack_size,
+          }),
       supply_request: item.supply_request?.id,
       origin: origin,
       destination: destination,
