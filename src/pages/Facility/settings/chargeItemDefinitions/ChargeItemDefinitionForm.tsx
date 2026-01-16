@@ -61,7 +61,7 @@ import {
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import facilityApi from "@/types/facility/facilityApi";
-import { zodDecimal } from "@/Utils/decimal";
+import { round, zodDecimal } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
@@ -156,8 +156,8 @@ export function ChargeItemDefinitionForm({
         z.object({
           monetary_component_type: z.nativeEnum(MonetaryComponentType),
           code: CodeSchema.optional(),
-          factor: zodDecimal({ min: 0, max: 100 }).optional(),
-          amount: zodDecimal({ min: 0 }).optional(),
+          factor: zodDecimal({ min: 0, max: 100 }).optional().nullable(),
+          amount: zodDecimal({ min: 0 }).optional().nullable(),
           conditions: z.array(conditionSchema),
         }),
       ),
@@ -197,14 +197,13 @@ export function ChargeItemDefinitionForm({
 
       // Base price
       base_price:
-        initialData?.price_components
-          .find((c) => c.monetary_component_type === MonetaryComponentType.base)
-          ?.amount?.toString() || "",
+        initialData?.price_components.find(
+          (c) => c.monetary_component_type === MonetaryComponentType.base,
+        )?.amount || "",
 
       // MRP and Purchase Price
-      mrp: mrpComponent?.amount?.toString() || "",
-      purchase_price: purchasePriceComponent?.amount?.toString() || "",
-
+      mrp: mrpComponent?.amount || "",
+      purchase_price: purchasePriceComponent?.amount || "",
       // Price components (excluding base price, MRP, and Purchase Price components)
       price_components:
         initialData?.price_components
@@ -391,8 +390,6 @@ export function ChargeItemDefinitionForm({
     const newSelectedComponents = selectedComponents.map((component) => ({
       ...component,
       monetary_component_type: type,
-      factor: component.factor != null ? component.factor : undefined,
-      amount: component.factor != null ? undefined : component.amount,
       conditions:
         component.conditions?.map((condition) => ({
           ...condition,
@@ -650,7 +647,7 @@ export function ChargeItemDefinitionForm({
                           <FormControl>
                             <MonetaryAmountInput
                               {...field}
-                              value={field.value ?? "0"}
+                              value={round(field.value ?? "0")}
                               onChange={(e) => field.onChange(e.target.value)}
                               placeholder="0.00"
                             />
@@ -675,7 +672,7 @@ export function ChargeItemDefinitionForm({
                       <FormControl>
                         <MonetaryAmountInput
                           {...field}
-                          value={field.value ?? "0"}
+                          value={round(field.value ?? "0")}
                           onChange={(e) => field.onChange(e.target.value)}
                           placeholder="0.00"
                         />
@@ -698,7 +695,7 @@ export function ChargeItemDefinitionForm({
                       <FormControl>
                         <MonetaryAmountInput
                           {...field}
-                          value={field.value ?? "0"}
+                          value={round(field.value ?? "0")}
                           onChange={(e) => field.onChange(e.target.value)}
                           placeholder="0.00"
                         />

@@ -60,7 +60,7 @@ import {
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import { UserReadMinimal } from "@/types/user/user";
-import { isPositive, zodDecimal } from "@/Utils/decimal";
+import { isPositive, round, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
@@ -460,7 +460,7 @@ export function EditInvoiceTable({
                           <FormControl>
                             <MonetaryAmountInput
                               {...field}
-                              value={field.value ?? "0"}
+                              value={round(field.value ?? "0")}
                               onChange={(e) => {
                                 field.onChange(e.target.value);
                                 handleBaseAmountChange(index, e.target.value);
@@ -479,7 +479,13 @@ export function EditInvoiceTable({
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input type="number" {...field} min="1" step="1" />
+                            <Input
+                              type="number"
+                              {...field}
+                              value={round(field.value)}
+                              min="1"
+                              step="1"
+                            />
                           </FormControl>
                         </FormItem>
                       )}
@@ -627,7 +633,7 @@ export function EditInvoiceTable({
                                         <FormControl>
                                           <MonetaryAmountInput
                                             hideCurrency={true}
-                                            value={value}
+                                            value={round(value)}
                                             onChange={(e) => {
                                               const newValue = e.target.value;
                                               if (isPercentage) {

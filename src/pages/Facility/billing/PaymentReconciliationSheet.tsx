@@ -447,7 +447,7 @@ export function PaymentReconciliationSheet({
                     <FormControl>
                       <MonetaryAmountInput
                         {...field}
-                        value={field.value || ""}
+                        value={round(field.value)}
                         onChange={(e) => {
                           field.onChange(e.target.value);
                           if (isCreditNote) {
@@ -477,7 +477,7 @@ export function PaymentReconciliationSheet({
                         <FormControl>
                           <MonetaryAmountInput
                             {...field}
-                            value={field.value || ""}
+                            value={round(field.value)}
                           />
                         </FormControl>
                         <FormDescription className="text-gray-700 italic -mt-1.5">
