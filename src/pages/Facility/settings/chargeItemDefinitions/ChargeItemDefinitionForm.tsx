@@ -178,6 +178,10 @@ export function ChargeItemDefinitionForm({
         c.monetary_component_type === MonetaryComponentType.informational,
     );
 
+    const initialDataBasePrice = initialData?.price_components.find(
+      (c) => c.monetary_component_type === MonetaryComponentType.base,
+    )?.amount;
+
     return {
       // Basic information fields
       title: initialData?.title || "",
@@ -196,11 +200,7 @@ export function ChargeItemDefinitionForm({
       derived_from_uri: initialData?.derived_from_uri || undefined,
 
       // Base price
-      base_price: round(
-        initialData?.price_components.find(
-          (c) => c.monetary_component_type === MonetaryComponentType.base,
-        )?.amount || "0",
-      ),
+      base_price: initialDataBasePrice ? round(initialDataBasePrice) : "",
 
       // MRP and Purchase Price
       mrp: mrpComponent?.amount ? round(mrpComponent.amount) : null,
