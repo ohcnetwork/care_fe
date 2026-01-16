@@ -1,9 +1,16 @@
+import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import {
   createServiceRequest,
   getLatestServiceRequestId,
 } from "tests/facility/encounter/serviceRequests/serviceRequest";
+import {
+  collectSpecimen,
+  getRandomSpecimenQuantity,
+  getRandomSpecimenUnit,
+} from "tests/facility/services/locations/serviceRequests/specimen";
 import { ACTIVITY_DEFINITION_MAPPING } from "tests/facility/settings/activityDefinition/activityDefinition";
+import { expectToast } from "tests/helper/ui";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getLocationId } from "tests/support/locationId";
@@ -391,7 +398,6 @@ test.describe("Service Request Show Page", () => {
         .getByRole("button", { name: /collect specimen/i })
         .click();
 
-      // Verify the SpecimenForm opens (card with "Collect Specimen:" title)
       const specimenFormCard = page.locator('[data-slot="card"]', {
         has: page.locator('[data-slot="card-title"]', {
           hasText: /collect specimen:/i,
@@ -427,6 +433,67 @@ test.describe("Service Request Show Page", () => {
             }),
           })
           .first(),
+      ).toBeVisible();
+    });
+
+    test("should collect specimen with only required fields (quantity value with prefilled unit)", async ({
+      page,
+    }) => {
+      await collectSpecimen(page, {
+        quantityValue: getRandomSpecimenQuantity(),
+      });
+
+      await expectToast(page, /specimen collected/i);
+
+      await expect(
+        page.locator('[data-slot="badge"]', { hasText: "Available" }).first(),
+      ).toBeVisible();
+    });
+
+    test("should collect specimen with manually selected unit", async ({
+      page,
+    }) => {
+      await collectSpecimen(page, {
+        quantityValue: getRandomSpecimenQuantity(),
+        quantityUnit: getRandomSpecimenUnit(),
+      });
+
+      await expectToast(page, /specimen collected/i);
+
+      await expect(
+        page.locator('[data-slot="badge"]', { hasText: "Available" }).first(),
+      ).toBeVisible();
+    });
+
+    test("should collect specimen with all fields filled", async ({ page }) => {
+      await collectSpecimen(page, {
+        quantityValue: getRandomSpecimenQuantity(),
+        bodySite: true,
+        fastingStatus: true,
+        fastingDuration: faker.number.int({ min: 1, max: 24 }).toString(),
+        notes: faker.lorem.sentence(),
+      });
+
+      await expectToast(page, /specimen collected/i);
+
+      await expect(
+        page.locator('[data-slot="badge"]', { hasText: "Available" }).first(),
+      ).toBeVisible();
+    });
+
+    test("should collect specimen using scan existing mode with manual identifier", async ({
+      page,
+    }) => {
+      await collectSpecimen(page, {
+        quantityValue: getRandomSpecimenQuantity(),
+        useScanMode: true,
+        specimenIdentifier: faker.string.numeric(8),
+      });
+
+      await expectToast(page, /specimen collected/i);
+
+      await expect(
+        page.locator('[data-slot="badge"]', { hasText: "Available" }).first(),
       ).toBeVisible();
     });
   });
