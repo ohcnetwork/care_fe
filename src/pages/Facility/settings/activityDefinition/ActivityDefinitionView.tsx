@@ -31,6 +31,7 @@ import {
   Status,
 } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
+import { ArrowLeft } from "lucide-react";
 
 interface Props {
   facilityId: string;
@@ -136,12 +137,9 @@ export default function ActivityDefinitionView({
     <Page title={definition.title} hideTitleOnPage={true}>
       <div className="container mx-auto max-w-3xl space-y-6">
         <BackButton
-          variant="outline"
-          size="xs"
-          className="mb-2"
-          to={`/facility/${facilityId}/settings/activity_definitions/categories/${definition.category.slug}`}
+          fallbackUrl={`/facility/${facilityId}/settings/activity_definitions/categories/${definition.category.slug}`}
         >
-          <CareIcon icon="l-arrow-left" className="size-4" />
+          <ArrowLeft />
           {t("back")}
         </BackButton>
 
@@ -343,6 +341,31 @@ export default function ActivityDefinitionView({
                     </div>
                   </div>
                 ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {definition.healthcare_service && (
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("healthcare_service")}</CardTitle>
+              <CardDescription>
+                {t("healthcare_service_for_activity")}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50">
+                <div className="space-y-2">
+                  <p className="font-medium">
+                    {definition.healthcare_service.name}
+                  </p>
+                  {definition.healthcare_service.extra_details && (
+                    <p className="text-sm text-gray-600">
+                      {definition.healthcare_service.extra_details}
+                    </p>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>

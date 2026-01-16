@@ -1,11 +1,14 @@
 import { navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
 import { ResourceCategoryList } from "@/components/Common/ResourceCategoryList";
 import { ChargeItemList } from "@/pages/Facility/settings/chargeItemDefinitions/ChargeItemDefinitionListComponent";
+
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
-import { useState } from "react";
+import { ChargeItemDefinitionStatus } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
+import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 
 interface ChargeItemDefinitionsListProps {
   facilityId: string;
@@ -44,6 +47,15 @@ export function ChargeItemDefinitionsList({
         onCreateItem={onCreateItem}
         createItemLabel={t("add_definition")}
         createItemIcon="l-plus"
+        itemSearchConfig={{
+          listItems: {
+            queryFn: chargeItemDefinitionApi.listChargeItemDefinition,
+            queryParams: {
+              status: ChargeItemDefinitionStatus.active,
+            },
+          },
+          queryKeyPrefix: "chargeItemDefinitionsSearch",
+        }}
       >
         {categorySlug && (
           <ChargeItemList

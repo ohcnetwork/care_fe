@@ -196,6 +196,7 @@ function extractPropertyMetadata(
     // x-ui hints
     uiControl: xui?.control,
     uiVariant: xui?.variant,
+    uiMetadata: xui?.metadata,
   };
 
   // Add numeric constraints

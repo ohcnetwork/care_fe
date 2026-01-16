@@ -57,9 +57,11 @@ import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import BackButton from "@/components/Common/BackButton";
+import { ReportSubTab } from "@/components/Files/ReportSubTab";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { ReportType } from "@/types/emr/report/report";
 import AccountSheet from "./AccountSheet";
 import BedChargeItemsTable from "./components/BedChargeItemsTable";
 import ChargeItemsTable from "./components/ChargeItemsTable";
@@ -73,7 +75,12 @@ function formatDate(date?: string) {
   });
 }
 
-type tab = "charge_items" | "invoices" | "payments" | "bed_charge_items";
+type tab =
+  | "charge_items"
+  | "invoices"
+  | "payments"
+  | "bed_charge_items"
+  | "reports";
 
 const closedStatusText = {
   [AccountBillingStatus.closed_baddebt]: "close_account_help_closed_baddebt",
@@ -207,6 +214,7 @@ export function AccountShow({
         end: new Date().toISOString(),
       },
       patient: account?.patient?.id || "",
+      extensions: account?.extensions || {},
     });
     setCloseAccountStatus({
       sheetOpen: false,
@@ -256,6 +264,16 @@ export function AccountShow({
       label: t("payments"),
       component: <PaymentsData facilityId={facilityId} accountId={accountId} />,
       shortcutId: "switch-to-payments-tab",
+    },
+    reports: {
+      label: t("reports"),
+      component: (
+        <ReportSubTab
+          associatingId={accountId}
+          reportType={ReportType.ACCOUNT_REPORT}
+        />
+      ),
+      shortcutId: "switch-to-reports-tab",
     },
     ...(encounterId && {
       bed_charge_items: {
@@ -568,7 +586,7 @@ export function AccountShow({
             </div>
           </div>
 
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-6 border-b md:border-r border-gray-200">
             <div className="space-y-1">
               <p className="text-sm font-medium text-gray-500">
                 {t("billed_gross")}
@@ -580,6 +598,24 @@ export function AccountShow({
               </div>
               <p className="text-xs text-gray-500">
                 {t("total_billed_before_adjustments")}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex-1 p-6">
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-gray-500">
+                {t("total_billable")}
+              </p>
+              <div className="flex items-end">
+                <p className="text-3xl font-bold text-gray-900">
+                  <MonetaryDisplay
+                    amount={account.total_billable_charge_items}
+                  />
+                </p>
+              </div>
+              <p className="text-xs text-gray-500">
+                {t("total_billable_charge_items_description")}
               </p>
             </div>
           </div>
