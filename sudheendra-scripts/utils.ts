@@ -432,6 +432,110 @@ export const loginAndGetTokens = async (
 };
 
 /**
+ * Refresh the access token using the refresh token
+ * @param apiBaseUrl - The API base URL
+ * @param refreshToken - The refresh token
+ * @returns Object containing new access and refresh tokens
+ */
+export const refreshAccessToken = async (
+  apiBaseUrl: string,
+  refreshToken: string,
+): Promise<{ care_access_token: string; care_refresh_token: string }> => {
+  const response = await fetch(`${apiBaseUrl}/api/v1/auth/token/refresh/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      refresh: refreshToken,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to refresh token: ${response.statusText}\n${await response.text()}`,
+    );
+  }
+
+  const data = await response.json();
+
+  // Extract tokens from response
+  if (!data.access || !data.refresh) {
+    throw new Error(
+      "Invalid refresh response: missing access or refresh token",
+    );
+  }
+
+  return {
+    care_access_token: data.access,
+    care_refresh_token: data.refresh,
+  };
+};
+
+const TOKEN_REFRESH_INTERVAL = 3 * 60 * 1000;
+let tokenRefreshTimer: NodeJS.Timeout | null = null;
+
+/**
+ * Start automatic token refresh in the background
+ * @param config - The base config with tokens
+ */
+export const startTokenRefresh = (config: BaseConfig): void => {
+  if (!config.enableTokenAuth || !config.care_refresh_token) {
+    return;
+  }
+
+  // Clear any existing timer
+  if (tokenRefreshTimer) {
+    clearInterval(tokenRefreshTimer);
+  }
+
+  const logger = getLogger();
+  logger(
+    colorize(
+      `Starting automatic token refresh every ${TOKEN_REFRESH_INTERVAL / 1000} seconds`,
+      0,
+    ),
+  );
+
+  // Set up periodic refresh
+  tokenRefreshTimer = setInterval(async () => {
+    try {
+      logger(colorize("Refreshing authentication token...", 0));
+      const newTokens = await refreshAccessToken(
+        config.apiBaseUrl,
+        config.care_refresh_token!,
+      );
+
+      // Update the config with new tokens
+      config.care_access_token = newTokens.care_access_token;
+      config.care_refresh_token = newTokens.care_refresh_token;
+
+      logger(colorize("✓ Token refreshed successfully", 2));
+    } catch (error) {
+      logger(colorize(`✗ Failed to refresh token: ${error}`, 1));
+      // Don't stop the timer - will try again next interval
+    }
+  }, TOKEN_REFRESH_INTERVAL);
+
+  // Keep the process running
+  if (tokenRefreshTimer.unref) {
+    tokenRefreshTimer.unref();
+  }
+};
+
+/**
+ * Stop automatic token refresh
+ */
+export const stopTokenRefresh = (): void => {
+  if (tokenRefreshTimer) {
+    clearInterval(tokenRefreshTimer);
+    tokenRefreshTimer = null;
+    const logger = getLogger();
+    logger(colorize("Stopped automatic token refresh", 0));
+  }
+};
+
+/**
  * Generate authentication headers based on config
  * @param config - The configuration object
  * @returns Authorization header value
@@ -460,8 +564,9 @@ export const ensureAuthentication = async (
     return config;
   }
 
-  // If tokens are already available, return the config as is
+  // If tokens are already available, start refresh and return
   if (config.care_access_token && config.care_refresh_token) {
+    startTokenRefresh(config);
     return config;
   }
 
@@ -476,13 +581,18 @@ export const ensureAuthentication = async (
 
   try {
     const tokens = await loginAndGetTokens(config.apiBaseUrl);
-    logger(colorize("Successfully obtained authentication tokens", 0));
+    logger(colorize("Successfully obtained authentication tokens", 2));
 
-    return {
+    const authenticatedConfig = {
       ...config,
       care_access_token: tokens.care_access_token,
       care_refresh_token: tokens.care_refresh_token,
     };
+
+    // Start automatic token refresh
+    startTokenRefresh(authenticatedConfig);
+
+    return authenticatedConfig;
   } catch (error) {
     logger(colorize(`Failed to obtain authentication tokens: ${error}`, 1));
     throw error;
@@ -1597,6 +1707,183 @@ export async function lookupCodeInValueset(
     code: code,
     display: data.metadata.display,
   };
+}
+
+/**
+ * Result type for batch code lookup
+ */
+export interface CodeLookupResult {
+  code: Code | null;
+  error?: string;
+}
+
+/**
+ * Batch lookup codes in valueset
+ * @param codes - Array of codes to lookup with their systems
+ * @param config - Configuration for API calls
+ * @param batchSize - Number of codes to lookup per batch (default: 100)
+ * @returns Promise<Map<string, CodeLookupResult>> - Map of code -> result with Code object or error
+ */
+export async function lookupCodesInValuesetBatch(
+  codes: Array<{ code: string; system: string }>,
+  config: BaseConfig,
+  batchSize: number = 100,
+): Promise<Map<string, CodeLookupResult>> {
+  const logger = getLogger();
+  const results = new Map<string, CodeLookupResult>();
+
+  if (codes.length === 0) {
+    return results;
+  }
+
+  // Split codes into smaller batches
+  const batches = [];
+  for (let i = 0; i < codes.length; i += batchSize) {
+    batches.push(codes.slice(i, i + batchSize));
+  }
+
+  logger(
+    colorize(
+      `Batch looking up ${codes.length} codes in ${batches.length} batches of ${batchSize}...`,
+      0,
+    ),
+  );
+
+  // Process each batch
+  for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+    const batch = batches[batchIndex];
+
+    try {
+      // Prepare batch request body
+      const requestBody = {
+        datapoints: batch.map(({ code, system }) => ({ code, system })),
+      };
+
+      logger(
+        colorize(
+          `Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} codes)...`,
+          0,
+        ),
+      );
+
+      const response = await fetch(
+        `${config.apiBaseUrl}/api/v1/valueset/lookup_codes/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...getAuthHeaders(config),
+          },
+          body: JSON.stringify(requestBody),
+        },
+      );
+
+      if (!response.ok) {
+        const errorText = `HTTP ${response.status}: ${response.statusText}`;
+        logger(
+          colorize(
+            `Failed to batch lookup codes in batch ${batchIndex + 1}: ${errorText}`,
+            1,
+          ),
+        );
+        try {
+          const errorData = await response.json();
+          logger(colorize(JSON.stringify(errorData), 1));
+        } catch (e) {
+          // Ignore JSON parse errors
+        }
+
+        // Only mark batch with error if it's a complete API failure
+        // This is a legitimate case where the entire batch failed
+        batch.forEach(({ code }) =>
+          results.set(code, { code: null, error: errorText }),
+        );
+        continue;
+      }
+
+      const data = await response.json();
+
+      // Process batch results
+      // Expected format: {results: [{code: string, metadata: {system, display}, error?: string}, ...]}
+      if (data.results && Array.isArray(data.results)) {
+        batch.forEach(({ code }, index) => {
+          const result = data.results[index];
+          // Check if result has error field (from API)
+          if (result && result.error) {
+            results.set(code, {
+              code: null,
+              error: result.error,
+            });
+          } else if (result && result.metadata) {
+            results.set(code, {
+              code: {
+                system: result.metadata.system,
+                code: code,
+                display: result.metadata.display,
+              },
+            });
+          } else {
+            // No metadata and no explicit error - code not found
+            results.set(code, {
+              code: null,
+              error: "Code not found in valueset",
+            });
+          }
+        });
+      } else {
+        const errorMsg = "Unexpected batch lookup response format";
+        logger(
+          colorize(
+            `${errorMsg} in batch ${batchIndex + 1}: ${JSON.stringify(data)}`,
+            1,
+          ),
+        );
+        // This is also a legitimate batch-level error - API returned invalid format
+        batch.forEach(({ code }) =>
+          results.set(code, { code: null, error: errorMsg }),
+        );
+      }
+
+      logger(
+        colorize(
+          `Batch ${batchIndex + 1}/${batches.length} completed successfully`,
+          2,
+        ),
+      );
+
+      // Add a small delay between batches to avoid rate limiting
+      if (batchIndex < batches.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      logger(
+        colorize(
+          `Error in batch ${batchIndex + 1}/${batches.length}: ${errorMsg}`,
+          1,
+        ),
+      );
+      // This is a legitimate network/parse error - the entire batch failed
+      batch.forEach(({ code }) =>
+        results.set(code, { code: null, error: errorMsg }),
+      );
+    }
+  }
+
+  const foundCount = Array.from(results.values()).filter(
+    (v) => v.code !== null,
+  ).length;
+  const errorCount = Array.from(results.values()).filter(
+    (v) => v.error !== undefined,
+  ).length;
+  logger(
+    colorize(
+      `Batch lookup completed: ${foundCount}/${codes.length} codes found${errorCount > 0 ? `, ${errorCount} errors` : ""}`,
+      foundCount === codes.length ? 2 : foundCount > 0 ? 1 : 0,
+    ),
+  );
+
+  return results;
 }
 
 /**
