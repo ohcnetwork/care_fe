@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 
 import { Input } from "@/components/ui/input";
 
-import { MonetaryComponent } from "@/types/base/monetaryComponent/monetaryComponent";
 import { roundForDisplay } from "@/Utils/decimal";
 import Decimal from "decimal.js";
 
@@ -23,15 +22,6 @@ export const numberFormatterWithoutCurrency = new Intl.NumberFormat("en-IN", {
 
 // Helper function to get currency symbol
 export const getCurrencySymbol = () => CURRENCY_SYMBOL;
-
-export function mapPriceComponent<T extends MonetaryComponent>(data: T): T {
-  if (!data) return data;
-
-  return {
-    ...data,
-    amount: data.amount != null ? String(data.amount) : undefined,
-  } as T;
-}
 
 function MonetaryDisplay({
   amount,

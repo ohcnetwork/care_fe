@@ -172,14 +172,10 @@ export function EditInvoiceTable({
         const taxComponents = getComponentsFromChargeItem(
           item.charge_item_definition,
           MonetaryComponentType.tax,
-        ).map((component) => ({
-          ...component,
-          amount: component.amount ? String(component.amount) : undefined,
-        }));
+        );
 
         const discounts = discountComponents.map((component) => ({
           ...component,
-          amount: component.amount ? String(component.amount) : undefined,
           conditions: component.conditions?.map((condition) => ({
             ...condition,
             _conditionType: getConditionDiscriminatorValue(
@@ -291,9 +287,6 @@ export function EditInvoiceTable({
     if (selectedComponent) {
       form.setValue(`items.${itemIndex}.discounts.${discountIndex}`, {
         ...selectedComponent,
-        amount: selectedComponent.amount
-          ? String(selectedComponent.amount)
-          : undefined,
         conditions:
           selectedComponent.conditions?.map((condition) => ({
             ...condition,
@@ -355,9 +348,6 @@ export function EditInvoiceTable({
         // Add the discount if not already present
         const newDiscount = {
           ...discountDefinition,
-          amount: discountDefinition.amount
-            ? String(discountDefinition.amount)
-            : undefined,
           conditions:
             discountDefinition.conditions?.map((condition) => ({
               ...condition,
@@ -635,8 +625,8 @@ export function EditInvoiceTable({
                                     const isPercentage =
                                       discount?.factor !== undefined;
                                     const value = isPercentage
-                                      ? String(discount?.factor ?? "0")
-                                      : String(discount?.amount ?? "0");
+                                      ? (discount?.factor ?? "0")
+                                      : (discount?.amount ?? "0");
 
                                     return (
                                       <FormItem className="flex-1 min-w-20">

@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  mapPriceComponent,
   MonetaryAmountInput,
   MonetaryDisplay,
 } from "@/components/ui/monetary-display";
@@ -241,7 +240,7 @@ export function ChargeItemDefinitionForm({
               c.code?.code !== PURCHASE_PRICE_CODE,
           )
           .map((component) => ({
-            ...mapPriceComponent(component),
+            ...component,
             conditions:
               component.conditions?.map((condition) => ({
                 ...condition,
@@ -676,10 +675,8 @@ export function ChargeItemDefinitionForm({
                           <FormControl>
                             <MonetaryAmountInput
                               {...field}
-                              value={field.value ?? 0}
-                              onChange={(e) =>
-                                field.onChange(String(e.target.value))
-                              }
+                              value={field.value ?? "0"}
+                              onChange={(e) => field.onChange(e.target.value)}
                               placeholder="0.00"
                             />
                           </FormControl>
@@ -703,7 +700,7 @@ export function ChargeItemDefinitionForm({
                       <FormControl>
                         <MonetaryAmountInput
                           {...field}
-                          value={field.value ?? 0}
+                          value={field.value ?? "0"}
                           onChange={(e) => field.onChange(e.target.value)}
                           placeholder="0.00"
                         />
@@ -726,7 +723,7 @@ export function ChargeItemDefinitionForm({
                       <FormControl>
                         <MonetaryAmountInput
                           {...field}
-                          value={field.value ?? 0}
+                          value={field.value ?? "0"}
                           onChange={(e) => field.onChange(e.target.value)}
                           placeholder="0.00"
                         />

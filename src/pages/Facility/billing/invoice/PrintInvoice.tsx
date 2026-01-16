@@ -34,7 +34,7 @@ import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import { getPartialId } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
-import { roundForDisplay } from "@/Utils/decimal";
+import { add, roundForDisplay } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 
 type PrintInvoiceProps = {
@@ -286,18 +286,14 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                         <TableCell className={cn(tableCellClass, "text-right")}>
                           <div className="flex flex-col items-end gap-0.5">
                             <MonetaryDisplay
-                              amount={String(
-                                item.total_price_components
+                              amount={add(
+                                ...item.total_price_components
                                   .filter(
                                     (c) =>
                                       c.monetary_component_type ===
                                       MonetaryComponentType.discount,
                                   )
-                                  .reduce(
-                                    (acc, curr) =>
-                                      acc + Number(curr.amount || 0),
-                                    0,
-                                  ),
+                                  .map((c) => c.amount || "0"),
                               )}
                               hideCurrency
                             />

@@ -57,9 +57,10 @@ import {
   PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
-import { zodDecimal } from "@/Utils/decimal";
+import { roundForApi, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
+import Decimal from "decimal.js";
 
 const PAYMENT_METHODS = [
   {
@@ -183,10 +184,10 @@ export function PaymentReconciliationSheet({
   useEffect(() => {
     if (isCashPayment) {
       // For cash payments, calculate change to return
-      const returned = String(
-        Math.max(0, Number(tenderedAmount || 0) - (Number(amount) || 0)),
+      form.setValue(
+        "returned_amount",
+        roundForApi(Decimal.max(0, tenderedAmount || "0").minus(amount || "0")),
       );
-      form.setValue("returned_amount", returned);
     } else {
       // For non-cash payments, tendered amount equals payment amount and returned is 0
       form.setValue("tendered_amount", amount || "0");
@@ -247,7 +248,7 @@ export function PaymentReconciliationSheet({
 
   useEffect(() => {
     if (open) {
-      const initialAmount = String(invoice?.total_gross || "0");
+      const initialAmount = invoice?.total_gross || "0";
       form.reset({
         reconciliation_type: invoice
           ? PaymentReconciliationType.payment
@@ -271,6 +272,7 @@ export function PaymentReconciliationSheet({
         location: selectedLocationObject?.id,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, invoice, accountId, isCreditNote]);
 
   return (
@@ -316,9 +318,7 @@ export function PaymentReconciliationSheet({
                         {t("balance_due")}
                       </p>
                       <p className="text-3xl font-bold text-gray-900">
-                        <MonetaryDisplay
-                          amount={String(account?.total_balance)}
-                        />
+                        <MonetaryDisplay amount={account?.total_balance} />
                       </p>
                     </>
                   )}

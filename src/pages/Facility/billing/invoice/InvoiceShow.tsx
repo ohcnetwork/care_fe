@@ -77,7 +77,7 @@ import patientApi from "@/types/emr/patient/patientApi";
 import facilityApi from "@/types/facility/facilityApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import dayjs from "@/Utils/dayjs";
-import { roundForDisplay } from "@/Utils/decimal";
+import { add, roundForDisplay } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -761,18 +761,14 @@ export function InvoiceShow({
                           >
                             <div className="flex flex-col items-end gap-0.5">
                               <MonetaryDisplay
-                                amount={String(
-                                  item.total_price_components
+                                amount={add(
+                                  ...item.total_price_components
                                     .filter(
                                       (c) =>
                                         c.monetary_component_type ===
                                         MonetaryComponentType.discount,
                                     )
-                                    .reduce(
-                                      (acc, curr) =>
-                                        acc + Number(curr.amount || 0),
-                                      0,
-                                    ),
+                                    .map((c) => c.amount || "0"),
                                 )}
                                 hideCurrency
                               />

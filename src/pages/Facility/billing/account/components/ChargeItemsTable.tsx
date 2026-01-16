@@ -292,8 +292,6 @@ export function ChargeItemsTable({
             <TableBody className="bg-white">
               {chargeItems.results.flatMap((item) => {
                 const isExpanded = expandedItems[item.id] || false;
-                const baseComponent = getBaseComponent(item);
-                const baseAmount = String(baseComponent?.amount || "0");
                 const linkedResource = getLinkedResource(item);
 
                 const mrpAmount = item.unit_price_components.find(
@@ -345,7 +343,9 @@ export function ChargeItemsTable({
                       <MonetaryDisplay amount={mrpAmount} />
                     </TableCell>
                     <TableCell className="border-x p-3 text-gray-950">
-                      <MonetaryDisplay amount={baseAmount} />
+                      <MonetaryDisplay
+                        amount={getBaseComponent(item)?.amount || "0"}
+                      />
                     </TableCell>
                     <TableCell className="border-x p-3 text-gray-950">
                       {roundForDisplay(item.quantity)}
