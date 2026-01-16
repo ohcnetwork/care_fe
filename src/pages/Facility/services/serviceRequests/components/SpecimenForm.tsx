@@ -195,7 +195,7 @@ export function SpecimenForm({
       newErrors.quantityValue = t("invalid_quantity");
     }
 
-    if (!quantity?.unit) {
+    if (!quantity?.unit && !defaultUnit) {
       newErrors.quantityUnit = t("field_required");
     }
 
@@ -227,7 +227,12 @@ export function SpecimenForm({
         method: finalData.specimen.collection?.method ?? null,
         collected_date_time:
           finalData.specimen.collection?.collected_date_time ?? null,
-        quantity: finalData.specimen.collection?.quantity ?? null,
+        quantity: finalData.specimen.collection?.quantity
+          ? {
+              ...finalData.specimen.collection.quantity,
+              unit: finalData.specimen.collection.quantity.unit ?? defaultUnit,
+            }
+          : null,
         procedure: finalData.specimen.collection?.procedure ?? null,
         body_site: finalData.specimen.collection?.body_site ?? null,
         fasting_status_codeable_concept:
@@ -371,6 +376,7 @@ export function SpecimenForm({
                       type="number"
                       placeholder={t("value")}
                       className="h-9"
+                      min={1}
                       value={
                         specimenData.specimen.collection?.quantity?.value ?? ""
                       }
