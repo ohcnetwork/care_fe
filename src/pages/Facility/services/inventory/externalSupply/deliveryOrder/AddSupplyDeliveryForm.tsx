@@ -438,40 +438,34 @@ export function AddSupplyDeliveryForm({
       // Only create ChargeItemDefinition if we don't already have one from our creation
       if (!chargeItemSlug) {
         const category = item.charge_item_category;
-        if (!category) {
-          throw new Error(
-            t("charge_item_category_required_for_item", {
-              item: item.product_knowledge.name,
-            }),
-          );
+        if (category) {
+          const priceComponents = buildPriceComponents(item);
+          const chargeItemCreate: ChargeItemDefinitionCreate = {
+            slug_value: crypto.randomUUID(),
+            category,
+            title: `${item.product_knowledge.name}${item.batch_number ? ` - ${item.batch_number}` : ""}`,
+            status: ChargeItemDefinitionStatus.active,
+            price_components:
+              priceComponents.length > 0
+                ? priceComponents
+                : [
+                    {
+                      monetary_component_type: MonetaryComponentType.base,
+                      amount: "0",
+                    },
+                  ],
+          };
+
+          const newChargeItem =
+            await createChargeItemDefinition(chargeItemCreate);
+          chargeItemSlug = newChargeItem.slug;
+
+          // Persist to form state and mark as no longer manually edited
+          // This ensures on retry: we reuse our ChargeItem but still create Product if needed
+          form.setValue(`items.${index}.charge_item_definition`, {
+            slug: chargeItemSlug,
+          });
         }
-
-        const priceComponents = buildPriceComponents(item);
-        const chargeItemCreate: ChargeItemDefinitionCreate = {
-          slug_value: crypto.randomUUID(),
-          category,
-          title: `${item.product_knowledge.name}${item.batch_number ? ` - ${item.batch_number}` : ""}`,
-          status: ChargeItemDefinitionStatus.active,
-          price_components:
-            priceComponents.length > 0
-              ? priceComponents
-              : [
-                  {
-                    monetary_component_type: MonetaryComponentType.base,
-                    amount: "0",
-                  },
-                ],
-        };
-
-        const newChargeItem =
-          await createChargeItemDefinition(chargeItemCreate);
-        chargeItemSlug = newChargeItem.slug;
-
-        // Persist to form state and mark as no longer manually edited
-        // This ensures on retry: we reuse our ChargeItem but still create Product if needed
-        form.setValue(`items.${index}.charge_item_definition`, {
-          slug: chargeItemSlug,
-        });
         form.setValue(`items.${index}.is_manually_edited`, false);
       }
 
@@ -484,7 +478,7 @@ export function AddSupplyDeliveryForm({
           },
           expiration_date: item.expiry_date!,
           product_knowledge: item.product_knowledge.slug,
-          charge_item_definition: chargeItemSlug,
+          ...(chargeItemSlug && { charge_item_definition: chargeItemSlug }),
           extensions: {},
         };
 
