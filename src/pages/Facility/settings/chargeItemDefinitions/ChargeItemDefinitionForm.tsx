@@ -61,7 +61,7 @@ import {
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import facilityApi from "@/types/facility/facilityApi";
-import { round, zodDecimal } from "@/Utils/decimal";
+import { zodDecimal } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
@@ -647,7 +647,7 @@ export function ChargeItemDefinitionForm({
                           <FormControl>
                             <MonetaryAmountInput
                               {...field}
-                              value={round(field.value ?? "0")}
+                              value={field.value ?? "0"}
                               onChange={(e) => field.onChange(e.target.value)}
                               placeholder="0.00"
                             />
@@ -672,7 +672,7 @@ export function ChargeItemDefinitionForm({
                       <FormControl>
                         <MonetaryAmountInput
                           {...field}
-                          value={round(field.value ?? "0")}
+                          value={field.value ?? "0"}
                           onChange={(e) => field.onChange(e.target.value)}
                           placeholder="0.00"
                         />
@@ -695,7 +695,7 @@ export function ChargeItemDefinitionForm({
                       <FormControl>
                         <MonetaryAmountInput
                           {...field}
-                          value={round(field.value ?? "0")}
+                          value={field.value ?? "0"}
                           onChange={(e) => field.onChange(e.target.value)}
                           placeholder="0.00"
                         />
