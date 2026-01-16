@@ -29,6 +29,7 @@ import {
 import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPriceDisplay";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 
+import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
 import {
@@ -42,7 +43,6 @@ import {
   ResponseValue,
 } from "@/types/questionnaire/form";
 import { UserReadMinimal } from "@/types/user/user";
-import { round } from "@/Utils/decimal";
 
 interface ChargeItemQuestionProps {
   encounterId: string;
@@ -122,12 +122,12 @@ function ChargeItemForm({
         <div className="space-y-1">
           <div className="flex items-center gap-1">
             <span>
-              {round(
-                chargeItem.charge_item_definition_object.price_components?.[0]
-                  ?.amount || "0",
-              )}{" "}
-              {chargeItem.charge_item_definition_object.price_components?.[0]
-                ?.code?.code || "INR"}
+              <MonetaryDisplay
+                amount={
+                  chargeItem.charge_item_definition_object.price_components?.[0]
+                    ?.amount || 0
+                }
+              />
             </span>
             {chargeItem.charge_item_definition_object.price_components?.length >
               0 && (

@@ -41,6 +41,7 @@ interface Props {
   facilityId?: string;
   organizationId?: string;
   disabled?: boolean;
+  isServiceAccount?: boolean;
 }
 
 const PAGE_LIMIT = 50;
@@ -132,6 +133,7 @@ export default function UserSelector({
   facilityId,
   organizationId,
   disabled,
+  isServiceAccount = false,
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -150,6 +152,7 @@ export default function UserSelector({
     limit: String(PAGE_LIMIT),
     offset: String(pageParam),
     search_text: search,
+    is_service_account: isServiceAccount,
   });
 
   const {
@@ -159,7 +162,7 @@ export default function UserSelector({
     isFetchingNextPage,
     isFetching,
   } = useInfiniteQuery({
-    queryKey: ["users", facilityId, search, organizationId],
+    queryKey: ["users", facilityId, search, organizationId, isServiceAccount],
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query.debounced(
         facilityId

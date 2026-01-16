@@ -265,7 +265,7 @@ export default function AddMultipleChargeItemsSheet({
                           <span>
                             {round(
                               item.charge_item_definition_object
-                                .price_components?.[0]?.amount || "0",
+                                .price_components?.[0]?.amount || 0,
                             )}{" "}
                             {item.charge_item_definition_object
                               .price_components?.[0]?.code?.code || "INR"}
@@ -329,7 +329,7 @@ export default function AddMultipleChargeItemsSheet({
                           <span>
                             {round(
                               item.charge_item_definition_object
-                                .price_components?.[0]?.amount || "0",
+                                .price_components?.[0]?.amount || 0,
                             )}{" "}
                             {item.charge_item_definition_object
                               .price_components?.[0]?.code?.code || "INR"}
