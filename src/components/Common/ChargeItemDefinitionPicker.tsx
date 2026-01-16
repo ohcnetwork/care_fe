@@ -16,6 +16,7 @@ import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { ChargeItemDefinitionDrawer } from "@/components/Common/ChargeItemDefinitionDrawer";
+import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   ResourceCategoryResourceType,
   ResourceCategorySubType,
@@ -137,7 +138,7 @@ export function ChargeItemDefinitionPicker({
 
   return (
     <>
-      <div className="grow-1">
+      <div className="grow">
         <ResourceDefinitionCategoryPicker<ChargeItemDefinitionBase>
           facilityId={facilityId}
           value={allowMultiple ? selectedDefinitions : selectedDefinitions[0]}
@@ -267,7 +268,7 @@ export function ChargeItemDefinitionPicker({
                       className="flex items-center justify-between px-3 py-3 cursor-pointer hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 border-b border-gray-200 last:border-b-0"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="flex-shrink-0">
+                        <div className="shrink-0">
                           <FileText className="h-5 w-5 text-blue-500" />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -281,14 +282,18 @@ export function ChargeItemDefinitionPicker({
                           )}
                           {definition.price_components?.[0] && (
                             <div className="text-xs mt-0.5">
-                              {definition.price_components[0].amount}{" "}
+                              {definition.price_components[0].amount && (
+                                <MonetaryDisplay
+                                  amount={definition.price_components[0].amount}
+                                />
+                              )}{" "}
                               {definition.price_components[0].code?.code ||
                                 "INR"}
                             </div>
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex items-center gap-2 shrink-0">
                         <Copy className="h-4 w-4 text-gray-500" />
                       </div>
                     </CommandItem>

@@ -333,7 +333,7 @@ export function AddSupplyDeliveryForm({
     const components: MonetaryComponent[] = [];
 
     // Base price component
-    if (item.unit_price !== undefined) {
+    if (item.unit_price != null) {
       components.push({
         monetary_component_type: MonetaryComponentType.base,
         amount: item.unit_price,

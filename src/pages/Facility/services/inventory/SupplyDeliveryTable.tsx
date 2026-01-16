@@ -225,7 +225,7 @@ export function SupplyDeliveryTable({
                 {delivery.supplied_item_pack_quantity || "-"}
               </TableCell>
             )}
-            <TableCell>{delivery.supplied_item_quantity}</TableCell>
+            <TableCell>{round(delivery.supplied_item_quantity)}</TableCell>
             <TableCell>
               {delivery.created_date &&
                 formatDate(new Date(delivery.created_date), "dd/MM/yyyy")}

@@ -71,8 +71,8 @@ function toMonetaryComponent(
   return {
     monetary_component_type: type,
     code: component.code,
-    factor: isPercentageBased(component) ? component.factor : undefined,
-    amount: !isPercentageBased(component) ? component.amount : undefined,
+    factor: isPercentageBased(component) ? component.factor : null,
+    amount: !isPercentageBased(component) ? component.amount : null,
     conditions: [],
   };
 }

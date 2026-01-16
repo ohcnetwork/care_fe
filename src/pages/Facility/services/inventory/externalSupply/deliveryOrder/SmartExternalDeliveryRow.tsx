@@ -387,7 +387,7 @@ export function SmartExternalDeliveryRow({
               }}
               disabled={!productKnowledge || isTaxInclusive}
               className={cn(
-                "w-[90px] text-right",
+                "w-[90px]",
                 isTaxInclusive && "bg-gray-100 text-gray-600",
               )}
             />
@@ -433,7 +433,7 @@ export function SmartExternalDeliveryRow({
                   );
                 }}
                 disabled={!productKnowledge}
-                className="w-[90px] text-right"
+                className="w-[90px]"
               />
             </div>
           </TableCell>
