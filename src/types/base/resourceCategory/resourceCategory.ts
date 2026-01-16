@@ -1,3 +1,4 @@
+import { MonetaryComponent } from "@/types/base/monetaryComponent/monetaryComponent";
 import { SlugConfig } from "@/types/base/slug/slugConfig";
 import { UserReadMinimal } from "@/types/user/user";
 
@@ -37,6 +38,8 @@ export interface ResourceCategoryBase {
   resource_type: ResourceCategoryResourceType;
   resource_sub_type: ResourceCategorySubType;
   slug_config: SlugConfig;
+  calculated_monetary_components?: MonetaryComponent[];
+  configured_monetary_components?: MonetaryComponent[];
 }
 
 export interface ResourceCategoryRead extends ResourceCategoryBase {

@@ -20,10 +20,10 @@ import {
 import Loading from "@/components/Common/Loading";
 
 import {
+  PAYMENT_RECONCILIATION_METHOD_MAP,
   PAYMENT_RECONCILIATION_OUTCOME_COLORS,
   PAYMENT_RECONCILIATION_STATUS_COLORS,
   PaymentReconciliationOutcome,
-  PaymentReconciliationPaymentMethod,
   PaymentReconciliationStatus,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
@@ -48,16 +48,6 @@ const outcomeMap: Record<
   error: { label: "Error", color: "destructive" },
   queued: { label: "Queued", color: "secondary" },
   partial: { label: "Partial", color: "warning" },
-};
-
-const methodMap: Record<PaymentReconciliationPaymentMethod, string> = {
-  cash: "Cash",
-  ccca: "Credit Card",
-  cchk: "Credit Check",
-  cdac: "Credit Account",
-  chck: "Check",
-  ddpo: "Direct Deposit",
-  debc: "Debit Card",
 };
 
 type PrintPaymentReconciliationProps = {
@@ -134,7 +124,9 @@ export function PrintPaymentReconciliation({
               </div>
               <div>
                 <span className="text-gray-600">{t("payment_method")}: </span>
-                <span className="font-medium">{methodMap[payment.method]}</span>
+                <span className="font-medium">
+                  {PAYMENT_RECONCILIATION_METHOD_MAP[payment.method]}
+                </span>
               </div>
             </div>
           </div>

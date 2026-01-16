@@ -58,6 +58,19 @@ export enum PaymentReconciliationPaymentMethod {
   debc = "debc",
 }
 
+export const PAYMENT_RECONCILIATION_METHOD_MAP: Record<
+  PaymentReconciliationPaymentMethod,
+  string
+> = {
+  cash: "Cash",
+  ccca: "Credit Card",
+  cchk: "Credit Check",
+  cdac: "Credit Account",
+  chck: "Check",
+  ddpo: "Direct Deposit",
+  debc: "Debit Card",
+};
+
 export interface PaymentReconciliationBase {
   id: string;
   reconciliation_type: PaymentReconciliationType;

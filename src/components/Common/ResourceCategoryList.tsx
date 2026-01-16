@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Coins, EllipsisVertical, FileIcon, Pencil } from "lucide-react";
 import { navigate } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -15,10 +16,17 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 
 import { getPermissions } from "@/common/Permissions";
+import { CategoryMonetaryComponentsSheet } from "@/components/Common/CategoryMonetaryComponentsSheet";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { usePermissions } from "@/context/PermissionContext";
 
@@ -34,7 +42,6 @@ import {
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
 import query from "@/Utils/request/query";
 import queryClient from "@/Utils/request/queryClient";
-import { FileIcon } from "lucide-react";
 
 export interface BaseSearchableItem {
   id: string;
@@ -85,11 +92,17 @@ function CategoryCard({
   category,
   onNavigate,
   onEdit,
+  onSetMonetaryComponents,
+  showMonetaryComponentsOption = false,
 }: {
   category: ResourceCategoryRead;
   onNavigate: (slug: string) => void;
   onEdit: (category: ResourceCategoryRead) => void;
+  onSetMonetaryComponents: (category: ResourceCategoryRead) => void;
+  showMonetaryComponentsOption?: boolean;
 }) {
+  const { t } = useTranslation();
+
   return (
     <Card
       className="hover:shadow-md transition-shadow cursor-pointer"
@@ -115,16 +128,54 @@ function CategoryCard({
             </h3>
           </div>
           <div className="flex items-center space-x-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit(category);
-              }}
-            >
-              <CareIcon icon="l-ellipsis-v" className="h-4 w-4" />
-            </Button>
+            {showMonetaryComponentsOption ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                  >
+                    <EllipsisVertical className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem
+                    className="cursor-pointer flex items-center gap-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(category);
+                    }}
+                  >
+                    <Pencil className="size-4" />
+                    {t("edit")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="cursor-pointer flex items-center gap-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSetMonetaryComponents(category);
+                    }}
+                  >
+                    <Coins className="size-4" />
+                    {t("set_monetary_components")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(category);
+                }}
+              >
+                <EllipsisVertical className="size-4" />
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>
@@ -232,6 +283,7 @@ interface ResourceCategoryListProps<
   createItemLabel?: string;
   createItemIcon?: "l-plus" | "l-file" | "l-folder-plus";
   allowCategoryCreate?: boolean;
+  showMonetaryComponentsOption?: boolean;
   children?: React.ReactNode;
   itemSearchConfig?: ItemSearchConfig<T>;
 }
@@ -249,6 +301,7 @@ export function ResourceCategoryList<
   createItemLabel,
   createItemIcon = "l-plus",
   allowCategoryCreate = false,
+  showMonetaryComponentsOption = false,
   children,
   itemSearchConfig,
 }: ResourceCategoryListProps<T>) {
@@ -264,6 +317,8 @@ export function ResourceCategoryList<
   const [editingCategory, setEditingCategory] = React.useState<string | null>(
     null,
   );
+  const [monetaryComponentsCategory, setMonetaryComponentsCategory] =
+    React.useState<ResourceCategoryRead | null>(null);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: RESULTS_PER_PAGE_LIMIT,
     disableCache: true,
@@ -343,6 +398,10 @@ export function ResourceCategoryList<
       queryKey: ["resourceCategories"],
     });
     onNavigate(category.slug);
+  };
+
+  const handleSetMonetaryComponents = (category: ResourceCategoryRead) => {
+    setMonetaryComponentsCategory(category);
   };
 
   return (
@@ -438,6 +497,8 @@ export function ResourceCategoryList<
                 category={category}
                 onNavigate={onNavigate}
                 onEdit={handleEditCategory}
+                onSetMonetaryComponents={handleSetMonetaryComponents}
+                showMonetaryComponentsOption={showMonetaryComponentsOption}
               />
             ))}
 
@@ -472,6 +533,19 @@ export function ResourceCategoryList<
         onClose={() => setIsCategoryFormOpen(false)}
         onSuccess={handleCategoryFormSuccess}
       />
+
+      {monetaryComponentsCategory && (
+        <CategoryMonetaryComponentsSheet
+          facilityId={facilityId}
+          categorySlug={monetaryComponentsCategory.slug}
+          categoryTitle={monetaryComponentsCategory.title}
+          configuredMonetaryComponents={
+            monetaryComponentsCategory.configured_monetary_components
+          }
+          isOpen={!!monetaryComponentsCategory}
+          onClose={() => setMonetaryComponentsCategory(null)}
+        />
+      )}
 
       <Pagination totalCount={categoriesResponse?.count || 0} />
     </div>

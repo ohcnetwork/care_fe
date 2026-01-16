@@ -26,9 +26,9 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import {
+  PAYMENT_RECONCILIATION_METHOD_MAP,
   PAYMENT_RECONCILIATION_OUTCOME_COLORS,
   PAYMENT_RECONCILIATION_STATUS_COLORS,
-  PaymentReconciliationPaymentMethod,
   PaymentReconciliationStatus,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
@@ -36,16 +36,6 @@ import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatPatientAge } from "@/Utils/utils";
-
-const methodMap: Record<PaymentReconciliationPaymentMethod, string> = {
-  cash: "Cash",
-  ccca: "Credit Card",
-  cchk: "Credit Check",
-  cdac: "Credit Account",
-  chck: "Check",
-  ddpo: "Direct Deposit",
-  debc: "Debit Card",
-};
 
 // Helper for friendly display of enum values
 function humanize(str: string): string {
@@ -153,7 +143,9 @@ export function PaymentReconciliationShow({
             >
               {t(payment.outcome)}
             </Badge>
-            <Badge variant="outline">{t(methodMap[payment.method])}</Badge>
+            <Badge variant="outline">
+              {t(PAYMENT_RECONCILIATION_METHOD_MAP[payment.method])}
+            </Badge>
             <Badge variant="outline">{t(payment.reconciliation_type)}</Badge>
           </div>
         </div>
@@ -251,7 +243,7 @@ export function PaymentReconciliationShow({
                 <div className="space-y-4">
                   <InfoItem
                     label={t("payment_method")}
-                    value={methodMap[payment.method]}
+                    value={PAYMENT_RECONCILIATION_METHOD_MAP[payment.method]}
                   />
                   {payment.reference_number && (
                     <InfoItem

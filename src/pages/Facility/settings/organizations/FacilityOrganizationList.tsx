@@ -104,6 +104,11 @@ export default function FacilityOrganizationList({
       title: t("departments_or_teams"),
       value: "departments",
     },
+    {
+      path: `/facility/${facilityId}/settings/departments/${organizationId}/service_accounts`,
+      title: t("service_accounts"),
+      value: "service_accounts",
+    },
   ];
 
   const handleTabChange = useCallback(
@@ -237,11 +242,14 @@ export default function FacilityOrganizationList({
                   </>
                 )}
                 <div className="mt-4">
-                  {currentTab === "users" && organizationId ? (
+                  {(currentTab === "users" ||
+                    currentTab === "service_accounts") &&
+                  organizationId ? (
                     <FacilityOrganizationUsers
                       id={organizationId}
                       facilityId={facilityId}
                       permissions={facility?.permissions ?? []}
+                      isServiceAccount={currentTab === "service_accounts"}
                     />
                   ) : (
                     <FacilityOrganizationView
