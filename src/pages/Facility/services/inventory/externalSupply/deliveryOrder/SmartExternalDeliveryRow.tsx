@@ -44,7 +44,6 @@ import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryCo
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ProductRead } from "@/types/inventory/product/product";
 
-import { round } from "@/Utils/decimal";
 import { SupplyDeliveryFormValues } from "./AddSupplyDeliveryForm";
 import { useDeliveryRowItem } from "./useDeliveryRowItem";
 
@@ -425,7 +424,7 @@ export function SmartExternalDeliveryRow({
                 type="number"
                 min={0}
                 step="0.01"
-                value={currentValue?.amount ? round(currentValue?.amount) : ""}
+                value={currentValue?.amount || ""}
                 placeholder="0"
                 onChange={(e) => {
                   updateInformationalComponent(
