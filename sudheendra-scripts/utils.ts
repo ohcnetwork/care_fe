@@ -1565,6 +1565,40 @@ export async function validateCodesInValueset(
   return results;
 }
 
+export async function lookupCodeInValueset(
+  code: string,
+  system: string,
+  config: BaseConfig,
+): Promise<Code | null> {
+  const body = {
+    code: code,
+    system: system,
+  };
+  const response = await fetch(
+    `${config.apiBaseUrl}/api/v1/valueset/lookup_code/`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(config),
+      },
+      body: JSON.stringify(body),
+    },
+  );
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const data = await response.json();
+
+  return {
+    system: data.metadata.system,
+    code: code,
+    display: data.metadata.display,
+  };
+}
+
 /**
  * Batch validate and substitute codes with defaults if not in valueset
  * @param codes - Array of codes to validate with their systems and defaults
