@@ -47,6 +47,11 @@ export default function WeekdayCheckbox({
     }
   };
 
+  const label =
+    selectedDays.length === dayOfWeekKeys.length
+      ? t("unselect_all")
+      : t("select_all");
+
   return (
     <div
       className={
@@ -81,8 +86,8 @@ export default function WeekdayCheckbox({
       <div>
         <Button
           type="button"
-          // variant={selectedDays.length === dayOfWeekKeys.length ? "primary" : "outline" }
           variant={"outline_primary"}
+          aria-label={label}
           onClick={() => {
             if (selectedDays.length === dayOfWeekKeys.length) {
               onChange([]);
@@ -91,9 +96,7 @@ export default function WeekdayCheckbox({
             }
           }}
         >
-          {selectedDays.length === dayOfWeekKeys.length
-            ? t(`unselect_all`)
-            : t(`select_all`)}
+          {label}
         </Button>
       </div>
     </div>
