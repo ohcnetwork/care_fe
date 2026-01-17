@@ -193,8 +193,10 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
         queryParams: {
           limit: 14,
           offset: String(pageParam),
-          ...(completedEncounterStatus.includes(primaryEncounter?.status ?? "")
-            ? { patient_filter: patientId, facility: facilityId }
+          ...(facilityId
+            ? completedEncounterStatus.includes(primaryEncounter?.status ?? "")
+              ? { patient_filter: patientId, facility: facilityId }
+              : { patient: patientId }
             : { patient: patientId }),
           ...(status && { status }),
           ...(selectedTagIds.length > 0 && {

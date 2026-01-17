@@ -8,6 +8,8 @@ import { Document, Page, pdfjs } from "react-pdf";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
+import PrintFooter from "@/components/Common/PrintFooter";
+
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName, formatPatientAge } from "@/Utils/utils";
@@ -293,14 +295,7 @@ export default function DiagnosticReportPrint({
           )}
 
           {/* Footer */}
-          <div className="mt-12 pt-4 border-t text-[10px] text-gray-500 flex justify-between">
-            <p>
-              {t("generated_on")} {format(new Date(), "PPP 'at' p")}
-            </p>
-            <p>
-              {t("generated_by")} {formatName(report.created_by)}
-            </p>
-          </div>
+          <PrintFooter showPrintedBy className="mt-12 pt-4 border-t" />
         </div>
       </PrintPreview>
     </div>

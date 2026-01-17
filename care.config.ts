@@ -255,6 +255,15 @@ const careConfig = {
       env.REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE,
       false,
     ),
+    /**
+     * Number of months offset for expiry restriction.
+     * 0 = current month, 1 = next month, etc.
+     * Products expiring before the end of (current month + offset) will be restricted.
+     * Set to null (default) to disable expiry restriction entirely.
+     */
+    expiryMonthOffset: env.REACT_INVENTORY_EXPIRY_MONTH_OFFSET
+      ? parseInt(env.REACT_INVENTORY_EXPIRY_MONTH_OFFSET, 10)
+      : null,
   },
 
   /**

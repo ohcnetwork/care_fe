@@ -762,6 +762,7 @@ export function AddSupplyDeliveryForm({
                                             enableSearch={true}
                                             multiSelect={false}
                                             className="w-full h-9"
+                                            dontRestrictExpired
                                           />
                                         </FormControl>
                                         <FormMessage />
