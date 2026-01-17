@@ -253,7 +253,7 @@ export function PaymentReconciliationSheet({
 
   useEffect(() => {
     if (open) {
-      const initialAmount = invoice?.total_gross || "0";
+      const initialAmount = round(invoice?.total_gross || "0");
       form.reset({
         reconciliation_type: invoice
           ? PaymentReconciliationType.payment
