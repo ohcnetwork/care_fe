@@ -403,7 +403,7 @@ export function EditInvoiceTable({
                         selected={undefined}
                         onChange={handleApplyPerformerToAll}
                         facilityId={facilityId}
-                        triggerOption={
+                        trigger={
                           <Button
                             variant="ghost"
                             size="sm"
@@ -413,6 +413,8 @@ export function EditInvoiceTable({
                             <ChevronDown className="h-3 w-3 ml-1" />
                           </Button>
                         }
+                        contentAlign="center"
+                        contentClassName="w-80"
                       />
                     )}
                   </div>

@@ -39,11 +39,13 @@ interface Props {
   placeholder?: string;
   noOptionsMessage?: string;
   popoverClassName?: string;
+  contentClassName?: string;
+  contentAlign?: React.ComponentProps<typeof PopoverContent>["align"];
   facilityId?: string;
   organizationId?: string;
   disabled?: boolean;
   isServiceAccount?: boolean;
-  triggerOption?: React.ReactNode;
+  trigger?: React.ReactNode;
 }
 
 const PAGE_LIMIT = 50;
@@ -132,11 +134,13 @@ export default function UserSelector({
   placeholder,
   noOptionsMessage,
   popoverClassName,
+  contentClassName,
+  contentAlign,
   facilityId,
   organizationId,
   disabled,
   isServiceAccount = false,
-  triggerOption,
+  trigger,
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -195,38 +199,39 @@ export default function UserSelector({
     if (inView && hasNextPage) fetchNextPage();
   }, [inView, hasNextPage, fetchNextPage]);
 
-  const renderTriggerButton = () => (
-    <Button
-      variant="outline"
-      role="combobox"
-      className="min-w-60 w-full justify-start"
-      disabled={disabled}
-    >
-      {selected ? (
-        <div className="flex items-center gap-2">
-          <Avatar
-            imageUrl={selected.profile_picture_url}
-            name={formatName(selected, true)}
-            className="size-6 rounded-full"
-          />
-          <TooltipComponent content={formatName(selected)} side="bottom">
-            <p className="font-medium text-gray-900 truncate max-w-48 sm:max-w-56 md:max-w-64">
-              {formatName(selected)}
-            </p>
-          </TooltipComponent>
-        </div>
-      ) : (
-        <span>{placeholder || t("select_user")}</span>
-      )}
-      <CaretDownIcon className="ml-auto" />
-    </Button>
-  );
+  const renderTriggerButton = () =>
+    trigger || (
+      <Button
+        variant="outline"
+        role="combobox"
+        className="min-w-60 w-full justify-start"
+        disabled={disabled}
+      >
+        {selected ? (
+          <div className="flex items-center gap-2">
+            <Avatar
+              imageUrl={selected.profile_picture_url}
+              name={formatName(selected, true)}
+              className="size-6 rounded-full"
+            />
+            <TooltipComponent content={formatName(selected)} side="bottom">
+              <p className="font-medium text-gray-900 truncate max-w-48 sm:max-w-56 md:max-w-64">
+                {formatName(selected)}
+              </p>
+            </TooltipComponent>
+          </div>
+        ) : (
+          <span>{placeholder || t("select_user")}</span>
+        )}
+        <CaretDownIcon className="ml-auto" />
+      </Button>
+    );
 
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild className={popoverClassName}>
-          {triggerOption ? triggerOption : renderTriggerButton()}
+          {renderTriggerButton()}
         </DrawerTrigger>
         <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
           <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
@@ -250,14 +255,14 @@ export default function UserSelector({
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger asChild className={popoverClassName}>
-        {triggerOption ? triggerOption : renderTriggerButton()}
+        {renderTriggerButton()}
       </PopoverTrigger>
       <PopoverContent
         className={cn(
-          "p-0 w-[var(--radix-popover-trigger-width)]",
-          triggerOption && "w-80 max-h-96 overflow-hidden",
+          "p-0 w-(--radix-popover-trigger-width)",
+          contentClassName,
         )}
-        align="start"
+        align={contentAlign || "start"}
         sideOffset={4}
       >
         <UserCommandContent
