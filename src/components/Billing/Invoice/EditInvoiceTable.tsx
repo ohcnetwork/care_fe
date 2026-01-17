@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { ChevronDown, Plus, X } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -38,6 +39,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import UserSelector from "@/components/Common/UserSelector";
+
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
@@ -56,6 +59,8 @@ import {
   PriceComponentType,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { UserReadMinimal } from "@/types/user/user";
+import { isPositive, round, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
@@ -77,29 +82,14 @@ const priceComponentSchema = z.object({
       display: z.string(),
     })
     .optional(),
-  factor: z.number().min(0).max(100).optional(),
-  amount: z
-    .string()
-    .refine((val) => !val || Number(val) >= 0, {
-      message: "Amount must be a valid number",
-    })
-    .optional(),
+  factor: zodDecimal({ min: 0, max: 100 }).optional().nullable(),
+  amount: zodDecimal({ min: 0 }).optional().nullable(),
   conditions: z.array(conditionSchema).optional(),
 });
 
 const chargeItemBaseSchema = z.object({
-  baseAmount: z
-    .string()
-    .refine(
-      (val) => !isNaN(parseFloat(val)) && parseFloat(val) >= 0,
-      "Base amount must be a positive number",
-    ),
-  quantity: z
-    .string()
-    .refine(
-      (val) => !isNaN(parseFloat(val)) && parseFloat(val) >= 0,
-      "Quantity must be a positive number",
-    ),
+  baseAmount: zodDecimal({ min: 0 }),
+  quantity: zodDecimal({ min: 1 }),
   taxComponents: z.array(priceComponentSchema).optional(),
   discounts: z.array(priceComponentSchema).optional(),
 });
@@ -133,6 +123,42 @@ export function EditInvoiceTable({
   const { facility } = useCurrentFacility();
   useShortcutSubContext("facility:billing:invoice:show");
 
+  const [performers, setPerformers] = useState<
+    Record<string, UserReadMinimal | undefined>
+  >(() => {
+    const initial: Record<string, UserReadMinimal | undefined> = {};
+    chargeItems.forEach((item) => {
+      initial[item.id] = item.performer_actor;
+    });
+    return initial;
+  });
+
+  const handlePerformerChange = (
+    chargeItemId: string,
+    user: UserReadMinimal | undefined,
+  ) => {
+    setPerformers((prev) => ({
+      ...prev,
+      [chargeItemId]: user,
+    }));
+  };
+
+  const handleApplyPerformerToAll = (user: UserReadMinimal | undefined) => {
+    const newPerformers: Record<string, UserReadMinimal | undefined> = {};
+    chargeItems.forEach((item) => {
+      newPerformers[item.id] = user;
+    });
+    setPerformers(newPerformers);
+  };
+
+  const handleClearAllPerformers = () => {
+    const newPerformers: Record<string, UserReadMinimal | undefined> = {};
+    chargeItems.forEach((item) => {
+      newPerformers[item.id] = undefined;
+    });
+    setPerformers(newPerformers);
+  };
+
   const getDiscountComponentKey = (
     component: MonetaryComponent | undefined,
   ) => {
@@ -157,14 +183,12 @@ export function EditInvoiceTable({
         const taxComponents = getComponentsFromChargeItem(
           item.charge_item_definition,
           MonetaryComponentType.tax,
-        ).map((component) => ({
-          ...component,
-          amount: component.amount ? String(component.amount) : undefined,
-        }));
+        );
 
         const discounts = discountComponents.map((component) => ({
           ...component,
-          amount: component.amount ? String(component.amount) : undefined,
+          factor: component.factor ? round(component.factor) : component.factor,
+          amount: component.amount ? round(component.amount) : component.amount,
           conditions: component.conditions?.map((condition) => ({
             ...condition,
             _conditionType: getConditionDiscriminatorValue(
@@ -179,8 +203,8 @@ export function EditInvoiceTable({
           title: item.title,
           status: item.status as ChargeItemStatus,
           description: item.description || "",
-          baseAmount: String(baseComponent?.amount || "0"),
-          quantity: String(item.quantity),
+          baseAmount: round(baseComponent?.amount || "0"),
+          quantity: round(item.quantity),
           taxComponents,
           discounts: discounts,
         };
@@ -219,11 +243,12 @@ export function EditInvoiceTable({
         ...(item.discounts || []).filter((discount) => {
           const hasAmount = discount.amount && parseFloat(discount.amount) > 0;
           const hasFactor =
-            discount.factor !== undefined && discount.factor > 0;
+            discount.factor != null && isPositive(discount.factor);
           return hasAmount || hasFactor;
         }),
       ],
       description: item.description || undefined,
+      performer_actor: performers[item.id]?.id,
     }));
 
     updateChargeItems({ datapoints: updates });
@@ -275,9 +300,6 @@ export function EditInvoiceTable({
     if (selectedComponent) {
       form.setValue(`items.${itemIndex}.discounts.${discountIndex}`, {
         ...selectedComponent,
-        amount: selectedComponent.amount
-          ? String(selectedComponent.amount)
-          : undefined,
         conditions:
           selectedComponent.conditions?.map((condition) => ({
             ...condition,
@@ -297,7 +319,10 @@ export function EditInvoiceTable({
   ) => {
     if (checked) {
       // Switch to percentage
-      form.setValue(`items.${itemIndex}.discounts.${discountIndex}.factor`, 0);
+      form.setValue(
+        `items.${itemIndex}.discounts.${discountIndex}.factor`,
+        "0",
+      );
       form.setValue(
         `items.${itemIndex}.discounts.${discountIndex}.amount`,
         undefined,
@@ -336,9 +361,6 @@ export function EditInvoiceTable({
         // Add the discount if not already present
         const newDiscount = {
           ...discountDefinition,
-          amount: discountDefinition.amount
-            ? String(discountDefinition.amount)
-            : undefined,
           conditions:
             discountDefinition.conditions?.map((condition) => ({
               ...condition,
@@ -367,36 +389,55 @@ export function EditInvoiceTable({
     return <div>{t("no_charge_items_found")}</div>;
   }
 
-  const onError = () => {
-    toast.error(t("invalid_value"));
-  };
+  const filteredDiscounts = globalDiscounts.filter(getDiscountComponentKey);
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit, onError)}
+        onSubmit={form.handleSubmit(onSubmit, () =>
+          toast.error(t("invalid_value")),
+        )}
         className="space-y-4"
       >
-        <div className="rounded-t-sm border border-gray-300 overflow-x-auto">
-          <Table>
+        <div>
+          <Table className="border">
             <TableHeader>
-              <TableRow className="border-b border-gray-200">
-                <TableHead className="border-r border-gray-200 font-semibold text-center sticky left-0 bg-white w-12">
-                  #
+              <TableRow className="divide-x font-semibold">
+                <TableHead className="w-12">#</TableHead>
+                <TableHead>{t("item")}</TableHead>
+                <TableHead>
+                  <div className="flex items-center justify-center gap-2">
+                    {t("performer")}
+                    {chargeItems.length > 1 && (
+                      <UserSelector
+                        selected={undefined}
+                        onChange={handleApplyPerformerToAll}
+                        facilityId={facilityId}
+                        trigger={
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-xs"
+                          >
+                            {t("apply_to_all")}
+                            <ChevronDown className="h-3 w-3 ml-1" />
+                          </Button>
+                        }
+                        contentAlign="center"
+                        contentClassName="w-80"
+                        onClear={handleClearAllPerformers}
+                      />
+                    )}
+                  </div>
                 </TableHead>
-                <TableHead className="border-r border-gray-200 font-semibold text-center sticky left-8 bg-white min-w-[200px]">
-                  {t("item")}
-                </TableHead>
-                <TableHead className="border-r border-gray-200 font-semibold text-center min-w-[150px]">
+                <TableHead className="min-w-[150px]">
                   {t("unit_price")} ({getCurrencySymbol()})
                 </TableHead>
-                <TableHead className="border-r border-gray-200 font-semibold text-center min-w-[100px]">
-                  {t("quantity")}
-                </TableHead>
-                <TableHead className="border-r border-gray-200 font-semibold text-center min-w-[400px]">
+                <TableHead className="min-w-[100px]">{t("quantity")}</TableHead>
+                <TableHead>
                   <div className="flex items-center justify-center gap-2">
                     {t("discounts")}
-                    {globalDiscounts.length > 0 && chargeItems.length > 1 && (
+                    {filteredDiscounts.length > 0 && chargeItems.length > 1 && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
@@ -409,7 +450,7 @@ export function EditInvoiceTable({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          {globalDiscounts.map((discount) => {
+                          {filteredDiscounts.map((discount) => {
                             const key = getDiscountComponentKey(discount);
                             return (
                               <DropdownMenuItem
@@ -439,14 +480,21 @@ export function EditInvoiceTable({
             </TableHeader>
             <TableBody>
               {form.watch("items").map((item, index) => (
-                <TableRow key={item.id} className="border-b border-gray-200">
-                  <TableCell className="border-r border-gray-200 font-medium text-gray-950 text-sm text-center sticky left-0 bg-white w-12">
-                    {index + 1}
+                <TableRow
+                  key={item.id}
+                  className="divide-x font-medium text-gray-950"
+                >
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{item.title}</TableCell>
+                  <TableCell>
+                    <UserSelector
+                      selected={performers[item.id]}
+                      onChange={(user) => handlePerformerChange(item.id, user)}
+                      facilityId={facilityId}
+                      placeholder={t("select_performer")}
+                    />
                   </TableCell>
-                  <TableCell className="border-r border-gray-200 font-medium text-gray-950 text-sm sticky left-8 bg-white min-w-[200px]">
-                    {item.title}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-200 font-medium text-gray-950 text-sm min-w-[150px]">
+                  <TableCell>
                     <FormField
                       control={form.control}
                       name={`items.${index}.baseAmount`}
@@ -467,26 +515,20 @@ export function EditInvoiceTable({
                       )}
                     />
                   </TableCell>
-                  <TableCell className="border-r border-gray-200 font-medium text-gray-950 text-sm min-w-[100px]">
+                  <TableCell>
                     <FormField
                       control={form.control}
                       name={`items.${index}.quantity`}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              min="0"
-                              step="1"
-                              className="text-right"
-                            />
+                            <Input type="number" {...field} min="1" step="1" />
                           </FormControl>
                         </FormItem>
                       )}
                     />
                   </TableCell>
-                  <TableCell className="border-r border-gray-200 font-medium text-gray-950 text-sm min-w-[400px]">
+                  <TableCell className="border-r border-gray-200 font-medium text-gray-950 text-sm ">
                     {(() => {
                       const hasAppliedDiscounts =
                         item.discounts && item.discounts.length > 0;
@@ -620,11 +662,11 @@ export function EditInvoiceTable({
                                     const isPercentage =
                                       discount?.factor !== undefined;
                                     const value = isPercentage
-                                      ? String(discount?.factor ?? "0")
-                                      : String(discount?.amount ?? "0");
+                                      ? (discount?.factor ?? "0")
+                                      : (discount?.amount ?? "0");
 
                                     return (
-                                      <FormItem className="flex-1">
+                                      <FormItem className="flex-1 min-w-20">
                                         <FormControl>
                                           <MonetaryAmountInput
                                             hideCurrency={true}
@@ -634,7 +676,7 @@ export function EditInvoiceTable({
                                               if (isPercentage) {
                                                 form.setValue(
                                                   `items.${index}.discounts.${discountIndex}.factor`,
-                                                  parseFloat(newValue) || 0,
+                                                  newValue,
                                                 );
                                               } else {
                                                 form.setValue(
@@ -724,7 +766,7 @@ export function EditInvoiceTable({
           </Table>
         </div>
 
-        <div className="flex justify-end gap-2">
+        <div className="sticky bottom-0 bg-white p-4 flex justify-end gap-2 border-t">
           <Button type="button" variant="outline" onClick={onClose}>
             {t("cancel")}
             {enableShortcut && <ShortcutBadge actionId="cancel-action" />}

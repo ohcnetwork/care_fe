@@ -18,6 +18,7 @@ import Loading from "@/components/Common/Loading";
 import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { EmptyState } from "@/components/ui/empty-state";
 
+import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 import { InvoiceStatus } from "@/types/billing/invoice/invoice";
@@ -75,6 +76,7 @@ interface Props {
   canAccess: boolean;
   canWrite: boolean;
   facilityId?: string;
+  dispenseOrderId?: string;
 }
 
 export function DispenseHistory({
@@ -82,21 +84,23 @@ export function DispenseHistory({
   encounterId,
   facilityId,
   canAccess,
+  dispenseOrderId,
   canWrite,
 }: Props) {
   const { t } = useTranslation();
   const [isDispenseOpen, setIsDispenseOpen] = useState(false);
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["medication_dispense", patientId, encounterId],
+    queryKey: ["medication_dispense", dispenseOrderId, patientId, encounterId],
     queryFn: query(medicationDispenseApi.list, {
       queryParams: {
         encounter: encounterId,
         limit: 100,
         patient: patientId,
+        order: dispenseOrderId,
       },
     }),
-    enabled: !!patientId && canAccess,
+    enabled: !!patientId && canAccess && !!dispenseOrderId,
   });
 
   const medications = response?.results || [];
@@ -165,7 +169,9 @@ export function DispenseHistory({
                     {medication.item.product.product_knowledge.name}
                   </TableCell>
                   <TableCell className="text-gray-950">
-                    {dosage ? `${dosage.value} ${dosage.unit.display}` : "-"}
+                    {dosage
+                      ? `${round(dosage.value)} ${dosage.unit.display}`
+                      : "-"}
                   </TableCell>
                   <TableCell className="text-gray-950">
                     {instruction?.as_needed_boolean
@@ -177,7 +183,7 @@ export function DispenseHistory({
                       : frequency?.display || "-"}
                   </TableCell>
                   <TableCell className="text-gray-950 font-medium">
-                    {medication.quantity || "-"}
+                    {medication.quantity ? round(medication.quantity) : "-"}
                   </TableCell>
                   <TableCell className="text-gray-950 font-medium">
                     {medication.location.name}
@@ -209,7 +215,7 @@ export function DispenseHistory({
                         hidden={!facilityId}
                       >
                         <Link
-                          href={`/facility/${facilityId}/locations/${medication.location.id}/medication_dispense/patient/${patientId}/${medication.status}?payment_status=${medication.charge_item?.paid_invoice?.status === InvoiceStatus.balanced ? "paid" : "unpaid"}`}
+                          href={`/facility/${facilityId}/locations/${medication.location.id}/medication_dispense/${dispenseOrderId ? `order/${dispenseOrderId}/${medication.status}?payment_status=${medication.charge_item?.paid_invoice?.status === InvoiceStatus.balanced ? "paid" : "unpaid"}` : ""}`}
                         >
                           {t("dispense")}
                         </Link>

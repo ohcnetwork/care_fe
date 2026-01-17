@@ -221,7 +221,7 @@ test.describe("Activity Definition Resource Category List", () => {
 
     await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
 
-    const searchInput = page.getByPlaceholder(/search categories/i);
+    const searchInput = page.getByPlaceholder(/search/i);
     await searchInput.fill(testData.title);
 
     await expect(page.getByText(testData.title)).toBeVisible();
@@ -241,9 +241,7 @@ test.describe("Activity Definition Resource Category List", () => {
   }) => {
     await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
 
-    await page
-      .getByPlaceholder(/search categories/i)
-      .fill(faker.string.alphanumeric(10));
+    await page.getByPlaceholder(/search/i).fill(faker.string.alphanumeric(10));
 
     await expect(page.getByText(/no results/i)).toBeVisible();
   });

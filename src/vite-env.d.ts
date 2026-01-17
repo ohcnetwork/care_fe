@@ -37,6 +37,9 @@ interface ImportMetaEnv {
   readonly REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE?: string;
   readonly REACT_AUTO_REFRESH_INTERVAL?: string;
   readonly REACT_AUTO_REFRESH_BY_DEFAULT?: string;
+  readonly REACT_DECIMAL_PRECISION?: string;
+  readonly REACT_ACCOUNTING_PRECISION?: string;
+  readonly REACT_DECIMAL_ROUNDING_METHOD?: string;
 
   // Plugins related envs...
   readonly REACT_SENTRY_DSN?: string;

@@ -28,10 +28,10 @@ import MedicationRequestList from "@/pages/Facility/services/pharmacy/Medication
 import PrescriptionsView, {
   PharmacyMedicationTab,
 } from "@/pages/Facility/services/pharmacy/PrescriptionsView";
+import { PrintDispenseOrder } from "@/pages/Facility/services/pharmacy/PrintDispenseOrder";
 import { PrintPharmacyPrescription } from "@/pages/Facility/services/pharmacy/PrintPharmacyPrescription";
 import ServiceRequestList from "@/pages/Facility/services/serviceRequests/ServiceRequestList";
 import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
-import { MedicationDispenseStatus } from "@/types/emr/medicationDispense/medicationDispense";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 
 interface LocationLayoutProps {
@@ -46,11 +46,55 @@ const getRoutes = (facilityId: string, locationId: string) => ({
   "/medication_requests": () => (
     <MedicationRequestList facilityId={facilityId} locationId={locationId} />
   ),
+  "/medication_requests/patient/:patientId/prescription/:prescriptionId": ({
+    patientId,
+    prescriptionId,
+  }: {
+    patientId: string;
+    prescriptionId: string;
+  }) => (
+    <PrescriptionsView
+      facilityId={facilityId}
+      patientId={patientId}
+      tab={PharmacyMedicationTab.PENDING}
+      prescriptionId={prescriptionId}
+    />
+  ),
+  "/medication_requests/patient/:patientId/print": ({
+    patientId,
+  }: {
+    patientId: string;
+  }) => (
+    <PrintPharmacyPrescription facilityId={facilityId} patientId={patientId} />
+  ),
+  "/medication_requests/patient/:patientId/bill": ({
+    patientId,
+  }: {
+    patientId: string;
+  }) => <MedicationBillForm patientId={patientId} />,
   "/medication_dispense": () => (
     <MedicationDispenseHistory
       facilityId={facilityId}
       locationId={locationId}
     />
+  ),
+  "/medication_dispense/order/:dispenseOrderId/print": ({
+    dispenseOrderId,
+  }: {
+    dispenseOrderId: string;
+  }) => (
+    <PrintDispenseOrder
+      facilityId={facilityId}
+      dispenseOrderId={dispenseOrderId}
+      locationId={locationId}
+    />
+  ),
+  "/medication_dispense/order/:dispenseOrderId": ({
+    dispenseOrderId,
+  }: {
+    dispenseOrderId: string;
+  }) => (
+    <DispensesView facilityId={facilityId} dispenseOrderId={dispenseOrderId} />
   ),
 
   // Laboratory
@@ -227,58 +271,6 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       internal={false}
     />
   ),
-
-  "/medication_requests/patient/:patientId": ({
-    patientId,
-  }: {
-    patientId: string;
-  }) => (
-    <Redirect
-      to={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${patientId}/pending`}
-    />
-  ),
-
-  "/medication_requests/patient/:patientId/prescription/:prescriptionId": ({
-    patientId,
-    prescriptionId,
-  }: {
-    patientId: string;
-    prescriptionId: string;
-  }) => (
-    <PrescriptionsView
-      facilityId={facilityId}
-      patientId={patientId}
-      tab={PharmacyMedicationTab.PENDING}
-      prescriptionId={prescriptionId}
-    />
-  ),
-  "/medication_requests/patient/:patientId/print": ({
-    patientId,
-  }: {
-    patientId: string;
-  }) => (
-    <PrintPharmacyPrescription facilityId={facilityId} patientId={patientId} />
-  ),
-
-  "/medication_dispense/patient/:patientId/:status": ({
-    patientId,
-    status,
-  }: {
-    patientId: string;
-    status: string;
-  }) => (
-    <DispensesView
-      facilityId={facilityId}
-      patientId={patientId}
-      status={status as MedicationDispenseStatus}
-    />
-  ),
-
-  "/medication_requests/patient/:patientId/bill": ({
-    patientId,
-  }: {
-    patientId: string;
-  }) => <MedicationBillForm patientId={patientId} />,
 
   // Schedule
   "/schedule": () => (

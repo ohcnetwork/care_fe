@@ -31,6 +31,7 @@ import {
   Status,
 } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
+import { ArrowLeft } from "lucide-react";
 
 interface Props {
   facilityId: string;
@@ -136,12 +137,9 @@ export default function ActivityDefinitionView({
     <Page title={definition.title} hideTitleOnPage={true}>
       <div className="container mx-auto max-w-3xl space-y-6">
         <BackButton
-          variant="outline"
-          size="xs"
-          className="mb-2"
-          to={`/facility/${facilityId}/settings/activity_definitions/categories/${definition.category.slug}`}
+          fallbackUrl={`/facility/${facilityId}/settings/activity_definitions/categories/${definition.category.slug}`}
         >
-          <CareIcon icon="l-arrow-left" className="size-4" />
+          <ArrowLeft />
           {t("back")}
         </BackButton>
 

@@ -45,6 +45,7 @@ import {
   BadgeCheck,
   ChevronDown,
   ChevronLeft,
+  EyeIcon,
   FileCheck,
   PrinterIcon,
   ReceiptText,
@@ -65,18 +66,19 @@ import { Separator } from "@/components/ui/separator";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { useCareApps } from "@/hooks/useCareApps";
 import { cn } from "@/lib/utils";
-import { paymentmethodMap } from "@/pages/Facility/billing/paymentReconciliation/PaymentsData";
 import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
+import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import { getPartialId } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import facilityApi from "@/types/facility/facilityApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import dayjs from "@/Utils/dayjs";
+import { add, round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -663,6 +665,9 @@ export function InvoiceShow({
                     <TableHead className={cn(tableHeadClass, "text-left")}>
                       {t("item")}
                     </TableHead>
+                    <TableHead className={cn(tableHeadClass, "text-left")}>
+                      {t("performer")}
+                    </TableHead>
                     <TableHead className={tableHeadClass}>
                       {t("mrp")} ({getCurrencySymbol()})
                     </TableHead>
@@ -700,8 +705,8 @@ export function InvoiceShow({
                       <TableCell
                         colSpan={
                           invoice?.status === InvoiceStatus.draft
-                            ? 8 + getApplicableTaxColumns(invoice).length
-                            : 7 + getApplicableTaxColumns(invoice).length
+                            ? 9 + getApplicableTaxColumns(invoice).length
+                            : 8 + getApplicableTaxColumns(invoice).length
                         }
                         className="text-center text-gray-500"
                       >
@@ -734,6 +739,9 @@ export function InvoiceShow({
                           >
                             {item.title}
                           </TableCell>
+                          <TableCell className={cn(tableCellClass)}>
+                            {formatName(item.performer_actor)}
+                          </TableCell>
                           <TableCell
                             className={cn(tableCellClass, "text-right")}
                           >
@@ -747,25 +755,21 @@ export function InvoiceShow({
                           <TableCell
                             className={cn(tableCellClass, "text-center")}
                           >
-                            {item.quantity}
+                            {round(item.quantity)}
                           </TableCell>
                           <TableCell
                             className={cn(tableCellClass, "text-right")}
                           >
                             <div className="flex flex-col items-end gap-0.5">
                               <MonetaryDisplay
-                                amount={String(
-                                  item.total_price_components
+                                amount={add(
+                                  ...item.total_price_components
                                     .filter(
                                       (c) =>
                                         c.monetary_component_type ===
                                         MonetaryComponentType.discount,
                                     )
-                                    .reduce(
-                                      (acc, curr) =>
-                                        acc + Number(curr.amount || 0),
-                                      0,
-                                    ),
+                                    .map((c) => c.amount || "0"),
                                 )}
                                 hideCurrency
                               />
@@ -991,7 +995,7 @@ export function InvoiceShow({
                 {/* Subtotal */}
                 <div className="flex w-64 justify-between">
                   <span className="text-gray-500">{t("net_amount")}</span>
-                  <MonetaryDisplay amount={String(invoice.total_net)} />
+                  <MonetaryDisplay amount={invoice.total_net} />
                 </div>
 
                 <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
@@ -999,7 +1003,7 @@ export function InvoiceShow({
                 {/* Total */}
                 <div className="flex w-64 justify-between font-bold">
                   <span>{t("total")}</span>
-                  <MonetaryDisplay amount={String(invoice.total_gross)} />
+                  <MonetaryDisplay amount={invoice.total_gross} />
                 </div>
                 <div className="p-1 pb-2.5 border-t-2 border-dashed border-gray-200 w-full" />
               </div>
@@ -1050,7 +1054,7 @@ export function InvoiceShow({
                             <TableCell
                               className={cn(tableCellClass, "font-medium")}
                             >
-                              <span className="flex justify-between items-center">
+                              <span className="flex justify-between items-center flex-wrap gap-2">
                                 {payment.payment_datetime
                                   ? format(
                                       new Date(payment.payment_datetime),
@@ -1058,27 +1062,48 @@ export function InvoiceShow({
                                     )
                                   : "-"}
 
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-gray-800 font-semibold text-xs p-2"
-                                  onClick={() => {
-                                    navigate(
-                                      `/facility/${facilityId}/billing/payments/${payment.id}/print`,
-                                    );
-                                  }}
-                                >
-                                  <>
-                                    <PrinterIcon className="size-3" />
-                                    {t("print")}
-                                  </>
-                                </Button>
+                                <div className="flex gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-gray-800 font-semibold text-xs p-2"
+                                    onClick={() => {
+                                      navigate(
+                                        `/facility/${facilityId}/billing/payments/${payment.id}`,
+                                      );
+                                    }}
+                                  >
+                                    <>
+                                      <EyeIcon className="size-3" />
+                                      {t("view")}
+                                    </>
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-gray-800 font-semibold text-xs p-2"
+                                    onClick={() => {
+                                      navigate(
+                                        `/facility/${facilityId}/billing/payments/${payment.id}/print`,
+                                      );
+                                    }}
+                                  >
+                                    <>
+                                      <PrinterIcon className="size-3" />
+                                      {t("print")}
+                                    </>
+                                  </Button>
+                                </div>
                               </span>
                             </TableCell>
                             <TableCell
                               className={cn(tableCellClass, "text-left")}
                             >
-                              {paymentmethodMap[payment.method]}
+                              {
+                                PAYMENT_RECONCILIATION_METHOD_MAP[
+                                  payment.method
+                                ]
+                              }
                             </TableCell>
                             <TableCell className={tableCellClass}>
                               {payment.reference_number}
@@ -1103,7 +1128,7 @@ export function InvoiceShow({
                   {/* Total Received */}
                   <div className="flex w-64 justify-between font-bold">
                     <span>{t("total_received")}</span>
-                    <MonetaryDisplay amount={String(invoice.total_payments)} />
+                    <MonetaryDisplay amount={invoice.total_payments} />
                   </div>
                   <div className="p-1 border-b-2 border-dashed border-gray-200 w-full" />
                 </div>
