@@ -1,5 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { formatDate } from "date-fns";
+import {
+  addMonths,
+  endOfMonth,
+  formatDate,
+  isBefore,
+  startOfMonth,
+} from "date-fns";
 import { ChevronDownIcon, SearchIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -22,6 +28,7 @@ import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { isPositive, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
+import careConfig from "@careConfig";
 
 export interface SelectedLot {
   selectedInventoryId: string;
@@ -40,6 +47,7 @@ interface StockLotSelectorProps {
   locationId?: string;
   productKnowledge?: ProductKnowledgeBase;
   availableInventories?: InventoryRead[];
+  dontRestrictExpired?: boolean;
 }
 
 export default function StockLotSelector({
@@ -54,9 +62,45 @@ export default function StockLotSelector({
   locationId,
   productKnowledge,
   availableInventories,
+  dontRestrictExpired = false,
 }: StockLotSelectorProps) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
+  const expiryMonthOffset = careConfig.inventory.expiryMonthOffset;
+
+  const isExpired = (expirationDate: string | undefined): boolean => {
+    if (!expirationDate) return false;
+    const expiryDate = new Date(expirationDate);
+    const currentMonthStart = startOfMonth(new Date());
+    return isBefore(expiryDate, currentMonthStart);
+  };
+
+  const isProductRestricted = (expirationDate: string | undefined): boolean => {
+    if (!expirationDate) return false;
+    if (isExpired(expirationDate)) return true;
+    if (expiryMonthOffset === null) return false;
+    const expiryDate = new Date(expirationDate);
+    const referenceMonthEnd = endOfMonth(
+      addMonths(new Date(), expiryMonthOffset),
+    );
+    return isBefore(expiryDate, referenceMonthEnd);
+  };
+
+  const getExpiryBadgeVariant = (
+    expirationDate: string | undefined,
+  ): "destructive" | "yellow" | "primary" => {
+    if (!expirationDate) return "primary";
+    const expiryDate = new Date(expirationDate);
+    const currentMonthStart = startOfMonth(new Date());
+    if (isBefore(expiryDate, currentMonthStart)) return "destructive";
+    if (expiryMonthOffset !== null) {
+      const referenceMonthEnd = endOfMonth(
+        addMonths(new Date(), expiryMonthOffset),
+      );
+      if (isBefore(expiryDate, referenceMonthEnd)) return "yellow";
+    }
+    return "primary";
+  };
 
   const { data: queryInventories } = useQuery({
     queryKey: ["inventoryItems", facilityId, locationId, productKnowledge?.id],
@@ -86,7 +130,11 @@ export default function StockLotSelector({
         )
       : inventories;
 
-  const toggleLotSelection = (inventoryId: string) => {
+  const toggleLotSelection = (inventoryId: string, isRestricted: boolean) => {
+    if (!dontRestrictExpired && isRestricted) {
+      return;
+    }
+
     const isSelected = selectedLots.some(
       (lot) => lot.selectedInventoryId === inventoryId,
     );
@@ -116,7 +164,7 @@ export default function StockLotSelector({
   };
 
   return (
-    <Popover>
+    <Popover modal>
       <PopoverTrigger>
         <Button
           variant="outline"
@@ -183,14 +231,9 @@ export default function StockLotSelector({
                       {showexpiry &&
                         selectedInventory?.product.expiration_date && (
                           <Badge
-                            variant={
-                              selectedInventory.status === "active" &&
-                              new Date(
-                                selectedInventory.product.expiration_date,
-                              ) >= new Date()
-                                ? "primary"
-                                : "destructive"
-                            }
+                            variant={getExpiryBadgeVariant(
+                              selectedInventory.product.expiration_date,
+                            )}
                             className="border-none rounded-sm"
                           >
                             {t("expiry")}:{" "}
@@ -211,7 +254,7 @@ export default function StockLotSelector({
           <ChevronDownIcon className="size-4 shrink-0" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0">
+      <PopoverContent className="w-auto max-w-[90vw] p-0">
         {enableSearch && (
           <div className="p-2 border-b">
             <div className="relative">
@@ -226,19 +269,37 @@ export default function StockLotSelector({
           </div>
         )}
         <div className="max-h-60 overflow-auto">
+          {!dontRestrictExpired &&
+            filteredInventories?.some((inv) =>
+              isProductRestricted(inv.product.expiration_date),
+            ) && (
+              <div className="px-2 py-1 bg-red-50 border-b border-red-100">
+                <span className="text-xs text-red-600">
+                  {t("expired_product_cannot_be_dispensed")}
+                </span>
+              </div>
+            )}
           {filteredInventories?.length ? (
             filteredInventories.map((inv) => {
               const isSelected = selectedLots.some(
                 (lot) => lot.selectedInventoryId === inv.id,
               );
+              const isRestricted = isProductRestricted(
+                inv.product.expiration_date,
+              );
+              const isDisabled = !dontRestrictExpired && isRestricted;
 
               return (
                 <div
                   key={inv.id}
-                  className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-accent"
-                  onClick={() => toggleLotSelection(inv.id)}
+                  className={`flex items-center space-x-2 p-2 ${
+                    isDisabled
+                      ? "cursor-not-allowed opacity-50 bg-gray-50"
+                      : "cursor-pointer hover:bg-accent"
+                  }`}
+                  onClick={() => toggleLotSelection(inv.id, isRestricted)}
                 >
-                  <Checkbox checked={isSelected} />
+                  <Checkbox checked={isSelected} disabled={isDisabled} />
                   <div className="flex-1 flex items-center justify-between gap-2">
                     <span
                       className={cn(
@@ -272,12 +333,9 @@ export default function StockLotSelector({
                       </Badge>
                       {inv.product?.expiration_date && (
                         <Badge
-                          variant={
-                            inv.status === "active" &&
-                            new Date(inv.product.expiration_date) >= new Date()
-                              ? "primary"
-                              : "destructive"
-                          }
+                          variant={getExpiryBadgeVariant(
+                            inv.product.expiration_date,
+                          )}
                         >
                           {t("expiry")}:{" "}
                           {inv.product.expiration_date

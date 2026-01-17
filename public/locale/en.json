@@ -2241,6 +2241,7 @@
   "expiration_date_description": "The date after which this product should not be used",
   "expiration_date_must_be_after_manufacture_date": "Expiration date must be after manufacture date",
   "expired": "Expired",
+  "expired_product_cannot_be_dispensed": "Expired products cannot be dispensed",
   "expires": "Expires",
   "expires_on": "Expires On",
   "expiry": "Expiry",
