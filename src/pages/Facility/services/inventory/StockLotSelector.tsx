@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/popover";
 
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import { cn } from "@/lib/utils";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
@@ -76,13 +77,14 @@ export default function StockLotSelector({
     (lot) => lot.selectedInventoryId,
   );
 
-  const filteredInventories = enableSearch
-    ? inventories.filter((inv) =>
-        inv.product.batch?.lot_number
-          ?.toLowerCase()
-          .includes(searchQuery.trim().toLowerCase()),
-      )
-    : inventories;
+  const filteredInventories =
+    enableSearch && searchQuery
+      ? inventories.filter((inv) =>
+          inv.product.batch?.lot_number
+            ?.toLowerCase()
+            .includes(searchQuery.trim().toLowerCase()),
+        )
+      : inventories;
 
   const toggleLotSelection = (inventoryId: string) => {
     const isSelected = selectedLots.some(
@@ -138,10 +140,18 @@ export default function StockLotSelector({
                     className="flex items-center justify-between w-full bg-gray-50 px-px py-0.5 border-gray-200 border rounded-sm text-gray-950 gap-1"
                   >
                     <span
-                      className="font-medium text-sm ml-1 truncate max-w-24"
-                      title={selectedInventory?.product.batch?.lot_number}
+                      className={cn(
+                        "font-medium text-sm ml-1 truncate max-w-24",
+                        !selectedInventory?.product.batch?.lot_number &&
+                          "text-gray-500",
+                      )}
+                      title={
+                        selectedInventory?.product.batch?.lot_number ||
+                        t("unknown")
+                      }
                     >
-                      {selectedInventory?.product.batch?.lot_number}
+                      {selectedInventory?.product.batch?.lot_number ||
+                        t("unknown")}
                     </span>
                     <div className="flex items-center gap-1">
                       <Badge>
@@ -230,7 +240,13 @@ export default function StockLotSelector({
                 >
                   <Checkbox checked={isSelected} />
                   <div className="flex-1 flex items-center justify-between gap-2">
-                    <span>{inv.product.batch?.lot_number}</span>
+                    <span
+                      className={cn(
+                        !inv.product.batch?.lot_number && "text-gray-500",
+                      )}
+                    >
+                      {inv.product.batch?.lot_number || t("unknown")}
+                    </span>
                     <div className="flex items-center gap-1">
                       <Badge>
                         <MonetaryDisplay
