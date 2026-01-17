@@ -122,13 +122,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
 
       - name: Restore build cache
         id: cache-restore
         uses: actions/cache/restore@v4
         with:
           path: |
+            build/
             node_modules/
           key: build-${{ github.sha }}
           fail-on-cache-miss: true
