@@ -43,6 +43,7 @@ import {
   ConditionOperationInRangeValue,
   ConditionOperationSummary,
   extractTagInformation,
+  getConditionDiscriminatorValue,
   getConditionValue,
   getDefaultCondition,
   Metrics,
@@ -294,7 +295,10 @@ export function ObservationInterpretation<
           ...r,
           conditions: r.conditions.map((condition) => ({
             ...condition,
-            _conditionType: `${condition.metric}_${condition.operation}`,
+            _conditionType: getConditionDiscriminatorValue(
+              condition.metric,
+              condition.operation,
+            ),
           })),
         })),
       ];
@@ -1429,13 +1433,11 @@ function NumericRangeComponent<TFieldValues extends FieldValues = FieldValues>({
   };
 
   const handleSetMin = (value: string, index: number) => {
-    const parsedValue = value === "" ? undefined : Number(value);
-    handleSetRange({ ...ranges[index], min: parsedValue }, index);
+    handleSetRange({ ...ranges[index], min: value || undefined }, index);
   };
 
-  const handleSetMax = (value: string | number, index: number) => {
-    const parsedValue = value === "" ? undefined : Number(value);
-    handleSetRange({ ...ranges[index], max: parsedValue }, index);
+  const handleSetMax = (value: string, index: number) => {
+    handleSetRange({ ...ranges[index], max: value || undefined }, index);
   };
 
   const handleAddRange = () => {

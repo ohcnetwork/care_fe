@@ -51,6 +51,7 @@
     "sort-locales": "node ./scripts/sort-locales.js"
   },
   "dependencies": {
+    "@dmitryrechkin/json-schema-to-zod": "^1.0.1",
     "@excalidraw/excalidraw": "^0.18.0-a18b139",
     "@fontsource/figtree": "^5.1.1",
     "@fontsource/libre-barcode-128-text": "^5.2.5",
@@ -97,6 +98,7 @@
     "cross-env": "^7.0.3",
     "date-fns": "^4.0.0",
     "dayjs": "^1.11.13",
+    "decimal.js": "^10.6.0",
     "framer-motion": "^12.6.3",
     "html-to-image": "^1.11.11",
     "i18next": "^25.0.0",

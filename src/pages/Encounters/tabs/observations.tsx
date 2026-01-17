@@ -70,17 +70,13 @@ function groupObservationsByDate(
 
 export const EncounterObservationsTab = () => {
   const { t } = useTranslation();
-  const {
-    selectedEncounterId: encounterId,
-    patientId,
-    canReadClinicalData,
-  } = useEncounter();
+  const { selectedEncounterId: encounterId, patientId } = useEncounter();
   const { ref, inView } = useInView();
 
   const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
     useInfiniteQuery<PaginatedResponse<ObservationListRead>, HTTPError>({
       queryKey: ["infinite-observations", patientId, encounterId],
-      queryFn: async ({ pageParam = 0 }) => {
+      queryFn: async ({ pageParam = 0, signal }) => {
         const response = await query(observationApi.list, {
           pathParams: { patientId },
           queryParams: {
@@ -89,15 +85,14 @@ export const EncounterObservationsTab = () => {
             limit: 20,
             offset: String(pageParam),
           },
-        })({ signal: new AbortController().signal });
-        return response;
+        })({ signal });
+        return response as PaginatedResponse<ObservationListRead>;
       },
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
         const currentOffset = allPages.length * 20;
         return currentOffset < lastPage.count ? currentOffset : null;
       },
-      enabled: canReadClinicalData,
     });
 
   useEffect(() => {

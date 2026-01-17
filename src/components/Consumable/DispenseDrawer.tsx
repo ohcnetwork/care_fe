@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { Check, Loader2, LocateFixed, XIcon } from "lucide-react";
+import { Check, Loader2, LocateFixed, Trash2, XIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -32,7 +32,6 @@ import query from "@/Utils/request/query";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import {
@@ -71,6 +70,19 @@ import {
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import {
+  DispenseOrderBatchResponse,
+  DispenseOrderStatus,
+  extractDispenseOrderFromBatchResponse,
+} from "@/types/emr/dispenseOrder/dispenseOrder";
+import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
+import {
+  isGreaterThan,
+  isLessThanOrEqual,
+  isZero,
+  round,
+  zodDecimal,
+} from "@/Utils/decimal";
 
 interface SelectedLocation {
   id: string;
@@ -90,11 +102,10 @@ interface Props {
 interface FormItemType {
   reference_id: string;
   productKnowledge: ProductKnowledgeBase;
-  isSelected: boolean;
-  quantity: number;
+  quantity: string;
   lots: Array<{
     selectedInventoryId: string;
-    quantity: number;
+    quantity: string;
   }>;
 }
 
@@ -104,12 +115,11 @@ const createFormSchema = () =>
       z.object({
         reference_id: z.string().uuid(),
         productKnowledge: z.any(),
-        isSelected: z.boolean(),
-        quantity: z.number().min(1),
+        quantity: zodDecimal({ min: 1 }),
         lots: z.array(
           z.object({
             selectedInventoryId: z.string(),
-            quantity: z.number().min(1),
+            quantity: zodDecimal({ min: 1 }),
           }),
         ),
       }),
@@ -162,7 +172,7 @@ export default function DispenseDrawer({
     },
   });
 
-  const { fields, append } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "items",
   });
@@ -231,12 +241,25 @@ export default function DispenseDrawer({
         form.setValue(`items.${index}.lots`, [
           {
             selectedInventoryId: inventories[0].id,
-            quantity: 1,
+            quantity: "1",
           },
         ]);
       }
     });
   }, [productKnowledgeInventoriesMap, fields, form]);
+
+  const { mutate: updateDispenseOrder } = useMutation({
+    mutationFn: ({
+      dispenseOrderId,
+      status,
+    }: {
+      dispenseOrderId: string;
+      status: DispenseOrderStatus;
+    }) =>
+      mutate(dispenseOrderApi.update, {
+        pathParams: { facilityId, id: dispenseOrderId },
+      })({ status }),
+  });
 
   const { mutate: dispense, isPending } = useMutation({
     mutationFn: mutate(batchApi.batchRequest),
@@ -250,7 +273,18 @@ export default function DispenseDrawer({
         response as ChargeItemBatchResponse,
       );
 
-      if (chargeItems.length > 0 && onDispenseComplete) {
+      const dispenseOrder = extractDispenseOrderFromBatchResponse(
+        response as DispenseOrderBatchResponse,
+      );
+
+      if (dispenseOrder) {
+        updateDispenseOrder({
+          dispenseOrderId: dispenseOrder.id,
+          status: DispenseOrderStatus.completed,
+        });
+      }
+
+      if (onDispenseComplete) {
         onDispenseComplete(chargeItems);
       } else {
         onOpenChange(false);
@@ -296,7 +330,7 @@ export default function DispenseDrawer({
   const validateFormWithToasts = useCallback(
     (formData: FormValues) => {
       let hasErrors = false;
-      const selectedItems = formData.items.filter((item) => item.isSelected);
+      const selectedItems = formData.items;
 
       if (selectedItems.length === 0) {
         toast.error(t("please_select_at_least_one_item"));
@@ -341,7 +375,7 @@ export default function DispenseDrawer({
 
       const itemsWithZeroQuantity = itemsInStock.filter((item) => {
         return item.lots.some(
-          (lot) => lot.selectedInventoryId.length > 0 && lot.quantity === 0,
+          (lot) => lot.selectedInventoryId.length > 0 && isZero(lot.quantity),
         );
       });
 
@@ -362,18 +396,19 @@ export default function DispenseDrawer({
           productKnowledgeInventoriesMap[item.productKnowledge.id] || [];
 
         for (const lot of item.lots) {
-          if (!lot.selectedInventoryId || lot.quantity <= 0) continue;
+          if (!lot.selectedInventoryId || isLessThanOrEqual(lot.quantity, 0))
+            continue;
 
           const inventory = inventoryList.find(
             (inv) => inv.id === lot.selectedInventoryId,
           );
-          if (inventory && lot.quantity > inventory.net_content) {
+          if (inventory && isGreaterThan(lot.quantity, inventory.net_content)) {
             toast.error(
               t("quantity_exceeds_available_stock", {
                 item: item.productKnowledge.name,
                 lot: inventory.product.batch?.lot_number || "N/A",
                 requested: lot.quantity,
-                available: inventory.net_content,
+                available: round(inventory.net_content),
               }),
             );
             hasErrors = true;
@@ -389,7 +424,7 @@ export default function DispenseDrawer({
   );
 
   const createDispenseRequests = useCallback(
-    (selectedItems: FormItemType[]) => {
+    (items: FormItemType[]) => {
       const requests: Array<{
         url: string;
         method: string;
@@ -397,7 +432,7 @@ export default function DispenseDrawer({
         body: MedicationDispenseCreate;
       }> = [];
 
-      selectedItems.forEach((item) => {
+      items.forEach((item) => {
         const productKnowledge = item.productKnowledge;
 
         item.lots.forEach((lot) => {
@@ -426,7 +461,7 @@ export default function DispenseDrawer({
             authorizing_request: null,
             item: selectedInventory.id,
             quantity: lot.quantity,
-            days_supply: 1,
+            days_supply: "1",
             fully_dispensed: true,
             create_dispense_order: {
               alternate_identifier: alternateIdentifier,
@@ -455,11 +490,11 @@ export default function DispenseDrawer({
       return;
     }
 
-    const selectedItems = formData.items.filter(
-      (item) => item.isSelected && item.productKnowledge,
+    const items = formData.items.filter(
+      (item) => item.productKnowledge,
     ) as FormItemType[];
 
-    const requests = createDispenseRequests(selectedItems);
+    const requests = createDispenseRequests(items);
     if (requests.length === 0) {
       toast.error(t("no_valid_requests_to_dispense"));
       return;
@@ -474,15 +509,9 @@ export default function DispenseDrawer({
     defaultValue: [],
   });
 
-  const selectedItemsCount = useMemo(
-    () => watchedItems.filter((item) => item.isSelected).length,
-    [watchedItems],
-  );
+  const itemsCount = useMemo(() => watchedItems.length, [watchedItems]);
 
-  const hasSelectedItems = useMemo(
-    () => watchedItems.some((item) => item.isSelected),
-    [watchedItems],
-  );
+  const hasItems = useMemo(() => watchedItems.length > 0, [watchedItems]);
 
   const hasUndispensedItems = fields.length > 0;
 
@@ -571,12 +600,11 @@ export default function DispenseDrawer({
                           append({
                             reference_id: crypto.randomUUID(),
                             productKnowledge: product,
-                            isSelected: true,
-                            quantity: 1,
+                            quantity: "1",
                             lots: [
                               {
                                 selectedInventoryId: "",
-                                quantity: 1,
+                                quantity: "1",
                               },
                             ],
                           });
@@ -597,36 +625,7 @@ export default function DispenseDrawer({
                       <Table className="w-full border-separate border-spacing-y-2 px-1">
                         <TableHeader>
                           <TableRow className="divide-x">
-                            <TableHead className="rounded-tl-md bg-gray-100 border-none">
-                              <FormField
-                                control={form.control}
-                                name="items"
-                                render={() => (
-                                  <FormItem className="mr-1.5">
-                                    <FormControl>
-                                      <Checkbox
-                                        checked={
-                                          form.watch("items").length > 0 &&
-                                          form
-                                            .watch("items")
-                                            .every((q) => q.isSelected)
-                                        }
-                                        onCheckedChange={(checked) => {
-                                          const items = form.getValues("items");
-                                          items.forEach((_, index) => {
-                                            form.setValue(
-                                              `items.${index}.isSelected`,
-                                              !!checked,
-                                            );
-                                          });
-                                        }}
-                                      />
-                                    </FormControl>
-                                  </FormItem>
-                                )}
-                              />
-                            </TableHead>
-                            <TableHead className="bg-gray-100 text-gray-700">
+                            <TableHead className="rounded-tl-md bg-gray-100 text-gray-700">
                               {t("items")}
                             </TableHead>
                             <TableHead className="bg-gray-100 text-gray-700">
@@ -638,8 +637,11 @@ export default function DispenseDrawer({
                             <TableHead className="bg-gray-100 text-gray-700">
                               {t("base_amount")}
                             </TableHead>
-                            <TableHead className="bg-gray-100 rounded-tr-md text-gray-700">
+                            <TableHead className="bg-gray-100 text-gray-700">
                               {t("expiry")}
+                            </TableHead>
+                            <TableHead className="bg-gray-100 rounded-tr-md text-gray-700 text-center">
+                              {t("actions")}
                             </TableHead>
                           </TableRow>
                         </TableHeader>
@@ -653,22 +655,6 @@ export default function DispenseDrawer({
                                 key={field.id}
                                 className="hover:bg-gray-50 rounded-md shadow-sm divide-x"
                               >
-                                <TableCell className="align-middle">
-                                  <FormField
-                                    control={form.control}
-                                    name={`items.${index}.isSelected`}
-                                    render={({ field: formField }) => (
-                                      <FormItem>
-                                        <FormControl>
-                                          <Checkbox
-                                            checked={formField.value}
-                                            onCheckedChange={formField.onChange}
-                                          />
-                                        </FormControl>
-                                      </FormItem>
-                                    )}
-                                  />
-                                </TableCell>
                                 <TableCell className="font-medium text-gray-950 text-base">
                                   {productKnowledge.name}
                                 </TableCell>
@@ -879,6 +865,19 @@ export default function DispenseDrawer({
                                     </TableCell>
                                   </>
                                 )}
+                                <TableCell className="text-center align-middle">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => remove(index)}
+                                    className="hover:text-red-600 hover:bg-white"
+                                    aria-label={t("remove_item", {
+                                      name: productKnowledge.name,
+                                    })}
+                                  >
+                                    <Trash2 className="size-4" />
+                                  </Button>
+                                </TableCell>
                               </TableRow>
                             );
                           })}
@@ -894,12 +893,11 @@ export default function DispenseDrawer({
                           append({
                             reference_id: crypto.randomUUID(),
                             productKnowledge: product,
-                            isSelected: true,
-                            quantity: 1,
+                            quantity: "1",
                             lots: [
                               {
                                 selectedInventoryId: "",
-                                quantity: 1,
+                                quantity: "1",
                               },
                             ],
                           });
@@ -925,7 +923,7 @@ export default function DispenseDrawer({
             <div className="max-w-4xl mx-auto w-full flex justify-between items-center">
               <div className="text-xs text-gray-950 font-medium italic">
                 {t("selected_items_count", {
-                  count: selectedItemsCount,
+                  count: itemsCount,
                 })}
               </div>
               <div className="flex gap-2">
@@ -939,7 +937,7 @@ export default function DispenseDrawer({
                 <Button
                   onClick={handleDispense}
                   className="font-semibold"
-                  disabled={!hasSelectedItems || isPending}
+                  disabled={!hasItems || isPending}
                 >
                   <Check className="size-4" />
                   {isPending ? t("dispensing") : t("confirm_dispense")}

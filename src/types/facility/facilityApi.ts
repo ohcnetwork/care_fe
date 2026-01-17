@@ -1,5 +1,4 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 import { Code } from "@/types/base/code/code";
 import { MonetaryComponentRead } from "@/types/base/monetaryComponent/monetaryComponent";
 import { UserReadMinimal } from "@/types/user/user";

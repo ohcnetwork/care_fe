@@ -29,6 +29,7 @@ import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
+import { useCareApps } from "@/hooks/useCareApps";
 import OrganizationLayoutSkeleton from "@/pages/Organization/components/OrganizationLayoutSkeleton";
 import {
   Organization,
@@ -36,6 +37,7 @@ import {
   OrgType,
 } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
+import { Bot } from "lucide-react";
 
 interface Props {
   // NavOrganizationId is used to show the organization switcher in the sidebar, it may not the parent organization
@@ -55,6 +57,11 @@ export default function OrganizationLayout({
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const careApps = useCareApps();
+
+  const organizationTabs = careApps.flatMap(
+    (c) => (!c.isLoading && c.organizationTabs) || [],
+  );
 
   const baseUrl = navOrganizationId
     ? `/organization/${navOrganizationId}/children`
@@ -85,30 +92,44 @@ export default function OrganizationLayout({
   const navItems: NavigationLink[] = [
     {
       url: `${baseUrl}/${id}`,
-      name: "Organizations",
+      name: t("organizations"),
       icon: <CareIcon icon="d-hospital" />,
       visibility: hasPermission("can_view_organization", org.permissions),
     },
     {
       url: `${baseUrl}/${id}/users`,
-      name: "Users",
+      name: t("users"),
       icon: <CareIcon icon="d-people" />,
       visibility: hasPermission("can_list_organization_users", org.permissions),
     },
     {
       url: `${baseUrl}/${id}/patients`,
-      name: "Patients",
+      name: t("patients"),
       icon: <CareIcon icon="d-people" />,
       visibility: hasPermission("can_list_patients", org.permissions),
     },
     {
       url: `${baseUrl}/${id}/facilities`,
-      name: "Facilities",
+      name: t("facilities"),
       icon: <CareIcon icon="d-hospital" />,
       visibility:
         org.org_type === OrgType.GOVT &&
         hasPermission("can_read_facility", org.permissions),
     },
+    {
+      url: `${baseUrl}/${id}/service_accounts`,
+      name: t("service_accounts"),
+      icon: <Bot className="size-4" />,
+      visibility: hasPermission("can_list_organization_users", org.permissions),
+    },
+    ...organizationTabs.map((tab) => ({
+      url: `${baseUrl}/${id}/${tab.slug}`,
+      name: tab.name,
+      icon: tab.icon,
+      visibility:
+        org.org_type === OrgType.GOVT &&
+        hasPermission("can_read_facility", org.permissions),
+    })),
   ];
 
   const visibleNavItems = navItems.filter((item) => item.visibility);

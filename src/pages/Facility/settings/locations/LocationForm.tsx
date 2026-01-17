@@ -28,6 +28,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+import { FormSkeleton } from "@/components/Common/SkeletonLoading";
+
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
@@ -201,7 +203,7 @@ export default function LocationForm({
     },
   });
 
-  const { mutate: submitBatch } = useMutation({
+  const { mutate: submitBatch, isPending: isBatchPending } = useMutation({
     mutationFn: mutate(batchApi.batchRequest),
     onSuccess: (data: BatchRequestResponse) => {
       toast.success(
@@ -263,7 +265,12 @@ export default function LocationForm({
   ];
 
   if (locationId && isLoading) {
-    return <div className="p-4">Loading...</div>;
+    return (
+      <output className="p-4" aria-live="polite">
+        <span className="sr-only">{t("loading")}</span>
+        <FormSkeleton rows={6} />
+      </output>
+    );
   }
 
   const showBedOptions = form.watch("form") === "bd" && !isEditMode;
@@ -485,7 +492,7 @@ export default function LocationForm({
             <FormItem>
               <FormLabel>{t("description")}</FormLabel>
               <FormControl>
-                <Textarea {...field} placeholder="Description" />
+                <Textarea {...field} placeholder={t("description")} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -548,11 +555,12 @@ export default function LocationForm({
           type="submit"
           disabled={
             isPending ||
+            isBatchPending ||
             !form.formState.isValid ||
             (!!location?.id && !form.formState.isDirty)
           }
         >
-          {isPending ? (
+          {isPending || isBatchPending ? (
             <>{isEditMode ? t("updating") : t("creating")}</>
           ) : (
             <>{isEditMode ? t("update") : t("create")}</>

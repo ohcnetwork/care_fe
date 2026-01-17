@@ -71,6 +71,8 @@ import {
 } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
 
+import { PLUGIN_Component } from "@/PluginEngine";
+
 interface DiagnosticReportFormProps {
   patientId: string;
   facilityId: string;
@@ -178,7 +180,7 @@ export function DiagnosticReportForm({
         },
       }),
       onSuccess: () => {
-        toast.success("Diagnostic report created successfully");
+        toast.success(t("diagnostic_report_created_successfully"));
         queryClient.invalidateQueries({
           queryKey: ["serviceRequest"],
         });
@@ -761,7 +763,7 @@ export function DiagnosticReportForm({
                         {componentData.unit ? (
                           componentData.unit
                         ) : (
-                          <SelectValue placeholder="Unit" />
+                          <SelectValue placeholder={t("unit")} />
                         )}
                       </SelectTrigger>
                       <SelectContent>
@@ -899,6 +901,10 @@ export function DiagnosticReportForm({
 
         <CollapsibleContent>
           <CardContent className="px-2 bg-gray-100">
+            <PLUGIN_Component
+              __name="ServiceRequestAction"
+              serviceRequestId={serviceRequestId}
+            />
             {hasReport && fullReport ? (
               <div className="space-y-6">
                 {fullReport.status !== DiagnosticReportStatus.final &&

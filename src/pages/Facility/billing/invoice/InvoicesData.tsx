@@ -125,8 +125,9 @@ export default function InvoicesData({
           onOperationChange={handleOperationChange}
           onClearAll={handleClearAll}
           onClearFilter={handleClearFilter}
-          className="flex flex-row flex-wrap sm:items-center"
+          className="flex flex-row-reverse flex-wrap sm:items-center"
           facilityId={facilityId}
+          align="end"
         />
       </div>
       {isLoading ? (
@@ -181,10 +182,17 @@ export default function InvoicesData({
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <MonetaryDisplay
-                      className="font-medium"
-                      amount={String(invoice.total_gross)}
-                    />
+                    {invoice.locked ? (
+                      <Badge variant="secondary" className="gap-1">
+                        <CareIcon icon="l-lock" className="size-3" />
+                        {t("locked")}
+                      </Badge>
+                    ) : (
+                      <MonetaryDisplay
+                        className="font-medium"
+                        amount={invoice.total_gross}
+                      />
+                    )}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-4">

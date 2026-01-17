@@ -20,7 +20,7 @@ export enum Preference {
 }
 
 export interface QuantitySpec {
-  value: number;
+  value: string;
   unit: Code;
 }
 
@@ -30,7 +30,7 @@ export interface MinimumVolumeSpec {
 }
 
 export interface DurationSpec {
-  value: number;
+  value: string;
   unit: Code;
 }
 
@@ -105,8 +105,10 @@ export interface SpecimenDefinitionCreate extends Omit<
   type_tested?: TypeTestedSpec;
 }
 
-export interface SpecimenDefinitionUpsert
-  extends Omit<SpecimenDefinition, "id" | "facility"> {
+export interface SpecimenDefinitionUpsert extends Omit<
+  SpecimenDefinition,
+  "id" | "facility"
+> {
   id?: string;
   type_tested?: TypeTestedSpec;
 }

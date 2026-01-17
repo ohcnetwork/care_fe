@@ -28,12 +28,12 @@ export function useLocationAssignment() {
     useState<LocationSheetState>(initialState);
   const [editingState, setEditingState] =
     useState<EditingState>(initialEditingState);
-  const [keepBedActive, setKeepBedActive] = useState(true);
+  const [keepBedActive, setKeepBedActive] = useState(false);
 
   const resetToInitial = () => {
     setSheetState(initialState);
     setEditingState(initialEditingState);
-    setKeepBedActive(true);
+    setKeepBedActive(false);
   };
 
   const resetEditingState = () => {

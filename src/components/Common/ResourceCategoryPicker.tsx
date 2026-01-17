@@ -6,7 +6,6 @@ import {
   Folder,
   FolderOpen,
   Home,
-  Loader2,
   Search,
   X,
 } from "lucide-react";
@@ -106,13 +105,20 @@ export function ResourceCategoryPicker({
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["resourceCategories", facilityId, resourceType, currentParent],
-    queryFn: query(resourceCategoryApi.list, {
+    queryKey: [
+      "resourceCategories",
+      facilityId,
+      resourceType,
+      currentParent,
+      searchQuery,
+    ],
+    queryFn: query.debounced(resourceCategoryApi.list, {
       pathParams: { facilityId },
       queryParams: {
         resource_type: resourceType,
         resource_sub_type: resourceSubType,
-        parent: currentParent || "",
+        parent: currentParent || undefined,
+        title: searchQuery || undefined,
       },
     }),
   });
@@ -130,17 +136,6 @@ export function ResourceCategoryPicker({
     }),
     enabled: !!value,
   });
-
-  // Filter categories based on search query
-  const filteredCategories = useMemo(() => {
-    if (!searchQuery.trim()) return categories;
-
-    return categories.filter(
-      (category) =>
-        category.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        category.description?.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
-  }, [categories, searchQuery]);
 
   // Reset search when navigating
   const resetSearch = () => setSearchQuery("");
@@ -190,9 +185,13 @@ export function ResourceCategoryPicker({
   const getDisplayValue = () => {
     if (isLoadingSelected) {
       return (
-        <div className="flex items-center gap-2">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <span className="text-gray-500">Loading...</span>
+        <div
+          className="flex items-center gap-2"
+          role="status"
+          aria-live="polite"
+          aria-label={t("loading")}
+        >
+          <Skeleton className="h-4 w-20" />
         </div>
       );
     }
@@ -385,7 +384,7 @@ export function ResourceCategoryPicker({
           </CommandEmpty>
 
           <CommandGroup>
-            {filteredCategories.map((category) => (
+            {categories.map((category) => (
               <CommandItem
                 key={category.id}
                 value={category.title}

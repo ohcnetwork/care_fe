@@ -28,6 +28,7 @@ import {
   ConditionOperationSummary,
   conditionSchema,
   extractTagInformation,
+  getConditionDiscriminatorValue,
   getConditionValue,
   getDefaultCondition,
   Metrics,
@@ -190,7 +191,7 @@ function RenderInput({
   if (metric === "patient_age" && operation === ConditionOperation.in_range) {
     const value = form.getValues("value") as AgeOperationInRangeValue;
     return (
-      <div className="flex gap-1 grow-2">
+      <div className="flex gap-1">
         <FormField
           control={form.control}
           name="value.min"
@@ -207,7 +208,7 @@ function RenderInput({
                       inputValue === "" ? undefined : Number(inputValue);
                     field.onChange(min);
                   }}
-                  className="grow"
+                  className="grow h-9"
                 />
               </FormControl>
             </FormItem>
@@ -230,7 +231,7 @@ function RenderInput({
                       inputValue === "" ? undefined : Number(inputValue);
                     field.onChange(max);
                   }}
-                  className="grow"
+                  className="grow h-9"
                 />
               </FormControl>
             </FormItem>
@@ -398,9 +399,12 @@ export function CompactConditionEditor({
     if (!isValid) return;
 
     let updatedConditions = [...conditions, form.getValues()];
-    updatedConditions = updatedConditions.map((cond) => ({
-      ...cond,
-      _conditionType: `${cond.metric}_${cond.operation}`,
+    updatedConditions = updatedConditions.map((condition) => ({
+      ...condition,
+      _conditionType: getConditionDiscriminatorValue(
+        condition.metric,
+        condition.operation,
+      ),
     }));
     onChange(updatedConditions);
 
@@ -441,7 +445,7 @@ export function CompactConditionEditor({
     const metric = form.getValues("metric");
     const value = getConditionValue(metric, op);
     form.setValue("value", value);
-    form.setValue("_conditionType", `${metric}_${op}`);
+    form.setValue("_conditionType", getConditionDiscriminatorValue(metric, op));
   };
 
   return (
@@ -475,12 +479,12 @@ export function CompactConditionEditor({
         {/* Add new condition */}
         {isAdding ? (
           <div className="space-y-3 p-3 bg-gray-50 rounded border">
-            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center flex-wrap">
               <FormField
                 control={form.control}
                 name="metric"
                 render={({ field }) => (
-                  <FormItem className="w-full sm:w-56!">
+                  <FormItem className="flex-1 w-auto">
                     <FormControl>
                       <Select
                         value={field.value}
@@ -509,7 +513,7 @@ export function CompactConditionEditor({
                 control={form.control}
                 name="operation"
                 render={({ field }) => (
-                  <FormItem className="grow-2 w-full sm:max-w-[200px]">
+                  <FormItem className="flex-1 w-auto">
                     <FormControl>
                       <Select
                         value={field.value}
