@@ -24,6 +24,7 @@ import {
 import {
   ChargeItemDefinitionBase,
   ChargeItemDefinitionRead,
+  ChargeItemDefinitionStatus,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import query from "@/Utils/request/query";
@@ -170,6 +171,9 @@ export function ChargeItemDefinitionPicker({
           listDefinitions={{
             queryFn: chargeItemDefinitionApi.listChargeItemDefinition,
             pathParams: { facilityId },
+            queryParams: {
+              status: ChargeItemDefinitionStatus.active,
+            },
           }}
           resourceSubType={resourceSubType}
           translationBaseKey="charge_item_definition"

@@ -47,6 +47,7 @@ import {
   MonetaryComponent,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
+import { ResourceCategorySubType } from "@/types/base/resourceCategory/resourceCategory";
 import {
   CHARGE_ITEM_STATUS_COLORS,
   ChargeItemRead,
@@ -293,6 +294,9 @@ export function BedChargeItemsTable({
         encounterId={encounterId}
         serviceResourceId={addChargeItemState.locationId}
         serviceResourceType={ChargeItemServiceResource.bed_association}
+        resourceSubType={
+          ResourceCategorySubType.charge_item_definition_location_bed_charges
+        }
         onChargeItemsAdded={() => {
           setAddChargeItemState({
             serviceRequestId: "",
