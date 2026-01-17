@@ -46,6 +46,7 @@ interface Props {
   disabled?: boolean;
   isServiceAccount?: boolean;
   trigger?: React.ReactNode;
+  onClear?: () => void;
 }
 
 const PAGE_LIMIT = 50;
@@ -60,6 +61,7 @@ interface UserCommandContentProps {
   onChange: (user: UserReadMinimal) => void;
   setOpen: (value: boolean) => void;
   ref: (node?: Element | null) => void;
+  onClear?: () => void;
 }
 
 function UserCommandContent({
@@ -72,6 +74,7 @@ function UserCommandContent({
   onChange,
   setOpen,
   ref,
+  onClear,
 }: UserCommandContentProps) {
   const { t } = useTranslation();
 
@@ -86,6 +89,19 @@ function UserCommandContent({
         <CommandEmpty>
           {isFetching ? t("searching") : noOptionsMessage || t("no_results")}
         </CommandEmpty>
+        {onClear && (
+          <CommandGroup>
+            <CommandItem
+              onSelect={() => {
+                onClear();
+                setOpen(false);
+              }}
+              className="cursor-pointer text-destructive"
+            >
+              {t("clear_all")}
+            </CommandItem>
+          </CommandGroup>
+        )}
         <CommandGroup>
           {usersList?.map((user: UserReadMinimal, i) => (
             <CommandItem
@@ -141,6 +157,7 @@ export default function UserSelector({
   disabled,
   isServiceAccount = false,
   trigger,
+  onClear,
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -245,6 +262,7 @@ export default function UserSelector({
               onChange={onChange}
               setOpen={setOpen}
               ref={ref}
+              onClear={onClear}
             />
           </div>
         </DrawerContent>
@@ -275,6 +293,7 @@ export default function UserSelector({
           onChange={onChange}
           setOpen={setOpen}
           ref={ref}
+          onClear={onClear}
         />
       </PopoverContent>
     </Popover>

@@ -151,6 +151,14 @@ export function EditInvoiceTable({
     setPerformers(newPerformers);
   };
 
+  const handleClearAllPerformers = () => {
+    const newPerformers: Record<string, UserReadMinimal | undefined> = {};
+    chargeItems.forEach((item) => {
+      newPerformers[item.id] = undefined;
+    });
+    setPerformers(newPerformers);
+  };
+
   const getDiscountComponentKey = (
     component: MonetaryComponent | undefined,
   ) => {
@@ -415,6 +423,7 @@ export function EditInvoiceTable({
                         }
                         contentAlign="center"
                         contentClassName="w-80"
+                        onClear={handleClearAllPerformers}
                       />
                     )}
                   </div>
