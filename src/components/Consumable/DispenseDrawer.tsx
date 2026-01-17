@@ -748,13 +748,6 @@ export default function DispenseDrawer({
                                                         type="number"
                                                         min={0}
                                                         {...formField}
-                                                        onChange={(e) => {
-                                                          formField.onChange(
-                                                            parseInt(
-                                                              e.target.value,
-                                                            ) || 0,
-                                                          );
-                                                        }}
                                                         className="border-gray-300 border rounded-md w-24"
                                                         placeholder="0"
                                                       />
