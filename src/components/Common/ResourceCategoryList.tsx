@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Coins, EllipsisVertical, FileIcon, Pencil } from "lucide-react";
 import { navigate } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -15,10 +16,17 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 
 import { getPermissions } from "@/common/Permissions";
+import { CategoryMonetaryComponentsSheet } from "@/components/Common/CategoryMonetaryComponentsSheet";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { usePermissions } from "@/context/PermissionContext";
 
@@ -27,6 +35,7 @@ import { ResourceCategoryForm } from "@/components/Common/ResourceCategoryForm";
 import useFilters from "@/hooks/useFilters";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
+  ResourceCategoryParent,
   ResourceCategoryRead,
   ResourceCategoryResourceType,
 } from "@/types/base/resourceCategory/resourceCategory";
@@ -34,16 +43,66 @@ import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryA
 import query from "@/Utils/request/query";
 import queryClient from "@/Utils/request/queryClient";
 
+export interface BaseSearchableItem {
+  id: string;
+  slug: string;
+  title?: string;
+  name?: string;
+  category?: ResourceCategoryParent;
+}
+
+function ItemCard<T extends BaseSearchableItem>({
+  item,
+  onItemClick,
+}: {
+  item: T;
+  onItemClick: (item: T) => void;
+}) {
+  const displayTitle = item.title ?? item.name;
+  return (
+    <Card
+      className="hover:shadow-md transition-shadow cursor-pointer"
+      onClick={() => onItemClick(item)}
+    >
+      <CardContent className="py-2 px-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="shrink-0">
+              <div className="p-1 rounded bg-green-100 text-green-600">
+                <FileIcon className="h-6 w-4" />
+              </div>
+            </div>
+            <div className="flex flex-col">
+              <h3 className="text-base font-semibold text-gray-900 truncate">
+                {displayTitle}
+              </h3>
+              <span className="text-xs text-gray-500">
+                {item.category?.title}
+              </span>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 // Category card component for displaying individual categories
 function CategoryCard({
   category,
   onNavigate,
   onEdit,
+  onSetMonetaryComponents,
+  showMonetaryComponentsOption = false,
 }: {
   category: ResourceCategoryRead;
   onNavigate: (slug: string) => void;
   onEdit: (category: ResourceCategoryRead) => void;
+  onSetMonetaryComponents: (category: ResourceCategoryRead) => void;
+  showMonetaryComponentsOption?: boolean;
 }) {
+  const { t } = useTranslation();
+
   return (
     <Card
       className="hover:shadow-md transition-shadow cursor-pointer"
@@ -52,7 +111,7 @@ function CategoryCard({
       <CardContent className="py-2 px-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <div
                 className={`p-1 rounded ${
                   category.has_children
@@ -69,16 +128,54 @@ function CategoryCard({
             </h3>
           </div>
           <div className="flex items-center space-x-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit(category);
-              }}
-            >
-              <CareIcon icon="l-ellipsis-v" className="h-4 w-4" />
-            </Button>
+            {showMonetaryComponentsOption ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                  >
+                    <EllipsisVertical className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem
+                    className="cursor-pointer flex items-center gap-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(category);
+                    }}
+                  >
+                    <Pencil className="size-4" />
+                    {t("edit")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="cursor-pointer flex items-center gap-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSetMonetaryComponents(category);
+                    }}
+                  >
+                    <Coins className="size-4" />
+                    {t("set_monetary_components")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(category);
+                }}
+              >
+                <EllipsisVertical className="size-4" />
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>
@@ -159,7 +256,23 @@ function ResourceCategoryBreadcrumb({
   );
 }
 
-interface ResourceCategoryListProps {
+interface ItemSearchConfig<T extends BaseSearchableItem> {
+  listItems: {
+    queryFn: {
+      path: string;
+      method: "GET";
+      TRes: { results: T[] };
+    };
+    pathParams?: Record<string, string>;
+    queryParams?: Record<string, unknown>;
+  };
+  searchParamName?: string;
+  queryKeyPrefix: string;
+}
+
+interface ResourceCategoryListProps<
+  T extends BaseSearchableItem = BaseSearchableItem,
+> {
   facilityId: string;
   categorySlug?: string;
   resourceType: ResourceCategoryResourceType;
@@ -170,10 +283,14 @@ interface ResourceCategoryListProps {
   createItemLabel?: string;
   createItemIcon?: "l-plus" | "l-file" | "l-folder-plus";
   allowCategoryCreate?: boolean;
+  showMonetaryComponentsOption?: boolean;
   children?: React.ReactNode;
+  itemSearchConfig?: ItemSearchConfig<T>;
 }
 
-export function ResourceCategoryList({
+export function ResourceCategoryList<
+  T extends BaseSearchableItem = BaseSearchableItem,
+>({
   facilityId,
   categorySlug,
   resourceType,
@@ -184,8 +301,10 @@ export function ResourceCategoryList({
   createItemLabel,
   createItemIcon = "l-plus",
   allowCategoryCreate = false,
+  showMonetaryComponentsOption = false,
   children,
-}: ResourceCategoryListProps) {
+  itemSearchConfig,
+}: ResourceCategoryListProps<T>) {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const { facility } = useCurrentFacility();
@@ -198,6 +317,8 @@ export function ResourceCategoryList({
   const [editingCategory, setEditingCategory] = React.useState<string | null>(
     null,
   );
+  const [monetaryComponentsCategory, setMonetaryComponentsCategory] =
+    React.useState<ResourceCategoryRead | null>(null);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: RESULTS_PER_PAGE_LIMIT,
     disableCache: true,
@@ -235,7 +356,29 @@ export function ResourceCategoryList({
     },
   );
 
+  const searchParamName = itemSearchConfig?.searchParamName || "title";
+  const { data: itemsResponse, isLoading: isLoadingItems } = useQuery({
+    queryKey: [
+      itemSearchConfig?.queryKeyPrefix || "items",
+      facilityId,
+      qParams.searchCategory,
+      qParams.page ?? 1,
+    ],
+    queryFn: query.debounced(itemSearchConfig!.listItems.queryFn, {
+      pathParams: { facilityId, ...itemSearchConfig?.listItems.pathParams },
+      queryParams: {
+        [searchParamName]: qParams.searchCategory,
+        limit: resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
+        ...itemSearchConfig?.listItems.queryParams,
+      },
+    }),
+    enabled: !!itemSearchConfig && !!qParams.searchCategory,
+  });
+
   const categories = categoriesResponse?.results || [];
+  const items = (itemsResponse?.results || []) as T[];
+  const isSearching = !!qParams.searchCategory;
   const isRootLevel = !categorySlug;
   const isLeafCategory = currentCategory && !currentCategory.has_children;
 
@@ -255,6 +398,10 @@ export function ResourceCategoryList({
       queryKey: ["resourceCategories"],
     });
     onNavigate(category.slug);
+  };
+
+  const handleSetMonetaryComponents = (category: ResourceCategoryRead) => {
+    setMonetaryComponentsCategory(category);
   };
 
   return (
@@ -309,7 +456,7 @@ export function ResourceCategoryList({
             <CareIcon icon="l-search" className="size-5" />
           </span>
           <Input
-            placeholder={t("search_categories")}
+            placeholder={t("search")}
             value={qParams.searchCategory || ""}
             onChange={(e) =>
               updateQuery({ searchCategory: e.target.value || undefined })
@@ -319,9 +466,9 @@ export function ResourceCategoryList({
         </div>
       )}
 
-      {isLoadingCategories ? (
+      {isLoadingCategories || isLoadingItems ? (
         <TableSkeleton count={5} />
-      ) : isRootLevel && categories.length === 0 ? (
+      ) : isRootLevel && categories.length === 0 && items.length === 0 ? (
         <EmptyState
           icon={
             <CareIcon icon="l-folder-open" className="text-primary size-6" />
@@ -338,15 +485,37 @@ export function ResourceCategoryList({
       ) : (
         <>
           <div className="grid gap-2">
-            {/* Show categories only at root level or in parent categories */}
+            {/* Show categories */}
+            {categories.length > 0 && isSearching && (
+              <h3 className="text-sm font-medium text-gray-500 mt-2">
+                {t("categories")}
+              </h3>
+            )}
             {categories.map((category) => (
               <CategoryCard
                 key={category.id}
                 category={category}
                 onNavigate={onNavigate}
                 onEdit={handleEditCategory}
+                onSetMonetaryComponents={handleSetMonetaryComponents}
+                showMonetaryComponentsOption={showMonetaryComponentsOption}
               />
             ))}
+
+            {items.length > 0 && isSearching && itemSearchConfig && (
+              <>
+                <h3 className="text-sm font-medium text-gray-500 mt-4">
+                  {t("items")}
+                </h3>
+                {items.map((item) => (
+                  <ItemCard
+                    key={item.id}
+                    item={item}
+                    onItemClick={() => navigate(`${basePath}/${item.slug}`)}
+                  />
+                ))}
+              </>
+            )}
           </div>
 
           {/* Render children (like charge item list) only in leaf categories */}
@@ -364,6 +533,19 @@ export function ResourceCategoryList({
         onClose={() => setIsCategoryFormOpen(false)}
         onSuccess={handleCategoryFormSuccess}
       />
+
+      {monetaryComponentsCategory && (
+        <CategoryMonetaryComponentsSheet
+          facilityId={facilityId}
+          categorySlug={monetaryComponentsCategory.slug}
+          categoryTitle={monetaryComponentsCategory.title}
+          configuredMonetaryComponents={
+            monetaryComponentsCategory.configured_monetary_components
+          }
+          isOpen={!!monetaryComponentsCategory}
+          onClose={() => setMonetaryComponentsCategory(null)}
+        />
+      )}
 
       <Pagination totalCount={categoriesResponse?.count || 0} />
     </div>

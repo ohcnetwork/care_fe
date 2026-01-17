@@ -1,4 +1,5 @@
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
+import { DispenseOrderRead } from "@/types/emr/dispenseOrder/dispenseOrder";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { MedicationRequestDosageInstruction } from "@/types/emr/medicationRequest/medicationRequest";
 import { InventoryRead } from "@/types/inventory/product/inventory";
@@ -186,8 +187,8 @@ export interface MedicationDispenseCreate extends Omit<
   location?: string;
   authorizing_request: string | null;
   item: string;
-  quantity: number;
-  days_supply: number;
+  quantity: string;
+  days_supply: string;
   fully_dispensed: boolean;
   create_dispense_order: MedicationDispenseOrderCreate;
 }
@@ -204,7 +205,8 @@ export interface MedicationDispenseRead extends MedicationDispenseBase {
   charge_item: ChargeItemRead;
   created_date: string;
   location: LocationRead;
-  quantity: number;
+  quantity: string;
+  order: DispenseOrderRead;
 }
 
 export interface MedicationDispenseSummary {

@@ -38,6 +38,7 @@ import {
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
+import { round, zodDecimal } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
 
@@ -61,13 +62,8 @@ export function DiscountMonetaryComponentForm({
         .object({
           monetary_component_type: z.literal(MonetaryComponentType.discount),
           code: CodeSchema.optional(),
-          factor: z.number().min(0).max(100).optional(),
-          amount: z
-            .string()
-            .refine((val) => !val || Number(val) >= 0, {
-              message: t("amount_must_be_greater_than_or_equal_to_0"),
-            })
-            .optional(),
+          factor: zodDecimal({ min: 0, max: 100 }).optional().nullable(),
+          amount: zodDecimal({ min: 0 }).optional().nullable(),
           title: z.string().min(1, { message: t("field_required") }),
           conditions: z.array(conditionSchema).default([]),
         })
@@ -105,8 +101,8 @@ export function DiscountMonetaryComponentForm({
     defaultValues: {
       monetary_component_type: MonetaryComponentType.discount,
       code: defaultValues?.code,
-      factor: defaultValues?.factor,
-      amount: defaultValues?.amount,
+      factor: defaultValues?.factor ? round(defaultValues.factor) : null,
+      amount: defaultValues?.amount ? round(defaultValues.amount) : null,
       title: defaultValues?.title || "",
       conditions: defaultValues?.conditions || [],
     },
@@ -115,9 +111,9 @@ export function DiscountMonetaryComponentForm({
   const handleValueTypeChange = (value: "factor" | "amount") => {
     setValueType(value);
     if (value === "factor") {
-      form.setValue("amount", undefined);
+      form.setValue("amount", null);
     } else {
-      form.setValue("factor", undefined);
+      form.setValue("factor", null);
     }
   };
 
@@ -168,14 +164,10 @@ export function DiscountMonetaryComponentForm({
                             max="100"
                             step="0.01"
                             {...field}
+                            value={field.value || ""}
                             onChange={(e) =>
-                              field.onChange(
-                                e.target.value
-                                  ? parseFloat(e.target.value)
-                                  : null,
-                              )
+                              field.onChange(e.target.value || null)
                             }
-                            value={field.value === null ? "" : field.value}
                             className="pr-8"
                           />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">

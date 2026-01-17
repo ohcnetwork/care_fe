@@ -43,6 +43,7 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   calculateSlotDuration,
   formatAvailabilityTime,
@@ -156,6 +157,7 @@ const ScheduleTemplateEditor = ({
       valid_to: z.date({
         required_error: t("field_required"),
       }),
+      is_public: z.boolean(),
     })
     .refine(
       (data) => !dayjs(data.valid_to).isBefore(dayjs(data.valid_from), "day"),
@@ -171,6 +173,7 @@ const ScheduleTemplateEditor = ({
       name: template.name,
       valid_from: new Date(template.valid_from),
       valid_to: new Date(template.valid_to),
+      is_public: template.is_public,
     },
   });
 
@@ -205,6 +208,7 @@ const ScheduleTemplateEditor = ({
       name: values.name,
       valid_from: dateQueryString(values.valid_from),
       valid_to: dateQueryString(values.valid_to),
+      is_public: values.is_public,
     });
   }
 
@@ -263,27 +267,47 @@ const ScheduleTemplateEditor = ({
             />
           </div>
 
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isProcessing}
-              onClick={() => setShowDeleteDialog(true)}
-              size="sm"
-            >
-              <Trash2Icon />
-              {isDeleting ? t("deleting") : t("delete")}
-            </Button>
+          <div className="flex justify-between items-center">
+            <FormField
+              control={form.control}
+              name="is_public"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-center">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormLabel className="text-sm">
+                    {t("make_template_public")}
+                  </FormLabel>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isProcessing}
+                onClick={() => setShowDeleteDialog(true)}
+                size="sm"
+              >
+                <Trash2Icon />
+                {isDeleting ? t("deleting") : t("delete")}
+              </Button>
 
-            <Button
-              variant="primary"
-              type="submit"
-              disabled={isUpdating || !form.formState.isDirty}
-              size="sm"
-            >
-              <SaveIcon />
-              {isUpdating ? t("saving") : t("save")}
-            </Button>
+              <Button
+                variant="primary"
+                type="submit"
+                disabled={isUpdating || !form.formState.isDirty}
+                size="sm"
+              >
+                <SaveIcon />
+                {isUpdating ? t("saving") : t("save")}
+              </Button>
+            </div>
           </div>
         </form>
       </Form>

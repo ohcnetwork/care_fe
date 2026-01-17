@@ -55,6 +55,7 @@ import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemStatus } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
+import { isPositive } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import BackButton from "@/components/Common/BackButton";
 import { ReportSubTab } from "@/components/Files/ReportSubTab";
@@ -556,16 +557,18 @@ export function AccountShow({
               </p>
               <div className="flex items-end">
                 <p
-                  className={cn("text-3xl font-bold", {
-                    "text-red-500": Number(account.total_balance) > 0,
-                    "text-green-700": Number(account.total_balance) <= 0,
-                  })}
+                  className={cn(
+                    "text-3xl font-bold",
+                    isPositive(account.total_balance)
+                      ? "text-red-500"
+                      : "text-green-700",
+                  )}
                 >
                   <MonetaryDisplay amount={account.total_balance} />
                 </p>
               </div>
               <p className="text-xs text-gray-500">
-                {Number(account.total_balance) >= 0
+                {isPositive(account.total_balance)
                   ? t("pending_from_patient")
                   : t("overpaid_amount")}
               </p>
@@ -586,7 +589,7 @@ export function AccountShow({
             </div>
           </div>
 
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-6 border-b md:border-r border-gray-200">
             <div className="space-y-1">
               <p className="text-sm font-medium text-gray-500">
                 {t("billed_gross")}
@@ -598,6 +601,24 @@ export function AccountShow({
               </div>
               <p className="text-xs text-gray-500">
                 {t("total_billed_before_adjustments")}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex-1 p-6">
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-gray-500">
+                {t("total_billable")}
+              </p>
+              <div className="flex items-end">
+                <p className="text-3xl font-bold text-gray-900">
+                  <MonetaryDisplay
+                    amount={account.total_billable_charge_items}
+                  />
+                </p>
+              </div>
+              <p className="text-xs text-gray-500">
+                {t("total_billable_charge_items_description")}
               </p>
             </div>
           </div>
@@ -689,7 +710,7 @@ export function AccountShow({
               ))}
             </SelectContent>
           </Select>
-          <ClosedCallout balance={Number(account.total_balance)} />
+          <ClosedCallout balance={account.total_balance} />
           {hasBillableItems && (
             <span className="text-warning-500 bg-warning-50 text-xs p-2 rounded block -mt-3">
               {t("close_account_with_pending_items_caution_message")}
@@ -704,9 +725,9 @@ export function AccountShow({
   );
 }
 
-const ClosedCallout = ({ balance }: { balance: number }) => {
+const ClosedCallout = ({ balance }: { balance: string }) => {
   const { t } = useTranslation();
-  const isNegative = balance > 0;
+  const isNegative = isPositive(balance);
   if (!isNegative) return <></>;
   return (
     <span className="text-red-500 bg-red-50 text-xs -mt-2 p-2 rounded">

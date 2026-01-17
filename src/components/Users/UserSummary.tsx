@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import LanguageSelector from "@/components/Common/LanguageSelector";
 import UserColumns, { userChildProps } from "@/components/Common/UserColumns";
+import ServiceTokenSection from "@/components/Users/ServiceTokenSection";
 import { TwoFactorAuth } from "@/components/Users/TwoFactorAuth";
 import UserAvatar from "@/components/Users/UserAvatar";
 import UserDeleteDialog from "@/components/Users/UserDeleteDialog";
@@ -86,6 +87,17 @@ export default function UserSummaryTab({
             {t("edit_user")}
           </Button>
         )}
+        {userData.is_service_account &&
+          userData.created_by?.username === authUser.username && (
+            <UserColumns
+              heading={t("manage_token")}
+              note={t("manage_service_account_token_for", {
+                username: userData.username,
+              })}
+              Child={() => <ServiceTokenSection userData={userData} />}
+              childProps={userColumnsData}
+            />
+          )}
         {canEditUser && (
           <UserColumns
             heading={t("edit_avatar")}

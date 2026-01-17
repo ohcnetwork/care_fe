@@ -21,15 +21,16 @@ import {
 import Loading from "@/components/Common/Loading";
 import PrintTable from "@/components/Common/PrintTable";
 
+import encounterApi from "@/types/emr/encounter/encounterApi";
+import { MedicationAdministrationRead } from "@/types/emr/medicationAdministration/medicationAdministration";
+import medicationAdministrationApi from "@/types/emr/medicationAdministration/medicationAdministrationApi";
+import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import {
   formatName,
   formatPatientAge,
   getWeeklyIntervalsFromTodayTill,
 } from "@/Utils/utils";
-import encounterApi from "@/types/emr/encounter/encounterApi";
-import { MedicationAdministrationRead } from "@/types/emr/medicationAdministration/medicationAdministration";
-import medicationAdministrationApi from "@/types/emr/medicationAdministration/medicationAdministrationApi";
 
 export const PrintMedicationAdministration = (props: {
   facilityId: string;
@@ -406,7 +407,8 @@ const MedicationAdministrationTable = ({
         </h5>
         <p className="text-sm flex items-center justify-center gap-1 flex-wrap">
           <span>
-            {administration.dosage?.dose?.value}{" "}
+            {administration.dosage?.dose &&
+              round(administration.dosage.dose.value)}{" "}
             {administration.dosage?.dose?.unit.display ??
               administration.dosage?.dose?.unit.code}
           </span>
@@ -486,7 +488,7 @@ const MedicationAdministrationTable = ({
               >
                 {index === 0 && (
                   <TableCell
-                    className="break-words whitespace-normal text-center"
+                    className="wrap-break-word whitespace-normal text-center"
                     rowSpan={hourRanges.length}
                   >
                     {renderMedication(dateWiseAdministrations)}
@@ -498,7 +500,7 @@ const MedicationAdministrationTable = ({
                 {dates.map((date) => (
                   <TableCell
                     key={date.toISOString()}
-                    className="break-words whitespace-normal text-center"
+                    className="wrap-break-word whitespace-normal text-center"
                   >
                     {dateWiseAdministrations[format(date, "yyyy-MM-dd")]?.[
                       `${hourRange.start}-${hourRange.end}`

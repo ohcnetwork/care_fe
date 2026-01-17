@@ -17,12 +17,15 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import { formatName, isUserOnline } from "@/Utils/utils";
 import { UserReadMinimal } from "@/types/user/user";
+import { Bot } from "lucide-react";
 
 interface UserCardProps {
   user: UserReadMinimal;
   roleName: string;
   actions?: React.ReactNode;
+  editRoleAction?: React.ReactNode;
   facility?: string;
+  isServiceAccount?: boolean;
 }
 
 export const UserStatusIndicator = ({
@@ -40,7 +43,12 @@ export const UserStatusIndicator = ({
 
   return (
     <span className={cn(addPadding ? "px-3 py-1" : "py-px", className)}>
-      {isUserOnline(user) || isAuthUser ? (
+      {user.is_service_account ? (
+        <Badge variant="secondary" className="whitespace-nowrap">
+          <Bot className="size-4" />
+          <span>{t("service_account")}</span>
+        </Badge>
+      ) : isUserOnline(user) || isAuthUser ? (
         <Badge variant="primary" className="whitespace-nowrap">
           <span className="inline-block size-2 shrink-0 rounded-full bg-green-500" />
           <span>{t("online")}</span>
@@ -61,7 +69,14 @@ export const UserStatusIndicator = ({
   );
 };
 export function UserCard(props: UserCardProps) {
-  const { user, actions, roleName, facility } = props;
+  const {
+    user,
+    editRoleAction,
+    roleName,
+    facility,
+    actions,
+    isServiceAccount,
+  } = props;
 
   const { t } = useTranslation();
 
@@ -69,30 +84,42 @@ export function UserCard(props: UserCardProps) {
     <Card key={user.id} className={cn("h-full", user.deleted && "opacity-60")}>
       <CardContent className="p-4 flex flex-col h-full justify-between">
         <div className="flex items-start gap-3">
-          <Avatar
-            name={formatName(user, true)}
-            imageUrl={user.profile_picture_url}
-            className="h-12 w-12 sm:h-14 sm:w-14 text-xl sm:text-2xl flex-shrink-0"
-          />
+          {!isServiceAccount && (
+            <Avatar
+              name={formatName(user, true)}
+              imageUrl={user.profile_picture_url}
+              className="h-12 w-12 sm:h-14 sm:w-14 text-xl sm:text-2xl shrink-0"
+            />
+          )}
 
           <div className="flex flex-col min-w-0 flex-1">
             <div className="flex flex-col gap-1">
               <div className="flex items-start justify-between">
-                <h1 className="text-base font-bold break-words pr-2">
+                <h1 className="text-base font-bold wrap-break-word pr-2">
                   {formatName(user)}
                 </h1>
-                <span className="text-sm text-gray-500">
-                  <UserStatusIndicator user={user} />
-                </span>
+                {!isServiceAccount && (
+                  <span className="text-sm text-gray-500">
+                    <UserStatusIndicator user={user} />
+                  </span>
+                )}
               </div>
-              <span className="text-sm text-gray-500 mr-2 break-words">
+              <span className="text-sm text-gray-500 mr-2 wrap-break-word">
                 {user.username}
               </span>
             </div>
-            <div className="mt-4 -ml-12 sm:ml-0 grid grid-cols-2 gap-2 text-sm">
-              <div>
+            <div
+              className={cn(
+                "mt-4 -ml-12 sm:ml-0 grid grid-cols-2 gap-2 text-sm",
+                isServiceAccount && "ml-0",
+              )}
+            >
+              <div className="flex flex-col">
                 <div className="text-gray-500">{t("role")}</div>
-                <div className="font-medium truncate">{roleName}</div>
+                <div className="flex items-center">
+                  <div className="font-medium truncate">{roleName}</div>
+                  {editRoleAction}
+                </div>
               </div>
               <div>
                 <div className="text-gray-500">{t("phone_number")}</div>

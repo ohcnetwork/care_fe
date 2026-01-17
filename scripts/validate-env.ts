@@ -54,6 +54,18 @@ const customShortcutsSchemaString = jsonAsStringSchema
   .transform((val) => JSON.parse(val))
   .pipe(customShortcutSchema);
 
+const VALID_ROUNDING_METHODS = [
+  "ROUND_UP",
+  "ROUND_DOWN",
+  "ROUND_CEIL",
+  "ROUND_FLOOR",
+  "ROUND_HALF_UP",
+  "ROUND_HALF_DOWN",
+  "ROUND_HALF_EVEN",
+  "ROUND_HALF_CEIL",
+  "ROUND_HALF_FLOOR",
+];
+
 /**
  * Schema for API URL map - validates that all keys are valid origins
  * and all values are valid URLs
@@ -141,6 +153,14 @@ const envSchema = z
     REACT_CUSTOM_SHORTCUTS: customShortcutsSchemaString.optional(),
     REACT_AUTO_REFRESH_INTERVAL: numberAsString.optional(),
     REACT_AUTO_REFRESH_BY_DEFAULT: booleanAsStringSchema.optional(),
+    REACT_DECIMAL_PRECISION: numberAsString.optional(),
+    REACT_ACCOUNTING_PRECISION: numberAsString.optional(),
+    REACT_DECIMAL_ROUNDING_METHOD: z
+      .string()
+      .refine((val) => VALID_ROUNDING_METHODS.includes(val), {
+        message: `Must be one of: ${VALID_ROUNDING_METHODS.join(", ")}`,
+      })
+      .optional(),
   })
   .superRefine(async (data, ctx) => {
     // Ensure at least one API URL configuration is provided

@@ -40,6 +40,7 @@ import {
   SPECIMEN_DEFINITION_UNITS_CODES,
   type SpecimenDefinitionRead,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
+import { isNegative, round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
@@ -187,15 +188,15 @@ export function SpecimenForm({
     const quantity = specimenData.specimen.collection?.quantity;
     const newErrors: typeof errors = {};
 
-    if (!quantity?.value || quantity.value <= 0) {
+    if (!quantity?.value) {
       newErrors.quantityValue = t("field_required");
     }
 
-    if (quantity?.value && quantity.value <= 0) {
+    if (quantity?.value && isNegative(quantity.value)) {
       newErrors.quantityValue = t("invalid_quantity");
     }
 
-    if (!quantity?.unit) {
+    if (!quantity?.unit && !defaultUnit) {
       newErrors.quantityUnit = t("field_required");
     }
 
@@ -227,7 +228,12 @@ export function SpecimenForm({
         method: finalData.specimen.collection?.method ?? null,
         collected_date_time:
           finalData.specimen.collection?.collected_date_time ?? null,
-        quantity: finalData.specimen.collection?.quantity ?? null,
+        quantity: finalData.specimen.collection?.quantity
+          ? {
+              ...finalData.specimen.collection.quantity,
+              unit: finalData.specimen.collection.quantity.unit ?? defaultUnit,
+            }
+          : null,
         procedure: finalData.specimen.collection?.procedure ?? null,
         body_site: finalData.specimen.collection?.body_site ?? null,
         fasting_status_codeable_concept:
@@ -371,6 +377,7 @@ export function SpecimenForm({
                       type="number"
                       placeholder={t("value")}
                       className="h-9"
+                      min={1}
                       value={
                         specimenData.specimen.collection?.quantity?.value ?? ""
                       }
@@ -515,7 +522,9 @@ export function SpecimenForm({
                       <span className="text-gray-600">
                         {t("container_capacity")}:{" "}
                       </span>
-                      {specimenDefinition.type_tested.container.capacity.value}{" "}
+                      {round(
+                        specimenDefinition.type_tested.container.capacity.value,
+                      )}{" "}
                       {
                         specimenDefinition.type_tested.container.capacity.unit
                           .display
@@ -531,7 +540,7 @@ export function SpecimenForm({
                         .string ||
                         (specimenDefinition.type_tested.container.minimum_volume
                           .quantity &&
-                          `${specimenDefinition.type_tested.container.minimum_volume.quantity.value} ${specimenDefinition.type_tested.container.minimum_volume.quantity.unit.display}`)}
+                          `${round(specimenDefinition.type_tested.container.minimum_volume.quantity.value)} ${specimenDefinition.type_tested.container.minimum_volume.quantity.unit.display}`)}
                     </div>
                   )}
                   {specimenDefinition.type_tested.container.preparation && (
@@ -553,7 +562,7 @@ export function SpecimenForm({
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                   handleSpecimenChange("note", e.target.value || null)
                 }
-                className="min-h-[80px]"
+                className="min-h-20"
                 disabled={disableEdit}
               />
             </div>

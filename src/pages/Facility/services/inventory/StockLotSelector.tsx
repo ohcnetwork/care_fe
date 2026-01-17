@@ -15,15 +15,17 @@ import {
 } from "@/components/ui/popover";
 
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import { cn } from "@/lib/utils";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
+import { isPositive, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 
 export interface SelectedLot {
   selectedInventoryId: string;
-  quantity: number;
+  quantity: string;
 }
 
 interface StockLotSelectorProps {
@@ -75,13 +77,14 @@ export default function StockLotSelector({
     (lot) => lot.selectedInventoryId,
   );
 
-  const filteredInventories = enableSearch
-    ? inventories.filter((inv) =>
-        inv.product.batch?.lot_number
-          ?.toLowerCase()
-          .includes(searchQuery.trim().toLowerCase()),
-      )
-    : inventories;
+  const filteredInventories =
+    enableSearch && searchQuery
+      ? inventories.filter((inv) =>
+          inv.product.batch?.lot_number
+            ?.toLowerCase()
+            .includes(searchQuery.trim().toLowerCase()),
+        )
+      : inventories;
 
   const toggleLotSelection = (inventoryId: string) => {
     const isSelected = selectedLots.some(
@@ -98,14 +101,14 @@ export default function StockLotSelector({
           ...selectedLots,
           {
             selectedInventoryId: inventoryId,
-            quantity: 1,
+            quantity: "1",
           },
         ]);
       } else {
         onLotSelectionChange([
           {
             selectedInventoryId: inventoryId,
-            quantity: 1,
+            quantity: "1",
           },
         ]);
       }
@@ -134,13 +137,21 @@ export default function StockLotSelector({
                 return (
                   <div
                     key={lot.selectedInventoryId}
-                    className="flex items-center justify-between w-full bg-gray-50 px-px py-0.5 border-gray-200 border-1 rounded-sm text-gray-950 gap-1"
+                    className="flex items-center justify-between w-full bg-gray-50 px-px py-0.5 border-gray-200 border rounded-sm text-gray-950 gap-1"
                   >
                     <span
-                      className="font-medium text-sm ml-1 truncate max-w-24"
-                      title={selectedInventory?.product.batch?.lot_number}
+                      className={cn(
+                        "font-medium text-sm ml-1 truncate max-w-24",
+                        !selectedInventory?.product.batch?.lot_number &&
+                          "text-gray-500",
+                      )}
+                      title={
+                        selectedInventory?.product.batch?.lot_number ||
+                        t("unknown")
+                      }
                     >
-                      {selectedInventory?.product.batch?.lot_number}
+                      {selectedInventory?.product.batch?.lot_number ||
+                        t("unknown")}
                     </span>
                     <div className="flex items-center gap-1">
                       <Badge>
@@ -157,13 +168,15 @@ export default function StockLotSelector({
                       <Badge
                         variant={
                           selectedInventory?.status === "active" &&
-                          selectedInventory?.net_content > 0
+                          isPositive(selectedInventory?.net_content || 0)
                             ? "primary"
                             : "destructive"
                         }
                         className="border-none rounded-sm"
                       >
-                        {selectedInventory?.net_content}{" "}
+                        {selectedInventory && (
+                          <>{round(selectedInventory.net_content)} </>
+                        )}
                         {selectedInventory?.product.product_knowledge.base_unit
                           .display || t("units")}
                       </Badge>
@@ -227,7 +240,13 @@ export default function StockLotSelector({
                 >
                   <Checkbox checked={isSelected} />
                   <div className="flex-1 flex items-center justify-between gap-2">
-                    <span>{inv.product.batch?.lot_number}</span>
+                    <span
+                      className={cn(
+                        !inv.product.batch?.lot_number && "text-gray-500",
+                      )}
+                    >
+                      {inv.product.batch?.lot_number || t("unknown")}
+                    </span>
                     <div className="flex items-center gap-1">
                       <Badge>
                         <MonetaryDisplay
@@ -242,12 +261,12 @@ export default function StockLotSelector({
                       </Badge>
                       <Badge
                         variant={
-                          inv.status === "active" && inv.net_content > 0
+                          inv.status === "active" && isPositive(inv.net_content)
                             ? "primary"
                             : "destructive"
                         }
                       >
-                        {inv.net_content}{" "}
+                        {round(inv.net_content)}{" "}
                         {inv.product.product_knowledge.base_unit.display ||
                           t("units")}
                       </Badge>

@@ -3,6 +3,8 @@ import { useNavigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { FormSkeleton } from "@/components/Common/SkeletonLoading";
+
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
@@ -45,7 +47,16 @@ export function UpdateSpecimenDefinition({
     });
 
   if (isFetching) {
-    return <div>Loading...</div>;
+    return (
+      <div
+        className="p-4"
+        role="status"
+        aria-live="polite"
+        aria-label={t("loading")}
+      >
+        <FormSkeleton rows={4} />
+      </div>
+    );
   }
 
   if (!specimenDefinition) {
