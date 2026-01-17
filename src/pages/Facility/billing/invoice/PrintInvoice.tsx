@@ -34,6 +34,7 @@ import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconc
 import { getPartialId } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import { add, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 
 type PrintInvoiceProps = {
@@ -117,7 +118,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
             <div className="text-left">
               <h1 className="text-2xl font-medium">{facility.name}</h1>
               {facility.address && (
-                <div className="text-gray-500 whitespace-pre-wrap break-words text-sm">
+                <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
                   {facility.address}
                   {facility.phone_number && (
                     <p className="text-gray-500 text-sm">
@@ -280,23 +281,19 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                         <TableCell
                           className={cn(tableCellClass, "text-center")}
                         >
-                          {item.quantity}
+                          {round(item.quantity)}
                         </TableCell>
                         <TableCell className={cn(tableCellClass, "text-right")}>
                           <div className="flex flex-col items-end gap-0.5">
                             <MonetaryDisplay
-                              amount={String(
-                                item.total_price_components
+                              amount={add(
+                                ...item.total_price_components
                                   .filter(
                                     (c) =>
                                       c.monetary_component_type ===
                                       MonetaryComponentType.discount,
                                   )
-                                  .reduce(
-                                    (acc, curr) =>
-                                      acc + Number(curr.amount || 0),
-                                    0,
-                                  ),
+                                  .map((c) => c.amount || "0"),
                               )}
                               hideCurrency
                             />
@@ -460,7 +457,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
               {/* Net Amount */}
               <div className="flex w-64 justify-between">
                 <span className="text-gray-500">{t("net_amount")}</span>
-                <MonetaryDisplay amount={String(invoice.total_net)} />
+                <MonetaryDisplay amount={invoice.total_net} />
               </div>
 
               <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
@@ -468,7 +465,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
               {/* Total */}
               <div className="flex w-64 justify-between font-semibold">
                 <span>{t("total")}</span>
-                <MonetaryDisplay amount={String(invoice.total_gross)} />
+                <MonetaryDisplay amount={invoice.total_gross} />
               </div>
               <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
             </div>
@@ -540,7 +537,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                 {/* Total Received */}
                 <div className="flex w-64 justify-between font-semibold">
                   <span>{t("total_received")}</span>
-                  <MonetaryDisplay amount={String(invoice.total_payments)} />
+                  <MonetaryDisplay amount={invoice.total_payments} />
                 </div>
                 <div className="p-1 border-b-2 border-dashed border-gray-200 w-full" />
               </div>

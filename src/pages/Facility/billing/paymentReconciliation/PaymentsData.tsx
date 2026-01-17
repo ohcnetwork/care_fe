@@ -33,6 +33,7 @@ import useFilters from "@/hooks/useFilters";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
+import { multiply } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import UserSelector from "@/components/Common/UserSelector";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
@@ -281,10 +282,9 @@ export default function PaymentsData({
                   </TableCell>
                   <TableCell>
                     <MonetaryDisplay
-                      amount={String(
-                        payment.is_credit_note
-                          ? -payment.amount
-                          : payment.amount,
+                      amount={multiply(
+                        payment.amount,
+                        payment.is_credit_note ? -1 : 1,
                       )}
                     />
                   </TableCell>

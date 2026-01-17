@@ -55,6 +55,7 @@ import {
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
+import { round } from "@/Utils/decimal";
 import queryClient from "@/Utils/request/queryClient";
 import { formatName } from "@/Utils/utils";
 import AddMultipleChargeItemsSheet from "@/pages/Facility/services/serviceRequests/components/AddMultipleChargeItemsSheet";
@@ -358,7 +359,7 @@ export function BedChargeItemsTable({
           <Table className="rounded-lg border shadow-sm w-full bg-white">
             <TableHeader className="bg-gray-100">
               <TableRow className="border-b">
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-[40px]"></TableHead>
+                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10"></TableHead>
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
                   {t("item")}
                 </TableHead>
@@ -415,10 +416,6 @@ export function BedChargeItemsTable({
                         ]
                       : items.flatMap((item) => {
                           const isExpanded = expandedItems[item.id] || false;
-                          const baseComponent = getBaseComponent(item);
-                          const baseAmount = String(
-                            baseComponent?.amount || "0",
-                          );
 
                           const mainRow = (
                             <TableRow
@@ -461,10 +458,12 @@ export function BedChargeItemsTable({
                                   )}
                               </TableCell>
                               <TableCell className="border-x p-3 text-gray-950">
-                                <MonetaryDisplay amount={baseAmount} />
+                                <MonetaryDisplay
+                                  amount={getBaseComponent(item)?.amount || "0"}
+                                />
                               </TableCell>
                               <TableCell className="border-x p-3 text-gray-950">
-                                {item.quantity}
+                                {round(item.quantity)}
                               </TableCell>
                               <TableCell className="border-x p-3 text-gray-950 font-medium">
                                 <MonetaryDisplay amount={item.total_price} />

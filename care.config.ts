@@ -6,6 +6,7 @@ import {
 } from "@/types/emr/encounter/encounter";
 
 import { NonEmptyArray } from "@/Utils/types";
+import Decimal from "decimal.js";
 import { CountryCode } from "libphonenumber-js/types.cjs";
 
 const env = import.meta.env;
@@ -254,6 +255,44 @@ const careConfig = {
       env.REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE,
       false,
     ),
+  },
+
+  /**
+   * Decimal calculation configuration
+   */
+  decimal: {
+    /**
+     * Maximum precision for decimal calculations (max_digits in backend)
+     */
+    precision: env.REACT_DECIMAL_PRECISION
+      ? parseInt(env.REACT_DECIMAL_PRECISION, 10)
+      : 20,
+
+    /**
+     * Accounting display precision
+     * Matches backend `ACCOUNTING_PRECISION` config
+     */
+    accountingPrecision: env.REACT_ACCOUNTING_PRECISION
+      ? parseInt(env.REACT_ACCOUNTING_PRECISION, 10)
+      : 2,
+
+    /**
+     * Rounding method for decimal calculations
+     * Matches backend `DECIMAL_ROUNDING_METHOD` config
+     */
+    rounding: (() => {
+      const method = (env.REACT_DECIMAL_ROUNDING_METHOD || "ROUND_HALF_UP") as
+        | "ROUND_UP"
+        | "ROUND_DOWN"
+        | "ROUND_CEIL"
+        | "ROUND_FLOOR"
+        | "ROUND_HALF_UP"
+        | "ROUND_HALF_DOWN"
+        | "ROUND_HALF_EVEN"
+        | "ROUND_HALF_CEIL"
+        | "ROUND_HALF_FLOOR";
+      return Decimal[method] as Decimal.Rounding;
+    })(),
   },
 } as const;
 

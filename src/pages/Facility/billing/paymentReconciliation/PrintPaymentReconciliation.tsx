@@ -183,7 +183,7 @@ export function PrintPaymentReconciliation({
                       <TableCell>{payment.target_invoice.status}</TableCell>
                       <TableCell className="text-right">
                         <MonetaryDisplay
-                          amount={String(payment.target_invoice.total_gross)}
+                          amount={payment.target_invoice.total_gross}
                         />
                       </TableCell>
                     </TableRow>

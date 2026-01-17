@@ -78,6 +78,7 @@ import patientApi from "@/types/emr/patient/patientApi";
 import facilityApi from "@/types/facility/facilityApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import dayjs from "@/Utils/dayjs";
+import { add, round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -754,25 +755,21 @@ export function InvoiceShow({
                           <TableCell
                             className={cn(tableCellClass, "text-center")}
                           >
-                            {item.quantity}
+                            {round(item.quantity)}
                           </TableCell>
                           <TableCell
                             className={cn(tableCellClass, "text-right")}
                           >
                             <div className="flex flex-col items-end gap-0.5">
                               <MonetaryDisplay
-                                amount={String(
-                                  item.total_price_components
+                                amount={add(
+                                  ...item.total_price_components
                                     .filter(
                                       (c) =>
                                         c.monetary_component_type ===
                                         MonetaryComponentType.discount,
                                     )
-                                    .reduce(
-                                      (acc, curr) =>
-                                        acc + Number(curr.amount || 0),
-                                      0,
-                                    ),
+                                    .map((c) => c.amount || "0"),
                                 )}
                                 hideCurrency
                               />
@@ -998,7 +995,7 @@ export function InvoiceShow({
                 {/* Subtotal */}
                 <div className="flex w-64 justify-between">
                   <span className="text-gray-500">{t("net_amount")}</span>
-                  <MonetaryDisplay amount={String(invoice.total_net)} />
+                  <MonetaryDisplay amount={invoice.total_net} />
                 </div>
 
                 <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
@@ -1006,7 +1003,7 @@ export function InvoiceShow({
                 {/* Total */}
                 <div className="flex w-64 justify-between font-bold">
                   <span>{t("total")}</span>
-                  <MonetaryDisplay amount={String(invoice.total_gross)} />
+                  <MonetaryDisplay amount={invoice.total_gross} />
                 </div>
                 <div className="p-1 pb-2.5 border-t-2 border-dashed border-gray-200 w-full" />
               </div>
@@ -1131,7 +1128,7 @@ export function InvoiceShow({
                   {/* Total Received */}
                   <div className="flex w-64 justify-between font-bold">
                     <span>{t("total_received")}</span>
-                    <MonetaryDisplay amount={String(invoice.total_payments)} />
+                    <MonetaryDisplay amount={invoice.total_payments} />
                   </div>
                   <div className="p-1 border-b-2 border-dashed border-gray-200 w-full" />
                 </div>

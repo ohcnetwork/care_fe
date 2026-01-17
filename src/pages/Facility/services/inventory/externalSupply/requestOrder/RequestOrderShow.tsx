@@ -58,9 +58,11 @@ import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { SUPPLY_REQUEST_STATUS_COLORS } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
+import { add, isPositive, round, subtract } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import Decimal from "decimal.js";
 
 interface AllSupplyDeliveriesProps {
   facilityId: string;
@@ -249,29 +251,35 @@ export function RequestOrderShow({
       acc[
         delivery.supplied_inventory_item?.product?.product_knowledge?.id || ""
       ] = {
-        quantity:
-          (acc[
+        quantity: add(
+          acc[
             delivery.supplied_inventory_item?.product?.product_knowledge?.id ||
               ""
-          ]?.quantity || 0) + delivery.supplied_item_quantity,
+          ]?.quantity || 0,
+          delivery.supplied_item_quantity,
+        ),
         product: delivery.supplied_inventory_item?.product,
       };
       return acc;
     },
     {} as Record<
       string,
-      { quantity: number; product: ProductRead | undefined }
+      { quantity: Decimal; product: ProductRead | undefined }
     >,
   );
 
   const supplyRequestsWithDeliveries = supplyRequests?.results?.map(
     (supplyRequest) => {
       const dispatchedQuantity =
-        supplyDeliveriesGroupedByItem?.[supplyRequest.item.id]?.quantity || 0;
+        supplyDeliveriesGroupedByItem?.[supplyRequest.item.id]?.quantity ||
+        new Decimal(0);
       return {
         ...supplyRequest,
         dispatched_quantity: dispatchedQuantity,
-        remaining_quantity: supplyRequest.quantity - dispatchedQuantity,
+        remaining_quantity: subtract(
+          supplyRequest.quantity,
+          dispatchedQuantity,
+        ),
       };
     },
   );
@@ -646,21 +654,25 @@ export function RequestOrderShow({
                                         {supplyRequest.item.name}
                                       </TableCell>
                                       <TableCell>
-                                        {supplyRequest.quantity}
+                                        {round(supplyRequest.quantity)}
                                       </TableCell>
                                       <TableCell>
-                                        {supplyRequest.dispatched_quantity}
+                                        {round(
+                                          supplyRequest.dispatched_quantity,
+                                        )}
                                       </TableCell>
                                       <TableCell
                                         className={cn(
-                                          supplyRequest.remaining_quantity > 0
+                                          isPositive(
+                                            supplyRequest.remaining_quantity,
+                                          )
                                             ? "text-red-500"
                                             : "text-green-500",
                                         )}
                                       >
-                                        {supplyRequest.remaining_quantity > 0
-                                          ? supplyRequest.remaining_quantity
-                                          : `(${supplyRequest.remaining_quantity * -1})`}
+                                        {round(
+                                          supplyRequest.remaining_quantity,
+                                        )}
                                       </TableCell>
                                       <TableCell>
                                         <Badge

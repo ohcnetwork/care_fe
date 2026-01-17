@@ -39,6 +39,7 @@ import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paym
 import patientApi from "@/types/emr/patient/patientApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
+import { add, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 
@@ -383,13 +384,10 @@ export const PrintChargeItems = (props: {
                               sortedCategories.forEach((categoryTitle) => {
                                 const items: ChargeItemRead[] =
                                   groups[categoryTitle] ?? [];
-                                const categoryTotal = items
-                                  .reduce(
-                                    (sum: number, item: ChargeItemRead) =>
-                                      sum + Number(item.total_price ?? 0),
-                                    0,
-                                  )
-                                  .toFixed(2);
+
+                                const categoryTotal = add(
+                                  ...items.map((i) => i.total_price || 0),
+                                );
 
                                 if (summaryMode) {
                                   // In summary mode, show only category with total
@@ -471,9 +469,7 @@ export const PrintChargeItems = (props: {
                                             />
                                           </TableCell>
                                           <TableCell className="text-right w-10">
-                                            {Math.floor(
-                                              Number(chargeItem.quantity),
-                                            )}
+                                            {round(chargeItem.quantity)}
                                           </TableCell>
                                           <TableCell className="text-right w-10">
                                             <MonetaryDisplay
@@ -501,13 +497,11 @@ export const PrintChargeItems = (props: {
                                   </TableCell>
                                   <TableCell className="text-right">
                                     <MonetaryDisplay
-                                      amount={validItems
-                                        .reduce(
-                                          (sum, item) =>
-                                            sum + Number(item.total_price ?? 0),
-                                          0,
-                                        )
-                                        .toFixed(2)}
+                                      amount={add(
+                                        ...validItems.map(
+                                          (i) => i.total_price || 0,
+                                        ),
+                                      )}
                                     />
                                   </TableCell>
                                 </TableRow>,
@@ -595,15 +589,9 @@ export const PrintChargeItems = (props: {
                               sortedTypes.forEach((paymentType) => {
                                 const paymentsOfType: PaymentReconciliationRead[] =
                                   paymentGroups[paymentType] ?? [];
-                                const typeTotal = paymentsOfType
-                                  .reduce(
-                                    (
-                                      sum: number,
-                                      payment: PaymentReconciliationRead,
-                                    ) => sum + Number(payment.amount ?? 0),
-                                    0,
-                                  )
-                                  .toFixed(2);
+                                const typeTotal = add(
+                                  ...paymentsOfType.map((p) => p.amount || 0),
+                                );
 
                                 if (summaryMode) {
                                   // In summary mode, show only payment type with total
@@ -702,13 +690,11 @@ export const PrintChargeItems = (props: {
                                   </TableCell>
                                   <TableCell className="text-right">
                                     <MonetaryDisplay
-                                      amount={validPayments
-                                        .reduce(
-                                          (sum, payment) =>
-                                            sum + Number(payment.amount ?? 0),
-                                          0,
-                                        )
-                                        .toFixed(2)}
+                                      amount={add(
+                                        ...validPayments.map(
+                                          (p) => p.amount || 0,
+                                        ),
+                                      )}
                                     />
                                   </TableCell>
                                 </TableRow>,
@@ -725,8 +711,8 @@ export const PrintChargeItems = (props: {
                   {/* Account Summary Section */}
                   {account && (
                     <div className="overflow-hidden mt-4">
-                      <Table className="w-full border-1 [&_th]:text-xs [&_td]:text-xs">
-                        <TableHeader className="[&_tr]:border-1 [&_th]:p-0.5 [&_th]:h-auto">
+                      <Table className="w-full border [&_th]:text-xs [&_td]:text-xs">
+                        <TableHeader className="[&_tr]:border [&_th]:p-0.5 [&_th]:h-auto">
                           <TableRow className="bg-transparent hover:bg-transparent">
                             <TableHead className="text-center font-bold">
                               {t("billed_gross")}
@@ -742,7 +728,7 @@ export const PrintChargeItems = (props: {
                             </TableHead>
                           </TableRow>
                         </TableHeader>
-                        <TableBody className="[&_tr]:border-1 [&_td]:p-0.5">
+                        <TableBody className="[&_tr]:border [&_td]:p-0.5">
                           <TableRow className="bg-transparent hover:bg-transparent">
                             <TableCell className="text-center">
                               <MonetaryDisplay amount={account.total_gross} />

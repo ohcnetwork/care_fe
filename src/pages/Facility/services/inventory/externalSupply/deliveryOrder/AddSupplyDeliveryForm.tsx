@@ -79,18 +79,14 @@ import {
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { SupplyRequestRead } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
+import { round, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
 const supplyDeliveryItemSchema = z.object({
   supplied_inventory_item: z.string().optional(),
-  supplied_item_quantity: z
-    .number()
-    .or(z.nan())
-    .refine((val) => !isNaN(val) && val > 0, {
-      message: "Quantity must be at least 1",
-    }),
+  supplied_item_quantity: zodDecimal({ min: 1 }),
   supplied_item_pack_quantity: z.number().optional(),
   supplied_item_pack_size: z.number().optional(),
   product_knowledge: z
@@ -104,7 +100,7 @@ const supplyDeliveryItemSchema = z.object({
   batch_number: z.string().optional(),
   expiry_date: z.string().optional(),
   charge_item_definition: z.object({ slug: z.string() }).optional(),
-  unit_price: z.number().optional(),
+  unit_price: zodDecimal({ min: 0 }).optional(),
   is_manually_edited: z.boolean().optional(),
   is_tax_inclusive: z.boolean().optional(),
   charge_item_category: z.string().optional(),
@@ -178,7 +174,7 @@ export function AddSupplyDeliveryForm({
     (): SupplyDeliveryItemValues => ({
       product_knowledge: {} as ProductKnowledgeBase,
       supplied_inventory_item: "",
-      supplied_item_quantity: 1,
+      supplied_item_quantity: "1",
       supplied_item_pack_quantity: origin ? undefined : 1,
       supplied_item_pack_size: origin ? undefined : 1,
       supplied_item: undefined,
@@ -337,10 +333,10 @@ export function AddSupplyDeliveryForm({
     const components: MonetaryComponent[] = [];
 
     // Base price component
-    if (item.unit_price !== undefined) {
+    if (item.unit_price != null) {
       components.push({
         monetary_component_type: MonetaryComponentType.base,
-        amount: item.unit_price.toString(),
+        amount: item.unit_price,
       });
     }
 
@@ -404,7 +400,7 @@ export function AddSupplyDeliveryForm({
               break;
             }
           }
-          if (item.unit_price === undefined || item.unit_price < 0) {
+          if (item.unit_price === undefined) {
             toast.error(t("unit_price_required_at_row", { row: index + 1 }));
             hasErrors = true;
             break;
@@ -650,13 +646,13 @@ export function AddSupplyDeliveryForm({
                                 <TableHead className="min-w-[140px] text-xs font-semibold text-center">
                                   {t("category")}
                                 </TableHead>
-                                <TableHead className="w-[5rem] text-xs font-semibold">
+                                <TableHead className="w-20 text-xs font-semibold">
                                   {t("pack_size")}
                                 </TableHead>
-                                <TableHead className="w-[7rem] text-xs font-semibold">
+                                <TableHead className="w-28 text-xs font-semibold">
                                   {t("pack_qty")}
                                 </TableHead>
-                                <TableHead className="w-[8rem] text-xs font-semibold">
+                                <TableHead className="w-32 text-xs font-semibold">
                                   {t("qty")}
                                 </TableHead>
                                 <TableHead className="min-w-[100px] text-xs font-semibold">
@@ -747,7 +743,7 @@ export function AddSupplyDeliveryForm({
                                                     {
                                                       selectedInventoryId:
                                                         field.value,
-                                                      quantity: 1,
+                                                      quantity: "1",
                                                     },
                                                   ]
                                                 : []
@@ -963,7 +959,7 @@ export function AddSupplyDeliveryForm({
                       </label>
                     </div>
                     <div className="text-sm font-medium">
-                      {request.quantity} {request.item.base_unit.display}
+                      {round(request.quantity)} {request.item.base_unit.display}
                     </div>
                   </div>
                 ))}
