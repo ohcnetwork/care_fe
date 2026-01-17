@@ -43,7 +43,10 @@ import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/charge
 import ObservationDefinitionForm from "@/pages/Facility/settings/observationDefinition/ObservationDefinitionForm";
 import { CreateSpecimenDefinition } from "@/pages/Facility/settings/specimen-definitions/CreateSpecimenDefinition";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
-import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
+import {
+  ChargeItemDefinitionBase,
+  ChargeItemDefinitionStatus,
+} from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import {
   type ActivityDefinitionCreateSpec,
   type ActivityDefinitionReadSpec,
@@ -888,6 +891,9 @@ function ActivityDefinitionFormContent({
                           queryFn:
                             chargeItemDefinitionApi.listChargeItemDefinition,
                           pathParams: { facilityId },
+                          queryParams: {
+                            status: ChargeItemDefinitionStatus.active,
+                          },
                         }}
                         translationBaseKey="charge_item_definition"
                         mapper={(item) => ({
