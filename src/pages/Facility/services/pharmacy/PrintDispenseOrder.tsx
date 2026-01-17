@@ -7,11 +7,9 @@ import { formatPhoneNumberIntl } from "react-phone-number-input";
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import Loading from "@/components/Common/Loading";
+import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
 
-import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
-import { formatPatientAge } from "@/Utils/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { DispenseOrderRead } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
@@ -22,6 +20,11 @@ import {
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
+import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import { round } from "@/Utils/decimal";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { formatPatientAge } from "@/Utils/utils";
 
 interface DetailRowProps {
   label: string;
@@ -95,7 +98,7 @@ const DispenseOrderContent = ({
                         : ""
                     }`
                   : frequency?.display || "-",
-                quantity: dispense.quantity || "-",
+                quantity: round(dispense.quantity) || "-",
                 lot_batch_number:
                   dispense.item.product.batch?.lot_number || "-",
                 expiry_date: dispense.item.product?.expiration_date
@@ -163,7 +166,7 @@ const DispenseOrderPreview = ({
           </div>
 
           {/* Patient Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 mb-8">
+          <div className="grid md:grid-cols-2 print:grid-cols-2 gap-x-12 gap-y-6 mb-8">
             <div className="space-y-3">
               <DetailRow label={t("patient")} value={patient.name} isStrong />
               <DetailRow
@@ -175,11 +178,19 @@ const DispenseOrderPreview = ({
                 }
                 isStrong
               />
-              <DetailRow
-                label={t("status")}
-                value={t(`dispense_order_status__${dispenseOrder.status}`)}
-                isStrong
-              />
+              {patient?.instance_identifiers
+                ?.filter(
+                  ({ config }) =>
+                    config.config.use === PatientIdentifierUse.official,
+                )
+                .map((identifier) => (
+                  <DetailRow
+                    key={identifier.config.id}
+                    label={identifier.config.config.display}
+                    value={identifier.value}
+                    isStrong
+                  />
+                ))}
             </div>
             <div className="space-y-3">
               <DetailRow
@@ -206,12 +217,7 @@ const DispenseOrderPreview = ({
           />
 
           {/* Footer */}
-          <div className="mt-8 pt-2 text-[10px] text-gray-500 flex justify-between flex-wrap">
-            <p>
-              {t("generated_on")} {format(new Date(), "PPP 'at' p")}
-            </p>
-            <p>{t("computer_generated_document")}</p>
-          </div>
+          <PrintFooter leftContent={t("computer_generated_document")} />
         </div>
       </div>
     </PrintPreview>
