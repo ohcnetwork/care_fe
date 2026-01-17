@@ -32,6 +32,7 @@ interface ChargeItemsSectionProps {
   sourceUrl?: string;
   encounterId?: string;
   disableCreateChargeItems?: boolean;
+  disableCreateChargeItemsSection?: boolean;
   viewOnly?: boolean;
 }
 
@@ -43,6 +44,7 @@ export function ChargeItemsSection({
   sourceUrl,
   encounterId,
   disableCreateChargeItems = false,
+  disableCreateChargeItemsSection = false,
   viewOnly = false,
 }: ChargeItemsSectionProps) {
   const { t } = useTranslation();
@@ -120,7 +122,7 @@ export function ChargeItemsSection({
                   <ShortcutBadge actionId="create-an-invoice" />
                 </Button>
               )}
-              {!disableCreateChargeItems && !viewOnly && (
+              {!disableCreateChargeItemsSection && !viewOnly && (
                 <Button
                   variant="outline"
                   size="sm"

@@ -63,7 +63,9 @@ export default function ChargeItemPriceDisplay({
     return (
       <span>
         {prefix}
-        {component.amount && <MonetaryDisplay amount={component.amount} />}
+        {component.amount && (
+          <MonetaryDisplay amount={component.amount} className="mr-2" />
+        )}
         {component.factor && <MonetaryDisplay factor={component.factor} />}
       </span>
     );
@@ -95,7 +97,7 @@ export default function ChargeItemPriceDisplay({
         {discountComponents.map((component, index) => (
           <div
             key={`discount-${index}`}
-            className="flex justify-between text-gray-500"
+            className="flex justify-between gap-2 text-gray-500"
           >
             <span className="max-w-40">
               {component.code?.display || t("discount")}
