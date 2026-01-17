@@ -48,6 +48,7 @@ import {
   getConditionDiscriminatorValue,
 } from "@/types/base/condition/condition";
 import {
+  isPercentageBased,
   MonetaryComponent,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
@@ -241,7 +242,7 @@ export function EditInvoiceTable({
         },
         ...(item.taxComponents || []),
         ...(item.discounts || []).filter((discount) => {
-          const hasAmount = discount.amount && parseFloat(discount.amount) > 0;
+          const hasAmount = discount.amount && isPositive(discount.amount);
           const hasFactor =
             discount.factor != null && isPositive(discount.factor);
           return hasAmount || hasFactor;
@@ -267,8 +268,8 @@ export function EditInvoiceTable({
         monetary_component_type: MonetaryComponentType.discount,
         code: undefined,
         conditions: [],
-        amount: undefined,
-        factor: undefined,
+        amount: null,
+        factor: null,
       },
     ]);
   };
@@ -325,7 +326,7 @@ export function EditInvoiceTable({
       );
       form.setValue(
         `items.${itemIndex}.discounts.${discountIndex}.amount`,
-        undefined,
+        null,
       );
     } else {
       // Switch to amount
@@ -335,7 +336,7 @@ export function EditInvoiceTable({
       );
       form.setValue(
         `items.${itemIndex}.discounts.${discountIndex}.factor`,
-        undefined,
+        null,
       );
     }
   };
@@ -660,7 +661,7 @@ export function EditInvoiceTable({
                                   render={() => {
                                     const isDisabled = !discount?.code;
                                     const isPercentage =
-                                      discount?.factor !== undefined;
+                                      discount && isPercentageBased(discount);
                                     const value = isPercentage
                                       ? (discount?.factor ?? "0")
                                       : (discount?.amount ?? "0");
@@ -700,8 +701,7 @@ export function EditInvoiceTable({
                                   render={() => {
                                     const isDisabled = !discount?.code;
                                     const isPercentage =
-                                      discount?.factor !== undefined;
-
+                                      discount && isPercentageBased(discount);
                                     return (
                                       <FormItem>
                                         <div className="flex items-center gap-2">
