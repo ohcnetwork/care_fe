@@ -15,6 +15,7 @@ import {
   getLogger,
   loadData,
   makeBatchApiCall,
+  mapResultsToOutput,
   mergeConfigWithCli,
   normalizeTitle,
   parseCliArgs,
@@ -227,32 +228,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
     );
 
     // Update output data with status
-    outputData = outputData.map((row) => {
-      const result = results.find((r) => r.item.slug_value === row.Slug_value);
-
-      // Handle error message properly - convert objects to strings
-      let errorMessage = "";
-      if (!result?.success && result?.error) {
-        if (typeof result.error === "string") {
-          errorMessage = result.error;
-        } else if (result.error.errorText) {
-          errorMessage = result.error.errorText;
-        } else if (result.error.message) {
-          errorMessage = result.error.message;
-        } else {
-          // If it's an object without message/errorText, stringify it
-          errorMessage = JSON.stringify(result.error);
-        }
-      } else if (!result?.success) {
-        errorMessage = "Unknown error";
-      }
-
-      return {
-        ...row,
-        Status: result?.success ? "Success" : "Failed",
-        "Error Message": errorMessage,
-      };
-    });
+    outputData = mapResultsToOutput(outputData, results);
 
     // Write output CSV
     logger(colorize("Writing output CSV...", 0));

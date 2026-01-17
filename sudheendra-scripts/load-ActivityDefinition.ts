@@ -20,6 +20,7 @@ import {
   getLogger,
   loadData,
   makeBatchApiCall,
+  mapResultsToOutput,
   mergeConfigWithCli,
   normalizeTitle,
   parseCliArgs,
@@ -74,7 +75,8 @@ async function lookupCode(
   config: BaseConfig,
 ): Promise<Code | null> {
   try {
-    const response = await fetch(
+    const { fetchWithTokenRetry } = await import("./utils.js");
+    const response = await fetchWithTokenRetry(
       `${config.apiBaseUrl}/api/v1/valueset/activity-definition-procedure-code/expand/`,
       {
         method: "POST",
@@ -87,6 +89,7 @@ async function lookupCode(
           search: searchTerm,
         }),
       },
+      config,
     );
 
     if (!response.ok) {
@@ -130,7 +133,7 @@ const ACTIVITY_VALIDATION_RULES: ValidationRule[] = [
   {
     rowPrefix: "code",
     valuesetUrl:
-      "/api/v1/valueset/activity-definition-procedure-code/validate_codes/",
+      "/api/v1/valueset/activity-definition-procedure-code/validate_code/",
     defaultCode: "71388002", // Default procedure code
     defaultSystem: "http://snomed.info/sct",
     defaultDisplay: "Procedure",
@@ -550,32 +553,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
     ];
 
     // Update output data with status
-    outputData = outputData.map((row) => {
-      const result = allResults.find(
-        (r) => r.item.slug_value === row.slug_value,
-      );
-
-      // Handle error message properly - convert objects to strings
-      let errorMessage = "";
-      if (result?.error) {
-        if (typeof result.error === "string") {
-          errorMessage = result.error;
-        } else if (result.error.message) {
-          errorMessage = result.error.message;
-        } else if (result.error.errorText) {
-          errorMessage = result.error.errorText;
-        } else {
-          // If it's an object without message/errorText, stringify it
-          errorMessage = JSON.stringify(result.error);
-        }
-      }
-
-      return {
-        ...row,
-        Status: result?.success ? "Success" : "Failed",
-        Errors: errorMessage,
-      };
-    });
+    outputData = mapResultsToOutput(outputData, allResults);
 
     // Write output CSV with dynamic substitution columns
     logger(colorize("Writing output CSV...", 0));
@@ -584,9 +562,11 @@ async function main(configOverride?: Partial<BaseConfig>) {
     const customHeaders = [
       "title",
       "slug_value",
-      "Status",
-      "Errors",
-      "code_substitution",
+      "status",
+      "errors",
+      ...ACTIVITY_VALIDATION_RULES.map(
+        (rule) => `${rule.rowPrefix}_Substitution`,
+      ),
     ];
 
     await writeOutputCsv(outputData, finalConfig.outputFile, customHeaders);

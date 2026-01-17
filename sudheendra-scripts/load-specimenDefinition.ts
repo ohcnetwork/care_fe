@@ -19,6 +19,7 @@ import {
   loadData,
   makeApiCall,
   makeBatchApiCall,
+  mapResultsToOutput,
   mergeConfigWithCli,
   normalizeTitle,
   parseCliArgs,
@@ -106,7 +107,7 @@ function processCsvData(
               minimumVolume > 0 && {
                 minimum_volume: {
                   quantity: {
-                    value: minimumVolume,
+                    value: minimumVolume.toString(),
                     unit: minimumVolumeUnit,
                   },
                 },
@@ -118,7 +119,7 @@ function processCsvData(
     const retentionTime =
       row.retention_time && retentionTimeUnit
         ? {
-            value: parseFloat(row.retention_time_value) || 0,
+            value: row.retention_time_value || "0",
             unit: retentionTimeUnit,
           }
         : undefined;
@@ -130,7 +131,7 @@ function processCsvData(
       ...(container && { container }),
       ...(row.requirement && { requirement: row.requirement }),
       retention_time: {
-        value: 24,
+        value: "24",
         unit: {
           code: "h",
           display: "hours",
@@ -236,30 +237,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
     );
 
     // Update output data with status
-    outputData = outputData.map((row) => {
-      const result = results.find((r) => r.item.slug_value === row.Slug_value);
-
-      // Handle error message properly - convert objects to strings
-      let errorMessage = "";
-      if (result?.error) {
-        if (typeof result.error === "string") {
-          errorMessage = result.error;
-        } else if (result.error.errorText) {
-          errorMessage = result.error.errorText;
-        } else if (result.error.message) {
-          errorMessage = result.error.message;
-        } else {
-          // If it's an object without message/errorText, stringify it
-          errorMessage = JSON.stringify(result.error);
-        }
-      }
-
-      return {
-        ...row,
-        Status: result?.success ? "Success" : "Failed",
-        Errors: errorMessage,
-      };
-    });
+    outputData = mapResultsToOutput(outputData, results);
 
     // Write output CSV
     logger(colorize("Writing output CSV...", 0));

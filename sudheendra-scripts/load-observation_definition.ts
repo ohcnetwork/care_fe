@@ -8,6 +8,8 @@ import {
   colorize,
   createScriptConfig,
   ensureAuthentication,
+  fetchWithTokenRetry,
+  extractErrorMessage,
   generateHashSlug,
   getAuthHeaders,
   getLogger,
@@ -116,7 +118,7 @@ const SCRIPT_DEFAULTS = {
 const OBSERVATION_VALIDATION_RULES: ValidationRule[] = [
   {
     rowPrefix: "code",
-    valuesetUrl: "/api/v1/valueset/system-observation/validate_codes/",
+    valuesetUrl: "/api/v1/valueset/system-observation/validate_code/",
     defaultCode: "104922-0", // Laboratory test details panel
     defaultSystem: "http://loinc.org",
     defaultDisplay: "Laboratory test details panel",
@@ -124,7 +126,7 @@ const OBSERVATION_VALIDATION_RULES: ValidationRule[] = [
   },
   {
     rowPrefix: "method",
-    valuesetUrl: "/api/v1/valueset/system-collection-method/validate_codes/",
+    valuesetUrl: "/api/v1/valueset/system-collection-method/validate_code/",
     defaultCode: "386053000",
     defaultSystem: "http://snomed.info/sct",
     defaultDisplay: "Technique",
@@ -336,14 +338,18 @@ async function upsertObservationDefinition(
   config: BaseConfig,
 ) {
   const apiUrl = `${config.apiBaseUrl}/api/v1/observation_definition/upsert/`;
-  const response = await fetch(apiUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(config),
+  const response = await fetchWithTokenRetry(
+    apiUrl,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(config),
+      },
+      body: JSON.stringify({ datapoints: [data] }),
     },
-    body: JSON.stringify({ datapoints: [data] }),
-  });
+    config,
+  );
 
   if (!response.ok) {
     const errorText = await response.json();
@@ -553,26 +559,11 @@ async function main(configOverride?: Partial<BaseConfig>) {
 
     // Add results from batch processing
     results.forEach((result) => {
-      // Handle error message properly - convert objects to strings
-      let errorMessage = "";
-      if (result.error) {
-        if (typeof result.error === "string") {
-          errorMessage = result.error;
-        } else if (result.error.errorText) {
-          errorMessage = result.error.errorText;
-        } else if (result.error.message) {
-          errorMessage = result.error.message;
-        } else {
-          // If it's an object without message/errorText, stringify it
-          errorMessage = JSON.stringify(result.error);
-        }
-      }
-
       processedRows.push({
         slug_value: result.item.slug_value,
         title: result.item.title,
         status: result.success ? "Success" : "Failed",
-        errors: errorMessage,
+        errors: extractErrorMessage(result.error),
         code_substitution: substitutions.get(result.item.slug_value) || "",
       });
     });

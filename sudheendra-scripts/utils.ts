@@ -5,6 +5,10 @@ import { fileURLToPath } from "url";
 
 import { Code } from "@/types/base/code/code";
 import {
+  BatchRequestBody,
+  BatchRequestResponse,
+} from "@/types/base/batch/batch";
+import {
   ResourceCategoryCreate,
   ResourceCategoryResourceType,
   ResourceCategorySubType,
@@ -553,6 +557,69 @@ export const getAuthHeaders = (config: BaseConfig): Record<string, string> => {
 };
 
 /**
+ * Fetch with automatic token refresh on 401/403 errors
+ * @param url - The URL to fetch
+ * @param options - Fetch options
+ * @param config - Configuration with tokens
+ * @param retries - Number of retries remaining (default: 1)
+ * @returns Promise<Response>
+ */
+export async function fetchWithTokenRetry(
+  url: string,
+  options: RequestInit,
+  config: BaseConfig,
+  retries: number = 2,
+): Promise<Response> {
+  const response = await fetch(url, options);
+
+  // If we get 401/403 and have token auth enabled, try refreshing token
+  if (
+    (response.status === 401 || response.status === 403) &&
+    retries > 0 &&
+    config.enableTokenAuth &&
+    config.care_refresh_token
+  ) {
+    const logger = getLogger();
+    logger(
+      colorize(
+        `Received ${response.status}, refreshing token and retrying...`,
+        1,
+      ),
+    );
+
+    try {
+      // Refresh the token
+      const newTokens = await refreshAccessToken(
+        config.apiBaseUrl,
+        config.care_refresh_token,
+      );
+
+      // Update config with new tokens
+      config.care_access_token = newTokens.care_access_token;
+      config.care_refresh_token = newTokens.care_refresh_token;
+
+      // Update authorization header with new token
+      const headers = new Headers(options.headers);
+      headers.set("Authorization", `Bearer ${config.care_access_token}`);
+
+      // Retry the request with new token
+      return fetchWithTokenRetry(
+        url,
+        { ...options, headers },
+        config,
+        retries - 1,
+      );
+    } catch (error) {
+      logger(colorize(`Failed to refresh token: ${error}`, 1));
+      // Return original response if refresh fails
+      return response;
+    }
+  }
+
+  return response;
+}
+
+/**
  * Ensure authentication tokens are available when token auth is enabled
  * @param config - The configuration object
  * @returns Updated config with tokens if needed
@@ -948,14 +1015,18 @@ export async function makeApiCall(
 ): Promise<any> {
   const url = `${config.apiBaseUrl}${endpoint}`;
 
-  const response = await fetch(url, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(config),
+  const response = await fetchWithTokenRetry(
+    url,
+    {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(config),
+      },
+      body: JSON.stringify({ datapoints: [data] }),
     },
-    body: JSON.stringify({ datapoints: [data] }),
-  });
+    config,
+  );
 
   if (!response.ok) {
     const errorText = await response.json();
@@ -1188,6 +1259,198 @@ export function handleApiError(error: any, item: any): ApiResult {
   }
 }
 
+/**
+ * Extract error message from various error formats
+ * Handles string errors, object errors with errorText/message properties,
+ * and complex error objects by stringifying them
+ */
+export function extractErrorMessage(error: any): string {
+  if (!error) return "";
+  if (typeof error === "string") return error;
+  if (error.errorText) return error.errorText;
+  if (error.message) return error.message;
+  return JSON.stringify(error);
+}
+
+/**
+ * Map API results to output rows for CSV export
+ * Standardizes the status and error message formatting across all loaders
+ */
+export function mapResultsToOutput<T extends { slug_value?: string }>(
+  outputRows: ProcessedRow[],
+  results: ApiResult<T>[],
+  slugKey: string = "slug_value",
+): ProcessedRow[] {
+  return outputRows.map((row) => {
+    const result = results.find(
+      (r) => r.item[slugKey] === row[slugKey] || r.item.slug_value === row[slugKey],
+    );
+    return {
+      ...row,
+      status: result?.success ? "Success" : "Failed",
+      errors: extractErrorMessage(result?.error),
+    };
+  });
+}
+
+/**
+ * Configuration for the generic loader pattern
+ */
+export interface LoaderConfig<TProcessed> {
+  /** Name of the script (e.g., "charge item", "specimen") */
+  scriptName: string;
+  /** Default input file path */
+  defaultInputFile: string;
+  /** Default output file path */
+  defaultOutputFile: string;
+  /** Function to process CSV rows into the target data format */
+  processCsvFn: (
+    rows: Record<string, string>[],
+    config: BaseConfig,
+  ) => Promise<TProcessed[]> | TProcessed[];
+  /** Function to generate API endpoint URL */
+  apiEndpointFn: (config: BaseConfig) => string;
+  /** Function to create initial output rows from processed data */
+  createOutputRowFn: (item: TProcessed) => ProcessedRow;
+  /** Optional: Function to ensure prerequisites (e.g., categories) exist */
+  ensurePrerequisitesFn?: (
+    rows: Record<string, string>[],
+    processedData: TProcessed[],
+    config: BaseConfig,
+  ) => Promise<void>;
+  /** Optional: Function to transform processed data before API call */
+  transformForApiFn?: (item: TProcessed, config: BaseConfig) => any;
+  /** Optional: Custom output row mapping function */
+  customOutputMapFn?: (
+    outputRows: ProcessedRow[],
+    results: ApiResult<TProcessed>[],
+    substitutions?: Map<string, string>,
+  ) => ProcessedRow[];
+  /** Optional: Validation rules for code validation */
+  validationRules?: ValidationRule[];
+  /** Optional: Custom headers for output CSV */
+  customHeaders?: string[];
+}
+
+/**
+ * Create a generic loader function that handles the common workflow:
+ * 1. Config initialization
+ * 2. Authentication
+ * 3. Load CSV data
+ * 4. Process & validate data
+ * 5. Ensure prerequisites
+ * 6. Batch API calls
+ * 7. Output CSV generation
+ */
+export function createGenericLoader<TProcessed>(
+  config: LoaderConfig<TProcessed>,
+) {
+  return async (configOverride?: Partial<BaseConfig>): Promise<LoaderResult> => {
+    const logger = getLogger();
+
+    // Step 1: Config initialization
+    let finalConfig = configOverride
+      ? createScriptConfig(
+          config.defaultInputFile,
+          config.defaultOutputFile,
+          configOverride,
+        )
+      : mergeConfigWithCli(
+          createScriptConfig(config.defaultInputFile, config.defaultOutputFile),
+        );
+
+    try {
+      logger(colorize(`Starting ${config.scriptName} loader...`, 0));
+
+      // Step 2: Ensure authentication tokens are available if token auth is enabled
+      const authenticatedConfig = await ensureAuthentication(finalConfig);
+      finalConfig = { ...finalConfig, ...authenticatedConfig };
+
+      // Step 3: Load CSV data
+      logger(colorize("Loading data...", 0));
+      const csvRows = await loadData(finalConfig);
+
+      if (csvRows.length === 0) {
+        throw new Error("No valid rows found in CSV file");
+      }
+
+      // Step 4: Process data (with optional code validation)
+      logger(colorize("Processing data...", 0));
+      let processedData = await config.processCsvFn(csvRows, finalConfig);
+      let substitutions: Map<string, string> | undefined;
+
+      // If validation rules are provided, validate codes
+      if (config.validationRules && config.validationRules.length > 0) {
+        const validationResult = await validateRowCodes(
+          csvRows,
+          finalConfig,
+          config.validationRules,
+        );
+        substitutions = validationResult.substitutions;
+        // Re-process with validated rows
+        processedData = await config.processCsvFn(
+          validationResult.validatedRows,
+          finalConfig,
+        );
+      }
+
+      // Remove duplicates
+      processedData = removeDuplicates(
+        processedData as (TProcessed & { slug_value: string })[],
+      );
+
+      // Step 5: Ensure prerequisites (categories, etc.)
+      if (config.ensurePrerequisitesFn) {
+        await config.ensurePrerequisitesFn(csvRows, processedData, finalConfig);
+      }
+
+      // Step 6: Create output data for CSV
+      let outputData: ProcessedRow[] = processedData.map(
+        config.createOutputRowFn,
+      );
+
+      // Step 7: Batch API call
+      logger(colorize(`Upserting ${config.scriptName}s...`, 0));
+      const itemsForApi = config.transformForApiFn
+        ? processedData.map((item) =>
+            config.transformForApiFn!(item, finalConfig),
+          )
+        : processedData;
+
+      const results = await makeBatchApiCall(
+        config.apiEndpointFn(finalConfig),
+        itemsForApi,
+        finalConfig,
+      );
+
+      // Step 8: Update output data with status
+      if (config.customOutputMapFn) {
+        outputData = config.customOutputMapFn(
+          outputData,
+          results,
+          substitutions,
+        );
+      } else {
+        outputData = mapResultsToOutput(outputData, results);
+      }
+
+      // Step 9: Write output CSV
+      logger(colorize("Writing output CSV...", 0));
+      await writeOutputCsv(
+        outputData,
+        finalConfig.outputFile,
+        config.customHeaders,
+      );
+
+      // Step 10: Process and return results
+      return processApiResults(results, config.scriptName);
+    } catch (error) {
+      logger(colorize(`Error in main process: ${error}`, 1));
+      throw error;
+    }
+  };
+}
+
 export type parserType = "local" | "google-sheets";
 
 // Common configuration defaults
@@ -1338,6 +1601,7 @@ export async function createResourceCategories(
   categories: string[],
   resourceType: ResourceCategoryResourceType,
   config: BaseConfig,
+  resourceSubType: ResourceCategorySubType = ResourceCategorySubType.other,
 ): Promise<{
   successful: string[];
   failed: string[];
@@ -1491,10 +1755,11 @@ export function parseCode(
 }
 
 /**
- * Validate multiple codes against a valueset using batch endpoint
+ * Validate multiple codes against a valueset using batch request API
  * @param codes - Array of codes to validate with their systems
- * @param valuesetUrl - The valueset validation endpoint URL (should end with /validate_codes/)
+ * @param valuesetUrl - The valueset validation endpoint URL
  * @param config - Configuration for API calls
+ * @param batchSize - Number of codes to validate per batch request (default: 100)
  * @returns Promise<Map<string, boolean>> - Map of code -> validation result
  */
 export async function validateCodesInValuesetBatch(
@@ -1510,7 +1775,7 @@ export async function validateCodesInValuesetBatch(
     return results;
   }
 
-  // Split codes into smaller batches
+  // Split codes into smaller batches for the batch request API
   const batches = [];
   for (let i = 0; i < codes.length; i += batchSize) {
     batches.push(codes.slice(i, i + batchSize));
@@ -1518,19 +1783,24 @@ export async function validateCodesInValuesetBatch(
 
   logger(
     colorize(
-      `Batch validating ${codes.length} codes in ${batches.length} batches of ${batchSize}...`,
+      `Batch validating ${codes.length} codes using batch request API in ${batches.length} batches of ${batchSize}...`,
       0,
     ),
   );
 
-  // Process each batch
+  // Process each batch using the batch request API
   for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
     const batch = batches[batchIndex];
 
     try {
-      // Prepare batch request body
-      const requestBody = {
-        datapoints: batch.map(({ code, system }) => ({ code, system })),
+      // Prepare batch request body using the batch API format
+      const batchRequestBody: BatchRequestBody = {
+        requests: batch.map(({ code, system }) => ({
+          url: valuesetUrl,
+          method: "POST",
+          reference_id: code, // Use code as reference_id for easy mapping
+          body: { code, system },
+        })),
       };
 
       logger(
@@ -1540,14 +1810,18 @@ export async function validateCodesInValuesetBatch(
         ),
       );
 
-      const response = await fetch(valuesetUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...getAuthHeaders(config),
+      const response = await fetchWithTokenRetry(
+        `${config.apiBaseUrl}/api/v1/batch_requests/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...getAuthHeaders(config),
+          },
+          body: JSON.stringify(batchRequestBody),
         },
-        body: JSON.stringify(requestBody),
-      });
+        config,
+      );
 
       if (!response.ok) {
         logger(
@@ -1556,21 +1830,36 @@ export async function validateCodesInValuesetBatch(
             1,
           ),
         );
-        logger(colorize(JSON.stringify(await response.json()), 1));
+        try {
+          logger(colorize(JSON.stringify(await response.json()), 1));
+        } catch (e) {
+          // Ignore JSON parse errors
+        }
 
         // Mark all codes in this batch as invalid
         batch.forEach(({ code }) => results.set(code, false));
         continue;
       }
 
-      const data = await response.json();
+      const data: BatchRequestResponse = await response.json();
 
-      // Process batch results - expecting {results: {code: boolean, ...}}
-      if (data.results && typeof data.results === "object") {
-        batch.forEach(({ code }, index) => {
-          //example of data.results: [{"468993001":false},{"256452006":false}]
-          const isValid = data.results[index][code] === true;
-          results.set(code, isValid);
+      // Process batch results
+      if (data.results && Array.isArray(data.results)) {
+        data.results.forEach((result) => {
+          const code = result.reference_id;
+          // Check if the request was successful (2xx status code)
+          if (result.status_code >= 200 && result.status_code < 300) {
+            // The data should contain the validation result
+            const responseData = result.data as any;
+            const isValid =
+              responseData?.result === true ||
+              responseData?.valid === true ||
+              responseData?.isValid === true;
+            results.set(code, isValid);
+          } else {
+            // Request failed, mark as invalid
+            results.set(code, false);
+          }
         });
       } else {
         logger(
@@ -1639,14 +1928,18 @@ export async function validateCodesInValueset(
 
       logger(colorize(`Validating code ${i + 1}/${codes.length}: ${code}`, 0));
 
-      const response = await fetch(valuesetUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...getAuthHeaders(config),
+      const response = await fetchWithTokenRetry(
+        valuesetUrl,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...getAuthHeaders(config),
+          },
+          body: JSON.stringify(requestBody),
         },
-        body: JSON.stringify(requestBody),
-      });
+        config,
+      );
 
       if (!response.ok) {
         logger(
@@ -1684,7 +1977,7 @@ export async function lookupCodeInValueset(
     code: code,
     system: system,
   };
-  const response = await fetch(
+  const response = await fetchWithTokenRetry(
     `${config.apiBaseUrl}/api/v1/valueset/lookup_code/`,
     {
       method: "POST",
@@ -1694,6 +1987,7 @@ export async function lookupCodeInValueset(
       },
       body: JSON.stringify(body),
     },
+    config,
   );
 
   if (!response.ok) {
@@ -1718,7 +2012,7 @@ export interface CodeLookupResult {
 }
 
 /**
- * Batch lookup codes in valueset
+ * Batch lookup codes in valueset using batch request API
  * @param codes - Array of codes to lookup with their systems
  * @param config - Configuration for API calls
  * @param batchSize - Number of codes to lookup per batch (default: 100)
@@ -1744,19 +2038,24 @@ export async function lookupCodesInValuesetBatch(
 
   logger(
     colorize(
-      `Batch looking up ${codes.length} codes in ${batches.length} batches of ${batchSize}...`,
+      `Batch looking up ${codes.length} codes using batch request API in ${batches.length} batches of ${batchSize}...`,
       0,
     ),
   );
 
-  // Process each batch
+  // Process each batch using the batch request API
   for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
     const batch = batches[batchIndex];
 
     try {
-      // Prepare batch request body
-      const requestBody = {
-        datapoints: batch.map(({ code, system }) => ({ code, system })),
+      // Prepare batch request body using the batch API format
+      const batchRequestBody: BatchRequestBody = {
+        requests: batch.map(({ code, system }) => ({
+          url: "/api/v1/valueset/lookup_code/",
+          method: "POST",
+          reference_id: code, // Use code as reference_id for easy mapping
+          body: { code, system },
+        })),
       };
 
       logger(
@@ -1766,16 +2065,17 @@ export async function lookupCodesInValuesetBatch(
         ),
       );
 
-      const response = await fetch(
-        `${config.apiBaseUrl}/api/v1/valueset/lookup_codes/`,
+      const response = await fetchWithTokenRetry(
+        `${config.apiBaseUrl}/api/v1/batch_requests/`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             ...getAuthHeaders(config),
           },
-          body: JSON.stringify(requestBody),
+          body: JSON.stringify(batchRequestBody),
         },
+        config,
       );
 
       if (!response.ok) {
@@ -1793,40 +2093,44 @@ export async function lookupCodesInValuesetBatch(
           // Ignore JSON parse errors
         }
 
-        // Only mark batch with error if it's a complete API failure
-        // This is a legitimate case where the entire batch failed
+        // Mark all codes in this batch with error
         batch.forEach(({ code }) =>
           results.set(code, { code: null, error: errorText }),
         );
         continue;
       }
 
-      const data = await response.json();
+      const data: BatchRequestResponse = await response.json();
 
       // Process batch results
-      // Expected format: {results: [{code: string, metadata: {system, display}, error?: string}, ...]}
       if (data.results && Array.isArray(data.results)) {
-        batch.forEach(({ code }, index) => {
-          const result = data.results[index];
-          // Check if result has error field (from API)
-          if (result && result.error) {
-            results.set(code, {
-              code: null,
-              error: result.error,
-            });
-          } else if (result && result.metadata) {
-            results.set(code, {
-              code: {
-                system: result.metadata.system,
-                code: code,
-                display: result.metadata.display,
-              },
-            });
+        data.results.forEach((result) => {
+          const code = result.reference_id;
+          
+          // Check if the request was successful (2xx status code)
+          if (result.status_code >= 200 && result.status_code < 300) {
+            // The data should contain the lookup result with metadata
+            const responseData = result.data as any;
+            if (responseData?.metadata) {
+              results.set(code, {
+                code: {
+                  system: responseData.metadata.system,
+                  code: code,
+                  display: responseData.metadata.display,
+                },
+              });
+            } else {
+              // No metadata - code not found
+              results.set(code, {
+                code: null,
+                error: "Code not found in valueset",
+              });
+            }
           } else {
-            // No metadata and no explicit error - code not found
+            // Request failed
             results.set(code, {
               code: null,
-              error: "Code not found in valueset",
+              error: `HTTP ${result.status_code}`,
             });
           }
         });
@@ -1838,7 +2142,7 @@ export async function lookupCodesInValuesetBatch(
             1,
           ),
         );
-        // This is also a legitimate batch-level error - API returned invalid format
+        // Mark all codes in this batch with error
         batch.forEach(({ code }) =>
           results.set(code, { code: null, error: errorMsg }),
         );
@@ -1863,7 +2167,7 @@ export async function lookupCodesInValuesetBatch(
           1,
         ),
       );
-      // This is a legitimate network/parse error - the entire batch failed
+      // Mark all codes in this batch with error
       batch.forEach(({ code }) =>
         results.set(code, { code: null, error: errorMsg }),
       );
@@ -1915,7 +2219,7 @@ export async function batchValidateAndSubstituteCodes(
   let validationResults: Map<string, boolean>;
 
   // Check if we should use batch endpoint (URL ends with /validate_codes/)
-  if (valuesetUrl.endsWith("/validate_codes/")) {
+  if (valuesetUrl.endsWith("/validate_code/")) {
     validationResults = await validateCodesInValuesetBatch(
       codesToValidate,
       valuesetUrl,
