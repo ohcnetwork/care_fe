@@ -37,6 +37,7 @@ import patientApi from "@/types/emr/patient/patientApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { add, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 
 type PrintInvoiceProps = {
   facilityId: string;
@@ -558,7 +559,12 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
 
         {/* Generated Info */}
         <PrintFooter
-          showPreparedBy
+          leftContent={
+            <>
+              <span className="font-semibold">{t("created_by")}: </span>
+              {formatName(invoice.created_by)}
+            </>
+          }
           rightContent={
             invoice.payments?.[0]?.location?.name ? (
               <>

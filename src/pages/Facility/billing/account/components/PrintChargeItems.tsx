@@ -749,10 +749,7 @@ export const PrintChargeItems = (props: {
                   )}
 
                   {/* Footer Section */}
-                  <PrintFooter
-                    showGeneratedBy
-                    className="mt-4 border-t border-gray-200"
-                  />
+                  <PrintFooter className="mt-4 border-t border-gray-200" />
                 </td>
               </tr>
             </tbody>
