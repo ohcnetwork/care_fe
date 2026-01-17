@@ -55,7 +55,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       careConsoleArt(),
       fixSonnerPackageJson(),
       tailwindcss(),
-      ...(env.CI
+      ...(env.COVERAGE === "true"
         ? [
             istanbul({
               include: "src/**/*",
@@ -64,12 +64,6 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
                 "tests/",
                 "**/*.test.*",
                 "**/*.spec.*",
-                "**/*.d.ts",
-                "**/types/**",
-                "**/__mocks__/**",
-                "**/pluginMap.ts",
-                "**/supportedBrowsers.ts",
-                "**/Locale/**",
               ],
               extension: [".js", ".ts", ".tsx"],
               requireEnv: false,

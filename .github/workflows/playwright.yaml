@@ -64,10 +64,11 @@ jobs:
       - name: Install dependencies
         run: npm ci --prefer-offline
 
-      - name: Build application
+      - name: Build application (no instrumentation)
         run: npm run build
         env:
           NODE_ENV: production
+          COVERAGE: false
 
       - name: Cache build
         uses: actions/cache@v4
@@ -128,10 +129,15 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: |
-            build/
             node_modules/
           key: build-${{ github.sha }}
           fail-on-cache-miss: true
+
+      - name: Build with coverage instrumentation
+        run: npm run build
+        env:
+          NODE_ENV: production
+          COVERAGE: true
 
       - name: Verify build exists
         run: |
