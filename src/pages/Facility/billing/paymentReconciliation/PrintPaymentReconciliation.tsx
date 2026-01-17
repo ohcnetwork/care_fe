@@ -29,7 +29,7 @@ import {
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import query from "@/Utils/request/query";
-import { formatPatientAge } from "@/Utils/utils";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 
 const statusMap: Record<
   PaymentReconciliationStatus,
@@ -263,7 +263,12 @@ export function PrintPaymentReconciliation({
 
           {/* Footer */}
           <PrintFooter
-            showGeneratedBy
+            leftContent={
+              <>
+                <span className="font-semibold">{t("generated_by")} </span>
+                {formatName(payment.updated_by)}
+              </>
+            }
             rightContent={
               payment.location?.name ? (
                 <>

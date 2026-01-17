@@ -224,7 +224,7 @@ export function PrintAppointments({
         </div>
 
         {/* Footer */}
-        <PrintFooter showPreparedBy className="mt-12 pt-4 border-t" />
+        <PrintFooter className="mt-12 pt-4 border-t" />
       </div>
     </PrintPreview>
   );

@@ -295,7 +295,7 @@ export default function DiagnosticReportPrint({
           )}
 
           {/* Footer */}
-          <PrintFooter showGeneratedBy className="mt-12 pt-4 border-t" />
+          <PrintFooter showPrintedBy className="mt-12 pt-4 border-t" />
         </div>
       </PrintPreview>
     </div>

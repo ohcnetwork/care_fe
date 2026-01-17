@@ -650,7 +650,7 @@ export default function TreatmentSummary({
           </div>
 
           {/* Footer */}
-          <PrintFooter showGeneratedBy />
+          <PrintFooter showPrintedBy />
         </div>
       </PrintPreview>
     </div>
