@@ -1766,7 +1766,7 @@ export async function validateCodesInValuesetBatch(
   codes: Array<{ code: string; system: string }>,
   valuesetUrl: string,
   config: BaseConfig,
-  batchSize: number = 100,
+  batchSize: number = 20,
 ): Promise<Map<string, boolean>> {
   const logger = getLogger();
   const results = new Map<string, boolean>();
@@ -2021,7 +2021,7 @@ export interface CodeLookupResult {
 export async function lookupCodesInValuesetBatch(
   codes: Array<{ code: string; system: string }>,
   config: BaseConfig,
-  batchSize: number = 100,
+  batchSize: number = 20,
 ): Promise<Map<string, CodeLookupResult>> {
   const logger = getLogger();
   const results = new Map<string, CodeLookupResult>();
@@ -2207,7 +2207,7 @@ export async function batchValidateAndSubstituteCodes(
   }>,
   valuesetUrl: string,
   config: BaseConfig,
-  batchSize: number = 50,
+  batchSize: number = 20,
 ): Promise<Map<string, { code: string; isValid: boolean }>> {
   // First, validate all codes - try batch endpoint first, fallback to sequential
   const codesToValidate = codes.map(({ code, system, rowIndex }) => ({
@@ -2270,7 +2270,7 @@ export async function validateRowCodes(
   rows: Record<string, string>[],
   config: BaseConfig,
   validationRules: ValidationRule[],
-  batchSize: number = 50,
+  batchSize: number = 20,
 ): Promise<{
   validatedRows: Record<string, string>[];
   substitutions: Map<string, string>;
@@ -2340,7 +2340,7 @@ export async function validateRowCodes(
         codesToValidate,
         `${config.apiBaseUrl}${rule.valuesetUrl}`,
         config,
-        batchSize,
+        rule.batchSize || batchSize,
       );
 
       // Apply validation results - loop through each row that had codes

@@ -110,7 +110,7 @@ const logger = getLogger();
 
 // Script-specific configuration defaults
 const SCRIPT_DEFAULTS = {
-  inputFile: path.join(__dirname, "observation_definitions.csv"),
+  inputFile: path.join(__dirname, "ObservationDefinition.csv"),
   outputFile: path.join(__dirname, "observations-output.csv"),
 };
 
@@ -127,7 +127,7 @@ const OBSERVATION_VALIDATION_RULES: ValidationRule[] = [
   {
     rowPrefix: "method",
     valuesetUrl: "/api/v1/valueset/system-collection-method/validate_code/",
-    defaultCode: "386053000",
+    defaultCode: "272394005",
     defaultSystem: "http://snomed.info/sct",
     defaultDisplay: "Technique",
     batchSize: 20,
