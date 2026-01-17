@@ -116,7 +116,7 @@ export default function AdminOrganizationList({
               defaultSize={20}
               minSize={15}
               maxSize={30}
-              className="h-full hidden md:block"
+              className=" hidden md:block"
             >
               <AdminOrganizationNavbar
                 organizationType={organizationType}
@@ -133,7 +133,7 @@ export default function AdminOrganizationList({
             />
 
             <ResizablePanel defaultSize={80} className="pl-0 md:pl-4">
-              <div className="space-y-3 sm:space-y-4 rounded-lg md:shadow-lg overflow-hidden md:bg-white">
+              <div className="h-full space-y-3 sm:space-y-4 rounded-lg md:shadow-lg overflow-hidden md:bg-white">
                 {organizationId && (
                   <div className="md:pt-4 flex items-center mx-auto max-w-4xl">
                     <Breadcrumb className="md:px-5 md:pt-5">
