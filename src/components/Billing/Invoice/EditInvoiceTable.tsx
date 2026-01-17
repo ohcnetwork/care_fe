@@ -373,6 +373,8 @@ export function EditInvoiceTable({
     return <div>{t("no_charge_items_found")}</div>;
   }
 
+  const filteredDiscounts = globalDiscounts.filter(getDiscountComponentKey);
+
   return (
     <Form {...form}>
       <form
@@ -395,7 +397,7 @@ export function EditInvoiceTable({
                 <TableHead>
                   <div className="flex items-center justify-center gap-2">
                     {t("discounts")}
-                    {globalDiscounts.length > 0 && chargeItems.length > 1 && (
+                    {filteredDiscounts.length > 0 && chargeItems.length > 1 && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
@@ -408,7 +410,7 @@ export function EditInvoiceTable({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          {globalDiscounts.map((discount) => {
+                          {filteredDiscounts.map((discount) => {
                             const key = getDiscountComponentKey(discount);
                             return (
                               <DropdownMenuItem
