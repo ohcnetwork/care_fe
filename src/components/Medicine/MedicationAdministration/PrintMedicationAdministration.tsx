@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/table";
 
 import Loading from "@/components/Common/Loading";
+import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
 
 import encounterApi from "@/types/emr/encounter/encounterApi";
@@ -308,12 +309,9 @@ export const PrintMedicationAdministration = (props: {
             )}
           </div>
 
-          <div className="mt-8 pt-2 text-[10px] text-gray-500 flex justify-between flex-wrap">
-            <p>
-              {t("generated_on")} {format(new Date(), "PPP 'at' p")}
-            </p>
-            <p>{t("computer_generated_medication_administration")}</p>
-          </div>
+          <PrintFooter
+            leftContent={t("computer_generated_medication_administration")}
+          />
         </div>
       </div>
     </PrintPreview>

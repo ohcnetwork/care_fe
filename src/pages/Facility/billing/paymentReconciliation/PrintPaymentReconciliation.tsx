@@ -19,6 +19,7 @@ import {
 
 import Loading from "@/components/Common/Loading";
 
+import PrintFooter from "@/components/Common/PrintFooter";
 import {
   PAYMENT_RECONCILIATION_METHOD_MAP,
   PAYMENT_RECONCILIATION_OUTCOME_COLORS,
@@ -28,7 +29,7 @@ import {
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import query from "@/Utils/request/query";
-import { formatPatientAge } from "@/Utils/utils";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 
 const statusMap: Record<
   PaymentReconciliationStatus,
@@ -261,10 +262,23 @@ export function PrintPaymentReconciliation({
           )}
 
           {/* Footer */}
-          <div className="mt-12 border-t pt-4 text-center text-sm text-gray-500">
-            <p>{t("thank_you_for_your_payment")}</p>
-            <p>{format(new Date(), "PPP")}</p>
-          </div>
+          <PrintFooter
+            leftContent={
+              <>
+                <span className="font-semibold">{t("generated_by")} </span>
+                {formatName(payment.updated_by)}
+              </>
+            }
+            rightContent={
+              payment.location?.name ? (
+                <>
+                  <span className="font-semibold">{t("location")}: </span>
+                  <span>{payment.location.name}</span>
+                </>
+              ) : undefined
+            }
+            className="border-t pt-4"
+          />
         </div>
       </div>
     </PrintPreview>

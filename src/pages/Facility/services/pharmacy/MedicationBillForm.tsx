@@ -1919,13 +1919,6 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                         type="number"
                                                         min={0}
                                                         {...formField}
-                                                        onChange={(e) => {
-                                                          formField.onChange(
-                                                            parseInt(
-                                                              e.target.value,
-                                                            ),
-                                                          );
-                                                        }}
                                                         className="border-gray-300 border rounded-none w-24"
                                                         placeholder="0"
                                                       />
@@ -1959,11 +1952,6 @@ export default function MedicationBillForm({ patientId }: Props) {
                                               type="number"
                                               min={1}
                                               {...formField}
-                                              onChange={(e) => {
-                                                formField.onChange(
-                                                  parseInt(e.target.value) || 0,
-                                                );
-                                              }}
                                               className="border-gray-300 border rounded-none w-24"
                                             />
                                           </FormControl>

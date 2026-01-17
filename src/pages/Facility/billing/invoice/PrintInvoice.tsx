@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import Loading from "@/components/Common/Loading";
+import PrintFooter from "@/components/Common/PrintFooter";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import {
   MonetaryDisplay,
@@ -36,6 +37,7 @@ import patientApi from "@/types/emr/patient/patientApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { add, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 
 type PrintInvoiceProps = {
   facilityId: string;
@@ -556,11 +558,22 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
         )}
 
         {/* Generated Info */}
-        <div className="mt-12 pt-4 border-t text-[10px] text-gray-500 flex justify-between">
-          <p>
-            {t("generated_on")} {format(new Date(), "PPP 'at' p")}
-          </p>
-        </div>
+        <PrintFooter
+          leftContent={
+            <>
+              <span className="font-semibold">{t("created_by")}: </span>
+              {formatName(invoice.created_by)}
+            </>
+          }
+          rightContent={
+            invoice.payments?.[0]?.location?.name ? (
+              <>
+                <span className="font-semibold">{t("location")}: </span>
+                <span>{invoice.payments[0].location.name}</span>
+              </>
+            ) : undefined
+          }
+        />
       </div>
     </PrintPreview>
   );
