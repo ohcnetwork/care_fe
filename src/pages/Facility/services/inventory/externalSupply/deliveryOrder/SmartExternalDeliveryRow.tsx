@@ -324,7 +324,7 @@ export function SmartExternalDeliveryRow({
             markAsEdited();
           }}
           disabled={!productKnowledge}
-          className="w-[5rem]"
+          className="w-20"
         />
       </TableCell>
 
