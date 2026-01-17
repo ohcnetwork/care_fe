@@ -68,37 +68,35 @@ export default function StockLotSelector({
   const [searchQuery, setSearchQuery] = useState("");
   const expiryMonthOffset = careConfig.inventory.expiryMonthOffset;
 
-  const isExpired = (expirationDate: string | undefined): boolean => {
-    if (!expirationDate) return false;
+  type ExpiryStatus = "expired" | "expiring_soon" | "valid";
+
+  const getExpiryStatus = (
+    expirationDate: string | undefined,
+  ): ExpiryStatus => {
+    if (!expirationDate) return "valid";
     const expiryDate = new Date(expirationDate);
     const currentMonthStart = startOfMonth(new Date());
-    return isBefore(expiryDate, currentMonthStart);
+    if (isBefore(expiryDate, currentMonthStart)) return "expired";
+    if (expiryMonthOffset !== null) {
+      const referenceMonthEnd = endOfMonth(
+        addMonths(new Date(), expiryMonthOffset),
+      );
+      if (isBefore(expiryDate, referenceMonthEnd)) return "expiring_soon";
+    }
+    return "valid";
   };
 
   const isProductRestricted = (expirationDate: string | undefined): boolean => {
-    if (!expirationDate) return false;
-    if (isExpired(expirationDate)) return true;
-    if (expiryMonthOffset === null) return false;
-    const expiryDate = new Date(expirationDate);
-    const referenceMonthEnd = endOfMonth(
-      addMonths(new Date(), expiryMonthOffset),
-    );
-    return isBefore(expiryDate, referenceMonthEnd);
+    const status = getExpiryStatus(expirationDate);
+    return status === "expired" || status === "expiring_soon";
   };
 
   const getExpiryBadgeVariant = (
     expirationDate: string | undefined,
   ): "destructive" | "yellow" | "primary" => {
-    if (!expirationDate) return "primary";
-    const expiryDate = new Date(expirationDate);
-    const currentMonthStart = startOfMonth(new Date());
-    if (isBefore(expiryDate, currentMonthStart)) return "destructive";
-    if (expiryMonthOffset !== null) {
-      const referenceMonthEnd = endOfMonth(
-        addMonths(new Date(), expiryMonthOffset),
-      );
-      if (isBefore(expiryDate, referenceMonthEnd)) return "yellow";
-    }
+    const status = getExpiryStatus(expirationDate);
+    if (status === "expired") return "destructive";
+    if (status === "expiring_soon") return "yellow";
     return "primary";
   };
 
