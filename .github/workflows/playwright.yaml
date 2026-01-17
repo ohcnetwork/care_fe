@@ -4,7 +4,8 @@ name: Playwright Tests
 # - Triggers on push to main branches and PRs
 # - Uses path filtering to skip unnecessary runs
 # - Runs tests in parallel using 3 shards
-# - Provides detailed test reports as artifacts
+# - Builds with coverage instrumentation only for test execution
+# - Provides detailed test reports and coverage as artifacts
 
 on:
   push:
@@ -43,17 +44,15 @@ jobs:
               - 'package.json'
               - 'playwright.config.ts'
 
-  # Build application once and cache for all test shards
-  build:
+  # Install dependencies once and cache for all jobs
+  install:
     if: always() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'
     needs: changes
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Checkout 📥
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -64,24 +63,22 @@ jobs:
       - name: Install dependencies
         run: npm ci --prefer-offline
 
-      - name: Build application (no instrumentation)
+      - name: Validate build (no instrumentation)
         run: npm run build
         env:
           NODE_ENV: production
           COVERAGE: false
 
-      - name: Cache build
+      - name: Cache dependencies
         uses: actions/cache/save@v4
         with:
-          path: |
-            build/
-            node_modules/
-          key: build-${{ github.sha }}
+          path: node_modules/
+          key: node-modules-${{ github.sha }}
 
   # Run E2E tests with backend integration
   test:
     if: always() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'
-    needs: [changes, build]
+    needs: [changes, install]
     timeout-minutes: 30
     runs-on: ubuntu-latest
     strategy:
@@ -90,47 +87,19 @@ jobs:
         shard: [1, 2, 3]
 
     steps:
-      - name: Checkout 📥
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set backend branch
-        id: backend-branch
-        run: echo "branch=develop" >> $GITHUB_OUTPUT
-
-      - name: Checkout care 📥
-        uses: actions/checkout@v4
-        with:
-          repository: ohcnetwork/care
-          path: care
-          ref: ${{ steps.backend-branch.outputs.branch }}
-          fetch-depth: 0
-
-      - name: Start care docker containers 🐳
-        run: |
-          cd care
-          echo DISABLE_RATELIMIT=True >> docker/.local.env
-          echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.local.env
-          echo MAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500 >> docker/.local.env
-          make docker_config_file=docker-compose.local.yaml up load-fixtures
-          cd ..
-        env:
-          JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Restore build cache
-        id: cache-restore
+      - name: Restore dependencies cache
         uses: actions/cache/restore@v4
         with:
-          path: |
-            build/
-            node_modules/
-          key: build-${{ github.sha }}
+          path: node_modules/
+          key: node-modules-${{ github.sha }}
           fail-on-cache-miss: true
 
       - name: Build with coverage instrumentation
@@ -139,21 +108,31 @@ jobs:
           NODE_ENV: production
           COVERAGE: true
 
-      - name: Verify build exists
+      - name: Set backend branch
+        id: backend-branch
+        run: echo "branch=develop" >> $GITHUB_OUTPUT
+
+      - name: Checkout care backend
+        uses: actions/checkout@v4
+        with:
+          repository: ohcnetwork/care
+          path: care
+          ref: ${{ steps.backend-branch.outputs.branch }}
+
+      - name: Start backend services
+        working-directory: care
         run: |
-          if [ ! -d "build" ]; then
-            echo "::error::Build directory not found. Cache restoration may have failed."
-            exit 1
-          fi
-          echo "Build directory verified ✓"
+          echo "DISABLE_RATELIMIT=True" >> docker/.local.env
+          echo "JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\"" >> docker/.local.env
+          echo "MAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500" >> docker/.local.env
+          make docker_config_file=docker-compose.local.yaml up load-fixtures
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}-${{ hashFiles('playwright.config.ts') }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}-
             ${{ runner.os }}-playwright-
 
       - name: Install Playwright browsers
@@ -161,16 +140,10 @@ jobs:
 
       - name: Run Playwright tests (Shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }})
         id: test
-        run: |
-          npx playwright test --shard=${{ matrix.shard }}/${{ env.TEST_SHARDS }}
+        run: npx playwright test --shard=${{ matrix.shard }}/${{ env.TEST_SHARDS }}
         env:
           NODE_ENV: production
           REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
-
-      - name: Annotate test failure
-        if: failure() && steps.test.conclusion == 'failure'
-        run: |
-          echo "::error::Playwright tests failed in shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }}"
 
       - name: Upload coverage data
         uses: actions/upload-artifact@v4
@@ -179,6 +152,7 @@ jobs:
           name: coverage-shard-${{ matrix.shard }}
           path: .nyc_output/
           retention-days: 7
+          include-hidden-files: true
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -193,14 +167,52 @@ jobs:
 
       - name: Stop backend services
         if: always()
-        run: |
-          cd care
-          make docker_config_file=docker-compose.local.yaml down || true
+        working-directory: care
+        run: make docker_config_file=docker-compose.local.yaml down || true
+
+  # Generate coverage reports from sharded test results
+  report:
+    if: always() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'
+    needs: [changes, test]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore dependencies cache
+        uses: actions/cache/restore@v4
+        with:
+          path: node_modules/
+          key: node-modules-${{ github.sha }}
+          fail-on-cache-miss: true
+
+      - name: Download coverage from all shards
+        uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-shard-*
+          path: .nyc_output
+          merge-multiple: true
+
+      - name: Generate combined coverage report
+        run: npm run playwright:coverage
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-coverage-report
+          path: coverage/
+          retention-days: 7
 
   # Aggregate results and create final report
-  report:
+  aggregate:
     if: always() && github.repository == 'ohcnetwork/care_fe'
-    needs: [changes, test]
+    needs: [changes, test, report]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
