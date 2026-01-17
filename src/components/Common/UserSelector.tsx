@@ -27,6 +27,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { cn } from "@/lib/utils";
 import facilityApi from "@/types/facility/facilityApi";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 import { UserReadMinimal } from "@/types/user/user";
@@ -42,6 +43,7 @@ interface Props {
   organizationId?: string;
   disabled?: boolean;
   isServiceAccount?: boolean;
+  triggerOption?: React.ReactNode;
 }
 
 const PAGE_LIMIT = 50;
@@ -134,6 +136,7 @@ export default function UserSelector({
   organizationId,
   disabled,
   isServiceAccount = false,
+  triggerOption,
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -223,7 +226,7 @@ export default function UserSelector({
     return (
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild className={popoverClassName}>
-          {renderTriggerButton()}
+          {triggerOption ? triggerOption : renderTriggerButton()}
         </DrawerTrigger>
         <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
           <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
@@ -247,10 +250,13 @@ export default function UserSelector({
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger asChild className={popoverClassName}>
-        {renderTriggerButton()}
+        {triggerOption ? triggerOption : renderTriggerButton()}
       </PopoverTrigger>
       <PopoverContent
-        className="p-0 w-[var(--radix-popover-trigger-width)]"
+        className={cn(
+          "p-0 w-[var(--radix-popover-trigger-width)]",
+          triggerOption && "w-80 max-h-96 overflow-hidden",
+        )}
         align="start"
         sideOffset={4}
       >
