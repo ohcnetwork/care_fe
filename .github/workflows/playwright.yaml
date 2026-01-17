@@ -71,7 +71,7 @@ jobs:
           COVERAGE: false
 
       - name: Cache build
-        uses: actions/cache@v4
+        uses: actions/cache/save@v4
         with:
           path: |
             build/
@@ -203,6 +203,9 @@ jobs:
     needs: [changes, test]
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Check if tests were skipped
         id: skipped
         run: |
