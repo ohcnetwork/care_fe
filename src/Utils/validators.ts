@@ -32,11 +32,10 @@ export default () => ({
   },
 
   pincode: z
-    .number()
+    .number({ required_error: t("field_required") })
     .int()
-    .positive()
-    .min(100000, t("pincode_must_be_6_digits"))
-    .max(999999, t("pincode_must_be_6_digits")),
+    .min(100000, t("invalid_pincode"))
+    .max(999999, t("invalid_pincode")),
 
   age: z
     .number()
