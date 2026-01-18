@@ -2661,6 +2661,7 @@
   "invoice_locked_successfully": "Invoice locked successfully",
   "invoice_management": "Invoice Management",
   "invoice_may_not_exist": "Invoice may not exist",
+  "invoice_no": "Invoice No.",
   "invoice_not_found": "Invoice not found",
   "invoice_note_placeholder": "Enter Invoice Note",
   "invoice_number": "Invoice Number",

@@ -15,12 +15,18 @@ import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
+interface WatermarkProps {
+  text: string;
+  color?: "red" | "gray" | "yellow";
+}
+
 type Props = {
   children: ReactNode;
   disabled?: boolean;
   className?: string;
   title: string;
   showBackButton?: boolean;
+  watermark?: WatermarkProps;
 };
 
 export default function PrintPreview(props: Props) {
@@ -57,8 +63,22 @@ export default function PrintPreview(props: Props) {
             <ZoomTransform className="origin-top-left bg-white p-10 text-sm shadow-2xl transition-all duration-200 ease-in-out print:transform-none max-w-[calc(100vw-1rem)]">
               <div
                 id="section-to-print"
-                className={cn("w-full print:py-10", props.className)}
+                className={cn("w-full relative", props.className)}
               >
+                {props.watermark && (
+                  <div
+                    className={cn(
+                      "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-30",
+                      "text-6xl font-bold uppercase tracking-widest opacity-20 select-none pointer-events-none z-10 whitespace-nowrap",
+                      props.watermark.color === "red" && "text-red-600",
+                      props.watermark.color === "gray" && "text-gray-600",
+                      props.watermark.color === "yellow" && "text-yellow-600",
+                      !props.watermark.color && "text-red-600",
+                    )}
+                  >
+                    {props.watermark.text}
+                  </div>
+                )}
                 {props.children}
               </div>
             </ZoomTransform>

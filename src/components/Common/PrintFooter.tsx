@@ -66,7 +66,7 @@ export function PrintFooter({
 
   return (
     <div
-      className={`mt-8 pt-2 text-[10px] text-gray-500 flex justify-between flex-wrap ${className}`}
+      className={`mt-2 text-[10px] text-gray-500 flex justify-between flex-wrap ${className}`}
     >
       <p>{leftContent ?? preparedByContent}</p>
       <p>{rightContent ?? generatedOnContent}</p>

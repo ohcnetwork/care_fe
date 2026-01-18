@@ -1,3 +1,4 @@
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -57,6 +58,7 @@ export default function DiagnosticReportPrint({
   diagnosticReportId: string;
 }) {
   const { t } = useTranslation();
+  const { facility } = useCurrentFacility();
 
   const { data: report, isLoading } = useQuery({
     queryKey: ["diagnosticReport", diagnosticReportId],
@@ -157,17 +159,22 @@ export default function DiagnosticReportPrint({
       <PrintPreview
         title={`${t("diagnostic_report")} - ${report.code?.display || t("diagnostic_report")}`}
       >
-        <div className="py-8 max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           {/* Header with Facility Name and Logo */}
-          <div className="flex justify-between items-start pb-6 border-b border-gray-200">
-            <div className="space-y-4 flex-1">
-              <div>
-                <h1 className="text-3xl font-semibold">
-                  {report.encounter?.facility?.name}
-                </h1>
-                <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold mt-1">
-                  {t("diagnostic_report")}
-                </h2>
+          <div className="flex justify-between items-start pb-2 border-b border-gray-200">
+            <div className="flex items-start gap-4">
+              <div className="text-left">
+                <h1 className="text-2xl font-medium">{facility?.name}</h1>
+                {facility?.address && (
+                  <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
+                    {facility.address}
+                    {facility.phone_number && (
+                      <p className="text-gray-500 text-sm">
+                        {t("phone")}: {facility.phone_number}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
             <img
@@ -177,8 +184,12 @@ export default function DiagnosticReportPrint({
             />
           </div>
 
+          <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold my-2">
+            {t("diagnostic_report")}
+          </h2>
+
           {/* Patient Details */}
-          <div className="mt-6 grid md:grid-cols-2 print:grid-cols-2 gap-x-6 gap-y-1">
+          <div className="grid md:grid-cols-2 print:grid-cols-2 gap-x-6 gap-y-1 border-t border-gray-200 pt-2">
             <div className="grid grid-cols-[6rem_auto_1fr] items-center">
               <span className="text-gray-600">{t("patient")}</span>
               <span className="text-gray-600">:</span>
