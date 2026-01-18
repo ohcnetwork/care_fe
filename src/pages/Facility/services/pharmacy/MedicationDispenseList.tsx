@@ -36,6 +36,7 @@ import {
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { formatDoseRange, formatTotalUnits } from "@/components/Medicine/utils";
+import { PatientHeader } from "@/components/Patient/PatientHeader";
 
 import query from "@/Utils/request/query";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
@@ -201,14 +202,12 @@ function MedicationTable({
 interface Props {
   facilityId: string;
   patientId: string;
-  patientName?: string;
   prescriptionId: string;
 }
 
 export default function MedicationDispenseList({
   facilityId,
   patientId,
-  patientName,
   prescriptionId,
 }: Props) {
   const { t } = useTranslation();
@@ -333,7 +332,14 @@ export default function MedicationDispenseList({
 
   return (
     <div>
-      <div className="mb-4 flex flex-col gap-4">
+      {prescription.encounter.patient && (
+        <PatientHeader
+          patient={prescription.encounter.patient}
+          facilityId={facilityId}
+          className="p-2 rounded-none shadow-none bg-gray-100"
+        />
+      )}
+      <div className="my-4 flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <div className="flex flex-col lg:flex-row items-stretch gap-2 w-full">
             <div className="w-full lg:w-64">
@@ -376,7 +382,7 @@ export default function MedicationDispenseList({
               className="w-full sm:w-auto border-gray-400 font-semibold"
             >
               <Link
-                href={`/facility/${facilityId}/locations/${locationId}/medication_dispense/?patientId=${patientId}&patient_name=${encodeURIComponent(patientName || "")}`}
+                href={`/facility/${facilityId}/locations/${locationId}/medication_dispense/?patientId=${patientId}&patient_name=${encodeURIComponent(prescription.encounter.patient.name || "")}`}
                 basePath="/"
               >
                 {t("dispenses")}

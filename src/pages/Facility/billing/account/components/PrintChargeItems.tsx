@@ -8,6 +8,7 @@ import { formatPhoneNumberIntl } from "react-phone-number-input";
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import Loading from "@/components/Common/Loading";
+import PrintFooter from "@/components/Common/PrintFooter";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -18,8 +19,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-import useAuthUser from "@/hooks/useAuthUser";
 
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconciliation/paymentReconciliation";
@@ -76,7 +75,6 @@ export const PrintChargeItems = (props: {
   const { facilityId, accountId } = props;
   const { facility } = useCurrentFacility();
   const { t } = useTranslation();
-  const currentUser = useAuthUser();
   const [hideCategories, setHideCategories] = useState(false);
   const [hidePaymentTypeGrouping, setHidePaymentTypeGrouping] = useState(false);
   const [summaryMode, setSummaryMode] = useState(false);
@@ -751,24 +749,7 @@ export const PrintChargeItems = (props: {
                   )}
 
                   {/* Footer Section */}
-                  <div className="mt-4 pt-2 border-t border-gray-200 text-sm text-gray-600">
-                    <div className="flex justify-between items-center">
-                      <div className="text-xs">
-                        <span className="font-medium text-xs">
-                          {t("prepared_by")}:{" "}
-                        </span>
-                        <span>{currentUser.username}</span>
-                      </div>
-                      <div className="text-xs">
-                        <span className="font-medium text-xs">
-                          {t("generated_on")}{" "}
-                        </span>
-                        <span>
-                          {formatDateTime(new Date(), "DD-MM-YYYY, hh:mm A")}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                  <PrintFooter className="mt-4 border-t border-gray-200" />
                 </td>
               </tr>
             </tbody>

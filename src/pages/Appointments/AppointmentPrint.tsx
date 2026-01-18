@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
+import PrintFooter from "@/components/Common/PrintFooter";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -219,12 +220,11 @@ export default function AppointmentPrint(props: Props) {
         <Separator className="my-4" />
 
         {/* Footer */}
-        <div className="text-center text-xs text-gray-500 flex justify-between items-center">
-          <div>
-            {t("generated_on")} {format(new Date(), "dd MMM yyyy 'at' h:mm a")}
-          </div>
-          <div>{facility.name}</div>
-        </div>
+        <PrintFooter
+          leftContent={format(new Date(), "PP 'at' p")}
+          rightContent={facility.name}
+          className="text-xs"
+        />
       </div>
     </PrintPreview>
   );

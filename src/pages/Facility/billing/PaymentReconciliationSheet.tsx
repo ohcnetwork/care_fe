@@ -149,10 +149,18 @@ const createFormSchema = () =>
         ? z.string().min(1)
         : z.string().optional(),
     })
-    .refine((data) => isGreaterThanOrEqual(data.tendered_amount, data.amount), {
-      message: t("tender_amount_cannot_be_less_than_payment_amount"),
-      path: ["tendered_amount"],
-    });
+    .refine(
+      (data) => {
+        if (!data.tendered_amount || !data.amount) {
+          return true;
+        }
+        return isGreaterThanOrEqual(data.tendered_amount, data.amount);
+      },
+      {
+        message: t("tender_amount_cannot_be_less_than_payment_amount"),
+        path: ["tendered_amount"],
+      },
+    );
 
 export function PaymentReconciliationSheet({
   open,
@@ -253,7 +261,9 @@ export function PaymentReconciliationSheet({
 
   useEffect(() => {
     if (open) {
-      const initialAmount = round(invoice?.total_gross || "0");
+      const initialAmount = invoice?.total_gross
+        ? round(invoice.total_gross)
+        : "";
       form.reset({
         reconciliation_type: invoice
           ? PaymentReconciliationType.payment

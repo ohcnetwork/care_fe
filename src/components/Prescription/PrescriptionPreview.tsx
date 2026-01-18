@@ -5,6 +5,7 @@ import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
+import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage, formatSig } from "@/components/Medicine/utils";
@@ -248,12 +249,7 @@ export const PrescriptionPreview = ({
           ))}
 
           {/* Footer */}
-          <div className="mt-8 pt-2 text-[10px] text-gray-500 flex justify-between flex-wrap">
-            <p>
-              {t("generated_on")} {format(new Date(), "PPP 'at' p")}
-            </p>
-            <p>{t("computer_generated_prescription")}</p>
-          </div>
+          <PrintFooter leftContent={t("computer_generated_prescription")} />
         </div>
       </div>
     </PrintPreview>
