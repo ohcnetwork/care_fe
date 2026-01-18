@@ -309,7 +309,7 @@ function ServiceRequestForm({
                 {t("cancel")}
               </Button>
             )}
-            <Button variant="outline_primary" onClick={onAdd} className="">
+            <Button variant="outline_primary" onClick={onAdd}>
               {t("add_service_request")}
             </Button>
           </div>
