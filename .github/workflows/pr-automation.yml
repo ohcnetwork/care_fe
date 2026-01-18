@@ -27,12 +27,14 @@ jobs:
     steps:
       - name: Generate token
         id: generate-token
+        continue-on-error: true
         uses: actions/create-github-app-token@v2
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PEM }}
 
       - name: Assign PR Author
+        if: steps.generate-token.outcome == 'success'
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -42,6 +44,7 @@ jobs:
           gh api --method POST repos/$REPO/issues/$PR_NUMBER/assignees -f assignees[]="$AUTHOR" || echo "Warning: Could not assign $AUTHOR"
 
       - name: Update PR Status and Labels
+        if: steps.generate-token.outcome == 'success'
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -61,7 +64,7 @@ jobs:
           fi
 
       - name: Handle Review Changes Requested
-        if: github.event_name == 'pull_request_review' && github.event.review.state == 'changes_requested'
+        if: github.event_name == 'pull_request_review' && github.event.review.state == 'changes_requested' && steps.generate-token.outcome == 'success'
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -72,7 +75,7 @@ jobs:
           gh pr edit $PR_NUMBER --add-label "changes required" --repo $REPO
 
       - name: Handle Review Re-Request
-        if: github.event.action == 'review_requested' && github.event.requested_reviewer.type != 'Bot'
+        if: github.event.action == 'review_requested' && github.event.requested_reviewer.type != 'Bot' && steps.generate-token.outcome == 'success'
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
