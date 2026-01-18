@@ -19,7 +19,6 @@ import {
 } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { PatientRead } from "@/types/emr/patient/patient";
-import patientApi from "@/types/emr/patient/patientApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
@@ -245,14 +244,6 @@ export const PrintDispenseOrder = ({
     enabled: !!dispenseOrderId,
   });
 
-  const { data: patient, isLoading: isLoadingPatient } = useQuery({
-    queryKey: ["patient", dispenseOrder?.patient.id],
-    queryFn: query(patientApi.get, {
-      pathParams: { id: dispenseOrder?.patient.id ?? "" },
-    }),
-    enabled: !!dispenseOrder?.patient.id,
-  });
-
   const { data: medicationDispenses, isLoading: isLoadingDispenses } = useQuery<
     PaginatedResponse<MedicationDispenseRead>
   >({
@@ -267,11 +258,11 @@ export const PrintDispenseOrder = ({
     enabled: !!dispenseOrderId,
   });
 
-  if (isLoadingOrder || isLoadingPatient || isLoadingDispenses) {
+  if (isLoadingOrder || isLoadingDispenses) {
     return <Loading />;
   }
 
-  if (!dispenseOrder || !patient) {
+  if (!dispenseOrder) {
     return (
       <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
         {t("dispense_order_not_found")}
@@ -291,7 +282,7 @@ export const PrintDispenseOrder = ({
     <DispenseOrderPreview
       dispenseOrder={dispenseOrder}
       dispenses={medicationDispenses.results}
-      patient={patient}
+      patient={dispenseOrder.patient}
     />
   );
 };
