@@ -306,10 +306,7 @@ export default function AppointmentDetail(props: Props) {
             <h3 className="text-base font-semibold">{t("token")}</h3>
             {appointment.token?.number ? (
               <>
-                <div
-                  id="section-to-print"
-                  className="print:w-[400px] print:pt-4"
-                >
+                <div id="single-print">
                   <TokenCard
                     appointment={appointment}
                     token={appointment.token}

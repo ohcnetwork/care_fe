@@ -666,7 +666,7 @@
   "appointment": "Appointment",
   "appointment_booking_success": "Your appointment has been successfully booked!",
   "appointment_cancelled": "Appointment has been cancelled!",
-  "appointment_closed_successfully": "Appoinment closed successfully",
+  "appointment_closed_successfully": "Appointment closed successfully",
   "appointment_created_success": "Appointment created successfully",
   "appointment_created_successfully": "Appointment created Successfully",
   "appointment_created_successfully_description": "Appointment with <strong>{{name}}</strong> on <strong>{{date}}</strong> for the <strong>{{slot_start_time}}</strong> - <strong>{{slot_end_time}}</strong> slot",

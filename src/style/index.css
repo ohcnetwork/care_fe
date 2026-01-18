@@ -310,8 +310,6 @@
   }
 
   @media print {
-
-
     /* Content scaling and layout adjustments */
     body * {
       visibility: hidden;
@@ -344,6 +342,37 @@
       /* CSS custom property for manual scale control */
       --print-scale: 1;
     }
+
+    /* Isolated print styles to prevents blank pages */
+    #single-print,
+    #single-print * {
+      visibility: visible;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    #single-print {
+      display: block !important;
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      overflow: visible;
+    }
+
+    /* Collapse all other content when this is present */
+    body:has(#single-print) *:not(#single-print):not(#single-print *) {
+      height: 0 !important;
+      min-height: 0 !important;
+      max-height: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      overflow: hidden !important;
+    }
+
+
 
     /* Auto-fit content to page width */
     #section-to-print.print-fit-page {
