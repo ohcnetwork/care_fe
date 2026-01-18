@@ -143,40 +143,52 @@ function ServiceRequestForm({
   const { t } = useTranslation();
 
   const renderBadgeRow = () => (
-    <div className="flex items-start gap-4 flex-wrap">
-      <div className="flex flex-col gap-1">
-        <span className="text-xs font-normal leading-none text-gray-700">
-          {t("status")}
-        </span>
-        <Badge variant="indigo">
-          {t(serviceRequest.service_request.status)}
-        </Badge>
-      </div>
-      <div className="flex flex-col gap-1">
-        <span className="text-xs font-normal leading-none text-gray-700">
-          {t("intent")}
-        </span>
-        <Badge variant="orange">
-          {t(serviceRequest.service_request.intent)}
-        </Badge>
-      </div>
-      <div className="flex flex-col gap-1">
-        <span className="text-xs font-normal leading-none text-gray-700">
-          {t("category")}
-        </span>
-        <Badge variant="pink">
-          {t(serviceRequest.service_request.category)}
-        </Badge>
+    <div className="flex items-start gap-4 flex-wrap lg:flex-nowrap">
+      <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-1">
+          <span className="text-xs font-normal leading-none text-gray-700">
+            {t("status")}
+          </span>
+          <Badge variant="indigo">
+            {t(serviceRequest.service_request.status)}
+          </Badge>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-xs font-normal leading-none text-gray-700">
+            {t("intent")}
+          </span>
+          <Badge variant="orange">
+            {t(serviceRequest.service_request.intent)}
+          </Badge>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-xs font-normal leading-none text-gray-700">
+            {t("category")}
+          </span>
+          <Badge variant="pink">
+            {t(serviceRequest.service_request.category)}
+          </Badge>
+        </div>
+        {activityDefinition?.healthcare_service && (
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-normal leading-none text-gray-700">
+              {t("healthcare_service")}
+            </span>
+            <Badge variant="purple">
+              {activityDefinition.healthcare_service.name}
+            </Badge>
+          </div>
+        )}
       </div>
       {activityDefinition?.locations &&
         activityDefinition.locations.length > 0 && (
           <>
-            <div className="w-px h-10 bg-gray-300 self-center" />
-            <div className="flex flex-col gap-1">
+            <div className="hidden lg:block w-px h-10 bg-gray-300 self-center" />
+            <div className="flex flex-col gap-1 w-full lg:w-auto">
               <span className="text-xs font-normal leading-none text-gray-700">
                 {t("location")}
               </span>
-              <div className="flex gap-1">
+              <div className="flex gap-1 flex-wrap">
                 {activityDefinition.locations.map((location) => (
                   <Badge key={location.id} variant="secondary">
                     {location.name}
@@ -188,7 +200,7 @@ function ServiceRequestForm({
         )}
       {serviceRequest.service_request.do_not_perform && (
         <>
-          <div className="w-px h-10 bg-gray-300 self-center" />
+          <div className="hidden lg:block w-px h-10 bg-gray-300 self-center" />
           <div className="flex flex-col gap-1">
             <span className="text-xs font-normal leading-none text-gray-700">
               &nbsp;
@@ -318,7 +330,10 @@ function ServiceRequestForm({
             {renderBadgeRow()}
           </div>
           <div className="flex items-center gap-1 shrink-0">
-            <CareIcon icon="l-edit" />
+            <CareIcon
+              icon="l-edit"
+              className="size-5 text-gray-950 font-normal"
+            />
             {onRemove && (
               <Button
                 variant="ghost"
@@ -331,7 +346,7 @@ function ServiceRequestForm({
                 }}
                 disabled={disabled}
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="size-5 text-gray-950 font-normal" />
               </Button>
             )}
           </div>
@@ -679,7 +694,11 @@ export function ServiceRequestQuestion({
           <div className="absolute left-0 top-4 w-1 h-6 bg-indigo-600 rounded-r-full" />
           <div className="p-4">
             <span className="text-lg font-semibold leading-6 text-gray-900">
-              {t("select_service_request")}
+              {t(
+                serviceRequests.length > 0
+                  ? "select_another_service_request"
+                  : "select_service_request",
+              )}
             </span>
             <ResourceDefinitionCategoryPicker<ActivityDefinitionReadSpec>
               facilityId={facilityId}
