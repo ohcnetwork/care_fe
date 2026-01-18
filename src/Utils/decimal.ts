@@ -133,6 +133,9 @@ export function isLessThan(
  * Check if value is zero
  */
 export function isZero(value: string | number | Decimal): boolean {
+  if (value === "") {
+    return false;
+  }
   return new Decimal(value).isZero();
 }
 
@@ -140,6 +143,9 @@ export function isZero(value: string | number | Decimal): boolean {
  * Check if value is positive (> 0)
  */
 export function isPositive(value: string | number | Decimal): boolean {
+  if (value === "") {
+    return false;
+  }
   return new Decimal(value).isPositive() && !new Decimal(value).isZero();
 }
 
@@ -147,6 +153,9 @@ export function isPositive(value: string | number | Decimal): boolean {
  * Check if value is negative (< 0)
  */
 export function isNegative(value: string | number | Decimal): boolean {
+  if (value === "") {
+    return false;
+  }
   return new Decimal(value).isNegative() && !new Decimal(value).isZero();
 }
 
