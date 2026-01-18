@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { ChevronDown, Info, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
+import { AutoExpandingTextarea } from "@/components/ui/auto-expanding-textarea";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,16 +13,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import RadioInput from "@/components/ui/RadioInput";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Textarea } from "@/components/ui/textarea";
-import { TooltipComponent } from "@/components/ui/tooltip";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
@@ -32,7 +25,8 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import query from "@/Utils/request/query";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { Separator } from "@/components/ui/separator";
 import {
   ServiceRequestApplyActivityDefinitionSpec as BaseServiceRequestApplyActivityDefinitionSpec,
   Intent,
@@ -43,6 +37,7 @@ import {
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
+import query from "@/Utils/request/query";
 
 // Extend the base type to use UserReadMinimal for requester
 interface ServiceRequestApplyActivityDefinitionSpec extends Omit<
@@ -128,6 +123,7 @@ interface ServiceRequestFormProps {
   isPreview?: boolean;
   activityDefinition?: ActivityDefinitionReadSpec;
   facilityId?: string;
+  pickerSlot?: React.ReactNode;
 }
 
 function ServiceRequestForm({
@@ -142,219 +138,192 @@ function ServiceRequestForm({
   isPreview = false,
   activityDefinition,
   facilityId = "",
+  pickerSlot,
 }: ServiceRequestFormProps) {
   const { t } = useTranslation();
 
-  const renderInfoSection = () => (
-    <div className="flex flex-wrap gap-x-5 gap-y-2 w-full">
-      <div className="flex items-center gap-2">
-        <span className="font-medium text-sm text-gray-700">
-          {t("status")}:
+  const renderBadgeRow = () => (
+    <div className="flex items-start gap-4 flex-wrap">
+      <div className="flex flex-col gap-1">
+        <span className="text-xs font-normal leading-none text-gray-700">
+          {t("status")}
         </span>
-        <Badge
-          variant="outline"
-          className="bg-blue-50 text-blue-700 border-blue-200"
-        >
+        <Badge variant="indigo">
           {t(serviceRequest.service_request.status)}
         </Badge>
       </div>
-      <div className="flex items-center gap-2">
-        <span className="font-medium text-sm text-gray-700">
-          {t("intent")}:
+      <div className="flex flex-col gap-1">
+        <span className="text-xs font-normal leading-none text-gray-700">
+          {t("intent")}
         </span>
-        <Badge
-          variant="outline"
-          className="bg-purple-50 text-purple-700 border-purple-200"
-        >
+        <Badge variant="orange">
           {t(serviceRequest.service_request.intent)}
         </Badge>
       </div>
-      <div className="flex items-center gap-2">
-        <span className="font-medium text-sm text-gray-700">
-          {t("category")}:
+      <div className="flex flex-col gap-1">
+        <span className="text-xs font-normal leading-none text-gray-700">
+          {t("category")}
         </span>
-        <Badge
-          variant="outline"
-          className="bg-green-50 text-green-700 border-green-200 whitespace-nowrap"
-        >
+        <Badge variant="pink">
           {t(serviceRequest.service_request.category)}
         </Badge>
       </div>
-
-      {serviceRequest.service_request.do_not_perform && (
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-sm text-gray-700">
-            {t("do_not_perform")}:
-          </span>
-          <Badge
-            variant="outline"
-            className="bg-red-50 text-red-700 border-red-200"
-          >
-            {t("yes")}
-          </Badge>
-        </div>
-      )}
-      {activityDefinition?.healthcare_service && (
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-sm text-gray-700">
-            {t("healthcare_service")}:
-          </span>
-          <Badge
-            variant="outline"
-            className="bg-indigo-50 text-indigo-700 border-indigo-200 whitespace-nowrap"
-          >
-            {activityDefinition.healthcare_service.name}
-          </Badge>
-        </div>
-      )}
       {activityDefinition?.locations &&
         activityDefinition.locations.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap w-full">
-            <span className="font-medium text-sm text-gray-700">
-              {t("locations")}:
-            </span>
-            {activityDefinition.locations.map((location) => (
-              <Badge
-                key={location.id}
-                variant="outline"
-                className="bg-gray-50 text-gray-700 border-gray-200"
-              >
-                {location.name}
-              </Badge>
-            ))}
-          </div>
+          <>
+            <div className="w-px h-10 bg-gray-300 self-center" />
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-normal leading-none text-gray-700">
+                {t("location")}
+              </span>
+              <div className="flex gap-1">
+                {activityDefinition.locations.map((location) => (
+                  <Badge key={location.id} variant="secondary">
+                    {location.name}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </>
         )}
+      {serviceRequest.service_request.do_not_perform && (
+        <>
+          <div className="w-px h-10 bg-gray-300 self-center" />
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-normal leading-none text-gray-700">
+              &nbsp;
+            </span>
+            <Badge variant="destructive">{t("do_not_perform")}</Badge>
+          </div>
+        </>
+      )}
     </div>
   );
 
   if (isPreview) {
     return (
-      <div className="rounded-lg border border-primary-500 p-4 space-y-4 bg-white shadow-sm">
-        <div className="flex flex-col gap-2 items-start w-full">
-          <div className="flex gap-2 items-center">
-            <p className="text-sm font-semibold text-gray-900">
-              {serviceRequest.service_request.title}
-            </p>
-            <TooltipComponent
-              content={`${serviceRequest.service_request.code.code} | ${serviceRequest.service_request.code.display} \n${serviceRequest.service_request.code.system}`}
-            >
-              <Info className="size-4 text-gray-600 cursor-help" />
-            </TooltipComponent>
+      <div className="rounded-lg border border-gray-200 bg-gray-200/20 shadow-sm overflow-hidden relative">
+        <div className="absolute left-0 top-4 w-1 h-6 bg-indigo-600 rounded-r-full" />
+        <div className="p-4 space-y-4">
+          <span className="text-lg font-semibold leading-6 text-gray-900">
+            {t("selected_service_request")}
+          </span>
+          {pickerSlot && <div className="space-y-2 pt-2">{pickerSlot}</div>}
+          <div className="flex items-start justify-between">
+            <div className="flex flex-col gap-2">{renderBadgeRow()}</div>
           </div>
-          {renderInfoSection()}
-          <div className="flex w-full justify-end items-center mt-2 gap-2">
+          <Separator orientation="horizontal" className="bg-gray-300" />
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>
+                {t("priority")} <span className="text-red-500">*</span>
+              </Label>
+              <RadioInput
+                value={serviceRequest.service_request.priority}
+                onValueChange={(value) =>
+                  onUpdate?.({ priority: value as Priority })
+                }
+                disabled={disabled}
+                required
+                options={Object.values(Priority).map((priority) => ({
+                  label: t(priority),
+                  value: priority,
+                }))}
+              />
+              {questionId && index !== undefined && (
+                <FieldError
+                  fieldKey={SERVICE_REQUEST_FIELDS.PRIORITY.key}
+                  questionId={questionId}
+                  errors={errors}
+                  index={index}
+                />
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>{t("body_site")}</Label>
+              <ValueSetSelect
+                system="system-body-site"
+                value={serviceRequest.service_request.body_site}
+                onSelect={(code) => onUpdate?.({ body_site: code })}
+                placeholder={t("select_body_site")}
+                disabled={disabled}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>{t("requester")}</Label>
+              <UserSelector
+                selected={serviceRequest.service_request.requester}
+                onChange={(user) => onUpdate?.({ requester: user })}
+                placeholder={t("select_requester")}
+                facilityId={facilityId}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>{t("patient_instruction")}</Label>
+              <AutoExpandingTextarea
+                value={serviceRequest.service_request.patient_instruction || ""}
+                onChange={(e) =>
+                  onUpdate?.({ patient_instruction: e.target.value })
+                }
+                disabled={disabled}
+                placeholder={t("enter_patient_instructions")}
+                className="border-gray-200 focus:ring-primary-500 w-full text-sm"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>{t("note")}</Label>
+              <AutoExpandingTextarea
+                value={serviceRequest.service_request.note || ""}
+                onChange={(e) => onUpdate?.({ note: e.target.value })}
+                disabled={disabled}
+                placeholder={t("add_notes")}
+                className="border-gray-200 focus:ring-primary-500 w-full text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2">
             {onRemove && (
-              <Button variant="ghost" size="icon" onClick={onRemove}>
-                <Trash2 className="h-4 w-4" />
+              <Button
+                variant="link"
+                onClick={onRemove}
+                className="underline text-gray-950"
+              >
+                {t("cancel")}
               </Button>
             )}
+            <Button variant="outline_primary" onClick={onAdd} className="">
+              {t("add_service_request")}
+            </Button>
           </div>
         </div>
-        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
-          <div className="space-y-2">
-            <Label>
-              {t("priority")} <span className="text-red-500">*</span>
-            </Label>
-            <Select
-              value={serviceRequest.service_request.priority}
-              onValueChange={(value: Priority) =>
-                onUpdate?.({ priority: value })
-              }
-              disabled={disabled}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={t("select_priority")} />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.values(Priority).map((priority) => (
-                  <SelectItem key={priority} value={priority}>
-                    {t(priority)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {questionId && index !== undefined && (
-              <FieldError
-                fieldKey={SERVICE_REQUEST_FIELDS.PRIORITY.key}
-                questionId={questionId}
-                errors={errors}
-                index={index}
-              />
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("body_site")}</Label>
-            <ValueSetSelect
-              system="system-body-site"
-              value={serviceRequest.service_request.body_site}
-              onSelect={(code) => onUpdate?.({ body_site: code })}
-              placeholder={t("select_body_site")}
-              disabled={disabled}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("patient_instruction")}</Label>
-            <Textarea
-              value={serviceRequest.service_request.patient_instruction || ""}
-              onChange={(e) =>
-                onUpdate?.({ patient_instruction: e.target.value })
-              }
-              disabled={disabled}
-              placeholder={t("enter_patient_instructions")}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("requester")}</Label>
-            <UserSelector
-              selected={serviceRequest.service_request.requester}
-              onChange={(user) => onUpdate?.({ requester: user })}
-              placeholder={t("select_requester")}
-              facilityId={facilityId}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("note")}</Label>
-            <Textarea
-              value={serviceRequest.service_request.note || ""}
-              onChange={(e) => onUpdate?.({ note: e.target.value })}
-              disabled={disabled}
-              placeholder={t("add_notes")}
-            />
-          </div>
-        </div>
-        {isPreview && (
-          <div className="flex justify-end">
-            <Button onClick={onAdd}>{t("add")}</Button>
-          </div>
-        )}
       </div>
     );
   }
 
   return (
     <Collapsible defaultOpen={false}>
-      <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
-        <CollapsibleTrigger className="flex flex-col gap-2 w-full items-start text-left p-4 hover:bg-gray-50 cursor-pointer">
-          <div className="flex gap-2 items-center">
-            <p className="text-sm font-semibold text-gray-900">
+      <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden relative">
+        <div className="absolute left-0 top-4 w-1 h-6 bg-indigo-600 rounded-r-full" />
+        <CollapsibleTrigger className="flex items-start justify-between w-full text-left p-4 hover:bg-gray-50 cursor-pointer">
+          <div className="flex flex-col gap-2">
+            <p className="text-base font-semibold text-gray-900">
               {serviceRequest.service_request.title}
             </p>
-            <TooltipComponent
-              content={`${serviceRequest.service_request.code.code} | ${serviceRequest.service_request.code.display} \n${serviceRequest.service_request.code.system}`}
-            >
-              <Info className="size-4 text-gray-600 cursor-help" />
-            </TooltipComponent>
+            {renderBadgeRow()}
           </div>
-          {renderInfoSection()}
-          <div className="flex w-full justify-end items-center mt-2 gap-2">
+          <div className="flex items-center gap-1 shrink-0">
+            <CareIcon icon="l-edit" />
             {onRemove && (
               <Button
                 variant="ghost"
                 size="icon"
+                className="h-8 w-8"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -365,34 +334,27 @@ function ServiceRequestForm({
                 <Trash2 className="h-4 w-4" />
               </Button>
             )}
-            <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
           </div>
         </CollapsibleTrigger>
         <CollapsibleContent>
           <div className="p-4 space-y-4 border-t border-gray-100">
-            <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+            <div className="space-y-4">
               <div className="space-y-2">
                 <Label>
                   {t("priority")} <span className="text-red-500">*</span>
                 </Label>
-                <Select
+                <RadioInput
                   value={serviceRequest.service_request.priority}
-                  onValueChange={(value: Priority) =>
-                    onUpdate?.({ priority: value })
+                  onValueChange={(value) =>
+                    onUpdate?.({ priority: value as Priority })
                   }
                   disabled={disabled}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("select_priority")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.values(Priority).map((priority) => (
-                      <SelectItem key={priority} value={priority}>
-                        {t(priority)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  required
+                  options={Object.values(Priority).map((priority) => ({
+                    label: t(priority),
+                    value: priority,
+                  }))}
+                />
                 {questionId && index !== undefined && (
                   <FieldError
                     fieldKey={SERVICE_REQUEST_FIELDS.PRIORITY.key}
@@ -416,7 +378,7 @@ function ServiceRequestForm({
 
               <div className="space-y-2">
                 <Label>{t("patient_instruction")}</Label>
-                <Textarea
+                <AutoExpandingTextarea
                   value={
                     serviceRequest.service_request.patient_instruction || ""
                   }
@@ -425,6 +387,7 @@ function ServiceRequestForm({
                   }
                   disabled={disabled}
                   placeholder={t("enter_patient_instructions")}
+                  className="border-gray-200 focus:ring-primary-500 w-full"
                 />
               </div>
 
@@ -440,11 +403,12 @@ function ServiceRequestForm({
 
               <div className="space-y-2">
                 <Label>{t("note")}</Label>
-                <Textarea
+                <AutoExpandingTextarea
                   value={serviceRequest.service_request.note || ""}
                   onChange={(e) => onUpdate?.({ note: e.target.value })}
                   disabled={disabled}
                   placeholder={t("add_notes")}
+                  className="border-gray-200 focus:ring-primary-500 w-full"
                 />
               </div>
             </div>
@@ -626,28 +590,37 @@ export function ServiceRequestQuestion({
       | undefined,
   ) => {
     const def = Array.isArray(value) ? value[0] : value;
-    setSelectedActivityDefinition(def?.slug || null);
+    if (!def) {
+      setSelectedActivityDefinition(null);
+      setPreviewServiceRequest(null);
+    } else {
+      setSelectedActivityDefinition(def.slug);
+    }
   };
 
   return (
     <div className="space-y-4">
-      {serviceRequests.map((serviceRequest, index) => (
-        <ServiceRequestForm
-          key={`${serviceRequest.service_request.code.code}-${index}`}
-          serviceRequest={serviceRequest}
-          onUpdate={(updates) => handleUpdateServiceRequest(index, updates)}
-          onRemove={() => handleRemoveServiceRequest(index)}
-          onAdd={handleAddServiceRequest}
-          disabled={disabled}
-          errors={errors}
-          questionId={questionnaireResponse.question_id}
-          index={index}
-          facilityId={facilityId}
-          activityDefinition={
-            activityDefinitionsMap[serviceRequest.activity_definition]
-          }
-        />
-      ))}
+      {serviceRequests.length > 0 && (
+        <div className="bg-gray-100 p-4 rounded-lg space-y-4">
+          {serviceRequests.map((serviceRequest, index) => (
+            <ServiceRequestForm
+              key={`${serviceRequest.service_request.code.code}-${index}`}
+              serviceRequest={serviceRequest}
+              onUpdate={(updates) => handleUpdateServiceRequest(index, updates)}
+              onRemove={() => handleRemoveServiceRequest(index)}
+              onAdd={handleAddServiceRequest}
+              disabled={disabled}
+              errors={errors}
+              questionId={questionnaireResponse.question_id}
+              index={index}
+              facilityId={facilityId}
+              activityDefinition={
+                activityDefinitionsMap[serviceRequest.activity_definition]
+              }
+            />
+          ))}
+        </div>
+      )}
 
       {isLoadingSelectedAD && (
         <div className="rounded-md border border-gray-200 p-4 space-y-4">
@@ -682,25 +655,49 @@ export function ServiceRequestQuestion({
           disabled={disabled}
           isPreview
           facilityId={facilityId}
+          pickerSlot={
+            <ResourceDefinitionCategoryPicker<ActivityDefinitionReadSpec>
+              facilityId={facilityId}
+              value={selectedActivityDefinitionData || undefined}
+              onValueChange={handleActivityDefinitionSelect}
+              placeholder={t("select_activity_definition")}
+              disabled={disabled}
+              className="w-full"
+              resourceType={ResourceCategoryResourceType.activity_definition}
+              listDefinitions={{
+                queryFn: activityDefinitionApi.listActivityDefinition,
+                pathParams: { facilityId },
+              }}
+              translationBaseKey="activity_definition"
+            />
+          }
         />
       )}
 
-      <div className="space-y-2 w-full">
-        <ResourceDefinitionCategoryPicker<ActivityDefinitionReadSpec>
-          facilityId={facilityId}
-          value={selectedActivityDefinitionData || undefined}
-          onValueChange={handleActivityDefinitionSelect}
-          placeholder={t("select_activity_definition")}
-          disabled={disabled}
-          className="w-full"
-          resourceType={ResourceCategoryResourceType.activity_definition}
-          listDefinitions={{
-            queryFn: activityDefinitionApi.listActivityDefinition,
-            pathParams: { facilityId },
-          }}
-          translationBaseKey="activity_definition"
-        />
-      </div>
+      {!previewServiceRequest && !isLoadingSelectedAD && (
+        <div className="rounded-lg border border-gray-200 bg-gray-200/20 shadow-sm overflow-hidden relative">
+          <div className="absolute left-0 top-4 w-1 h-6 bg-indigo-600 rounded-r-full" />
+          <div className="p-4">
+            <span className="text-lg font-semibold leading-6 text-gray-900">
+              {t("select_service_request")}
+            </span>
+            <ResourceDefinitionCategoryPicker<ActivityDefinitionReadSpec>
+              facilityId={facilityId}
+              value={selectedActivityDefinitionData || undefined}
+              onValueChange={handleActivityDefinitionSelect}
+              placeholder={t("select_from_list")}
+              disabled={disabled}
+              className="w-full"
+              resourceType={ResourceCategoryResourceType.activity_definition}
+              listDefinitions={{
+                queryFn: activityDefinitionApi.listActivityDefinition,
+                pathParams: { facilityId },
+              }}
+              translationBaseKey="activity_definition"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
