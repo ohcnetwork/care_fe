@@ -37,7 +37,7 @@ import patientApi from "@/types/emr/patient/patientApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { add, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 
 type PrintInvoiceProps = {
   facilityId: string;
@@ -124,7 +124,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                   {facility.address}
                   {facility.phone_number && (
                     <p className="text-gray-500 text-sm">
-                      {facility.phone_number}
+                      {t("phone")}: {facility.phone_number}
                     </p>
                   )}
                 </div>
@@ -173,12 +173,16 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                 {t("bill_to")}:
               </div>
               <div>
-                <p className="font-medium text-base ml-2">
+                <p className="font-semibold text-lg ml-2">
                   {invoice.account.patient.name}
+                  <span className="text-gray-600 font-normal text-base ml-2">
+                    ({t(`GENDER__${invoice.account.patient.gender}`)},{" "}
+                    {formatPatientAge(invoice.account.patient, true)})
+                  </span>
                 </p>
               </div>
             </div>
-            <div>
+            <div className="flex flex-col items-end">
               <div className="flex gap-1 font-medium text-gray-700 text-sm ml-2">
                 {t("address")}:{" "}
                 <p className="font-medium text-gray-700 text-sm whitespace-pre-wrap ml-2">
@@ -200,7 +204,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                   .map((identifier) => (
                     <p
                       key={identifier.config.id}
-                      className="font-medium text-gray-700 text-sm ml-2"
+                      className="font-bold text-gray-950 text-base ml-2"
                     >
                       <span>{identifier.config.config.display}: </span>
                       <span className="ml-2">{identifier.value}</span>
