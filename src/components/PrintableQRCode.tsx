@@ -1,13 +1,10 @@
 "use client";
 
 import { QRCodeSVG } from "qrcode.react";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-
-import { QRPrint } from "./QRPrint";
 
 interface PrintableQRCodeProps {
   value: string;
@@ -22,19 +19,20 @@ export function PrintableQRCode({
   title,
   subtitle,
   size = 100,
-  printSize = 80,
 }: PrintableQRCodeProps) {
   const qrCodeRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
-  const [showPrintDialog, setShowPrintDialog] = useState(false);
 
   // Calculate logo size as 25% of QR code size
   const logoSize = Math.floor(size * 0.25);
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start gap-4 sm:gap-6">
-        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center sm:items-start">
+      <div
+        id="single-print"
+        className="flex print:scale-60 print:justify-start flex-col sm:flex-row print:flex-row print:items-start justify-between items-center sm:items-start gap-4 sm:gap-6"
+      >
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center sm:items-start print:flex-row print:items-start">
           <div ref={qrCodeRef} className="shrink-0">
             <QRCodeSVG
               value={value}
@@ -49,7 +47,7 @@ export function PrintableQRCode({
               level="H"
             />
           </div>
-          <div className="text-center sm:text-left">
+          <div className="text-center print:text-left sm:text-left">
             {title && (
               <div className="text-lg font-semibold pt-2.5">{title}</div>
             )}
@@ -66,25 +64,13 @@ export function PrintableQRCode({
         <Button
           variant="outline"
           size="sm"
-          className="w-auto"
+          className="w-auto print:hidden"
           type="button"
-          onClick={() => setShowPrintDialog(true)}
+          onClick={() => print()}
         >
           {t("PRINTABLE_QR_CODE__print_button")}
         </Button>
       </div>
-
-      <Dialog open={showPrintDialog} onOpenChange={setShowPrintDialog}>
-        <DialogContent className="md:min-w-4xl w-auto overflow-x-auto md:overflow-hidden">
-          <QRPrint
-            value={value}
-            title={title}
-            subtitle={subtitle}
-            size={size}
-            printSize={printSize}
-          />
-        </DialogContent>
-      </Dialog>
     </>
   );
 }
