@@ -1,5 +1,5 @@
 import { Condition, conditionSchema } from "@/types/base/condition/condition";
-import { round } from "@/Utils/decimal";
+import { round, zodDecimal } from "@/Utils/decimal";
 import { t } from "i18next";
 import { z } from "zod";
 
@@ -50,8 +50,8 @@ export const qualifiedRangeSchema = z.array(
         z
           .object({
             interpretation: interpretationSchema,
-            min: z.number().optional(),
-            max: z.number().optional(),
+            min: zodDecimal().optional(),
+            max: zodDecimal().optional(),
           })
           .refine(
             (data) => {
