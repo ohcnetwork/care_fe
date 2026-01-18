@@ -1205,6 +1205,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               pattern="[0-9]*[.]?[0-9]*"
               min={0}
               value={
+                !dosageInstruction.timing.repeat.bounds_duration.value ||
                 isZero(dosageInstruction.timing.repeat.bounds_duration.value)
                   ? ""
                   : dosageInstruction.timing.repeat.bounds_duration?.value
