@@ -42,13 +42,15 @@
   "facility:patient:home": [
     { "key": "p", "action": "print-token", "description": "Print Token", "when": "always" },
     { "key": "e", "action": "create-encounter", "description": "Create Encounter", "when": "always" },
-    { "key": "a", "action": "schedule-appointment", "description": "Schedule Appointment", "when": "always" }
+    { "key": "s", "action": "schedule-appointment", "description": "Schedule Appointment", "when": "always" },
+    { "key": "a", "action": "view-the-accounts", "description": "View Accounts", "when": "always" }
   ],
 
   "facility:appointment": [
     { "key": "2", "action": "create-encounter", "description": "Create Encounter", "when": "always" },
     { "key": "1", "action": "start-consultation", "description": "Start Consultation", "when": "always" },
     { "key": "3", "action": "print-appointment", "description": "Print Appointment", "when": "always" },
+    { "key": "4", "action": "goto-account", "description": "Go to Account", "when": "always" },
     { "key": "c", "action": "check-in-action", "description": "Check-in Appointment", "when": "always" },
     { "key": "i", "action": "create-an-invoice", "description": "Create Invoice", "when": "always" },
     { "key": "a", "action": "add-a-charge-item", "description": "Add Charge Items", "when": "always" }

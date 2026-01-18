@@ -75,6 +75,7 @@ import {
   PrinterIcon,
   ReceiptText,
   SquareActivity,
+  Wallet,
   X,
 } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
@@ -531,6 +532,13 @@ export default function AppointmentDetail(props: Props) {
                     title={t("print_appointment")}
                     actionId="print-appointment"
                     href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}/print`}
+                  />
+
+                  <QuickAction
+                    icon={<Wallet className="size-4" />}
+                    title={t("accounts")}
+                    actionId="goto-account"
+                    href={`/facility/${facilityId}/billing/account?status=active&patient_filter=${appointment.patient.id}&patient_name=${appointment.patient.name}`}
                   />
                 </div>
               </div>
