@@ -28,6 +28,7 @@ import {
 } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
   CHARGE_ITEM_DEFINITION_STATUS_COLORS,
+  ChargeItemDefinitionRead,
   ChargeItemDefinitionStatus,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
@@ -36,6 +37,98 @@ import { ArrowLeft } from "lucide-react";
 interface ChargeItemDefinitionDetailProps {
   facilityId: string;
   slug: string;
+}
+
+export function PriceComponentCard({
+  chargeItemDefinition,
+}: {
+  chargeItemDefinition: ChargeItemDefinitionRead;
+}) {
+  const { t } = useTranslation();
+  const renderPriceComponent = (component: MonetaryComponent) => {
+    const typeLabels: Record<string, string> = {
+      base: t("base_price"),
+      discount: t("discount"),
+      tax: t("tax"),
+      informational: t("informational"),
+    };
+
+    return (
+      <div className="flex items-center justify-between py-2">
+        <div>
+          <p className="font-medium">
+            {typeLabels[component.monetary_component_type]}
+          </p>
+          {component.code && (
+            <p className="text-sm text-gray-500">{component.code.display}</p>
+          )}
+        </div>
+        <div className="text-right">
+          {component.amount ? (
+            <p className="font-medium">
+              {getCurrencySymbol()}
+              {round(component.amount)}
+            </p>
+          ) : component.factor ? (
+            <p className="font-medium">{round(component.factor)}%</p>
+          ) : (
+            <p className="text-sm text-gray-500">{t("not_specified")}</p>
+          )}
+        </div>
+      </div>
+    );
+  };
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("price_components")}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {chargeItemDefinition.price_components.length === 0 ? (
+          <div className="py-4 text-center text-gray-500">
+            <p>{t("no_price_components")}</p>
+          </div>
+        ) : (
+          <div>
+            {chargeItemDefinition.price_components
+              .sort(
+                (a, b) =>
+                  MonetaryComponentOrder[a.monetary_component_type] -
+                  MonetaryComponentOrder[b.monetary_component_type],
+              )
+              .map((component, index) => (
+                <div key={index}>
+                  {renderPriceComponent(component)}
+                  {index < chargeItemDefinition.price_components.length - 1 && (
+                    <Separator className="my-2" />
+                  )}
+                  {/* {component.conditions && ( */}
+                  {component.conditions && (
+                    <div>
+                      <p className="text-sm text-gray-500">{t("conditions")}</p>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {component.conditions?.map((condition, index) => {
+                          return (
+                            <div
+                              key={index}
+                              className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded border"
+                            >
+                              <ConditionOperationSummary
+                                condition={condition}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
 }
 
 export function ChargeItemDefinitionDetail({
@@ -75,40 +168,6 @@ export function ChargeItemDefinitionDetail({
       category: chargeItemDefinition.category.slug,
       slug_value: chargeItemDefinition.slug_config.slug_value,
     });
-  };
-
-  const renderPriceComponent = (component: MonetaryComponent) => {
-    const typeLabels: Record<string, string> = {
-      base: t("base_price"),
-      discount: t("discount"),
-      tax: t("tax"),
-      informational: t("informational"),
-    };
-
-    return (
-      <div className="flex items-center justify-between py-2">
-        <div>
-          <p className="font-medium">
-            {typeLabels[component.monetary_component_type]}
-          </p>
-          {component.code && (
-            <p className="text-sm text-gray-500">{component.code.display}</p>
-          )}
-        </div>
-        <div className="text-right">
-          {component.amount ? (
-            <p className="font-medium">
-              {getCurrencySymbol()}
-              {round(component.amount)}
-            </p>
-          ) : component.factor ? (
-            <p className="font-medium">{round(component.factor)}%</p>
-          ) : (
-            <p className="text-sm text-gray-500">{t("not_specified")}</p>
-          )}
-        </div>
-      </div>
-    );
   };
 
   if (isLoading) {
@@ -265,58 +324,7 @@ export function ChargeItemDefinitionDetail({
             </Card>
           )}
 
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("price_components")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {chargeItemDefinition.price_components.length === 0 ? (
-                <div className="py-4 text-center text-gray-500">
-                  <p>{t("no_price_components")}</p>
-                </div>
-              ) : (
-                <div>
-                  {chargeItemDefinition.price_components
-                    .sort(
-                      (a, b) =>
-                        MonetaryComponentOrder[a.monetary_component_type] -
-                        MonetaryComponentOrder[b.monetary_component_type],
-                    )
-                    .map((component, index) => (
-                      <div key={index}>
-                        {renderPriceComponent(component)}
-                        {index <
-                          chargeItemDefinition.price_components.length - 1 && (
-                          <Separator className="my-2" />
-                        )}
-                        {/* {component.conditions && ( */}
-                        {component.conditions && (
-                          <div>
-                            <p className="text-sm text-gray-500">
-                              {t("conditions")}
-                            </p>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {component.conditions?.map((condition, index) => {
-                                return (
-                                  <div
-                                    key={index}
-                                    className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded border"
-                                  >
-                                    <ConditionOperationSummary
-                                      condition={condition}
-                                    />
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <PriceComponentCard chargeItemDefinition={chargeItemDefinition} />
         </div>
       </div>
     </Page>
