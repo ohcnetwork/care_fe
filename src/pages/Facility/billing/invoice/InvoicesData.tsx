@@ -181,10 +181,17 @@ export default function InvoicesData({
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <MonetaryDisplay
-                      className="font-medium"
-                      amount={String(invoice.total_gross)}
-                    />
+                    {invoice.locked ? (
+                      <Badge variant="secondary" className="gap-1">
+                        <CareIcon icon="l-lock" className="size-3" />
+                        {t("locked")}
+                      </Badge>
+                    ) : (
+                      <MonetaryDisplay
+                        className="font-medium"
+                        amount={String(invoice.total_gross)}
+                      />
+                    )}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-4">
