@@ -40,15 +40,12 @@ import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
 import MedicationValueSetSelect from "@/components/Questionnaire/MedicationValueSetSelect";
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
-import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
 import { Avatar } from "@/components/Common/Avatar";
 import { formatDosage } from "@/components/Medicine/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
@@ -81,14 +78,14 @@ import {
   validateFields,
 } from "@/types/questionnaire/validation";
 import { UserReadMinimal } from "@/types/user/user";
+import { isZero, round } from "@/Utils/decimal";
+import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
+import { QuestionLabel } from "../QuestionLabel";
 
 function formatDoseRange(range?: DoseRange): string {
   if (!range?.high?.value) return "";
-
-  const formatValue = (value: number) =>
-    value.toString().includes(".") ? value.toFixed(2) : value.toString();
-
-  return `${formatValue(range.low?.value)} → ${formatValue(range.high?.value)} ${range.high?.unit?.display}`;
+  return `${round(range.low?.value)} → ${round(range.high?.value)} ${range.high?.unit?.display}`;
 }
 
 interface MedicationRequestQuestionProps {
@@ -326,7 +323,7 @@ export function MedicationRequestQuestion({
           ...request,
           requested_product: requested_product?.id,
           requested_product_internal: requested_product,
-          requester: request.requester || currentUser,
+          requester: currentUser,
           medication: requested_product?.id ? null : request.medication,
         } as MedicationRequestCreate;
       } else {
@@ -484,17 +481,17 @@ export function MedicationRequestQuestion({
                   },
                 },
                 {
-                  key: "created_by",
+                  key: "requester",
                   label: t("prescribed_by"),
-                  render: (created_by) => (
+                  render: (requester) => (
                     <div className="flex items-center gap-2">
                       <Avatar
-                        imageUrl={created_by?.profile_picture_url}
-                        name={formatName(created_by, true)}
+                        imageUrl={requester?.profile_picture_url}
+                        name={formatName(requester, true)}
                         className="size-6 rounded-full"
                       />
                       <span className="text-sm truncate">
-                        {formatName(created_by)}
+                        {formatName(requester)}
                       </span>
                     </div>
                   ),
@@ -700,7 +697,7 @@ export function MedicationRequestQuestion({
                                     <div className="flex-1 min-w-0 mr-2">
                                       <CardTitle
                                         className={cn(
-                                          "text-base text-gray-950 break-words",
+                                          "text-base text-gray-950 wrap-break-word",
                                           isInactive &&
                                             medication.status !== "ended" &&
                                             "line-through",
@@ -754,7 +751,7 @@ export function MedicationRequestQuestion({
                                     <div className="text-sm mt-1 text-gray-600">
                                       {dosageInstruction?.dose_and_rate
                                         ?.dose_quantity &&
-                                        `${dosageInstruction.dose_and_rate.dose_quantity.value} ${dosageInstruction.dose_and_rate.dose_quantity.unit?.display || ""}`}
+                                        `${round(dosageInstruction.dose_and_rate.dose_quantity.value)} ${dosageInstruction.dose_and_rate.dose_quantity.unit?.display || ""}`}
 
                                       {dosageInstruction?.dose_and_rate
                                         ?.dose_range &&
@@ -1035,7 +1032,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm">
           <span
             className={cn(
-              "break-words line-clamp-2 hidden lg:block",
+              "wrap-break-word line-clamp-2 hidden lg:block",
               disabled &&
                 medication.status !== "entered_in_error" &&
                 "line-through",
@@ -1217,7 +1214,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               pattern="[0-9]*[.]?[0-9]*"
               min={0}
               value={
-                dosageInstruction.timing.repeat.bounds_duration?.value == 0
+                isZero(dosageInstruction.timing.repeat.bounds_duration.value)
                   ? ""
                   : dosageInstruction.timing.repeat.bounds_duration?.value
               }
@@ -1230,7 +1227,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                     repeat: {
                       ...dosageInstruction.timing.repeat,
                       bounds_duration: {
-                        value: Number(value),
+                        value: value,
                         unit: dosageInstruction.timing.repeat.bounds_duration
                           .unit,
                       },

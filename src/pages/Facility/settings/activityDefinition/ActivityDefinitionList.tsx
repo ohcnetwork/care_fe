@@ -1,11 +1,13 @@
 import { navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
 import { ResourceCategoryList } from "@/components/Common/ResourceCategoryList";
 import { ActivityDefinitionList as ActivityDefinitionListComponent } from "@/pages/Facility/settings/activityDefinition/ActivityDefinitionListComponent";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
-import { useState } from "react";
+import { Status } from "@/types/emr/activityDefinition/activityDefinition";
+import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 
 interface ActivityDefinitionListProps {
   facilityId: string;
@@ -44,6 +46,15 @@ export default function ActivityDefinitionList({
         onCreateItem={onCreateItem}
         createItemLabel={t("add_activity_definition")}
         createItemIcon="l-plus"
+        itemSearchConfig={{
+          listItems: {
+            queryFn: activityDefinitionApi.listActivityDefinition,
+            queryParams: {
+              status: Status.active,
+            },
+          },
+          queryKeyPrefix: "activityDefinitionsSearch",
+        }}
       >
         {categorySlug && (
           <ActivityDefinitionListComponent

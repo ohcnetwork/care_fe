@@ -724,45 +724,16 @@ function ObservationDefinitionFormContent({
             {/* Components Section */}
             <div className="rounded-lg border border-gray-200 bg-white p-4">
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-base font-medium text-gray-900">
-                      {t("components")}{" "}
-                      <span className="text-sm font-normal text-gray-500">
-                        {t("optional")}
-                      </span>
-                    </h2>
-                    <p className="mt-0.5 text-sm text-gray-500">
-                      {t("observation_components_description")}
-                    </p>
-                  </div>
-                  {(form.watch("component") ?? [])?.length > 0 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const currentComponents =
-                          form.getValues("component") || [];
-                        form.setValue("component", [
-                          ...currentComponents,
-                          {
-                            code: { code: "", display: "", system: "" },
-                            permitted_data_type: QuestionType.quantity,
-                            permitted_unit: {
-                              code: "",
-                              display: "",
-                              system: "",
-                            },
-                            qualified_ranges: [],
-                          },
-                        ]);
-                      }}
-                    >
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      {t("add_component")}
-                    </Button>
-                  )}
+                <div>
+                  <h2 className="text-base font-medium text-gray-900">
+                    {t("components")}{" "}
+                    <span className="text-sm font-normal text-gray-500">
+                      {t("optional")}
+                    </span>
+                  </h2>
+                  <p className="mt-0.5 text-sm text-gray-500">
+                    {t("observation_components_description")}
+                  </p>
                 </div>
 
                 {(form.watch("component") ?? [])?.length === 0 ? (
@@ -804,7 +775,7 @@ function ObservationDefinitionFormContent({
                     {(form.watch("component") ?? []).map((_, index) => (
                       <div
                         key={index}
-                        className="relative rounded-lg border border-gray-200 bg-white p-4"
+                        className="relative rounded-lg border border-gray-200 bg-gray-50 p-4"
                       >
                         <div className="absolute right-3 top-3">
                           <Button
@@ -961,6 +932,31 @@ function ObservationDefinitionFormContent({
                         </div>
                       </div>
                     ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        const currentComponents =
+                          form.getValues("component") || [];
+                        form.setValue("component", [
+                          ...currentComponents,
+                          {
+                            code: { code: "", display: "", system: "" },
+                            permitted_data_type: QuestionType.quantity,
+                            permitted_unit: {
+                              code: "",
+                              display: "",
+                              system: "",
+                            },
+                            qualified_ranges: [],
+                          },
+                        ]);
+                      }}
+                    >
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      {t("add_component")}
+                    </Button>
                   </div>
                 )}
               </div>

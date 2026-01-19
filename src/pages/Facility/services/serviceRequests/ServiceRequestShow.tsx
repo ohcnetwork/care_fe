@@ -448,6 +448,7 @@ export default function ServiceRequestShow({
               sourceUrl={`/facility/${facilityId}${locationId ? `/locations/${locationId}` : ""}/service_requests/${serviceRequestId}`}
               patientId={request.encounter.patient.id}
               viewOnly={disableEdit}
+              disableCreateChargeItems
             />
           </div>
 

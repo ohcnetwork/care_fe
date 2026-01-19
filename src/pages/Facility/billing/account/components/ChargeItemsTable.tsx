@@ -60,8 +60,10 @@ import {
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./AddChargeItemsBillingSheet";
 import EditChargeItemSheet from "./EditChargeItemSheet";
@@ -87,6 +89,7 @@ function PriceComponentRow({ label, components }: PriceComponentRowProps) {
             <TableCell>
               <MonetaryDisplay {...component} />
             </TableCell>
+            <TableCell></TableCell>
             <TableCell></TableCell>
             <TableCell></TableCell>
             <TableCell></TableCell>
@@ -256,7 +259,7 @@ export function ChargeItemsTable({
           <Table className="rounded-lg border shadow-sm w-full bg-white">
             <TableHeader className="bg-gray-100">
               <TableRow className="border-b">
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-[40px]"></TableHead>
+                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10"></TableHead>
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
                   {t("item")}
                 </TableHead>
@@ -275,6 +278,9 @@ export function ChargeItemsTable({
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
                   {t("total")}
                 </TableHead>
+                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
+                  {t("performer")}
+                </TableHead>
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-[120px]">
                   {t("status")}
                 </TableHead>
@@ -286,8 +292,6 @@ export function ChargeItemsTable({
             <TableBody className="bg-white">
               {chargeItems.results.flatMap((item) => {
                 const isExpanded = expandedItems[item.id] || false;
-                const baseComponent = getBaseComponent(item);
-                const baseAmount = String(baseComponent?.amount || "0");
                 const linkedResource = getLinkedResource(item);
 
                 const mrpAmount = item.unit_price_components.find(
@@ -339,13 +343,18 @@ export function ChargeItemsTable({
                       <MonetaryDisplay amount={mrpAmount} />
                     </TableCell>
                     <TableCell className="border-x p-3 text-gray-950">
-                      <MonetaryDisplay amount={baseAmount} />
+                      <MonetaryDisplay
+                        amount={getBaseComponent(item)?.amount || "0"}
+                      />
                     </TableCell>
                     <TableCell className="border-x p-3 text-gray-950">
-                      {item.quantity}
+                      {round(item.quantity)}
                     </TableCell>
                     <TableCell className="border-x p-3 text-gray-950 font-medium">
                       <MonetaryDisplay amount={item.total_price} />
+                    </TableCell>
+                    <TableCell className="border-x p-3 text-gray-950">
+                      {formatName(item.performer_actor)}
                     </TableCell>
                     <TableCell className="border-x p-3 text-gray-950">
                       <div className="flex items-center gap-1">

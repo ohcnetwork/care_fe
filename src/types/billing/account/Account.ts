@@ -1,3 +1,4 @@
+import { NamespacedExtensionData } from "@/hooks/useExtensions";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { Period } from "@/types/questionnaire/base";
@@ -40,7 +41,7 @@ export interface AccountBase {
   name: string;
   service_period: Period;
   description?: string;
-  extensions: Record<string, unknown>;
+  extensions: NamespacedExtensionData;
 }
 
 export interface AccountRead extends AccountBase {
@@ -50,6 +51,7 @@ export interface AccountRead extends AccountBase {
   total_gross: string;
   total_paid: string;
   total_balance: string;
+  total_billable_charge_items: string;
   created_date: string;
   tags: TagConfig[];
 }

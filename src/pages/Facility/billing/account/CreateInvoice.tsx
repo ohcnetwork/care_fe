@@ -61,8 +61,10 @@ import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { formatName } from "@/Utils/utils";
 
 import BackButton from "@/components/Common/BackButton";
+import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./components/AddChargeItemsBillingSheet";
 
@@ -87,9 +89,8 @@ interface CreateInvoicePageProps {
   showHeader?: boolean;
   sourceUrl?: string;
   locationId?: string;
-  patientId?: string;
   disableCreateChargeItems?: boolean;
-  showDispenseNowButton?: boolean;
+  dispenseOrderId?: string;
 }
 
 interface PriceComponentRowProps {
@@ -121,6 +122,7 @@ function PriceComponentRow({
           <TableCell className="text-right">
             <MonetaryDisplay {...component} />
           </TableCell>
+          <TableCell></TableCell>
           <TableCell className="text-right">
             {component.monetary_component_type ===
             MonetaryComponentType.discount
@@ -144,9 +146,8 @@ export function CreateInvoicePage({
   showHeader = true,
   sourceUrl,
   locationId,
-  patientId,
   disableCreateChargeItems = false,
-  showDispenseNowButton = false,
+  dispenseOrderId,
 }: CreateInvoicePageProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -459,6 +460,9 @@ export function CreateInvoicePage({
                       <TableHead className="border-y bg-gray-100 text-gray-700 text-right">
                         {t("unit_price")} ({getCurrencySymbol()})
                       </TableHead>
+                      <TableHead className="border bg-gray-100 text-gray-700">
+                        {t("performer")}
+                      </TableHead>
                       <TableHead className="border rounded-tr-md bg-gray-100 text-gray-700 text-right font-semibold">
                         {t("amount")} ({getCurrencySymbol()})
                       </TableHead>
@@ -512,13 +516,16 @@ export function CreateInvoicePage({
                             {item.title}
                           </TableCell>
                           <TableCell className="font-medium text-base border-y text-gray-950">
-                            {item.quantity}
+                            {round(item.quantity)}
                           </TableCell>
                           <TableCell className="font-medium text-base border-y text-gray-950 text-right">
                             <MonetaryDisplay amount={mrpAmount} />
                           </TableCell>
                           <TableCell className="font-medium text-base border-y text-gray-950 text-right">
                             <MonetaryDisplay amount={baseAmount} />
+                          </TableCell>
+                          <TableCell className="font-medium text-base border-y text-gray-950">
+                            {formatName(item.performer_actor)}
                           </TableCell>
                           <TableCell className="border-y border-r p-0 overflow-hidden rounded-tr-md">
                             <div className="bg-gray-100 border border-white rounded-md p-4 text-right font-semibold text-base text-gray-950">
@@ -618,13 +625,13 @@ export function CreateInvoicePage({
             >
               <span className="underline">{t("cancel")}</span>
             </BackButton>
-            {showDispenseNowButton && (
+            {dispenseOrderId && (
               <Button
                 type="button"
                 variant="outline_primary"
                 onClick={() =>
                   navigate(
-                    `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation?payment_status=unpaid`,
+                    `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}?status=preparation&payment_status=unpaid`,
                   )
                 }
               >

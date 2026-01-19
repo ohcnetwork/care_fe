@@ -1,5 +1,11 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, SquareActivity, Stethoscope, Ticket } from "lucide-react";
+import {
+  AlertCircle,
+  SquareActivity,
+  Stethoscope,
+  Ticket,
+  Wallet,
+} from "lucide-react";
 import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -155,6 +161,13 @@ export default function VerifyPatient() {
                     }
                   />
                 )}
+
+                <QuickAction
+                  icon={<Wallet className="size-4" />}
+                  title={t("view_accounts")}
+                  actionId="view-the-accounts"
+                  href={`/facility/${facilityId}/billing/account?status=active&patient_filter=${patientData.id}&patient_name=${patientData.name}`}
+                />
               </div>
 
               <PatientHomeTabs

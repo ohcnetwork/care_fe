@@ -4,9 +4,10 @@ import "reactflow/dist/style.css";
 import * as Sentry from "@sentry/browser";
 
 import App from "@/App";
+import { AuthContextType, AuthUserContext } from "@/hooks/useAuthUser";
 import { initI18n } from "@/i18n";
 import careConfig from "@careConfig";
-import React from "react";
+import React, { Context } from "react";
 import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 
@@ -15,11 +16,13 @@ declare global {
   interface Window {
     CARE_API_URL: string;
     __CORE_ENV__: typeof careConfig;
+    AuthUserContext: Context<AuthContextType | null>;
   }
 }
 
 // Expose Environment variable to window object for use in plugins
 window.CARE_API_URL = careConfig.apiUrl;
+window.AuthUserContext = AuthUserContext;
 window.__CORE_ENV__ = careConfig;
 
 if ("serviceWorker" in navigator) {

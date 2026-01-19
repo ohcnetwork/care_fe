@@ -71,10 +71,8 @@ function toMonetaryComponent(
   return {
     monetary_component_type: type,
     code: component.code,
-    factor: isPercentageBased(component) ? component.factor : undefined,
-    amount: isPercentageBased(component)
-      ? undefined
-      : String(component.amount || 0),
+    factor: isPercentageBased(component) ? component.factor : null,
+    amount: !isPercentageBased(component) ? component.amount : null,
     conditions: [],
   };
 }
@@ -227,12 +225,12 @@ export function MonetaryComponentSelector({
         isComponentSelected(item, draftSelection),
       );
       const selectedValue = selectedInGroup
-        ? String(getComponentNumericValue(selectedInGroup))
+        ? getComponentNumericValue(selectedInGroup)
         : "";
 
       const radioOptions = groupItems.map((item) => ({
         label: formatComponentValue(item),
-        value: String(getComponentNumericValue(item)),
+        value: getComponentNumericValue(item),
       }));
 
       return (
@@ -361,7 +359,7 @@ export function MonetaryComponentSelector({
 
     // Full display mode
     return (
-      <div className="bg-white border rounded-md p-3 cursor-pointer hover:border-gray-400 transition-colors min-h-[44px] flex items-center justify-between">
+      <div className="bg-white border rounded-md p-3 cursor-pointer hover:border-gray-400 transition-colors min-h-11 flex items-center justify-between">
         <div className="flex items-center gap-2 flex-wrap">
           {selectedComponents.length === 0 ? (
             <span className="text-gray-500 text-sm">
@@ -472,11 +470,11 @@ export function MonetaryComponentSelector({
       )}
 
       {/* Trigger and Popover */}
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <Popover open={isOpen} onOpenChange={setIsOpen} modal>
         <PopoverTrigger asChild>{renderTrigger()}</PopoverTrigger>
 
         <PopoverContent
-          className={cn("p-0", displayMode === "inline" ? "w-[320px]" : "w-68")}
+          className={cn("p-0", displayMode === "inline" ? "w-80" : "w-68")}
           align="start"
         >
           {/* Search */}

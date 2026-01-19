@@ -50,4 +50,5 @@ export interface DiagnosticReportRead extends Omit<DiagnosticReportBase, "id"> {
   created_date: string;
   modified_date: string;
   updated_by: UserReadMinimal;
+  requester: UserReadMinimal;
 }

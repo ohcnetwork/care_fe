@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import Loading from "@/components/Common/Loading";
+import PrintFooter from "@/components/Common/PrintFooter";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import {
   MonetaryDisplay,
@@ -22,19 +23,21 @@ import {
 } from "@/components/ui/table";
 
 import { cn } from "@/lib/utils";
-import { paymentmethodMap } from "@/pages/Facility/billing/paymentReconciliation/PaymentsData";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
   ChargeItemRead,
   MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
-import { InvoiceRead } from "@/types/billing/invoice/invoice";
+import { InvoiceRead, InvoiceStatus } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
+import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import { getPartialId } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import { add, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 
 type PrintInvoiceProps = {
   facilityId: string;
@@ -108,8 +111,21 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
     );
   };
 
+  const getWatermark = () => {
+    if (invoice.status === InvoiceStatus.cancelled) {
+      return { text: t("cancelled"), color: "red" as const };
+    }
+    if (invoice.status === InvoiceStatus.entered_in_error) {
+      return { text: t("entered_in_error"), color: "red" as const };
+    }
+    return undefined;
+  };
+
   return (
-    <PrintPreview title={`${t("invoice")} ${invoice.number}`}>
+    <PrintPreview
+      title={`${t("invoice")} ${invoice.number}`}
+      watermark={getWatermark()}
+    >
       <div className="max-w-5xl mx-auto">
         {/* Header with Facility Name and Logo */}
         <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
@@ -117,11 +133,11 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
             <div className="text-left">
               <h1 className="text-2xl font-medium">{facility.name}</h1>
               {facility.address && (
-                <div className="text-gray-500 whitespace-pre-wrap break-words text-sm">
+                <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
                   {facility.address}
                   {facility.phone_number && (
                     <p className="text-gray-500 text-sm">
-                      {facility.phone_number}
+                      {t("phone")}: {facility.phone_number}
                     </p>
                   )}
                 </div>
@@ -151,7 +167,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
               {invoice.number}
             </div>
           </div>
-          <div className="text-right">
+          <div className="text-right flex">
             <div className="font-medium text-gray-700 text-sm">
               {t("issue_date")}:
             </div>
@@ -164,16 +180,39 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
         </div>
 
         <div className="space-y-4">
-          <div className="flex  justify-between items-center">
+          <div className="flex justify-between items-center">
             <div>
               <div className="font-medium text-gray-700 text-sm">
                 {t("bill_to")}:
               </div>
               <div>
-                <p className="font-medium text-base ml-2">
+                <p className="font-semibold text-base">
                   {invoice.account.patient.name}
+                  <span className="text-gray-600 ml-2 font-normal">
+                    ({t(`GENDER__${invoice.account.patient.gender}`)},{" "}
+                    {formatPatientAge(invoice.account.patient, true)})
+                  </span>
                 </p>
               </div>
+              {verifiedPatient &&
+                "instance_identifiers" in verifiedPatient &&
+                verifiedPatient.instance_identifiers
+                  .filter(
+                    ({ config }) =>
+                      config.config.use === PatientIdentifierUse.official &&
+                      !config.config.auto_maintained,
+                  )
+                  .map((identifier) => (
+                    <div
+                      key={identifier.config.id}
+                      className="text-base text-gray-700"
+                    >
+                      <span>{identifier.config.config.display}: </span>
+                      <span className="ml-2 font-semibold">
+                        {identifier.value}
+                      </span>
+                    </div>
+                  ))}
             </div>
             <div>
               <div className="flex gap-1 font-medium text-gray-700 text-sm ml-2">
@@ -186,23 +225,6 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                   )}
                 </p>
               </div>
-              {verifiedPatient &&
-                "instance_identifiers" in verifiedPatient &&
-                verifiedPatient.instance_identifiers
-                  .filter(
-                    ({ config }) =>
-                      config.config.use === PatientIdentifierUse.official &&
-                      !config.config.auto_maintained,
-                  )
-                  .map((identifier) => (
-                    <p
-                      key={identifier.config.id}
-                      className="font-medium text-gray-700 text-sm ml-2"
-                    >
-                      <span>{identifier.config.config.display}: </span>
-                      <span className="ml-2">{identifier.value}</span>
-                    </p>
-                  ))}
             </div>
           </div>
 
@@ -280,23 +302,19 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                         <TableCell
                           className={cn(tableCellClass, "text-center")}
                         >
-                          {item.quantity}
+                          {round(item.quantity)}
                         </TableCell>
                         <TableCell className={cn(tableCellClass, "text-right")}>
                           <div className="flex flex-col items-end gap-0.5">
                             <MonetaryDisplay
-                              amount={String(
-                                item.total_price_components
+                              amount={add(
+                                ...item.total_price_components
                                   .filter(
                                     (c) =>
                                       c.monetary_component_type ===
                                       MonetaryComponentType.discount,
                                   )
-                                  .reduce(
-                                    (acc, curr) =>
-                                      acc + Number(curr.amount || 0),
-                                    0,
-                                  ),
+                                  .map((c) => c.amount || "0"),
                               )}
                               hideCurrency
                             />
@@ -460,7 +478,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
               {/* Net Amount */}
               <div className="flex w-64 justify-between">
                 <span className="text-gray-500">{t("net_amount")}</span>
-                <MonetaryDisplay amount={String(invoice.total_net)} />
+                <MonetaryDisplay amount={invoice.total_net} />
               </div>
 
               <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
@@ -468,7 +486,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
               {/* Total */}
               <div className="flex w-64 justify-between font-semibold">
                 <span>{t("total")}</span>
-                <MonetaryDisplay amount={String(invoice.total_gross)} />
+                <MonetaryDisplay amount={invoice.total_gross} />
               </div>
               <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
             </div>
@@ -518,7 +536,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                             : "-"}
                         </TableCell>
                         <TableCell className={cn(tableCellClass, "text-left")}>
-                          {paymentmethodMap[payment.method]}
+                          {PAYMENT_RECONCILIATION_METHOD_MAP[payment.method]}
                         </TableCell>
                         <TableCell className={tableCellClass}>
                           {payment.reference_number}
@@ -540,7 +558,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                 {/* Total Received */}
                 <div className="flex w-64 justify-between font-semibold">
                   <span>{t("total_received")}</span>
-                  <MonetaryDisplay amount={String(invoice.total_payments)} />
+                  <MonetaryDisplay amount={invoice.total_payments} />
                 </div>
                 <div className="p-1 border-b-2 border-dashed border-gray-200 w-full" />
               </div>
@@ -559,11 +577,22 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
         )}
 
         {/* Generated Info */}
-        <div className="mt-12 pt-4 border-t text-[10px] text-gray-500 flex justify-between">
-          <p>
-            {t("generated_on")} {format(new Date(), "PPP 'at' p")}
-          </p>
-        </div>
+        <PrintFooter
+          leftContent={
+            <>
+              <span className="font-semibold">{t("created_by")}: </span>
+              {formatName(invoice.created_by)}
+            </>
+          }
+          rightContent={
+            invoice.payments?.[0]?.location?.name ? (
+              <>
+                <span className="font-semibold">{t("location")}: </span>
+                <span>{invoice.payments[0].location.name}</span>
+              </>
+            ) : undefined
+          }
+        />
       </div>
     </PrintPreview>
   );
