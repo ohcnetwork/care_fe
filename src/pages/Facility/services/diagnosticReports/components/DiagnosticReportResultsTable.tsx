@@ -105,10 +105,8 @@ export function DiagnosticReportResultsTable({
         )}
       >
         <TableCell className="pl-4 border-r border-b border-gray-300 whitespace-normal wrap-break-word">
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-px bg-gray-400" />
-            {component.code?.display}
-          </div>
+          <div className="w-2 h-px bg-gray-400" />
+          {component.code?.display}
         </TableCell>
         <TableCell className="border-r border-b border-gray-300 whitespace-normal wrap-break-word">
           <div className="whitespace-normal">
@@ -190,16 +188,16 @@ export function DiagnosticReportResultsTable({
       <Table className="border-collapse bg-white shadow-sm cursor-default table-fixed w-full">
         <TableHeader className="bg-gray-100">
           <TableRow className="divide-x-1 divide-gray-300">
-            <TableHead className="font-medium text-sm text-gray-700">
+            <TableHead className="font-medium text-sm text-gray-700 w-[25%]">
               {t("test")}
             </TableHead>
             <TableHead className="font-medium text-sm text-gray-700 w-[25%]">
               {t("result")}
             </TableHead>
-            <TableHead className="font-medium text-sm text-gray-700 w-[25%]">
+            <TableHead className="font-medium text-sm text-gray-700 w-[25%] whitespace-normal wrap-break-word">
               {t("reference_range")}
             </TableHead>
-            <TableHead className="font-medium text-sm text-gray-700 w-[25%]">
+            <TableHead className="font-medium text-sm text-gray-700 w-[25%] whitespace-normal wrap-break-word">
               {t("interpretation")}
             </TableHead>
           </TableRow>
