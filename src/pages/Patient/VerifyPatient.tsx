@@ -58,6 +58,9 @@ export default function VerifyPatient() {
     canListTokens,
   } = getPermissions(hasPermission, facility?.permissions ?? []);
 
+  const hideGenerateTokenAction =
+    import.meta.env.REACT_HIDE_GENERATE_TOKEN_ACTION === "true";
+
   const {
     data: patientData,
     isPending: isVerifyingPatient,
@@ -148,7 +151,7 @@ export default function VerifyPatient() {
                   />
                 )}
 
-                {canWriteToken && (
+                {canWriteToken && !hideGenerateTokenAction && (
                   <CreateTokenForm
                     patient={patientData}
                     facilityId={facilityId}
@@ -163,7 +166,7 @@ export default function VerifyPatient() {
                 )}
 
                 <QuickAction
-                  icon={<Wallet className="size-4" />}
+                  icon={<Wallet />}
                   title={t("view_accounts")}
                   actionId="view-the-accounts"
                   href={`/facility/${facilityId}/billing/account?status=active&patient_filter=${patientData.id}&patient_name=${patientData.name}`}
