@@ -72,7 +72,10 @@ import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryCo
 import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
-import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconciliation/paymentReconciliation";
+import {
+  PAYMENT_RECONCILIATION_METHOD_MAP,
+  PAYMENT_RECONCILIATION_STATUS_COLORS,
+} from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import { getPartialId } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import facilityApi from "@/types/facility/facilityApi";
@@ -1026,6 +1029,9 @@ export function InvoiceShow({
                           {t("payment_method")}
                         </TableHead>
                         <TableHead className={cn(tableHeadClass, "text-left")}>
+                          {t("status")}
+                        </TableHead>
+                        <TableHead className={cn(tableHeadClass, "text-left")}>
                           {t("reference")}
                         </TableHead>
                         <TableHead
@@ -1104,6 +1110,17 @@ export function InvoiceShow({
                                   payment.method
                                 ]
                               }
+                            </TableCell>
+                            <TableCell className={tableCellClass}>
+                              <Badge
+                                variant={
+                                  PAYMENT_RECONCILIATION_STATUS_COLORS[
+                                    payment.status
+                                  ]
+                                }
+                              >
+                                {t(payment.status)}
+                              </Badge>
                             </TableCell>
                             <TableCell className={tableCellClass}>
                               {payment.reference_number}
