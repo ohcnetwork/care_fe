@@ -239,21 +239,45 @@
     font-size: 14pt !important;
   }
 
-  /* Print-specific scaling utilities */
-  .print-scale-sm {
+  /* Auto-scaling print text - scales relative to page width */
+  .print-text-auto {
+    font-size: clamp(8pt, 1.8vw, 12pt) !important;
+  }
+
+  .print-text-auto-small {
+    font-size: clamp(6pt, 1.4vw, 10pt) !important;
+  }
+
+  .print-text-auto-large {
+    font-size: clamp(10pt, 2.2vw, 14pt) !important;
+  }
+
+  /* Scale factor utilities for print containers */
+  .print-scale-90 {
+    transform: scale(0.9);
+    transform-origin: top left;
+  }
+
+  .print-scale-85 {
     transform: scale(0.85);
     transform-origin: top left;
   }
 
-  .print-scale-md {
-    transform: scale(0.95);
+  .print-scale-80 {
+    transform: scale(0.8);
     transform-origin: top left;
   }
 
-  .print-scale-lg {
-    transform: scale(1.1);
+  .print-scale-75 {
+    transform: scale(0.75);
     transform-origin: top left;
   }
+
+  .print-scale-fit {
+    transform: scale(var(--print-scale, 1));
+    transform-origin: top left;
+  }
+
 
   /* Print-specific logo sizing */
   .print-logo-small {
@@ -272,41 +296,20 @@
   }
 
   @media print {
-    /* Base page settings with auto size for responsive scaling */
+    /* Respect browser's margin selection (None/Default/Minimum)
+     * by not setting explicit @page margins */
     @page {
-      size: auto; /* Auto size allows content to adapt to paper size */
-      margin: 0.5in 0.5in 0.75in 0.5in; /* Extra bottom margin for page numbers */
+      size: auto;
 
       @bottom-center {
         content: "Page " counter(page) " of " counter(pages);
-        font-size: 10pt;
+        font-size: 8pt;
         color: #666;
       }
     }
+  }
 
-    /* Portrait orientation specific settings */
-    @page portrait {
-      size: auto portrait;
-      margin: 0.75in 0.5in; /* More vertical margin for portrait */
-    }
-
-    /* Landscape orientation specific settings */
-    @page landscape {
-      size: auto landscape;
-      margin: 0.5in 0.75in; /* More horizontal margin for landscape */
-    }
-
-    /* Standard paper sizes with responsive scaling */
-    @page letter {
-      size: letter;
-      margin: 0.75in;
-    }
-
-    @page a4 {
-      size: A4;
-      margin: 20mm;
-    }
-
+  @media print {
     /* Content scaling and layout adjustments */
     body * {
       visibility: hidden;
@@ -330,11 +333,66 @@
       box-sizing: border-box;
       /* Ensure content fits within printable area */
       overflow: visible;
-      /* Scale content to fit page width */
+      /* No transform to respect browser margins exactly */
+      transform: none;
       transform-origin: top left;
-      /* Responsive font scaling for print */
-      font-size: clamp(10pt, 2.5vw, 14pt);
+      /* Responsive font scaling for print - scales based on page width */
+      font-size: clamp(8pt, 1.6vw, 12pt);
+      line-height: 1.4;
+      /* CSS custom property for manual scale control */
+      --print-scale: 1;
     }
+
+    /* Isolated print styles to prevents blank pages */
+    #single-print,
+    #single-print * {
+      visibility: visible;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    #single-print {
+      display: block !important;
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      overflow: visible;
+    }
+
+    /* Collapse all other content when this is present */
+    body:has(#single-print) *:not(#single-print):not(#single-print *) {
+      height: 0 !important;
+      min-height: 0 !important;
+      max-height: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      overflow: hidden !important;
+    }
+
+
+
+    /* Auto-fit content to page width */
+    #section-to-print.print-fit-page {
+      transform: scale(var(--print-scale, 0.95));
+      width: calc(100% / var(--print-scale, 0.95));
+    }
+
+    /* Tighter text scaling for dense content */
+    #section-to-print.print-compact {
+      font-size: clamp(7pt, 1.3vw, 10pt);
+      line-height: 1.3;
+    }
+
+    /* Looser text scaling for readability */
+    #section-to-print.print-readable {
+      font-size: clamp(10pt, 2vw, 14pt);
+      line-height: 1.5;
+    }
+
+    /* No scaling applied - respect browser's layout and margins exactly */
 
     /* Break handling for better content flow */
     #section-to-print {
@@ -347,8 +405,32 @@
       max-width: 100%;
       width: 100%;
       table-layout: auto;
-      font-size: inherit;
+      font-size: clamp(7pt, 1.4vw, 11pt);
       border-collapse: collapse;
+    }
+
+    #section-to-print table th,
+    #section-to-print table td {
+      padding: clamp(2pt, 0.4vw, 6pt);
+    }
+
+    /* Scale headings proportionally */
+    #section-to-print h1 {
+      font-size: clamp(14pt, 3vw, 20pt);
+    }
+
+    #section-to-print h2 {
+      font-size: clamp(12pt, 2.5vw, 16pt);
+    }
+
+    #section-to-print h3 {
+      font-size: clamp(10pt, 2vw, 14pt);
+    }
+
+    #section-to-print h4,
+    #section-to-print h5,
+    #section-to-print h6 {
+      font-size: clamp(9pt, 1.8vw, 12pt);
     }
 
     #section-to-print img {
@@ -380,23 +462,8 @@
     #section-to-print .content {
       width: 100%;
       max-width: none;
-      padding: 0.25in;
+      padding: 0;
       margin: 0;
-    }
-
-    /* Responsive text scaling based on content width */
-    @media print and (max-width: 8.5in) {
-      #section-to-print {
-        font-size: 11pt;
-        transform: scale(0.95);
-      }
-    }
-
-    @media print and (max-width: 6in) {
-      #section-to-print {
-        font-size: 10pt;
-        transform: scale(0.9);
-      }
     }
 
     /* Ensure content doesn't overflow page boundaries */
@@ -440,21 +507,6 @@
 
     .print-text-large {
       font-size: 14pt !important;
-    }
-
-    .print-scale-sm {
-      transform: scale(0.85) !important;
-      transform-origin: top left;
-    }
-
-    .print-scale-md {
-      transform: scale(0.95) !important;
-      transform-origin: top left;
-    }
-
-    .print-scale-lg {
-      transform: scale(1.1) !important;
-      transform-origin: top left;
     }
   }
 

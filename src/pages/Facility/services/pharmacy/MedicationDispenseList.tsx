@@ -406,7 +406,7 @@ export default function MedicationDispenseList({
             <Button
               onClick={() =>
                 navigate(
-                  `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${patientId}/bill`,
+                  `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${patientId}/prescription/${prescriptionId}/bill`,
                 )
               }
               className="w-full sm:w-auto"

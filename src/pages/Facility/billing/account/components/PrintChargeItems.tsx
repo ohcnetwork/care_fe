@@ -229,13 +229,13 @@ export const PrintChargeItems = (props: {
                   {hideHeader && preserveHeaderSpace ? (
                     <div className="mb-4 pb-2 border-b border-gray-200 h-20" />
                   ) : !hideHeader ? (
-                    <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
+                    <div className="flex flex-col sm:flex-row print:flex-row print:items-start justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
                       <img
                         src={careConfig.mainLogo?.dark}
                         alt="Care Logo"
-                        className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2"
+                        className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2 print:mb-0 print:order-2"
                       />
-                      <div className="text-center sm:text-left sm:order-1">
+                      <div className="text-center sm:text-left sm:order-1 print:text-left">
                         <h1 className="text-3xl font-semibold">
                           {facility?.name}
                         </h1>

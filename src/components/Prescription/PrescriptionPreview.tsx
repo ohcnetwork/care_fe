@@ -16,6 +16,7 @@ import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { displayMedicationName } from "@/types/emr/medicationRequest/medicationRequest";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { PrescriptionGroup } from "@/types/emr/prescription/prescription";
+import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
 interface DetailRowProps {
   label: string;
@@ -179,36 +180,35 @@ export const PrescriptionPreview = ({
       title={`${t("prescriptions")} - ${patient.name}`}
       disabled={!prescriptions?.length}
     >
-      <div className="md:p-2 max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <div>
           {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
+          <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
+            <div className="flex items-start gap-4">
+              <div className="text-left">
+                <h1 className="text-2xl font-medium">{facility?.name}</h1>
+                {facility?.address && (
+                  <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
+                    {facility.address}
+                    {facility.phone_number && (
+                      <p className="text-gray-500 text-sm">
+                        {t("phone")}: {facility.phone_number}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
             <img
               src={careConfig.mainLogo?.dark}
-              alt="Care Logo"
-              className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2"
+              alt="Logo"
+              className="h-10 w-auto object-contain mb-2 sm:mb-0 text-end"
             />
-            <div className="text-center sm:text-left sm:order-1">
-              <h1 className="text-2xl font-semibold mb-1">{facility?.name}</h1>
-              {facility?.address && (
-                <div className="text-gray-500 whitespace-pre-wrap break-words text-sm">
-                  {facility.address}
-                  {facility.phone_number && (
-                    <p className="text-gray-500 text-sm">
-                      {facility.phone_number}
-                    </p>
-                  )}
-                </div>
-              )}
-              <h2 className="mt-2 text-gray-500 uppercase text-sm tracking-wide mt-1 font-semibold">
-                {t("medicine_prescription")}
-              </h2>
-            </div>
           </div>
 
           {/* Patient Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 mb-8">
-            <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-6 pb-3">
+            <div className="space-y-1">
               <DetailRow label={t("patient")} value={patient.name} isStrong />
               <DetailRow
                 label={`${t("age")} / ${t("sex")}`}
@@ -219,8 +219,21 @@ export const PrescriptionPreview = ({
                 }
                 isStrong
               />
+              {encounter?.patient?.instance_identifiers
+                ?.filter(
+                  ({ config }) =>
+                    config.config.use === PatientIdentifierUse.official,
+                )
+                .map((identifier) => (
+                  <DetailRow
+                    key={identifier.config.id}
+                    label={identifier.config.config.display}
+                    value={identifier.value}
+                    isStrong
+                  />
+                ))}
             </div>
-            <div className="space-y-3">
+            <div className="space-y-1">
               <DetailRow
                 label={t("date")}
                 value={

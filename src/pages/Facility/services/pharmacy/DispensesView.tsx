@@ -16,7 +16,6 @@ import { DISPENSE_ORDER_STATUS_STYLES } from "@/types/emr/dispenseOrder/dispense
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import { MedicationDispenseStatus } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
-import patientApi from "@/types/emr/patient/patientApi";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 
@@ -63,14 +62,6 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
       enabled: !!dispenseOrderId && !!locationId,
     });
 
-  const { data: patientData } = useQuery({
-    queryKey: ["patient", dispenseOrder?.patient.id],
-    queryFn: query(patientApi.get, {
-      pathParams: { id: dispenseOrder?.patient.id ?? "" },
-    }),
-    enabled: !!dispenseOrder?.patient.id,
-  });
-
   const { data: prescriptionTags } = useQuery({
     queryKey: ["prescriptionQueue", facilityId, dispenseOrder?.patient.id],
     queryFn: query(prescriptionApi.summary, {
@@ -116,9 +107,12 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
           {t("back_to_dispense_queue")}
         </Button>
       </div>
-      {patientData && (
+      {dispenseOrder && (
         <Card className="flex gap-4 mb-4 p-4 rounded-none shadow-none bg-gray-100">
-          <PatientHeader patient={patientData} facilityId={facilityId} />
+          <PatientHeader
+            patient={dispenseOrder.patient}
+            facilityId={facilityId}
+          />
           {prescriptionTags && prescriptionTags.length > 0 && (
             <div className="flex flex-col gap-1 items-start mt-5">
               <span className="text-xs text-gray-700">

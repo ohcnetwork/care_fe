@@ -29,7 +29,7 @@ import {
   ChargeItemRead,
   MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
-import { InvoiceRead } from "@/types/billing/invoice/invoice";
+import { InvoiceRead, InvoiceStatus } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import { getPartialId } from "@/types/emr/patient/patient";
@@ -111,8 +111,21 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
     );
   };
 
+  const getWatermark = () => {
+    if (invoice.status === InvoiceStatus.cancelled) {
+      return { text: t("cancelled"), color: "red" as const };
+    }
+    if (invoice.status === InvoiceStatus.entered_in_error) {
+      return { text: t("entered_in_error"), color: "red" as const };
+    }
+    return undefined;
+  };
+
   return (
-    <PrintPreview title={`${t("invoice")} ${invoice.number}`}>
+    <PrintPreview
+      title={`${t("invoice")} ${invoice.number}`}
+      watermark={getWatermark()}
+    >
       <div className="max-w-5xl mx-auto">
         {/* Header with Facility Name and Logo */}
         <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
@@ -154,7 +167,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
               {invoice.number}
             </div>
           </div>
-          <div className="text-right">
+          <div className="text-right flex">
             <div className="font-medium text-gray-700 text-sm">
               {t("issue_date")}:
             </div>
@@ -167,30 +180,18 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
         </div>
 
         <div className="space-y-4">
-          <div className="flex  justify-between items-center">
+          <div className="flex justify-between items-center">
             <div>
               <div className="font-medium text-gray-700 text-sm">
                 {t("bill_to")}:
               </div>
               <div>
-                <p className="font-semibold text-lg ml-2">
+                <p className="font-semibold text-base">
                   {invoice.account.patient.name}
-                  <span className="text-gray-600 font-normal text-base ml-2">
+                  <span className="text-gray-600 ml-2 font-normal">
                     ({t(`GENDER__${invoice.account.patient.gender}`)},{" "}
                     {formatPatientAge(invoice.account.patient, true)})
                   </span>
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-col items-end">
-              <div className="flex gap-1 font-medium text-gray-700 text-sm ml-2">
-                {t("address")}:{" "}
-                <p className="font-medium text-gray-700 text-sm whitespace-pre-wrap ml-2">
-                  {formatPatientAddress(invoice.account.patient.address) || (
-                    <span className="text-gray-500">
-                      {t("no_address_provided")}
-                    </span>
-                  )}
                 </p>
               </div>
               {verifiedPatient &&
@@ -202,14 +203,28 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                       !config.config.auto_maintained,
                   )
                   .map((identifier) => (
-                    <p
+                    <div
                       key={identifier.config.id}
-                      className="font-bold text-gray-950 text-base ml-2"
+                      className="text-base text-gray-700"
                     >
                       <span>{identifier.config.config.display}: </span>
-                      <span className="ml-2">{identifier.value}</span>
-                    </p>
+                      <span className="ml-2 font-semibold">
+                        {identifier.value}
+                      </span>
+                    </div>
                   ))}
+            </div>
+            <div>
+              <div className="flex gap-1 font-medium text-gray-700 text-sm ml-2">
+                {t("address")}:{" "}
+                <p className="font-medium text-gray-700 text-sm whitespace-pre-wrap ml-2">
+                  {formatPatientAddress(invoice.account.patient.address) || (
+                    <span className="text-gray-500">
+                      {t("no_address_provided")}
+                    </span>
+                  )}
+                </p>
+              </div>
             </div>
           </div>
 
