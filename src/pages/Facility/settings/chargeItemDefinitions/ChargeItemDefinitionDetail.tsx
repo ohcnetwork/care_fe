@@ -51,6 +51,7 @@ export function PriceComponentCard({
       discount: t("discount"),
       tax: t("tax"),
       informational: t("informational"),
+      surcharge: t("surcharge"),
     };
 
     return (
@@ -102,7 +103,6 @@ export function PriceComponentCard({
                   {index < chargeItemDefinition.price_components.length - 1 && (
                     <Separator className="my-2" />
                   )}
-                  {/* {component.conditions && ( */}
                   {component.conditions && (
                     <div>
                       <p className="text-sm text-gray-500">{t("conditions")}</p>
