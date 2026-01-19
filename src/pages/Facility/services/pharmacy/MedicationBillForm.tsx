@@ -834,6 +834,36 @@ export default function MedicationBillForm({
     fetchMissingInventories();
   }, [productKnowledgeInventoriesMap, facilityId, locationId]);
 
+  // for Auto-select single lot if only one inventory is available
+  useEffect(() => {
+    fields.forEach((field, index) => {
+      const productKnowledge = field.productKnowledge as ProductKnowledgeBase;
+      const substitution = form.watch(`items.${index}.substitution`);
+      const effectiveProductKnowledge =
+        substitution?.substitutedProductKnowledge || productKnowledge;
+
+      const inventories =
+        productKnowledgeInventoriesMap[effectiveProductKnowledge?.id];
+      const currentLots = form.getValues(`items.${index}.lots`);
+
+      if (
+        inventories !== undefined &&
+        inventories?.length === 1 &&
+        !currentLots.some((lot) => lot.selectedInventoryId)
+      ) {
+        const medication = form.getValues(`items.${index}.medication`);
+        form.setValue(`items.${index}.lots`, [
+          {
+            selectedInventoryId: inventories[0].id,
+            quantity: medication
+              ? computeInitialQuantity(medication)
+              : currentLots[0]?.quantity || "1",
+          },
+        ]);
+      }
+    });
+  }, [productKnowledgeInventoriesMap, fields, form]);
+
   const medications = useMemo(
     () =>
       prescription?.medications.filter((med) => med.requested_product) || [],
@@ -883,13 +913,13 @@ export default function MedicationBillForm({
       return "0";
     }
 
-    if (instruction.as_needed_boolean) {
-      return "0";
-    }
-
     const doseValue = instruction.dose_and_rate?.dose_quantity?.value;
     if (!doseValue) {
       return "0";
+    }
+
+    if (instruction.as_needed_boolean) {
+      return round(doseValue);
     }
 
     const repeat = instruction.timing?.repeat;
@@ -1066,8 +1096,10 @@ export default function MedicationBillForm({
       return;
     }
 
-    const medsWithInvalidDaysSupply = selectedItems.filter((item) =>
-      isLessThanOrEqual(item.daysSupply, 0),
+    const medsWithInvalidDaysSupply = selectedItems.filter(
+      (item) =>
+        isLessThanOrEqual(item.daysSupply, 0) &&
+        !item.dosageInstructions?.[0]?.as_needed_boolean,
     );
 
     if (medsWithInvalidDaysSupply.length > 0) {
