@@ -142,7 +142,7 @@ export const PatientInfoHoverCard = ({
           </div>
         </div>
         {hasPatientTags && (
-          <div className="flex items-start border-t border-gray-200 pt-2 bg-red">
+          <div className="flex items-start border-t border-gray-200 pt-2">
             <PatientTagsDisplay patient={patient} />
           </div>
         )}
