@@ -48,6 +48,7 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 
 import { Avatar } from "@/components/Common/Avatar";
 import { formatDosage } from "@/components/Medicine/utils";
+import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
 import {
@@ -81,7 +82,6 @@ import { UserReadMinimal } from "@/types/user/user";
 import { isZero, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import { QuestionLabel } from "../QuestionLabel";
 
 function formatDoseRange(range?: DoseRange): string {
   if (!range?.high?.value) return "";
