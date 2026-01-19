@@ -213,7 +213,7 @@ export const EncounterShow = (props: Props) => {
       }
     >
       {primaryEncounter.appointment && canViewAppointmentEncounterHeader && (
-        <div className="flex items-center justify-end -mt-2 mb-2">
+        <div className="flex items-center justify-center -mt-2 mb-2">
           <AppointmentEncounterHeader
             canWritePrimaryEncounter={canWritePrimaryEncounter}
             appointment={primaryEncounter.appointment}
