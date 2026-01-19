@@ -1,3 +1,4 @@
+import { PatientTagsDisplay } from "@/components/Patient/PatientTagsDisplay";
 import TagAssignmentSheet, {
   TagEntityType,
 } from "@/components/Tags/TagAssignmentSheet";
@@ -59,29 +60,7 @@ export const PatientInfoCard = ({
                       </span>
                     </div>
                   ))}
-              {"instance_tags" in patient &&
-                patient.instance_tags.length > 0 &&
-                tagEntityType !== "patient" && (
-                  <div className="flex flex-col gap-1 items-start">
-                    <span className="text-xs text-gray-700">
-                      {t("patient_tags")}:
-                    </span>
-                    <div className="flex flex-wrap gap-2 text-sm whitespace-nowrap">
-                      <>
-                        {patient.instance_tags.map((tag) => (
-                          <Badge
-                            key={tag.id}
-                            variant="secondary"
-                            className="capitalize"
-                            title={tag.description}
-                          >
-                            {getTagHierarchyDisplay(tag)}
-                          </Badge>
-                        ))}
-                      </>
-                    </div>
-                  </div>
-                )}
+              <PatientTagsDisplay patient={patient} />
             </div>
           </div>
           {children}

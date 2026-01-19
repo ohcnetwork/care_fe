@@ -87,7 +87,10 @@ export default function VerifyPatient() {
             <div className="space-y-6 lg:col-span-2">
               <div className="">
                 <PatientInfoCard
-                  tags={patientData.instance_tags}
+                  tags={[
+                    ...patientData.instance_tags,
+                    ...patientData.facility_tags,
+                  ]}
                   tagEntityType="patient"
                   tagEntityId={patientData.id}
                   patient={patientData}
