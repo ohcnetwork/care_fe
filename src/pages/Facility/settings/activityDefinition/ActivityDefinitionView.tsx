@@ -23,14 +23,22 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
 import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
+import { getCurrencySymbol } from "@/components/ui/monetary-display";
 import { Code } from "@/types/base/code/code";
+import { ConditionOperationSummary } from "@/types/base/condition/condition";
+import {
+  MonetaryComponent,
+  MonetaryComponentOrder,
+} from "@/types/base/monetaryComponent/monetaryComponent";
 import {
   ACTIVITY_DEFINITION_STATUS_COLORS,
   Status,
 } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
+import { round } from "@/Utils/decimal";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import { TFunction } from "i18next";
 import { ArrowLeft } from "lucide-react";
 
 interface Props {
@@ -48,6 +56,40 @@ function CodeDisplay({ code }: { code: Code | null }) {
     </div>
   );
 }
+
+const renderPriceComponent = (component: MonetaryComponent, t: TFunction) => {
+  const typeLabels: Record<string, string> = {
+    base: t("base_price"),
+    discount: t("discount"),
+    tax: t("tax"),
+    informational: t("informational"),
+  };
+
+  return (
+    <div className="flex items-center justify-between py-2">
+      <div>
+        <p className="font-normal">
+          {typeLabels[component.monetary_component_type]}
+        </p>
+        {component.code && (
+          <p className="text-sm text-gray-500">{component.code.display}</p>
+        )}
+      </div>
+      <div className="text-right">
+        {component.amount ? (
+          <p className="font-medium">
+            {getCurrencySymbol()}
+            {round(component.amount)}
+          </p>
+        ) : component.factor ? (
+          <p className="font-medium">{round(component.factor)}%</p>
+        ) : (
+          <p className="text-sm text-gray-500">{t("not_specified")}</p>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default function ActivityDefinitionView({
   facilityId,
@@ -326,7 +368,7 @@ export default function ActivityDefinitionView({
                 {definition.charge_item_definitions.map((chargeItem) => (
                   <div
                     key={chargeItem.slug}
-                    className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50"
+                    className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50 space-y-2"
                   >
                     <div className="space-y-2">
                       <p className="font-medium">{chargeItem.title}</p>
@@ -334,11 +376,75 @@ export default function ActivityDefinitionView({
                         {chargeItem.description}
                       </p>
                       <Separator />
-                      <div className="pt-2">
-                        <p className="text-sm text-gray-500">{t("purpose")}</p>
-                        <p className="text-gray-700">{chargeItem.purpose}</p>
-                      </div>
+                      {chargeItem.purpose && (
+                        <div className="pt-2">
+                          <p className="text-sm text-gray-500">
+                            {t("purpose")}
+                          </p>
+                          <p className="text-gray-700">{chargeItem.purpose}</p>
+                        </div>
+                      )}
                     </div>
+                    <Card className="rounded-sm">
+                      <CardHeader>
+                        <CardTitle className="font-medium">
+                          {t("price_components")}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {chargeItem.price_components.length === 0 ? (
+                          <div className="py-4 text-center text-gray-500">
+                            <p>{t("no_price_components")}</p>
+                          </div>
+                        ) : (
+                          <div>
+                            {chargeItem.price_components
+                              .sort(
+                                (a, b) =>
+                                  MonetaryComponentOrder[
+                                    a.monetary_component_type
+                                  ] -
+                                  MonetaryComponentOrder[
+                                    b.monetary_component_type
+                                  ],
+                              )
+                              .map((component, index) => (
+                                <div key={index}>
+                                  {renderPriceComponent(component, t)}
+                                  {index <
+                                    chargeItem.price_components.length - 1 && (
+                                    <Separator className="my-2" />
+                                  )}
+                                  {/* {component.conditions && ( */}
+                                  {component.conditions && (
+                                    <div>
+                                      <p className="text-sm text-gray-500">
+                                        {t("conditions")}
+                                      </p>
+                                      <div className="flex flex-wrap gap-1 mt-1">
+                                        {component.conditions?.map(
+                                          (condition, index) => {
+                                            return (
+                                              <div
+                                                key={index}
+                                                className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded border"
+                                              >
+                                                <ConditionOperationSummary
+                                                  condition={condition}
+                                                />
+                                              </div>
+                                            );
+                                          },
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
                   </div>
                 ))}
               </div>
