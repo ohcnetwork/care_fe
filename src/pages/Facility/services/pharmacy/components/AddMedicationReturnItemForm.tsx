@@ -103,7 +103,6 @@ export function AddMedicationReturnItemForm({
     queryFn: query(inventoryApi.list, {
       pathParams: { facilityId, locationId },
       queryParams: {
-        net_content_gt: 0,
         limit: 100,
       },
     }),

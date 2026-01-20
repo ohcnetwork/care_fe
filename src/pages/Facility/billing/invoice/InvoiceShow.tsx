@@ -443,10 +443,12 @@ export function InvoiceShow({
                 onClick={() => setIsPaymentSheetOpen(true)}
               >
                 <CareIcon icon="l-plus" className="mr-2 size-4" />
-                {t("record_payment")}
+                {invoice.is_refund
+                  ? t("record_credit_note")
+                  : t("record_payment")}
                 <ShortcutBadge actionId="record-payment" />
               </Button>
-              {isInvoiceRecordPaymentPluginsPresent && (
+              {isInvoiceRecordPaymentPluginsPresent && !invoice.is_refund && (
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -1016,7 +1018,9 @@ export function InvoiceShow({
               <>
                 <div className="border-x border-b border-t border-gray-300 rounded-b-md -mt-4 space-y-2">
                   <div className="-mt-7 px-3 font-medium ">
-                    {t("payments_received_against_this_invoice")}
+                    {invoice.is_refund
+                      ? t("refunds_given_against_this_invoice")
+                      : t("payments_received_against_this_invoice")}
                   </div>
                   <Table>
                     <TableHeader>
@@ -1128,9 +1132,13 @@ export function InvoiceShow({
                 <div className="flex flex-col items-end space-y-2 text-gray-950 font-mormal text-sm mb-4">
                   <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
 
-                  {/* Total Received */}
+                  {/* Total Received/Refunded */}
                   <div className="flex w-64 justify-between font-bold">
-                    <span>{t("total_received")}</span>
+                    <span>
+                      {invoice.is_refund
+                        ? t("total_refunded")
+                        : t("total_received")}
+                    </span>
                     <MonetaryDisplay amount={invoice.total_payments} />
                   </div>
                   <div className="p-1 border-b-2 border-dashed border-gray-200 w-full" />
@@ -1159,6 +1167,7 @@ export function InvoiceShow({
         facilityId={facilityId}
         invoice={invoice}
         accountId={invoice.account.id}
+        isCreditNote={invoice.is_refund}
       />
 
       <AlertDialog

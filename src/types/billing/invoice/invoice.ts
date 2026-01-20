@@ -56,6 +56,7 @@ export interface InvoiceRead extends InvoiceList {
   updated_by: UserReadMinimal;
   total_payments: string;
   payments: PaymentReconciliationRead[];
+  is_refund: boolean;
 }
 
 export interface InvoiceCancel {

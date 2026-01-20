@@ -220,7 +220,11 @@ export function PaymentReconciliationSheet({
       pathParams: { facilityId },
     }),
     onSuccess: () => {
-      toast.success(t("payment_recorded_successfully"));
+      toast.success(
+        isCreditNote
+          ? t("refund_recorded_successfully")
+          : t("payment_recorded_successfully"),
+      );
 
       // Invalidate relevant queries
       if (invoice) {
@@ -262,7 +266,7 @@ export function PaymentReconciliationSheet({
   useEffect(() => {
     if (open) {
       const initialAmount = invoice?.total_gross
-        ? round(invoice.total_gross)
+        ? round(new Decimal(invoice.total_gross).abs())
         : "";
       form.reset({
         reconciliation_type: invoice
@@ -294,13 +298,21 @@ export function PaymentReconciliationSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full max-w-md sm:max-w-lg overflow-y-auto pb-0">
         <SheetHeader>
-          <SheetTitle className="m-0">{t("record_payment")}</SheetTitle>
+          <SheetTitle className="m-0">
+            {isCreditNote ? t("record_credit_note") : t("record_payment")}
+          </SheetTitle>
           <SheetDescription className="text-gray-700">
             {invoice
-              ? t("recording_payment_for_invoice", {
-                  id: invoice.number,
-                })
-              : t("recording_payment")}
+              ? isCreditNote
+                ? t("recording_refund_for_invoice", {
+                    id: invoice.number,
+                  })
+                : t("recording_payment_for_invoice", {
+                    id: invoice.number,
+                  })
+              : isCreditNote
+                ? t("recording_refund")
+                : t("recording_payment")}
           </SheetDescription>
         </SheetHeader>
 
@@ -321,7 +333,9 @@ export function PaymentReconciliationSheet({
                   {invoice ? (
                     <>
                       <p className="text-sm text-gray-600 mb-1">
-                        {t("payment_received")}
+                        {isCreditNote
+                          ? t("refund_given")
+                          : t("payment_received")}
                       </p>
                       <p className="text-3xl font-bold text-gray-900">
                         <MonetaryDisplay amount={invoice.total_payments} />
@@ -452,7 +466,7 @@ export function PaymentReconciliationSheet({
                 render={({ field }) => (
                   <FormItem className="gap-1.5">
                     <FormLabel className="text-gray-950">
-                      {t("amount_paid")}
+                      {isCreditNote ? t("refund_amount") : t("amount_paid")}
                     </FormLabel>
                     <FormControl>
                       <MonetaryAmountInput
@@ -596,7 +610,9 @@ export function PaymentReconciliationSheet({
                 <Button
                   type="submit"
                   disabled={isPending}
-                  aria-label={t("record_payment")}
+                  aria-label={
+                    isCreditNote ? t("record_credit_note") : t("record_payment")
+                  }
                 >
                   {isPending ? (
                     <>
@@ -606,6 +622,8 @@ export function PaymentReconciliationSheet({
                       />
                       {t("processing_with_dots")}
                     </>
+                  ) : isCreditNote ? (
+                    t("record_credit_note")
                   ) : (
                     t("record_payment")
                   )}

@@ -199,3 +199,13 @@ export const zodDecimal = (options?: {
       message: `Must be at most ${options?.max}`,
     })
     .transform(round);
+
+/**
+ * Absolute value of a decimal value
+ */
+export function abs(value: string | number | Decimal): Decimal {
+  if (value === "") {
+    return new Decimal(0);
+  }
+  return new Decimal(value).abs();
+}

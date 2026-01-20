@@ -21,6 +21,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import useFilters from "@/hooks/useFilters";
 
+import { CreateMedicationReturnSheet } from "@/pages/Facility/services/pharmacy/CreateMedicationReturnSheet";
+
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 
@@ -83,6 +85,10 @@ export default function MedicationReturnList({
               {t("medication_return")}
             </h1>
           </div>
+          <CreateMedicationReturnSheet
+            facilityId={facilityId}
+            locationId={locationId}
+          />
         </div>
 
         {/* Status Tabs */}
