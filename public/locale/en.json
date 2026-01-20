@@ -950,7 +950,7 @@
   "cache_clear_failed": "Failed to clear cache",
   "calculation": "Calculation",
   "calculation_preview": "Calculation Preview",
-  "call_next_patient": "Call Next Patient",
+  "call_next_patient": "Call and In-service next patient",
   "call_patient": "Call Patient",
   "called": "Called",
   "called_plus_now_serving": "Called + Now Serving",
