@@ -421,6 +421,43 @@ export function PaymentReconciliationSheet({
                 )}
               />
 
+              {!isCreditNote && (
+                <FormField
+                  control={form.control}
+                  name="issuer_type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-950">
+                        {t("issuer_type")}
+                      </FormLabel>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        className="flex flex-wrap"
+                      >
+                        {Object.values(PaymentReconciliationIssuerType).map(
+                          (type) => (
+                            <Label
+                              key={type}
+                              className="flex cursor-pointer gap-2 items-center justify-center rounded-md border border-gray-400 shadow-sm p-2.5 outline-none has-checked:border-primary-600 has-checked:bg-primary-100/50"
+                            >
+                              <RadioGroupItem
+                                value={type}
+                                aria-label={`issuer-type-${type}`}
+                              />
+                              <span className="text-sm font-medium text-gray-950">
+                                {t(type)}
+                              </span>
+                            </Label>
+                          ),
+                        )}
+                      </RadioGroup>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
               <FormField
                 control={form.control}
                 name="location"

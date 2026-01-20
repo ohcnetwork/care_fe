@@ -2591,6 +2591,7 @@
   "insurance__member_id": "Member ID",
   "insurance__policy_name": "Policy ID / Policy Name",
   "insurance_details_detail": "Include details of all the Insurance Policies held by the Patient for smooth insurance processing",
+  "insurer": "Insurer",
   "insurer_name_required": "Insurer Name is required",
   "integer": "Integer",
   "intended_routes": "Intended Routes",

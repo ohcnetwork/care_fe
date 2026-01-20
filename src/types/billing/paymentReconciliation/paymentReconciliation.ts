@@ -32,7 +32,7 @@ export enum PaymentReconciliationKind {
 
 export enum PaymentReconciliationIssuerType {
   patient = "patient",
-  insurance = "insurance",
+  insurer = "insurer",
 }
 
 export enum PaymentReconciliationOutcome {
