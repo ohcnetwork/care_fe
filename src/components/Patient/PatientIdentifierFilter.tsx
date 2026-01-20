@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { QrCode, Search, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
@@ -100,6 +100,18 @@ function PatientSearchSelector({
   isPatientFetching,
 }: PatientSearchSelectorProps) {
   const { t } = useTranslation();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus input when search type changes
+  useEffect(() => {
+    if (searchType) {
+      // Small delay to ensure the input is rendered after type change
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [searchType]);
 
   const searchStateMessage = (() => {
     if (!searchType) {
@@ -178,6 +190,7 @@ function PatientSearchSelector({
         <div className="relative px-2">
           {isPhoneNumberConfig ? (
             <PhoneInput
+              ref={inputRef}
               placeholder={selectedConfig?.config.display || t("search")}
               value={searchTerm}
               onChange={(value) => setSearchTerm(value || "")}
@@ -188,6 +201,7 @@ function PatientSearchSelector({
             <>
               <Search className="absolute left-5 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none z-10" />
               <Input
+                ref={inputRef}
                 type="text"
                 placeholder={selectedConfig?.config.display || t("search")}
                 value={searchTerm}
