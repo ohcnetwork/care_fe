@@ -358,4 +358,70 @@ test.describe("Schedule Template Management", () => {
       displayTime: testData.displayTime,
     });
   });
+
+  test("should select and deselect all weekdays while creating a template", async ({
+    page,
+  }) => {
+    // Open create template form
+    await expect(
+      page.getByRole("button", { name: "Create Template" }),
+    ).toBeVisible({ timeout: 10000 });
+    await page.getByRole("button", { name: "Create Template" }).click();
+
+    // Weekdays in create-template context (short format)
+    const weekdayShortNames = [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun",
+    ] as const;
+
+    // Ensure weekday buttons are visible
+    for (const day of weekdayShortNames) {
+      await expect(page.getByRole("button", { name: day })).toBeVisible();
+    }
+
+    // Select All toggle button
+    const selectAllButton = page.getByRole("button", { name: "Select All" });
+    await expect(selectAllButton).toBeVisible();
+
+    // Initially all weekdays should be unselected
+    for (const day of weekdayShortNames) {
+      await expect(page.getByRole("button", { name: day })).toHaveAttribute(
+        "aria-pressed",
+        "false",
+      );
+    }
+
+    // Click "Select All"
+    await selectAllButton.click();
+
+    // All weekdays should now be selected
+    for (const day of weekdayShortNames) {
+      await expect(page.getByRole("button", { name: day })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+    }
+
+    // Toggle switches to "Deselect All"
+    const deselectAllButton = page.getByRole("button", {
+      name: "Deselect All",
+    });
+    await expect(deselectAllButton).toBeVisible();
+
+    // Click "Deselect All"
+    await deselectAllButton.click();
+
+    // All weekdays should now be unselected again
+    for (const day of weekdayShortNames) {
+      await expect(page.getByRole("button", { name: day })).toHaveAttribute(
+        "aria-pressed",
+        "false",
+      );
+    }
+  });
 });
