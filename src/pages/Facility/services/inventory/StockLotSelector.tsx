@@ -48,6 +48,7 @@ interface StockLotSelectorProps {
   productKnowledge?: ProductKnowledgeBase;
   availableInventories?: InventoryRead[];
   dontRestrictExpired?: boolean;
+  disabled?: boolean;
 }
 
 export default function StockLotSelector({
@@ -63,6 +64,7 @@ export default function StockLotSelector({
   productKnowledge,
   availableInventories,
   dontRestrictExpired = false,
+  disabled = false,
 }: StockLotSelectorProps) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -163,11 +165,12 @@ export default function StockLotSelector({
 
   return (
     <Popover modal>
-      <PopoverTrigger>
+      <PopoverTrigger disabled={disabled}>
         <Button
           variant="outline"
           className={`w-auto min-w-40 h-auto justify-between p-1 border-gray-300 border ${className}`}
           type="button"
+          disabled={disabled}
         >
           <div className="flex flex-col min-w-40 items-start gap-1 w-full">
             {selectedLotsWithInventory.length === 0 ? (
