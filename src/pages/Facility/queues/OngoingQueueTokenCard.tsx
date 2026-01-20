@@ -160,18 +160,6 @@ export function OngoingQueueTokenCard({
                 <ContextMenuItem
                   onClick={() =>
                     updateToken({
-                      status: TokenStatus.FULFILLED,
-                      note: token.note,
-                      sub_queue: token.sub_queue?.id || null,
-                    })
-                  }
-                >
-                  <Check className="size-4 mr-2" />
-                  {t("mark_as_complete")}
-                </ContextMenuItem>
-                <ContextMenuItem
-                  onClick={() =>
-                    updateToken({
                       status: TokenStatus.IN_PROGRESS,
                       note: token.note,
                       sub_queue: token.sub_queue?.id || null,
@@ -267,6 +255,19 @@ export function OngoingQueueTokenCard({
                   {t("call_to", { name: service.name })}
                 </ContextMenuItem>
               ))}
+
+            <ContextMenuItem
+              onClick={() =>
+                updateToken({
+                  status: TokenStatus.FULFILLED,
+                  note: token.note,
+                  sub_queue: token.sub_queue?.id || null,
+                })
+              }
+            >
+              <Check className="size-4 mr-2" />
+              {t("mark_as_complete")}
+            </ContextMenuItem>
 
             <ContextMenuSeparator />
             {/* Cancel Token */}

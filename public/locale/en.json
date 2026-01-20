@@ -3133,6 +3133,8 @@
   "move": "Move",
   "move_back_to_in_service": "Move back to In-service",
   "move_back_to_in_service_confirmation": "Are you sure you want to move the token {{tokenNumber}} for {{patientName}} back to in service?",
+  "move_back_to_waiting": "Move back to waiting",
+  "move_back_to_waiting_confirmation": "Are you sure you want to move the token {{tokenNumber}} for {{patientName}} back to waiting?",
   "move_down": "Move Down",
   "move_item": "Move Item",
   "move_left": "Move Left",
