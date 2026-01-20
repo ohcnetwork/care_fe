@@ -25,10 +25,7 @@ import {
 import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
-import {
-  ChargeItemRead,
-  MRP_CODE,
-} from "@/types/billing/chargeItem/chargeItem";
+import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import { InvoiceRead, InvoiceStatus } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconciliation/paymentReconciliation";
@@ -238,9 +235,6 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                     {t("item")}
                   </TableHead>
                   <TableHead className={tableHeadClass}>
-                    {t("mrp")} ({getCurrencySymbol()})
-                  </TableHead>
-                  <TableHead className={tableHeadClass}>
                     {t("unit_price")} ({getCurrencySymbol()})
                   </TableHead>
                   <TableHead className={tableHeadClass}>{t("qty")}</TableHead>
@@ -271,12 +265,6 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                   invoice.charge_items.map((item, index) => {
                     const baseComponent = getBaseComponent(item);
                     const baseAmount = baseComponent?.amount || "0";
-                    const mrpAmount = item.unit_price_components.find(
-                      (c) =>
-                        c.monetary_component_type ===
-                          MonetaryComponentType.informational &&
-                        c.code?.code === MRP_CODE,
-                    )?.amount;
 
                     return (
                       <TableRow
@@ -292,9 +280,6 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                           className={cn(tableCellClass, "font-medium")}
                         >
                           {item.title}
-                        </TableCell>
-                        <TableCell className={cn(tableCellClass, "text-right")}>
-                          <MonetaryDisplay amount={mrpAmount} hideCurrency />
                         </TableCell>
                         <TableCell className={cn(tableCellClass, "text-right")}>
                           <MonetaryDisplay amount={baseAmount} hideCurrency />

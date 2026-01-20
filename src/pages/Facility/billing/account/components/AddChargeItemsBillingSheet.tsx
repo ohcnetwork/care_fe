@@ -367,6 +367,7 @@ export default function AddChargeItemsBillingSheet({
                   queryParams: { status: "active" },
                 }}
                 translationBaseKey="charge_item_definition"
+                data-shortcut-id="keydown-action"
               />
             </div>
 
