@@ -304,6 +304,9 @@ export function InvoiceShow({
   const [{ sourceUrl }] = useQueryParams();
 
   const alertButtonText = (() => {
+    if (sourceUrl?.includes("medication_return")) {
+      return t("back_to_medication_return");
+    }
     if (sourceUrl?.includes("medication_dispense")) {
       return t("medication_dispense_invoice_alert");
     }
