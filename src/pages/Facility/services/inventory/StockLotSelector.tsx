@@ -1,11 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  addMonths,
-  endOfMonth,
-  formatDate,
-  isBefore,
-  startOfMonth,
-} from "date-fns";
+import { formatDate } from "date-fns";
 import { ChevronDownIcon, SearchIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -27,8 +21,8 @@ import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { isPositive, round } from "@/Utils/decimal";
+import { getExpiryBadgeVariant, isProductRestricted } from "@/Utils/inventory";
 import query from "@/Utils/request/query";
-import careConfig from "@careConfig";
 
 export interface SelectedLot {
   selectedInventoryId: string;
@@ -48,6 +42,7 @@ interface StockLotSelectorProps {
   productKnowledge?: ProductKnowledgeBase;
   availableInventories?: InventoryRead[];
   dontRestrictExpired?: boolean;
+  showUnitPrice?: boolean;
 }
 
 export default function StockLotSelector({
@@ -63,42 +58,10 @@ export default function StockLotSelector({
   productKnowledge,
   availableInventories,
   dontRestrictExpired = false,
+  showUnitPrice = true,
 }: StockLotSelectorProps) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
-  const expiryMonthOffset = careConfig.inventory.expiryMonthOffset;
-
-  type ExpiryStatus = "expired" | "expiring_soon" | "valid";
-
-  const getExpiryStatus = (
-    expirationDate: string | undefined,
-  ): ExpiryStatus => {
-    if (!expirationDate) return "valid";
-    const expiryDate = new Date(expirationDate);
-    const currentMonthStart = startOfMonth(new Date());
-    if (isBefore(expiryDate, currentMonthStart)) return "expired";
-    if (expiryMonthOffset !== null) {
-      const referenceMonthEnd = endOfMonth(
-        addMonths(new Date(), expiryMonthOffset),
-      );
-      if (isBefore(expiryDate, referenceMonthEnd)) return "expiring_soon";
-    }
-    return "valid";
-  };
-
-  const isProductRestricted = (expirationDate: string | undefined): boolean => {
-    const status = getExpiryStatus(expirationDate);
-    return status === "expired" || status === "expiring_soon";
-  };
-
-  const getExpiryBadgeVariant = (
-    expirationDate: string | undefined,
-  ): "destructive" | "yellow" | "primary" => {
-    const status = getExpiryStatus(expirationDate);
-    if (status === "expired") return "destructive";
-    if (status === "expiring_soon") return "yellow";
-    return "primary";
-  };
 
   const { data: queryInventories } = useQuery({
     queryKey: ["inventoryItems", facilityId, locationId, productKnowledge?.id],
@@ -200,17 +163,19 @@ export default function StockLotSelector({
                         t("unknown")}
                     </span>
                     <div className="flex items-center gap-1">
-                      <Badge>
-                        <MonetaryDisplay
-                          amount={
-                            selectedInventory?.product.charge_item_definition?.price_components?.find(
-                              (c) =>
-                                c.monetary_component_type ===
-                                MonetaryComponentType.base,
-                            )?.amount
-                          }
-                        />
-                      </Badge>
+                      {showUnitPrice && (
+                        <Badge>
+                          <MonetaryDisplay
+                            amount={
+                              selectedInventory?.product.charge_item_definition?.price_components?.find(
+                                (c) =>
+                                  c.monetary_component_type ===
+                                  MonetaryComponentType.base,
+                              )?.amount
+                            }
+                          />
+                        </Badge>
+                      )}
                       <Badge
                         variant={
                           selectedInventory?.status === "active" &&

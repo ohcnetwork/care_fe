@@ -83,6 +83,7 @@ import {
   round,
   zodDecimal,
 } from "@/Utils/decimal";
+import { isValidLot } from "@/Utils/inventory";
 
 interface SelectedLocation {
   id: string;
@@ -226,7 +227,7 @@ export default function DispenseDrawer({
     fetchMissingInventories();
   }, [productKnowledgeInventoriesMap, facilityId, currentLocation.id]);
 
-  // Auto-select single lot if only one inventory is available
+  // Auto-select first valid (non-expired) lot by default
   useEffect(() => {
     fields.forEach((field, index) => {
       const inventories =
@@ -235,15 +236,21 @@ export default function DispenseDrawer({
 
       if (
         inventories !== undefined &&
-        inventories?.length === 1 &&
+        inventories?.length &&
         !currentLots.some((lot) => lot.selectedInventoryId)
       ) {
-        form.setValue(`items.${index}.lots`, [
-          {
-            selectedInventoryId: inventories[0].id,
-            quantity: "1",
-          },
-        ]);
+        const validLot = inventories.find((inv) =>
+          isValidLot(inv.product.expiration_date),
+        );
+
+        if (validLot) {
+          form.setValue(`items.${index}.lots`, [
+            {
+              selectedInventoryId: validLot.id,
+              quantity: "1",
+            },
+          ]);
+        }
       }
     });
   }, [productKnowledgeInventoriesMap, fields, form]);
@@ -750,6 +757,7 @@ export default function DispenseDrawer({
                                                         {...formField}
                                                         className="border-gray-300 border rounded-md w-24"
                                                         placeholder="0"
+                                                        autoFocus
                                                       />
                                                     </FormControl>
                                                     <FormMessage />

@@ -176,22 +176,19 @@ export function LocationSelectorDialog({
   };
 
   const handleConfirmSelection = (newLocation: LocationRead) => {
-    const oldLocationId = location?.id;
     setLocation(newLocation);
     setLocationLevel([]);
     setOpen(false);
     setSearchValue("");
     setCurrentPage(1);
-    if (newLocation.id !== oldLocationId) {
-      if (onLocationSelect) {
-        onLocationSelect(newLocation);
-      } else if (navigateUrl) {
-        navigate(navigateUrl(newLocation));
-      } else {
-        navigate(
-          `/facility/${facilityId}/locations/${newLocation.id}/${subPath}`,
-        );
-      }
+    if (onLocationSelect) {
+      onLocationSelect(newLocation);
+    } else if (navigateUrl) {
+      navigate(navigateUrl(newLocation));
+    } else {
+      navigate(
+        `/facility/${facilityId}/locations/${newLocation.id}/${subPath}`,
+      );
     }
   };
 

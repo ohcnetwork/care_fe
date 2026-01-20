@@ -35,7 +35,6 @@ import {
   PaymentReconciliationStatus,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
-import patientApi from "@/types/emr/patient/patientApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
 import { add, round } from "@/Utils/decimal";
@@ -92,14 +91,6 @@ export const PrintChargeItems = (props: {
     queryFn: query(accountApi.retrieveAccount, {
       pathParams: { facilityId, accountId },
     }),
-  });
-
-  const { data: patient } = useQuery({
-    queryKey: ["patient", account?.patient?.id],
-    queryFn: query(patientApi.get, {
-      pathParams: { id: account?.patient?.id || "" },
-    }),
-    enabled: !!account?.patient?.id,
   });
 
   const { data: chargeItems, isLoading } = useQuery({
@@ -263,21 +254,21 @@ export const PrintChargeItems = (props: {
                     <div className="space-y-1">
                       <DetailRow
                         label={t("name")}
-                        value={patient?.name}
+                        value={account?.patient?.name}
                         width="w-16"
                       />
                       <DetailRow
                         label={`${t("age")} / ${t("sex")}`}
                         value={
-                          patient
-                            ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
+                          account?.patient
+                            ? `${formatPatientAge(account.patient, true)}, ${t(`GENDER__${account.patient.gender}`)}`
                             : undefined
                         }
                         width="w-16"
                       />
                       <DetailRow
                         label={`${t("address")}`}
-                        value={patient?.address}
+                        value={account?.patient?.address}
                         width="w-16"
                       />
                     </div>
@@ -287,7 +278,7 @@ export const PrintChargeItems = (props: {
                         value={formatDateTime(new Date(), "DD-MM-YYYY")}
                         width="w-24"
                       />
-                      {patient?.instance_identifiers
+                      {account?.patient?.instance_identifiers
                         ?.filter(
                           ({ config }) =>
                             config.config.use === PatientIdentifierUse.official,
@@ -303,7 +294,8 @@ export const PrintChargeItems = (props: {
                       <DetailRow
                         label={t("mobile_number")}
                         value={
-                          patient && formatPhoneNumberIntl(patient.phone_number)
+                          account?.patient &&
+                          formatPhoneNumberIntl(account.patient.phone_number)
                         }
                         width="w-24"
                       />
