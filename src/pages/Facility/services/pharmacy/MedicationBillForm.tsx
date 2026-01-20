@@ -1519,6 +1519,8 @@ export default function MedicationBillForm({
                       substitution?.substitutedProductKnowledge ||
                       productKnowledge;
 
+                    const isChecked = form.watch(`items.${index}.isSelected`);
+
                     return (
                       <TableRow
                         key={field.id}
@@ -1543,7 +1545,12 @@ export default function MedicationBillForm({
                           />
                         </TableCell>
                         <TableCell className={tableCellClass}>
-                          <div className="flex items-center justify-between gap-2">
+                          <div
+                            className={cn(
+                              "flex items-center justify-between gap-2",
+                              !isChecked && "opacity-60 line-through",
+                            )}
+                          >
                             <div>
                               <div className="font-medium text-gray-950 text-base flex items-center">
                                 <div>
@@ -1782,6 +1789,7 @@ export default function MedicationBillForm({
                                 size="sm"
                                 className="border-gray-400 border text-gray-950 hover:bg-gray-50"
                                 type="button"
+                                disabled={!isChecked}
                                 onClick={() => {
                                   setSubstitutingItemIndex(index);
                                   setOriginalProductForSubstitution(
@@ -1841,11 +1849,17 @@ export default function MedicationBillForm({
                                 }
                                 multiSelect
                                 showexpiry={false}
+                                disabled={!isChecked}
                                 showUnitPrice={false}
                               />
                             </div>
                           ) : (
-                            <Badge variant="destructive">{t("no_stock")}</Badge>
+                            <Badge
+                              variant="destructive"
+                              className={cn(!isChecked && "opacity-50")}
+                            >
+                              {t("no_stock")}
+                            </Badge>
                           )}
                         </TableCell>
                         <TableCell className={tableCellClass}>
@@ -1879,6 +1893,7 @@ export default function MedicationBillForm({
                                               {...formField}
                                               className="border-gray-300 border rounded-md w-24"
                                               placeholder="0"
+                                              disabled={!isChecked}
                                               autoFocus
                                             />
                                           </FormControl>
@@ -1914,6 +1929,7 @@ export default function MedicationBillForm({
                                       min={1}
                                       {...formField}
                                       className="border-gray-300 border rounded-md w-24"
+                                      disabled={!isChecked}
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -1937,7 +1953,10 @@ export default function MedicationBillForm({
                               return (
                                 <div
                                   key={lot.selectedInventoryId}
-                                  className="py-2.5 text-gray-950 font-normal text-base"
+                                  className={cn(
+                                    "py-2.5 text-gray-950 font-normal text-base",
+                                    !isChecked && "opacity-60 text-gray-500",
+                                  )}
                                 >
                                   {selectedInventory?.product.expiration_date
                                     ? formatDate(
@@ -1972,7 +1991,10 @@ export default function MedicationBillForm({
                               return (
                                 <div
                                   key={lot.selectedInventoryId}
-                                  className="py-2.5 text-gray-950 font-normal text-base"
+                                  className={cn(
+                                    "py-2.5 text-gray-950 font-normal text-base",
+                                    !isChecked && "opacity-60 text-gray-500",
+                                  )}
                                 >
                                   <MonetaryDisplay amount={prices.basePrice} />
                                 </div>
@@ -1998,7 +2020,10 @@ export default function MedicationBillForm({
                               return selectedInventory ? (
                                 <div
                                   key={lot.selectedInventoryId}
-                                  className="py-2.5 text-gray-950 font-normal text-base"
+                                  className={cn(
+                                    "py-2.5 text-gray-950 font-normal text-base",
+                                    !isChecked && "opacity-60 text-gray-500",
+                                  )}
                                 >
                                   {selectedInventory.product.charge_item_definition?.price_components
                                     .filter(
@@ -2040,6 +2065,7 @@ export default function MedicationBillForm({
                                       className="data-[state=checked]:bg-primary-600"
                                       checked={formField.value}
                                       onCheckedChange={formField.onChange}
+                                      disabled={!isChecked}
                                     />
                                   </FormControl>
                                 </FormItem>
@@ -2054,7 +2080,11 @@ export default function MedicationBillForm({
                         >
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="outline" size="icon">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                disabled={!isChecked}
+                              >
                                 <MoreVertical className="size-5" />
                               </Button>
                             </DropdownMenuTrigger>
