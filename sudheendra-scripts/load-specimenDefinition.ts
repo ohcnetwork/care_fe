@@ -9,7 +9,9 @@ import {
 } from "@/types/emr/specimenDefinition/specimenDefinition.js";
 import dotenv from "dotenv";
 import {
+  ApiResult,
   type BaseConfig,
+  LoaderResult,
   type ProcessedRow,
   colorize,
   createScriptConfig,
@@ -101,27 +103,27 @@ function processCsvData(
     const container =
       containerCap || minimumVolumeUnit
         ? {
-            ...(containerCap && { cap: containerCap }),
-            ...(minimumVolumeUnit &&
-              !isNaN(minimumVolume) &&
-              minimumVolume > 0 && {
-                minimum_volume: {
-                  quantity: {
-                    value: minimumVolume.toString(),
-                    unit: minimumVolumeUnit,
-                  },
-                },
-              }),
-          }
+          ...(containerCap && { cap: containerCap }),
+          ...(minimumVolumeUnit &&
+            !isNaN(minimumVolume) &&
+            minimumVolume > 0 && {
+            minimum_volume: {
+              quantity: {
+                value: minimumVolume.toString(),
+                unit: minimumVolumeUnit,
+              },
+            },
+          }),
+        }
         : undefined;
 
     // Build retention time (optional)
     const retentionTime =
       row.retention_time && retentionTimeUnit
         ? {
-            value: row.retention_time_value || "0",
-            unit: retentionTimeUnit,
-          }
+          value: row.retention_time_value || "0",
+          unit: retentionTimeUnit,
+        }
         : undefined;
 
     // Build type_tested (optional)
@@ -182,22 +184,50 @@ async function upsertSpecimenDefinition(
   );
 }
 
+
+async function mockInsert(config: BaseConfig): Promise<LoaderResult> {
+  logger(colorize("Loading data...", 0));
+  const csvRows = await loadData(config);
+
+  if (csvRows.length === 0) {
+    throw new Error("No valid rows found in CSV file");
+  }
+
+  let processedData = processCsvData(csvRows);
+
+  // Remove duplicates
+  processedData = removeDuplicates(processedData);
+
+  return {
+    successful: processedData as unknown as ApiResult<SpecimenDefinitionCreate>[],
+    failed: [],
+    results: processedData.map((item) => ({
+      success: true,
+      item: item,
+    })),
+  };
+}
+
 // Main function
 async function main(configOverride?: Partial<BaseConfig>) {
   // If configOverride is provided, don't merge CLI args (called programmatically)
   // Otherwise, merge CLI args (called from command line)
   let finalConfig = configOverride
     ? createScriptConfig(
+      SCRIPT_DEFAULTS.inputFile,
+      SCRIPT_DEFAULTS.outputFile,
+      configOverride,
+    )
+    : mergeConfigWithCli(
+      createScriptConfig(
         SCRIPT_DEFAULTS.inputFile,
         SCRIPT_DEFAULTS.outputFile,
-        configOverride,
-      )
-    : mergeConfigWithCli(
-        createScriptConfig(
-          SCRIPT_DEFAULTS.inputFile,
-          SCRIPT_DEFAULTS.outputFile,
-        ),
-      );
+      ),
+    );
+
+  if (finalConfig.skipInsert?.includes("sm")) {
+    return mockInsert(finalConfig);
+  }
 
   try {
     logger(colorize("Starting specimen definition loader...", 0));
@@ -223,6 +253,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
 
     // Create output data for CSV
     let outputData: ProcessedRow[] = processedData.map((item) => ({
+      ...item,
       title: item.title,
       slug_value: item.slug_value,
       status: "Pending",

@@ -153,9 +153,14 @@ const ACTIVITY_VALIDATION_RULES: ValidationRule[] = [
 // Helper function to create ActivityData from a row with validated code
 function createActivityDataFromRow(row: Record<string, string>): ActivityData {
   // Create code from validated row data
+
+  let rowCode = row.code_value;
+  if (rowCode && rowCode.includes(",")) {
+    rowCode = rowCode.split(",")[0];
+  }
   const finalCode = {
     system: row.code_system || ACTIVITY_VALIDATION_RULES[0].defaultSystem,
-    code: row.code_value || ACTIVITY_VALIDATION_RULES[0].defaultCode,
+    code: rowCode || ACTIVITY_VALIDATION_RULES[0].defaultCode,
     display: row.code_display || ACTIVITY_VALIDATION_RULES[0].defaultDisplay,
   };
   const bodySite = parseCode(
@@ -197,21 +202,21 @@ function createActivityDataFromRow(row: Record<string, string>): ActivityData {
     category: row.category || "laboratory",
     observations: row.observation_slugs
       ? row.observation_slugs
-          .split(",")
-          .map((s: string) => s.trim())
-          .filter((s: string) => s)
+        .split(",")
+        .map((s: string) => s.trim())
+        .filter((s: string) => s)
       : [],
     specimens: row.specimen_slugs
       ? row.specimen_slugs
-          .split(",")
-          .map((s: string) => s.trim())
-          .filter((s: string) => s)
+        .split(",")
+        .map((s: string) => s.trim())
+        .filter((s: string) => s)
       : [],
     chargeItems: row.charge_item_slugs
       ? row.charge_item_slugs
-          .split(",")
-          .map((s: string) => s.trim())
-          .filter((s: string) => s)
+        .split(",")
+        .map((s: string) => s.trim())
+        .filter((s: string) => s)
       : [],
     diagnostic_report_loinc_codes: [], //diagnosticReportCodes,
     code: finalCode,
@@ -219,9 +224,9 @@ function createActivityDataFromRow(row: Record<string, string>): ActivityData {
     derived_from_uri: row.derived_from_uri || undefined,
     locations: row.locations
       ? row.locations
-          .split(",")
-          .map((s: string) => s.trim())
-          .filter((s: string) => s)
+        .split(",")
+        .map((s: string) => s.trim())
+        .filter((s: string) => s)
       : [],
   };
 }
@@ -281,16 +286,16 @@ async function processCsvData(
 async function main(configOverride?: Partial<BaseConfig>) {
   let finalConfig = configOverride
     ? createScriptConfig(
+      SCRIPT_DEFAULTS.inputFile,
+      SCRIPT_DEFAULTS.outputFile,
+      configOverride,
+    )
+    : mergeConfigWithCli(
+      createScriptConfig(
         SCRIPT_DEFAULTS.inputFile,
         SCRIPT_DEFAULTS.outputFile,
-        configOverride,
-      )
-    : mergeConfigWithCli(
-        createScriptConfig(
-          SCRIPT_DEFAULTS.inputFile,
-          SCRIPT_DEFAULTS.outputFile,
-        ),
-      );
+      ),
+    );
 
   try {
     logger(colorize("Starting activity definition loader...", 0));
@@ -309,7 +314,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
     logger(colorize("\n=== Loading Dependencies ===", 0));
 
     // Load charge items
-    if (finalConfig.skipInsert) {
+    if (finalConfig.skipInsert?.includes("cid")) {
       logger(colorize("Skipping charge item loading...", 1));
     } else {
       logger(colorize("Loading charge items...", 2));
@@ -326,7 +331,11 @@ async function main(configOverride?: Partial<BaseConfig>) {
     });
 
     // Load specimens
-    logger(colorize("Loading specimens...", 2));
+    if (finalConfig.skipInsert?.includes("sm")) {
+      logger(colorize("Skipping specimen loading...", 1));
+    } else {
+      logger(colorize("Loading specimens...", 2));
+    }
     const specimenResults = await loadSpecimens({
       ...authenticatedConfig,
       inputFile: path.join(__dirname, "SpecimenDefinition.csv"),
@@ -339,7 +348,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
     });
 
     // Load observations
-    if (finalConfig.skipInsert) {
+    if (finalConfig.skipInsert?.includes("obs")) {
       logger(colorize("Skipping observation loading...", 1));
     } else {
       logger(colorize("Loading observations...", 2));
@@ -408,7 +417,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
 
     // Create output data for CSV
     let outputData: ProcessedRow[] = uniqueProcessedData.map((item) => ({
-      title: item.title,
+      ...item,
       slug_value: item.slug_value,
       status: "Pending",
       code_substitution: substitutions.get(item.slug_value) || "",
@@ -558,18 +567,7 @@ async function main(configOverride?: Partial<BaseConfig>) {
     // Write output CSV with dynamic substitution columns
     logger(colorize("Writing output CSV...", 0));
 
-    // Create custom headers with substitution columns
-    const customHeaders = [
-      "title",
-      "slug_value",
-      "status",
-      "errors",
-      ...ACTIVITY_VALIDATION_RULES.map(
-        (rule) => `${rule.rowPrefix}_Substitution`,
-      ),
-    ];
-
-    await writeOutputCsv(outputData, finalConfig.outputFile, customHeaders);
+    await writeOutputCsv(outputData, finalConfig.outputFile);
 
     // Process and return results
     return processApiResults(allResults, "activity");

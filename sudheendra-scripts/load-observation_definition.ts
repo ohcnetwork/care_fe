@@ -437,18 +437,18 @@ async function main(configOverride?: Partial<BaseConfig>) {
   // Otherwise, merge CLI args (called from command line)
   let finalConfig = configOverride
     ? createScriptConfig(
+      SCRIPT_DEFAULTS.inputFile,
+      SCRIPT_DEFAULTS.outputFile,
+      configOverride,
+    )
+    : mergeConfigWithCli(
+      createScriptConfig(
         SCRIPT_DEFAULTS.inputFile,
         SCRIPT_DEFAULTS.outputFile,
-        configOverride,
-      )
-    : mergeConfigWithCli(
-        createScriptConfig(
-          SCRIPT_DEFAULTS.inputFile,
-          SCRIPT_DEFAULTS.outputFile,
-        ),
-      );
+      ),
+    );
 
-  if (finalConfig.skipInsert) {
+  if (finalConfig.skipInsert?.includes("obs")) {
     return mockInsert(finalConfig);
   }
 

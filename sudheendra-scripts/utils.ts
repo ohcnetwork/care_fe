@@ -290,7 +290,7 @@ export const transformCsvToObjects = <T extends string>(
 
 // Common interfaces
 export interface ProcessedRow {
-  [key: string]: string;
+  [key: string]: any;
 }
 
 export interface ApiResult<T = any> {
@@ -312,7 +312,7 @@ export interface BaseConfig {
   outputFile: string;
   facilityId: string;
   apiBaseUrl: string;
-  skipInsert?: boolean;
+  skipInsert?: string;
   parser?: "local" | "google-sheets";
   googleSheetId?: string;
   sheetName?: string;
@@ -1028,16 +1028,21 @@ export async function makeApiCall(
     config,
   );
 
+
   if (!response.ok) {
     const errorText = await response.json();
 
-    // Check if it's a "slug must be unique" error
+    // Check if it's an "already exists" error (slug already exists, etc.)
     const errorString = JSON.stringify(errorText).toLowerCase();
-    if (errorString.includes("slug must be unique")) {
+    if (
+      errorString.includes("slug must be unique") ||
+      errorString.includes("already exists") ||
+      errorString.includes("slug already exists")
+    ) {
       throw {
         status: response.status,
         statusText: response.statusText,
-        errorText: "slug must be unique",
+        errorText: "already exists",
         isAlreadyExists: true,
       };
     }
@@ -1165,10 +1170,11 @@ export async function writeOutputCsv(
 export function removeDuplicates<T extends { slug_value: string }>(
   items: T[],
 ): T[] {
-  return items.filter(
-    (item, index, self) =>
-      index === self.findIndex((t) => t.slug_value === item.slug_value),
-  );
+  /*   return items.filter(
+      (item, index, self) =>
+        index === self.findIndex((t) => t.slug_value === item.slug_value),
+    ); */
+  return items;
 }
 
 // Function to format error messages in a readable way
@@ -1351,13 +1357,13 @@ export function createGenericLoader<TProcessed>(
     // Step 1: Config initialization
     let finalConfig = configOverride
       ? createScriptConfig(
-          config.defaultInputFile,
-          config.defaultOutputFile,
-          configOverride,
-        )
+        config.defaultInputFile,
+        config.defaultOutputFile,
+        configOverride,
+      )
       : mergeConfigWithCli(
-          createScriptConfig(config.defaultInputFile, config.defaultOutputFile),
-        );
+        createScriptConfig(config.defaultInputFile, config.defaultOutputFile),
+      );
 
     try {
       logger(colorize(`Starting ${config.scriptName} loader...`, 0));
@@ -1413,8 +1419,8 @@ export function createGenericLoader<TProcessed>(
       logger(colorize(`Upserting ${config.scriptName}s...`, 0));
       const itemsForApi = config.transformForApiFn
         ? processedData.map((item) =>
-            config.transformForApiFn!(item, finalConfig),
-          )
+          config.transformForApiFn!(item, finalConfig),
+        )
         : processedData;
 
       const results = await makeBatchApiCall(
@@ -1526,7 +1532,7 @@ export function mergeConfigWithCli<T extends BaseConfig>(
   }
 
   if (cliArgs["skip-insert"]) {
-    cliConfig.skipInsert = true;
+    cliConfig.skipInsert = cliArgs["skip-insert"];
   }
 
   // Merge in order: defaultConfig -> override -> cliConfig
@@ -1601,7 +1607,7 @@ export async function createResourceCategories(
   categories: string[],
   resourceType: ResourceCategoryResourceType,
   config: BaseConfig,
-  resourceSubType: ResourceCategorySubType = ResourceCategorySubType.other,
+  resourceSubTypeMap?: Map<string, string>,
 ): Promise<{
   successful: string[];
   failed: string[];
@@ -1631,17 +1637,19 @@ export async function createResourceCategories(
       resourceTypePrefix = "pk";
       break;
   }
-
   const categoryData: ResourceCategoryCreate[] = filteredCategories.map(
-    (category) => ({
-      title: normalizeTitle(category),
-      description: `Auto-generated category for ${category}`,
-      resource_type: resourceType,
-      resource_sub_type: ResourceCategorySubType.other,
-      slug_value: generateHashSlug(
-        normalizeTitle(`${resourceTypePrefix}_${category}`),
-      ),
-    }),
+    (category) => {
+      const resourceSubType = resourceSubTypeMap?.get(category) || ResourceCategorySubType.other;
+      return ({
+        title: normalizeTitle(category),
+        description: `Auto-generated category for ${category}`,
+        resource_type: resourceType,
+        resource_sub_type: resourceSubType as ResourceCategorySubType,
+        slug_value: generateHashSlug(
+          normalizeTitle(`${resourceTypePrefix}_${category}`),
+        ),
+      })
+    }
   );
 
   // Use batch API call to create categories
@@ -1714,6 +1722,7 @@ export async function ensureActivityDefinitionCategories(
 export async function ensureChargeItemCategories(
   categoriesList: string[],
   config: BaseConfig,
+  resourceSubTypeMap?: Map<string, string>,
 ): Promise<{
   successful: string[];
   failed: string[];
@@ -1728,6 +1737,7 @@ export async function ensureChargeItemCategories(
     categories,
     ResourceCategoryResourceType.charge_item_definition,
     config,
+    resourceSubTypeMap,
   );
 }
 
@@ -2106,7 +2116,7 @@ export async function lookupCodesInValuesetBatch(
       if (data.results && Array.isArray(data.results)) {
         data.results.forEach((result) => {
           const code = result.reference_id;
-          
+
           // Check if the request was successful (2xx status code)
           if (result.status_code >= 200 && result.status_code < 300) {
             // The data should contain the lookup result with metadata

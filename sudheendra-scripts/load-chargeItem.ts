@@ -99,7 +99,9 @@ function processCsvData(rows: Record<string, string>[]): ChargeItemData[] {
     const basePrice = parseFloat(row["Base Price"].replace(/[^\d.-]/g, ""));
     const taxRate = row["Tax Rate"] || row["RATE"] || row["Tax"] || undefined;
     const title = row["Service"] || row["title"];
-    const slug_value = generateHashSlug(normalizeTitle(title || ""));
+    const slug_value = generateHashSlug(normalizeTitle(title || ""), 25);
+    const resource_subtype = row["resource_sub_type"];
+    const status = row["status"];
 
     return {
       title: title,
@@ -109,8 +111,9 @@ function processCsvData(rows: Record<string, string>[]): ChargeItemData[] {
       category: row.category || "service",
       description: row.description || `Service: ${title}`,
       status:
-        (row.status as ChargeItemDefinitionStatus) ||
+        (status as ChargeItemDefinitionStatus) ||
         ChargeItemDefinitionStatus.active,
+      resource_subtype: resource_subtype,
     };
   });
 }
@@ -143,18 +146,18 @@ async function main(configOverride?: Partial<BaseConfig>) {
   // Otherwise, merge CLI args (called from command line)
   let finalConfig = configOverride
     ? createScriptConfig(
+      SCRIPT_DEFAULTS.inputFile,
+      SCRIPT_DEFAULTS.outputFile,
+      configOverride,
+    )
+    : mergeConfigWithCli(
+      createScriptConfig(
         SCRIPT_DEFAULTS.inputFile,
         SCRIPT_DEFAULTS.outputFile,
-        configOverride,
-      )
-    : mergeConfigWithCli(
-        createScriptConfig(
-          SCRIPT_DEFAULTS.inputFile,
-          SCRIPT_DEFAULTS.outputFile,
-        ),
-      );
+      ),
+    );
 
-  if (finalConfig.skipInsert) {
+  if (finalConfig.skipInsert?.includes("cid")) {
     return mockInsert(finalConfig);
   }
 
@@ -175,9 +178,15 @@ async function main(configOverride?: Partial<BaseConfig>) {
 
     // Ensure categories exist
     const categoriesList = csvRows.map((item) => item.category);
+    const resourceSubTypeMap = new Map<string, string>();
+    csvRows.forEach((item) => {
+      if (item.resource_sub_type) {
+        resourceSubTypeMap.set(item.category, item.resource_sub_type);
+      }
+    });
     logger(colorize("Ensuring categories exist...", 0));
     const { successful, failed, categoryData } =
-      await ensureChargeItemCategories(categoriesList, finalConfig);
+      await ensureChargeItemCategories(categoriesList, finalConfig, resourceSubTypeMap);
     if (failed.length > 0) {
       logger(colorize("Failed to create categories:", 1));
       failed.forEach((category) => {
@@ -195,11 +204,8 @@ async function main(configOverride?: Partial<BaseConfig>) {
 
     // Create output data for CSV
     let outputData: ProcessedRow[] = processedData.map((item) => ({
-      Service: normalizeTitle(item.title),
-      "Base Price": item.basePrice.toString(),
-      "Tax Rate": item.taxRate || "N/A",
-      Slug_value: item.slug_value,
-      Status: "Pending",
+      ...item,
+      status: "Pending",
     }));
 
     // Upsert charge item definitions via API using batch processing
@@ -220,7 +226,10 @@ async function main(configOverride?: Partial<BaseConfig>) {
               amount: item.basePrice.toString(),
               conditions: [],
             },
-            ...getTaxComponents(item.taxRate),
+            ...getTaxComponents(item.taxRate).map((component) => ({
+              ...component,
+              factor: component.factor.toString(),
+            })),
           ],
         };
       }),
