@@ -1442,6 +1442,8 @@ export default function MedicationBillForm({
                       substitution?.substitutedProductKnowledge ||
                       productKnowledge;
 
+                    const isChecked = form.watch(`items.${index}.isSelected`);
+
                     return (
                       <TableRow
                         key={field.id}
@@ -1469,9 +1471,7 @@ export default function MedicationBillForm({
                           <div
                             className={cn(
                               "flex items-center justify-between gap-2",
-                              form.watch(`items.${index}.isSelected`)
-                                ? ""
-                                : "opacity-60",
+                              !isChecked && "opacity-60 line-through",
                             )}
                           >
                             <div>
@@ -1710,9 +1710,7 @@ export default function MedicationBillForm({
                                 size="sm"
                                 className="border-gray-400 border text-gray-950 hover:bg-gray-50"
                                 type="button"
-                                disabled={
-                                  !form.watch(`items.${index}.isSelected`)
-                                }
+                                disabled={!isChecked}
                                 onClick={() => {
                                   setSubstitutingItemIndex(index);
                                   setOriginalProductForSubstitution(
@@ -1765,18 +1763,13 @@ export default function MedicationBillForm({
                                 }
                                 multiSelect
                                 showexpiry={false}
-                                disabled={
-                                  !form.watch(`items.${index}.isSelected`)
-                                }
+                                disabled={!isChecked}
                               />
                             </div>
                           ) : (
                             <Badge
                               variant="destructive"
-                              className={cn(
-                                !form.watch(`items.${index}.isSelected`) &&
-                                  "opacity-50",
-                              )}
+                              className={cn(!isChecked && "opacity-50")}
                             >
                               {t("no_stock")}
                             </Badge>
@@ -1849,9 +1842,7 @@ export default function MedicationBillForm({
                                     min={1}
                                     {...formField}
                                     className="border-gray-300 border rounded-none w-24"
-                                    disabled={
-                                      !form.watch(`items.${index}.isSelected`)
-                                    }
+                                    disabled={!isChecked}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -1876,9 +1867,7 @@ export default function MedicationBillForm({
                                   key={lot.selectedInventoryId}
                                   className={cn(
                                     "py-2.5 text-gray-950 font-normal text-base",
-                                    form.watch(`items.${index}.isSelected`)
-                                      ? ""
-                                      : "opacity-60 text-gray-500",
+                                    !isChecked && "opacity-60 text-gray-500",
                                   )}
                                 >
                                   {selectedInventory?.product.expiration_date
@@ -1916,9 +1905,7 @@ export default function MedicationBillForm({
                                   key={lot.selectedInventoryId}
                                   className={cn(
                                     "py-2.5 text-gray-950 font-normal text-base",
-                                    form.watch(`items.${index}.isSelected`)
-                                      ? ""
-                                      : "opacity-60 text-gray-500",
+                                    !isChecked && "opacity-60 text-gray-500",
                                   )}
                                 >
                                   <MonetaryDisplay amount={prices.basePrice} />
@@ -1947,9 +1934,7 @@ export default function MedicationBillForm({
                                   key={lot.selectedInventoryId}
                                   className={cn(
                                     "py-2.5 text-gray-950 font-normal text-base",
-                                    form.watch(`items.${index}.isSelected`)
-                                      ? ""
-                                      : "opacity-60 text-gray-500",
+                                    !isChecked && "opacity-60 text-gray-500",
                                   )}
                                 >
                                   {selectedInventory.product.charge_item_definition?.price_components
@@ -1992,9 +1977,7 @@ export default function MedicationBillForm({
                                       className="data-[state=checked]:bg-primary-600"
                                       checked={formField.value}
                                       onCheckedChange={formField.onChange}
-                                      disabled={
-                                        !form.watch(`items.${index}.isSelected`)
-                                      }
+                                      disabled={!isChecked}
                                     />
                                   </FormControl>
                                 </FormItem>
@@ -2012,9 +1995,7 @@ export default function MedicationBillForm({
                               <Button
                                 variant="outline"
                                 size="icon"
-                                disabled={
-                                  !form.watch(`items.${index}.isSelected`)
-                                }
+                                disabled={!isChecked}
                               >
                                 <MoreVertical className="size-5" />
                               </Button>
