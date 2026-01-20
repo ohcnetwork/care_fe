@@ -247,6 +247,14 @@ const careConfig = {
   ),
 
   /**
+   * Show token generation button in patient home if set to "true"
+   */
+  enableTokenGenerationInPatientHome: booleanFromString(
+    env.REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME,
+    false,
+  ),
+
+  /**
    * Default state for tax inclusive pricing in inventory
    * When true, base price is calculated from MRP by removing tax
    */

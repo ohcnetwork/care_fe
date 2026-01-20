@@ -146,7 +146,7 @@ const createFormSchema = () =>
       account: z.string(),
       is_credit_note: z.boolean().optional(),
       location: careConfig.paymentLocationRequired
-        ? z.string().min(1)
+        ? z.string().min(1, t("field_required"))
         : z.string().optional(),
     })
     .refine(
