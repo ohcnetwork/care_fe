@@ -454,9 +454,7 @@ export function CreateInvoicePage({
                       <TableHead className="border bg-gray-100 text-gray-700">
                         {t("quantity")}
                       </TableHead>
-                      <TableHead className="border bg-gray-100 text-gray-700 text-right">
-                        {t("mrp")} ({getCurrencySymbol()})
-                      </TableHead>
+
                       <TableHead className="border-y bg-gray-100 text-gray-700 text-right">
                         {t("unit_price")} ({getCurrencySymbol()})
                       </TableHead>

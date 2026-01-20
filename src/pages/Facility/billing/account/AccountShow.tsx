@@ -346,8 +346,8 @@ export function AccountShow({
                       }
                     >
                       <CareIcon icon="l-plus" className="size-4" />
-                      {t("record_payment")}
-                      <ShortcutBadge actionId="record-payment-account" />
+                      {t("add_credit")}
+                      <ShortcutBadge actionId="credit-payment-account" />
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -405,7 +405,7 @@ export function AccountShow({
                   }
                 >
                   <CareIcon icon="l-plus" className="size-4" />
-                  {t("payment")}
+                  {t("credit")}
                   <ShortcutBadge actionId="record-payment-account" />
                 </Button>
                 <DropdownMenu>

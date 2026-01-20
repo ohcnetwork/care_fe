@@ -8,8 +8,8 @@ import {
 } from "@/components/ui/context-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { AssignToServicePointDialog } from "@/pages/Facility/queues/AssignToServicePointDialog";
 import { CancelTokenDialog } from "@/pages/Facility/queues/CancelTokenDialog";
+import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePoints";
 import {
   renderTokenNumber,
   TokenRead,
@@ -49,9 +49,8 @@ export function OngoingQueueTokenCard({
   const { t } = useTranslation();
   const contextMenuTriggerRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  const { assignedServicePoints } = useQueueServicePoints();
 
-  const [showAssignToServicePointDialog, setShowAssignToServicePointDialog] =
-    useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   const { mutate: updateToken } = useMutation({
@@ -157,33 +156,23 @@ export function OngoingQueueTokenCard({
         <>
           <ContextMenuContent>
             {token.status === TokenStatus.CREATED && token.sub_queue && (
-              <ContextMenuItem
-                onClick={() =>
-                  updateToken({
-                    status: TokenStatus.IN_PROGRESS,
-                    note: token.note,
-                    sub_queue: token.sub_queue?.id || null,
-                  })
-                }
-              >
-                <CircleDot className="size-4 mr-2" />
-                {t("mark_as_now_serving")}
-              </ContextMenuItem>
-            )}
-            {token.status === TokenStatus.IN_PROGRESS && (
               <>
                 <ContextMenuItem
                   onClick={() =>
                     updateToken({
-                      status: TokenStatus.FULFILLED,
+                      status: TokenStatus.IN_PROGRESS,
                       note: token.note,
                       sub_queue: token.sub_queue?.id || null,
                     })
                   }
                 >
-                  <Check className="size-4 mr-2" />
-                  {t("mark_as_complete")}
+                  <CircleDot className="size-4 mr-2" />
+                  {t("mark_as_now_serving")}
                 </ContextMenuItem>
+              </>
+            )}
+            {token.status === TokenStatus.IN_PROGRESS && (
+              <>
                 <ContextMenuItem
                   onClick={() =>
                     updateToken({
@@ -225,20 +214,59 @@ export function OngoingQueueTokenCard({
               </ContextMenuItem>
             )}
 
+            {assignedServicePoints
+              .filter((service) => service.id !== token.sub_queue?.id)
+              .map((service) => (
+                <ContextMenuItem
+                  key={service.id}
+                  onClick={() =>
+                    updateToken({
+                      status: TokenStatus.IN_PROGRESS,
+                      note: token.note,
+                      sub_queue: service.id,
+                    })
+                  }
+                >
+                  {token.sub_queue ? (
+                    <RedoDot className="size-4 mr-2" />
+                  ) : (
+                    <TicketCheck className="size-4 mr-2" />
+                  )}
+                  {token.sub_queue
+                    ? t("reassign_service_point", { name: service.name })
+                    : t("mark_as_in_service", { name: service.name })}
+                </ContextMenuItem>
+              ))}
+
+            {assignedServicePoints
+              .filter((service) => service.id !== token.sub_queue?.id)
+              .map((service) => (
+                <ContextMenuItem
+                  key={service.id}
+                  onClick={() =>
+                    updateToken({
+                      status: TokenStatus.CREATED,
+                      note: token.note,
+                      sub_queue: service.id,
+                    })
+                  }
+                >
+                  <Megaphone className="size-4 mr-2" />
+                  {t("call_to", { name: service.name })}
+                </ContextMenuItem>
+              ))}
+
             <ContextMenuItem
-              onClick={() => setShowAssignToServicePointDialog(true)}
+              onClick={() =>
+                updateToken({
+                  status: TokenStatus.FULFILLED,
+                  note: token.note,
+                  sub_queue: token.sub_queue?.id || null,
+                })
+              }
             >
-              {token.sub_queue ? (
-                <>
-                  <RedoDot className="size-4 mr-2" />
-                  {t("reassign_service_point")}
-                </>
-              ) : (
-                <>
-                  <TicketCheck className="size-4 mr-2" />
-                  {t("assign_to_service_point")}
-                </>
-              )}
+              <Check className="size-4 mr-2" />
+              {t("mark_as_complete")}
             </ContextMenuItem>
 
             <ContextMenuSeparator />
@@ -271,11 +299,7 @@ export function OngoingQueueTokenCard({
               </ContextMenuItem>
             )}
           </ContextMenuContent>
-          <AssignToServicePointDialog
-            open={showAssignToServicePointDialog}
-            onOpenChange={setShowAssignToServicePointDialog}
-            token={token}
-          />
+
           <CancelTokenDialog
             open={showCancelDialog}
             onOpenChange={setShowCancelDialog}

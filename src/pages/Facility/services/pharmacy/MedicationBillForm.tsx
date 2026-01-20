@@ -1,7 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { ArrowLeft, Eye, Info, MoreVertical, Shuffle } from "lucide-react";
+import {
+  ArrowLeft,
+  Eye,
+  Info,
+  LoaderCircle,
+  MoreVertical,
+  Shuffle,
+} from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
 import React, { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -135,8 +142,10 @@ import {
   isZero,
   multiply,
   round,
+  roundWhole,
   zodDecimal,
 } from "@/Utils/decimal";
+import { isLotAllowedForDispensing } from "@/Utils/inventory";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -150,7 +159,7 @@ interface Props {
 function convertDurationToDays(value: string, unit: string) {
   switch (unit) {
     case "h":
-      return divide(value, 24).round();
+      return divide(value, 24);
     case "d":
       return new Decimal(value);
     case "wk":
@@ -232,22 +241,37 @@ const AddMedicationSheet = ({
     });
   const [showDosageDialog, setShowDosageDialog] = useState(false);
 
+  const isConsumable = selectedProduct?.product_type === "consumable";
+
+  useShortcutSubContext("patient:search:-global", {
+    ignoreInputFields: true,
+  });
+
   // Update local state when the sheet opens or when editing a different item
   useEffect(() => {
     if (open && existingDosageInstructions) {
       setLocalDosageInstruction(existingDosageInstructions);
     } else if (open) {
       resetForm();
+
+      const updates: Partial<MedicationRequestDosageInstruction> = {};
+
       if (selectedProduct?.base_unit) {
-        handleUpdateDosageInstruction({
-          dose_and_rate: {
-            type: "ordered",
-            dose_quantity: {
-              value: "0",
-              unit: selectedProduct.base_unit,
-            },
+        updates.dose_and_rate = {
+          type: "ordered",
+          dose_quantity: {
+            value: "1",
+            unit: selectedProduct.base_unit,
           },
-        });
+        };
+      }
+
+      if (isConsumable) {
+        updates.as_needed_boolean = true;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        handleUpdateDosageInstruction(updates);
       }
     } else {
       resetForm();
@@ -441,12 +465,14 @@ const AddMedicationSheet = ({
                         </Label>
                         <Select
                           value={
+                            isConsumable ||
                             localDosageInstruction?.as_needed_boolean
                               ? "PRN"
                               : reverseFrequencyOption(
                                   localDosageInstruction?.timing,
                                 )
                           }
+                          disabled={isConsumable}
                           onValueChange={(value) => {
                             if (value === "PRN") {
                               handleUpdateDosageInstruction({
@@ -485,95 +511,104 @@ const AddMedicationSheet = ({
                     </div>
 
                     {/* Duration and Method Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Duration */}
-                      <div>
-                        <Label className="mb-1.5 block text-sm">
-                          {t("duration")}
-                        </Label>
-                        <div
-                          className={cn(
-                            "flex gap-2",
-                            localDosageInstruction?.as_needed_boolean &&
-                              "opacity-50 bg-gray-100 rounded-md",
-                          )}
-                        >
-                          {localDosageInstruction?.timing && (
-                            <Input
-                              type="number"
-                              min={0}
-                              value={
-                                isZero(
-                                  localDosageInstruction.timing.repeat
-                                    .bounds_duration.value,
-                                )
-                                  ? ""
-                                  : localDosageInstruction.timing.repeat
-                                      .bounds_duration?.value
-                              }
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                if (!localDosageInstruction.timing) return;
-                                handleUpdateDosageInstruction({
-                                  timing: {
-                                    ...localDosageInstruction.timing,
-                                    repeat: {
-                                      ...localDosageInstruction.timing.repeat,
-                                      bounds_duration: {
-                                        value,
-                                        unit: localDosageInstruction.timing
-                                          .repeat.bounds_duration.unit,
+                    <div
+                      className={cn(
+                        "grid gap-4",
+                        isConsumable
+                          ? "grid-cols-1"
+                          : "grid-cols-1 md:grid-cols-2",
+                      )}
+                    >
+                      {/* Duration - hidden for consumables */}
+                      {!isConsumable && (
+                        <div>
+                          <Label className="mb-1.5 block text-sm">
+                            {t("duration")}
+                          </Label>
+                          <div
+                            className={cn(
+                              "flex gap-2",
+                              localDosageInstruction?.as_needed_boolean &&
+                                "opacity-50 bg-gray-100 rounded-md",
+                            )}
+                          >
+                            {localDosageInstruction?.timing && (
+                              <Input
+                                type="number"
+                                min={0}
+                                value={
+                                  isZero(
+                                    localDosageInstruction.timing.repeat
+                                      .bounds_duration.value,
+                                  )
+                                    ? ""
+                                    : localDosageInstruction.timing.repeat
+                                        .bounds_duration?.value
+                                }
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  if (!localDosageInstruction.timing) return;
+                                  handleUpdateDosageInstruction({
+                                    timing: {
+                                      ...localDosageInstruction.timing,
+                                      repeat: {
+                                        ...localDosageInstruction.timing.repeat,
+                                        bounds_duration: {
+                                          value,
+                                          unit: localDosageInstruction.timing
+                                            .repeat.bounds_duration.unit,
+                                        },
                                       },
                                     },
-                                  },
-                                });
-                              }}
-                              className="h-9 text-sm"
-                            />
-                          )}
-                          <Select
-                            value={
-                              localDosageInstruction?.timing?.repeat
-                                ?.bounds_duration?.unit ?? UCUM_TIME_UNITS[0]
-                            }
-                            onValueChange={(
-                              unit: (typeof UCUM_TIME_UNITS)[number],
-                            ) => {
-                              if (localDosageInstruction?.timing?.repeat) {
-                                const value =
-                                  localDosageInstruction?.timing?.repeat
-                                    ?.bounds_duration?.value ?? 0;
-                                handleUpdateDosageInstruction({
-                                  timing: {
-                                    ...localDosageInstruction.timing,
-                                    repeat: {
-                                      ...localDosageInstruction.timing.repeat,
-                                      bounds_duration: { value, unit },
-                                    },
-                                  },
-                                });
+                                  });
+                                }}
+                                className="h-9 text-sm"
+                              />
+                            )}
+                            <Select
+                              value={
+                                localDosageInstruction?.timing?.repeat
+                                  ?.bounds_duration?.unit ?? UCUM_TIME_UNITS[0]
                               }
-                            }}
-                          >
-                            <SelectTrigger
-                              className={cn(
-                                "h-9 text-sm w-full",
-                                localDosageInstruction?.as_needed_boolean &&
-                                  "cursor-not-allowed bg-gray-50",
-                              )}
+                              onValueChange={(
+                                unit: (typeof UCUM_TIME_UNITS)[number],
+                              ) => {
+                                if (localDosageInstruction?.timing?.repeat) {
+                                  const value =
+                                    localDosageInstruction?.timing?.repeat
+                                      ?.bounds_duration?.value ?? 0;
+                                  handleUpdateDosageInstruction({
+                                    timing: {
+                                      ...localDosageInstruction.timing,
+                                      repeat: {
+                                        ...localDosageInstruction.timing.repeat,
+                                        bounds_duration: { value, unit },
+                                      },
+                                    },
+                                  });
+                                }
+                              }}
                             >
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {UCUM_TIME_UNITS.map((unit) => (
-                                <SelectItem key={unit} value={unit}>
-                                  {unit}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                              <SelectTrigger
+                                className={cn(
+                                  "h-9 text-sm w-full",
+                                  localDosageInstruction?.as_needed_boolean &&
+                                    "cursor-not-allowed bg-gray-50",
+                                )}
+                              >
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {UCUM_TIME_UNITS.map((unit) => (
+                                  <SelectItem key={unit} value={unit}>
+                                    {unit}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
-                      </div>
+                      )}
 
                       {/* Method */}
                       <div>
@@ -698,6 +733,9 @@ export default function MedicationBillForm({
   const { facilityId } = useCurrentFacility();
   const { locationId } = useCurrentLocation();
   const [{ encounterId }] = useQueryParams();
+
+  const isConsumable = (product?: ProductKnowledgeBase) =>
+    product?.product_type === "consumable";
   const [productKnowledgeInventoriesMap, setProductKnowledgeInventoriesMap] =
     useState<Record<string, InventoryRead[] | undefined>>({});
   const [isInvoiceSheetOpen, setIsInvoiceSheetOpen] = useState(false);
@@ -834,6 +872,42 @@ export default function MedicationBillForm({
     fetchMissingInventories();
   }, [productKnowledgeInventoriesMap, facilityId, locationId]);
 
+  // Auto-select first valid (non-expired) lot by default
+  useEffect(() => {
+    fields.forEach((field, index) => {
+      const productKnowledge = field.productKnowledge as ProductKnowledgeBase;
+      const substitution = form.watch(`items.${index}.substitution`);
+      const effectiveProductKnowledge =
+        substitution?.substitutedProductKnowledge || productKnowledge;
+
+      const inventories =
+        productKnowledgeInventoriesMap[effectiveProductKnowledge?.id];
+      const currentLots = form.getValues(`items.${index}.lots`);
+
+      if (
+        inventories !== undefined &&
+        inventories?.length &&
+        !currentLots.some((lot) => lot.selectedInventoryId)
+      ) {
+        const validLot = inventories.find((inv) =>
+          isLotAllowedForDispensing(inv.product.expiration_date),
+        );
+
+        if (validLot) {
+          const medication = form.getValues(`items.${index}.medication`);
+          form.setValue(`items.${index}.lots`, [
+            {
+              selectedInventoryId: validLot.id,
+              quantity: medication
+                ? computeInitialQuantity(medication)
+                : currentLots[0]?.quantity || "1",
+            },
+          ]);
+        }
+      }
+    });
+  }, [productKnowledgeInventoriesMap, fields, form]);
+
   const medications = useMemo(
     () =>
       prescription?.medications.filter((med) => med.requested_product) || [],
@@ -855,7 +929,7 @@ export default function MedicationBillForm({
         productKnowledge: medication.requested_product,
         medication,
         isSelected: true,
-        daysSupply: round(
+        daysSupply: roundWhole(
           convertDurationToDays(
             medication.dosage_instruction[0]?.timing?.repeat?.bounds_duration
               ?.value || "0",
@@ -883,13 +957,13 @@ export default function MedicationBillForm({
       return "0";
     }
 
-    if (instruction.as_needed_boolean) {
-      return "0";
-    }
-
     const doseValue = instruction.dose_and_rate?.dose_quantity?.value;
     if (!doseValue) {
       return "0";
+    }
+
+    if (instruction.as_needed_boolean) {
+      return round(doseValue);
     }
 
     const repeat = instruction.timing?.repeat;
@@ -1066,8 +1140,11 @@ export default function MedicationBillForm({
       return;
     }
 
-    const medsWithInvalidDaysSupply = selectedItems.filter((item) =>
-      isLessThanOrEqual(item.daysSupply, 0),
+    const medsWithInvalidDaysSupply = selectedItems.filter(
+      (item) =>
+        isLessThanOrEqual(item.daysSupply, 0) &&
+        !item.dosageInstructions?.[0]?.as_needed_boolean &&
+        !isConsumable(item.productKnowledge),
     );
 
     if (medsWithInvalidDaysSupply.length > 0) {
@@ -1118,7 +1195,7 @@ export default function MedicationBillForm({
             name: effectiveProductKnowledge.name,
             lot: inventory.product.batch?.lot_number || "N/A",
             requested: lot.quantity,
-            available: round(inventory.net_content),
+            available: roundWhole(inventory.net_content),
           });
         }
       });
@@ -1259,7 +1336,7 @@ export default function MedicationBillForm({
 
   return (
     <Page title={t("bill_medications")} hideTitleOnPage={true} isInsidePage>
-      <div className="md:max-w-[75vw] mx-auto">
+      <div className="md:max-w-[88vw] mx-auto">
         <div className="mb-6 flex items-center justify-between flex-wrap gap-2">
           <h1 className="text-2xl font-bold whitespace-nowrap">
             {t("bill_medications")}
@@ -1275,8 +1352,8 @@ export default function MedicationBillForm({
                 !form.watch("items").some((q) => q.isSelected) || isPending
               }
             >
-              <ShortcutBadge actionId="billing-action" />
               {isPending ? t("billing") : t("bill_selected")}
+              <ShortcutBadge actionId="submit-action" />
             </Button>
           </div>
         </div>
@@ -1320,7 +1397,7 @@ export default function MedicationBillForm({
           <TableSkeleton count={5} />
         ) : (
           <Form {...form}>
-            <form>
+            <form onSubmit={(e) => e.preventDefault()}>
               <Table className="w-full border-separate border-spacing-y-2 px-1">
                 <TableHeader>
                   <TableRow className="bg-white rounded-lg shadow-sm rounded-b-none">
@@ -1478,7 +1555,9 @@ export default function MedicationBillForm({
                               <div className="font-medium text-gray-950 text-base flex items-center">
                                 <div>
                                   <div className="flex items-center gap-2">
-                                    {effectiveProductKnowledge.name}
+                                    <span className="whitespace-pre-wrap wrap-break-word">
+                                      {effectiveProductKnowledge.name}
+                                    </span>
                                     {substitution && (
                                       <Popover>
                                         <PopoverTrigger asChild>
@@ -1728,7 +1807,14 @@ export default function MedicationBillForm({
                         <TableCell className={tableCellClass}>
                           {productKnowledgeInventoriesMap[
                             effectiveProductKnowledge.id
-                          ]?.length ? (
+                          ] === undefined ? (
+                            <div className="flex w-full items-center">
+                              <LoaderCircle className="animate-spin size-4 mr-2" />
+                              {t("loading_stock")}
+                            </div>
+                          ) : productKnowledgeInventoriesMap[
+                              effectiveProductKnowledge.id
+                            ]?.length ? (
                             <div className="space-y-2">
                               <StockLotSelector
                                 selectedLots={form.watch(`items.${index}.lots`)}
@@ -1764,6 +1850,7 @@ export default function MedicationBillForm({
                                 multiSelect
                                 showexpiry={false}
                                 disabled={!isChecked}
+                                showUnitPrice={false}
                               />
                             </div>
                           ) : (
@@ -1804,13 +1891,10 @@ export default function MedicationBillForm({
                                               type="number"
                                               min={0}
                                               {...formField}
-                                              className="border-gray-300 border rounded-none w-24"
+                                              className="border-gray-300 border rounded-md w-24"
                                               placeholder="0"
-                                              disabled={
-                                                !form.watch(
-                                                  `items.${index}.isSelected`,
-                                                )
-                                              }
+                                              disabled={!isChecked}
+                                              autoFocus
                                             />
                                           </FormControl>
                                           <FormMessage />
@@ -1831,24 +1915,28 @@ export default function MedicationBillForm({
                           </div>
                         </TableCell>
                         <TableCell className={tableCellClass}>
-                          <FormField
-                            control={form.control}
-                            name={`items.${index}.daysSupply`}
-                            render={({ field: formField }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input
-                                    type="number"
-                                    min={1}
-                                    {...formField}
-                                    className="border-gray-300 border rounded-none w-24"
-                                    disabled={!isChecked}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                          {isConsumable(effectiveProductKnowledge) ? (
+                            <div className="text-sm text-gray-500 py-2">-</div>
+                          ) : (
+                            <FormField
+                              control={form.control}
+                              name={`items.${index}.daysSupply`}
+                              render={({ field: formField }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      min={1}
+                                      {...formField}
+                                      className="border-gray-300 border rounded-md w-24"
+                                      disabled={!isChecked}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          )}
                         </TableCell>
                         <TableCell className={tableCellClass}>
                           {form
@@ -2118,7 +2206,7 @@ export default function MedicationBillForm({
                   );
 
                   if (dosageInstructions?.[0]) {
-                    const newDaysSupply = round(
+                    const newDaysSupply = roundWhole(
                       convertDurationToDays(
                         dosageInstructions[0]?.timing?.repeat?.bounds_duration
                           ?.value || "0",
@@ -2180,7 +2268,7 @@ export default function MedicationBillForm({
               reference_id: crypto.randomUUID(),
               productKnowledge: product,
               isSelected: true,
-              daysSupply: round(
+              daysSupply: roundWhole(
                 convertDurationToDays(
                   dosageInstructions[0]?.timing?.repeat?.bounds_duration
                     ?.value || "0",

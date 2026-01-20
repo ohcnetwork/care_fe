@@ -192,6 +192,8 @@ function FinishedTokenOptions({
   const queryClient = useQueryClient();
   const [showMoveBackToInServiceDialog, setShowMoveBackToInServiceDialog] =
     useState(false);
+  const [showMoveBackToWaitingDialog, setShowMoveBackToWaitingDialog] =
+    useState(false);
 
   const { mutate: updateToken, isPending: isUpdating } = useMutation({
     mutationFn: mutate(tokenApi.update, {
@@ -209,6 +211,7 @@ function FinishedTokenOptions({
         queryKey: ["token-queue-summary", facilityId, queueId],
       });
       setShowMoveBackToInServiceDialog(false);
+      setShowMoveBackToWaitingDialog(false);
     },
   });
 
@@ -217,6 +220,14 @@ function FinishedTokenOptions({
       status: TokenStatus.IN_PROGRESS,
       note: token.note,
       sub_queue: token.sub_queue?.id || null,
+    });
+  };
+
+  const handleMoveBackToWaiting = () => {
+    updateToken({
+      status: TokenStatus.CREATED,
+      note: token.note,
+      sub_queue: null,
     });
   };
 
@@ -230,13 +241,24 @@ function FinishedTokenOptions({
           <MoreHorizontal className="size-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onClick={() => setShowMoveBackToInServiceDialog(true)}
-            disabled={isUpdating}
-          >
-            <RotateCcw className="size-4" />
-            {t("move_back_to_in_service")}
-          </DropdownMenuItem>
+          {token.sub_queue ? (
+            <DropdownMenuItem
+              onClick={() => setShowMoveBackToInServiceDialog(true)}
+              disabled={isUpdating}
+            >
+              <RotateCcw className="size-4" />
+              {t("move_back_to_in_service")}
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem
+              onClick={() => setShowMoveBackToWaitingDialog(true)}
+              disabled={isUpdating}
+            >
+              <RotateCcw className="size-4" />
+              {t("move_back_to_waiting")}
+            </DropdownMenuItem>
+          )}
+
           <DropdownMenuItem
             onClick={() =>
               updateToken({
@@ -262,6 +284,21 @@ function FinishedTokenOptions({
           tokenNumber: renderTokenNumber(token),
         })}
         onConfirm={handleMoveBackToInService}
+        cancelText={t("cancel")}
+        confirmText={t("confirm")}
+        variant="primary"
+        disabled={isUpdating}
+      />
+
+      <ConfirmActionDialog
+        open={showMoveBackToWaitingDialog}
+        onOpenChange={setShowMoveBackToWaitingDialog}
+        title={t("move_back_to_waiting")}
+        description={t("move_back_to_waiting_confirmation", {
+          patientName: token.patient?.name,
+          tokenNumber: renderTokenNumber(token),
+        })}
+        onConfirm={handleMoveBackToWaiting}
         cancelText={t("cancel")}
         confirmText={t("confirm")}
         variant="primary"

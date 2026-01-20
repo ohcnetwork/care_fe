@@ -30,10 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  ChargeItemRead,
-  MRP_CODE,
-} from "@/types/billing/chargeItem/chargeItem";
+import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import {
   INVOICE_STATUS_COLORS,
   InvoiceCreate,
@@ -274,7 +271,13 @@ export function InvoiceShow({
             : invoice?.issue_date,
       };
 
-      updateInvoice(data);
+      updateInvoice(data, {
+        onSuccess: () => {
+          if (status === InvoiceStatus.issued) {
+            setIsPaymentSheetOpen(true);
+          }
+        },
+      });
     }
   };
 
@@ -669,9 +672,6 @@ export function InvoiceShow({
                       {t("performer")}
                     </TableHead>
                     <TableHead className={tableHeadClass}>
-                      {t("mrp")} ({getCurrencySymbol()})
-                    </TableHead>
-                    <TableHead className={tableHeadClass}>
                       {t("unit_price")} ({getCurrencySymbol()})
                     </TableHead>
                     <TableHead className={tableHeadClass}>{t("qty")}</TableHead>
@@ -717,12 +717,6 @@ export function InvoiceShow({
                     invoice.charge_items.flatMap((item, index) => {
                       const baseComponent = getBaseComponent(item);
                       const baseAmount = baseComponent?.amount || "0";
-                      const mrpAmount = item.unit_price_components.find(
-                        (c) =>
-                          c.monetary_component_type ===
-                            MonetaryComponentType.informational &&
-                          c.code?.code === MRP_CODE,
-                      )?.amount;
 
                       const mainRow = (
                         <TableRow
@@ -741,11 +735,6 @@ export function InvoiceShow({
                           </TableCell>
                           <TableCell className={cn(tableCellClass)}>
                             {formatName(item.performer_actor)}
-                          </TableCell>
-                          <TableCell
-                            className={cn(tableCellClass, "text-right")}
-                          >
-                            <MonetaryDisplay amount={mrpAmount} hideCurrency />
                           </TableCell>
                           <TableCell
                             className={cn(tableCellClass, "text-right")}
