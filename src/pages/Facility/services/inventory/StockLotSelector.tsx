@@ -21,7 +21,10 @@ import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { isPositive, round } from "@/Utils/decimal";
-import { getExpiryBadgeVariant, isProductRestricted } from "@/Utils/inventory";
+import {
+  getExpiryBadgeVariant,
+  isProductRestrictedFromDispensing,
+} from "@/Utils/inventory";
 import query from "@/Utils/request/query";
 
 export interface SelectedLot {
@@ -234,7 +237,7 @@ export default function StockLotSelector({
         <div className="max-h-60 overflow-auto">
           {!dontRestrictExpired &&
             filteredInventories?.some((inv) =>
-              isProductRestricted(inv.product.expiration_date),
+              isProductRestrictedFromDispensing(inv.product.expiration_date),
             ) && (
               <div className="px-2 py-1 bg-red-50 border-b border-red-100">
                 <span className="text-xs text-red-600">
@@ -247,7 +250,7 @@ export default function StockLotSelector({
               const isSelected = selectedLots.some(
                 (lot) => lot.selectedInventoryId === inv.id,
               );
-              const isRestricted = isProductRestricted(
+              const isRestricted = isProductRestrictedFromDispensing(
                 inv.product.expiration_date,
               );
               const isDisabled = !dontRestrictExpired && isRestricted;

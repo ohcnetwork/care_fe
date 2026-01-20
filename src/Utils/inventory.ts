@@ -38,7 +38,7 @@ export function getExpiryStatus(
  * @param expirationDate - The expiration date string
  * @returns boolean - true if the product is expired or expiring soon
  */
-export function isProductRestricted(
+export function isProductRestrictedFromDispensing(
   expirationDate: string | undefined,
 ): boolean {
   const status = getExpiryStatus(expirationDate);
@@ -50,8 +50,10 @@ export function isProductRestricted(
  * @param expirationDate - The expiration date string
  * @returns boolean - true if the lot is valid for selection
  */
-export function isValidLot(expirationDate: string | undefined): boolean {
-  return !isProductRestricted(expirationDate);
+export function isLotAllowedForDispensing(
+  expirationDate: string | undefined,
+): boolean {
+  return !isProductRestrictedFromDispensing(expirationDate);
 }
 
 /**

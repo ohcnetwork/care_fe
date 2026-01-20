@@ -84,7 +84,7 @@ import {
   round,
   zodDecimal,
 } from "@/Utils/decimal";
-import { isValidLot } from "@/Utils/inventory";
+import { isLotAllowedForDispensing } from "@/Utils/inventory";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 interface SelectedLocation {
@@ -244,7 +244,7 @@ export default function DispenseDrawer({
         !currentLots.some((lot) => lot.selectedInventoryId)
       ) {
         const validLot = inventories.find((inv) =>
-          isValidLot(inv.product.expiration_date),
+          isLotAllowedForDispensing(inv.product.expiration_date),
         );
 
         if (validLot) {

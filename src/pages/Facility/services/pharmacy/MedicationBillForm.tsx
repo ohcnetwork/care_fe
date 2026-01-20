@@ -145,7 +145,7 @@ import {
   roundWhole,
   zodDecimal,
 } from "@/Utils/decimal";
-import { isValidLot } from "@/Utils/inventory";
+import { isLotAllowedForDispensing } from "@/Utils/inventory";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -276,7 +276,7 @@ const AddMedicationSheet = ({
     } else {
       resetForm();
     }
-  }, [open, existingDosageInstructions, selectedProduct, isConsumable]);
+  }, [open, existingDosageInstructions, selectedProduct]);
 
   const handleUpdateDosageInstruction = (
     updates: Partial<MedicationRequestDosageInstruction>,
@@ -890,7 +890,7 @@ export default function MedicationBillForm({
         !currentLots.some((lot) => lot.selectedInventoryId)
       ) {
         const validLot = inventories.find((inv) =>
-          isValidLot(inv.product.expiration_date),
+          isLotAllowedForDispensing(inv.product.expiration_date),
         );
 
         if (validLot) {
