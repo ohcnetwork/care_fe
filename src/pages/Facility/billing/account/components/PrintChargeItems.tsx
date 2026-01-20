@@ -8,6 +8,7 @@ import { formatPhoneNumberIntl } from "react-phone-number-input";
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import Loading from "@/components/Common/Loading";
+import PrintFooter from "@/components/Common/PrintFooter";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -19,10 +20,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import useAuthUser from "@/hooks/useAuthUser";
-
-import { paymentmethodMap } from "@/pages/Facility/billing/paymentReconciliation/PaymentsData";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import accountApi from "@/types/billing/account/accountApi";
@@ -39,6 +38,7 @@ import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paym
 import patientApi from "@/types/emr/patient/patientApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
+import { add, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 
@@ -75,7 +75,6 @@ export const PrintChargeItems = (props: {
   const { facilityId, accountId } = props;
   const { facility } = useCurrentFacility();
   const { t } = useTranslation();
-  const currentUser = useAuthUser();
   const [hideCategories, setHideCategories] = useState(false);
   const [hidePaymentTypeGrouping, setHidePaymentTypeGrouping] = useState(false);
   const [summaryMode, setSummaryMode] = useState(false);
@@ -109,6 +108,7 @@ export const PrintChargeItems = (props: {
       pathParams: { facilityId },
       queryParams: {
         account: accountId,
+        status: "billable,billed,paid",
       },
       pageSize: 100,
     }),
@@ -230,13 +230,13 @@ export const PrintChargeItems = (props: {
                   {hideHeader && preserveHeaderSpace ? (
                     <div className="mb-4 pb-2 border-b border-gray-200 h-20" />
                   ) : !hideHeader ? (
-                    <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
+                    <div className="flex flex-col sm:flex-row print:flex-row print:items-start justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
                       <img
                         src={careConfig.mainLogo?.dark}
                         alt="Care Logo"
-                        className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2"
+                        className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2 print:mb-0 print:order-2"
                       />
-                      <div className="text-center sm:text-left sm:order-1">
+                      <div className="text-center sm:text-left sm:order-1 print:text-left">
                         <h1 className="text-3xl font-semibold">
                           {facility?.name}
                         </h1>
@@ -383,13 +383,10 @@ export const PrintChargeItems = (props: {
                               sortedCategories.forEach((categoryTitle) => {
                                 const items: ChargeItemRead[] =
                                   groups[categoryTitle] ?? [];
-                                const categoryTotal = items
-                                  .reduce(
-                                    (sum: number, item: ChargeItemRead) =>
-                                      sum + Number(item.total_price ?? 0),
-                                    0,
-                                  )
-                                  .toFixed(2);
+
+                                const categoryTotal = add(
+                                  ...items.map((i) => i.total_price || 0),
+                                );
 
                                 if (summaryMode) {
                                   // In summary mode, show only category with total
@@ -471,9 +468,7 @@ export const PrintChargeItems = (props: {
                                             />
                                           </TableCell>
                                           <TableCell className="text-right w-10">
-                                            {Math.floor(
-                                              Number(chargeItem.quantity),
-                                            )}
+                                            {round(chargeItem.quantity)}
                                           </TableCell>
                                           <TableCell className="text-right w-10">
                                             <MonetaryDisplay
@@ -501,13 +496,11 @@ export const PrintChargeItems = (props: {
                                   </TableCell>
                                   <TableCell className="text-right">
                                     <MonetaryDisplay
-                                      amount={validItems
-                                        .reduce(
-                                          (sum, item) =>
-                                            sum + Number(item.total_price ?? 0),
-                                          0,
-                                        )
-                                        .toFixed(2)}
+                                      amount={add(
+                                        ...validItems.map(
+                                          (i) => i.total_price || 0,
+                                        ),
+                                      )}
                                     />
                                   </TableCell>
                                 </TableRow>,
@@ -595,15 +588,9 @@ export const PrintChargeItems = (props: {
                               sortedTypes.forEach((paymentType) => {
                                 const paymentsOfType: PaymentReconciliationRead[] =
                                   paymentGroups[paymentType] ?? [];
-                                const typeTotal = paymentsOfType
-                                  .reduce(
-                                    (
-                                      sum: number,
-                                      payment: PaymentReconciliationRead,
-                                    ) => sum + Number(payment.amount ?? 0),
-                                    0,
-                                  )
-                                  .toFixed(2);
+                                const typeTotal = add(
+                                  ...paymentsOfType.map((p) => p.amount || 0),
+                                );
 
                                 if (summaryMode) {
                                   // In summary mode, show only payment type with total
@@ -666,7 +653,11 @@ export const PrintChargeItems = (props: {
                                             </TableCell>
                                           )}
                                           <TableCell>
-                                            {paymentmethodMap[payment.method]}
+                                            {
+                                              PAYMENT_RECONCILIATION_METHOD_MAP[
+                                                payment.method
+                                              ]
+                                            }
                                           </TableCell>
                                           <TableCell className="text-right">
                                             <MonetaryDisplay
@@ -698,13 +689,11 @@ export const PrintChargeItems = (props: {
                                   </TableCell>
                                   <TableCell className="text-right">
                                     <MonetaryDisplay
-                                      amount={validPayments
-                                        .reduce(
-                                          (sum, payment) =>
-                                            sum + Number(payment.amount ?? 0),
-                                          0,
-                                        )
-                                        .toFixed(2)}
+                                      amount={add(
+                                        ...validPayments.map(
+                                          (p) => p.amount || 0,
+                                        ),
+                                      )}
                                     />
                                   </TableCell>
                                 </TableRow>,
@@ -721,8 +710,8 @@ export const PrintChargeItems = (props: {
                   {/* Account Summary Section */}
                   {account && (
                     <div className="overflow-hidden mt-4">
-                      <Table className="w-full border-1 [&_th]:text-xs [&_td]:text-xs">
-                        <TableHeader className="[&_tr]:border-1 [&_th]:p-0.5 [&_th]:h-auto">
+                      <Table className="w-full border [&_th]:text-xs [&_td]:text-xs">
+                        <TableHeader className="[&_tr]:border [&_th]:p-0.5 [&_th]:h-auto">
                           <TableRow className="bg-transparent hover:bg-transparent">
                             <TableHead className="text-center font-bold">
                               {t("billed_gross")}
@@ -738,7 +727,7 @@ export const PrintChargeItems = (props: {
                             </TableHead>
                           </TableRow>
                         </TableHeader>
-                        <TableBody className="[&_tr]:border-1 [&_td]:p-0.5">
+                        <TableBody className="[&_tr]:border [&_td]:p-0.5">
                           <TableRow className="bg-transparent hover:bg-transparent">
                             <TableCell className="text-center">
                               <MonetaryDisplay amount={account.total_gross} />
@@ -761,24 +750,7 @@ export const PrintChargeItems = (props: {
                   )}
 
                   {/* Footer Section */}
-                  <div className="mt-4 pt-2 border-t border-gray-200 text-sm text-gray-600">
-                    <div className="flex justify-between items-center">
-                      <div className="text-xs">
-                        <span className="font-medium text-xs">
-                          {t("prepared_by")}:{" "}
-                        </span>
-                        <span>{currentUser.username}</span>
-                      </div>
-                      <div className="text-xs">
-                        <span className="font-medium text-xs">
-                          {t("generated_on")}{" "}
-                        </span>
-                        <span>
-                          {formatDateTime(new Date(), "DD-MM-YYYY, hh:mm A")}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                  <PrintFooter className="mt-4 border-t border-gray-200" />
                 </td>
               </tr>
             </tbody>

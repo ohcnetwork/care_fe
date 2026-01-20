@@ -98,6 +98,7 @@
     "cross-env": "^7.0.3",
     "date-fns": "^4.0.0",
     "dayjs": "^1.11.13",
+    "decimal.js": "^10.6.0",
     "framer-motion": "^12.6.3",
     "html-to-image": "^1.11.11",
     "i18next": "^25.0.0",

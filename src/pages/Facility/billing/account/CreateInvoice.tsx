@@ -64,6 +64,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 
 import BackButton from "@/components/Common/BackButton";
+import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./components/AddChargeItemsBillingSheet";
 
@@ -88,9 +89,8 @@ interface CreateInvoicePageProps {
   showHeader?: boolean;
   sourceUrl?: string;
   locationId?: string;
-  patientId?: string;
   disableCreateChargeItems?: boolean;
-  showDispenseNowButton?: boolean;
+  dispenseOrderId?: string;
 }
 
 interface PriceComponentRowProps {
@@ -146,9 +146,8 @@ export function CreateInvoicePage({
   showHeader = true,
   sourceUrl,
   locationId,
-  patientId,
   disableCreateChargeItems = false,
-  showDispenseNowButton = false,
+  dispenseOrderId,
 }: CreateInvoicePageProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -517,7 +516,7 @@ export function CreateInvoicePage({
                             {item.title}
                           </TableCell>
                           <TableCell className="font-medium text-base border-y text-gray-950">
-                            {item.quantity}
+                            {round(item.quantity)}
                           </TableCell>
                           <TableCell className="font-medium text-base border-y text-gray-950 text-right">
                             <MonetaryDisplay amount={mrpAmount} />
@@ -626,13 +625,13 @@ export function CreateInvoicePage({
             >
               <span className="underline">{t("cancel")}</span>
             </BackButton>
-            {showDispenseNowButton && (
+            {dispenseOrderId && (
               <Button
                 type="button"
                 variant="outline_primary"
                 onClick={() =>
                   navigate(
-                    `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation?payment_status=unpaid`,
+                    `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}?status=preparation&payment_status=unpaid`,
                   )
                 }
               >

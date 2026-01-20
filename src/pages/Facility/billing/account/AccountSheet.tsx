@@ -301,7 +301,6 @@ export function AccountSheet({
                   disabled={
                     isCreating ||
                     updateMutation.isPending ||
-                    !methods.formState.isValid ||
                     !methods.formState.isDirty
                   }
                 >

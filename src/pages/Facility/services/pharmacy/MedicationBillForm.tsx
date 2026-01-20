@@ -97,6 +97,10 @@ import {
   extractChargeItemsFromBatchResponse,
 } from "@/types/billing/chargeItem/chargeItem";
 import {
+  DispenseOrderBatchResponse,
+  extractDispenseOrderFromBatchResponse,
+} from "@/types/emr/dispenseOrder/dispenseOrder";
+import {
   MEDICATION_DISPENSE_STATUS_COLORS,
   MedicationDispenseCategory,
   MedicationDispenseCreate,
@@ -119,40 +123,44 @@ import {
   UCUM_TIME_UNITS,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
-import patientApi from "@/types/emr/patient/patientApi";
-import { PrescriptionRead } from "@/types/emr/prescription/prescription";
+import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
+import {
+  add,
+  divide,
+  isGreaterThan,
+  isLessThanOrEqual,
+  isZero,
+  multiply,
+  round,
+  zodDecimal,
+} from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-
-interface GroupedPrescription {
-  [key: string]: {
-    requests: MedicationRequestRead[];
-    prescription: PrescriptionRead;
-  };
-}
+import Decimal from "decimal.js";
 
 interface Props {
   patientId: string;
+  prescriptionId: string;
 }
 
-function convertDurationToDays(value: number, unit: string): number {
+function convertDurationToDays(value: string, unit: string) {
   switch (unit) {
     case "h":
-      return Math.round(value / 24);
+      return divide(value, 24).round();
     case "d":
-      return value;
+      return new Decimal(value);
     case "wk":
-      return value * 7;
+      return multiply(value, 7);
     case "mo":
-      return value * 30; // approximating month as 30 days
+      return multiply(value, 30); // approximating month as 30 days
     case "a":
-      return value * 365; // approximating year as 365 days
+      return multiply(value, 365); // approximating year as 365 days
     default:
-      return value;
+      return new Decimal(value);
   }
 }
 
@@ -163,14 +171,14 @@ const formSchema = z.object({
       medication: z.any(),
       productKnowledge: z.any(),
       isSelected: z.boolean(),
-      daysSupply: z.number().min(1),
+      daysSupply: zodDecimal({ min: 1 }),
       fully_dispensed: z.boolean(),
       dosageInstructions: z.any().optional(),
       lots: z
         .array(
           z.object({
             selectedInventoryId: z.string().uuid(),
-            quantity: z.number().min(0),
+            quantity: zodDecimal({ min: 0 }),
           }),
         )
         .min(1),
@@ -235,7 +243,7 @@ const AddMedicationSheet = ({
           dose_and_rate: {
             type: "ordered",
             dose_quantity: {
-              value: 0,
+              value: "0",
               unit: selectedProduct.base_unit,
             },
           },
@@ -495,8 +503,10 @@ const AddMedicationSheet = ({
                               type="number"
                               min={0}
                               value={
-                                localDosageInstruction.timing.repeat
-                                  .bounds_duration?.value == 0
+                                isZero(
+                                  localDosageInstruction.timing.repeat
+                                    .bounds_duration.value,
+                                )
                                   ? ""
                                   : localDosageInstruction.timing.repeat
                                       .bounds_duration?.value
@@ -510,7 +520,7 @@ const AddMedicationSheet = ({
                                     repeat: {
                                       ...localDosageInstruction.timing.repeat,
                                       bounds_duration: {
-                                        value: Number(value),
+                                        value,
                                         unit: localDosageInstruction.timing
                                           .repeat.bounds_duration.unit,
                                       },
@@ -678,7 +688,10 @@ const AddMedicationSheet = ({
   );
 };
 
-export default function MedicationBillForm({ patientId }: Props) {
+export default function MedicationBillForm({
+  patientId,
+  prescriptionId,
+}: Props) {
   useShortcutSubContext("facility:general");
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -721,6 +734,7 @@ export default function MedicationBillForm({ patientId }: Props) {
   const [alternateIdentifier, _setAlternateIdentifier] = useState<string>(
     `${patientId}-${new Date().toISOString().replace(/[:.]/g, "-")}`,
   );
+  const [dispenseOrderId, setDispenseOrderId] = useState<string | null>(null);
 
   const { mutate: updateMedicationRequest } = useMutation({
     mutationFn: (medication: MedicationRequestRead) => {
@@ -737,7 +751,7 @@ export default function MedicationBillForm({ patientId }: Props) {
   });
 
   const tableHeaderClass =
-    "px-4 py-3 border-r font-medium border-y-1 border-r-none border-gray-200 rounded-b-none border-b-0";
+    "px-4 py-3 border-r font-medium border-y-1 border-r-0 border-gray-200 rounded-b-none border-b-0";
   const tableCellClass = "px-4 py-4 border-r";
 
   const form = useForm<FormValues>({
@@ -766,20 +780,14 @@ export default function MedicationBillForm({ patientId }: Props) {
     }),
   });
 
-  const { data: response, isLoading } = useQuery({
-    queryKey: ["medication_requests", patientId, "dispense"],
+  const { data: prescription, isLoading } = useQuery({
+    queryKey: ["prescription", patientId, prescriptionId],
     queryFn: async ({ signal }) => {
-      const medicationResponse = await query(medicationRequestApi.list, {
-        pathParams: { patientId },
-        queryParams: {
-          facility: facilityId,
-          limit: 100,
-          status: "active,on_hold,draft,unknown,ended,completed,cancelled",
-          exclude_dispense_status: "complete,incomplete",
-        },
+      const prescriptionResponse = await query(prescriptionApi.get, {
+        pathParams: { patientId, id: prescriptionId },
       })({ signal });
 
-      const productKnowledgeIds = medicationResponse.results
+      const productKnowledgeIds = prescriptionResponse.medications
         .filter((medication) => medication.requested_product)
         .reduce(
           (acc, medication) => ({
@@ -794,18 +802,9 @@ export default function MedicationBillForm({ patientId }: Props) {
         ...prev,
       }));
 
-      return medicationResponse;
+      return prescriptionResponse;
     },
-  });
-
-  const { data: patient } = useQuery({
-    queryKey: ["patient", patientId],
-    queryFn: query(patientApi.get, {
-      pathParams: {
-        id: patientId,
-      },
-    }),
-    enabled: !!patientId,
+    enabled: !!prescriptionId,
   });
 
   useEffect(() => {
@@ -836,82 +835,61 @@ export default function MedicationBillForm({ patientId }: Props) {
   }, [productKnowledgeInventoriesMap, facilityId, locationId]);
 
   const medications = useMemo(
-    () => response?.results.filter((med) => med.requested_product) || [],
-    [response?.results],
+    () =>
+      prescription?.medications.filter((med) => med.requested_product) || [],
+    [prescription?.medications],
   );
-
-  // Group medications by prescription - simplified
-  const groupedMedications = useMemo((): GroupedPrescription => {
-    return medications.reduce((acc, medication) => {
-      const prescriptionId = medication.prescription?.id || "no-prescription";
-      if (!acc[prescriptionId]) {
-        acc[prescriptionId] = {
-          requests: [],
-          prescription: medication.prescription!,
-        };
-      }
-      acc[prescriptionId].requests.push(medication);
-      return acc;
-    }, {} as GroupedPrescription);
-  }, [medications]);
 
   useEffect(() => {
     form.reset({ items: [] }); // Reset form with empty items array
 
-    // Initialize prescription completion map with default checked state
-    const newPrescriptionCompletionMap: Record<string, boolean> = {};
-    Object.keys(groupedMedications).forEach((prescriptionId) => {
-      if (prescriptionId !== "no-prescription") {
-        newPrescriptionCompletionMap[prescriptionId] = true; // Default to checked
-      }
-    });
-    setPrescriptionCompletionMap(newPrescriptionCompletionMap);
+    // Initialize prescription completion map with default checked state (always checked for single prescription)
+    if (prescriptionId) {
+      setPrescriptionCompletionMap({ [prescriptionId]: true });
+    }
 
-    // Process medications grouped by prescription
-    Object.entries(groupedMedications).forEach(
-      ([prescriptionId, groupData]) => {
-        groupData.requests.forEach((medication) => {
-          append({
-            reference_id: crypto.randomUUID(),
-            productKnowledge: medication.requested_product,
-            medication,
-            isSelected: true,
-            daysSupply: convertDurationToDays(
-              medication.dosage_instruction[0]?.timing?.repeat?.bounds_duration
-                ?.value || 0,
-              medication.dosage_instruction[0]?.timing?.repeat?.bounds_duration
-                ?.unit || "",
-            ),
-            fully_dispensed: true,
-            dosageInstructions: medication.dosage_instruction,
-            lots: [
-              {
-                selectedInventoryId:
-                  (medication.inventory_items_internal?.[0]?.id as string) ||
-                  "",
-                quantity: computeInitialQuantity(medication),
-              },
-            ],
-            prescriptionId,
-          });
-        });
-      },
-    );
-  }, [medications.length, append, form, groupedMedications]);
+    // Process medications from the prescription
+    medications.forEach((medication) => {
+      append({
+        reference_id: crypto.randomUUID(),
+        productKnowledge: medication.requested_product,
+        medication,
+        isSelected: true,
+        daysSupply: round(
+          convertDurationToDays(
+            medication.dosage_instruction[0]?.timing?.repeat?.bounds_duration
+              ?.value || "0",
+            medication.dosage_instruction[0]?.timing?.repeat?.bounds_duration
+              ?.unit || "",
+          ),
+        ),
+        fully_dispensed: true,
+        dosageInstructions: medication.dosage_instruction,
+        lots: [
+          {
+            selectedInventoryId:
+              (medication.inventory_items_internal?.[0]?.id as string) || "",
+            quantity: computeInitialQuantity(medication),
+          },
+        ],
+        prescriptionId,
+      });
+    });
+  }, [medications.length, append, form, prescriptionId]);
 
   function computeInitialQuantity(medication: MedicationRequestRead) {
     const instruction = medication.dosage_instruction[0];
     if (!instruction) {
-      return 0;
+      return "0";
     }
 
     if (instruction.as_needed_boolean) {
-      return 0;
+      return "0";
     }
 
     const doseValue = instruction.dose_and_rate?.dose_quantity?.value;
     if (!doseValue) {
-      return 0;
+      return "0";
     }
 
     const repeat = instruction.timing?.repeat;
@@ -919,24 +897,29 @@ export default function MedicationBillForm({ patientId }: Props) {
       return doseValue;
     }
 
-    const convertToHours = (value: number, unit: string) => {
+    const convertToHours = (value: string, unit: string) => {
       switch (unit) {
         case "h":
-          return value;
+          return new Decimal(value);
         case "d":
-          return value * 24;
+          return multiply(value, 24);
         case "wk":
-          return value * 24 * 7;
+          return multiply(value, 24 * 7);
         case "mo":
-          return value * 24 * 30;
+          return multiply(value, 24 * 30);
         case "a":
-          return value * 24 * 365;
+          return multiply(value, 24 * 365);
         default:
           return 0;
       }
     };
 
-    const { frequency = 1, period = 1, period_unit, bounds_duration } = repeat;
+    const {
+      frequency = 1,
+      period = "1",
+      period_unit,
+      bounds_duration,
+    } = repeat;
 
     const totalDurationInHours = convertToHours(
       bounds_duration.value,
@@ -948,31 +931,45 @@ export default function MedicationBillForm({ patientId }: Props) {
       return doseValue;
     }
 
-    const doseIntervalInHours = periodInHours / frequency;
+    const doseIntervalInHours = divide(periodInHours, frequency);
 
-    if (doseIntervalInHours === 0) {
+    if (isZero(doseIntervalInHours)) {
       return doseValue;
     }
 
-    const numberOfDoses = Math.ceil(totalDurationInHours / doseIntervalInHours);
+    const numberOfDoses = divide(
+      totalDurationInHours,
+      doseIntervalInHours,
+    ).ceil();
 
     if (instruction.dose_and_rate?.dose_range) {
-      const lowDose = instruction.dose_and_rate.dose_range.low.value || 0;
-      const highDose = instruction.dose_and_rate.dose_range.high.value || 0;
-      const avgDose = (lowDose + highDose) / 2;
-      return Number((avgDose * numberOfDoses).toFixed(2));
+      const lowDose = instruction.dose_and_rate.dose_range.low.value || "0";
+      const highDose = instruction.dose_and_rate.dose_range.high.value || "0";
+      const avgDose = divide(add(lowDose, highDose), 2);
+      return round(multiply(avgDose, numberOfDoses));
     }
 
-    return Number((doseValue * numberOfDoses).toFixed(2));
+    return round(multiply(doseValue, numberOfDoses));
   }
 
   const { mutate: dispense, isPending } = useMutation({
     mutationFn: mutate(batchApi.batchRequest),
-    onSuccess: (response) => {
+    onSuccess: (response: any) => {
       toast.success(t("medications_billed_and_prescriptions_completed"));
       queryClient.invalidateQueries({
-        queryKey: ["medication_requests", patientId, "dispense"],
+        queryKey: ["prescription", patientId, prescriptionId],
       });
+
+      let dispenseOrderId: string | null = null;
+
+      const dispenseOrder = extractDispenseOrderFromBatchResponse(
+        response as DispenseOrderBatchResponse,
+      );
+
+      if (dispenseOrder) {
+        dispenseOrderId = dispenseOrder.id;
+        setDispenseOrderId(dispenseOrderId);
+      }
 
       if (!account?.results[0]) {
         queryClient.invalidateQueries({
@@ -985,9 +982,11 @@ export default function MedicationBillForm({ patientId }: Props) {
         response as unknown as ChargeItemBatchResponse,
       );
       if (chargeItems.length === 0) {
-        navigate(
-          `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation?payment_status=unpaid`,
-        );
+        if (dispenseOrderId) {
+          navigate(
+            `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}?status=preparation&payment_status=unpaid`,
+          );
+        }
       } else {
         setIsInvoiceSheetOpen(true);
         setExtractedChargeItems(chargeItems);
@@ -1050,7 +1049,7 @@ export default function MedicationBillForm({ patientId }: Props) {
       return item.lots.every(
         (lot) =>
           !lot.quantity ||
-          lot.quantity === 0 ||
+          isZero(lot.quantity) ||
           !lot.selectedInventoryId ||
           !lot.selectedInventoryId.length,
       );
@@ -1067,8 +1066,8 @@ export default function MedicationBillForm({ patientId }: Props) {
       return;
     }
 
-    const medsWithInvalidDaysSupply = selectedItems.filter(
-      (item) => item.daysSupply <= 0,
+    const medsWithInvalidDaysSupply = selectedItems.filter((item) =>
+      isLessThanOrEqual(item.daysSupply, 0),
     );
 
     if (medsWithInvalidDaysSupply.length > 0) {
@@ -1100,8 +1099,8 @@ export default function MedicationBillForm({ patientId }: Props) {
     const medsWithInsufficientStock: {
       name: string;
       lot: string;
-      requested: number;
-      available: number;
+      requested: string;
+      available: string;
     }[] = [];
     selectedItems.forEach((item) => {
       const productKnowledge = item.productKnowledge;
@@ -1114,12 +1113,12 @@ export default function MedicationBillForm({ patientId }: Props) {
         const inventory = inventoryList.find(
           (inv) => inv.id === lot.selectedInventoryId,
         );
-        if (inventory && lot.quantity > inventory.net_content) {
+        if (inventory && isGreaterThan(lot.quantity, inventory.net_content)) {
           medsWithInsufficientStock.push({
             name: effectiveProductKnowledge.name,
             lot: inventory.product.batch?.lot_number || "N/A",
             requested: lot.quantity,
-            available: inventory.net_content,
+            available: round(inventory.net_content),
           });
         }
       });
@@ -1140,7 +1139,7 @@ export default function MedicationBillForm({ patientId }: Props) {
     }
 
     const requests = [];
-    const defaultEncounterId = response?.results[0]?.encounter;
+    const defaultEncounterId = prescription?.encounter?.id;
 
     // Add all dispense requests - now one per lot
     selectedItems.forEach((item) => {
@@ -1282,9 +1281,38 @@ export default function MedicationBillForm({ patientId }: Props) {
           </div>
         </div>
 
-        {patient && (
-          <div className="mb-4 rounded-none shadow-none bg-gray-100">
-            <PatientHeader patient={patient} facilityId={facilityId} />
+        {prescription?.encounter?.patient && (
+          <div className="mb-4 rounded-none shadow-none bg-gray-100 p-4">
+            <PatientHeader
+              patient={prescription.encounter.patient}
+              facilityId={facilityId}
+            />
+            <div className="flex flex-wrap gap-4 mt-2 text-sm">
+              {prescription.encounter.current_location && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-gray-500">{t("location")}:</span>
+                  <span className="font-medium">
+                    {prescription.encounter.current_location.name}
+                  </span>
+                </div>
+              )}
+              {prescription.encounter.organizations &&
+                prescription.encounter.organizations.length > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-gray-500">
+                      {t("departments", {
+                        count: prescription.encounter.organizations.length,
+                      })}
+                      :
+                    </span>
+                    <span className="font-medium">
+                      {prescription.encounter.organizations
+                        .map((org) => org.name)
+                        .join(", ")}
+                    </span>
+                  </div>
+                )}
+            </div>
           </div>
         )}
 
@@ -1300,7 +1328,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                       className={cn(
                         "w-12",
                         tableHeaderClass,
-                        "rounded-l-lg border-y-1 border-l-1 border-gray-200 rounded-b-none border-b-0",
+                        "rounded-l-lg border-y border-l border-gray-200 rounded-b-none border-b-0",
                       )}
                     >
                       <FormField
@@ -1332,7 +1360,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                     <TableHead
                       className={cn(
                         tableHeaderClass,
-                        "border-y-1 border-r-none border-gray-200 rounded-b-none border-b-0",
+                        "border-y border-r-0 border-gray-200 rounded-b-none border-b-0",
                       )}
                     >
                       {t("medicine")}
@@ -1364,790 +1392,631 @@ export default function MedicationBillForm({ patientId }: Props) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {(() => {
-                    // Group fields by prescriptionId for rendering
-                    const groupedFields = fields.reduce(
-                      (acc, field, index) => {
-                        const group = field.prescriptionId || "no-prescription";
-                        if (!acc[group]) acc[group] = [];
-                        acc[group].push({ field, index });
-                        return acc;
-                      },
-                      {} as Record<
-                        string,
-                        Array<{ field: any; index: number }>
-                      >,
+                  {/* Prescription Header Row */}
+                  {prescription && fields.length > 0 && (
+                    <TableRow className="bg-gray-50">
+                      <TableCell
+                        colSpan={10}
+                        className="py-2 px-4 font-semibold text-gray-800 border-b"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            {t("prescription")} -{" "}
+                            {prescription.created_date
+                              ? formatDate(
+                                  new Date(prescription.created_date),
+                                  "dd/MM/yyyy",
+                                )
+                              : prescriptionId}{" "}
+                            ({fields.length} {t("medications")})
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              checked={
+                                prescriptionCompletionMap[prescriptionId] ||
+                                false
+                              }
+                              onCheckedChange={(checked) => {
+                                setPrescriptionCompletionMap((prev) => ({
+                                  ...prev,
+                                  [prescriptionId]: !!checked,
+                                }));
+                              }}
+                            />
+                            <span className="text-sm text-gray-600">
+                              {t("mark_complete")}
+                            </span>
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {/* Medication Items */}
+                  {fields.map((field, index) => {
+                    const productKnowledge =
+                      field.productKnowledge as ProductKnowledgeBase;
+                    const substitution = form.watch(
+                      `items.${index}.substitution`,
                     );
+                    const effectiveProductKnowledge =
+                      substitution?.substitutedProductKnowledge ||
+                      productKnowledge;
 
-                    // Get prescription groups and sort them
-                    const prescriptionGroups = Object.entries(groupedFields)
-                      .map(([prescriptionId, groupFields]) => {
-                        const groupData = groupedMedications[prescriptionId];
-                        const prescription = groupData?.prescription;
-
-                        let prescriptionLabel: string;
-                        let date: Date | null = null;
-                        if (prescriptionId === "no-prescription") {
-                          prescriptionLabel = t("no_prescription");
-                        } else if (prescription?.created_date) {
-                          date = new Date(prescription.created_date);
-                          prescriptionLabel = `${t("prescription")} - ${formatDate(
-                            date,
-                            "dd/MM/yyyy",
-                          )}`;
-                        } else {
-                          prescriptionLabel = `${t("prescription")} - ${prescriptionId}`;
-                        }
-
-                        return {
-                          key: prescriptionId,
-                          label: prescriptionLabel,
-                          fields: groupFields,
-                          date: date,
-                        };
-                      })
-                      .sort((a, b) => {
-                        // Sort by date, newest first, with no-prescription at the end
-                        if (a.key === "no-prescription") return 1;
-                        if (b.key === "no-prescription") return -1;
-                        if (!a.date && !b.date) return 0;
-                        if (!a.date) return 1;
-                        if (!b.date) return -1;
-                        return b.date.getTime() - a.date.getTime();
-                      });
-
-                    return prescriptionGroups.map(
-                      ({ key, label, fields: groupFields }) => {
-                        if (!groupFields || groupFields.length === 0)
-                          return null;
-
-                        return (
-                          <React.Fragment key={key}>
-                            {/* Group Header Row */}
-                            <TableRow className="bg-gray-50">
-                              <TableCell
-                                colSpan={10}
-                                className="py-2 px-4 font-semibold text-gray-800 border-b"
-                              >
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    {label} ({groupFields.length}{" "}
-                                    {t("medications")})
+                    return (
+                      <TableRow
+                        key={field.id}
+                        className="bg-white hover:bg-gray-50/50 shadow-sm rounded-lg"
+                      >
+                        <TableCell
+                          className={cn(tableCellClass, "rounded-l-lg")}
+                        >
+                          <FormField
+                            control={form.control}
+                            name={`items.${index}.isSelected`}
+                            render={({ field: formField }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Checkbox
+                                    checked={formField.value}
+                                    onCheckedChange={formField.onChange}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </TableCell>
+                        <TableCell className={tableCellClass}>
+                          <div className="flex items-center justify-between gap-2">
+                            <div>
+                              <div className="font-medium text-gray-950 text-base flex items-center">
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    {effectiveProductKnowledge.name}
+                                    {substitution && (
+                                      <Popover>
+                                        <PopoverTrigger asChild>
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="p-1 h-6 w-6 rounded-full hover:bg-blue-100"
+                                          >
+                                            <Info className="h-4 w-4" />
+                                            <span className="sr-only">
+                                              {t("substitution_details")}
+                                            </span>
+                                          </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent
+                                          className="p-4 w-auto"
+                                          align="start"
+                                          side="bottom"
+                                        >
+                                          <div className="space-y-3">
+                                            <div className="font-semibold text-sm text-gray-950 underline">
+                                              {t("substitution_details")} :
+                                            </div>
+                                            <div className="space-y-3 text-sm max-w-md">
+                                              <div>
+                                                <div className="flex items-center gap-1 mb-1">
+                                                  <span className="font-medium text-gray-600">
+                                                    {t("original_medication")}:
+                                                  </span>
+                                                  <div className="text-gray-950 font-medium">
+                                                    {productKnowledge.name}
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              <div>
+                                                <div className="flex items-center gap-1 mb-1">
+                                                  <span className="font-medium text-gray-600">
+                                                    {t("substituted_with")}:
+                                                  </span>
+                                                  <div className="text-gray-950 font-medium">
+                                                    {
+                                                      effectiveProductKnowledge.name
+                                                    }
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              <div>
+                                                <div className="flex items-center gap-1">
+                                                  <span className="font-medium text-gray-600">
+                                                    {t("substitution_type")}:
+                                                  </span>
+                                                  <div className="text-gray-950 font-medium">
+                                                    {getSubstitutionTypeDisplay(
+                                                      t,
+                                                      substitution.type,
+                                                    )}{" "}
+                                                    ({substitution.type})
+                                                  </div>
+                                                </div>
+                                                <div className="text-gray-700 text-xs italic leading-relaxed">
+                                                  {getSubstitutionTypeDescription(
+                                                    t,
+                                                    substitution.type,
+                                                  )}
+                                                </div>
+                                              </div>
+                                              <div>
+                                                <div className="flex items-center gap-1">
+                                                  <span className="font-medium text-gray-600">
+                                                    {t("substitution_reason")}:
+                                                  </span>
+                                                  <div className="text-gray-950 font-medium">
+                                                    {getSubstitutionReasonDisplay(
+                                                      t,
+                                                      substitution.reason,
+                                                    )}{" "}
+                                                    ({substitution.reason})
+                                                  </div>
+                                                </div>
+                                                <div className="text-gray-700 text-xs italic leading-relaxed">
+                                                  {getSubstitutionReasonDescription(
+                                                    t,
+                                                    substitution.reason,
+                                                  )}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </PopoverContent>
+                                      </Popover>
+                                    )}
+                                    {substitution && (
+                                      <Badge variant="orange">
+                                        {t("substituted")}
+                                      </Badge>
+                                    )}
+                                    {field.medication?.dispense_status ===
+                                      MedicationRequestDispenseStatus.partial && (
+                                      <Badge variant="yellow">
+                                        {t("partially_billed")}
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <Button
+                                              variant="outline"
+                                              size="icon"
+                                              className="p-0 h-auto text-yellow-900 underline font-normal rounded-md w-6"
+                                              type="button"
+                                              onClick={() => {
+                                                setViewingDispensedMedicationId(
+                                                  field.medication.id,
+                                                );
+                                              }}
+                                            >
+                                              <Eye className="size-5" />
+                                            </Button>
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            {t("view_dispensed")}
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </Badge>
+                                    )}
                                   </div>
-                                  {key !== "no-prescription" && (
-                                    <div className="flex items-center gap-2">
-                                      <Checkbox
-                                        checked={
-                                          prescriptionCompletionMap[key] ||
-                                          false
-                                        }
-                                        onCheckedChange={(checked) => {
-                                          setPrescriptionCompletionMap(
-                                            (prev) => ({
-                                              ...prev,
-                                              [key]: !!checked,
-                                            }),
-                                          );
-                                        }}
-                                      />
-                                      <span className="text-sm text-gray-600">
-                                        {t("mark_complete")}
-                                      </span>
+                                  {substitution && (
+                                    <div className="text-gray-500 font-normal italic line-through text-sm">
+                                      {productKnowledge.name}
                                     </div>
                                   )}
                                 </div>
-                              </TableCell>
-                            </TableRow>
-                            {/* Group Items */}
-                            {groupFields.map(({ field, index }) => {
-                              const productKnowledge =
-                                field.productKnowledge as ProductKnowledgeBase;
-                              const substitution = form.watch(
-                                `items.${index}.substitution`,
-                              );
-                              const effectiveProductKnowledge =
-                                substitution?.substitutedProductKnowledge ||
-                                productKnowledge;
-
-                              return (
-                                <TableRow
-                                  key={field.id}
-                                  className="bg-white hover:bg-gray-50/50 shadow-sm rounded-lg"
-                                >
-                                  <TableCell
-                                    className={cn(
-                                      tableCellClass,
-                                      "rounded-l-lg",
-                                    )}
-                                  >
-                                    <FormField
-                                      control={form.control}
-                                      name={`items.${index}.isSelected`}
-                                      render={({ field: formField }) => (
-                                        <FormItem>
-                                          <FormControl>
-                                            <Checkbox
-                                              checked={formField.value}
-                                              onCheckedChange={
-                                                formField.onChange
-                                              }
-                                            />
-                                          </FormControl>
-                                        </FormItem>
+                              </div>
+                              {field.medication ? (
+                                <div>
+                                  <div className="text-sm text-gray-700 font-medium flex items-center gap-1">
+                                    {/* Existing medication - show read-only dosage instructions */}
+                                    {
+                                      field.dosageInstructions?.[0]
+                                        ?.dose_and_rate?.dose_quantity?.value
+                                    }{" "}
+                                    {
+                                      field.dosageInstructions?.[0]
+                                        ?.dose_and_rate?.dose_quantity?.unit
+                                        ?.display
+                                    }{" "}
+                                    ×{" "}
+                                    {
+                                      field.dosageInstructions?.[0]?.timing
+                                        ?.code?.code
+                                    }{" "}
+                                    ×{" "}
+                                    {field.dosageInstructions?.[0]?.timing
+                                      ?.repeat?.bounds_duration?.value || 0}
+                                    {
+                                      field.dosageInstructions?.[0]?.timing
+                                        ?.repeat?.bounds_duration?.unit
+                                    }{" "}
+                                    ={" "}
+                                    <div className="text-gray-700 font-semibold text-sm">
+                                      {formatTotalUnits(
+                                        field.dosageInstructions,
+                                        t("units"),
                                       )}
-                                    />
-                                  </TableCell>
-                                  <TableCell className={tableCellClass}>
-                                    <div className="flex items-center justify-between gap-2">
-                                      <div>
-                                        <div className="font-medium text-gray-950 text-base flex items-center">
-                                          <div>
-                                            <div className="flex items-center gap-2">
-                                              {effectiveProductKnowledge.name}
-                                              {substitution && (
-                                                <Popover>
-                                                  <PopoverTrigger asChild>
-                                                    <Button
-                                                      variant="ghost"
-                                                      size="sm"
-                                                      className="p-1 h-6 w-6 rounded-full hover:bg-blue-100"
-                                                    >
-                                                      <Info className="h-4 w-4" />
-                                                      <span className="sr-only">
-                                                        {t(
-                                                          "substitution_details",
-                                                        )}
-                                                      </span>
-                                                    </Button>
-                                                  </PopoverTrigger>
-                                                  <PopoverContent
-                                                    className="p-4 w-auto"
-                                                    align="start"
-                                                    side="bottom"
-                                                  >
-                                                    <div className="space-y-3">
-                                                      <div className="font-semibold text-sm text-gray-950 underline">
-                                                        {t(
-                                                          "substitution_details",
-                                                        )}{" "}
-                                                        :
-                                                      </div>
-                                                      <div className="space-y-3 text-sm max-w-md">
-                                                        <div>
-                                                          <div className="flex items-center gap-1 mb-1">
-                                                            <span className="font-medium text-gray-600">
-                                                              {t(
-                                                                "original_medication",
-                                                              )}
-                                                              :
-                                                            </span>
-                                                            <div className="text-gray-950 font-medium">
-                                                              {
-                                                                productKnowledge.name
-                                                              }
-                                                            </div>
-                                                          </div>
-                                                        </div>
-                                                        <div>
-                                                          <div className="flex items-center gap-1 mb-1">
-                                                            <span className="font-medium text-gray-600">
-                                                              {t(
-                                                                "substituted_with",
-                                                              )}
-                                                              :
-                                                            </span>
-                                                            <div className="text-gray-950 font-medium">
-                                                              {
-                                                                effectiveProductKnowledge.name
-                                                              }
-                                                            </div>
-                                                          </div>
-                                                        </div>
-                                                        <div>
-                                                          <div className="flex items-center gap-1">
-                                                            <span className="font-medium text-gray-600">
-                                                              {t(
-                                                                "substitution_type",
-                                                              )}
-                                                              :
-                                                            </span>
-                                                            <div className="text-gray-950 font-medium">
-                                                              {getSubstitutionTypeDisplay(
-                                                                t,
-                                                                substitution.type,
-                                                              )}{" "}
-                                                              (
-                                                              {
-                                                                substitution.type
-                                                              }
-                                                              )
-                                                            </div>
-                                                          </div>
-                                                          <div className="text-gray-700 text-xs italic leading-relaxed">
-                                                            {getSubstitutionTypeDescription(
-                                                              t,
-                                                              substitution.type,
-                                                            )}
-                                                          </div>
-                                                        </div>
-                                                        <div>
-                                                          <div className="flex items-center gap-1">
-                                                            <span className="font-medium text-gray-600">
-                                                              {t(
-                                                                "substitution_reason",
-                                                              )}
-                                                              :
-                                                            </span>
-                                                            <div className="text-gray-950 font-medium">
-                                                              {getSubstitutionReasonDisplay(
-                                                                t,
-                                                                substitution.reason,
-                                                              )}{" "}
-                                                              (
-                                                              {
-                                                                substitution.reason
-                                                              }
-                                                              )
-                                                            </div>
-                                                          </div>
-                                                          <div className="text-gray-700 text-xs italic leading-relaxed">
-                                                            {getSubstitutionReasonDescription(
-                                                              t,
-                                                              substitution.reason,
-                                                            )}
-                                                          </div>
-                                                        </div>
-                                                      </div>
-                                                    </div>
-                                                  </PopoverContent>
-                                                </Popover>
-                                              )}
-                                              {substitution && (
-                                                <Badge variant="orange">
-                                                  {t("substituted")}
-                                                </Badge>
-                                              )}
-                                              {field.medication
-                                                ?.dispense_status ===
-                                                MedicationRequestDispenseStatus.partial && (
-                                                <Badge variant="yellow">
-                                                  {t("partially_billed")}
-                                                  <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                      <Button
-                                                        variant="outline"
-                                                        size="icon"
-                                                        className="p-0 h-auto text-yellow-900 underline font-normal rounded-md w-6"
-                                                        type="button"
-                                                        onClick={() => {
-                                                          setViewingDispensedMedicationId(
-                                                            field.medication.id,
-                                                          );
-                                                        }}
-                                                      >
-                                                        <Eye className="size-5" />
-                                                      </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                      {t("view_dispensed")}
-                                                    </TooltipContent>
-                                                  </Tooltip>
-                                                </Badge>
-                                              )}
-                                            </div>
-                                            {substitution && (
-                                              <div className="text-gray-500 font-normal italic line-through text-sm">
-                                                {productKnowledge.name}
-                                              </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div
+                                  className="text-sm text-gray-500 cursor-pointer hover:text-gray-900"
+                                  onClick={() => {
+                                    setSelectedProduct(productKnowledge);
+                                    setEditingItemIndex(index);
+                                    setIsAddMedicationSheetOpen(true);
+                                  }}
+                                >
+                                  {(() => {
+                                    const currentDosageInstructions =
+                                      form.watch(
+                                        `items.${index}.dosageInstructions`,
+                                      )?.[0];
+
+                                    if (
+                                      currentDosageInstructions?.dose_and_rate
+                                        ?.dose_quantity
+                                    ) {
+                                      return (
+                                        <div className="text-sm text-gray-700 font-medium flex items-center gap-1">
+                                          {
+                                            currentDosageInstructions
+                                              .dose_and_rate.dose_quantity.value
+                                          }{" "}
+                                          {
+                                            currentDosageInstructions
+                                              .dose_and_rate.dose_quantity.unit
+                                              ?.display
+                                          }{" "}
+                                          ×{" "}
+                                          {
+                                            currentDosageInstructions.timing
+                                              ?.code?.code
+                                          }{" "}
+                                          ×{" "}
+                                          {currentDosageInstructions.timing
+                                            ?.repeat?.bounds_duration?.value ||
+                                            0}
+                                          {
+                                            currentDosageInstructions.timing
+                                              ?.repeat?.bounds_duration?.unit
+                                          }{" "}
+                                          ={" "}
+                                          <div className="text-gray-700 font-semibold text-sm">
+                                            {formatTotalUnits(
+                                              [currentDosageInstructions],
+                                              t("units"),
                                             )}
                                           </div>
                                         </div>
-                                        {field.medication ? (
-                                          <div>
-                                            <div className="text-sm text-gray-700 font-medium flex items-center gap-1">
-                                              {/* Existing medication - show read-only dosage instructions */}
-                                              {
-                                                field.dosageInstructions?.[0]
-                                                  ?.dose_and_rate?.dose_quantity
-                                                  ?.value
-                                              }{" "}
-                                              {
-                                                field.dosageInstructions?.[0]
-                                                  ?.dose_and_rate?.dose_quantity
-                                                  ?.unit?.display
-                                              }{" "}
-                                              ×{" "}
-                                              {
-                                                field.dosageInstructions?.[0]
-                                                  ?.timing?.code?.code
-                                              }{" "}
-                                              ×{" "}
-                                              {field.dosageInstructions?.[0]
-                                                ?.timing?.repeat
-                                                ?.bounds_duration?.value || 0}
-                                              {
-                                                field.dosageInstructions?.[0]
-                                                  ?.timing?.repeat
-                                                  ?.bounds_duration?.unit
-                                              }{" "}
-                                              ={" "}
-                                              <div className="text-gray-700 font-semibold text-sm">
-                                                {formatTotalUnits(
-                                                  field.dosageInstructions,
-                                                  t("units"),
-                                                )}
-                                              </div>
-                                            </div>
-                                          </div>
-                                        ) : (
-                                          <div
-                                            className="text-sm text-gray-500 cursor-pointer hover:text-gray-900"
-                                            onClick={() => {
-                                              setSelectedProduct(
-                                                productKnowledge,
-                                              );
-                                              setEditingItemIndex(index);
-                                              setIsAddMedicationSheetOpen(true);
-                                            }}
-                                          >
-                                            {(() => {
-                                              const currentDosageInstructions =
-                                                form.watch(
-                                                  `items.${index}.dosageInstructions`,
-                                                )?.[0];
+                                      );
+                                    }
 
-                                              if (
-                                                currentDosageInstructions
-                                                  ?.dose_and_rate?.dose_quantity
-                                              ) {
-                                                return (
-                                                  <div className="text-sm text-gray-700 font-medium flex items-center gap-1">
-                                                    {
-                                                      currentDosageInstructions
-                                                        .dose_and_rate
-                                                        .dose_quantity.value
-                                                    }{" "}
-                                                    {
-                                                      currentDosageInstructions
-                                                        .dose_and_rate
-                                                        .dose_quantity.unit
-                                                        ?.display
-                                                    }{" "}
-                                                    ×{" "}
-                                                    {
-                                                      currentDosageInstructions
-                                                        .timing?.code?.code
-                                                    }{" "}
-                                                    ×{" "}
-                                                    {currentDosageInstructions
-                                                      .timing?.repeat
-                                                      ?.bounds_duration
-                                                      ?.value || 0}
-                                                    {
-                                                      currentDosageInstructions
-                                                        .timing?.repeat
-                                                        ?.bounds_duration?.unit
-                                                    }{" "}
-                                                    ={" "}
-                                                    <div className="text-gray-700 font-semibold text-sm">
-                                                      {formatTotalUnits(
-                                                        [
-                                                          currentDosageInstructions,
-                                                        ],
-                                                        t("units"),
-                                                      )}
-                                                    </div>
-                                                  </div>
-                                                );
-                                              }
+                                    return t(
+                                      "click_to_add_dosage_instructions",
+                                    );
+                                  })()}
+                                </div>
+                              )}
+                            </div>
+                            {field.medication && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-gray-400 border text-gray-950 hover:bg-gray-50"
+                                type="button"
+                                onClick={() => {
+                                  setSubstitutingItemIndex(index);
+                                  setOriginalProductForSubstitution(
+                                    productKnowledge,
+                                  );
+                                  setIsSubstitutionSheetOpen(true);
+                                }}
+                              >
+                                <Shuffle className="size-5" />
+                                {t("substitute")}
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className={tableCellClass}>
+                          {productKnowledgeInventoriesMap[
+                            effectiveProductKnowledge.id
+                          ]?.length ? (
+                            <div className="space-y-2">
+                              <StockLotSelector
+                                selectedLots={form.watch(`items.${index}.lots`)}
+                                onLotSelectionChange={(lots) => {
+                                  const existingLotIds = form
+                                    .getValues(`items.${index}.lots`)
+                                    .map((lot) => lot.selectedInventoryId);
+                                  const newLots = lots.map((lot) => {
+                                    if (
+                                      !existingLotIds.includes(
+                                        lot.selectedInventoryId,
+                                      )
+                                    ) {
+                                      const medication = form.getValues(
+                                        `items.${index}.medication`,
+                                      );
+                                      return {
+                                        ...lot,
+                                        quantity: medication
+                                          ? computeInitialQuantity(medication)
+                                          : lot.quantity,
+                                      };
+                                    }
+                                    return lot;
+                                  });
+                                  form.setValue(`items.${index}.lots`, newLots);
+                                }}
+                                availableInventories={
+                                  productKnowledgeInventoriesMap[
+                                    effectiveProductKnowledge.id
+                                  ]
+                                }
+                                multiSelect
+                                showexpiry={false}
+                              />
+                            </div>
+                          ) : (
+                            <Badge variant="destructive">{t("no_stock")}</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className={tableCellClass}>
+                          <div className="space-y-2">
+                            {form
+                              .watch(`items.${index}.lots`)
+                              .filter((lot) => lot.selectedInventoryId)
+                              .map((lot) => {
+                                const actualLotIndex = form
+                                  .watch(`items.${index}.lots`)
+                                  .findIndex(
+                                    (l) =>
+                                      l.selectedInventoryId ===
+                                      lot.selectedInventoryId,
+                                  );
 
-                                              return t(
-                                                "click_to_add_dosage_instructions",
-                                              );
-                                            })()}
-                                          </div>
-                                        )}
-                                      </div>
-                                      {field.medication && (
-                                        <Button
-                                          variant="outline"
-                                          size="sm"
-                                          className="border-gray-400 border text-gray-950 hover:bg-gray-50"
-                                          type="button"
-                                          onClick={() => {
-                                            setSubstitutingItemIndex(index);
-                                            setOriginalProductForSubstitution(
-                                              productKnowledge,
-                                            );
-                                            setIsSubstitutionSheetOpen(true);
-                                          }}
-                                        >
-                                          <Shuffle className="size-5" />
-                                          {t("substitute")}
-                                        </Button>
-                                      )}
-                                    </div>
-                                  </TableCell>
-                                  <TableCell className={tableCellClass}>
-                                    {productKnowledgeInventoriesMap[
-                                      effectiveProductKnowledge.id
-                                    ]?.length ? (
-                                      <div className="space-y-2">
-                                        <StockLotSelector
-                                          selectedLots={form.watch(
-                                            `items.${index}.lots`,
-                                          )}
-                                          onLotSelectionChange={(lots) => {
-                                            const existingLotIds = form
-                                              .getValues(`items.${index}.lots`)
-                                              .map(
-                                                (lot) =>
-                                                  lot.selectedInventoryId,
-                                              );
-                                            const newLots = lots.map((lot) => {
-                                              if (
-                                                !existingLotIds.includes(
-                                                  lot.selectedInventoryId,
-                                                )
-                                              ) {
-                                                const medication =
-                                                  form.getValues(
-                                                    `items.${index}.medication`,
-                                                  );
-                                                return {
-                                                  ...lot,
-                                                  quantity: medication
-                                                    ? computeInitialQuantity(
-                                                        medication,
-                                                      )
-                                                    : lot.quantity,
-                                                };
-                                              }
-                                              return lot;
-                                            });
-                                            form.setValue(
-                                              `items.${index}.lots`,
-                                              newLots,
-                                            );
-                                          }}
-                                          availableInventories={
-                                            productKnowledgeInventoriesMap[
-                                              effectiveProductKnowledge.id
-                                            ]
-                                          }
-                                          multiSelect
-                                          showexpiry={false}
-                                        />
-                                      </div>
-                                    ) : (
-                                      <Badge variant="destructive">
-                                        {t("no_stock")}
-                                      </Badge>
-                                    )}
-                                  </TableCell>
-                                  <TableCell className={tableCellClass}>
-                                    <div className="space-y-2">
-                                      {form
-                                        .watch(`items.${index}.lots`)
-                                        .filter(
-                                          (lot) => lot.selectedInventoryId,
-                                        )
-                                        .map((lot) => {
-                                          const actualLotIndex = form
-                                            .watch(`items.${index}.lots`)
-                                            .findIndex(
-                                              (l) =>
-                                                l.selectedInventoryId ===
-                                                lot.selectedInventoryId,
-                                            );
-
-                                          return (
-                                            <div
-                                              key={lot.selectedInventoryId}
-                                              className="flex items-center gap-2"
-                                            >
-                                              <FormField
-                                                control={form.control}
-                                                name={`items.${index}.lots.${actualLotIndex}.quantity`}
-                                                render={({
-                                                  field: formField,
-                                                }) => (
-                                                  <FormItem>
-                                                    <FormControl>
-                                                      <Input
-                                                        type="number"
-                                                        min={0}
-                                                        {...formField}
-                                                        onChange={(e) => {
-                                                          formField.onChange(
-                                                            parseInt(
-                                                              e.target.value,
-                                                            ),
-                                                          );
-                                                        }}
-                                                        className="border-gray-300 border rounded-none w-24"
-                                                        placeholder="0"
-                                                      />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                  </FormItem>
-                                                )}
-                                              />
-                                            </div>
-                                          );
-                                        })}
-                                      {form
-                                        .watch(`items.${index}.lots`)
-                                        .filter(
-                                          (lot) => lot.selectedInventoryId,
-                                        ).length === 0 && (
-                                        <div className="text-sm text-gray-500 py-2">
-                                          {t("select_lots_first")}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </TableCell>
-                                  <TableCell className={tableCellClass}>
+                                return (
+                                  <div
+                                    key={lot.selectedInventoryId}
+                                    className="flex items-center gap-2"
+                                  >
                                     <FormField
                                       control={form.control}
-                                      name={`items.${index}.daysSupply`}
+                                      name={`items.${index}.lots.${actualLotIndex}.quantity`}
                                       render={({ field: formField }) => (
                                         <FormItem>
                                           <FormControl>
                                             <Input
                                               type="number"
-                                              min={1}
+                                              min={0}
                                               {...formField}
-                                              onChange={(e) => {
-                                                formField.onChange(
-                                                  parseInt(e.target.value) || 0,
-                                                );
-                                              }}
                                               className="border-gray-300 border rounded-none w-24"
+                                              placeholder="0"
                                             />
                                           </FormControl>
                                           <FormMessage />
                                         </FormItem>
                                       )}
                                     />
-                                  </TableCell>
-                                  <TableCell className={tableCellClass}>
-                                    {form
-                                      .watch(`items.${index}.lots`)
-                                      .filter((lot) => lot.selectedInventoryId)
-                                      .map((lot) => {
-                                        const selectedInventory =
-                                          productKnowledgeInventoriesMap[
-                                            effectiveProductKnowledge.id
-                                          ]?.find(
-                                            (inv) =>
-                                              inv.id ===
-                                              lot.selectedInventoryId,
-                                          );
+                                  </div>
+                                );
+                              })}
+                            {form
+                              .watch(`items.${index}.lots`)
+                              .filter((lot) => lot.selectedInventoryId)
+                              .length === 0 && (
+                              <div className="text-sm text-gray-500 py-2">
+                                {t("select_lots_first")}
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className={tableCellClass}>
+                          <FormField
+                            control={form.control}
+                            name={`items.${index}.daysSupply`}
+                            render={({ field: formField }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    min={1}
+                                    {...formField}
+                                    className="border-gray-300 border rounded-none w-24"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </TableCell>
+                        <TableCell className={tableCellClass}>
+                          {form
+                            .watch(`items.${index}.lots`)
+                            .filter((lot) => lot.selectedInventoryId)
+                            .map((lot) => {
+                              const selectedInventory =
+                                productKnowledgeInventoriesMap[
+                                  effectiveProductKnowledge.id
+                                ]?.find(
+                                  (inv) => inv.id === lot.selectedInventoryId,
+                                );
 
-                                        return (
-                                          <div
-                                            key={lot.selectedInventoryId}
-                                            className="py-2.5 text-gray-950 font-normal text-base"
-                                          >
-                                            {selectedInventory?.product
-                                              .expiration_date
-                                              ? formatDate(
-                                                  selectedInventory?.product
-                                                    .expiration_date,
-                                                  "MM/yyyy",
-                                                )
-                                              : "-"}
-                                          </div>
-                                        );
-                                      })}
-                                    {form
-                                      .watch(`items.${index}.lots`)
-                                      .filter((lot) => lot.selectedInventoryId)
-                                      .length === 0 && (
-                                      <div className="text-sm text-gray-500 py-2">
-                                        -
-                                      </div>
-                                    )}
-                                  </TableCell>
-                                  <TableCell className={tableCellClass}>
-                                    {form
-                                      .watch(`items.${index}.lots`)
-                                      .filter((lot) => lot.selectedInventoryId)
-                                      .map((lot) => {
-                                        const selectedInventory =
-                                          productKnowledgeInventoriesMap[
-                                            effectiveProductKnowledge.id
-                                          ]?.find(
-                                            (inv) =>
-                                              inv.id ===
-                                              lot.selectedInventoryId,
-                                          );
-                                        const prices =
-                                          calculatePrices(selectedInventory);
-
-                                        return (
-                                          <div
-                                            key={lot.selectedInventoryId}
-                                            className="py-2.5 text-gray-950 font-normal text-base"
-                                          >
-                                            <MonetaryDisplay
-                                              amount={prices.basePrice}
-                                            />
-                                          </div>
-                                        );
-                                      })}
-                                    {form
-                                      .watch(`items.${index}.lots`)
-                                      .filter((lot) => lot.selectedInventoryId)
-                                      .length === 0 && (
-                                      <div className="text-sm py-2">-</div>
-                                    )}
-                                  </TableCell>
-                                  <TableCell className={tableCellClass}>
-                                    {form
-                                      .watch(`items.${index}.lots`)
-                                      .filter((lot) => lot.selectedInventoryId)
-                                      .map((lot) => {
-                                        const selectedInventory =
-                                          productKnowledgeInventoriesMap[
-                                            effectiveProductKnowledge.id
-                                          ]?.find(
-                                            (inv) =>
-                                              inv.id ===
-                                              lot.selectedInventoryId,
-                                          );
-
-                                        return selectedInventory ? (
-                                          <div
-                                            key={lot.selectedInventoryId}
-                                            className="py-2.5 text-gray-950 font-normal text-base"
-                                          >
-                                            {selectedInventory.product.charge_item_definition?.price_components
-                                              .filter(
-                                                (c) =>
-                                                  c.monetary_component_type ===
-                                                  MonetaryComponentType.discount,
-                                              )
-                                              .map((component) =>
-                                                component.factor
-                                                  ? `${component.factor}%`
-                                                  : "--",
-                                              )}
-                                          </div>
-                                        ) : (
-                                          <div
-                                            key={lot.selectedInventoryId}
-                                            className="py-2.5"
-                                          >
-                                            --
-                                          </div>
-                                        );
-                                      })}
-                                    {form
-                                      .watch(`items.${index}.lots`)
-                                      .filter((lot) => lot.selectedInventoryId)
-                                      .length === 0 && (
-                                      <div className="text-sm text-gray-500 py-2">
-                                        -
-                                      </div>
-                                    )}
-                                  </TableCell>
-                                  <TableCell className={tableCellClass}>
-                                    {field.medication ? (
-                                      <FormField
-                                        control={form.control}
-                                        name={`items.${index}.fully_dispensed`}
-                                        render={({ field: formField }) => (
-                                          <FormItem>
-                                            <FormControl>
-                                              <Switch
-                                                className="data-[state=checked]:bg-primary-600"
-                                                checked={formField.value}
-                                                onCheckedChange={
-                                                  formField.onChange
-                                                }
-                                              />
-                                            </FormControl>
-                                          </FormItem>
-                                        )}
-                                      />
-                                    ) : (
-                                      "-"
-                                    )}
-                                  </TableCell>
-                                  <TableCell
-                                    className={cn(
-                                      tableCellClass,
-                                      "rounded-r-lg",
-                                    )}
-                                  >
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" size="icon">
-                                          <MoreVertical className="size-5" />
-                                        </Button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end">
-                                        {field.medication?.dispense_status !==
-                                        MedicationRequestDispenseStatus.partial ? (
-                                          <Popover>
-                                            <PopoverTrigger asChild>
-                                              <div className="w-full">
-                                                <DropdownMenuItem
-                                                  disabled
-                                                  className="w-full"
-                                                >
-                                                  {t("mark_as_already_given")}
-                                                </DropdownMenuItem>
-                                              </div>
-                                            </PopoverTrigger>
-                                            <PopoverContent>
-                                              {t(
-                                                "enabled_only_for_partially_dispensed",
-                                              )}
-                                            </PopoverContent>
-                                          </Popover>
-                                        ) : (
-                                          <DropdownMenuItem
-                                            onSelect={() => {
-                                              setMedicationToMarkComplete({
-                                                medication:
-                                                  field.medication as MedicationRequestRead,
-                                                index,
-                                              });
-                                            }}
-                                          >
-                                            {t("mark_as_already_given")}
-                                          </DropdownMenuItem>
-                                        )}
-                                        <DropdownMenuItem
-                                          onSelect={() => {
-                                            setMedicationToRemove({
-                                              medication:
-                                                field.medication as MedicationRequestRead,
-                                              medicationName:
-                                                effectiveProductKnowledge.name,
-                                              index,
-                                              isAdded: !field.medication
-                                                ? true
-                                                : false,
-                                            });
-                                          }}
-                                        >
-                                          {t("remove_medication")}
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
-                                  </TableCell>
-                                </TableRow>
+                              return (
+                                <div
+                                  key={lot.selectedInventoryId}
+                                  className="py-2.5 text-gray-950 font-normal text-base"
+                                >
+                                  {selectedInventory?.product.expiration_date
+                                    ? formatDate(
+                                        selectedInventory?.product
+                                          .expiration_date,
+                                        "MM/yyyy",
+                                      )
+                                    : "-"}
+                                </div>
                               );
                             })}
-                          </React.Fragment>
-                        );
-                      },
+                          {form
+                            .watch(`items.${index}.lots`)
+                            .filter((lot) => lot.selectedInventoryId).length ===
+                            0 && (
+                            <div className="text-sm text-gray-500 py-2">-</div>
+                          )}
+                        </TableCell>
+                        <TableCell className={tableCellClass}>
+                          {form
+                            .watch(`items.${index}.lots`)
+                            .filter((lot) => lot.selectedInventoryId)
+                            .map((lot) => {
+                              const selectedInventory =
+                                productKnowledgeInventoriesMap[
+                                  effectiveProductKnowledge.id
+                                ]?.find(
+                                  (inv) => inv.id === lot.selectedInventoryId,
+                                );
+                              const prices = calculatePrices(selectedInventory);
+
+                              return (
+                                <div
+                                  key={lot.selectedInventoryId}
+                                  className="py-2.5 text-gray-950 font-normal text-base"
+                                >
+                                  <MonetaryDisplay amount={prices.basePrice} />
+                                </div>
+                              );
+                            })}
+                          {form
+                            .watch(`items.${index}.lots`)
+                            .filter((lot) => lot.selectedInventoryId).length ===
+                            0 && <div className="text-sm py-2">-</div>}
+                        </TableCell>
+                        <TableCell className={tableCellClass}>
+                          {form
+                            .watch(`items.${index}.lots`)
+                            .filter((lot) => lot.selectedInventoryId)
+                            .map((lot) => {
+                              const selectedInventory =
+                                productKnowledgeInventoriesMap[
+                                  effectiveProductKnowledge.id
+                                ]?.find(
+                                  (inv) => inv.id === lot.selectedInventoryId,
+                                );
+
+                              return selectedInventory ? (
+                                <div
+                                  key={lot.selectedInventoryId}
+                                  className="py-2.5 text-gray-950 font-normal text-base"
+                                >
+                                  {selectedInventory.product.charge_item_definition?.price_components
+                                    .filter(
+                                      (c) =>
+                                        c.monetary_component_type ===
+                                        MonetaryComponentType.discount,
+                                    )
+                                    .map((component) =>
+                                      component.factor
+                                        ? `${round(component.factor)}%`
+                                        : "--",
+                                    )}
+                                </div>
+                              ) : (
+                                <div
+                                  key={lot.selectedInventoryId}
+                                  className="py-2.5"
+                                >
+                                  --
+                                </div>
+                              );
+                            })}
+                          {form
+                            .watch(`items.${index}.lots`)
+                            .filter((lot) => lot.selectedInventoryId).length ===
+                            0 && (
+                            <div className="text-sm text-gray-500 py-2">-</div>
+                          )}
+                        </TableCell>
+                        <TableCell className={tableCellClass}>
+                          {field.medication ? (
+                            <FormField
+                              control={form.control}
+                              name={`items.${index}.fully_dispensed`}
+                              render={({ field: formField }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Switch
+                                      className="data-[state=checked]:bg-primary-600"
+                                      checked={formField.value}
+                                      onCheckedChange={formField.onChange}
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                          ) : (
+                            "-"
+                          )}
+                        </TableCell>
+                        <TableCell
+                          className={cn(tableCellClass, "rounded-r-lg")}
+                        >
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="icon">
+                                <MoreVertical className="size-5" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {field.medication?.dispense_status !==
+                              MedicationRequestDispenseStatus.partial ? (
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <div className="w-full">
+                                      <DropdownMenuItem
+                                        disabled
+                                        className="w-full"
+                                      >
+                                        {t("mark_as_already_given")}
+                                      </DropdownMenuItem>
+                                    </div>
+                                  </PopoverTrigger>
+                                  <PopoverContent>
+                                    {t("enabled_only_for_partially_dispensed")}
+                                  </PopoverContent>
+                                </Popover>
+                              ) : (
+                                <DropdownMenuItem
+                                  onSelect={() => {
+                                    setMedicationToMarkComplete({
+                                      medication:
+                                        field.medication as MedicationRequestRead,
+                                      index,
+                                    });
+                                  }}
+                                >
+                                  {t("mark_as_already_given")}
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem
+                                onSelect={() => {
+                                  setMedicationToRemove({
+                                    medication:
+                                      field.medication as MedicationRequestRead,
+                                    medicationName:
+                                      effectiveProductKnowledge.name,
+                                    index,
+                                    isAdded: !field.medication ? true : false,
+                                  });
+                                }}
+                              >
+                                {t("remove_medication")}
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
                     );
-                  })()}
+                  })}
                   <TableRow className="bg-white rounded-lg shadow-sm">
                     <TableCell colSpan={12} className="p-0 rounded-lg">
                       <ProductKnowledgeSelect
@@ -2177,13 +2046,12 @@ export default function MedicationBillForm({ patientId }: Props) {
             onSuccess={() => {
               setIsInvoiceSheetOpen(false);
               navigate(
-                `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation`,
+                `/facility/${facilityId}/locations/${locationId}/medication_dispense/${dispenseOrderId ? `order/${dispenseOrderId}?status=preparation` : ""}`,
               );
             }}
-            sourceUrl={`/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation`}
+            sourceUrl={`/facility/${facilityId}/locations/${locationId}/medication_dispense/${dispenseOrderId ? `order/${dispenseOrderId}?status=preparation` : ""}`}
             locationId={locationId}
-            patientId={patientId}
-            showDispenseNowButton={true}
+            dispenseOrderId={dispenseOrderId ?? undefined}
           />
         )}
 
@@ -2216,11 +2084,13 @@ export default function MedicationBillForm({ patientId }: Props) {
                   );
 
                   if (dosageInstructions?.[0]) {
-                    const newDaysSupply = convertDurationToDays(
-                      dosageInstructions[0]?.timing?.repeat?.bounds_duration
-                        ?.value || 0,
-                      dosageInstructions[0]?.timing?.repeat?.bounds_duration
-                        ?.unit || "",
+                    const newDaysSupply = round(
+                      convertDurationToDays(
+                        dosageInstructions[0]?.timing?.repeat?.bounds_duration
+                          ?.value || "0",
+                        dosageInstructions[0]?.timing?.repeat?.bounds_duration
+                          ?.unit || "",
+                      ),
                     );
                     form.setValue(
                       `items.${editingItemIndex}.daysSupply`,
@@ -2276,11 +2146,13 @@ export default function MedicationBillForm({ patientId }: Props) {
               reference_id: crypto.randomUUID(),
               productKnowledge: product,
               isSelected: true,
-              daysSupply: convertDurationToDays(
-                dosageInstructions[0]?.timing?.repeat?.bounds_duration?.value ||
-                  0,
-                dosageInstructions[0]?.timing?.repeat?.bounds_duration?.unit ||
-                  "",
+              daysSupply: round(
+                convertDurationToDays(
+                  dosageInstructions[0]?.timing?.repeat?.bounds_duration
+                    ?.value || "0",
+                  dosageInstructions[0]?.timing?.repeat?.bounds_duration
+                    ?.unit || "",
+                ),
               ),
               fully_dispensed: true,
               dosageInstructions,
@@ -2325,7 +2197,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                 // Reset lots and quantity for the substituted item
                 form.setValue(
                   `items.${substitutingItemIndex}.lots`,
-                  [{ selectedInventoryId: "", quantity: 0 }],
+                  [{ selectedInventoryId: "", quantity: "0" }],
                   { shouldDirty: true, shouldTouch: true },
                 );
 
@@ -2352,7 +2224,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                   | undefined;
                 const initialQuantity = originalMedication
                   ? computeInitialQuantity(originalMedication)
-                  : 0;
+                  : "0";
                 form.setValue(
                   `items.${substitutingItemIndex}.lots`,
                   [{ selectedInventoryId: "", quantity: initialQuantity }],
@@ -2611,7 +2483,7 @@ export const DispensedItemsSheet = ({
                           {item.item.product.product_knowledge.name}
                         </TableCell>
                         <TableCell>
-                          {item.charge_item.quantity}{" "}
+                          {round(item.charge_item.quantity)}{" "}
                           {
                             item.dosage_instruction?.[0]?.dose_and_rate
                               ?.dose_quantity?.unit?.display
@@ -2637,7 +2509,7 @@ export const DispensedItemsSheet = ({
                         </TableCell>
                         <TableCell>
                           <MonetaryDisplay
-                            amount={item.charge_item.total_price}
+                            amount={item?.charge_item?.total_price}
                           />
                         </TableCell>
                       </TableRow>

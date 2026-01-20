@@ -32,6 +32,7 @@ interface MultiFilterProps {
   selectedBarClassName?: string;
   facilityId?: string;
   disabled?: boolean;
+  align?: "start" | "end";
 }
 export default function MultiFilter({
   selectedFilters,
@@ -46,6 +47,7 @@ export default function MultiFilter({
   selectedBarClassName,
   facilityId,
   disabled = false,
+  align = "start",
 }: MultiFilterProps) {
   const [open, setOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
@@ -137,7 +139,7 @@ export default function MultiFilter({
         </DropdownMenuTrigger>
         <DropdownMenuContent
           className="w-[calc(100vw)] max-w-[calc(100vw-3rem)] sm:max-w-xs p-0"
-          align="start"
+          align={align}
         >
           {activeFilter ? (
             <FilterRenderer

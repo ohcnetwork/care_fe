@@ -55,6 +55,7 @@ import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemStatus } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
+import { isPositive } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import BackButton from "@/components/Common/BackButton";
 import { ReportSubTab } from "@/components/Files/ReportSubTab";
@@ -556,16 +557,18 @@ export function AccountShow({
               </p>
               <div className="flex items-end">
                 <p
-                  className={cn("text-3xl font-bold", {
-                    "text-red-500": Number(account.total_balance) > 0,
-                    "text-green-700": Number(account.total_balance) <= 0,
-                  })}
+                  className={cn(
+                    "text-3xl font-bold",
+                    isPositive(account.total_balance)
+                      ? "text-red-500"
+                      : "text-green-700",
+                  )}
                 >
                   <MonetaryDisplay amount={account.total_balance} />
                 </p>
               </div>
               <p className="text-xs text-gray-500">
-                {Number(account.total_balance) >= 0
+                {isPositive(account.total_balance)
                   ? t("pending_from_patient")
                   : t("overpaid_amount")}
               </p>
@@ -707,7 +710,7 @@ export function AccountShow({
               ))}
             </SelectContent>
           </Select>
-          <ClosedCallout balance={Number(account.total_balance)} />
+          <ClosedCallout balance={account.total_balance} />
           {hasBillableItems && (
             <span className="text-warning-500 bg-warning-50 text-xs p-2 rounded block -mt-3">
               {t("close_account_with_pending_items_caution_message")}
@@ -722,9 +725,9 @@ export function AccountShow({
   );
 }
 
-const ClosedCallout = ({ balance }: { balance: number }) => {
+const ClosedCallout = ({ balance }: { balance: string }) => {
   const { t } = useTranslation();
-  const isNegative = balance > 0;
+  const isNegative = isPositive(balance);
   if (!isNegative) return <></>;
   return (
     <span className="text-red-500 bg-red-50 text-xs -mt-2 p-2 rounded">

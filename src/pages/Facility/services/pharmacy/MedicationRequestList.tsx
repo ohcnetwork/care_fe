@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowUpRightSquare } from "lucide-react";
+import { ArrowUpRightSquare, ReceiptTextIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -274,18 +274,32 @@ export default function MedicationRequestList({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="outline"
-                      className="font-semibold"
-                      onClick={() => {
-                        navigate(
-                          `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}/prescription/${item.id}`,
-                        );
-                      }}
-                    >
-                      <ArrowUpRightSquare strokeWidth={1.5} />
-                      {t("see_prescription")}
-                    </Button>
+                    <div className="flex gap-2 self-center">
+                      <Button
+                        variant="outline"
+                        className="font-semibold"
+                        onClick={() => {
+                          navigate(
+                            `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}/prescription/${item.id}/bill`,
+                          );
+                        }}
+                      >
+                        <ReceiptTextIcon strokeWidth={1.5} />
+                        {t("billing")}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="font-semibold"
+                        onClick={() => {
+                          navigate(
+                            `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}/prescription/${item.id}`,
+                          );
+                        }}
+                      >
+                        <ArrowUpRightSquare strokeWidth={1.5} />
+                        {t("see_prescription")}
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

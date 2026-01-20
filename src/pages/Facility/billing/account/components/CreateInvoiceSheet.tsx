@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -23,9 +22,8 @@ interface CreateInvoiceSheetProps {
   onSuccess?: () => void;
   sourceUrl?: string;
   locationId?: string;
-  patientId?: string;
   disableCreateChargeItems?: boolean;
-  showDispenseNowButton?: boolean;
+  dispenseOrderId?: string;
 }
 
 export function CreateInvoiceSheet({
@@ -38,9 +36,8 @@ export function CreateInvoiceSheet({
   onSuccess,
   sourceUrl,
   locationId,
-  patientId,
   disableCreateChargeItems = false,
-  showDispenseNowButton = false,
+  dispenseOrderId,
 }: CreateInvoiceSheetProps) {
   const { t } = useTranslation();
 
@@ -52,7 +49,7 @@ export function CreateInvoiceSheet({
           <SheetTitle>{t("create_invoice")}</SheetTitle>
           <SheetDescription>{t("create_invoice_description")}</SheetDescription>
         </SheetHeader>
-        <ScrollArea className="h-[calc(100vh-8rem)] mt-6 -mx-4">
+        <div className="h-[calc(100vh-8rem)] overflow-auto mt-6 -mx-4">
           <CreateInvoicePage
             facilityId={facilityId}
             accountId={accountId}
@@ -62,11 +59,10 @@ export function CreateInvoiceSheet({
             showHeader={false}
             sourceUrl={sourceUrl}
             locationId={locationId}
-            patientId={patientId}
             disableCreateChargeItems={disableCreateChargeItems}
-            showDispenseNowButton={showDispenseNowButton}
+            dispenseOrderId={dispenseOrderId}
           />
-        </ScrollArea>
+        </div>
       </SheetContent>
     </Sheet>
   );

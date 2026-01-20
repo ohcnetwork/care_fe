@@ -1,4 +1,5 @@
 import { Condition, conditionSchema } from "@/types/base/condition/condition";
+import { round, zodDecimal } from "@/Utils/decimal";
 import { t } from "i18next";
 import { z } from "zod";
 
@@ -10,8 +11,8 @@ export interface Interpretation {
 
 export interface NumericRange {
   interpretation: Interpretation;
-  min?: number;
-  max?: number;
+  min?: string;
+  max?: string;
 }
 
 export interface CustomValueSet {
@@ -49,8 +50,8 @@ export const qualifiedRangeSchema = z.array(
         z
           .object({
             interpretation: interpretationSchema,
-            min: z.number().optional(),
-            max: z.number().optional(),
+            min: zodDecimal().optional(),
+            max: zodDecimal().optional(),
           })
           .refine(
             (data) => {
@@ -134,13 +135,13 @@ export const getRangeSummary = (range: NumericRange) => {
   if (!range.min) {
     return t("observation_interpretation_range_max_only", {
       display: range.interpretation.display,
-      max: range.max,
+      max: round(range.max!),
     });
   }
   if (!range.max) {
     return t("observation_interpretation_range_min_only", {
       display: range.interpretation.display,
-      min: range.min,
+      min: round(range.min),
     });
   }
   return t("observation_interpretation_range_between", {
