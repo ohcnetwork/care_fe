@@ -159,6 +159,9 @@ export function DispenseHistory({
               const instruction = medication.dosage_instruction[0] ?? {};
               const frequency = instruction?.timing?.code;
               const dosage = instruction?.dose_and_rate?.dose_quantity;
+              const totalAmount = Number(
+                medication.charge_item?.total_price || 0,
+              );
 
               return (
                 <TableRow
@@ -215,7 +218,18 @@ export function DispenseHistory({
                         hidden={!facilityId}
                       >
                         <Link
-                          href={`/facility/${facilityId}/locations/${medication.location.id}/medication_dispense/${dispenseOrderId ? `order/${dispenseOrderId}/?status=${medication.status}&payment_status=${medication.charge_item?.paid_invoice?.status === InvoiceStatus.balanced ? "paid" : "unpaid"}` : ""}`}
+                          href={`/facility/${facilityId}/locations/${medication.location.id}/medication_dispense/${
+                            dispenseOrderId
+                              ? `order/${dispenseOrderId}/${medication.status}?payment_status=${
+                                  !medication.charge_item || totalAmount === 0
+                                    ? "paid"
+                                    : medication.charge_item?.paid_invoice
+                                          ?.status === InvoiceStatus.balanced
+                                      ? "paid"
+                                      : "unpaid"
+                                }`
+                              : ""
+                          }`}
                         >
                           {t("dispense")}
                         </Link>

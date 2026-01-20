@@ -62,7 +62,6 @@ import {
 } from "@/types/emr/dispenseOrder/dispenseOrder";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { PatientListRead } from "@/types/emr/patient/patient";
-import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -70,6 +69,7 @@ import { PillIcon } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { round } from "@/Utils/decimal";
 
 interface MedicationTableProps {
   facilityId: string;
@@ -146,6 +146,9 @@ function MedicationTable({ facilityId, medications }: MedicationTableProps) {
             const instruction = medication.dosage_instruction[0] ?? {};
             const frequency = instruction?.timing?.code;
             const dosage = instruction?.dose_and_rate?.dose_quantity;
+            const totalAmount = Number(
+              medication.charge_item?.total_price || 0,
+            );
             const isPaid =
               medication.charge_item?.paid_invoice?.status ===
               InvoiceStatus.balanced;
@@ -221,8 +224,8 @@ function MedicationTable({ facilityId, medications }: MedicationTableProps) {
                   {new Date(medication.when_prepared).toLocaleDateString()}
                 </TableCell>
                 <TableCell>
-                  {!medication.charge_item ? (
-                    "-"
+                  {!medication.charge_item || totalAmount === 0 ? (
+                    "—"
                   ) : (
                     <Badge variant={isPaid ? "green" : "destructive"}>
                       {isPaid ? t("paid") : t("unpaid")}
@@ -428,14 +431,32 @@ export default function DispensedMedicationList({
   };
 
   const filteredMedications = medications?.filter((med) => {
-    if (paymentFilter === "paid")
+    const totalAmount = Number(med.charge_item?.total_price || 0);
+
+    // Case 1: No charge item at all
+    if (!med.charge_item) {
+      return paymentFilter === "all";
+    }
+
+    // Case 2: Zero-amount charge → treat as paid, but neutral
+    if (totalAmount === 0) {
+      return paymentFilter === "all" || paymentFilter === "paid";
+    }
+
+    // Case 3: Normal paid
+    if (paymentFilter === "paid") {
       return med.charge_item?.paid_invoice?.status === InvoiceStatus.balanced;
-    if (paymentFilter === "unpaid")
+    }
+
+    // Case 4: Normal unpaid
+    if (paymentFilter === "unpaid") {
       return (
         !med.charge_item?.paid_invoice ||
         med.charge_item?.paid_invoice?.status === InvoiceStatus.issued ||
         med.charge_item?.paid_invoice?.status === InvoiceStatus.draft
       );
+    }
+
     return true;
   });
 
