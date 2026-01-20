@@ -28,7 +28,10 @@ import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryCo
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import { InvoiceRead, InvoiceStatus } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
-import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconciliation/paymentReconciliation";
+import {
+  PAYMENT_RECONCILIATION_METHOD_MAP,
+  PaymentReconciliationStatus,
+} from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import { getPartialId } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
@@ -373,7 +376,9 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
           <div
             className={cn(
               "border-x border-gray-300 p-2 -mt-4 border-t-none space-y-2",
-              invoice.payments?.length === 0 && "border-b rounded-b-md",
+              invoice.payments?.filter(
+                (p) => p.status === PaymentReconciliationStatus.active,
+              ).length === 0 && "border-b rounded-b-md",
             )}
           >
             <div className="flex flex-col items-end space-y-2 text-gray-950 font-normal text-sm mb-4">
@@ -478,7 +483,9 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
           </div>
 
           {/* Payments Section */}
-          {invoice.payments?.length > 0 && (
+          {invoice.payments?.filter(
+            (p) => p.status === PaymentReconciliationStatus.active,
+          ).length > 0 && (
             <>
               <div className="border-x border-b border-t border-gray-300 rounded-b-md -mt-4 space-y-2">
                 <Table>
@@ -500,40 +507,46 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {invoice.payments.map((payment, index) => (
-                      <TableRow
-                        key={payment.id}
-                        className="border-b border-gray-200"
-                      >
-                        <TableCell
-                          className={cn(tableCellClass, "text-center")}
+                    {invoice.payments
+                      .filter(
+                        (p) => p.status === PaymentReconciliationStatus.active,
+                      )
+                      .map((payment, index) => (
+                        <TableRow
+                          key={payment.id}
+                          className="border-b border-gray-200"
                         >
-                          {index + 1}
-                        </TableCell>
-                        <TableCell
-                          className={cn(tableCellClass, "font-medium")}
-                        >
-                          {payment.payment_datetime
-                            ? format(
-                                new Date(payment.payment_datetime),
-                                "d MMM yyyy, hh:mm a",
-                              )
-                            : "-"}
-                        </TableCell>
-                        <TableCell className={cn(tableCellClass, "text-left")}>
-                          {PAYMENT_RECONCILIATION_METHOD_MAP[payment.method]}
-                        </TableCell>
-                        <TableCell className={tableCellClass}>
-                          {payment.reference_number}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <MonetaryDisplay
-                            amount={payment.amount}
-                            hideCurrency
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          <TableCell
+                            className={cn(tableCellClass, "text-center")}
+                          >
+                            {index + 1}
+                          </TableCell>
+                          <TableCell
+                            className={cn(tableCellClass, "font-medium")}
+                          >
+                            {payment.payment_datetime
+                              ? format(
+                                  new Date(payment.payment_datetime),
+                                  "d MMM yyyy, hh:mm a",
+                                )
+                              : "-"}
+                          </TableCell>
+                          <TableCell
+                            className={cn(tableCellClass, "text-left")}
+                          >
+                            {PAYMENT_RECONCILIATION_METHOD_MAP[payment.method]}
+                          </TableCell>
+                          <TableCell className={tableCellClass}>
+                            {payment.reference_number}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <MonetaryDisplay
+                              amount={payment.amount}
+                              hideCurrency
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </div>
