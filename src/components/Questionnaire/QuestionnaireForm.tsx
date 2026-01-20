@@ -773,7 +773,10 @@ export function QuestionnaireForm({
     <div className="flex gap-4">
       {/* Left Navigation */}
       <div className="w-64 border-r border-gray-200 p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
-        <BackButton className="w-full">
+        <BackButton
+          className="w-full"
+          fallbackUrl={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`}
+        >
           <ArrowLeft />
           <span>{t("back_to_encounter")}</span>
         </BackButton>
