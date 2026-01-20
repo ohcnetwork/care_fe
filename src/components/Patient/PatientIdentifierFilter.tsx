@@ -54,6 +54,8 @@ import patientApi from "@/types/emr/patient/patientApi";
 import query from "@/Utils/request/query";
 import careConfig from "@careConfig";
 
+const IDENTIFIER_CONFIG_STORAGE_KEY = "patient_identifier_filter_search_type";
+
 interface Props {
   onSelect: (patientId: string | undefined, patientName?: string) => void;
   placeholder?: string;
@@ -324,15 +326,33 @@ export default function PatientIdentifierFilter({
     ],
   );
 
-  // Set default search type to first identifier config (prioritize phone number)
+  // Set default search type from localStorage, fallback to first identifier config (prioritize phone number)
   useEffect(() => {
     if (allIdentifierConfigs.length && !searchType) {
-      const phoneConfig = allIdentifierConfigs.find(
-        (c) => c.config.system === careConfig.phoneNumberConfigSystem,
+      const cachedSearchType = localStorage.getItem(
+        IDENTIFIER_CONFIG_STORAGE_KEY,
       );
-      setSearchType(phoneConfig?.id || allIdentifierConfigs[0].id);
+      const cachedConfigExists = allIdentifierConfigs.some(
+        (c) => c.id === cachedSearchType,
+      );
+
+      if (cachedSearchType && cachedConfigExists) {
+        setSearchType(cachedSearchType);
+      } else {
+        const phoneConfig = allIdentifierConfigs.find(
+          (c) => c.config.system === careConfig.phoneNumberConfigSystem,
+        );
+        setSearchType(phoneConfig?.id || allIdentifierConfigs[0].id);
+      }
     }
   }, [allIdentifierConfigs, searchType]);
+
+  // Cache the selected identifier config in localStorage
+  useEffect(() => {
+    if (searchType) {
+      localStorage.setItem(IDENTIFIER_CONFIG_STORAGE_KEY, searchType);
+    }
+  }, [searchType]);
 
   // Check if current search type is phone number
   const isPhoneNumberConfig =
