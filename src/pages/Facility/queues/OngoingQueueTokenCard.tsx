@@ -263,7 +263,7 @@ export function OngoingQueueTokenCard({
                     })
                   }
                 >
-                  <TicketCheck className="size-4 mr-2" />
+                  <Megaphone className="size-4 mr-2" />
                   {t("call_to", { name: service.name })}
                 </ContextMenuItem>
               ))}

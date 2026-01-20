@@ -949,7 +949,7 @@
   "cache_clear_failed": "Failed to clear cache",
   "calculation": "Calculation",
   "calculation_preview": "Calculation Preview",
-  "call_next_patient": "Call and mark as In-service next patient",
+  "call_next_patient": "Serve Next Patient",
   "call_patient": "Call Patient",
   "call_to": "Call to {{name}}",
   "called": "Called",
