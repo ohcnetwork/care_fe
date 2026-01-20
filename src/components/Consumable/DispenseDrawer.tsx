@@ -582,7 +582,7 @@ export default function DispenseDrawer({
 
           <div className="flex-1 overflow-y-auto sm:pr-4 px-3">
             <Form {...form}>
-              <form>
+              <form onSubmit={(e) => e.preventDefault()}>
                 {fields.length === 0 ? (
                   <EmptyState
                     icon={
@@ -862,6 +862,7 @@ export default function DispenseDrawer({
                                   <Button
                                     variant="ghost"
                                     size="icon"
+                                    type="button"
                                     onClick={() => remove(index)}
                                     className="hover:text-red-600 hover:bg-white"
                                     aria-label={t("remove_item", {
