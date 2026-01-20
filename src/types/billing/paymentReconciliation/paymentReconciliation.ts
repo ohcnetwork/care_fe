@@ -1,6 +1,7 @@
 import { AccountRead } from "@/types/billing/account/Account";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import { LocationRead } from "@/types/location/location";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum PaymentReconciliationType {
   payment = "payment",
@@ -58,6 +59,19 @@ export enum PaymentReconciliationPaymentMethod {
   debc = "debc",
 }
 
+export const PAYMENT_RECONCILIATION_METHOD_MAP: Record<
+  PaymentReconciliationPaymentMethod,
+  string
+> = {
+  cash: "Cash",
+  ccca: "Credit Card",
+  cchk: "Credit Check",
+  cdac: "Credit Account",
+  chck: "Check",
+  ddpo: "Direct Deposit",
+  debc: "Debit Card",
+};
+
 export interface PaymentReconciliationBase {
   id: string;
   reconciliation_type: PaymentReconciliationType;
@@ -93,6 +107,8 @@ export interface PaymentReconciliationRead extends PaymentReconciliationBase {
   account: AccountRead;
   is_credit_note: boolean;
   location: LocationRead | null;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
 }
 
 export interface PaymentReconciliationCancel {

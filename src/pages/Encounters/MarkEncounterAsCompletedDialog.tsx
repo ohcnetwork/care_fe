@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import {
   AlertDialog,
@@ -33,7 +32,6 @@ export function MarkEncounterAsCompletedDialog(
       pathParams: { id: encounter?.id || "" },
     }),
     onSuccess: () => {
-      toast.success(t("encounter_marked_as_complete"));
       queryClient.invalidateQueries({ queryKey: ["encounter", encounter?.id] });
     },
   });

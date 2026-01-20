@@ -280,7 +280,7 @@ export default function MedicationRequestList({
                         className="font-semibold"
                         onClick={() => {
                           navigate(
-                            `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}/bill`,
+                            `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}/prescription/${item.id}/bill`,
                           );
                         }}
                       >

@@ -82,6 +82,7 @@ import {
 } from "@/types/emr/specimen/specimen";
 import specimenApi from "@/types/emr/specimen/specimenApi";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
+import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { formatName } from "@/Utils/utils";
@@ -636,7 +637,7 @@ export function SpecimenWorkflowCard({
                             </TableHead>
                             <TableCell className="text-gray-950 font-semibold">
                               {requirement.type_tested?.retention_time
-                                ? `${requirement.type_tested.retention_time.value} ${requirement.type_tested.retention_time.unit.display}`
+                                ? `${round(requirement.type_tested.retention_time.value)} ${requirement.type_tested.retention_time.unit.display}`
                                 : t("na")}
                             </TableCell>
                           </TableRow>

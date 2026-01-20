@@ -1,5 +1,5 @@
 export interface Quantity {
-  value: number;
+  value: string;
   unit: string;
   system?: string;
   code?: string;

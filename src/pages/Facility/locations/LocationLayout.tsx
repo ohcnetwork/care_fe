@@ -67,11 +67,19 @@ const getRoutes = (facilityId: string, locationId: string) => ({
   }) => (
     <PrintPharmacyPrescription facilityId={facilityId} patientId={patientId} />
   ),
-  "/medication_requests/patient/:patientId/bill": ({
-    patientId,
-  }: {
-    patientId: string;
-  }) => <MedicationBillForm patientId={patientId} />,
+  "/medication_requests/patient/:patientId/prescription/:prescriptionId/bill":
+    ({
+      patientId,
+      prescriptionId,
+    }: {
+      patientId: string;
+      prescriptionId: string;
+    }) => (
+      <MedicationBillForm
+        patientId={patientId}
+        prescriptionId={prescriptionId}
+      />
+    ),
   "/medication_dispense": () => (
     <MedicationDispenseHistory
       facilityId={facilityId}

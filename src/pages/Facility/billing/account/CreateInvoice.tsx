@@ -64,6 +64,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 
 import BackButton from "@/components/Common/BackButton";
+import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./components/AddChargeItemsBillingSheet";
 
@@ -515,7 +516,7 @@ export function CreateInvoicePage({
                             {item.title}
                           </TableCell>
                           <TableCell className="font-medium text-base border-y text-gray-950">
-                            {item.quantity}
+                            {round(item.quantity)}
                           </TableCell>
                           <TableCell className="font-medium text-base border-y text-gray-950 text-right">
                             <MonetaryDisplay amount={mrpAmount} />

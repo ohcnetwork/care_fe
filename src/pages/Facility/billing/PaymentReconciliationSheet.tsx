@@ -57,8 +57,15 @@ import {
   PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import {
+  isGreaterThanOrEqual,
+  isPositive,
+  round,
+  zodDecimal,
+} from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
+import Decimal from "decimal.js";
 
 const PAYMENT_METHODS = [
   {
@@ -128,23 +135,9 @@ const createFormSchema = () =>
         .refine((val) => new Date(val) <= new Date(), {
           message: t("payment_date_cannot_be_in_future"),
         }),
-      amount: z.string().refine(
-        (val) => {
-          const num = Number(val);
-          return !isNaN(num) && num > 0 && /^\d+(\.\d{0,2})?$/.test(val);
-        },
-        { message: t("enter_valid_amount") },
-      ),
-      tendered_amount: z.string().refine(
-        (val) => {
-          const num = Number(val);
-          return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
-        },
-        {
-          message: t("enter_valid_amount"),
-        },
-      ),
-      returned_amount: z.string().optional(),
+      amount: zodDecimal({ min: 0 }),
+      tendered_amount: zodDecimal({ min: 0 }),
+      returned_amount: zodDecimal({ min: 0 }).optional(),
       target_invoice: z.string().optional(),
       reference_number: z.string().optional(),
       authorization: z.string().optional(),
@@ -156,10 +149,18 @@ const createFormSchema = () =>
         ? z.string().min(1)
         : z.string().optional(),
     })
-    .refine((data) => Number(data.tendered_amount) >= Number(data.amount), {
-      message: t("tender_amount_cannot_be_less_than_payment_amount"),
-      path: ["tendered_amount"],
-    });
+    .refine(
+      (data) => {
+        if (!data.tendered_amount || !data.amount) {
+          return true;
+        }
+        return isGreaterThanOrEqual(data.tendered_amount, data.amount);
+      },
+      {
+        message: t("tender_amount_cannot_be_less_than_payment_amount"),
+        path: ["tendered_amount"],
+      },
+    );
 
 export function PaymentReconciliationSheet({
   open,
@@ -196,10 +197,10 @@ export function PaymentReconciliationSheet({
   useEffect(() => {
     if (isCashPayment) {
       // For cash payments, calculate change to return
-      const returned = String(
-        Math.max(0, Number(tenderedAmount || 0) - (Number(amount) || 0)),
+      form.setValue(
+        "returned_amount",
+        round(Decimal.max(0, tenderedAmount || "0").minus(amount || "0")),
       );
-      form.setValue("returned_amount", returned);
     } else {
       // For non-cash payments, tendered amount equals payment amount and returned is 0
       form.setValue("tendered_amount", amount || "0");
@@ -252,10 +253,6 @@ export function PaymentReconciliationSheet({
     // Convert form data to PaymentReconciliationCreate type
     const submissionData: PaymentReconciliationCreate = {
       ...data,
-      // Ensure amount strings are properly formatted
-      amount: Number(data.amount).toFixed(2),
-      tendered_amount: Number(data.tendered_amount).toFixed(2),
-      returned_amount: Number(data.returned_amount).toFixed(2),
       is_credit_note: isCreditNote,
       location: data.location,
     };
@@ -264,7 +261,9 @@ export function PaymentReconciliationSheet({
 
   useEffect(() => {
     if (open) {
-      const initialAmount = String(invoice?.total_gross || "0");
+      const initialAmount = invoice?.total_gross
+        ? round(invoice.total_gross)
+        : "";
       form.reset({
         reconciliation_type: invoice
           ? PaymentReconciliationType.payment
@@ -288,6 +287,7 @@ export function PaymentReconciliationSheet({
         location: selectedLocationObject?.id,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, invoice, accountId, isCreditNote]);
 
   return (
@@ -312,7 +312,7 @@ export function PaymentReconciliationSheet({
                   <div className="flex text-sm justify-center text-gray-700">
                     {t("invoice_total")}:
                     <p className="font-bold ml-1">
-                      <MonetaryDisplay amount={String(invoice.total_gross)} />
+                      <MonetaryDisplay amount={invoice.total_gross} />
                     </p>
                   </div>
                 )}
@@ -324,9 +324,7 @@ export function PaymentReconciliationSheet({
                         {t("payment_received")}
                       </p>
                       <p className="text-3xl font-bold text-gray-900">
-                        <MonetaryDisplay
-                          amount={String(invoice.total_payments)}
-                        />
+                        <MonetaryDisplay amount={invoice.total_payments} />
                       </p>
                     </>
                   ) : (
@@ -335,9 +333,7 @@ export function PaymentReconciliationSheet({
                         {t("balance_due")}
                       </p>
                       <p className="text-3xl font-bold text-gray-900">
-                        <MonetaryDisplay
-                          amount={String(account?.total_balance)}
-                        />
+                        <MonetaryDisplay amount={account?.total_balance} />
                       </p>
                     </>
                   )}
@@ -502,7 +498,7 @@ export function PaymentReconciliationSheet({
                     )}
                   />
 
-                  {Number(form.watch("returned_amount")) > 0 && (
+                  {isPositive(form.watch("returned_amount") || "0") && (
                     <div className="rounded-md bg-yellow-50 border border-yellow-500 p-2 mt-2">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-yellow-950">

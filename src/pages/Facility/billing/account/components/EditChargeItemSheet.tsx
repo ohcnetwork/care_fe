@@ -52,6 +52,7 @@ import {
   MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { isGreaterThan, round, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { formatName } from "@/Utils/utils";
@@ -60,11 +61,7 @@ const formSchema = z.object({
   title: z.string(),
   description: z.string().optional(),
   status: z.nativeEnum(ChargeItemStatus),
-  quantity: z
-    .string()
-    .refine((val) => !isNaN(Number(val)) && Number(val) >= 1, {
-      message: "Quantity must be at least 1",
-    }),
+  quantity: zodDecimal({ min: 1 }),
   note: z.string().optional(),
 });
 
@@ -123,7 +120,7 @@ export function EditChargeItemSheet({
   const getTotalComponentsByType = (type: MonetaryComponentType) => {
     return (
       item.total_price_components?.filter(
-        (c: any) => c.monetary_component_type === type,
+        (c) => c.monetary_component_type === type,
       ) || []
     );
   };
@@ -281,7 +278,8 @@ export function EditChargeItemSheet({
                               min={1}
                               {...field}
                               disabled={
-                                item.status !== ChargeItemStatus.planned
+                                item.status === ChargeItemStatus.billed ||
+                                item.status === ChargeItemStatus.paid
                               }
                             />
                           </FormControl>
@@ -298,21 +296,22 @@ export function EditChargeItemSheet({
                       <h3 className="text-sm font-medium">
                         {t("pricing_details")}
                       </h3>
-                      {(item.status === ChargeItemStatus.planned ||
-                        item.status === ChargeItemStatus.billable) && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="border-gray-400 gap-1"
-                          onClick={() => {
-                            setIsEditDialogOpen(true);
-                          }}
-                        >
-                          <CareIcon icon="l-edit" className="size-4" />
-                          {t("edit")}
-                          <ShortcutBadge actionId="edit-account" />
-                        </Button>
-                      )}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-gray-400 gap-1"
+                        onClick={() => {
+                          setIsEditDialogOpen(true);
+                        }}
+                        disabled={
+                          item.status === ChargeItemStatus.billed ||
+                          item.status === ChargeItemStatus.paid
+                        }
+                      >
+                        <CareIcon icon="l-edit" className="size-4" />
+                        {t("edit")}
+                        <ShortcutBadge actionId="edit-account" />
+                      </Button>
                     </div>
 
                     <div className="rounded-md border bg-card">
@@ -379,7 +378,7 @@ export function EditChargeItemSheet({
                       </div>
                     </div>
 
-                    {Number(item.quantity) > 1 && (
+                    {isGreaterThan(item.quantity, 1) && (
                       <div className="rounded-md border bg-card mt-4">
                         <div className="p-4 text-sm">
                           <div className="space-y-2">
@@ -387,7 +386,7 @@ export function EditChargeItemSheet({
                               <span className="font-medium">
                                 {t("quantity")}
                               </span>
-                              <span>{item.quantity}</span>
+                              <span>{round(item.quantity)}</span>
                             </div>
 
                             <Separator className="my-2" />

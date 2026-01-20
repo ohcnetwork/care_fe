@@ -99,17 +99,3 @@ jobs:
                 body: commentBody
               });
             }
-
-      - name: Add deployment status
-        uses: actions/github-script@v7
-        if: steps.deploy.outputs.deployment-url
-        with:
-          script: |
-            await github.rest.repos.createDeploymentStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              deployment_id: context.payload.pull_request.head.sha,
-              state: 'success',
-              environment_url: '${{ steps.deploy.outputs.deployment-url }}',
-              description: 'Preview deployment successful'
-            });
