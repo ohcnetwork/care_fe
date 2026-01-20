@@ -67,6 +67,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
@@ -83,6 +84,7 @@ import {
   round,
   zodDecimal,
 } from "@/Utils/decimal";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 interface SelectedLocation {
   id: string;
@@ -176,6 +178,8 @@ export default function DispenseDrawer({
     control: form.control,
     name: "items",
   });
+
+  useShortcutSubContext("patient:search:-global", { ignoreInputFields: true });
 
   useEffect(() => {
     form.clearErrors();
@@ -935,6 +939,7 @@ export default function DispenseDrawer({
                 >
                   <Check className="size-4" />
                   {isPending ? t("dispensing") : t("confirm_dispense")}
+                  <ShortcutBadge actionId="submit-action" />
                 </Button>
               </div>
             </div>
