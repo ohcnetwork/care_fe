@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -29,7 +29,6 @@ import {
 
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
-import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import {
   SupplyDeliveryCondition,
@@ -40,7 +39,6 @@ import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryAp
 import { zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 
 const returnItemSchema = z.object({
   supplied_inventory_item: z.string().min(1, "Please select a stock item"),
@@ -96,20 +94,6 @@ export function AddMedicationReturnItemForm({
       items: [],
     },
   });
-
-  // Query inventories for the location (to look up product IDs when user selects stock)
-  const { data: inventoriesData } = useQuery({
-    queryKey: ["inventoryItemsForReturn", facilityId, locationId],
-    queryFn: query(inventoryApi.list, {
-      pathParams: { facilityId, locationId },
-      queryParams: {
-        limit: 100,
-      },
-    }),
-    enabled: Boolean(facilityId && locationId),
-  });
-
-  const inventories = inventoriesData?.results || [];
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -293,19 +277,21 @@ export function AddMedicationReturnItemForm({
                                             : []
                                         }
                                         onLotSelectionChange={(lots) => {
+                                          const lot = lots[0];
                                           const inventoryId =
-                                            lots[0]?.selectedInventoryId || "";
+                                            lot?.selectedInventoryId || "";
                                           field.onChange(inventoryId);
 
-                                          // Find the inventory item and store the product ID
-                                          const selectedInventory =
-                                            inventories.find(
-                                              (inv) => inv.id === inventoryId,
-                                            );
-                                          if (selectedInventory) {
+                                          // Use the inventory from the lot to get the product ID
+                                          if (lot?.inventory) {
                                             form.setValue(
                                               `items.${index}.supplied_item`,
-                                              selectedInventory.product.id,
+                                              lot.inventory.product.id,
+                                            );
+                                          } else {
+                                            form.setValue(
+                                              `items.${index}.supplied_item`,
+                                              "",
                                             );
                                           }
                                         }}

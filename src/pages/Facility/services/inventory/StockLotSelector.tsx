@@ -30,6 +30,7 @@ import query from "@/Utils/request/query";
 export interface SelectedLot {
   selectedInventoryId: string;
   quantity: string;
+  inventory?: InventoryRead;
 }
 
 interface StockLotSelectorProps {
@@ -96,11 +97,15 @@ export default function StockLotSelector({
         )
       : inventories;
 
-  const toggleLotSelection = (inventoryId: string, isRestricted: boolean) => {
+  const toggleLotSelection = (
+    inventory: InventoryRead,
+    isRestricted: boolean,
+  ) => {
     if (!dontRestrictExpired && isRestricted) {
       return;
     }
 
+    const inventoryId = inventory.id;
     const isSelected = selectedLots.some(
       (lot) => lot.selectedInventoryId === inventoryId,
     );
@@ -116,6 +121,7 @@ export default function StockLotSelector({
           {
             selectedInventoryId: inventoryId,
             quantity: "1",
+            inventory,
           },
         ]);
       } else {
@@ -123,6 +129,7 @@ export default function StockLotSelector({
           {
             selectedInventoryId: inventoryId,
             quantity: "1",
+            inventory,
           },
         ]);
       }
@@ -266,7 +273,7 @@ export default function StockLotSelector({
                       ? "cursor-not-allowed opacity-50 bg-gray-50"
                       : "cursor-pointer hover:bg-accent"
                   }`}
-                  onClick={() => toggleLotSelection(inv.id, isRestricted)}
+                  onClick={() => toggleLotSelection(inv, isRestricted)}
                 >
                   <Checkbox checked={isSelected} disabled={isDisabled} />
                   <div className="flex-1 flex items-center justify-between gap-2">
