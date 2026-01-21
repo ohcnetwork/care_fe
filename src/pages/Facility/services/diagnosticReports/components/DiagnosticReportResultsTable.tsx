@@ -45,11 +45,17 @@ export function DiagnosticReportResultsTable({
       }
     }
     if (!range) return "-";
+    let innerContent = "";
+    if (range.min && range.max) {
+      innerContent = `${range.min} - ${range.max}`;
+    } else if (range.min) {
+      innerContent = `> ${range.min}`;
+    } else if (range.max) {
+      innerContent = `< ${range.max}`;
+    }
     return (
       <div className="flex items-center gap-1 text-gray-500">
-        <span>
-          {range.min} - {range.max}
-        </span>
+        <span>{innerContent}</span>
       </div>
     );
   };
@@ -104,27 +110,25 @@ export function DiagnosticReportResultsTable({
           component.interpretation && "font-semibold",
         )}
       >
-        <TableCell className="pl-4 border-r border-b border-gray-300">
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-px bg-gray-400" />
-            {component.code?.display}
-          </div>
+        <TableCell className="pl-4 border-r border-b border-gray-300 whitespace-normal wrap-break-word">
+          <div className="w-2 h-px bg-gray-400" />
+          {component.code?.display}
         </TableCell>
-        <TableCell className="border-r border-b border-gray-300">
-          <div className="flex items-center gap-2">
+        <TableCell className="border-r border-b border-gray-300 whitespace-normal wrap-break-word">
+          <div className="whitespace-normal">
             <span>{component.value.value}</span>
             {component.value.unit && (
-              <span className="text-gray-500">
-                {component.value.unit.display}
+              <span className="text-gray-500 ml-1">
+                {component.value.unit.code || component.value.unit.display}
               </span>
             )}
           </div>
         </TableCell>
-        <TableCell className="border-r border-b border-gray-300">
+        <TableCell className="border-r border-b border-gray-300 whitespace-normal wrap-break-word">
           {component.reference_range &&
             renderReferenceRange(component.reference_range, component.value)}
         </TableCell>
-        <TableCell className="border-b border-gray-300">
+        <TableCell className="border-b border-gray-300 whitespace-normal wrap-break-word">
           {renderInterpretation(component.interpretation || "")}
         </TableCell>
       </TableRow>
@@ -145,30 +149,31 @@ export function DiagnosticReportResultsTable({
             observation.interpretation && "font-semibold",
           )}
         >
-          <TableCell>
+          <TableCell className="whitespace-normal wrap-break-word">
             {observation.observation_definition?.title ||
               observation.observation_definition?.code?.display}
           </TableCell>
-          <TableCell>
+          <TableCell className="whitespace-normal wrap-break-word">
             {!hasComponents && (
-              <div className="flex items-center gap-2">
+              <div className="whitespace-normal">
                 <span>{observation.value.value}</span>
                 {observation.value.unit && (
-                  <span className="text-gray-500">
-                    {observation.value.unit.display}
+                  <span className="text-gray-500 ml-1">
+                    {observation.value.unit.code ||
+                      observation.value.unit.display}
                   </span>
                 )}
               </div>
             )}
           </TableCell>
-          <TableCell>
+          <TableCell className="whitespace-normal wrap-break-word">
             {!hasComponents &&
               renderReferenceRange(
                 observation.reference_range || [],
                 observation.value,
               )}
           </TableCell>
-          <TableCell>
+          <TableCell className="whitespace-normal wrap-break-word">
             {!hasComponents &&
               observation.interpretation &&
               renderInterpretation(observation.interpretation)}
@@ -186,20 +191,20 @@ export function DiagnosticReportResultsTable({
   }
 
   return (
-    <div className="rounded-md border">
-      <Table className="border-collapse bg-white shadow-sm cursor-default">
+    <div className="rounded-md border overflow-hidden">
+      <Table className="border-collapse bg-white shadow-sm cursor-default table-fixed w-full">
         <TableHeader className="bg-gray-100">
           <TableRow className="divide-x-1 divide-gray-300">
-            <TableHead className="font-medium text-sm text-gray-700">
+            <TableHead className="font-medium text-sm text-gray-700 w-[25%]">
               {t("test")}
             </TableHead>
-            <TableHead className="font-medium text-sm text-gray-700">
+            <TableHead className="font-medium text-sm text-gray-700 w-[25%]">
               {t("result")}
             </TableHead>
-            <TableHead className="font-medium text-sm text-gray-700">
+            <TableHead className="font-medium text-sm text-gray-700 w-[25%] whitespace-normal wrap-break-word">
               {t("reference_range")}
             </TableHead>
-            <TableHead className="font-medium text-sm text-gray-700">
+            <TableHead className="font-medium text-sm text-gray-700 w-[25%] whitespace-normal wrap-break-word">
               {t("interpretation")}
             </TableHead>
           </TableRow>

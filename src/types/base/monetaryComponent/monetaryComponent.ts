@@ -1,6 +1,8 @@
 import { CURRENCY_SYMBOL } from "@/components/ui/monetary-display";
 import { Code } from "@/types/base/code/code";
 import { Condition } from "@/types/base/condition/condition";
+import { decimal, isEqual, round } from "@/Utils/decimal";
+import Decimal from "decimal.js";
 
 export enum MonetaryComponentType {
   base = "base",
@@ -13,8 +15,9 @@ export enum MonetaryComponentType {
 export interface MonetaryComponent {
   monetary_component_type: MonetaryComponentType;
   code?: Code;
-  factor?: number;
-  amount?: string;
+  factor?: string | null;
+  amount?: string | null;
+  tax_included_amount?: string;
   conditions?: Condition[];
 }
 
@@ -43,11 +46,8 @@ export function isPercentageBased(component: MonetaryComponent): boolean {
  * Get the numeric value of a monetary component
  * Returns the factor (percentage) or parsed amount (fixed)
  */
-export function getComponentNumericValue(component: MonetaryComponent): number {
-  if (component.factor != null) {
-    return component.factor;
-  }
-  return parseFloat(component.amount || "0") || 0;
+export function getComponentNumericValue(component: MonetaryComponent) {
+  return component.factor ?? component.amount ?? "0";
 }
 
 /**
@@ -59,8 +59,8 @@ export function formatComponentValue(
 ): string {
   const value = getComponentNumericValue(component);
   return isPercentageBased(component)
-    ? `${value}%`
-    : `${currencySymbol}${value}`;
+    ? `${round(value)}%`
+    : `${currencySymbol}${round(value)}`;
 }
 
 /**
@@ -86,10 +86,10 @@ export function isSameValue(
   b: MonetaryComponent,
 ): boolean {
   if (isPercentageBased(a) && isPercentageBased(b)) {
-    return a.factor === b.factor;
+    return isEqual(a.factor, b.factor);
   }
   if (!isPercentageBased(a) && !isPercentageBased(b)) {
-    return a.amount === b.amount;
+    return isEqual(a.amount, b.amount);
   }
   return false;
 }
@@ -106,4 +106,11 @@ export function isComponentSelected(
       isSameComponentCode(selected, component) &&
       isSameValue(selected, component),
   );
+}
+
+export function getBasePrice(priceComponents: MonetaryComponent[]): Decimal {
+  const basePrice = priceComponents.find(
+    (c) => c.monetary_component_type === MonetaryComponentType.base,
+  )?.amount;
+  return basePrice ? decimal(basePrice) : new Decimal(0);
 }

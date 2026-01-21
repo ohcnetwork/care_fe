@@ -16,6 +16,7 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import BackButton from "@/components/Common/BackButton";
@@ -98,10 +99,10 @@ export function ChargeItemDefinitionDetail({
           {component.amount ? (
             <p className="font-medium">
               {getCurrencySymbol()}
-              {component.amount}
+              {round(component.amount)}
             </p>
           ) : component.factor ? (
-            <p className="font-medium">{component.factor}%</p>
+            <p className="font-medium">{round(component.factor)}%</p>
           ) : (
             <p className="text-sm text-gray-500">{t("not_specified")}</p>
           )}

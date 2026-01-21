@@ -42,6 +42,7 @@ import {
   SupplyDeliveryStatus,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
+import { add, round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { EllipsisVertical } from "lucide-react";
@@ -161,8 +162,8 @@ export function SupplyDeliveryTable({
           )}
           <TableHead>{t("item")}</TableHead>
           <TableHead>{t("requested_qty")}</TableHead>
-          <TableHead>{t("pack_size")}</TableHead>
-          <TableHead>{t("pack_qty")}</TableHead>
+          {!internal && <TableHead>{t("pack_size")}</TableHead>}
+          {!internal && <TableHead>{t("pack_qty")}</TableHead>}
           <TableHead>
             {isRequester ? t("received_qty") : t("dispatched_qty")}
           </TableHead>
@@ -211,10 +212,20 @@ export function SupplyDeliveryTable({
                   : delivery.supplied_item?.product_knowledge?.name}
               </div>
             </TableCell>
-            <TableCell>{delivery.supply_request?.quantity || "-"}</TableCell>
-            <TableCell>{delivery.supplied_item_pack_size || "-"}</TableCell>
-            <TableCell>{delivery.supplied_item_pack_quantity || "-"}</TableCell>
-            <TableCell>{delivery.supplied_item_quantity}</TableCell>
+            <TableCell>
+              {delivery.supply_request
+                ? round(delivery.supply_request.quantity)
+                : "-"}
+            </TableCell>
+            {!internal && (
+              <TableCell>{delivery.supplied_item_pack_size || "-"}</TableCell>
+            )}
+            {!internal && (
+              <TableCell>
+                {delivery.supplied_item_pack_quantity || "-"}
+              </TableCell>
+            )}
+            <TableCell>{round(delivery.supplied_item_quantity)}</TableCell>
             <TableCell>
               {delivery.created_date &&
                 formatDate(new Date(delivery.created_date), "dd/MM/yyyy")}
@@ -247,14 +258,17 @@ export function SupplyDeliveryTable({
             })}
             <TableCell>
               <MonetaryDisplay
-                factor={
-                  delivery.supplied_inventory_item?.product.charge_item_definition?.price_components
+                factor={add(
+                  ...(
+                    delivery.supplied_inventory_item?.product
+                      .charge_item_definition?.price_components || []
+                  )
                     .filter(
                       (c) =>
                         c.monetary_component_type === MonetaryComponentType.tax,
                     )
-                    .reduce((sum, c) => sum + (c.factor || 0), 0) || undefined
-                }
+                    .map((c) => c.factor || "0"),
+                )}
               />
             </TableCell>
             <TableCell>

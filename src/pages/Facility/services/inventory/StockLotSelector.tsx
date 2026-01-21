@@ -15,15 +15,21 @@ import {
 } from "@/components/ui/popover";
 
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import { cn } from "@/lib/utils";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
+import { isPositive, round } from "@/Utils/decimal";
+import {
+  getExpiryBadgeVariant,
+  isProductRestrictedFromDispensing,
+} from "@/Utils/inventory";
 import query from "@/Utils/request/query";
 
 export interface SelectedLot {
   selectedInventoryId: string;
-  quantity: number;
+  quantity: string;
 }
 
 interface StockLotSelectorProps {
@@ -38,6 +44,9 @@ interface StockLotSelectorProps {
   locationId?: string;
   productKnowledge?: ProductKnowledgeBase;
   availableInventories?: InventoryRead[];
+  dontRestrictExpired?: boolean;
+  disabled?: boolean;
+  showUnitPrice?: boolean;
 }
 
 export default function StockLotSelector({
@@ -52,6 +61,9 @@ export default function StockLotSelector({
   locationId,
   productKnowledge,
   availableInventories,
+  dontRestrictExpired = false,
+  disabled = false,
+  showUnitPrice = true,
 }: StockLotSelectorProps) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -75,15 +87,20 @@ export default function StockLotSelector({
     (lot) => lot.selectedInventoryId,
   );
 
-  const filteredInventories = enableSearch
-    ? inventories.filter((inv) =>
-        inv.product.batch?.lot_number
-          ?.toLowerCase()
-          .includes(searchQuery.trim().toLowerCase()),
-      )
-    : inventories;
+  const filteredInventories =
+    enableSearch && searchQuery
+      ? inventories.filter((inv) =>
+          inv.product.batch?.lot_number
+            ?.toLowerCase()
+            .includes(searchQuery.trim().toLowerCase()),
+        )
+      : inventories;
 
-  const toggleLotSelection = (inventoryId: string) => {
+  const toggleLotSelection = (inventoryId: string, isRestricted: boolean) => {
+    if (!dontRestrictExpired && isRestricted) {
+      return;
+    }
+
     const isSelected = selectedLots.some(
       (lot) => lot.selectedInventoryId === inventoryId,
     );
@@ -98,14 +115,14 @@ export default function StockLotSelector({
           ...selectedLots,
           {
             selectedInventoryId: inventoryId,
-            quantity: 1,
+            quantity: "1",
           },
         ]);
       } else {
         onLotSelectionChange([
           {
             selectedInventoryId: inventoryId,
-            quantity: 1,
+            quantity: "1",
           },
         ]);
       }
@@ -113,12 +130,13 @@ export default function StockLotSelector({
   };
 
   return (
-    <Popover>
-      <PopoverTrigger>
+    <Popover modal>
+      <PopoverTrigger disabled={disabled}>
         <Button
           variant="outline"
           className={`w-auto min-w-40 h-auto justify-between p-1 border-gray-300 border ${className}`}
           type="button"
+          disabled={disabled}
         >
           <div className="flex flex-col min-w-40 items-start gap-1 w-full">
             {selectedLotsWithInventory.length === 0 ? (
@@ -134,50 +152,57 @@ export default function StockLotSelector({
                 return (
                   <div
                     key={lot.selectedInventoryId}
-                    className="flex items-center justify-between w-full bg-gray-50 px-px py-0.5 border-gray-200 border-1 rounded-sm text-gray-950 gap-1"
+                    className="flex items-center justify-between w-full bg-gray-50 px-px py-0.5 border-gray-200 border rounded-sm text-gray-950 gap-1"
                   >
                     <span
-                      className="font-medium text-sm ml-1 truncate max-w-24"
-                      title={selectedInventory?.product.batch?.lot_number}
+                      className={cn(
+                        "font-medium text-sm ml-1 truncate max-w-24",
+                        !selectedInventory?.product.batch?.lot_number &&
+                          "text-gray-500",
+                      )}
+                      title={
+                        selectedInventory?.product.batch?.lot_number ||
+                        t("unknown")
+                      }
                     >
-                      {selectedInventory?.product.batch?.lot_number}
+                      {selectedInventory?.product.batch?.lot_number ||
+                        t("unknown")}
                     </span>
                     <div className="flex items-center gap-1">
-                      <Badge>
-                        <MonetaryDisplay
-                          amount={
-                            selectedInventory?.product.charge_item_definition?.price_components?.find(
-                              (c) =>
-                                c.monetary_component_type ===
-                                MonetaryComponentType.base,
-                            )?.amount
-                          }
-                        />
-                      </Badge>
+                      {showUnitPrice && (
+                        <Badge>
+                          <MonetaryDisplay
+                            amount={
+                              selectedInventory?.product.charge_item_definition?.price_components?.find(
+                                (c) =>
+                                  c.monetary_component_type ===
+                                  MonetaryComponentType.base,
+                              )?.amount
+                            }
+                          />
+                        </Badge>
+                      )}
                       <Badge
                         variant={
                           selectedInventory?.status === "active" &&
-                          selectedInventory?.net_content > 0
+                          isPositive(selectedInventory?.net_content || 0)
                             ? "primary"
                             : "destructive"
                         }
                         className="border-none rounded-sm"
                       >
-                        {selectedInventory?.net_content}{" "}
+                        {selectedInventory && (
+                          <>{round(selectedInventory.net_content)} </>
+                        )}
                         {selectedInventory?.product.product_knowledge.base_unit
                           .display || t("units")}
                       </Badge>
                       {showexpiry &&
                         selectedInventory?.product.expiration_date && (
                           <Badge
-                            variant={
-                              selectedInventory.status === "active" &&
-                              new Date(
-                                selectedInventory.product.expiration_date,
-                              ) >= new Date()
-                                ? "primary"
-                                : "destructive"
-                            }
+                            variant={getExpiryBadgeVariant(
+                              selectedInventory.product.expiration_date,
+                            )}
                             className="border-none rounded-sm"
                           >
                             {t("expiry")}:{" "}
@@ -198,7 +223,7 @@ export default function StockLotSelector({
           <ChevronDownIcon className="size-4 shrink-0" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0">
+      <PopoverContent className="w-auto max-w-[90vw] p-0">
         {enableSearch && (
           <div className="p-2 border-b">
             <div className="relative">
@@ -213,21 +238,45 @@ export default function StockLotSelector({
           </div>
         )}
         <div className="max-h-60 overflow-auto">
+          {!dontRestrictExpired &&
+            filteredInventories?.some((inv) =>
+              isProductRestrictedFromDispensing(inv.product.expiration_date),
+            ) && (
+              <div className="px-2 py-1 bg-red-50 border-b border-red-100">
+                <span className="text-xs text-red-600">
+                  {t("expired_product_cannot_be_dispensed")}
+                </span>
+              </div>
+            )}
           {filteredInventories?.length ? (
             filteredInventories.map((inv) => {
               const isSelected = selectedLots.some(
                 (lot) => lot.selectedInventoryId === inv.id,
               );
+              const isRestricted = isProductRestrictedFromDispensing(
+                inv.product.expiration_date,
+              );
+              const isDisabled = !dontRestrictExpired && isRestricted;
 
               return (
                 <div
                   key={inv.id}
-                  className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-accent"
-                  onClick={() => toggleLotSelection(inv.id)}
+                  className={`flex items-center space-x-2 p-2 ${
+                    isDisabled
+                      ? "cursor-not-allowed opacity-50 bg-gray-50"
+                      : "cursor-pointer hover:bg-accent"
+                  }`}
+                  onClick={() => toggleLotSelection(inv.id, isRestricted)}
                 >
-                  <Checkbox checked={isSelected} />
+                  <Checkbox checked={isSelected} disabled={isDisabled} />
                   <div className="flex-1 flex items-center justify-between gap-2">
-                    <span>{inv.product.batch?.lot_number}</span>
+                    <span
+                      className={cn(
+                        !inv.product.batch?.lot_number && "text-gray-500",
+                      )}
+                    >
+                      {inv.product.batch?.lot_number || t("unknown")}
+                    </span>
                     <div className="flex items-center gap-1">
                       <Badge>
                         <MonetaryDisplay
@@ -242,23 +291,20 @@ export default function StockLotSelector({
                       </Badge>
                       <Badge
                         variant={
-                          inv.status === "active" && inv.net_content > 0
+                          inv.status === "active" && isPositive(inv.net_content)
                             ? "primary"
                             : "destructive"
                         }
                       >
-                        {inv.net_content}{" "}
+                        {round(inv.net_content)}{" "}
                         {inv.product.product_knowledge.base_unit.display ||
                           t("units")}
                       </Badge>
                       {inv.product?.expiration_date && (
                         <Badge
-                          variant={
-                            inv.status === "active" &&
-                            new Date(inv.product.expiration_date) >= new Date()
-                              ? "primary"
-                              : "destructive"
-                          }
+                          variant={getExpiryBadgeVariant(
+                            inv.product.expiration_date,
+                          )}
                         >
                           {t("expiry")}:{" "}
                           {inv.product.expiration_date

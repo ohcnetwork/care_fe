@@ -276,7 +276,7 @@ export default function MedicationRequestList({
                   <TableCell>
                     <div className="flex gap-2 self-center">
                       <Button
-                        variant="outline"
+                        variant="outline_primary"
                         className="font-semibold"
                         onClick={() => {
                           navigate(
@@ -285,7 +285,19 @@ export default function MedicationRequestList({
                         }}
                       >
                         <ReceiptTextIcon strokeWidth={1.5} />
-                        {t("billing")}
+                        {t("bill_all")}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="font-semibold"
+                        onClick={() => {
+                          navigate(
+                            `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}/prescription/${item.id}/bill`,
+                          );
+                        }}
+                      >
+                        <ReceiptTextIcon strokeWidth={1.5} />
+                        {t("bill_this")}
                       </Button>
                       <Button
                         variant="outline"

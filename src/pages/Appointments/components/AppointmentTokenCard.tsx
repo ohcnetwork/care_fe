@@ -12,7 +12,9 @@ import { Separator } from "@/components/ui/separator";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { formatSlotTimeRange } from "@/pages/Appointments/utils";
+import { PatientRead } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
+import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import {
   Appointment,
   formatScheduleResourceName,
@@ -43,6 +45,10 @@ const TokenCard = ({
 
   // Get patient from token or appointment
   const patient = token?.patient || appointment?.patient;
+  // Get patient with identifiers (appointment.patient has more data)
+  const patientWithIdentifiers = appointment?.patient as
+    | PatientRead
+    | undefined;
 
   return (
     <Card
@@ -78,6 +84,20 @@ const TokenCard = ({
                   {t(`GENDER__${patient.gender}`)}
                 </p>
               )}
+              {patientWithIdentifiers?.instance_identifiers
+                ?.filter(
+                  (identifier) =>
+                    identifier.config.config.use ===
+                    PatientIdentifierUse.official,
+                )
+                .map((identifier) => (
+                  <div key={identifier.config.id}>
+                    <Label className="text-gray-600 text-sm">
+                      {identifier.config.config.display}:
+                    </Label>
+                    <p className="font-semibold text-sm">{identifier.value}</p>
+                  </div>
+                ))}
             </div>
 
             <div className="flex justify-between items-start gap-4">

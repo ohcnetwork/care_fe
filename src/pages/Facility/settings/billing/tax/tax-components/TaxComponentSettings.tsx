@@ -35,10 +35,8 @@ export function TaxComponentSettings() {
       (component.code?.display || "")
         .toLowerCase()
         .includes(search.toLowerCase()) ||
-      (component.factor != null &&
-        component.factor.toString().includes(search)) ||
-      (component.amount != null &&
-        component.amount.toString().includes(search)),
+      (component.factor && component.factor.includes(search)) ||
+      (component.amount && component.amount.includes(search)),
   );
 
   return (

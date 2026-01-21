@@ -120,6 +120,7 @@ interface ResourceDefinitionCategoryPickerProps<T> {
   hideSelectedDisplay?: boolean;
   alignContent?: "start" | "center" | "end";
   defaultOpen?: boolean;
+  "data-shortcut-id"?: string;
 }
 
 export function ResourceDefinitionCategoryPicker<T>({
@@ -143,6 +144,7 @@ export function ResourceDefinitionCategoryPicker<T>({
   hideClearButton = false,
   alignContent = "start",
   defaultOpen = false,
+  "data-shortcut-id": shortcutId,
 }: ResourceDefinitionCategoryPickerProps<T>) {
   const shouldHideClearButton = allowMultiple || hideClearButton;
   const { t } = useTranslation();
@@ -920,6 +922,12 @@ export function ResourceDefinitionCategoryPicker<T>({
                   className,
                 )}
                 disabled={disabled}
+                data-shortcut-id={shortcutId}
+                onClick={() => {
+                  if (!open) {
+                    setOpen(true);
+                  }
+                }}
               >
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   {getDisplayValue()}

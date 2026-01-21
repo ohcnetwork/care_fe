@@ -66,6 +66,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           "@tanstack/react-query",
           "raviger",
           "sonner",
+          "decimal.js",
         ],
       }),
       viteStaticCopy({
