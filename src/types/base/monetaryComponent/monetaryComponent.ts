@@ -1,7 +1,8 @@
 import { CURRENCY_SYMBOL } from "@/components/ui/monetary-display";
 import { Code } from "@/types/base/code/code";
 import { Condition } from "@/types/base/condition/condition";
-import { isEqual, round } from "@/Utils/decimal";
+import { decimal, isEqual, round } from "@/Utils/decimal";
+import Decimal from "decimal.js";
 
 export enum MonetaryComponentType {
   base = "base",
@@ -105,4 +106,11 @@ export function isComponentSelected(
       isSameComponentCode(selected, component) &&
       isSameValue(selected, component),
   );
+}
+
+export function getBasePrice(priceComponents: MonetaryComponent[]): Decimal {
+  const basePrice = priceComponents.find(
+    (c) => c.monetary_component_type === MonetaryComponentType.base,
+  )?.amount;
+  return basePrice ? decimal(basePrice) : new Decimal(0);
 }

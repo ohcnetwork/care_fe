@@ -223,6 +223,7 @@ export default function PaymentsData({
                 <TableHead>{t("date")}</TableHead>
                 <TableHead>{t("invoice")}</TableHead>
                 <TableHead>{t("type")}</TableHead>
+                <TableHead>{t("issuer_type")}</TableHead>
                 <TableHead>{t("method")}</TableHead>
                 <TableHead>{t("amount")}</TableHead>
                 <TableHead>{t("status")}</TableHead>
@@ -277,6 +278,7 @@ export default function PaymentsData({
                     )}
                   </TableCell>
                   <TableCell>{typeMap[payment.reconciliation_type]}</TableCell>
+                  <TableCell>{t(payment.issuer_type)}</TableCell>
                   <TableCell>
                     {PAYMENT_RECONCILIATION_METHOD_MAP[payment.method]}
                   </TableCell>

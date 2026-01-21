@@ -60,9 +60,9 @@ export default function VerifyPatient() {
   } = useQuery({
     queryKey: ["patient-verify", phone_number, year_of_birth, partial_id],
     queryFn: query(patientApi.searchRetrieve, {
-      body: { phone_number, year_of_birth, partial_id },
+      body: { phone_number: phone_number ?? "", year_of_birth, partial_id },
     }),
-    enabled: !!(phone_number && year_of_birth && partial_id),
+    enabled: !!(year_of_birth && partial_id),
   });
 
   if (isVerifyingPatient || !facility) {
@@ -75,7 +75,7 @@ export default function VerifyPatient() {
   }
   return (
     <div>
-      {!phone_number || !year_of_birth || !partial_id ? (
+      {!year_of_birth || !partial_id ? (
         <Alert variant="destructive">
           <AlertCircle className="size-4" />
           <AlertDescription>

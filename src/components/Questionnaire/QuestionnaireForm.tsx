@@ -40,8 +40,10 @@ import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
+import BackButton from "@/components/Common/BackButton";
 import { validateEncounterQuestion } from "@/components/Questionnaire/QuestionTypes/EncounterQuestion";
 import { EncounterEdit } from "@/types/emr/encounter/encounter";
+import { ArrowLeft } from "lucide-react";
 import { QuestionRenderer } from "./QuestionRenderer";
 import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion";
 import { validateFileUploadQuestion } from "./QuestionTypes/FileQuestion";
@@ -771,6 +773,10 @@ export function QuestionnaireForm({
     <div className="flex gap-4">
       {/* Left Navigation */}
       <div className="w-64 border-r border-gray-200 p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
+        <BackButton className="w-full">
+          <ArrowLeft />
+          <span>{t("back_to_encounter")}</span>
+        </BackButton>
         {questionnaireForms.map((form) => (
           <div key={form.questionnaire.id} className="space-y-2">
             <button
@@ -807,7 +813,6 @@ export function QuestionnaireForm({
           </div>
         ))}
       </div>
-
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto w-full pb-8 space-y-2">
         {/* Questionnaire Forms */}

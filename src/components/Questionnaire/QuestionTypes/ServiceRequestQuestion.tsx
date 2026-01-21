@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ChevronDown, Info, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -12,16 +12,10 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { TooltipComponent } from "@/components/ui/tooltip";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
@@ -32,7 +26,11 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { add } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
+import { getBasePrice } from "@/types/base/monetaryComponent/monetaryComponent";
+import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import {
   ServiceRequestApplyActivityDefinitionSpec as BaseServiceRequestApplyActivityDefinitionSpec,
   Intent,
@@ -43,6 +41,7 @@ import {
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
+import { Decimal } from "decimal.js";
 
 // Extend the base type to use UserReadMinimal for requester
 interface ServiceRequestApplyActivityDefinitionSpec extends Omit<
@@ -121,11 +120,11 @@ interface ServiceRequestFormProps {
   onUpdate?: (updates: Partial<ServiceRequestReadSpec>) => void;
   onRemove?: () => void;
   onAdd?: () => void;
+  onCancel?: () => void;
   disabled?: boolean;
   errors?: QuestionValidationError[];
   questionId?: string;
   index?: number;
-  isPreview?: boolean;
   activityDefinition?: ActivityDefinitionReadSpec;
   facilityId?: string;
 }
@@ -134,238 +133,84 @@ function ServiceRequestForm({
   serviceRequest,
   onUpdate,
   onRemove,
-  onAdd,
   disabled,
   errors,
   questionId,
   index,
-  isPreview = false,
   activityDefinition,
   facilityId = "",
 }: ServiceRequestFormProps) {
   const { t } = useTranslation();
-
-  const renderInfoSection = () => (
-    <div className="flex flex-wrap gap-x-5 gap-y-2 w-full">
-      <div className="flex items-center gap-2">
-        <span className="font-medium text-sm text-gray-700">
-          {t("status")}:
-        </span>
-        <Badge
-          variant="outline"
-          className="bg-blue-50 text-blue-700 border-blue-200"
-        >
-          {t(serviceRequest.service_request.status)}
-        </Badge>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="font-medium text-sm text-gray-700">
-          {t("intent")}:
-        </span>
-        <Badge
-          variant="outline"
-          className="bg-purple-50 text-purple-700 border-purple-200"
-        >
-          {t(serviceRequest.service_request.intent)}
-        </Badge>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="font-medium text-sm text-gray-700">
-          {t("category")}:
-        </span>
-        <Badge
-          variant="outline"
-          className="bg-green-50 text-green-700 border-green-200 whitespace-nowrap"
-        >
-          {t(serviceRequest.service_request.category)}
-        </Badge>
-      </div>
-
-      {serviceRequest.service_request.do_not_perform && (
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-sm text-gray-700">
-            {t("do_not_perform")}:
-          </span>
-          <Badge
-            variant="outline"
-            className="bg-red-50 text-red-700 border-red-200"
-          >
-            {t("yes")}
-          </Badge>
-        </div>
-      )}
-      {activityDefinition?.healthcare_service && (
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-sm text-gray-700">
-            {t("healthcare_service")}:
-          </span>
-          <Badge
-            variant="outline"
-            className="bg-indigo-50 text-indigo-700 border-indigo-200 whitespace-nowrap"
-          >
-            {activityDefinition.healthcare_service.name}
-          </Badge>
-        </div>
-      )}
-      {activityDefinition?.locations &&
-        activityDefinition.locations.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap w-full">
-            <span className="font-medium text-sm text-gray-700">
-              {t("locations")}:
-            </span>
-            {activityDefinition.locations.map((location) => (
-              <Badge
-                key={location.id}
-                variant="outline"
-                className="bg-gray-50 text-gray-700 border-gray-200"
-              >
-                {location.name}
-              </Badge>
-            ))}
-          </div>
-        )}
-    </div>
-  );
-
-  if (isPreview) {
-    return (
-      <div className="rounded-lg border border-primary-500 p-4 space-y-4 bg-white shadow-sm">
-        <div className="flex flex-col gap-2 items-start w-full">
-          <div className="flex gap-2 items-center">
-            <p className="text-sm font-semibold text-gray-900">
-              {serviceRequest.service_request.title}
-            </p>
-            <TooltipComponent
-              content={`${serviceRequest.service_request.code.code} | ${serviceRequest.service_request.code.display} \n${serviceRequest.service_request.code.system}`}
-            >
-              <Info className="size-4 text-gray-600 cursor-help" />
-            </TooltipComponent>
-          </div>
-          {renderInfoSection()}
-          <div className="flex w-full justify-end items-center mt-2 gap-2">
-            {onRemove && (
-              <Button variant="ghost" size="icon" onClick={onRemove}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        </div>
-        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
-          <div className="space-y-2">
-            <Label>
-              {t("priority")} <span className="text-red-500">*</span>
-            </Label>
-            <Select
-              value={serviceRequest.service_request.priority}
-              onValueChange={(value: Priority) =>
-                onUpdate?.({ priority: value })
-              }
-              disabled={disabled}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={t("select_priority")} />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.values(Priority).map((priority) => (
-                  <SelectItem key={priority} value={priority}>
-                    {t(priority)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {questionId && index !== undefined && (
-              <FieldError
-                fieldKey={SERVICE_REQUEST_FIELDS.PRIORITY.key}
-                questionId={questionId}
-                errors={errors}
-                index={index}
-              />
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("body_site")}</Label>
-            <ValueSetSelect
-              system="system-body-site"
-              value={serviceRequest.service_request.body_site}
-              onSelect={(code) => onUpdate?.({ body_site: code })}
-              placeholder={t("select_body_site")}
-              disabled={disabled}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("patient_instruction")}</Label>
-            <Textarea
-              value={serviceRequest.service_request.patient_instruction || ""}
-              onChange={(e) =>
-                onUpdate?.({ patient_instruction: e.target.value })
-              }
-              disabled={disabled}
-              placeholder={t("enter_patient_instructions")}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("requester")}</Label>
-            <UserSelector
-              selected={serviceRequest.service_request.requester}
-              onChange={(user) => onUpdate?.({ requester: user })}
-              placeholder={t("select_requester")}
-              facilityId={facilityId}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("note")}</Label>
-            <Textarea
-              value={serviceRequest.service_request.note || ""}
-              onChange={(e) => onUpdate?.({ note: e.target.value })}
-              disabled={disabled}
-              placeholder={t("add_notes")}
-            />
-          </div>
-        </div>
-        {isPreview && (
-          <div className="flex justify-end">
-            <Button onClick={onAdd}>{t("add")}</Button>
-          </div>
-        )}
-      </div>
-    );
-  }
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <Collapsible defaultOpen={false}>
-      <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
-        <CollapsibleTrigger className="flex flex-col gap-2 w-full items-start text-left p-4 hover:bg-gray-50 cursor-pointer">
-          <div className="flex gap-2 items-center">
-            <p className="text-sm font-semibold text-gray-900">
-              {serviceRequest.service_request.title}
-            </p>
-            <TooltipComponent
-              content={`${serviceRequest.service_request.code.code} | ${serviceRequest.service_request.code.display} \n${serviceRequest.service_request.code.system}`}
-            >
-              <Info className="size-4 text-gray-600 cursor-help" />
-            </TooltipComponent>
-          </div>
-          {renderInfoSection()}
-          <div className="flex w-full justify-end items-center mt-2 gap-2">
-            {onRemove && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onRemove();
-                }}
-                disabled={disabled}
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <div className="rounded-lg border border-gray-200 bg-white shadow-sm relative">
+        <div className="absolute left-0 top-4 w-1 h-4 bg-purple-500 rounded-r-full" />
+        <CollapsibleTrigger className="flex flex-col gap-3 w-full items-start text-left p-2 pl-6 hover:bg-gray-50 cursor-pointer">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between w-full">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-900">
+                {serviceRequest.service_request.title}
+              </p>
+              <Badge
+                variant="outline"
+                className="bg-purple-50 text-purple-700 border-purple-200"
               >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
-            <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+                {t(serviceRequest.service_request.category)}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between sm:justify-end gap-3">
+              {serviceRequest.service_request.requester && (
+                <Badge
+                  variant="outline"
+                  className="bg-green-50 text-green-700 border-green-200 whitespace-nowrap"
+                >
+                  {formatName(serviceRequest.service_request.requester)}
+                </Badge>
+              )}
+              <div className="flex items-center gap-1">
+                {activityDefinition && (
+                  <span className="text-sm font-medium text-gray-700">
+                    <MonetaryDisplay
+                      amount={activityDefinition.charge_item_definitions.reduce(
+                        (acc: Decimal, curr: ChargeItemDefinitionBase) =>
+                          add(acc, getBasePrice(curr.price_components)),
+                        new Decimal(0),
+                      )}
+                    />
+                  </span>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsOpen(true);
+                  }}
+                  disabled={disabled}
+                >
+                  <Pencil className="h-4 w-4 text-gray-600" />
+                </Button>
+                {onRemove && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onRemove();
+                    }}
+                    disabled={disabled}
+                  >
+                    <Trash2 className="h-4 w-4 text-gray-600" />
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
         </CollapsibleTrigger>
         <CollapsibleContent>
@@ -375,24 +220,30 @@ function ServiceRequestForm({
                 <Label>
                   {t("priority")} <span className="text-red-500">*</span>
                 </Label>
-                <Select
+                <RadioGroup
                   value={serviceRequest.service_request.priority}
                   onValueChange={(value: Priority) =>
                     onUpdate?.({ priority: value })
                   }
                   disabled={disabled}
+                  className="flex flex-wrap gap-4"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("select_priority")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.values(Priority).map((priority) => (
-                      <SelectItem key={priority} value={priority}>
+                  {Object.values(Priority).map((priority) => (
+                    <div key={priority} className="flex items-center space-x-2">
+                      <RadioGroupItem
+                        value={priority}
+                        id={`priority-${priority}-${index || "preview"}`}
+                        className="h-4 w-4"
+                      />
+                      <Label
+                        htmlFor={`priority-${priority}-${index || "preview"}`}
+                        className="text-sm font-normal cursor-pointer"
+                      >
                         {t(priority)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
                 {questionId && index !== undefined && (
                   <FieldError
                     fieldKey={SERVICE_REQUEST_FIELDS.PRIORITY.key}
@@ -468,8 +319,6 @@ export function ServiceRequestQuestion({
   const [selectedActivityDefinition, setSelectedActivityDefinition] = useState<
     string | null
   >(null);
-  const [previewServiceRequest, setPreviewServiceRequest] =
-    useState<ServiceRequestApplyActivityDefinitionSpec | null>(null);
   const [serviceRequests, setServiceRequests] = useState<
     ServiceRequestApplyActivityDefinitionSpec[]
   >(
@@ -519,12 +368,21 @@ export function ServiceRequestQuestion({
         encounter: encounterId,
       };
 
-      setPreviewServiceRequest(newServiceRequest);
-
+      setServiceRequests([...serviceRequests, newServiceRequest]);
+      updateQuestionnaireResponseCB(
+        [
+          {
+            type: "service_request",
+            value: [...serviceRequests, newServiceRequest],
+          },
+        ],
+        questionnaireResponse.question_id,
+      );
       setActivityDefinitionsMap((prev) => ({
         ...prev,
         [selectedActivityDefinition]: selectedActivityDefinitionData,
       }));
+      setSelectedActivityDefinition(null);
     }
   }, [
     selectedActivityDefinition,
@@ -532,23 +390,6 @@ export function ServiceRequestQuestion({
     encounterId,
     currentUser,
   ]);
-
-  const handleAddServiceRequest = () => {
-    if (!previewServiceRequest) return;
-
-    setServiceRequests([...serviceRequests, previewServiceRequest]);
-    updateQuestionnaireResponseCB(
-      [
-        {
-          type: "service_request",
-          value: [...serviceRequests, previewServiceRequest],
-        },
-      ],
-      questionnaireResponse.question_id,
-    );
-    setPreviewServiceRequest(null);
-    setSelectedActivityDefinition(null);
-  };
 
   const handleRemoveServiceRequest = (index: number) => {
     const newServiceRequests = serviceRequests.filter(
@@ -589,22 +430,6 @@ export function ServiceRequestQuestion({
     );
   };
 
-  const handlePreviewServiceRequestUpdate = (
-    updates: Partial<ServiceRequestReadSpec>,
-  ) => {
-    if (!previewServiceRequest) return;
-
-    const { locations: _locations, ...otherUpdates } = updates;
-
-    setPreviewServiceRequest({
-      ...previewServiceRequest,
-      service_request: {
-        ...previewServiceRequest.service_request,
-        ...otherUpdates,
-      },
-    });
-  };
-
   // Effect to sync service requests with questionnaire response
   useEffect(() => {
     const initialServiceRequests =
@@ -637,7 +462,6 @@ export function ServiceRequestQuestion({
           serviceRequest={serviceRequest}
           onUpdate={(updates) => handleUpdateServiceRequest(index, updates)}
           onRemove={() => handleRemoveServiceRequest(index)}
-          onAdd={handleAddServiceRequest}
           disabled={disabled}
           errors={errors}
           questionId={questionnaireResponse.question_id}
@@ -667,22 +491,6 @@ export function ServiceRequestQuestion({
             ))}
           </div>
         </div>
-      )}
-
-      {previewServiceRequest && !isLoadingSelectedAD && (
-        <ServiceRequestForm
-          serviceRequest={previewServiceRequest}
-          activityDefinition={selectedActivityDefinitionData}
-          onUpdate={handlePreviewServiceRequestUpdate}
-          onRemove={() => {
-            setPreviewServiceRequest(null);
-            setSelectedActivityDefinition(null);
-          }}
-          onAdd={handleAddServiceRequest}
-          disabled={disabled}
-          isPreview
-          facilityId={facilityId}
-        />
       )}
 
       <div className="space-y-2 w-full">

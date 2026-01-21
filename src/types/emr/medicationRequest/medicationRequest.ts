@@ -352,6 +352,25 @@ export const MEDICATION_REQUEST_TIMING_OPTIONS: Record<
       },
     },
   },
+  NOON: {
+    display: "NOON (0-1-0)",
+    timing: {
+      repeat: {
+        frequency: 1,
+        period: "1",
+        period_unit: "d",
+        bounds_duration: {
+          value: "1",
+          unit: "d",
+        },
+      },
+      code: {
+        code: "NOON",
+        display: "At noon",
+        system: "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
+      },
+    },
+  },
   PM: {
     display: "PM (0-0-1)",
     timing: {
@@ -367,6 +386,63 @@ export const MEDICATION_REQUEST_TIMING_OPTIONS: Record<
       code: {
         code: "PM",
         display: "Every afternoon",
+        system: "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
+      },
+    },
+  },
+  BID_MORNING_NOON: {
+    display: "BID (1-1-0)",
+    timing: {
+      repeat: {
+        frequency: 2,
+        period: "1",
+        period_unit: "d",
+        bounds_duration: {
+          value: "1",
+          unit: "d",
+        },
+      },
+      code: {
+        code: "BID",
+        display: "Morning and noon",
+        system: "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
+      },
+    },
+  },
+  BID_NOON_NIGHT: {
+    display: "BID (0-1-1)",
+    timing: {
+      repeat: {
+        frequency: 2,
+        period: "1",
+        period_unit: "d",
+        bounds_duration: {
+          value: "1",
+          unit: "d",
+        },
+      },
+      code: {
+        code: "BID",
+        display: "Noon and night",
+        system: "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
+      },
+    },
+  },
+  TID_MORNING_NOON_NIGHT: {
+    display: "TID (1-1-1)",
+    timing: {
+      repeat: {
+        frequency: 3,
+        period: "1",
+        period_unit: "d",
+        bounds_duration: {
+          value: "1",
+          unit: "d",
+        },
+      },
+      code: {
+        code: "TID",
+        display: "Morning, noon and night",
         system: "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
       },
     },
@@ -523,6 +599,25 @@ export const MEDICATION_REQUEST_TIMING_OPTIONS: Record<
       },
     },
   },
+  Q12H: {
+    display: "Q12H (Every 12 hours)",
+    timing: {
+      repeat: {
+        frequency: 1,
+        period: "12",
+        period_unit: "h",
+        bounds_duration: {
+          value: "1",
+          unit: "d",
+        },
+      },
+      code: {
+        code: "Q12H",
+        display: "Every 12 hours",
+        system: "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
+      },
+    },
+  },
   BED: {
     display: "BED (0-0-1)",
     timing: {
@@ -580,6 +675,82 @@ export const MEDICATION_REQUEST_TIMING_OPTIONS: Record<
       },
     },
   },
+  HS: {
+    display: "HS (At bedtime)",
+    timing: {
+      repeat: {
+        frequency: 1,
+        period: "1",
+        period_unit: "d",
+        bounds_duration: {
+          value: "1",
+          unit: "d",
+        },
+      },
+      code: {
+        code: "HS",
+        display: "At bedtime",
+        system: "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
+      },
+    },
+  },
+  AC: {
+    display: "AC (Before meals)",
+    timing: {
+      repeat: {
+        frequency: 3,
+        period: "1",
+        period_unit: "d",
+        bounds_duration: {
+          value: "1",
+          unit: "d",
+        },
+      },
+      code: {
+        code: "AC",
+        display: "Before meals",
+        system: "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
+      },
+    },
+  },
+  PC: {
+    display: "PC (After meals)",
+    timing: {
+      repeat: {
+        frequency: 3,
+        period: "1",
+        period_unit: "d",
+        bounds_duration: {
+          value: "1",
+          unit: "d",
+        },
+      },
+      code: {
+        code: "PC",
+        display: "After meals",
+        system: "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
+      },
+    },
+  },
+  STAT: {
+    display: "STAT (Immediately)",
+    timing: {
+      repeat: {
+        frequency: 1,
+        period: "1",
+        period_unit: "d",
+        bounds_duration: {
+          value: "1",
+          unit: "d",
+        },
+      },
+      code: {
+        code: "STAT",
+        display: "Immediately",
+        system: "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
+      },
+    },
+  },
 } as const;
 
 /**
@@ -605,7 +776,7 @@ export function parseMedicationStringToRequest(
     dosageInstruction.dose_and_rate = {
       type: "ordered",
       dose_quantity: {
-        value: "0",
+        value: "1",
         unit: productKnowledge.base_unit,
       },
     };
