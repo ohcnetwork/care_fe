@@ -44,7 +44,7 @@ const PrescriptionContent = ({ prescription }: PrescriptionContentProps) => {
   return (
     <div>
       {/* Prescription Symbol */}
-      <div className="text-2xl font-semibold mb-3 flex items-end gap-4">
+      <div className="text-xl font-semibold mb-3 flex items-end gap-4">
         <p>{t("℞")}</p>
         <p className="text-sm text-gray-600 font-semibold ">
           {formatDateTime(
@@ -87,6 +87,13 @@ const PrescriptionContent = ({ prescription }: PrescriptionContentProps) => {
                 instructions: `${remarks || "-"}${notes ? ` (${t("note")}: ${notes})` : ""}`,
               };
             })}
+            className="text-xs whitespace-break-spaces text-gray-950"
+            cellConfig={{
+              medicine: { className: "text-left font-semibold" },
+              instructions: { className: "text-[10px] font-normal" },
+              frequency: { className: "text-[10px] font-normal" },
+              duration: { className: "text-[10px] font-normal" },
+            }}
           />
         </div>
       )}
@@ -123,13 +130,20 @@ const PrescriptionContent = ({ prescription }: PrescriptionContentProps) => {
                 instructions: `${remarks || "-"}${notes ? ` (${t("note")}: ${notes})` : ""}`,
               };
             })}
+            className="text-xs whitespace-break-spaces text-gray-950"
+            cellConfig={{
+              medicine: { className: "text-left font-semibold" },
+              instructions: { className: "text-[10px] font-normal" },
+              frequency: { className: "text-[10px] font-normal" },
+              duration: { className: "text-[10px] font-normal" },
+            }}
           />
         </div>
       )}
       {/* Doctor's Signature */}
       <div className="w-full items-end mt-6 flex flex-row justify-end gap-1">
         <div className="text-right">
-          <p className="text-sm text-gray-400">{t("prescribed_by")}</p>
+          <p className="text-xs text-gray-400">{t("prescribed_by")}</p>
           <p className="text-sm text-gray-600 font-semibold">
             {formatName(
               prescription.prescription?.prescribed_by ||
@@ -187,12 +201,12 @@ export const PrescriptionPreview = ({
           <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
             <div className="flex items-start gap-4">
               <div className="text-left">
-                <h1 className="text-2xl font-medium">{facility?.name}</h1>
+                <h1 className="text-xl font-medium">{facility?.name}</h1>
                 {facility?.address && (
-                  <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
+                  <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-xs">
                     {facility.address}
                     {facility.phone_number && (
-                      <p className="text-gray-500 text-sm">
+                      <p className="text-gray-500 text-xs">
                         {t("phone")}: {facility.phone_number}
                       </p>
                     )}
@@ -240,11 +254,8 @@ export const PrescriptionPreview = ({
                 label={t("date")}
                 value={
                   encounter?.period?.start
-                    ? format(
-                        new Date(encounter.period.start),
-                        "dd MMM yyyy, EEEE",
-                      )
-                    : format(new Date(), "dd MMM yyyy, EEEE")
+                    ? format(new Date(encounter.period.start), "dd/mm/yy")
+                    : format(new Date(), "dd/mm/yy")
                 }
                 isStrong
               />
@@ -264,7 +275,10 @@ export const PrescriptionPreview = ({
           ))}
 
           {/* Footer */}
-          <PrintFooter leftContent={t("computer_generated_prescription")} />
+          <PrintFooter
+            leftContent={t("computer_generated_prescription")}
+            className="text-xs"
+          />
         </div>
       </div>
     </PrintPreview>

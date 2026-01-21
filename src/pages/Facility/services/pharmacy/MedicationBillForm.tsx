@@ -243,10 +243,9 @@ const AddMedicationSheet = ({
 
   const isConsumable = selectedProduct?.product_type === "consumable";
 
-  // TODO: bring this back, after debugging what's causing it. B, P, E, T (and more?) can't be typed.
-  // useShortcutSubContext("patient:search:-global", {
-  //   ignoreInputFields: true,
-  // });
+  useShortcutSubContext("patient:search:-global", {
+    ignoreInputFields: true,
+  });
 
   // Update local state when the sheet opens or when editing a different item
   useEffect(() => {
@@ -728,7 +727,6 @@ export default function MedicationBillForm({
   patientId,
   prescriptionId,
 }: Props) {
-  useShortcutSubContext("facility:general");
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { facilityId } = useCurrentFacility();
