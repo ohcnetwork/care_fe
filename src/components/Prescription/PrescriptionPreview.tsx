@@ -87,12 +87,9 @@ const PrescriptionContent = ({ prescription }: PrescriptionContentProps) => {
                 instructions: `${remarks || "-"}${notes ? ` (${t("note")}: ${notes})` : ""}`,
               };
             })}
-            className="text-xs whitespace-break-spaces text-gray-950"
+            className="text-xs font-semibold whitespace-break-spaces text-gray-950"
             cellConfig={{
               medicine: { className: "text-left font-semibold" },
-              instructions: { className: "text-[10px] font-normal" },
-              frequency: { className: "text-[10px] font-normal" },
-              duration: { className: "text-[10px] font-normal" },
             }}
           />
         </div>
@@ -130,12 +127,9 @@ const PrescriptionContent = ({ prescription }: PrescriptionContentProps) => {
                 instructions: `${remarks || "-"}${notes ? ` (${t("note")}: ${notes})` : ""}`,
               };
             })}
-            className="text-xs whitespace-break-spaces text-gray-950"
+            className="text-xs font-semibold whitespace-break-spaces text-gray-950"
             cellConfig={{
               medicine: { className: "text-left font-semibold" },
-              instructions: { className: "text-[10px] font-normal" },
-              frequency: { className: "text-[10px] font-normal" },
-              duration: { className: "text-[10px] font-normal" },
             }}
           />
         </div>
@@ -254,8 +248,8 @@ export const PrescriptionPreview = ({
                 label={t("date")}
                 value={
                   encounter?.period?.start
-                    ? format(new Date(encounter.period.start), "dd/mm/yy")
-                    : format(new Date(), "dd/mm/yy")
+                    ? format(new Date(encounter.period.start), "dd/MM/yy")
+                    : format(new Date(), "dd/MM/yy")
                 }
                 isStrong
               />
