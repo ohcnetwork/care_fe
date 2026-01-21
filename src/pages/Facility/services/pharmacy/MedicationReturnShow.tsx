@@ -329,7 +329,10 @@ export default function MedicationReturnShow({
 
             {deliveryOrder.status === DeliveryOrderStatus.draft && (
               <Button variant="outline" asChild>
-                <Link href={`${basePath}/order/${deliveryOrderId}/edit`}>
+                <Link
+                  basePath="/"
+                  href={`${basePath}/order/${deliveryOrderId}/edit`}
+                >
                   <Edit /> {t("edit")}
                   <ShortcutBadge actionId="edit-order" />
                 </Link>

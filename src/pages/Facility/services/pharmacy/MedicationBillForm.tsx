@@ -243,9 +243,10 @@ const AddMedicationSheet = ({
 
   const isConsumable = selectedProduct?.product_type === "consumable";
 
-  useShortcutSubContext("patient:search:-global", {
-    ignoreInputFields: true,
-  });
+  // TODO: bring this back, after debugging what's causing it. B, P, E, T (and more?) can't be typed.
+  // useShortcutSubContext("patient:search:-global", {
+  //   ignoreInputFields: true,
+  // });
 
   // Update local state when the sheet opens or when editing a different item
   useEffect(() => {
