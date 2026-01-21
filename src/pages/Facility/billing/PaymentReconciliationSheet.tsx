@@ -276,7 +276,7 @@ export function PaymentReconciliationSheet({
         kind: PaymentReconciliationKind.deposit,
         issuer_type: PaymentReconciliationIssuerType.patient,
         outcome: PaymentReconciliationOutcome.complete,
-        method: PaymentReconciliationPaymentMethod.cash,
+        method: undefined,
         payment_datetime: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
         amount: initialAmount,
         tendered_amount: initialAmount,

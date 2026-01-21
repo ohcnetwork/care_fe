@@ -11,6 +11,8 @@ import globals from "globals";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { requireOnInvalidForUseFormReturn } 
+  from "./plugins/requireOnInvalidForUseFormReturn.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,6 +29,13 @@ fs.writeFileSync(
 const isPreCommit = process.env.PRE_COMMIT === "true";
 const isProduction = process.env.NODE_ENV === "production";
 const DEFAULT = true;
+
+const reactHookFormPlugin = {
+  rules: {
+    "require-handleSubmit-onInvalid":
+      requireOnInvalidForUseFormReturn,
+  },
+};
 
 const dynamicRules = (ruleset, logKey) => {
   const appliedRule = Object.entries(ruleset).find(([rule, condition]) => {
@@ -120,6 +129,16 @@ const config = [
         warn: DEFAULT,
       }),
       "no-undef": "off",
+    },
+  },
+
+  {
+    files: ["**/*.{tsx,jsx}"],
+    plugins: {
+      "react-hook-form": reactHookFormPlugin,
+    },
+    rules: {
+      "react-hook-form/require-handleSubmit-onInvalid": "error",
     },
   },
 

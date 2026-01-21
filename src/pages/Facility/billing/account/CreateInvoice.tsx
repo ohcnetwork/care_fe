@@ -5,7 +5,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { ChevronDown, ChevronUp, PlusIcon } from "lucide-react";
+import { ChevronDown, ChevronUp, PlusIcon, Zap } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -67,6 +67,7 @@ import BackButton from "@/components/Common/BackButton";
 import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./components/AddChargeItemsBillingSheet";
+import QuickAddChargeItemsSheet from "./components/QuickAddChargeItemsSheet";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -170,6 +171,7 @@ export function CreateInvoicePage({
     {},
   );
   const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = useState(false);
+  const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -398,15 +400,26 @@ export function CreateInvoicePage({
                 {t("billable_charge_items")}
               </div>
               {!disableCreateChargeItems && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsAddChargeItemsOpen(true)}
-                >
-                  <PlusIcon className="size-4 mr-2" />
-                  {t("add_charge_items")}
-                  <ShortcutBadge actionId="add-charge-item" />
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsQuickAddOpen(true)}
+                    className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 hover:border-amber-300 hover:from-amber-100 hover:to-orange-100"
+                  >
+                    <Zap className="size-4 mr-2 text-amber-500" />
+                    {t("quick_add")}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsAddChargeItemsOpen(true)}
+                  >
+                    <PlusIcon className="size-4 mr-2" />
+                    {t("add_charge_items")}
+                    <ShortcutBadge actionId="add-charge-item" />
+                  </Button>
+                </div>
               )}
             </div>
             {isLoading ? (
@@ -591,9 +604,9 @@ export function CreateInvoicePage({
               render={({ field }) => (
                 <FormMessage className="text-xs text-gray-950 italic">
                   {field.value.length > 0
-                    ? `${t("selected_items_count", {
+                    ? t("selected_items_count_one", {
                         count: field.value.length,
-                      })}`
+                      })
                     : t("no_items_selected")}
                 </FormMessage>
               )}
@@ -640,7 +653,11 @@ export function CreateInvoicePage({
             <Button
               type="submit"
               variant="primary_gradient"
-              disabled={createMutation.isPending || isAddChargeItemsOpen}
+              disabled={
+                createMutation.isPending ||
+                isAddChargeItemsOpen ||
+                isQuickAddOpen
+              }
             >
               {createMutation.isPending ? (
                 <div className="flex items-center gap-2">
@@ -660,13 +677,22 @@ export function CreateInvoicePage({
       </Form>
 
       {account?.patient && (
-        <AddChargeItemsBillingSheet
-          open={isAddChargeItemsOpen}
-          onOpenChange={setIsAddChargeItemsOpen}
-          facilityId={facilityId}
-          patientId={account.patient.id}
-          onChargeItemsAdded={handleChargeItemsAdded}
-        />
+        <>
+          <AddChargeItemsBillingSheet
+            open={isAddChargeItemsOpen}
+            onOpenChange={setIsAddChargeItemsOpen}
+            facilityId={facilityId}
+            patientId={account.patient.id}
+            onChargeItemsAdded={handleChargeItemsAdded}
+          />
+          <QuickAddChargeItemsSheet
+            open={isQuickAddOpen}
+            onOpenChange={setIsQuickAddOpen}
+            facilityId={facilityId}
+            patientId={account.patient.id}
+            onChargeItemsAdded={handleChargeItemsAdded}
+          />
+        </>
       )}
     </div>
   );

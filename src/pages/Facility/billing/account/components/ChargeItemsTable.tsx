@@ -7,6 +7,7 @@ import {
   PencilIcon,
   PlusIcon,
   PrinterIcon,
+  Zap,
 } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
@@ -67,6 +68,7 @@ import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./AddChargeItemsBillingSheet";
 import EditChargeItemSheet from "./EditChargeItemSheet";
+import QuickAddChargeItemsSheet from "./QuickAddChargeItemsSheet";
 
 interface PriceComponentRowProps {
   label: string;
@@ -116,6 +118,7 @@ export function ChargeItemsTable({
     {},
   );
   const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = useState(false);
+  const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
 
   // Register shortcuts for this table
   useShortcutSubContext("facility:billing");
@@ -235,6 +238,14 @@ export function ChargeItemsTable({
             <PrinterIcon className="size-4 mr-2" />
             {t("print_charge_items")}
             <ShortcutBadge actionId="print-button" />
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setIsQuickAddOpen(true)}
+            className="w-full sm:w-auto bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 hover:border-amber-300 hover:from-amber-100 hover:to-orange-100"
+          >
+            <Zap className="size-4 mr-2 text-amber-500" />
+            {t("quick_add")}
           </Button>
           <Button
             variant="outline"
@@ -483,6 +494,14 @@ export function ChargeItemsTable({
       <AddChargeItemsBillingSheet
         open={isAddChargeItemsOpen}
         onOpenChange={setIsAddChargeItemsOpen}
+        facilityId={facilityId}
+        patientId={patientId}
+        onChargeItemsAdded={handleChargeItemsAdded}
+      />
+
+      <QuickAddChargeItemsSheet
+        open={isQuickAddOpen}
+        onOpenChange={setIsQuickAddOpen}
         facilityId={facilityId}
         patientId={patientId}
         onChargeItemsAdded={handleChargeItemsAdded}
