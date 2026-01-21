@@ -56,6 +56,7 @@ import {
   Status,
 } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
+import { ObservationDefinitionStatus } from "@/types/emr/observationDefinition/observationDefinition";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 import { SpecimenDefinitionStatus } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
@@ -229,6 +230,7 @@ function ActivityDefinitionFormContent({
             facility: facilityId,
             limit: 100,
             title: observationSearch,
+            status: "active" as ObservationDefinitionStatus,
           },
         },
       ),
