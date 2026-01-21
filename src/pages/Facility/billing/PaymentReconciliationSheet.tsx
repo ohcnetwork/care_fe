@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 import { useAtom } from "jotai";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -15,6 +15,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import careConfig from "@careConfig";
 
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -177,6 +178,10 @@ export function PaymentReconciliationSheet({
   const [selectedLocationObject, setSelectedLocationObject] = useAtom(
     locationAtomFamily(facilityId),
   );
+  const [showExceedsWarning, setShowExceedsWarning] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState<z.infer<
+    typeof formSchema
+  > | null>(null);
   useShortcutSubContext();
 
   const formSchema = createFormSchema();
@@ -254,6 +259,20 @@ export function PaymentReconciliationSheet({
   });
 
   const handleSubmit = form.handleSubmit((data) => {
+    if (
+      !isCreditNote &&
+      invoice &&
+      invoice.total_gross &&
+      data.amount &&
+      new Decimal(data.amount)
+        .minus(new Decimal(invoice.total_gross))
+        .greaterThan(1)
+    ) {
+      setPendingFormData(data);
+      setShowExceedsWarning(true);
+      return;
+    }
+
     // Convert form data to PaymentReconciliationCreate type
     const submissionData: PaymentReconciliationCreate = {
       ...data,
@@ -262,6 +281,19 @@ export function PaymentReconciliationSheet({
     };
     submitPayment(submissionData);
   });
+
+  const handleConfirmExceedingPayment = () => {
+    if (pendingFormData) {
+      const submissionData: PaymentReconciliationCreate = {
+        ...pendingFormData,
+        is_credit_note: isCreditNote,
+        location: pendingFormData.location,
+      };
+      submitPayment(submissionData);
+      setShowExceedsWarning(false);
+      setPendingFormData(null);
+    }
+  };
 
   useEffect(() => {
     if (open) {
@@ -671,6 +703,55 @@ export function PaymentReconciliationSheet({
           </form>
         </Form>
       </SheetContent>
+
+      <ConfirmActionDialog
+        open={showExceedsWarning}
+        onOpenChange={(open) => {
+          setShowExceedsWarning(open);
+          if (!open) {
+            setPendingFormData(null);
+          }
+        }}
+        title={t("payment_exceeds_invoice_amount")}
+        description={
+          <div className="space-y-2">
+            <p>{t("payment_amount_exceeds_invoice_warning")}</p>
+            <div className="rounded-md bg-yellow-50 border border-yellow-200 p-3 space-y-1">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-700">{t("invoice_total")}:</span>
+                <span className="font-semibold text-gray-900">
+                  <MonetaryDisplay amount={invoice?.total_gross} />
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-700">{t("payment_amount")}:</span>
+                <span className="font-semibold text-gray-900">
+                  <MonetaryDisplay amount={pendingFormData?.amount} />
+                </span>
+              </div>
+              <div className="flex justify-between text-sm border-t border-yellow-300 pt-1 mt-1">
+                <span className="text-gray-700">{t("difference")}:</span>
+                <span className="font-bold text-yellow-900">
+                  <MonetaryDisplay
+                    amount={
+                      pendingFormData?.amount && invoice?.total_gross
+                        ? new Decimal(pendingFormData.amount)
+                            .minus(new Decimal(invoice.total_gross))
+                            .toString()
+                        : "0"
+                    }
+                  />
+                </span>
+              </div>
+            </div>
+            <p className="text-sm font-medium">
+              {t("confirm_to_proceed_with_payment")}
+            </p>
+          </div>
+        }
+        onConfirm={handleConfirmExceedingPayment}
+        confirmText={t("yes_proceed")}
+      />
     </Sheet>
   );
 }
