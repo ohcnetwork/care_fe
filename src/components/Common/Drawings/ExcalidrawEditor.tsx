@@ -1,5 +1,5 @@
 import { Excalidraw } from "@excalidraw/excalidraw";
-import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/element/src/types";
+import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/excalidraw/element/types";
 import { BinaryFiles } from "@excalidraw/excalidraw/dist/types/excalidraw/types";
 import "@excalidraw/excalidraw/index.css";
 import {

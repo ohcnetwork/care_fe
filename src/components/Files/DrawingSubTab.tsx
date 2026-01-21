@@ -1,5 +1,5 @@
 import { exportToSvg } from "@excalidraw/excalidraw";
-import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/element/src/types";
+import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/excalidraw/element/types";
 import { BinaryFiles } from "@excalidraw/excalidraw/dist/types/excalidraw/types";
 import { useQuery } from "@tanstack/react-query";
 import { SearchIcon } from "lucide-react";

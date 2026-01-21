@@ -15,6 +15,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { AdminNav } from "@/components/ui/sidebar/admin-nav";
+import { AppointmentNotificationBell } from "@/components/ui/sidebar/AppointmentNotificationBell";
 import { FacilityNav } from "@/components/ui/sidebar/facility/facility-nav";
 import { FacilitySwitcher } from "@/components/ui/sidebar/facility/facility-switcher";
 import { LocationNav } from "@/components/ui/sidebar/facility/location/location-nav";
@@ -173,6 +174,11 @@ export function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter>
+        {facilityId && !patientSidebar && (
+          <div className="flex justify-center px-2 pb-2">
+            <AppointmentNotificationBell facilityId={facilityId} />
+          </div>
+        )}
         {patientSidebar ? (
           <PatientNavUser />
         ) : (
