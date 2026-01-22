@@ -5,9 +5,9 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { ChevronDown, ChevronUp, PlusIcon, Zap } from "lucide-react";
+import { ChevronDown, ChevronUp, Package, PlusIcon } from "lucide-react";
 import { navigate } from "raviger";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -64,12 +64,12 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 
 import BackButton from "@/components/Common/BackButton";
-import { round } from "@/Utils/decimal";
+import { add, round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./components/AddChargeItemsBillingSheet";
 import QuickAddChargeItemsSheet from "./components/QuickAddChargeItemsSheet";
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 200;
 
 const formSchema = z.object({
   status: z.nativeEnum(InvoiceStatus),
@@ -190,6 +190,9 @@ export function CreateInvoicePage({
     }),
     enabled: !!facilityId && !!accountId,
   });
+
+  // Track known item IDs to detect new items
+  const knownItemIds = useRef<Set<string>>(new Set());
 
   const handleChargeItemsAdded = () => {
     queryClient.invalidateQueries({
@@ -318,9 +321,19 @@ export function CreateInvoicePage({
     chargeItemsData?.pages.flatMap((page) => page.results) ??
     [];
 
+  // Calculate total of selected items
+  const selectedItemsTotal = useMemo(() => {
+    return chargeItems
+      .filter((item) => selectedRows[item.id])
+      .reduce((sum, item) => add(sum, item.total_price ?? 0), add(0, 0))
+      .toString();
+  }, [chargeItems, selectedRows]);
+
   useEffect(() => {
-    // Only auto-select on the very first load when we have data
-    if (chargeItems.length > 0 && !hasInitializedSelections.current) {
+    if (chargeItems.length === 0) return;
+
+    // First load - select all items
+    if (!hasInitializedSelections.current) {
       setSelectedRows(
         chargeItems.reduce(
           (acc, item) => {
@@ -334,7 +347,30 @@ export function CreateInvoicePage({
         "charge_items",
         chargeItems.map((item) => item.id),
       );
+      // Track all current items as known
+      knownItemIds.current = new Set(chargeItems.map((item) => item.id));
       hasInitializedSelections.current = true;
+      return;
+    }
+
+    // After initial load - auto-select any new items (e.g., from Quick Add)
+    const newItems = chargeItems.filter(
+      (item) => !knownItemIds.current.has(item.id),
+    );
+    if (newItems.length > 0) {
+      setSelectedRows((prev) => {
+        const updated = { ...prev };
+        newItems.forEach((item) => {
+          updated[item.id] = true;
+        });
+        return updated;
+      });
+      form.setValue("charge_items", [
+        ...form.getValues("charge_items"),
+        ...newItems.map((item) => item.id),
+      ]);
+      // Update known items
+      newItems.forEach((item) => knownItemIds.current.add(item.id));
     }
   }, [chargeItems, form]);
 
@@ -405,9 +441,8 @@ export function CreateInvoicePage({
                     type="button"
                     variant="outline"
                     onClick={() => setIsQuickAddOpen(true)}
-                    className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 hover:border-amber-300 hover:from-amber-100 hover:to-orange-100"
                   >
-                    <Zap className="size-4 mr-2 text-amber-500" />
+                    <Package className="size-4 mr-2" />
                     {t("quick_add")}
                   </Button>
                   <Button
@@ -467,7 +502,9 @@ export function CreateInvoicePage({
                       <TableHead className="border bg-gray-100 text-gray-700">
                         {t("quantity")}
                       </TableHead>
-
+                      <TableHead className="border-y bg-gray-100 text-gray-700 text-right">
+                        {t("mrp")} ({getCurrencySymbol()})
+                      </TableHead>
                       <TableHead className="border-y bg-gray-100 text-gray-700 text-right">
                         {t("unit_price")} ({getCurrencySymbol()})
                       </TableHead>
@@ -584,6 +621,7 @@ export function CreateInvoicePage({
                           <TableCell></TableCell>
                           <TableCell></TableCell>
                           <TableCell></TableCell>
+                          <TableCell></TableCell>
                           <TableCell className="text-right">
                             <MonetaryDisplay amount={item.total_price} />
                           </TableCell>
@@ -611,6 +649,26 @@ export function CreateInvoicePage({
                 </FormMessage>
               )}
             />
+
+            {/* Invoice Total */}
+            {chargeItems.length > 0 && (
+              <div className="mt-4 flex justify-end">
+                <div className="bg-gray-50 border rounded-lg p-4 min-w-[280px]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-600">
+                      {t("invoice_total")}
+                    </span>
+                    <span className="text-2xl font-bold text-gray-900">
+                      <MonetaryDisplay amount={selectedItemsTotal} />
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1 text-right">
+                    {t("includes_all_taxes")}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {hasNextPage && (
               <div className="mt-4 flex justify-center">
                 <Button

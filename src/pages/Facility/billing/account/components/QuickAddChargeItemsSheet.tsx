@@ -2,14 +2,14 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Check,
   ChevronDown,
+  ChevronRight,
   ChevronUp,
+  FolderOpen,
   Minus,
   Package,
   Plus,
   ShoppingCart,
-  Sparkles,
   Trash2,
-  Zap,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -17,6 +17,11 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -33,12 +38,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { cn } from "@/lib/utils";
 
+import {
+  calculateTotalPrice,
+  calculateTotalPriceWithQuantity,
+} from "@/types/base/monetaryComponent/monetaryComponent";
 import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
+import { add } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
@@ -78,9 +88,9 @@ export default function QuickAddChargeItemsSheet({
     }
   }, [open]);
 
-  // Fetch packages (tags for charge item definitions)
-  const { data: packageTags, isLoading: isLoadingPackages } = useQuery({
-    queryKey: ["chargeItemPackages", facilityId],
+  // Fetch parent tags (groups) for charge item definitions
+  const { data: groupTags, isLoading: isLoadingGroups } = useQuery({
+    queryKey: ["chargeItemGroups", facilityId],
     queryFn: query(tagConfigApi.list, {
       queryParams: {
         resource: TagResource.CHARGE_ITEM_DEFINITION,
@@ -104,15 +114,20 @@ export default function QuickAddChargeItemsSheet({
     },
   });
 
-  // Calculate totals
+  // Calculate totals (including tax)
   const cartTotal = useMemo(() => {
-    return cartItems.reduce((sum, item) => {
-      const basePrice =
-        item.definition.price_components?.find(
-          (c) => c.monetary_component_type === "base",
-        )?.amount ?? 0;
-      return sum + Number(basePrice) * Number(item.quantity);
-    }, 0);
+    return cartItems
+      .reduce(
+        (sum, item) => {
+          const itemTotal = calculateTotalPriceWithQuantity(
+            item.definition.price_components ?? [],
+            item.quantity,
+          );
+          return add(sum, itemTotal);
+        },
+        add(0, 0),
+      )
+      .toString();
   }, [cartItems]);
 
   // Add item to cart
@@ -198,48 +213,45 @@ export default function QuickAddChargeItemsSheet({
     });
   };
 
-  const packages = packageTags?.results ?? [];
+  const groups = groupTags?.results ?? [];
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-lg flex flex-col p-0 gap-0">
-        <SheetHeader className="px-6 py-4 border-b bg-gradient-to-r from-amber-50 to-orange-50">
-          <SheetTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-amber-500" />
-            {t("quick_add")}
-          </SheetTitle>
+        <SheetHeader className="px-6 py-4 border-b">
+          <SheetTitle>{t("quick_add")}</SheetTitle>
           <SheetDescription>
-            {t("select_group_to_add_all_items")}
+            {t("select_package_to_add_all_items")}
           </SheetDescription>
         </SheetHeader>
 
         <ScrollArea className="flex-1">
           <div className="p-6 space-y-6">
-            {/* Packages Section */}
+            {/* Groups Section */}
             <section className="space-y-4">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-amber-500" />
+                <Package className="h-4 w-4 text-gray-500" />
                 <h3 className="font-semibold text-sm">{t("packages")}</h3>
               </div>
 
-              {isLoadingPackages ? (
+              {isLoadingGroups ? (
                 <div className="space-y-3">
                   {[1, 2, 3].map((i) => (
                     <Skeleton key={i} className="h-20 rounded-xl" />
                   ))}
                 </div>
-              ) : packages.length === 0 ? (
+              ) : groups.length === 0 ? (
                 <></>
               ) : (
-                <div className="space-y-3">
-                  {packages.map((tag) => (
-                    <PackageCard
-                      key={tag.id}
-                      tag={tag}
+                <div className="space-y-4">
+                  {groups.map((group) => (
+                    <GroupCard
+                      key={group.id}
+                      group={group}
                       facilityId={facilityId}
-                      isSelected={selectedPackages.has(tag.id)}
-                      onSelect={(items) => handlePackageSelect(tag, items)}
-                      onDeselect={() => handlePackageDeselect(tag.id)}
+                      selectedPackages={selectedPackages}
+                      onPackageSelect={handlePackageSelect}
+                      onPackageDeselect={handlePackageDeselect}
                       disabled={disabled}
                     />
                   ))}
@@ -316,13 +328,14 @@ export default function QuickAddChargeItemsSheet({
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting || cartItems.length === 0 || disabled}
-                className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                variant="primary"
+                className="flex-1"
               >
                 {isSubmitting ? (
                   t("adding")
                 ) : (
                   <>
-                    <Zap className="h-4 w-4 mr-2" />
+                    <Plus className="h-4 w-4 mr-2" />
                     {t("add_items")} ({cartItems.length})
                   </>
                 )}
@@ -335,7 +348,106 @@ export default function QuickAddChargeItemsSheet({
   );
 }
 
-// Package Card Component
+// Group Card Component (Parent Tag)
+interface GroupCardProps {
+  group: TagConfig;
+  facilityId: string;
+  selectedPackages: Set<string>;
+  onPackageSelect: (tag: TagConfig, items: ChargeItemDefinitionRead[]) => void;
+  onPackageDeselect: (tagId: string) => void;
+  disabled?: boolean;
+}
+
+function GroupCard({
+  group,
+  facilityId,
+  selectedPackages,
+  onPackageSelect,
+  onPackageDeselect,
+  disabled,
+}: GroupCardProps) {
+  const { t } = useTranslation();
+  const [isOpen, setIsOpen] = useState(true);
+
+  // Fetch child tags (packages) for this group
+  const { data: childTags, isLoading: isLoadingChildren } = useQuery({
+    queryKey: ["childTags", facilityId, group.id],
+    queryFn: query(tagConfigApi.list, {
+      queryParams: {
+        resource: TagResource.CHARGE_ITEM_DEFINITION,
+        status: "active",
+        facility: facilityId,
+        parent: group.id,
+      },
+    }),
+  });
+
+  const packages = childTags?.results ?? [];
+  const selectedCount = packages.filter((pkg) =>
+    selectedPackages.has(pkg.id),
+  ).length;
+
+  if (isLoadingChildren) {
+    return <Skeleton className="h-16 rounded-xl" />;
+  }
+
+  if (packages.length === 0) {
+    return null;
+  }
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <CollapsibleTrigger asChild>
+        <button
+          type="button"
+          className="w-full flex items-center gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+        >
+          <div className="p-1.5 rounded-md bg-gray-100">
+            <FolderOpen className="h-4 w-4 text-gray-600" />
+          </div>
+          <div className="flex-1 text-left">
+            <h4 className="font-semibold text-sm text-gray-900">
+              {group.display}
+            </h4>
+            <span className="text-xs text-gray-500">
+              {t("packages_count", {
+                count: packages.length,
+                defaultValue: `${packages.length} packages`,
+              })}
+              {selectedCount > 0 && (
+                <span className="text-primary-600 ml-2">
+                  ({selectedCount} {t("selected")})
+                </span>
+              )}
+            </span>
+          </div>
+          {isOpen ? (
+            <ChevronDown className="h-4 w-4 text-gray-400" />
+          ) : (
+            <ChevronRight className="h-4 w-4 text-gray-400" />
+          )}
+        </button>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="pl-4 pt-2 space-y-2">
+          {packages.map((pkg) => (
+            <PackageCard
+              key={pkg.id}
+              tag={pkg}
+              facilityId={facilityId}
+              isSelected={selectedPackages.has(pkg.id)}
+              onSelect={(items) => onPackageSelect(pkg, items)}
+              onDeselect={() => onPackageDeselect(pkg.id)}
+              disabled={disabled}
+            />
+          ))}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
+// Package Card Component (Child Tag)
 interface PackageCardProps {
   tag: TagConfig;
   facilityId: string;
@@ -374,12 +486,15 @@ function PackageCard({
   );
 
   const totalEstimate = useMemo(() => {
-    return items.reduce((sum, item) => {
-      const basePrice =
-        item.price_components?.find((c) => c.monetary_component_type === "base")
-          ?.amount ?? 0;
-      return sum + Number(basePrice);
-    }, 0);
+    return items
+      .reduce(
+        (sum, item) => {
+          const itemTotal = calculateTotalPrice(item.price_components ?? []);
+          return add(sum, itemTotal);
+        },
+        add(0, 0),
+      )
+      .toString();
   }, [items]);
 
   const handleClick = () => {
@@ -396,8 +511,8 @@ function PackageCard({
       className={cn(
         "rounded-xl border-2 transition-all duration-200 overflow-hidden",
         isSelected
-          ? "border-amber-400 bg-amber-50 shadow-md shadow-amber-100"
-          : "border-gray-200 bg-white hover:border-amber-300 hover:shadow-sm",
+          ? "border-primary-400 bg-primary-50 shadow-md shadow-primary-100"
+          : "border-gray-200 bg-white hover:border-primary-300 hover:shadow-sm",
         (disabled || items.length === 0) && "opacity-50 cursor-not-allowed",
       )}
     >
@@ -405,26 +520,26 @@ function PackageCard({
         type="button"
         onClick={handleClick}
         disabled={disabled || isLoading || items.length === 0}
-        className="w-full p-4 text-left"
+        className="w-full p-3 text-left"
       >
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {/* Selection indicator */}
           <div
             className={cn(
-              "w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all",
+              "w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all",
               isSelected
-                ? "bg-amber-500 border-amber-500"
+                ? "bg-primary-500 border-primary-500"
                 : "border-gray-300 bg-white",
             )}
           >
-            {isSelected && <Check className="h-4 w-4 text-white" />}
+            {isSelected && <Check className="h-3 w-3 text-white" />}
           </div>
 
           {/* Package info */}
           <div className="flex-1 min-w-0">
-            <h4 className="font-semibold text-gray-900">{tag.display}</h4>
-            <div className="flex items-center gap-3 mt-1">
-              <span className="text-sm text-gray-500">
+            <h4 className="font-medium text-sm text-gray-900">{tag.display}</h4>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-xs text-gray-500">
                 {isLoading
                   ? "..."
                   : t("items_count", {
@@ -432,10 +547,10 @@ function PackageCard({
                       defaultValue: `${items.length} items`,
                     })}
               </span>
-              {!isLoading && totalEstimate > 0 && (
+              {!isLoading && Number(totalEstimate) > 0 && (
                 <>
                   <span className="text-gray-300">•</span>
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-xs font-medium text-gray-700">
                     <MonetaryDisplay amount={totalEstimate} />
                   </span>
                 </>
@@ -446,14 +561,14 @@ function PackageCard({
           {/* Package icon */}
           <div
             className={cn(
-              "p-2 rounded-lg",
-              isSelected ? "bg-amber-100" : "bg-gray-100",
+              "p-1.5 rounded-lg",
+              isSelected ? "bg-primary-100" : "bg-gray-100",
             )}
           >
             <Package
               className={cn(
-                "h-5 w-5",
-                isSelected ? "text-amber-600" : "text-gray-500",
+                "h-4 w-4",
+                isSelected ? "text-primary-600" : "text-gray-500",
               )}
             />
           </div>
@@ -469,7 +584,7 @@ function PackageCard({
               e.stopPropagation();
               setIsExpanded(!isExpanded);
             }}
-            className="w-full px-4 py-2 text-xs text-gray-500 hover:bg-gray-50 flex items-center justify-center gap-1"
+            className="w-full px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-50 flex items-center justify-center gap-1"
           >
             {isExpanded ? (
               <>
@@ -485,19 +600,17 @@ function PackageCard({
           </button>
 
           {isExpanded && (
-            <div className="px-4 pb-3 space-y-1.5 bg-gray-50/50">
+            <div className="px-3 pb-2 space-y-1 bg-gray-50/50">
               {items.map((item) => (
                 <div
                   key={item.id}
-                  className="text-sm text-gray-600 flex items-center justify-between py-1"
+                  className="text-xs text-gray-600 flex items-center justify-between py-0.5"
                 >
                   <span className="truncate pr-2">{item.title}</span>
                   <MonetaryDisplay
-                    amount={
-                      item.price_components?.find(
-                        (c) => c.monetary_component_type === "base",
-                      )?.amount ?? 0
-                    }
+                    amount={calculateTotalPrice(
+                      item.price_components ?? [],
+                    ).toString()}
                     className="text-gray-500 flex-shrink-0 text-xs"
                   />
                 </div>
@@ -524,11 +637,13 @@ function CartItemRow({
   onRemove,
   disabled,
 }: CartItemRowProps) {
-  const basePrice =
-    item.definition.price_components?.find(
-      (c) => c.monetary_component_type === "base",
-    )?.amount ?? 0;
-  const lineTotal = Number(basePrice) * Number(item.quantity);
+  const unitPrice = calculateTotalPrice(
+    item.definition.price_components ?? [],
+  ).toString();
+  const lineTotal = calculateTotalPriceWithQuantity(
+    item.definition.price_components ?? [],
+    item.quantity,
+  ).toString();
 
   return (
     <div className="flex items-center gap-3 p-2 rounded-lg bg-white border">
@@ -538,7 +653,7 @@ function CartItemRow({
           {item.definition.title}
         </p>
         <p className="text-xs text-gray-500">
-          <MonetaryDisplay amount={basePrice} /> × {item.quantity}
+          <MonetaryDisplay amount={unitPrice} /> × {item.quantity}
         </p>
       </div>
 
