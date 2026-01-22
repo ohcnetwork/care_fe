@@ -1,6 +1,9 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
+import { ShieldAlert } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
+import { EmptyState } from "@/components/ui/empty-state";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
@@ -11,12 +14,15 @@ import { VitalsList } from "@/components/Patient/vitals/list";
 import { ObservationPlotConfig } from "@/types/emr/observation/observation";
 
 import { ClinicalHistoryOverview } from "@/pages/Encounters/tabs/overview/clinical-history-overview";
+import { FormSubmissionDrafts } from "@/pages/Encounters/tabs/overview/FormSubmissionDrafts";
 import { QuickActions } from "@/pages/Encounters/tabs/overview/quick-actions";
 import { SummaryPanel } from "@/pages/Encounters/tabs/overview/summary-panel";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import EncounterOverviewDevices from "@/pages/Facility/settings/devices/components/EncounterOverviewDevices";
+import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 
 export const EncounterOverviewTab = () => {
+  const { t } = useTranslation();
   const {
     selectedEncounter: encounter,
     patientId,
@@ -37,7 +43,7 @@ export const EncounterOverviewTab = () => {
 
   return (
     <div className="flex gap-3 @max-md:w-full">
-      {canReadClinicalData && (
+      {canReadClinicalData ? (
         <div className="flex-1 xl:pr-3 overflow-y-auto xl:h-[calc(100vh-14rem-var(--encounter-header-offset))]">
           <div className="flex flex-col gap-6">
             {canWrite && <QuickActions />}
@@ -52,6 +58,14 @@ export const EncounterOverviewTab = () => {
                 {encounter && (
                   <EncounterOverviewDevices encounter={encounter} />
                 )}
+                {encounter &&
+                  !inactiveEncounterStatus.includes(encounter.status) && (
+                    <FormSubmissionDrafts
+                      facilityId={encounter.facility.id}
+                      patientId={patientId}
+                      encounterId={encounterId}
+                    />
+                  )}
                 {/* Clinical informations */}
                 <AllergyList
                   patientId={patientId}
@@ -85,6 +99,15 @@ export const EncounterOverviewTab = () => {
               </div>
             }
           </div>
+        </div>
+      ) : (
+        <div className="flex-1 xl:pr-3 flex items-center justify-center">
+          <EmptyState
+            icon={<ShieldAlert className="text-gray-400 size-8" />}
+            title={t("no_permission_to_view_clinical_data")}
+            description={t("no_permission_to_view_clinical_data_description")}
+            className="h-full w-full bg-transparent"
+          />
         </div>
       )}
 

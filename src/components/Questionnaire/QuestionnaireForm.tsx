@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useNavigationPrompt } from "raviger";
+import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -31,6 +31,7 @@ import type {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
+import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
 import {
   type Question,
   AnswerOption,
@@ -40,8 +41,10 @@ import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
+import BackButton from "@/components/Common/BackButton";
 import { validateEncounterQuestion } from "@/components/Questionnaire/QuestionTypes/EncounterQuestion";
 import { EncounterEdit } from "@/types/emr/encounter/encounter";
+import { ArrowLeft } from "lucide-react";
 import { QuestionRenderer } from "./QuestionRenderer";
 import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion";
 import { validateFileUploadQuestion } from "./QuestionTypes/FileQuestion";
@@ -369,6 +372,7 @@ export function QuestionnaireForm({
   facilityId,
 }: QuestionnaireFormProps) {
   const { t } = useTranslation();
+  const [{ continue_draft: continueDraftId }] = useQueryParams();
 
   const [isDirty, setIsDirty] = useState(false);
   const [questionnaireForms, setQuestionnaireForms] = useState<
@@ -379,6 +383,7 @@ export function QuestionnaireForm({
 
   const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
+  const [draftMismatchError, setDraftMismatchError] = useState(false);
 
   const {
     data: questionnaireData,
@@ -392,7 +397,22 @@ export function QuestionnaireForm({
     enabled: !!questionnaireSlug && !FIXED_QUESTIONNAIRES[questionnaireSlug],
   });
 
-  const { mutate: submitBatch, isPending } = useMutation({
+  // Fetch draft if continue_draft query param is present
+  const {
+    data: draftData,
+    isLoading: isDraftLoading,
+    error: draftError,
+  } = useQuery({
+    queryKey: ["formSubmission", continueDraftId],
+    queryFn: query(formSubmissionApi.get, {
+      pathParams: {
+        external_id: continueDraftId ?? "",
+      },
+    }),
+    enabled: !!continueDraftId,
+  });
+
+  const { mutate: submitBatch, isPending: isSubmitPending } = useMutation({
     mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
       setServerErrors(undefined);
@@ -485,6 +505,44 @@ export function QuestionnaireForm({
     },
   });
 
+  const { mutate: createDraft, isPending: isCreateDraftPending } = useMutation({
+    mutationFn: mutate(formSubmissionApi.create),
+    onSuccess: () => {
+      setIsDirty(false);
+      toast.success(t("draft_saved_successfully"));
+      navigate(
+        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+      );
+    },
+    onError: () => {
+      toast.error(t("draft_save_failed"));
+    },
+  });
+
+  const { mutate: updateDraft, isPending: isUpdateDraftPending } = useMutation({
+    mutationFn: (data: {
+      id: string;
+      body: { status: "draft"; response_dump: Record<string, unknown> };
+    }) =>
+      mutate(formSubmissionApi.update, {
+        pathParams: { external_id: data.id },
+      })(data.body),
+    onSuccess: () => {
+      setIsDirty(false);
+      toast.success(t("draft_saved_successfully"));
+      navigate(
+        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+      );
+    },
+    onError: () => {
+      toast.error(t("draft_save_failed"));
+    },
+  });
+
+  const isDraftPending = isCreateDraftPending || isUpdateDraftPending;
+
+  const isPending = isSubmitPending || isDraftPending;
+
   // TODO: Use useBlocker hook after switching to tanstack router
   // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
   useNavigationPrompt(isDirty && !import.meta.env.DEV, t("unsaved_changes"));
@@ -494,7 +552,35 @@ export function QuestionnaireForm({
       const questionnaire =
         FIXED_QUESTIONNAIRES[questionnaireSlug] || questionnaireData;
 
-      if (questionnaire) {
+      // If we have a draft to continue, wait for it to load
+      if (continueDraftId) {
+        if (draftData && questionnaire) {
+          // Extract the questionnaire from the draft
+          const draftQuestionnaireResponses = draftData.response_dump
+            ?.questionnaireResponses as QuestionnaireFormState | undefined;
+          const draftQuestionnaire = draftQuestionnaireResponses?.questionnaire;
+
+          // Compare questionnaire IDs to verify they match
+          if (draftQuestionnaire?.id !== questionnaire.id) {
+            setDraftMismatchError(true);
+            setIsInitialized(true);
+            return;
+          }
+
+          // Restore the draft state
+          setQuestionnaireForms([
+            {
+              questionnaire,
+              responses:
+                draftQuestionnaireResponses?.responses ||
+                initializeResponses(questionnaire.questions),
+              errors: [],
+            },
+          ]);
+          setIsInitialized(true);
+        }
+      } else if (questionnaire) {
+        // No draft, initialize with empty responses
         setQuestionnaireForms([
           {
             questionnaire,
@@ -505,17 +591,45 @@ export function QuestionnaireForm({
         setIsInitialized(true);
       }
     }
-  }, [questionnaireData, isInitialized, questionnaireSlug]);
+  }, [
+    questionnaireData,
+    isInitialized,
+    questionnaireSlug,
+    continueDraftId,
+    draftData,
+  ]);
 
-  if (isQuestionnaireLoading) {
+  // Show loading while fetching questionnaire or draft
+  if (isQuestionnaireLoading || (continueDraftId && isDraftLoading)) {
     return <Loading />;
   }
 
+  // Show error if questionnaire failed to load
   if (questionnaireError) {
     return (
       <Alert variant="destructive" className="m-4">
         <AlertTitle>{t("questionnaire_error_loading")}</AlertTitle>
         <AlertDescription>{t("questionnaire_not_exist")}</AlertDescription>
+      </Alert>
+    );
+  }
+
+  // Show error if draft failed to load
+  if (continueDraftId && draftError) {
+    return (
+      <Alert variant="destructive" className="m-4">
+        <AlertTitle>{t("draft_error_loading")}</AlertTitle>
+        <AlertDescription>{t("draft_not_found")}</AlertDescription>
+      </Alert>
+    );
+  }
+
+  // Show error if draft questionnaire doesn't match current questionnaire
+  if (draftMismatchError) {
+    return (
+      <Alert variant="destructive" className="m-4">
+        <AlertTitle>{t("draft_not_recoverable")}</AlertTitle>
+        <AlertDescription>{t("draft_questionnaire_mismatch")}</AlertDescription>
       </Alert>
     );
   }
@@ -560,6 +674,63 @@ export function QuestionnaireForm({
   };
 
   const hasErrors = questionnaireForms.some((form) => form.errors.length > 0);
+
+  const handleSaveDraft = () => {
+    if (!questionnaireSlug || questionnaireForms.length > 1) {
+      toast.error(t("cannot_save_draft_multiple_questionnaires"));
+      return;
+    }
+
+    // Check for structured questions
+    const structuredQuestionNames: string[] = [];
+    const findStructuredQuestions = (questions: Question[]) => {
+      for (const q of questions) {
+        if (q.type === "structured") {
+          structuredQuestionNames.push(q.text);
+        }
+        if (q.type === "group" && q.questions) {
+          findStructuredQuestions(q.questions);
+        }
+      }
+    };
+
+    questionnaireForms.forEach((form) => {
+      findStructuredQuestions(form.questionnaire.questions);
+    });
+
+    if (structuredQuestionNames.length > 0) {
+      toast.error(
+        t("cannot_save_draft_structured_questions", {
+          questions: structuredQuestionNames.join(", "),
+        }),
+      );
+      return;
+    }
+
+    const draftQuestionnaire = questionnaireForms[0];
+
+    const responseDump = {
+      questionnaireResponses: draftQuestionnaire,
+    };
+
+    if (continueDraftId) {
+      updateDraft({
+        id: continueDraftId,
+        body: {
+          status: "draft",
+          response_dump: responseDump,
+        },
+      });
+    } else {
+      createDraft({
+        patient: patientId,
+        questionnaire: draftQuestionnaire.questionnaire.slug,
+        encounter: encounterId,
+        status: "draft",
+        response_dump: responseDump,
+      });
+    }
+  };
 
   const handleSubmit = async () => {
     setIsDirty(false);
@@ -745,6 +916,25 @@ export function QuestionnaireForm({
         });
       }
     });
+
+    // If continuing from a draft, update the form submission status to submitted
+    if (continueDraftId) {
+      const draftQuestionnaire = formsWithValidation[0];
+      requests.push({
+        url: `/api/v1/form_submission/${continueDraftId}/`,
+        method: "PUT",
+        reference_id: `form_submission_${continueDraftId}`,
+        body: {
+          patient: patientId,
+          encounter: encounterId,
+          status: "submitted",
+          response_dump: {
+            questionnaireResponses: draftQuestionnaire,
+          },
+        },
+      });
+    }
+
     submitBatch({ requests });
   };
 
@@ -771,6 +961,10 @@ export function QuestionnaireForm({
     <div className="flex gap-4">
       {/* Left Navigation */}
       <div className="w-64 border-r border-gray-200 p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
+        <BackButton className="w-full">
+          <ArrowLeft />
+          <span>{t("back_to_encounter")}</span>
+        </BackButton>
         {questionnaireForms.map((form) => (
           <div key={form.questionnaire.id} className="space-y-2">
             <button
@@ -807,7 +1001,6 @@ export function QuestionnaireForm({
           </div>
         ))}
       </div>
-
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto w-full pb-8 space-y-2">
         {/* Questionnaire Forms */}
@@ -943,12 +1136,30 @@ export function QuestionnaireForm({
                   {t("cancel")}
                 </Button>
                 <Button
+                  type="button"
+                  variant="outline_primary"
+                  onClick={handleSaveDraft}
+                  disabled={isPending || !questionnaireSlug}
+                  className="relative"
+                >
+                  {isDraftPending ? (
+                    <>
+                      <span className="opacity-0">{t("save_as_draft")}</span>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="size-5 animate-spin rounded-full border-b-2 border-primary-600" />
+                      </div>
+                    </>
+                  ) : (
+                    t("save_as_draft")
+                  )}
+                </Button>
+                <Button
                   type="submit"
                   onClick={handleSubmit}
                   disabled={isPending || hasErrors}
                   className="relative"
                 >
-                  {isPending ? (
+                  {isSubmitPending ? (
                     <>
                       <span className="opacity-0">{t("submit")}</span>
                       <div className="absolute inset-0 flex items-center justify-center">

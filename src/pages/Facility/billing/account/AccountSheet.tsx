@@ -1,7 +1,9 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React from "react";
+import React, { useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,8 +31,13 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
+import {
+  ExtensionEntityType,
+  getCombinedExtensionProps,
+  NamespacedExtensionData,
+  useEntityExtensions,
+  useExtensionSchemas,
+} from "@/hooks/useExtensions";
 import {
   ACCOUNT_STATUS_COLORS,
   AccountBillingStatus,
@@ -40,16 +47,19 @@ import {
 import accountApi from "@/types/billing/account/accountApi";
 import { Period } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 
-interface AccountFormValues {
-  name: string;
-  description?: string;
-  status: AccountStatus;
-  billing_status: AccountBillingStatus;
-  id?: string;
-  patient?: PatientRead;
-  service_period?: Period;
-}
+const createBaseSchema = (t: (key: string) => string) =>
+  z.object({
+    name: z.string().min(1, t("name_is_required")),
+    description: z.string().optional(),
+    status: z.nativeEnum(AccountStatus),
+    billing_status: z.nativeEnum(AccountBillingStatus),
+    id: z.string().optional(),
+    patient: z.custom<PatientRead>().optional(),
+    service_period: z.custom<Period>().optional(),
+  });
 
 interface AccountSheetProps {
   open: boolean;
@@ -70,14 +80,42 @@ export function AccountSheet({
 }: AccountSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { getExtensions } = useExtensionSchemas();
 
-  const methods = useForm<AccountFormValues>({
+  const ext = useMemo(
+    () =>
+      getCombinedExtensionProps(
+        getExtensions(ExtensionEntityType.account, "write"),
+      ),
+    [getExtensions],
+  );
+
+  const formSchema = useMemo(
+    () =>
+      createBaseSchema(t).extend({
+        extensions: ext.validation.optional(),
+      }),
+    [t, ext.validation],
+  );
+
+  type FormValues = z.infer<typeof formSchema>;
+
+  const methods = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: initialValues || {
       name: "",
       description: "",
       status: AccountStatus.active,
       billing_status: AccountBillingStatus.open,
+      extensions: ext.defaults,
     },
+  });
+
+  const extensions = useEntityExtensions({
+    entityType: ExtensionEntityType.account,
+    schemaType: "write",
+    form: methods,
+    existingData: initialValues?.extensions,
   });
 
   // Reset form when initialValues changes
@@ -88,9 +126,10 @@ export function AccountSheet({
         description: "",
         status: AccountStatus.active,
         billing_status: AccountBillingStatus.open,
+        extensions: ext.defaults,
       },
     );
-  }, [initialValues, methods]);
+  }, [initialValues, methods, ext.defaults]);
 
   const { mutate: createAccount, isPending: isCreating } = useMutation({
     mutationFn: mutate(accountApi.createAccount, {
@@ -102,7 +141,7 @@ export function AccountSheet({
     },
   });
 
-  const updateMutation = useMutation<AccountRead, unknown, AccountFormValues>({
+  const updateMutation = useMutation<AccountRead, unknown, FormValues>({
     mutationFn: (data) =>
       query(accountApi.updateAccount, {
         pathParams: { facilityId, accountId: data.id! },
@@ -116,6 +155,9 @@ export function AccountSheet({
             start: new Date().toISOString(),
           },
           patient: data.patient?.id || patientId!,
+          extensions: extensions.prepareForSubmit(
+            data.extensions as NamespacedExtensionData,
+          ),
         },
       })({ signal: new AbortController().signal }),
     onSuccess: () => {
@@ -127,18 +169,24 @@ export function AccountSheet({
     },
   });
 
-  const onSubmit = (values: AccountFormValues) => {
+  const onSubmit = (values: FormValues) => {
+    const { extensions: formExtensions, ...restData } = values;
+    const cleanedExtensions = extensions.prepareForSubmit(
+      formExtensions as NamespacedExtensionData,
+    );
+
     if (isEdit && initialValues?.id) {
       updateMutation.mutate({ ...values, id: initialValues.id });
     } else {
       createAccount({
-        ...values,
+        ...restData,
         patient: patientId!,
         billing_status: values.billing_status,
         service_period: {
           start: new Date().toISOString(),
         },
         description: values.description,
+        extensions: cleanedExtensions,
       });
     }
   };
@@ -245,13 +293,14 @@ export function AccountSheet({
                 )}
               />
 
+              {extensions.fields}
+
               <SheetFooter>
                 <Button
                   type="submit"
                   disabled={
                     isCreating ||
                     updateMutation.isPending ||
-                    !methods.formState.isValid ||
                     !methods.formState.isDirty
                   }
                 >

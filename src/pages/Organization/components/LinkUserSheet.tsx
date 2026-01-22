@@ -34,6 +34,7 @@ interface Props {
   open: boolean;
   setOpen: (open: boolean) => void;
   preSelectedUsername?: string;
+  isServiceAccount?: boolean;
 }
 
 export default function LinkUserSheet({
@@ -41,6 +42,7 @@ export default function LinkUserSheet({
   open,
   setOpen,
   preSelectedUsername,
+  isServiceAccount = false,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -100,23 +102,38 @@ export default function LinkUserSheet({
       <SheetTrigger asChild>
         <Button variant="primary_gradient">
           <CareIcon icon="l-plus" className="mr-2 size-4" />
-          {t("link_user")}
+          {isServiceAccount ? t("link_service_account") : t("link_user")}
         </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>{t("link_user_to_organization")}</SheetTitle>
+          <SheetTitle>
+            {isServiceAccount
+              ? t("link_service_account_to_organization")
+              : t("link_user_to_organization")}
+          </SheetTitle>
           <SheetDescription>
-            {t("link_user_to_organization_description")}
+            {isServiceAccount
+              ? t("link_service_account_to_organization_description")
+              : t("link_user_to_organization_description")}
           </SheetDescription>
         </SheetHeader>
         <div className="space-y-6 py-4">
           <UserSelector
             selected={selectedUser}
             onChange={handleUserChange}
-            placeholder={t("search_for_a_user")}
-            noOptionsMessage={t("no_users_found")}
+            placeholder={
+              isServiceAccount
+                ? t("search_for_a_service_account")
+                : t("search_for_a_user")
+            }
+            noOptionsMessage={
+              isServiceAccount
+                ? t("no_service_accounts_found")
+                : t("no_users_found")
+            }
             popoverClassName="w-full"
+            isServiceAccount={isServiceAccount}
           />
           {selectedUser && (
             <div className="space-y-4">
@@ -145,7 +162,9 @@ export default function LinkUserSheet({
                   </div>
                   <div>
                     <span className="text-sm text-gray-500">
-                      {t("user_type")}
+                      {isServiceAccount
+                        ? t("service_account_type")
+                        : t("user_type")}
                     </span>
                     <p className="text-sm font-medium">
                       {selectedUser.user_type}

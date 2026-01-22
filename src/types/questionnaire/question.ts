@@ -123,6 +123,13 @@ export interface ObservationType {
   display: string;
 }
 
+export interface TemplateConfig {
+  name: string;
+  content: string;
+  structured_content?: Record<string, string>;
+  meta?: Record<string, string>;
+}
+
 export interface Question {
   id: string;
   link_id: string;
@@ -155,6 +162,7 @@ export interface Question {
   unit?: Code;
   questions?: Question[];
   formula?: string;
+  templates?: TemplateConfig[];
 }
 
 export const findQuestionById = (

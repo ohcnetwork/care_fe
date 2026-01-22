@@ -1,12 +1,20 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { Plus, X } from "lucide-react";
+import { ChevronDown, Plus, X } from "lucide-react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,12 +39,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import UserSelector from "@/components/Common/UserSelector";
+
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   conditionSchema,
   getConditionDiscriminatorValue,
 } from "@/types/base/condition/condition";
 import {
+  isPercentageBased,
   MonetaryComponent,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
@@ -48,8 +60,11 @@ import {
   PriceComponentType,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { UserReadMinimal } from "@/types/user/user";
+import { isPositive, round, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
+import { FieldErrors } from "react-hook-form";
 
 interface EditInvoiceTableProps {
   facilityId: string;
@@ -69,29 +84,14 @@ const priceComponentSchema = z.object({
       display: z.string(),
     })
     .optional(),
-  factor: z.number().gt(0).max(100).optional(),
-  amount: z
-    .string()
-    .refine((val) => !val || Number(val) > 0, {
-      message: "Amount must be greater than 0",
-    })
-    .optional(),
+  factor: zodDecimal({ min: 0, max: 100 }).optional().nullable(),
+  amount: zodDecimal({ min: 0 }).optional().nullable(),
   conditions: z.array(conditionSchema).optional(),
 });
 
 const chargeItemBaseSchema = z.object({
-  baseAmount: z
-    .string()
-    .refine(
-      (val) => !isNaN(parseFloat(val)) && parseFloat(val) >= 0,
-      "Base amount must be a positive number",
-    ),
-  quantity: z
-    .string()
-    .refine(
-      (val) => !isNaN(parseFloat(val)) && parseFloat(val) >= 0,
-      "Quantity must be a positive number",
-    ),
+  baseAmount: zodDecimal({ min: 0 }),
+  quantity: zodDecimal({ min: 1 }),
   taxComponents: z.array(priceComponentSchema).optional(),
   discounts: z.array(priceComponentSchema).optional(),
 });
@@ -114,6 +114,34 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+// Helper to extract all error messages from a row's errors object
+function getRowErrors(
+  rowErrors: FieldErrors<FormValues["items"][number]> | undefined,
+): string[] {
+  if (!rowErrors) return [];
+
+  const errors: string[] = [];
+
+  const extractErrors = (obj: unknown, prefix = ""): void => {
+    if (!obj || typeof obj !== "object") return;
+
+    const record = obj as Record<string, unknown>;
+
+    if ("message" in record && typeof record.message === "string") {
+      errors.push(prefix ? `${prefix}: ${record.message}` : record.message);
+      return;
+    }
+
+    for (const [key, value] of Object.entries(record)) {
+      if (key === "ref" || key === "type") continue;
+      extractErrors(value, prefix ? `${prefix} › ${key}` : key);
+    }
+  };
+
+  extractErrors(rowErrors);
+  return errors;
+}
+
 export function EditInvoiceTable({
   facilityId,
   chargeItems,
@@ -122,7 +150,44 @@ export function EditInvoiceTable({
   enableShortcut,
 }: EditInvoiceTableProps) {
   const { t } = useTranslation();
+  const { facility } = useCurrentFacility();
   useShortcutSubContext("facility:billing:invoice:show");
+
+  const [performers, setPerformers] = useState<
+    Record<string, UserReadMinimal | undefined>
+  >(() => {
+    const initial: Record<string, UserReadMinimal | undefined> = {};
+    chargeItems.forEach((item) => {
+      initial[item.id] = item.performer_actor;
+    });
+    return initial;
+  });
+
+  const handlePerformerChange = (
+    chargeItemId: string,
+    user: UserReadMinimal | undefined,
+  ) => {
+    setPerformers((prev) => ({
+      ...prev,
+      [chargeItemId]: user,
+    }));
+  };
+
+  const handleApplyPerformerToAll = (user: UserReadMinimal | undefined) => {
+    const newPerformers: Record<string, UserReadMinimal | undefined> = {};
+    chargeItems.forEach((item) => {
+      newPerformers[item.id] = user;
+    });
+    setPerformers(newPerformers);
+  };
+
+  const handleClearAllPerformers = () => {
+    const newPerformers: Record<string, UserReadMinimal | undefined> = {};
+    chargeItems.forEach((item) => {
+      newPerformers[item.id] = undefined;
+    });
+    setPerformers(newPerformers);
+  };
 
   const getDiscountComponentKey = (
     component: MonetaryComponent | undefined,
@@ -148,14 +213,12 @@ export function EditInvoiceTable({
         const taxComponents = getComponentsFromChargeItem(
           item.charge_item_definition,
           MonetaryComponentType.tax,
-        ).map((component) => ({
-          ...component,
-          amount: component.amount ? String(component.amount) : undefined,
-        }));
+        );
 
         const discounts = discountComponents.map((component) => ({
           ...component,
-          amount: component.amount ? String(component.amount) : undefined,
+          factor: component.factor ? round(component.factor) : component.factor,
+          amount: component.amount ? round(component.amount) : component.amount,
           conditions: component.conditions?.map((condition) => ({
             ...condition,
             _conditionType: getConditionDiscriminatorValue(
@@ -170,8 +233,8 @@ export function EditInvoiceTable({
           title: item.title,
           status: item.status as ChargeItemStatus,
           description: item.description || "",
-          baseAmount: String(baseComponent?.amount || "0"),
-          quantity: String(item.quantity),
+          baseAmount: round(baseComponent?.amount || "0"),
+          quantity: round(item.quantity),
           taxComponents,
           discounts: discounts,
         };
@@ -208,13 +271,14 @@ export function EditInvoiceTable({
         },
         ...(item.taxComponents || []),
         ...(item.discounts || []).filter((discount) => {
-          const hasAmount = discount.amount && parseFloat(discount.amount) > 0;
+          const hasAmount = discount.amount && isPositive(discount.amount);
           const hasFactor =
-            discount.factor !== undefined && discount.factor > 0;
+            discount.factor != null && isPositive(discount.factor);
           return hasAmount || hasFactor;
         }),
       ],
       description: item.description || undefined,
+      performer_actor: performers[item.id]?.id,
     }));
 
     updateChargeItems({ datapoints: updates });
@@ -233,8 +297,8 @@ export function EditInvoiceTable({
         monetary_component_type: MonetaryComponentType.discount,
         code: undefined,
         conditions: [],
-        amount: undefined,
-        factor: undefined,
+        amount: null,
+        factor: null,
       },
     ]);
   };
@@ -248,19 +312,18 @@ export function EditInvoiceTable({
     );
   };
 
+  // Get discounts from facility settings
+  const globalDiscounts = [
+    ...(facility?.discount_monetary_components || []),
+    ...(facility?.instance_discount_monetary_components || []),
+  ].filter((d) => d != null);
+
   const handleDiscountComponentChange = (
     itemIndex: number,
     discountIndex: number,
     componentKey: string,
   ) => {
-    const chargeItem = chargeItems[itemIndex];
-    if (!chargeItem) return;
-
-    const availableDiscounts = getComponentsFromChargeItem(
-      chargeItem.charge_item_definition,
-      MonetaryComponentType.discount,
-    );
-    const selectedComponent = availableDiscounts.find(
+    const selectedComponent = globalDiscounts.find(
       (c) => getDiscountComponentKey(c) === componentKey,
     );
 
@@ -286,10 +349,13 @@ export function EditInvoiceTable({
   ) => {
     if (checked) {
       // Switch to percentage
-      form.setValue(`items.${itemIndex}.discounts.${discountIndex}.factor`, 0);
+      form.setValue(
+        `items.${itemIndex}.discounts.${discountIndex}.factor`,
+        "0",
+      );
       form.setValue(
         `items.${itemIndex}.discounts.${discountIndex}.amount`,
-        undefined,
+        null,
       );
     } else {
       // Switch to amount
@@ -299,341 +365,482 @@ export function EditInvoiceTable({
       );
       form.setValue(
         `items.${itemIndex}.discounts.${discountIndex}.factor`,
-        undefined,
+        null,
       );
     }
+  };
+
+  const handleApplyGlobalDiscount = (discountKey: string) => {
+    const items = form.getValues("items");
+
+    // Find the discount definition from the global discounts
+    const discountDefinition = globalDiscounts.find(
+      (d) => getDiscountComponentKey(d) === discountKey,
+    );
+
+    if (!discountDefinition) return;
+
+    items.forEach((item, itemIndex) => {
+      const currentDiscounts = item.discounts || [];
+      // Check if this discount is already applied
+      const existingIndex = currentDiscounts.findIndex(
+        (d) => getDiscountComponentKey(d) === discountKey,
+      );
+
+      if (existingIndex === -1) {
+        // Add the discount if not already present
+        const newDiscount = {
+          ...discountDefinition,
+          conditions:
+            discountDefinition.conditions?.map((condition) => ({
+              ...condition,
+              _conditionType: getConditionDiscriminatorValue(
+                condition.metric,
+                condition.operation,
+              ),
+            })) || [],
+        };
+        form.setValue(`items.${itemIndex}.discounts`, [
+          ...currentDiscounts,
+          newDiscount,
+        ]);
+      }
+    });
+  };
+
+  const handleClearAllDiscounts = () => {
+    const items = form.getValues("items");
+    items.forEach((_, itemIndex) => {
+      form.setValue(`items.${itemIndex}.discounts`, []);
+    });
   };
 
   if (chargeItems.length === 0) {
     return <div>{t("no_charge_items_found")}</div>;
   }
 
-  const onError = () => {
-    toast.error(t("invalid_value"));
-  };
+  const filteredDiscounts = globalDiscounts.filter(getDiscountComponentKey);
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit, onError)}
-        className="space-y-4"
-      >
-        <div className="rounded-t-sm border border-gray-300 overflow-x-auto">
-          <Table>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div>
+          <Table className="border">
             <TableHeader>
-              <TableRow className="border-b border-gray-200">
-                <TableHead className="border-r border-gray-200 font-semibold text-center sticky left-0 bg-white w-12">
-                  #
+              <TableRow className="divide-x font-semibold">
+                <TableHead className="w-12">#</TableHead>
+                <TableHead>{t("item")}</TableHead>
+                <TableHead>
+                  <div className="flex items-center justify-center gap-2">
+                    {t("performer")}
+                    {chargeItems.length > 1 && (
+                      <UserSelector
+                        selected={undefined}
+                        onChange={handleApplyPerformerToAll}
+                        facilityId={facilityId}
+                        trigger={
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-xs"
+                          >
+                            {t("apply_to_all")}
+                            <ChevronDown className="h-3 w-3 ml-1" />
+                          </Button>
+                        }
+                        contentAlign="center"
+                        contentClassName="w-80"
+                        onClear={handleClearAllPerformers}
+                      />
+                    )}
+                  </div>
                 </TableHead>
-                <TableHead className="border-r border-gray-200 font-semibold text-center sticky left-8 bg-white min-w-[200px]">
-                  {t("item")}
-                </TableHead>
-                <TableHead className="border-r border-gray-200 font-semibold text-center min-w-[150px]">
+                <TableHead className="min-w-[150px]">
                   {t("unit_price")} ({getCurrencySymbol()})
                 </TableHead>
-                <TableHead className="border-r border-gray-200 font-semibold text-center min-w-[100px]">
-                  {t("quantity")}
-                </TableHead>
-                <TableHead className="border-r border-gray-200 font-semibold text-center min-w-[400px]">
-                  {t("discounts")}
+                <TableHead className="min-w-[100px]">{t("quantity")}</TableHead>
+                <TableHead>
+                  <div className="flex items-center justify-center gap-2">
+                    {t("discounts")}
+                    {filteredDiscounts.length > 0 && chargeItems.length > 1 && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-xs"
+                          >
+                            {t("apply_to_all")}
+                            <ChevronDown className="h-3 w-3 ml-1" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {filteredDiscounts.map((discount) => {
+                            const key = getDiscountComponentKey(discount);
+                            return (
+                              <DropdownMenuItem
+                                key={key}
+                                onClick={() =>
+                                  key && handleApplyGlobalDiscount(key)
+                                }
+                              >
+                                {discount.code?.display} @{" "}
+                                <MonetaryDisplay {...discount} />
+                              </DropdownMenuItem>
+                            );
+                          })}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={handleClearAllDiscounts}
+                            className="text-destructive"
+                          >
+                            {t("clear_all")}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </div>
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {form.watch("items").map((item, index) => (
-                <TableRow key={item.id} className="border-b border-gray-200">
-                  <TableCell className="border-r border-gray-200 font-medium text-gray-950 text-sm text-center sticky left-0 bg-white w-12">
-                    {index + 1}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-200 font-medium text-gray-950 text-sm sticky left-8 bg-white min-w-[200px]">
-                    {item.title}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-200 font-medium text-gray-950 text-sm min-w-[150px]">
-                    <FormField
-                      control={form.control}
-                      name={`items.${index}.baseAmount`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <MonetaryAmountInput
-                              {...field}
-                              value={field.value ?? "0"}
-                              onChange={(e) => {
-                                field.onChange(e.target.value);
-                                handleBaseAmountChange(index, e.target.value);
-                              }}
-                              placeholder="0.00"
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell className="border-r border-gray-200 font-medium text-gray-950 text-sm min-w-[100px]">
-                    <FormField
-                      control={form.control}
-                      name={`items.${index}.quantity`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              min="0"
-                              step="1"
-                              className="text-right"
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell className="border-r border-gray-200 font-medium text-gray-950 text-sm min-w-[400px]">
-                    {(() => {
-                      const chargeItem = chargeItems[index];
-                      const availableDiscounts = getComponentsFromChargeItem(
-                        chargeItem.charge_item_definition,
-                        MonetaryComponentType.discount,
-                      );
+              {form.watch("items").map((item, index) => {
+                const rowErrors = getRowErrors(
+                  form.formState.errors.items?.[index],
+                );
 
-                      if (availableDiscounts.length === 0) {
-                        return (
-                          <div className="text-sm text-gray-500 py-2">
-                            {t("no_discounts")}
-                          </div>
-                        );
-                      }
+                return (
+                  <React.Fragment key={item.id}>
+                    <TableRow className="divide-x font-medium text-gray-950">
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{item.title}</TableCell>
+                      <TableCell>
+                        <UserSelector
+                          selected={performers[item.id]}
+                          onChange={(user) =>
+                            handlePerformerChange(item.id, user)
+                          }
+                          facilityId={facilityId}
+                          placeholder={t("select_performer")}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={form.control}
+                          name={`items.${index}.baseAmount`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <MonetaryAmountInput
+                                  {...field}
+                                  value={field.value ?? "0"}
+                                  onChange={(e) => {
+                                    field.onChange(e.target.value);
+                                    handleBaseAmountChange(
+                                      index,
+                                      e.target.value,
+                                    );
+                                  }}
+                                  placeholder="0.00"
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={form.control}
+                          name={`items.${index}.quantity`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  min="1"
+                                  step="1"
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell className="border-r border-gray-200 font-medium text-gray-950 text-sm ">
+                        {(() => {
+                          const hasAppliedDiscounts =
+                            item.discounts && item.discounts.length > 0;
 
-                      const hasEmptyRow =
-                        item.discounts?.some((d) => !d.code) || false;
+                          // Show "no discounts" only if no global discounts available AND no discounts applied
+                          if (
+                            globalDiscounts.length === 0 &&
+                            !hasAppliedDiscounts
+                          ) {
+                            return (
+                              <div className="text-sm text-gray-500 py-2">
+                                {t("no_discounts")}
+                              </div>
+                            );
+                          }
 
-                      const hasMoreDiscountsToAdd =
-                        (item.discounts?.length || 0) <
-                        availableDiscounts.length;
+                          const hasEmptyRow =
+                            item.discounts?.some((d) => !d.code) || false;
 
-                      return (
-                        <div className="space-y-2">
-                          {item.discounts &&
-                            item.discounts.length > 0 &&
-                            item.discounts.map((discount, discountIndex) => (
-                              <div
-                                key={discountIndex}
-                                className="flex items-center gap-2"
-                              >
-                                <FormField
-                                  key={`${discountIndex}-code`}
-                                  control={form.control}
-                                  name={`items.${index}.discounts.${discountIndex}.code`}
-                                  render={() => {
-                                    const chargeItem = chargeItems[index];
-                                    const availableDiscounts =
-                                      getComponentsFromChargeItem(
-                                        chargeItem.charge_item_definition,
-                                        MonetaryComponentType.discount,
-                                      );
+                          const hasMoreDiscountsToAdd =
+                            (item.discounts?.length || 0) <
+                            globalDiscounts.length;
 
-                                    const selectedDiscountKeys =
-                                      item.discounts
-                                        ?.filter(
-                                          (_, idx) => idx !== discountIndex,
-                                        )
-                                        .map((d) => getDiscountComponentKey(d))
-                                        .filter((key) => key) || [];
+                          return (
+                            <div className="space-y-2">
+                              {item.discounts &&
+                                item.discounts.length > 0 &&
+                                item.discounts.map(
+                                  (discount, discountIndex) => (
+                                    <div
+                                      key={discountIndex}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <FormField
+                                        key={`${discountIndex}-code`}
+                                        control={form.control}
+                                        name={`items.${index}.discounts.${discountIndex}.code`}
+                                        render={() => {
+                                          const selectedDiscountKeys =
+                                            item.discounts
+                                              ?.filter(
+                                                (_, idx) =>
+                                                  idx !== discountIndex,
+                                              )
+                                              .map((d) =>
+                                                getDiscountComponentKey(d),
+                                              )
+                                              .filter((key) => key) || [];
 
-                                    const filteredDiscounts =
-                                      availableDiscounts.filter((component) => {
-                                        const key =
-                                          getDiscountComponentKey(component);
-                                        return (
-                                          key &&
-                                          !selectedDiscountKeys.includes(key)
-                                        );
-                                      });
-
-                                    const currentKey =
-                                      getDiscountComponentKey(discount);
-                                    const currentDiscount =
-                                      availableDiscounts.find(
-                                        (c) =>
-                                          getDiscountComponentKey(c) ===
-                                          currentKey,
-                                      );
-
-                                    return (
-                                      <FormItem className="flex-1">
-                                        <FormControl>
-                                          <Select
-                                            value={currentKey || ""}
-                                            onValueChange={(value) => {
-                                              handleDiscountComponentChange(
-                                                index,
-                                                discountIndex,
-                                                value,
-                                              );
-                                            }}
-                                          >
-                                            <SelectTrigger>
-                                              <SelectValue
-                                                placeholder={t(
-                                                  "select_discount",
-                                                )}
-                                              >
-                                                {currentDiscount && (
-                                                  <>
-                                                    {
-                                                      currentDiscount.code
-                                                        ?.display
-                                                    }{" "}
-                                                    @
-                                                    <MonetaryDisplay
-                                                      {...currentDiscount}
-                                                    />
-                                                  </>
-                                                )}
-                                              </SelectValue>
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                              {filteredDiscounts.map(
-                                                (component) => {
-                                                  const key =
-                                                    getDiscountComponentKey(
-                                                      component,
-                                                    );
-                                                  return (
-                                                    <SelectItem
-                                                      key={key}
-                                                      value={key || ""}
-                                                    >
-                                                      {component.code?.display}{" "}
-                                                      @
-                                                      <MonetaryDisplay
-                                                        {...component}
-                                                      />
-                                                    </SelectItem>
+                                          const filteredDiscounts =
+                                            globalDiscounts.filter(
+                                              (component) => {
+                                                const key =
+                                                  getDiscountComponentKey(
+                                                    component,
                                                   );
-                                                },
-                                              )}
-                                            </SelectContent>
-                                          </Select>
-                                        </FormControl>
-                                      </FormItem>
-                                    );
-                                  }}
-                                />
-                                <FormField
-                                  key={`${discountIndex}-amount`}
-                                  control={form.control}
-                                  name={`items.${index}.discounts.${discountIndex}`}
-                                  render={() => {
-                                    const isDisabled = !discount?.code;
-                                    const isPercentage =
-                                      discount?.factor !== undefined;
-                                    const value = isPercentage
-                                      ? String(discount?.factor ?? "0")
-                                      : String(discount?.amount ?? "0");
+                                                return (
+                                                  key &&
+                                                  !selectedDiscountKeys.includes(
+                                                    key,
+                                                  )
+                                                );
+                                              },
+                                            );
 
-                                    return (
-                                      <FormItem className="flex-1">
-                                        <FormControl>
-                                          <MonetaryAmountInput
-                                            hideCurrency={true}
-                                            value={value}
-                                            onChange={(e) => {
-                                              const newValue = e.target.value;
-                                              if (isPercentage) {
-                                                form.setValue(
-                                                  `items.${index}.discounts.${discountIndex}.factor`,
-                                                  parseFloat(newValue) || 0,
-                                                );
-                                              } else {
-                                                form.setValue(
-                                                  `items.${index}.discounts.${discountIndex}.amount`,
-                                                  newValue,
-                                                );
-                                              }
-                                            }}
-                                            placeholder="0.00"
-                                            disabled={isDisabled}
-                                          />
-                                        </FormControl>
-                                      </FormItem>
-                                    );
-                                  }}
-                                />
-                                <FormField
-                                  key={`${discountIndex}-type`}
-                                  control={form.control}
-                                  name={`items.${index}.discounts.${discountIndex}`}
-                                  render={() => {
-                                    const isDisabled = !discount?.code;
-                                    const isPercentage =
-                                      discount?.factor !== undefined;
+                                          const currentKey =
+                                            getDiscountComponentKey(discount);
+                                          const currentDiscount =
+                                            globalDiscounts.find(
+                                              (c) =>
+                                                getDiscountComponentKey(c) ===
+                                                currentKey,
+                                            );
 
-                                    return (
-                                      <FormItem>
-                                        <div className="flex items-center gap-2">
-                                          <span className="text-sm text-gray-500">
-                                            {getCurrencySymbol()}
-                                          </span>
-                                          <FormControl>
-                                            <Switch
-                                              checked={isPercentage}
-                                              onCheckedChange={(checked) => {
-                                                handleDiscountTypeToggle(
-                                                  index,
-                                                  discountIndex,
-                                                  checked,
-                                                );
-                                              }}
-                                              disabled={isDisabled}
-                                              className="data-[state=unchecked]:bg-gray-900"
-                                            />
-                                          </FormControl>
-                                          <span className="text-sm text-gray-500">
-                                            %
-                                          </span>
-                                        </div>
-                                      </FormItem>
-                                    );
-                                  }}
-                                />
+                                          return (
+                                            <FormItem className="flex-1">
+                                              <FormControl>
+                                                <Select
+                                                  value={currentKey || ""}
+                                                  onValueChange={(value) => {
+                                                    handleDiscountComponentChange(
+                                                      index,
+                                                      discountIndex,
+                                                      value,
+                                                    );
+                                                  }}
+                                                >
+                                                  <SelectTrigger>
+                                                    <SelectValue
+                                                      placeholder={t(
+                                                        "select_discount",
+                                                      )}
+                                                    >
+                                                      {currentDiscount && (
+                                                        <>
+                                                          {
+                                                            currentDiscount.code
+                                                              ?.display
+                                                          }{" "}
+                                                          @
+                                                          <MonetaryDisplay
+                                                            {...currentDiscount}
+                                                          />
+                                                        </>
+                                                      )}
+                                                    </SelectValue>
+                                                  </SelectTrigger>
+                                                  <SelectContent>
+                                                    {filteredDiscounts.map(
+                                                      (component) => {
+                                                        const key =
+                                                          getDiscountComponentKey(
+                                                            component,
+                                                          );
+                                                        return (
+                                                          <SelectItem
+                                                            key={key}
+                                                            value={key || ""}
+                                                          >
+                                                            {
+                                                              component.code
+                                                                ?.display
+                                                            }{" "}
+                                                            @
+                                                            <MonetaryDisplay
+                                                              {...component}
+                                                            />
+                                                          </SelectItem>
+                                                        );
+                                                      },
+                                                    )}
+                                                  </SelectContent>
+                                                </Select>
+                                              </FormControl>
+                                            </FormItem>
+                                          );
+                                        }}
+                                      />
+                                      <FormField
+                                        key={`${discountIndex}-amount`}
+                                        control={form.control}
+                                        name={`items.${index}.discounts.${discountIndex}`}
+                                        render={() => {
+                                          const isDisabled = !discount?.code;
+                                          const isPercentage =
+                                            discount &&
+                                            isPercentageBased(discount);
+                                          const value = isPercentage
+                                            ? (discount?.factor ?? "0")
+                                            : (discount?.amount ?? "0");
+
+                                          return (
+                                            <FormItem className="flex-1 min-w-20">
+                                              <FormControl>
+                                                <MonetaryAmountInput
+                                                  hideCurrency={true}
+                                                  value={value}
+                                                  onChange={(e) => {
+                                                    const newValue =
+                                                      e.target.value;
+                                                    if (isPercentage) {
+                                                      form.setValue(
+                                                        `items.${index}.discounts.${discountIndex}.factor`,
+                                                        newValue,
+                                                      );
+                                                    } else {
+                                                      form.setValue(
+                                                        `items.${index}.discounts.${discountIndex}.amount`,
+                                                        newValue,
+                                                      );
+                                                    }
+                                                  }}
+                                                  placeholder="0.00"
+                                                  disabled={isDisabled}
+                                                />
+                                              </FormControl>
+                                            </FormItem>
+                                          );
+                                        }}
+                                      />
+                                      <FormField
+                                        key={`${discountIndex}-type`}
+                                        control={form.control}
+                                        name={`items.${index}.discounts.${discountIndex}`}
+                                        render={() => {
+                                          const isDisabled = !discount?.code;
+                                          const isPercentage =
+                                            discount &&
+                                            isPercentageBased(discount);
+
+                                          return (
+                                            <FormItem>
+                                              <div className="flex items-center gap-2">
+                                                <span className="text-sm text-gray-500">
+                                                  {getCurrencySymbol()}
+                                                </span>
+                                                <FormControl>
+                                                  <Switch
+                                                    checked={isPercentage}
+                                                    onCheckedChange={(
+                                                      checked,
+                                                    ) => {
+                                                      handleDiscountTypeToggle(
+                                                        index,
+                                                        discountIndex,
+                                                        checked,
+                                                      );
+                                                    }}
+                                                    disabled={isDisabled}
+                                                    className="data-[state=unchecked]:bg-gray-900"
+                                                  />
+                                                </FormControl>
+                                                <span className="text-sm text-gray-500">
+                                                  %
+                                                </span>
+                                              </div>
+                                            </FormItem>
+                                          );
+                                        }}
+                                      />
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 shrink-0"
+                                        onClick={() =>
+                                          handleRemoveDiscount(
+                                            index,
+                                            discountIndex,
+                                          )
+                                        }
+                                      >
+                                        <X className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  ),
+                                )}
+                              {hasMoreDiscountsToAdd && (
                                 <Button
                                   type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 shrink-0"
-                                  onClick={() =>
-                                    handleRemoveDiscount(index, discountIndex)
-                                  }
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full"
+                                  onClick={() => handleAddDiscount(index)}
+                                  disabled={hasEmptyRow}
                                 >
-                                  <X className="h-4 w-4" />
+                                  <Plus className="h-4 w-4 mr-2" />
+                                  {t("add_discount")}
                                 </Button>
-                              </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </TableCell>
+                    </TableRow>
+                    {rowErrors.length > 0 && (
+                      <TableRow className="bg-red-50 hover:bg-red-50">
+                        <TableCell colSpan={6} className="py-2">
+                          <ul className="list-disc list-inside text-sm text-red-600 space-y-0.5">
+                            {rowErrors.map((error, i) => (
+                              <li key={i}>{error}</li>
                             ))}
-                          {hasMoreDiscountsToAdd && (
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              className="w-full"
-                              onClick={() => handleAddDiscount(index)}
-                              disabled={hasEmptyRow}
-                            >
-                              <Plus className="h-4 w-4 mr-2" />
-                              {t("add_discount")}
-                            </Button>
-                          )}
-                        </div>
-                      );
-                    })()}
-                  </TableCell>
-                </TableRow>
-              ))}
+                          </ul>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
 
-        <div className="flex justify-end gap-2">
+        <div className="sticky bottom-0 bg-white p-4 flex justify-end gap-2 border-t">
           <Button type="button" variant="outline" onClick={onClose}>
             {t("cancel")}
             {enableShortcut && <ShortcutBadge actionId="cancel-action" />}

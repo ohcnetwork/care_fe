@@ -28,7 +28,7 @@ export const SUPPLY_REQUEST_STATUS_COLORS = {
 export interface SupplyRequestBase {
   id: string;
   status: SupplyRequestStatus;
-  quantity: number;
+  quantity: string;
 }
 
 export interface SupplyRequestCreate extends Omit<SupplyRequestBase, "id"> {

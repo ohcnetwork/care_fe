@@ -10,6 +10,7 @@ import {
   Box,
   Calendar,
   ChartLine,
+  Database,
   HeartPulse,
   Stethoscope,
   Users,
@@ -109,6 +110,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     Calendar,
     Users,
     Box,
+    Database,
   };
 
   const context: DashboardLinkContext = {

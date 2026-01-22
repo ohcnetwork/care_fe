@@ -1,7 +1,11 @@
 import { MinusCircledIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
+import {
+  ChevronsDownUp,
+  ChevronsUpDown,
+  SlidersHorizontal,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -46,8 +50,6 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import useAuthUser from "@/hooks/useAuthUser";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
-import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
 import { Avatar } from "@/components/Common/Avatar";
 import { formatDosage } from "@/components/Medicine/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
@@ -79,14 +81,13 @@ import {
   validateFields,
 } from "@/types/questionnaire/validation";
 import { UserReadMinimal } from "@/types/user/user";
+import { isZero, round } from "@/Utils/decimal";
+import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 
 function formatDoseRange(range?: DoseRange): string {
   if (!range?.high?.value) return "";
-
-  const formatValue = (value: number) =>
-    value.toString().includes(".") ? value.toFixed(2) : value.toString();
-
-  return `${formatValue(range.low?.value)} → ${formatValue(range.high?.value)} ${range.high?.unit?.display}`;
+  return `${round(range.low?.value)} → ${round(range.high?.value)} ${range.high?.unit?.display}`;
 }
 
 interface MedicationRequestQuestionProps {
@@ -246,6 +247,7 @@ export function MedicationRequestQuestion({
   const [medicationToDelete, setMedicationToDelete] = useState<number | null>(
     null,
   );
+  const [showAdvancedFields, setShowAdvancedFields] = useState(false);
   const desktopLayout = useBreakpoints({ lg: true, default: false });
 
   const [newMedicationInSheet, setNewMedicationInSheet] =
@@ -322,7 +324,7 @@ export function MedicationRequestQuestion({
           ...request,
           requested_product: requested_product?.id,
           requested_product_internal: requested_product,
-          requester: request.requester || currentUser,
+          requester: currentUser,
           medication: requested_product?.id ? null : request.medication,
         } as MedicationRequestCreate;
       } else {
@@ -416,6 +418,7 @@ export function MedicationRequestQuestion({
           questionId={questionnaireResponse.question_id}
           errors={errors}
           facilityId={facilityId}
+          showAdvancedFields={true}
         />
       )}
     </div>
@@ -476,17 +479,17 @@ export function MedicationRequestQuestion({
                 },
               },
               {
-                key: "created_by",
+                key: "requester",
                 label: t("prescribed_by"),
-                render: (created_by) => (
+                render: (requester) => (
                   <div className="flex items-center gap-2">
                     <Avatar
-                      imageUrl={created_by?.profile_picture_url}
-                      name={formatName(created_by, true)}
+                      imageUrl={requester?.profile_picture_url}
+                      name={formatName(requester, true)}
                       className="size-6 rounded-full"
                     />
                     <span className="text-sm truncate">
-                      {formatName(created_by)}
+                      {formatName(requester)}
                     </span>
                   </div>
                 ),
@@ -593,14 +596,22 @@ export function MedicationRequestQuestion({
           <div className="min-w-fit">
             <div
               className={cn(
-                "max-w-[2624px] relative lg:border border-gray-200 rounded-md",
+                "relative lg:border border-gray-200 rounded-md",
+                showAdvancedFields ? "max-w-[2678px]" : "max-w-[1108px]",
                 {
                   "bg-gray-50/50": !desktopLayout,
                 },
               )}
             >
               {/* Header - Only show on desktop */}
-              <div className="hidden lg:grid grid-cols-[280px_220px_180px_160px_300px_180px_250px_180px_160px_220px_280px_180px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
+              <div
+                className={cn(
+                  "hidden lg:grid bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500",
+                  showAdvancedFields
+                    ? "grid-cols-[280px_220px_180px_160px_40px_300px_180px_250px_180px_160px_220px_280px_180px_48px]"
+                    : "grid-cols-[280px_220px_180px_160px_40px_180px_48px]",
+                )}
+              >
                 <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("medicine")}
                 </div>
@@ -615,27 +626,54 @@ export function MedicationRequestQuestion({
                 <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("duration")}
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
-                  {t("instructions")}
+                {/* Expand/Collapse bar for advanced fields */}
+                <div
+                  className={cn(
+                    "flex items-center justify-center border-r border-gray-200 cursor-pointer transition-colors",
+                    showAdvancedFields
+                      ? "bg-primary-50 hover:bg-primary-100"
+                      : "bg-gray-100 hover:bg-gray-200",
+                  )}
+                  onClick={() => setShowAdvancedFields(!showAdvancedFields)}
+                  title={
+                    showAdvancedFields
+                      ? t("hide_advanced_fields")
+                      : t("show_advanced_fields")
+                  }
+                >
+                  {showAdvancedFields ? (
+                    <ChevronsDownUp className="h-4 w-4 text-primary-600 rotate-90" />
+                  ) : (
+                    <ChevronsUpDown className="h-4 w-4 text-gray-500 rotate-90" />
+                  )}
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
-                  {t("route")}
-                </div>
-                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
-                  {t("site")}
-                </div>
-                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
-                  {t("method")}
-                </div>
-                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
-                  {t("intent")}
-                </div>
-                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
-                  {t("authored_on")}
-                </div>
-                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
-                  {t("requester")}
-                </div>
+                {/* Advanced fields - inserted between bar and notes when expanded */}
+                {showAdvancedFields && (
+                  <>
+                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                      {t("instructions")}
+                    </div>
+                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                      {t("route")}
+                    </div>
+                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                      {t("site")}
+                    </div>
+                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                      {t("method")}
+                    </div>
+                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                      {t("intent")}
+                    </div>
+                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                      {t("authored_on")}
+                    </div>
+                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                      {t("requester")}
+                    </div>
+                  </>
+                )}
+                {/* Notes - Always visible, at the end before remove button */}
                 <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("note")}
                 </div>
@@ -691,7 +729,7 @@ export function MedicationRequestQuestion({
                                     <div className="flex-1 min-w-0 mr-2">
                                       <CardTitle
                                         className={cn(
-                                          "text-base text-gray-950 break-words",
+                                          "text-base text-gray-950 wrap-break-word",
                                           isInactive &&
                                             medication.status !== "ended" &&
                                             "line-through",
@@ -745,7 +783,7 @@ export function MedicationRequestQuestion({
                                     <div className="text-sm mt-1 text-gray-600">
                                       {dosageInstruction?.dose_and_rate
                                         ?.dose_quantity &&
-                                        `${dosageInstruction.dose_and_rate.dose_quantity.value} ${dosageInstruction.dose_and_rate.dose_quantity.unit?.display || ""}`}
+                                        `${round(dosageInstruction.dose_and_rate.dose_quantity.value)} ${dosageInstruction.dose_and_rate.dose_quantity.unit?.display || ""}`}
 
                                       {dosageInstruction?.dose_and_rate
                                         ?.dose_range &&
@@ -781,6 +819,7 @@ export function MedicationRequestQuestion({
                                   questionId={questionnaireResponse.question_id}
                                   errors={errors}
                                   facilityId={facilityId}
+                                  showAdvancedFields={true}
                                 />
                               </CardContent>
                             </CollapsibleContent>
@@ -798,6 +837,10 @@ export function MedicationRequestQuestion({
                           questionId={questionnaireResponse.question_id}
                           errors={errors}
                           facilityId={facilityId}
+                          showAdvancedFields={showAdvancedFields}
+                          onToggleAdvanced={() =>
+                            setShowAdvancedFields(!showAdvancedFields)
+                          }
                         />
                       )}
                     </React.Fragment>
@@ -853,6 +896,8 @@ interface MedicationRequestGridRowProps {
   questionId: string;
   errors?: QuestionValidationError[];
   facilityId?: string;
+  showAdvancedFields?: boolean;
+  onToggleAdvanced?: () => void;
 }
 
 const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
@@ -864,9 +909,12 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   questionId,
   errors,
   facilityId,
+  showAdvancedFields = false,
+  onToggleAdvanced,
 }) => {
   const { t } = useTranslation();
   const [showDosageDialog, setShowDosageDialog] = useState(false);
+  const [showMobileAdvanced, setShowMobileAdvanced] = useState(false);
   const desktopLayout = useBreakpoints({ lg: true, default: false });
   const dosageInstruction = medication.dosage_instruction[0] || {};
   const isReadOnly = !!medication.id;
@@ -1015,7 +1063,10 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 lg:grid-cols-[280px_220px_180px_160px_300px_180px_250px_180px_160px_220px_280px_180px_48px] border-b border-gray-200 hover:bg-gray-50/50 space-y-3 lg:space-y-0",
+        "grid grid-cols-1 border-b border-gray-200 hover:bg-gray-50/50 space-y-3 lg:space-y-0",
+        showAdvancedFields
+          ? "lg:grid-cols-[280px_220px_180px_160px_40px_300px_180px_250px_180px_160px_220px_280px_180px_48px]"
+          : "lg:grid-cols-[280px_220px_180px_160px_40px_180px_48px]",
         {
           "opacity-40 pointer-events-none": disabled,
         },
@@ -1026,7 +1077,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm">
           <span
             className={cn(
-              "break-words line-clamp-2 hidden lg:block",
+              "wrap-break-word line-clamp-2 hidden lg:block",
               disabled &&
                 medication.status !== "entered_in_error" &&
                 "line-through",
@@ -1037,7 +1088,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         </div>
       )}
       {/* Dosage */}
-      <div className="lg:px-2 p-1 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="p-1 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("dosage")}
           <span className="text-red-500 ml-0.5">*</span>
@@ -1208,7 +1259,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               pattern="[0-9]*[.]?[0-9]*"
               min={0}
               value={
-                dosageInstruction.timing.repeat.bounds_duration?.value == 0
+                isZero(dosageInstruction.timing.repeat.bounds_duration.value)
                   ? ""
                   : dosageInstruction.timing.repeat.bounds_duration?.value
               }
@@ -1221,7 +1272,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                     repeat: {
                       ...dosageInstruction.timing.repeat,
                       bounds_duration: {
-                        value: Number(value),
+                        value: value,
                         unit: dosageInstruction.timing.repeat.bounds_duration
                           .unit,
                       },
@@ -1291,133 +1342,154 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           index={index}
         />
       </div>
-      {/* Instructions */}
-      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
-        <Label className="mb-1.5 block text-sm lg:hidden">
-          {t("instructions")}
-        </Label>
-        {dosageInstruction?.as_needed_boolean ? (
-          <div className="space-y-2">
+      {/* Clickable expand/collapse bar column - Desktop only */}
+      {desktopLayout && (
+        <div
+          className={cn(
+            "lg:border-r border-gray-200 cursor-pointer transition-colors flex items-center justify-center",
+            showAdvancedFields
+              ? "bg-primary-50 hover:bg-primary-100"
+              : "bg-gray-100 hover:bg-gray-200",
+          )}
+          onClick={onToggleAdvanced}
+          title={
+            showAdvancedFields
+              ? t("hide_advanced_fields")
+              : t("show_advanced_fields")
+          }
+        >
+          {showAdvancedFields ? (
+            <ChevronsDownUp className="h-4 w-4 text-primary-600 rotate-90" />
+          ) : (
+            <ChevronsUpDown className="h-4 w-4 text-gray-500 rotate-90" />
+          )}
+        </div>
+      )}
+      {/* Advanced Fields - Desktop: inserted between bar and notes when expanded */}
+      {showAdvancedFields && desktopLayout && (
+        <>
+          {/* Instructions */}
+          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+            {dosageInstruction?.as_needed_boolean ? (
+              <div className="space-y-2">
+                <ValueSetSelect
+                  system="system-as-needed-reason"
+                  value={dosageInstruction?.as_needed_for || null}
+                  placeholder={t("select_prn_reason")}
+                  onSelect={(value) => {
+                    handleUpdateDosageInstruction({
+                      as_needed_for: value || undefined,
+                    });
+                  }}
+                  disabled={disabled || isReadOnly}
+                />
+                <InstructionsPopover
+                  currentInstructions={currentInstructions}
+                  removeInstruction={removeInstruction}
+                  addInstruction={addInstruction}
+                  isReadOnly={isReadOnly}
+                  disabled={disabled}
+                />
+              </div>
+            ) : (
+              <InstructionsPopover
+                currentInstructions={currentInstructions}
+                removeInstruction={removeInstruction}
+                addInstruction={addInstruction}
+                isReadOnly={isReadOnly}
+                disabled={disabled}
+              />
+            )}
+          </div>
+          {/* Route */}
+          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
             <ValueSetSelect
-              system="system-as-needed-reason"
-              value={dosageInstruction?.as_needed_for || null}
-              placeholder={t("select_prn_reason")}
-              onSelect={(value) => {
-                handleUpdateDosageInstruction({
-                  as_needed_for: value || undefined,
-                });
-              }}
+              system="system-route"
+              value={dosageInstruction?.route}
+              onSelect={(route) => handleUpdateDosageInstruction({ route })}
+              placeholder={t("select_route")}
               disabled={disabled || isReadOnly}
             />
-            <InstructionsPopover
-              currentInstructions={currentInstructions}
-              removeInstruction={removeInstruction}
-              addInstruction={addInstruction}
-              isReadOnly={isReadOnly}
-              disabled={disabled}
+          </div>
+          {/* Site */}
+          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+            <ValueSetSelect
+              system="system-body-site"
+              value={dosageInstruction?.site}
+              onSelect={(site) => handleUpdateDosageInstruction({ site })}
+              placeholder={t("select_site")}
+              disabled={disabled || isReadOnly}
             />
           </div>
-        ) : (
-          <InstructionsPopover
-            currentInstructions={currentInstructions}
-            removeInstruction={removeInstruction}
-            addInstruction={addInstruction}
-            isReadOnly={isReadOnly}
-            disabled={disabled}
-          />
-        )}
-      </div>
-      {/* Route */}
-      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
-        <Label className="mb-1.5 block text-sm lg:hidden">{t("route")}</Label>
-        <ValueSetSelect
-          system="system-route"
-          value={dosageInstruction?.route}
-          onSelect={(route) => handleUpdateDosageInstruction({ route })}
-          placeholder={t("select_route")}
-          disabled={disabled || isReadOnly}
-        />
-      </div>
-      {/* Site */}
-      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
-        <Label className="mb-1.5 block text-sm lg:hidden">{t("site")}</Label>
-        <ValueSetSelect
-          system="system-body-site"
-          value={dosageInstruction?.site}
-          onSelect={(site) => handleUpdateDosageInstruction({ site })}
-          placeholder={t("select_site")}
-          disabled={disabled || isReadOnly}
-        />
-      </div>
-      {/* Method */}
-      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
-        <Label className="mb-1.5 block text-sm lg:hidden">{t("method")}</Label>
-        <ValueSetSelect
-          system="system-administration-method"
-          value={dosageInstruction?.method}
-          onSelect={(method) => handleUpdateDosageInstruction({ method })}
-          placeholder={t("select_method")}
-          disabled={disabled || isReadOnly}
-          count={20}
-        />
-      </div>
-      {/* Intent */}
-      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
-        <Label className="mb-1.5 block text-sm lg:hidden">{t("intent")}</Label>
-        <Select
-          value={medication.intent}
-          onValueChange={(value: MedicationRequestIntent) =>
-            onUpdate?.({ intent: value })
-          }
-          disabled={disabled || isReadOnly}
-        >
-          <SelectTrigger className="h-9 text-sm capitalize">
-            <SelectValue
-              className="capitalize"
-              placeholder={t("select_intent")}
+          {/* Method */}
+          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+            <ValueSetSelect
+              system="system-administration-method"
+              value={dosageInstruction?.method}
+              onSelect={(method) => handleUpdateDosageInstruction({ method })}
+              placeholder={t("select_method")}
+              disabled={disabled || isReadOnly}
+              count={20}
             />
-          </SelectTrigger>
-          <SelectContent>
-            {MEDICATION_REQUEST_INTENT.map((intent) => (
-              <SelectItem key={intent} value={intent} className="capitalize">
-                {intent.replace(/_/g, " ")}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      {/* Authored On */}
-      <div className="lg:px-1 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
-        <Label className="mb-1.5 block text-sm lg:hidden">
-          {t("authored_on")}
-        </Label>
-        <CombinedDatePicker
-          value={
-            medication.authored_on
-              ? new Date(medication.authored_on)
-              : undefined
-          }
-          onChange={(date) => onUpdate?.({ authored_on: date?.toISOString() })}
-          disabled={disabled || isReadOnly}
-          blockDate={(date) => date > new Date()}
-        />
-      </div>
-      {/* Requester */}
-      <div className="lg:px-1 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
-        <Label className="mb-1.5 block text-sm lg:hidden">
-          {t("requester")}
-        </Label>
-        <UserSelector
-          selected={medication.requester}
-          onChange={(user) => {
-            onUpdate?.({ requester: user });
-          }}
-          placeholder={t("select_requester")}
-          facilityId={facilityId}
-          disabled={disabled || isReadOnly}
-        />
-      </div>
-      {/* Notes */}
+          </div>
+          {/* Intent */}
+          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+            <Select
+              value={medication.intent}
+              onValueChange={(value: MedicationRequestIntent) =>
+                onUpdate?.({ intent: value })
+              }
+              disabled={disabled || isReadOnly}
+            >
+              <SelectTrigger className="h-9 text-sm capitalize">
+                <SelectValue
+                  className="capitalize"
+                  placeholder={t("select_intent")}
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {MEDICATION_REQUEST_INTENT.map((intent) => (
+                  <SelectItem
+                    key={intent}
+                    value={intent}
+                    className="capitalize"
+                  >
+                    {intent.replace(/_/g, " ")}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {/* Authored On */}
+          <div className="lg:px-1 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+            <CombinedDatePicker
+              value={
+                medication.authored_on
+                  ? new Date(medication.authored_on)
+                  : undefined
+              }
+              onChange={(date) =>
+                onUpdate?.({ authored_on: date?.toISOString() })
+              }
+              disabled={disabled || isReadOnly}
+              blockDate={(date) => date > new Date()}
+            />
+          </div>
+          {/* Requester */}
+          <div className="lg:px-1 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+            <UserSelector
+              selected={medication.requester}
+              onChange={(user) => {
+                onUpdate?.({ requester: user });
+              }}
+              placeholder={t("select_requester")}
+              facilityId={facilityId}
+              disabled={disabled || isReadOnly}
+            />
+          </div>
+        </>
+      )}
+      {/* Notes - Always visible on desktop, at the end before remove button */}
       <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("note")}</Label>
         <Input
@@ -1428,6 +1500,168 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           className="h-9 text-base sm:text-sm"
         />
       </div>
+
+      {/* Mobile Advanced Fields - Collapsible section */}
+      {!desktopLayout && (
+        <div className="col-span-1 mt-2">
+          <Collapsible
+            open={showMobileAdvanced}
+            onOpenChange={setShowMobileAdvanced}
+          >
+            <CollapsibleTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-between text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              >
+                <span className="flex items-center gap-2">
+                  <SlidersHorizontal className="h-4 w-4" />
+                  {t("advanced_fields")}
+                </span>
+                {showMobileAdvanced ? (
+                  <ChevronsDownUp className="h-4 w-4" />
+                ) : (
+                  <ChevronsUpDown className="h-4 w-4" />
+                )}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-3 pt-2">
+              {/* Instructions */}
+              <div className="p-1">
+                <Label className="mb-1.5 block text-sm">
+                  {t("instructions")}
+                </Label>
+                {dosageInstruction?.as_needed_boolean ? (
+                  <div className="space-y-2">
+                    <ValueSetSelect
+                      system="system-as-needed-reason"
+                      value={dosageInstruction?.as_needed_for || null}
+                      placeholder={t("select_prn_reason")}
+                      onSelect={(value) => {
+                        handleUpdateDosageInstruction({
+                          as_needed_for: value || undefined,
+                        });
+                      }}
+                      disabled={disabled || isReadOnly}
+                    />
+                    <InstructionsPopover
+                      currentInstructions={currentInstructions}
+                      removeInstruction={removeInstruction}
+                      addInstruction={addInstruction}
+                      isReadOnly={isReadOnly}
+                      disabled={disabled}
+                    />
+                  </div>
+                ) : (
+                  <InstructionsPopover
+                    currentInstructions={currentInstructions}
+                    removeInstruction={removeInstruction}
+                    addInstruction={addInstruction}
+                    isReadOnly={isReadOnly}
+                    disabled={disabled}
+                  />
+                )}
+              </div>
+              {/* Route */}
+              <div className="p-1">
+                <Label className="mb-1.5 block text-sm">{t("route")}</Label>
+                <ValueSetSelect
+                  system="system-route"
+                  value={dosageInstruction?.route}
+                  onSelect={(route) => handleUpdateDosageInstruction({ route })}
+                  placeholder={t("select_route")}
+                  disabled={disabled || isReadOnly}
+                />
+              </div>
+              {/* Site */}
+              <div className="p-1">
+                <Label className="mb-1.5 block text-sm">{t("site")}</Label>
+                <ValueSetSelect
+                  system="system-body-site"
+                  value={dosageInstruction?.site}
+                  onSelect={(site) => handleUpdateDosageInstruction({ site })}
+                  placeholder={t("select_site")}
+                  disabled={disabled || isReadOnly}
+                />
+              </div>
+              {/* Method */}
+              <div className="p-1">
+                <Label className="mb-1.5 block text-sm">{t("method")}</Label>
+                <ValueSetSelect
+                  system="system-administration-method"
+                  value={dosageInstruction?.method}
+                  onSelect={(method) =>
+                    handleUpdateDosageInstruction({ method })
+                  }
+                  placeholder={t("select_method")}
+                  disabled={disabled || isReadOnly}
+                  count={20}
+                />
+              </div>
+              {/* Intent */}
+              <div className="p-1">
+                <Label className="mb-1.5 block text-sm">{t("intent")}</Label>
+                <Select
+                  value={medication.intent}
+                  onValueChange={(value: MedicationRequestIntent) =>
+                    onUpdate?.({ intent: value })
+                  }
+                  disabled={disabled || isReadOnly}
+                >
+                  <SelectTrigger className="h-9 text-sm capitalize">
+                    <SelectValue
+                      className="capitalize"
+                      placeholder={t("select_intent")}
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MEDICATION_REQUEST_INTENT.map((intent) => (
+                      <SelectItem
+                        key={intent}
+                        value={intent}
+                        className="capitalize"
+                      >
+                        {intent.replace(/_/g, " ")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {/* Authored On */}
+              <div className="p-1">
+                <Label className="mb-1.5 block text-sm">
+                  {t("authored_on")}
+                </Label>
+                <CombinedDatePicker
+                  value={
+                    medication.authored_on
+                      ? new Date(medication.authored_on)
+                      : undefined
+                  }
+                  onChange={(date) =>
+                    onUpdate?.({ authored_on: date?.toISOString() })
+                  }
+                  disabled={disabled || isReadOnly}
+                  blockDate={(date) => date > new Date()}
+                />
+              </div>
+              {/* Requester */}
+              <div className="p-1">
+                <Label className="mb-1.5 block text-sm">{t("requester")}</Label>
+                <UserSelector
+                  selected={medication.requester}
+                  onChange={(user) => {
+                    onUpdate?.({ requester: user });
+                  }}
+                  placeholder={t("select_requester")}
+                  facilityId={facilityId}
+                  disabled={disabled || isReadOnly}
+                />
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
+      )}
 
       {/* Remove Button */}
       <div className="hidden lg:flex lg:px-2 lg:py-1 items-center justify-center sticky right-0 bg-white shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)] w-12">

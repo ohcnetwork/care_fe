@@ -31,6 +31,7 @@ import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/product
 import { RequestOrderStatus } from "@/types/inventory/requestOrder/requestOrder";
 import { SupplyRequestStatus } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
+import { zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { Box, Check, Trash2 } from "lucide-react";
@@ -42,7 +43,7 @@ const supplyRequestFormSchema = z.object({
         id: z.string().min(1, "Item ID is required"),
         name: z.string().min(1, "Item name is required"),
       }),
-      quantity: z.number().min(1, "Quantity must be at least 1"),
+      quantity: zodDecimal({ min: 1 }),
     }),
   ),
 });
@@ -80,7 +81,7 @@ export function AddItemsForm({
 
   const { mutate: createSupplyRequests, isPending: isCreating } = useMutation({
     mutationFn: async (
-      requests: Array<{ item: { id: string; name: string }; quantity: number }>,
+      requests: Array<{ item: { id: string; name: string }; quantity: string }>,
     ) => {
       const promises = requests.map((request) =>
         mutate(supplyRequestApi.createSupplyRequest)({
@@ -118,7 +119,7 @@ export function AddItemsForm({
         id: product.id,
         name: product.name,
       },
-      quantity: 1,
+      quantity: "1",
     });
   }
 
@@ -180,9 +181,6 @@ export function AddItemsForm({
                                       type="number"
                                       min={1}
                                       {...field}
-                                      onChange={(e) =>
-                                        field.onChange(parseInt(e.target.value))
-                                      }
                                       className="w-20"
                                     />
                                   </FormControl>

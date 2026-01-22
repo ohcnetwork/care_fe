@@ -55,11 +55,14 @@ import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemStatus } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
+import { isPositive } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import BackButton from "@/components/Common/BackButton";
+import { ReportSubTab } from "@/components/Files/ReportSubTab";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { ReportType } from "@/types/emr/report/report";
 import AccountSheet from "./AccountSheet";
 import BedChargeItemsTable from "./components/BedChargeItemsTable";
 import ChargeItemsTable from "./components/ChargeItemsTable";
@@ -73,7 +76,12 @@ function formatDate(date?: string) {
   });
 }
 
-type tab = "charge_items" | "invoices" | "payments" | "bed_charge_items";
+type tab =
+  | "charge_items"
+  | "invoices"
+  | "payments"
+  | "bed_charge_items"
+  | "reports";
 
 const closedStatusText = {
   [AccountBillingStatus.closed_baddebt]: "close_account_help_closed_baddebt",
@@ -207,6 +215,7 @@ export function AccountShow({
         end: new Date().toISOString(),
       },
       patient: account?.patient?.id || "",
+      extensions: account?.extensions || {},
     });
     setCloseAccountStatus({
       sheetOpen: false,
@@ -256,6 +265,16 @@ export function AccountShow({
       label: t("payments"),
       component: <PaymentsData facilityId={facilityId} accountId={accountId} />,
       shortcutId: "switch-to-payments-tab",
+    },
+    reports: {
+      label: t("reports"),
+      component: (
+        <ReportSubTab
+          associatingId={accountId}
+          reportType={ReportType.ACCOUNT_REPORT}
+        />
+      ),
+      shortcutId: "switch-to-reports-tab",
     },
     ...(encounterId && {
       bed_charge_items: {
@@ -327,8 +346,8 @@ export function AccountShow({
                       }
                     >
                       <CareIcon icon="l-plus" className="size-4" />
-                      {t("record_payment")}
-                      <ShortcutBadge actionId="record-payment-account" />
+                      {t("add_credit")}
+                      <ShortcutBadge actionId="credit-payment-account" />
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -386,7 +405,7 @@ export function AccountShow({
                   }
                 >
                   <CareIcon icon="l-plus" className="size-4" />
-                  {t("payment")}
+                  {t("credit")}
                   <ShortcutBadge actionId="record-payment-account" />
                 </Button>
                 <DropdownMenu>
@@ -473,7 +492,7 @@ export function AccountShow({
             </div>
             <div>
               <p className="text-sm text-gray-700 font-medium">
-                {t("tags_other")}
+                {t("tags_proper")}
               </p>
               <div className="flex flex-wrap gap-1">
                 <TagAssignmentSheet
@@ -538,16 +557,18 @@ export function AccountShow({
               </p>
               <div className="flex items-end">
                 <p
-                  className={cn("text-3xl font-bold", {
-                    "text-red-500": Number(account.total_balance) > 0,
-                    "text-green-700": Number(account.total_balance) <= 0,
-                  })}
+                  className={cn(
+                    "text-3xl font-bold",
+                    isPositive(account.total_balance)
+                      ? "text-red-500"
+                      : "text-green-700",
+                  )}
                 >
                   <MonetaryDisplay amount={account.total_balance} />
                 </p>
               </div>
               <p className="text-xs text-gray-500">
-                {Number(account.total_balance) >= 0
+                {isPositive(account.total_balance)
                   ? t("pending_from_patient")
                   : t("overpaid_amount")}
               </p>
@@ -568,7 +589,7 @@ export function AccountShow({
             </div>
           </div>
 
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-6 border-b md:border-r border-gray-200">
             <div className="space-y-1">
               <p className="text-sm font-medium text-gray-500">
                 {t("billed_gross")}
@@ -580,6 +601,24 @@ export function AccountShow({
               </div>
               <p className="text-xs text-gray-500">
                 {t("total_billed_before_adjustments")}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex-1 p-6">
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-gray-500">
+                {t("total_billable")}
+              </p>
+              <div className="flex items-end">
+                <p className="text-3xl font-bold text-gray-900">
+                  <MonetaryDisplay
+                    amount={account.total_billable_charge_items}
+                  />
+                </p>
+              </div>
+              <p className="text-xs text-gray-500">
+                {t("total_billable_charge_items_description")}
               </p>
             </div>
           </div>
@@ -671,7 +710,7 @@ export function AccountShow({
               ))}
             </SelectContent>
           </Select>
-          <ClosedCallout balance={Number(account.total_balance)} />
+          <ClosedCallout balance={account.total_balance} />
           {hasBillableItems && (
             <span className="text-warning-500 bg-warning-50 text-xs p-2 rounded block -mt-3">
               {t("close_account_with_pending_items_caution_message")}
@@ -686,9 +725,9 @@ export function AccountShow({
   );
 }
 
-const ClosedCallout = ({ balance }: { balance: number }) => {
+const ClosedCallout = ({ balance }: { balance: string }) => {
   const { t } = useTranslation();
-  const isNegative = balance > 0;
+  const isNegative = isPositive(balance);
   if (!isNegative) return <></>;
   return (
     <span className="text-red-500 bg-red-50 text-xs -mt-2 p-2 rounded">

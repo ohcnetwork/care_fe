@@ -69,7 +69,6 @@ export function QuestionInput({
   const questionnaireResponse = questionnaireResponses.find(
     (v) => v.question_id === question.id,
   );
-
   if (!questionnaireResponse) {
     return null;
   }

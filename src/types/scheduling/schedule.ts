@@ -53,6 +53,7 @@ export interface ScheduleTemplate {
   charge_item_definition: ChargeItemDefinitionRead;
   revisit_charge_item_definition: ChargeItemDefinitionRead;
   revisit_allowed_days: number;
+  is_public: boolean;
 }
 
 type ScheduleAvailabilityBase = {
@@ -79,6 +80,7 @@ export interface ScheduleTemplateCreateRequest {
   availabilities: ScheduleAvailabilityBase[];
   resource_type: SchedulableResourceType;
   resource_id: string;
+  is_public: boolean;
 }
 export interface ScheduleTemplateSetChargeItemDefinitionRequest {
   charge_item_definition: string;
@@ -89,6 +91,7 @@ export interface ScheduleTemplateUpdateRequest {
   name: string;
   valid_from: string;
   valid_to: string;
+  is_public: boolean;
 }
 
 export type ScheduleAvailability = ScheduleAvailabilityBase & {
