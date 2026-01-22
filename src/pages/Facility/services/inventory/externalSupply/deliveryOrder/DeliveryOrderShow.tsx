@@ -571,7 +571,7 @@ export function DeliveryOrderShow({
               <div className="flex flex-wrap gap-1">
                 <div>
                   <label className="text-sm font-medium text-gray-700">
-                    {t("tags_other")}
+                    {t("tags_proper")}
                   </label>
                   <div className="flex flex-wrap gap-2">
                     <TagAssignmentSheet

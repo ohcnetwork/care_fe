@@ -243,7 +243,7 @@ export function AccountList({
                 <TableHead>{t("account_status")}</TableHead>
                 <TableHead>{t("billing_status")}</TableHead>
                 <TableHead>{t("period")}</TableHead>
-                <TableHead>{t("tags_other")}</TableHead>
+                <TableHead>{t("tags_proper")}</TableHead>
                 <TableHead>{t("action")}</TableHead>
               </TableRow>
             </TableHeader>

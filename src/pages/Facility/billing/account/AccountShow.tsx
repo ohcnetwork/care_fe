@@ -492,7 +492,7 @@ export function AccountShow({
             </div>
             <div>
               <p className="text-sm text-gray-700 font-medium">
-                {t("tags_other")}
+                {t("tags_proper")}
               </p>
               <div className="flex flex-wrap gap-1">
                 <TagAssignmentSheet
