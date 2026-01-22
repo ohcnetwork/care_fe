@@ -265,7 +265,7 @@ export function AddMedicationReturnItemForm({
                                   <FormItem>
                                     <FormControl>
                                       <StockLotSelector
-                                        net_content_gt={0}
+                                        net_content_gt={-1}
                                         selectedLots={
                                           field.value
                                             ? [
