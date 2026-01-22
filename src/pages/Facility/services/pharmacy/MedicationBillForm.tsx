@@ -257,15 +257,17 @@ const AddMedicationSheet = ({
 
       const updates: Partial<MedicationRequestDosageInstruction> = {};
 
-      if (selectedProduct?.base_unit) {
-        updates.dose_and_rate = {
-          type: "ordered",
-          dose_quantity: {
-            value: "1",
-            unit: selectedProduct.base_unit,
+      updates.dose_and_rate = {
+        type: "ordered",
+        dose_quantity: {
+          value: "1",
+          unit: selectedProduct?.base_unit || {
+            code: "{count}",
+            display: "count",
+            system: "http://unitsofmeasure.org",
           },
-        };
-      }
+        },
+      };
 
       if (isConsumable) {
         updates.as_needed_boolean = true;
@@ -2151,15 +2153,17 @@ export default function MedicationBillForm({
                           const defaultDosageInstructions: MedicationRequestDosageInstruction[] =
                             [
                               {
-                                dose_and_rate: product.base_unit
-                                  ? {
-                                      type: "ordered",
-                                      dose_quantity: {
-                                        value: "1",
-                                        unit: product.base_unit,
-                                      },
-                                    }
-                                  : undefined,
+                                dose_and_rate: {
+                                  type: "ordered",
+                                  dose_quantity: {
+                                    value: "1",
+                                    unit: product.base_unit || {
+                                      code: "{count}",
+                                      display: "count",
+                                      system: "http://unitsofmeasure.org",
+                                    },
+                                  },
+                                },
                                 timing: undefined,
                                 as_needed_boolean: true, // Default to PRN
                                 route: undefined,

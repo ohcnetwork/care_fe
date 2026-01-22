@@ -246,17 +246,19 @@ const AddMedicationSheet = ({
       setLocalDosageInstruction(existingDosageInstructions);
     } else if (open) {
       resetForm();
-      if (selectedProduct?.base_unit) {
-        handleUpdateDosageInstruction({
-          dose_and_rate: {
-            type: "ordered",
-            dose_quantity: {
-              value: "0",
-              unit: selectedProduct.base_unit,
+      handleUpdateDosageInstruction({
+        dose_and_rate: {
+          type: "ordered",
+          dose_quantity: {
+            value: "0",
+            unit: selectedProduct?.base_unit || {
+              code: "{count}",
+              display: "count",
+              system: "http://unitsofmeasure.org",
             },
           },
-        });
-      }
+        },
+      });
     } else {
       resetForm();
     }
@@ -2226,15 +2228,17 @@ export default function AllMedicationBillForm({ patientId }: Props) {
                           const defaultDosageInstructions: MedicationRequestDosageInstruction[] =
                             [
                               {
-                                dose_and_rate: product.base_unit
-                                  ? {
-                                      type: "ordered",
-                                      dose_quantity: {
-                                        value: "1",
-                                        unit: product.base_unit,
-                                      },
-                                    }
-                                  : undefined,
+                                dose_and_rate: {
+                                  type: "ordered",
+                                  dose_quantity: {
+                                    value: "1",
+                                    unit: product.base_unit || {
+                                      code: "{count}",
+                                      display: "count",
+                                      system: "http://unitsofmeasure.org",
+                                    },
+                                  },
+                                },
                                 timing: undefined,
                                 as_needed_boolean: true, // Default to PRN
                                 route: undefined,
