@@ -42,6 +42,7 @@ import UserSelector from "@/components/Common/UserSelector";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
+import { MedicationTimingSelect } from "@/components/Medicine/MedicationTimingSelect";
 import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
 import MedicationValueSetSelect from "@/components/Questionnaire/MedicationValueSetSelect";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
@@ -1185,52 +1186,18 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           {t("frequency")}
           <span className="text-red-500 ml-0.5">*</span>
         </Label>
-        <Select
-          value={
-            dosageInstruction?.as_needed_boolean
-              ? "PRN"
-              : reverseFrequencyOption(dosageInstruction?.timing)
-          }
-          onValueChange={(value) => {
-            if (value === "PRN") {
-              handleUpdateDosageInstruction({
-                as_needed_boolean: true,
-                timing: undefined,
-              });
-            } else {
-              const timingOption =
-                MEDICATION_REQUEST_TIMING_OPTIONS[
-                  value as keyof typeof MEDICATION_REQUEST_TIMING_OPTIONS
-                ];
-
-              handleUpdateDosageInstruction({
-                as_needed_boolean: false,
-                timing: timingOption.timing,
-              });
-            }
+        <MedicationTimingSelect
+          timing={dosageInstruction?.timing}
+          asNeeded={dosageInstruction?.as_needed_boolean}
+          onTimingChange={(timing, asNeeded) => {
+            handleUpdateDosageInstruction({
+              as_needed_boolean: asNeeded,
+              timing,
+            });
           }}
           disabled={disabled || isReadOnly}
-        >
-          <SelectTrigger
-            className={cn(
-              "h-9 text-sm",
-              hasError(MEDICATION_REQUEST_FIELDS.FREQUENCY.key) &&
-                "border-red-500",
-            )}
-          >
-            <SelectValue placeholder={t("select_frequency")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="PRN">{t("as_needed_prn")}</SelectItem>
-            {Object.entries(MEDICATION_REQUEST_TIMING_OPTIONS).map(
-              ([key, option]) => (
-                <SelectItem key={key} value={key}>
-                  {option.display}
-                </SelectItem>
-              ),
-            )}
-          </SelectContent>
-        </Select>
+          hasError={hasError(MEDICATION_REQUEST_FIELDS.FREQUENCY.key)}
+        />
         <FieldError
           fieldKey={MEDICATION_REQUEST_FIELDS.FREQUENCY.key}
           questionId={questionId}
@@ -1680,10 +1647,5 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   );
 };
 
-export const reverseFrequencyOption = (
-  option: MedicationRequestCreate["dosage_instruction"][0]["timing"],
-) => {
-  return Object.entries(MEDICATION_REQUEST_TIMING_OPTIONS).find(
-    ([key]) => key === option?.code?.code,
-  )?.[0] as keyof typeof MEDICATION_REQUEST_TIMING_OPTIONS;
-};
+// Re-export reverseFrequencyOption from MedicationTimingSelect for backwards compatibility
+export { reverseFrequencyOption } from "@/components/Medicine/MedicationTimingSelect";
