@@ -316,7 +316,7 @@ const AddMedicationSheet = ({
     <Sheet open={open} onOpenChange={handleSheetOpenChange}>
       <SheetContent
         side="bottom"
-        className="max-h-[90vh] min-h-[50vh] px-4 pt-2 pb-0 rounded-t-lg overflow-y-auto pb-safe"
+        className="max-h-[90vh] min-h-[50vh] px-4 pt-2 pb-0 rounded-t-lg pb-safe"
       >
         <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto bg-gray-300 mt-2" />
         <div className="mt-6 h-full flex flex-col">
@@ -1859,7 +1859,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
                                     {productKnowledgeInventoriesMap[
                                       effectiveProductKnowledge.id
                                     ]?.length ? (
-                                      <div className="space-y-2">
+                                      <div className="space-y-2 flex ">
                                         <StockLotSelector
                                           selectedLots={form.watch(
                                             `items.${index}.lots`,

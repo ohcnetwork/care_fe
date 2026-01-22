@@ -140,7 +140,7 @@ export default function StockLotSelector({
 
   return (
     <Popover modal>
-      <PopoverTrigger disabled={disabled}>
+      <PopoverTrigger disabled={disabled} className="p-0!">
         <Button
           variant="outline"
           className={`w-auto min-w-40 h-auto justify-between p-1 border-gray-300 border ${className}`}
