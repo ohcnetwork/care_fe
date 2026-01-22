@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 import { useAtom } from "jotai";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -45,6 +45,13 @@ import { LocationPicker } from "@/components/Location/LocationPicker";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import {
+  ExtensionEntityType,
+  getCombinedExtensionProps,
+  NamespacedExtensionData,
+  useEntityExtensions,
+  useExtensionSchemas,
+} from "@/hooks/useExtensions";
 import { AccountRead } from "@/types/billing/account/Account";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import {
@@ -121,33 +128,36 @@ interface PaymentReconciliationSheetProps {
   isCreditNote?: boolean;
 }
 
-const createFormSchema = () =>
-  z
-    .object({
-      reconciliation_type: z.nativeEnum(PaymentReconciliationType),
-      status: z.nativeEnum(PaymentReconciliationStatus),
-      kind: z.nativeEnum(PaymentReconciliationKind),
-      issuer_type: z.nativeEnum(PaymentReconciliationIssuerType),
-      outcome: z.nativeEnum(PaymentReconciliationOutcome),
-      method: z.nativeEnum(PaymentReconciliationPaymentMethod),
-      payment_datetime: z
-        .string()
-        .refine((val) => new Date(val) <= new Date(), {
-          message: t("payment_date_cannot_be_in_future"),
-        }),
-      amount: zodDecimal({ min: 0 }),
-      tendered_amount: zodDecimal({ min: 0 }),
-      returned_amount: zodDecimal({ min: 0 }).optional(),
-      target_invoice: z.string().optional(),
-      reference_number: z.string().optional(),
-      authorization: z.string().optional(),
-      disposition: z.string().optional(),
-      note: z.string().optional(),
-      account: z.string(),
-      is_credit_note: z.boolean().optional(),
-      location: careConfig.paymentLocationRequired
-        ? z.string().min(1, t("field_required"))
-        : z.string().optional(),
+const createBaseSchema = () =>
+  z.object({
+    reconciliation_type: z.nativeEnum(PaymentReconciliationType),
+    status: z.nativeEnum(PaymentReconciliationStatus),
+    kind: z.nativeEnum(PaymentReconciliationKind),
+    issuer_type: z.nativeEnum(PaymentReconciliationIssuerType),
+    outcome: z.nativeEnum(PaymentReconciliationOutcome),
+    method: z.nativeEnum(PaymentReconciliationPaymentMethod),
+    payment_datetime: z.string().refine((val) => new Date(val) <= new Date(), {
+      message: t("payment_date_cannot_be_in_future"),
+    }),
+    amount: zodDecimal({ min: 0 }),
+    tendered_amount: zodDecimal({ min: 0 }),
+    returned_amount: zodDecimal({ min: 0 }).optional(),
+    target_invoice: z.string().optional(),
+    reference_number: z.string().optional(),
+    authorization: z.string().optional(),
+    disposition: z.string().optional(),
+    note: z.string().optional(),
+    account: z.string(),
+    is_credit_note: z.boolean().optional(),
+    location: careConfig.paymentLocationRequired
+      ? z.string().min(1, t("field_required"))
+      : z.string().optional(),
+  });
+
+const createFormSchema = (extValidation: z.ZodType<Record<string, unknown>>) =>
+  createBaseSchema()
+    .extend({
+      extensions: extValidation.optional(),
     })
     .refine(
       (data) => {
@@ -179,9 +189,31 @@ export function PaymentReconciliationSheet({
   );
   useShortcutSubContext();
 
-  const formSchema = createFormSchema();
-  const form = useForm<z.infer<typeof formSchema>>({
+  const { getExtensions, isLoading: isExtensionsLoading } =
+    useExtensionSchemas();
+
+  const ext = useMemo(
+    () =>
+      getCombinedExtensionProps(
+        getExtensions(ExtensionEntityType.payment_reconciliation, "write"),
+      ),
+    [getExtensions],
+  );
+
+  const formSchema = useMemo(
+    () => createFormSchema(ext.validation),
+    [ext.validation],
+  );
+
+  type FormValues = z.infer<typeof formSchema>;
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+  });
+
+  const extensions = useEntityExtensions({
+    entityType: ExtensionEntityType.payment_reconciliation,
+    schemaType: "write",
+    form,
   });
 
   // Watch for payment method changes
@@ -254,11 +286,17 @@ export function PaymentReconciliationSheet({
   });
 
   const handleSubmit = form.handleSubmit((data) => {
+    const { extensions: formExtensions, ...restData } = data;
+    const cleanedExtensions = extensions.prepareForSubmit(
+      formExtensions as NamespacedExtensionData,
+    );
+
     // Convert form data to PaymentReconciliationCreate type
     const submissionData: PaymentReconciliationCreate = {
-      ...data,
+      ...restData,
       is_credit_note: isCreditNote,
-      location: data.location,
+      location: restData.location,
+      extensions: cleanedExtensions,
     };
     submitPayment(submissionData);
   });
@@ -289,10 +327,11 @@ export function PaymentReconciliationSheet({
         account: accountId,
         is_credit_note: isCreditNote,
         location: selectedLocationObject?.id,
+        extensions: ext.defaults,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, invoice, accountId, isCreditNote]);
+  }, [open, invoice, accountId, isCreditNote, ext.defaults]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -630,6 +669,8 @@ export function PaymentReconciliationSheet({
                   </FormItem>
                 )}
               />
+
+              {extensions.fields}
             </div>
 
             <SheetFooter className="sticky bottom-0 bg-white p-4 border-t border-gray-200 -mx-6">
@@ -646,7 +687,7 @@ export function PaymentReconciliationSheet({
 
                 <Button
                   type="submit"
-                  disabled={isPending}
+                  disabled={isPending || isExtensionsLoading}
                   aria-label={
                     isCreditNote ? t("record_credit_note") : t("record_payment")
                   }
