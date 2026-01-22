@@ -141,7 +141,7 @@ function ServiceRequestForm({
   facilityId = "",
 }: ServiceRequestFormProps) {
   const { t } = useTranslation();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
