@@ -1859,7 +1859,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
                                     {productKnowledgeInventoriesMap[
                                       effectiveProductKnowledge.id
                                     ]?.length ? (
-                                      <div className="space-y-2 flex ">
+                                      <div className="space-y-2">
                                         <StockLotSelector
                                           selectedLots={form.watch(
                                             `items.${index}.lots`,
