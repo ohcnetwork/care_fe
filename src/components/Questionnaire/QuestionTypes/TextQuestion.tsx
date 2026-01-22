@@ -175,7 +175,7 @@ export function TextQuestion({
                   : undefined
               }
               className={cn(
-                "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 resize-none",
+                "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
                 hasTemplates ? "rounded-tl-md" : "rounded-l-md",
               )}
               disabled={disabled}

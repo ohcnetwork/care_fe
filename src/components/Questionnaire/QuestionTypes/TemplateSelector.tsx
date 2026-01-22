@@ -70,7 +70,7 @@ export function TemplateSelector({
           disabled={disabled}
           className="h-8 px-3 text-gray-900 hover:bg-transparent"
         >
-          <CareIcon icon="l-file-upload-alt" className="mr-1.5 size-4" />
+          <CareIcon icon="l-file-upload-alt" className="size-4" />
           <span className="font-semibold underline">
             {t("insert_template")}
           </span>
@@ -78,7 +78,10 @@ export function TemplateSelector({
       </PopoverTrigger>
       <PopoverContent className="w-72 p-0" align="start">
         <Command>
-          <CommandInput placeholder={t("search_template")} />
+          <CommandInput
+            placeholder={t("search_template")}
+            className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
+          />
           <CommandList>
             <CommandEmpty>{t("no_templates_found")}</CommandEmpty>
             <CommandGroup>
@@ -101,7 +104,7 @@ export function TemplateSelector({
             </CommandGroup>
           </CommandList>
         </Command>
-        <div className="flex items-center justify-between border-t px-3 py-2 text-xs text-gray-500">
+        <div className="flex items-center justify-between border-t px-3 py-2 text-xs text-gray-500 mt-2">
           <div className="flex items-center gap-1">
             <kbd className="rounded border bg-gray-100 px-1">↑</kbd>
             <kbd className="rounded border bg-gray-100 px-1">↓</kbd>
