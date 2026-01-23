@@ -39,11 +39,7 @@ const TokenEncounterRedirect = ({
   if (token.booking && token?.patient?.id) {
     return (
       <Redirect
-        to={`/facility/${facilityId}/patient/${token?.patient?.id}/appointments/${token.booking.id}?${new URLSearchParams(
-          {
-            from_queue: "true",
-          },
-        ).toString()}`}
+        to={`/facility/${facilityId}/patient/${token?.patient?.id}/appointments/${token.booking.id}?from_queue=true`}
       />
     );
   }

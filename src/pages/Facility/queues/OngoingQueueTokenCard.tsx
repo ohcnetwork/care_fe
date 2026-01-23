@@ -90,20 +90,7 @@ export function OngoingQueueTokenCard({
             {token ? (
               <Link
                 basePath="/"
-                href={
-                  token.patient
-                    ? `/facility/${facilityId}/patients/verify?${new URLSearchParams(
-                        {
-                          phone_number: token.patient.phone_number,
-                          year_of_birth:
-                            token.patient.year_of_birth?.toString() ?? "",
-                          partial_id: token.patient.id.slice(0, 5),
-                          queue_id: token.queue.id,
-                          token_id: token.id,
-                        },
-                      ).toString()}`
-                    : "#"
-                }
+                href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
                 className="font-semibold hover:underline transition-colors"
               >
                 <span className="font-semibold flex items-center gap-1">
@@ -124,7 +111,7 @@ export function OngoingQueueTokenCard({
                 <Button variant="outline" asChild>
                   <Link
                     basePath="/"
-                    href={`/facility/${facilityId}/queues/${token.queue.id}/tokens/${token.id}`}
+                    href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
                   >
                     {t("encounter")}
                   </Link>

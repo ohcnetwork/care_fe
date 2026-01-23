@@ -127,9 +127,7 @@ export default function AppointmentDetail(props: Props) {
   const { goBack } = useAppHistory();
   const [params, setQueryParams] = useQueryParams();
   const { showSuccess } = params;
-  const [queryParams] = useQueryParams();
-
-  const { from_queue } = queryParams;
+  const [{ from_queue }] = useQueryParams();
 
   useShortcutSubContext("facility:appointment");
 

@@ -41,7 +41,7 @@ const ScheduleRoutes: AppRoutes = {
       to={`/facility/${facilityId}/practitioner/${practitionerId}/queues/${queueId}/ongoing`}
     />
   ),
-  "/facility/:facilityId/queues/:queueId/tokens/:tokenId": ({
+  "/facility/:facilityId/queue/:queueId/token/:tokenId": ({
     facilityId,
     queueId,
     tokenId,
