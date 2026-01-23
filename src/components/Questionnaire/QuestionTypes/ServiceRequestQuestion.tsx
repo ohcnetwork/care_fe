@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Pencil, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,7 @@ import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activ
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 
 import UserSelector from "@/components/Common/UserSelector";
+import ManageResponseTemplatesSheet from "@/components/Questionnaire/ManageResponseTemplatesSheet";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
@@ -40,6 +42,7 @@ import {
 } from "@/types/emr/serviceRequest/serviceRequest";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import { QuestionnaireResponseTemplateReadSpec } from "@/types/questionnaire/questionnaireResponseTemplate";
 import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
 import { Decimal } from "decimal.js";
 
@@ -67,6 +70,8 @@ interface ServiceRequestQuestionProps {
   ) => void;
   disabled?: boolean;
   errors?: QuestionValidationError[];
+  questionnaireId?: string;
+  questionnaireSlug?: string;
 }
 
 const SERVICE_REQUEST_FIELDS = {
@@ -313,6 +318,8 @@ export function ServiceRequestQuestion({
   facilityId,
   encounterId,
   errors,
+  questionnaireId,
+  questionnaireSlug,
 }: ServiceRequestQuestionProps) {
   const { t } = useTranslation();
   const currentUser = useAuthUser() as CurrentUserRead;
@@ -454,6 +461,21 @@ export function ServiceRequestQuestion({
     setSelectedActivityDefinition(def?.slug || null);
   };
 
+  const handleApplyTemplate = (
+    template: QuestionnaireResponseTemplateReadSpec,
+  ) => {
+    const templateServiceRequests = template.template_data?.service_request;
+    if (!templateServiceRequests?.length) {
+      toast.info(t("template_has_no_service_requests"));
+      return;
+    }
+
+    // Note: Service requests in templates are stored differently (with slug and service_request)
+    // We need to fetch the activity definitions for each and create proper service requests
+    // For now, we'll display an info message that this feature requires activity definition lookup
+    toast.info(t("service_request_templates_coming_soon"));
+  };
+
   return (
     <div className="space-y-4">
       {serviceRequests.map((serviceRequest, index) => (
@@ -493,21 +515,32 @@ export function ServiceRequestQuestion({
         </div>
       )}
 
-      <div className="space-y-2 w-full">
-        <ResourceDefinitionCategoryPicker<ActivityDefinitionReadSpec>
-          facilityId={facilityId}
-          value={selectedActivityDefinitionData || undefined}
-          onValueChange={handleActivityDefinitionSelect}
-          placeholder={t("select_activity_definition")}
-          disabled={disabled}
-          className="w-full"
-          resourceType={ResourceCategoryResourceType.activity_definition}
-          listDefinitions={{
-            queryFn: activityDefinitionApi.listActivityDefinition,
-            pathParams: { facilityId },
-          }}
-          translationBaseKey="activity_definition"
-        />
+      <div className="flex flex-wrap items-center gap-2 w-full">
+        <div className="flex-1 min-w-[200px]">
+          <ResourceDefinitionCategoryPicker<ActivityDefinitionReadSpec>
+            facilityId={facilityId}
+            value={selectedActivityDefinitionData || undefined}
+            onValueChange={handleActivityDefinitionSelect}
+            placeholder={t("select_activity_definition")}
+            disabled={disabled}
+            className="w-full"
+            resourceType={ResourceCategoryResourceType.activity_definition}
+            listDefinitions={{
+              queryFn: activityDefinitionApi.listActivityDefinition,
+              pathParams: { facilityId },
+            }}
+            translationBaseKey="activity_definition"
+          />
+        </div>
+        {questionnaireId && questionnaireSlug && (
+          <ManageResponseTemplatesSheet
+            questionnaireId={questionnaireId}
+            questionnaireSlug={questionnaireSlug}
+            facilityId={facilityId}
+            onTemplateSelect={handleApplyTemplate}
+            disabled={disabled}
+          />
+        )}
       </div>
     </div>
   );

@@ -1046,6 +1046,8 @@ export function QuestionnaireForm({
               encounterId={encounterId}
               questions={form.questionnaire.questions}
               responses={form.responses}
+              questionnaireId={form.questionnaire.id}
+              questionnaireSlug={form.questionnaire.slug}
               onResponseChange={(
                 values: ResponseValue[],
                 questionId: string,

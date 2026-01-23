@@ -13,6 +13,7 @@ export const questionnaireResponseTemplateApi = {
     TRes: Type<PaginatedResponse<QuestionnaireResponseTemplateReadSpec>>(),
     TQuery: Type<{
       questionnaire?: string; // questionnaire external_id
+      name?: string;
       limit?: number;
       offset?: number;
     }>(),

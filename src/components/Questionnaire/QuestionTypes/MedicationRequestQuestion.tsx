@@ -1,9 +1,10 @@
 import { MinusCircledIcon } from "@radix-ui/react-icons";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import {
   ChevronsDownUp,
   ChevronsUpDown,
+  MoreVerticalIcon,
   SlidersHorizontal,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -20,7 +21,20 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -43,6 +57,7 @@ import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector"
 import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
+import ManageResponseTemplatesSheet from "@/components/Questionnaire/ManageResponseTemplatesSheet";
 import MedicationValueSetSelect from "@/components/Questionnaire/MedicationValueSetSelect";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -71,17 +86,21 @@ import medicationRequestApi from "@/types/emr/medicationRequest/medicationReques
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
+import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
+import { QuestionnaireResponseTemplateReadSpec } from "@/types/questionnaire/questionnaireResponseTemplate";
+import { questionnaireResponseTemplateApi } from "@/types/questionnaire/questionnaireResponseTemplateApi";
 import {
   useFieldError,
   validateFields,
 } from "@/types/questionnaire/validation";
 import { UserReadMinimal } from "@/types/user/user";
 import { isZero, round } from "@/Utils/decimal";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 
@@ -101,6 +120,8 @@ interface MedicationRequestQuestionProps {
   disabled?: boolean;
   encounterId: string;
   errors?: QuestionValidationError[];
+  questionnaireId?: string;
+  questionnaireSlug?: string;
 }
 
 const MEDICATION_REQUEST_FIELDS = {
@@ -199,7 +220,10 @@ export function MedicationRequestQuestion({
   patientId,
   encounterId,
   errors,
+  questionnaireId,
+  questionnaireSlug,
 }: MedicationRequestQuestionProps) {
+  const authUser = useAuthUser();
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
   const currentUser = useAuthUser() as UserReadMinimal;
@@ -207,6 +231,8 @@ export function MedicationRequestQuestion({
   const medications =
     (questionnaireResponse.values?.[0]?.value as MedicationRequestCreate[]) ||
     [];
+
+  console.log(medications);
 
   const { data: patientMedications } = useQuery({
     queryKey: ["medication_requests", patientId, encounterId],
@@ -252,6 +278,97 @@ export function MedicationRequestQuestion({
 
   const [newMedicationInSheet, setNewMedicationInSheet] =
     useState<MedicationRequestCreate | null>(null);
+
+  // Add to template state
+  const [medicationToAddToTemplate, setMedicationToAddToTemplate] =
+    useState<MedicationRequestCreate | null>(null);
+  const [templateSearchQuery, setTemplateSearchQuery] = useState("");
+
+  const queryClient = useQueryClient();
+
+  // Query for templates
+  const { data: templatesData, isLoading: isLoadingTemplates } = useQuery({
+    queryKey: [
+      "questionnaire_response_templates",
+      questionnaireSlug,
+      templateSearchQuery,
+    ],
+    queryFn: query(questionnaireResponseTemplateApi.list, {
+      pathParams: { questionnaireSlug: questionnaireSlug! },
+      queryParams: {
+        name: templateSearchQuery || undefined,
+        limit: 20,
+      },
+    }),
+    enabled: !!questionnaireSlug && !!medicationToAddToTemplate,
+  });
+
+  // Mutation for adding medication to template
+  const addToTemplateMutation = useMutation({
+    mutationFn: (params: {
+      template: QuestionnaireResponseTemplateReadSpec;
+      medication: MedicationRequestCreate;
+    }) => {
+      const existingMedications =
+        (params.template.template_data
+          ?.medication_request as MedicationRequestCreate[]) || [];
+
+      // Extract the slug from requested_product_internal if available
+      const medicationForTemplate = {
+        ...params.medication,
+        requested_product:
+          params.medication.requested_product_internal?.slug ||
+          params.medication.requested_product,
+      };
+      // Remove the internal object - we only need the slug for templates
+      delete (medicationForTemplate as { requested_product_internal?: unknown })
+        .requested_product_internal;
+
+      return mutate(questionnaireResponseTemplateApi.update, {
+        pathParams: {
+          id: params.template.id!,
+        },
+      })({
+        name: params.template.name,
+        description: params.template.description || "",
+        template_data: {
+          ...params.template.template_data,
+          medication_request: [...existingMedications, medicationForTemplate],
+        },
+        users: [authUser.username],
+        facility_organizations: [],
+      });
+    },
+    onSuccess: (_, variables) => {
+      toast.success(
+        t("medication_added_to_template", {
+          template: variables.template.name,
+        }),
+      );
+      queryClient.invalidateQueries({
+        queryKey: ["questionnaire_response_templates", questionnaireSlug],
+      });
+      setMedicationToAddToTemplate(null);
+      setTemplateSearchQuery("");
+    },
+    onError: () => {
+      toast.error(t("failed_to_add_to_template"));
+    },
+  });
+
+  const handleAddToTemplate = (medication: MedicationRequestCreate) => {
+    setMedicationToAddToTemplate(medication);
+  };
+
+  const handleSelectTemplate = (
+    template: QuestionnaireResponseTemplateReadSpec,
+  ) => {
+    if (!medicationToAddToTemplate) return;
+    addToTemplateMutation.mutate({
+      template,
+      medication: medicationToAddToTemplate,
+    });
+  };
 
   const handleAddMedication = (medication: Code) => {
     const initialDetails: MedicationRequestCreate = {
@@ -399,6 +516,71 @@ export function MedicationRequestQuestion({
     );
   };
 
+  const handleApplyTemplate = async (
+    template: QuestionnaireResponseTemplateReadSpec,
+  ) => {
+    const templateMedications = template.template_data?.medication_request;
+    if (!templateMedications?.length) {
+      toast.info(t("template_has_no_medications"));
+      return;
+    }
+
+    // Fetch product knowledge for each medication that has a requested_product slug
+    const medicationsWithProductKnowledge = await Promise.all(
+      templateMedications.map(async (med) => {
+        let productKnowledge: ProductKnowledgeBase | undefined;
+        if (
+          med.requested_product &&
+          typeof med.requested_product === "string"
+        ) {
+          try {
+            productKnowledge = await query(
+              productKnowledgeApi.retrieveProductKnowledge,
+              {
+                pathParams: { slug: med.requested_product },
+              },
+            )({ signal: new AbortController().signal });
+          } catch {
+            // If fetching fails, continue without product knowledge
+            console.warn(
+              `Failed to fetch product knowledge for slug: ${med.requested_product}`,
+            );
+          }
+        }
+        return {
+          ...med,
+          id: undefined, // Remove IDs so they're created as new
+          do_not_perform: med.do_not_perform ?? false,
+          dosage_instruction: med.dosage_instruction ?? [
+            { as_needed_boolean: false },
+          ],
+          authored_on: new Date().toISOString(),
+          requester: currentUser,
+          requested_product_internal: productKnowledge,
+        };
+      }),
+    );
+
+    const newMedications: MedicationRequestCreate[] = [
+      ...medications,
+      ...medicationsWithProductKnowledge,
+    ];
+
+    updateQuestionnaireResponseCB(
+      [{ type: "medication_request", value: newMedications }],
+      questionnaireResponse.question_id,
+    );
+
+    toast.success(
+      t("template_applied_medications", {
+        count: templateMedications.length,
+        name: template.name,
+      }),
+    );
+
+    setExpandedMedicationIndex(medications.length);
+  };
+
   const newMedicationSheetContent = (
     <div className="space-y-3">
       {newMedicationInSheet && (
@@ -446,151 +628,220 @@ export function MedicationRequestQuestion({
         confirmText={t("remove")}
         variant="destructive"
       />
-      <HistoricalRecordSelector<MedicationRequestRead | MedicationStatementRead>
-        title={t("medication_history")}
-        structuredTypes={[
-          {
-            type: t("past_prescriptions"),
-            displayFields: [
-              {
-                key: "",
-                label: t("medicine"),
-                render: (med) => displayMedicationName(med),
-              },
-              {
-                key: "dosage_instruction",
-                label: t("dosage"),
-                render: (instructions) => {
-                  const dosage = formatDosage(instructions[0]) || "";
-                  const frequency =
-                    getFrequencyDisplay(instructions[0]?.timing)?.meaning ||
-                    "-";
-                  return `${dosage}\n${frequency}`;
+
+      {/* Add to Template Dialog */}
+      <Dialog
+        open={!!medicationToAddToTemplate}
+        onOpenChange={(open) => {
+          if (!open) {
+            setMedicationToAddToTemplate(null);
+            setTemplateSearchQuery("");
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t("add_to_template")}</DialogTitle>
+            <DialogDescription>
+              {medicationToAddToTemplate &&
+                t("add_medication_to_template_description", {
+                  medication: displayMedicationName(medicationToAddToTemplate),
+                })}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder={t("search_templates")}
+              value={templateSearchQuery}
+              onChange={(e) => setTemplateSearchQuery(e.target.value)}
+            />
+            <div className="max-h-64 overflow-y-auto space-y-2">
+              {isLoadingTemplates ? (
+                <div className="flex items-center justify-center py-4">
+                  <span className="text-sm text-muted-foreground">
+                    {t("loading")}...
+                  </span>
+                </div>
+              ) : templatesData?.results?.length === 0 ? (
+                <div className="text-center py-4 text-sm text-muted-foreground">
+                  {t("no_templates_found")}
+                </div>
+              ) : (
+                templatesData?.results?.map((template) => (
+                  <Button
+                    key={template.id}
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => handleSelectTemplate(template)}
+                    disabled={addToTemplateMutation.isPending}
+                  >
+                    {template.name}
+                  </Button>
+                ))
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <HistoricalRecordSelector<
+          MedicationRequestRead | MedicationStatementRead
+        >
+          title={t("medication_history")}
+          structuredTypes={[
+            {
+              type: t("past_prescriptions"),
+              displayFields: [
+                {
+                  key: "",
+                  label: t("medicine"),
+                  render: (med) => displayMedicationName(med),
                 },
-              },
-              {
-                key: "dosage_instruction",
-                label: t("duration"),
-                render: (instructions) => {
-                  const duration =
-                    instructions?.[0]?.timing?.repeat?.bounds_duration;
-                  if (!duration?.value) return "-";
-                  return `${duration.value} ${duration.unit}`;
+                {
+                  key: "dosage_instruction",
+                  label: t("dosage"),
+                  render: (instructions) => {
+                    const dosage = formatDosage(instructions[0]) || "";
+                    const frequency =
+                      getFrequencyDisplay(instructions[0]?.timing)?.meaning ||
+                      "-";
+                    return `${dosage}\n${frequency}`;
+                  },
                 },
-              },
-              {
-                key: "requester",
-                label: t("prescribed_by"),
-                render: (requester) => (
-                  <div className="flex items-center gap-2">
-                    <Avatar
-                      imageUrl={requester?.profile_picture_url}
-                      name={formatName(requester, true)}
-                      className="size-6 rounded-full"
-                    />
-                    <span className="text-sm truncate">
-                      {formatName(requester)}
-                    </span>
-                  </div>
-                ),
-              },
-            ],
-            expandableFields: [
-              {
-                key: "dosage_instruction",
-                label: t("instructions"),
-                render: (instructions) =>
-                  instructions?.[0]?.additional_instruction?.[0]?.display,
-              },
-              {
-                key: "note",
-                label: t("notes"),
-                render: (note) => note,
-              },
-            ],
-            queryKey: ["medication_requests", patientId],
-            queryFn: async (
-              limit: number,
-              offset: number,
-              signal: AbortSignal,
-            ) => {
-              const response = await query(medicationRequestApi.list, {
-                pathParams: { patientId },
-                queryParams: {
-                  limit,
-                  offset,
-                  status:
-                    "active,on_hold,draft,unknown,ended,completed,cancelled",
+                {
+                  key: "dosage_instruction",
+                  label: t("duration"),
+                  render: (instructions) => {
+                    const duration =
+                      instructions?.[0]?.timing?.repeat?.bounds_duration;
+                    if (!duration?.value) return "-";
+                    return `${duration.value} ${duration.unit}`;
+                  },
                 },
-              })({ signal });
-              return response;
+                {
+                  key: "requester",
+                  label: t("prescribed_by"),
+                  render: (requester) => (
+                    <div className="flex items-center gap-2">
+                      <Avatar
+                        imageUrl={requester?.profile_picture_url}
+                        name={formatName(requester, true)}
+                        className="size-6 rounded-full"
+                      />
+                      <span className="text-sm truncate">
+                        {formatName(requester)}
+                      </span>
+                    </div>
+                  ),
+                },
+              ],
+              expandableFields: [
+                {
+                  key: "dosage_instruction",
+                  label: t("instructions"),
+                  render: (instructions) =>
+                    instructions?.[0]?.additional_instruction?.[0]?.display,
+                },
+                {
+                  key: "note",
+                  label: t("notes"),
+                  render: (note) => note,
+                },
+              ],
+              queryKey: ["medication_requests", patientId],
+              queryFn: async (
+                limit: number,
+                offset: number,
+                signal: AbortSignal,
+              ) => {
+                const response = await query(medicationRequestApi.list, {
+                  pathParams: { patientId },
+                  queryParams: {
+                    limit,
+                    offset,
+                    status:
+                      "active,on_hold,draft,unknown,ended,completed,cancelled",
+                  },
+                })({ signal });
+                return response;
+              },
             },
-          },
-          {
-            type: t("medication_statements"),
-            displayFields: [
-              {
-                key: "medication",
-                label: t("medicine"),
-                render: (med) => med?.display,
-              },
-              {
-                key: "dosage_text",
-                label: t("dosage_instruction"),
-                render: (dosage) => dosage,
-              },
-              {
-                key: "status",
-                label: t("status"),
-                render: (status: string) => t(`medication_status__${status}`),
-              },
-              {
-                key: "created_by",
-                label: t("prescribed_by"),
-                render: (created_by) => (
-                  <div className="flex items-center gap-2">
-                    <Avatar
-                      imageUrl={created_by?.profile_picture_url}
-                      name={formatName(created_by, true)}
-                      className="size-6 rounded-full"
-                    />
-                    <span className="text-sm truncate">
-                      {formatName(created_by)}
-                    </span>
-                  </div>
-                ),
-              },
-            ],
-            expandableFields: [
-              {
-                key: "note",
-                label: t("notes"),
-                render: (note) => note,
-              },
-            ],
-            queryKey: ["medication_statements", patientId],
-            queryFn: async (
-              limit: number,
-              offset: number,
-              signal: AbortSignal,
-            ) => {
-              const response = await query(medicationStatementApi.list, {
-                pathParams: { patientId },
-                queryParams: {
-                  limit,
-                  offset,
-                  status:
-                    "active,on_hold,completed,stopped,unknown,not_taken,intended",
+            {
+              type: t("medication_statements"),
+              displayFields: [
+                {
+                  key: "medication",
+                  label: t("medicine"),
+                  render: (med) => med?.display,
                 },
-              })({ signal });
-              return response;
+                {
+                  key: "dosage_text",
+                  label: t("dosage_instruction"),
+                  render: (dosage) => dosage,
+                },
+                {
+                  key: "status",
+                  label: t("status"),
+                  render: (status: string) => t(`medication_status__${status}`),
+                },
+                {
+                  key: "created_by",
+                  label: t("prescribed_by"),
+                  render: (created_by) => (
+                    <div className="flex items-center gap-2">
+                      <Avatar
+                        imageUrl={created_by?.profile_picture_url}
+                        name={formatName(created_by, true)}
+                        className="size-6 rounded-full"
+                      />
+                      <span className="text-sm truncate">
+                        {formatName(created_by)}
+                      </span>
+                    </div>
+                  ),
+                },
+              ],
+              expandableFields: [
+                {
+                  key: "note",
+                  label: t("notes"),
+                  render: (note) => note,
+                },
+              ],
+              queryKey: ["medication_statements", patientId],
+              queryFn: async (
+                limit: number,
+                offset: number,
+                signal: AbortSignal,
+              ) => {
+                const response = await query(medicationStatementApi.list, {
+                  pathParams: { patientId },
+                  queryParams: {
+                    limit,
+                    offset,
+                    status:
+                      "active,on_hold,completed,stopped,unknown,not_taken,intended",
+                  },
+                })({ signal });
+                return response;
+              },
             },
-          },
-        ]}
-        buttonLabel={t("medication_history")}
-        onAddSelected={handleAddHistoricalMedications}
-        disableAPI={isPreview}
-      />
+          ]}
+          buttonLabel={t("medication_history")}
+          onAddSelected={handleAddHistoricalMedications}
+          disableAPI={isPreview}
+        />
+        {questionnaireId && questionnaireSlug && (
+          <ManageResponseTemplatesSheet
+            questionnaireId={questionnaireId}
+            questionnaireSlug={questionnaireSlug}
+            facilityId={facilityId}
+            onTemplateSelect={handleApplyTemplate}
+            disabled={disabled || isPreview}
+          />
+        )}
+      </div>
       {medications.length > 0 && (
         <div className="md:overflow-x-auto w-auto">
           <div className="min-w-fit">
@@ -815,6 +1066,11 @@ export function MedicationRequestQuestion({
                                     handleUpdateMedication(index, updates)
                                   }
                                   onRemove={() => handleRemoveMedication(index)}
+                                  onAddToTemplate={
+                                    questionnaireSlug
+                                      ? handleAddToTemplate
+                                      : undefined
+                                  }
                                   index={index}
                                   questionId={questionnaireResponse.question_id}
                                   errors={errors}
@@ -833,6 +1089,9 @@ export function MedicationRequestQuestion({
                             handleUpdateMedication(index, updates)
                           }
                           onRemove={() => handleRemoveMedication(index)}
+                          onAddToTemplate={
+                            questionnaireSlug ? handleAddToTemplate : undefined
+                          }
                           index={index}
                           questionId={questionnaireResponse.question_id}
                           errors={errors}
@@ -892,6 +1151,7 @@ interface MedicationRequestGridRowProps {
   disabled?: boolean;
   onUpdate?: (medication: Partial<MedicationRequestCreate>) => void;
   onRemove?: () => void;
+  onAddToTemplate?: (medication: MedicationRequestCreate) => void;
   index: number;
   questionId: string;
   errors?: QuestionValidationError[];
@@ -905,6 +1165,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   disabled,
   onUpdate,
   onRemove,
+  onAddToTemplate,
   index,
   questionId,
   errors,
@@ -1663,18 +1924,37 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         </div>
       )}
 
-      {/* Remove Button */}
+      {/* Actions Dropdown */}
       <div className="hidden lg:flex lg:px-2 lg:py-1 items-center justify-center sticky right-0 bg-white shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)] w-12">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onRemove}
-          disabled={disabled}
-          className="size-8"
-          aria-label="Remove medication"
-        >
-          <MinusCircledIcon className="size-4" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              disabled={disabled}
+              className="size-8"
+              aria-label={t("medication_actions")}
+            >
+              <MoreVerticalIcon className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {onAddToTemplate && (
+              <>
+                <DropdownMenuItem onClick={() => onAddToTemplate(medication)}>
+                  {t("add_to_template")}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
+            <DropdownMenuItem
+              onClick={onRemove}
+              className="text-destructive focus:text-destructive"
+            >
+              {t("remove")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
