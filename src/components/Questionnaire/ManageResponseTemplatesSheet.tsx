@@ -934,7 +934,7 @@ export default function ManageResponseTemplatesSheet({
         }}
       >
         <SheetTrigger asChild>{trigger ?? defaultTrigger}</SheetTrigger>
-        <SheetContent className="sm:max-w-lg flex flex-col">
+        <SheetContent className="sm:max-w-lg flex flex-col overflow-y-auto">
           <SheetHeader className="space-y-1">
             <SheetTitle className="flex items-center gap-2">
               <div className="rounded-lg bg-primary-100 p-1.5">
