@@ -184,6 +184,7 @@ export default function MultiFilter({
             onFilterChange={onFilterChange}
             onOperationChange={onOperationChange}
             selectedBarClassName={selectedBarClassName}
+            facilityId={facilityId}
           />
         );
       })}

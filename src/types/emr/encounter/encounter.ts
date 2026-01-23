@@ -24,7 +24,7 @@ import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationAssociationRead } from "@/types/location/association";
-import { LocationRead } from "@/types/location/location";
+import { LocationMinSpec, LocationRead } from "@/types/location/location";
 import { AppointmentRead } from "@/types/scheduling/schedule";
 import { UserReadMinimal } from "@/types/user/user";
 
@@ -223,6 +223,7 @@ export interface EncounterListRead extends EncounterBase {
   created_date: string;
   modified_date: string;
   tags: TagConfig[];
+  current_location: LocationMinSpec | null;
 }
 
 export interface EncounterRead

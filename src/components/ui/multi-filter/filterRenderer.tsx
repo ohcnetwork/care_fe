@@ -1,6 +1,8 @@
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 
 import RenderDateFilter from "./dateFilter";
+import RenderDepartmentFilter from "./departmentFilter";
 import GenericFilter from "./genericFilter";
 import RenderTagFilter from "./tagFilter";
 import NavigationHelper from "./utils/navigation-helper";
@@ -45,6 +47,16 @@ export default function FilterRenderer({
           <RenderTagFilter
             {...commonProps}
             selectedTags={selected as TagConfig[]}
+          />
+          <NavigationHelper isActiveFilter={true} />
+        </>
+      );
+    case "department":
+      return (
+        <>
+          <RenderDepartmentFilter
+            {...commonProps}
+            selectedOrgs={selected as FacilityOrganizationRead[]}
           />
           <NavigationHelper isActiveFilter={true} />
         </>

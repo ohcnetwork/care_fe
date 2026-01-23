@@ -303,10 +303,10 @@ function MedicationValueSetSelectTabs({
     >
       <TabsList className="flex w-full">
         <TabsTrigger value="product" className="flex-1">
-          {t("in_stock")}
+          {t("product")}
         </TabsTrigger>
         <TabsTrigger value="valueset" className="flex-1">
-          {t("medication_list")}
+          {t("medication")}
         </TabsTrigger>
       </TabsList>
     </Tabs>
