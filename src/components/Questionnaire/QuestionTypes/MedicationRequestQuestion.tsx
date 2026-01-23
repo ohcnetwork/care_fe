@@ -2,6 +2,7 @@ import { MinusCircledIcon } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import {
+  AlertTriangle,
   ChevronsDownUp,
   ChevronsUpDown,
   FileTextIcon,
@@ -17,6 +18,7 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -259,6 +261,7 @@ export function MedicationRequestQuestion({
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,
+        ordering: "-modified_date",
         limit: 100,
         facility: facilityId,
       },
@@ -1278,6 +1281,17 @@ export function MedicationRequestQuestion({
           />
         )}
       </div>
+      {patientMedications?.count && patientMedications.count > 100 && (
+        <Alert className="bg-yellow-50 border-yellow-200">
+          <AlertTriangle className="h-4 w-4 text-yellow-600" />
+          <AlertDescription className="text-yellow-800">
+            {t("medication_list_truncated_warning", {
+              shown: 100,
+              total: patientMedications.count,
+            })}
+          </AlertDescription>
+        </Alert>
+      )}
       {medications.length > 0 && (
         <div className="md:overflow-x-auto w-auto">
           <div className="min-w-fit">
