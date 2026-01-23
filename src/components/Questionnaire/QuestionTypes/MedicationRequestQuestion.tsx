@@ -340,11 +340,8 @@ export function MedicationRequestQuestion({
           ?.medication_request as MedicationRequestCreate[]) || [];
 
       const productInternal = params.medication.requested_product_internal;
-      // Use product ID (UUID) for the template, not the slug
-      const productId =
-        productInternal?.id || params.medication.requested_product;
 
-      // Get the slug for display name extraction if needed
+      // Store SLUG in requested_product (not UUID) so we can use retrieve API when applying
       const productSlug =
         productInternal?.slug ||
         (isProductSlug(params.medication.requested_product)
@@ -358,16 +355,15 @@ export function MedicationRequestQuestion({
         extractNameFromSlug(productSlug) ||
         "Medication";
 
-      // Build template medication
-      // If requested_product is present, don't include medication field
+      // Build template medication with SLUG in requested_product
       const medicationForTemplate: Record<string, unknown> = {
         ...params.medication,
-        requested_product: productId,
+        requested_product: productSlug, // Store SLUG for retrieve API
         display_name: displayName,
       };
 
-      // Remove medication field if we have requested_product
-      if (productId) {
+      // Remove medication field if we have product slug
+      if (productSlug) {
         delete medicationForTemplate.medication;
       } else if (params.medication.medication?.code) {
         // Keep medication only if it has a valid code and no product
@@ -422,11 +418,8 @@ export function MedicationRequestQuestion({
       medication: MedicationRequestCreate;
     }) => {
       const productInternal = params.medication.requested_product_internal;
-      // Use product ID (UUID) for the template, not the slug
-      const productId =
-        productInternal?.id || params.medication.requested_product;
 
-      // Get the slug for display name extraction if needed
+      // Store SLUG in requested_product (not UUID) so we can use retrieve API when applying
       const productSlug =
         productInternal?.slug ||
         (isProductSlug(params.medication.requested_product)
@@ -440,15 +433,15 @@ export function MedicationRequestQuestion({
         extractNameFromSlug(productSlug) ||
         "Medication";
 
-      // Build template medication
+      // Build template medication with SLUG in requested_product
       const medicationForTemplate: Record<string, unknown> = {
         ...params.medication,
-        requested_product: productId,
+        requested_product: productSlug, // Store SLUG for retrieve API
         display_name: displayName,
       };
 
-      // Remove medication field if we have requested_product
-      if (productId) {
+      // Remove medication field if we have product slug
+      if (productSlug) {
         delete medicationForTemplate.medication;
       } else if (params.medication.medication?.code) {
         medicationForTemplate.medication = params.medication.medication;
@@ -668,29 +661,34 @@ export function MedicationRequestQuestion({
   // Handler for adding a single medication from a template
   const handleAddSingleMedication = async (med: MedicationRequestCreate) => {
     let productKnowledge: ProductKnowledgeBase | undefined;
-    const requestedProduct = med.requested_product;
 
-    if (requestedProduct && typeof requestedProduct === "string") {
-      // Check if it's a slug (starts with "f-") or UUID
-      const isSlug =
-        requestedProduct.startsWith("f-") && requestedProduct.includes("-");
+    // Templates store SLUG in requested_product (not UUID)
+    const requestedProduct =
+      typeof med.requested_product === "string"
+        ? med.requested_product
+        : undefined;
 
-      if (isSlug) {
-        try {
-          productKnowledge = await query(
-            productKnowledgeApi.retrieveProductKnowledge,
-            {
-              pathParams: { slug: requestedProduct },
-            },
-          )({ signal: new AbortController().signal });
-        } catch {
-          // If fetching fails, continue without product knowledge
-        }
+    // The slug should be in requested_product
+    const slugForFetch = requestedProduct;
+
+    if (slugForFetch && isProductSlug(slugForFetch)) {
+      try {
+        productKnowledge = await query(
+          productKnowledgeApi.retrieveProductKnowledge,
+          {
+            pathParams: { slug: slugForFetch },
+          },
+        )({ signal: new AbortController().signal });
+      } catch (error) {
+        console.warn(
+          `Failed to fetch product knowledge for slug: ${slugForFetch}`,
+          error,
+        );
       }
     }
 
-    // Use product knowledge ID (UUID) if available, otherwise keep the original
-    const productId = productKnowledge?.id || requestedProduct;
+    // Use product knowledge ID (UUID) for the actual medication request
+    const productId = productKnowledge?.id;
 
     const medicationToAdd: MedicationRequestCreate = {
       ...med,
@@ -728,41 +726,40 @@ export function MedicationRequestQuestion({
     }
 
     try {
-      // Fetch product knowledge for each medication that has a requested_product
-      // Template may store either UUID or slug in requested_product
+      // Fetch product knowledge for each medication using the stored slug
       const medicationsWithProductKnowledge = await Promise.all(
         templateMedications.map(async (med) => {
           let productKnowledge: ProductKnowledgeBase | undefined;
-          const requestedProduct = med.requested_product;
 
-          if (requestedProduct && typeof requestedProduct === "string") {
-            // Check if it's a slug (starts with "f-") or UUID
-            const isSlug =
-              requestedProduct.startsWith("f-") &&
-              requestedProduct.includes("-");
+          // Templates store SLUG in requested_product (not UUID)
+          // We fetch product knowledge using the slug, then use the UUID when adding to form
+          const requestedProduct =
+            typeof med.requested_product === "string"
+              ? med.requested_product
+              : undefined;
 
-            if (isSlug) {
-              // Fetch by slug
-              try {
-                productKnowledge = await query(
-                  productKnowledgeApi.retrieveProductKnowledge,
-                  {
-                    pathParams: { slug: requestedProduct },
-                  },
-                )({ signal: new AbortController().signal });
-              } catch {
-                // If fetching fails, continue without product knowledge
-              }
-            } else {
-              // It's a UUID - fetch by listing with ID filter or use the UUID directly
-              // For now, we'll keep the UUID and not fetch (product knowledge not strictly needed)
-              // The UUID will be used as requested_product
+          // The slug should be in requested_product (new format)
+          const slugForFetch = requestedProduct;
+
+          if (slugForFetch && isProductSlug(slugForFetch)) {
+            // Fetch product knowledge by slug using retrieve API
+            try {
+              productKnowledge = await query(
+                productKnowledgeApi.retrieveProductKnowledge,
+                {
+                  pathParams: { slug: slugForFetch },
+                },
+              )({ signal: new AbortController().signal });
+            } catch (error) {
+              console.warn(
+                `Failed to fetch product knowledge for slug: ${slugForFetch}`,
+                error,
+              );
             }
           }
 
-          // Use product knowledge ID (UUID) if available, otherwise keep the original
-          // (which should already be a UUID for newer templates)
-          const productId = productKnowledge?.id || requestedProduct;
+          // Use product knowledge ID (UUID) for the actual medication request
+          const productId = productKnowledge?.id;
 
           return {
             ...med,

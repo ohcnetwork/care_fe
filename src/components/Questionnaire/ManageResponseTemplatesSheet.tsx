@@ -101,6 +101,7 @@ function MedicationName({
 }: {
   medication: MedicationRequestCreate & {
     display_name?: string;
+    product_slug?: string; // Stored slug for fetching product details
     requested_product_internal?: { name?: string; slug?: string };
   };
   fallbackName: string;
@@ -109,18 +110,25 @@ function MedicationName({
   const internalName = medication.requested_product_internal?.name;
   const internalSlug = medication.requested_product_internal?.slug;
 
-  // Only fetch if we have a slug (not a UUID) and no other name source
+  // Determine the slug to use for fetching (stored slug > internal slug > requested_product if it's a slug)
+  const slugForFetch =
+    medication.product_slug ||
+    internalSlug ||
+    (isProductSlug(medication.requested_product)
+      ? medication.requested_product
+      : undefined);
+
+  // Fetch if we have a slug and no display_name
   const canFetch =
-    !!medication.requested_product &&
-    isProductSlug(medication.requested_product) &&
+    !!slugForFetch &&
     !medication.display_name &&
     !internalName &&
     !medication.medication?.display;
 
   const { data: productKnowledge, isLoading } = useQuery({
-    queryKey: ["productKnowledge", medication.requested_product],
+    queryKey: ["productKnowledge", slugForFetch],
     queryFn: query(productKnowledgeApi.retrieveProductKnowledge, {
-      pathParams: { slug: medication.requested_product! },
+      pathParams: { slug: slugForFetch! },
     }),
     enabled: canFetch,
     staleTime: Infinity, // Cache indefinitely since product names don't change
@@ -132,8 +140,7 @@ function MedicationName({
     internalName ||
     productKnowledge?.name ||
     medication.medication?.display ||
-    extractNameFromSlug(internalSlug) ||
-    extractNameFromSlug(medication.requested_product) ||
+    extractNameFromSlug(slugForFetch) ||
     fallbackName;
 
   if (isLoading && canFetch) {
@@ -261,7 +268,7 @@ export default function ManageResponseTemplatesSheet({
   const onSubmit = (data: FormData) => {
     const isSavingCurrent = viewState === "save-current";
 
-    // Prepare medications for template (use product ID, handle medication field properly)
+    // Prepare medications for template (store SLUG in requested_product for retrieve API)
     const medicationsForTemplate =
       isSavingCurrent && currentMedications.length > 0
         ? currentMedications.map((med) => {
@@ -274,24 +281,18 @@ export default function ManageResponseTemplatesSheet({
               };
             };
 
-            // Use product ID (UUID) for the template, not the slug
-            // Fall back to med.requested_product which might already be a UUID
-            const productId =
-              medWithInternal.requested_product_internal?.id ||
-              med.requested_product;
-
-            // Get the slug for display name extraction if needed
+            // Store SLUG in requested_product (not UUID) so we can use retrieve API when applying
+            // Priority: internal slug > existing slug in requested_product
             const productSlug =
               medWithInternal.requested_product_internal?.slug ||
               (isProductSlug(med.requested_product)
                 ? med.requested_product
                 : undefined);
 
-            // If requested_product is present, don't include medication field
-            // If no requested_product, we need medication with a valid code
+            // If no product slug, we need medication with a valid code
             let medicationCode: typeof med.medication | undefined = undefined;
-            if (!productId) {
-              // No product ID - need medication code
+            if (!productSlug) {
+              // No product slug - need medication code
               medicationCode = med.medication?.code
                 ? med.medication
                 : undefined;
@@ -304,12 +305,13 @@ export default function ManageResponseTemplatesSheet({
               extractNameFromSlug(productSlug) ||
               "Medication";
 
-            // Build template medication with display_name for UI rendering
+            // Build template medication with slug in requested_product
             const templateMed = {
               ...med,
-              requested_product: productId,
-              // Set medication only if we don't have requested_product
-              medication: productId ? undefined : medicationCode,
+              // Store SLUG so we can fetch product details when applying template
+              requested_product: productSlug,
+              // Set medication only if we don't have a product slug
+              medication: productSlug ? undefined : medicationCode,
               // Store display name for template preview
               display_name: displayName,
             };
