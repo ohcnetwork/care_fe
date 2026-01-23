@@ -110,6 +110,8 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 
+import { filterStructuredQuestionnaireSlugs } from "@/components/Questionnaire/data/StructuredFormData";
+
 function formatDoseRange(range?: DoseRange): string {
   if (!range?.high?.value) return "";
   return `${round(range.low?.value)} → ${round(range.high?.value)} ${range.high?.unit?.display}`;
@@ -319,13 +321,9 @@ export function MedicationRequestQuestion({
       templateSearchQuery,
     ],
     queryFn: query(questionnaireResponseTemplateApi.list, {
-      pathParams: {
-        ...(questionnaireSlug && questionnaireSlug !== "medication_request"
-          ? { questionnaire: questionnaireSlug }
-          : {}),
-        key_filter: "medication_request",
-      },
       queryParams: {
+        questionnaire: filterStructuredQuestionnaireSlugs(questionnaireSlug),
+        key_filter: "medication_request",
         name: templateSearchQuery || undefined,
         limit: 20,
       },
@@ -467,7 +465,7 @@ export function MedicationRequestQuestion({
       return mutate(questionnaireResponseTemplateApi.create)({
         name: params.name,
         description: "",
-        questionnaire: questionnaireSlug!,
+        questionnaire: filterStructuredQuestionnaireSlugs(questionnaireSlug),
         facility: facilityId,
         template_data: {
           medication_request: [medicationForTemplate],
@@ -1281,17 +1279,18 @@ export function MedicationRequestQuestion({
           />
         )}
       </div>
-      {patientMedications?.count && patientMedications.count > 100 && (
-        <Alert className="bg-yellow-50 border-yellow-200">
-          <AlertTriangle className="h-4 w-4 text-yellow-600" />
-          <AlertDescription className="text-yellow-800">
-            {t("medication_list_truncated_warning", {
-              shown: 100,
-              total: patientMedications.count,
-            })}
-          </AlertDescription>
-        </Alert>
-      )}
+      {patientMedications?.count !== undefined &&
+        patientMedications.count > 100 && (
+          <Alert className="bg-yellow-50 border-yellow-200">
+            <AlertTriangle className="h-4 w-4 text-yellow-600" />
+            <AlertDescription className="text-yellow-800">
+              {t("medication_list_truncated_warning", {
+                shown: 100,
+                total: patientMedications.count,
+              })}
+            </AlertDescription>
+          </Alert>
+        )}
       {medications.length > 0 && (
         <div className="md:overflow-x-auto w-auto">
           <div className="min-w-fit">
