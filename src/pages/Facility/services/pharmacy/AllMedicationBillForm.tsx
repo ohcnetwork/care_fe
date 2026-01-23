@@ -896,11 +896,12 @@ export default function AllMedicationBillForm({ patientId }: Props) {
   }, [medications]);
 
   // Watch form items to calculate grand total
-  const watchedItems = form.watch("items");
+  const formValues = form.watch();
 
   // Calculate grand total for all selected items
   const grandTotal = useMemo(() => {
     let total = new Decimal(0);
+    const watchedItems = formValues.items || [];
 
     watchedItems?.forEach((item) => {
       if (!item.isSelected) return;
@@ -930,7 +931,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
     });
 
     return round(total);
-  }, [watchedItems, productKnowledgeInventoriesMap]);
+  }, [formValues, productKnowledgeInventoriesMap]);
 
   useEffect(() => {
     form.reset({ items: [] }); // Reset form with empty items array

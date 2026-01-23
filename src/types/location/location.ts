@@ -49,6 +49,8 @@ export interface LocationRead extends LocationBase {
   sort_index: number;
 }
 
+export type LocationMinSpec = Omit<LocationRead, "current_encounter">;
+
 export interface LocationWrite extends LocationBase {
   id?: string;
   parent?: string;

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/hover-card";
 import {
   dateFilter,
+  departmentFilter,
   encounterStatusFilter,
   tagFilter,
 } from "@/components/ui/multi-filter/filterConfigs";
@@ -31,8 +32,9 @@ import {
   completedEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { ChevronDown, Tags } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
@@ -44,8 +46,11 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { dateTimeQueryString } from "@/Utils/utils";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { useAtom } from "jotai";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
+
+import { encounterHistoryFiltersAtom } from "@/atoms/encounterFilterAtom";
 
 interface EncounterCardProps {
   encounter: EncounterRead;
@@ -151,11 +156,51 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
 
-  const [status, setStatus] = useState<string>();
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
-  const [tagsBehavior, setTagsBehavior] = useState<string>("any");
-  const [dateFrom, setDateFrom] = useState<Date>();
-  const [dateTo, setDateTo] = useState<Date>();
+  // Use persisted filters from atom
+  const [filters, setFilters] = useAtom(encounterHistoryFiltersAtom);
+
+  // Memoize date objects from ISO strings
+  const dateFrom = useMemo(
+    () => (filters.dateFrom ? new Date(filters.dateFrom) : undefined),
+    [filters.dateFrom],
+  );
+  const dateTo = useMemo(
+    () => (filters.dateTo ? new Date(filters.dateTo) : undefined),
+    [filters.dateTo],
+  );
+
+  // Read directly from sessionStorage on mount to avoid Jotai hydration delay
+  const initialQueryParamsRef = useRef(() => {
+    try {
+      const stored = sessionStorage.getItem("encounter_history_filters");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const selectedTags = parsed.selectedTags ?? [];
+        return {
+          status: parsed.status ? [parsed.status] : undefined,
+          tags: selectedTags.length > 0 ? selectedTags : undefined,
+          tags_behavior: parsed.tagsBehavior || "any",
+          organization: parsed.selectedOrg ? [parsed.selectedOrg] : undefined,
+          created_date:
+            parsed.dateFrom && parsed.dateTo
+              ? { from: new Date(parsed.dateFrom), to: new Date(parsed.dateTo) }
+              : undefined,
+        };
+      }
+    } catch {
+      // Ignore parsing errors
+    }
+    return {};
+  });
+
+  // Compute initial params once
+  const initialQueryParams = useMemo(
+    () =>
+      typeof initialQueryParamsRef.current === "function"
+        ? initialQueryParamsRef.current()
+        : initialQueryParamsRef.current,
+    [],
+  );
 
   const {
     primaryEncounter,
@@ -182,11 +227,12 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
       "infinite-encounters",
       "past",
       patientId,
-      status,
-      selectedTagIds,
-      tagsBehavior,
-      dateFrom,
-      dateTo,
+      filters.status,
+      filters.selectedTags,
+      filters.tagsBehavior,
+      filters.selectedOrg?.id,
+      filters.dateFrom,
+      filters.dateTo,
     ],
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query(encounterApi.list, {
@@ -198,10 +244,13 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
               ? { patient_filter: patientId, facility: facilityId }
               : { patient: patientId }
             : { patient: patientId }),
-          ...(status && { status }),
-          ...(selectedTagIds.length > 0 && {
-            tags: selectedTagIds.join(","),
-            tags_behavior: tagsBehavior,
+          ...(filters.status && { status: filters.status }),
+          ...(filters.selectedTags?.length > 0 && {
+            tags: filters.selectedTags.map((t) => t.id).join(","),
+            tags_behavior: filters.tagsBehavior || "any",
+          }),
+          ...(filters.selectedOrg && {
+            organization: filters.selectedOrg.id,
           }),
           ...(dateFrom && {
             created_date_after: dateTimeQueryString(dateFrom),
@@ -233,45 +282,55 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     }
   }, [inView, hasNextPage, fetchNextPage]);
 
-  const onFilterUpdate = (query: Record<string, unknown>) => {
-    for (const [key, value] of Object.entries(query)) {
-      const filterValue = value as
-        | string
-        | TagConfig[]
-        | { from: Date; to: Date };
-      switch (key) {
-        case "status":
-          setStatus(filterValue as string);
-          break;
-        case "tags":
-          setSelectedTagIds(
-            (filterValue as TagConfig[])?.map((tag) => tag.id) ?? [],
-          );
-          break;
-        case "tags_behavior":
-          setTagsBehavior(filterValue as string);
-          break;
-        case "created_date":
-          if (
-            filterValue &&
-            typeof filterValue === "object" &&
-            "from" in filterValue &&
-            "to" in filterValue
-          ) {
-            setDateFrom(filterValue.from as Date);
-            setDateTo(filterValue.to as Date);
-          } else {
-            setDateFrom(undefined);
-            setDateTo(undefined);
-          }
-          break;
+  const onFilterUpdate = (updateQuery: Record<string, unknown>) => {
+    setFilters((prev) => {
+      const updates = { ...prev };
+      for (const [key, value] of Object.entries(updateQuery)) {
+        const filterValue = value as
+          | string
+          | TagConfig[]
+          | FacilityOrganizationRead
+          | { from: Date; to: Date }
+          | null
+          | undefined;
+        switch (key) {
+          case "status":
+            updates.status = (filterValue as string) || undefined;
+            break;
+          case "tags":
+            updates.selectedTags = (filterValue as TagConfig[]) ?? [];
+            break;
+          case "tags_behavior":
+            updates.tagsBehavior = (filterValue as string) || "any";
+            break;
+          case "organization":
+            updates.selectedOrg =
+              (filterValue as FacilityOrganizationRead) || undefined;
+            break;
+          case "created_date":
+            if (
+              filterValue &&
+              typeof filterValue === "object" &&
+              "from" in filterValue &&
+              "to" in filterValue
+            ) {
+              updates.dateFrom = (filterValue.from as Date)?.toISOString();
+              updates.dateTo = (filterValue.to as Date)?.toISOString();
+            } else {
+              updates.dateFrom = undefined;
+              updates.dateTo = undefined;
+            }
+            break;
+        }
       }
-    }
+      return updates;
+    });
   };
 
-  const filters = [
+  const filterConfigs = [
     encounterStatusFilter("status"),
     tagFilter("tags", TagResource.ENCOUNTER),
+    departmentFilter("organization"),
     dateFilter("created_date"),
   ];
   const {
@@ -280,7 +339,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     handleOperationChange,
     handleClearAll,
     handleClearFilter,
-  } = useMultiFilterState(filters, onFilterUpdate);
+  } = useMultiFilterState(filterConfigs, onFilterUpdate, initialQueryParams);
 
   return (
     <div className="space-y-4 pt-2">
