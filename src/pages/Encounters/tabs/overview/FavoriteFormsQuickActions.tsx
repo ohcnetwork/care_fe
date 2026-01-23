@@ -52,7 +52,6 @@ export const FavoriteFormsQuickActions = (
 
   return (
     <div {...props} className={cn("flex flex-col ", props.className)}>
-      <div className="flex items-center gap-2 text-sm font-medium text-gray-600"></div>
       <div className="flex flex-wrap gap-2">
         {favorites.map((form) => (
           <Link
