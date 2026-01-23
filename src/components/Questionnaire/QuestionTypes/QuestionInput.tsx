@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -5,6 +6,12 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Textarea } from "@/components/ui/textarea";
 
 import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { AppointmentQuestion } from "@/components/Questionnaire/QuestionTypes/AppointmentQuestion";
@@ -28,13 +35,121 @@ import { EncounterQuestion } from "./EncounterQuestion";
 import { FilesQuestion } from "./FileQuestion";
 import { MedicationRequestQuestion } from "./MedicationRequestQuestion";
 import { MedicationStatementQuestion } from "./MedicationStatementQuestion";
-import { NotesInput } from "./NotesInput";
 import { NumberQuestion } from "./NumberQuestion";
 import { QuantityQuestion } from "./QuantityQuestion";
 import { ServiceRequestQuestion } from "./ServiceRequestQuestion";
 import { SymptomQuestion } from "./SymptomQuestion";
 import { TextQuestion } from "./TextQuestion";
 import { TimeQuestion } from "./TimeQuestion";
+
+// Wrapper component for inputs with integrated notes icon
+function InputWithNotes({
+  children,
+  questionnaireResponse,
+  onUpdateNote,
+  disabled,
+}: {
+  children: React.ReactNode;
+  questionnaireResponse: QuestionnaireResponse;
+  onUpdateNote: (note: string) => void;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
+  const [notesOpen, setNotesOpen] = useState(false);
+  const notes = questionnaireResponse.note || "";
+  const hasNotes = notes.length > 0;
+
+  return (
+    <div className="flex items-stretch">
+      <div className="flex-1 bg-white border border-gray-300 rounded-l-md border-r-0 [&>*]:border-0 [&>*]:shadow-none [&>*]:focus-visible:ring-0 [&>*]:rounded-l-md">
+        {children}
+      </div>
+      <Popover open={notesOpen} onOpenChange={setNotesOpen}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            disabled={disabled}
+            className={cn(
+              "flex items-center justify-center w-10 border border-gray-300 rounded-r-md bg-gray-100/20",
+              hasNotes && "bg-orange-50",
+            )}
+          >
+            <CareIcon
+              icon={hasNotes ? "l-notes" : "l-file-medical-alt"}
+              className={cn(
+                "size-4",
+                hasNotes ? "text-orange-600" : "text-gray-500",
+              )}
+            />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent
+          className="w-72 bg-orange-50 border border-orange-200 shadow-lg p-2"
+          align="end"
+        >
+          <Textarea
+            value={notes}
+            onChange={(e) => onUpdateNote(e.target.value)}
+            className="bg-white border-orange-200 focus-visible:border-orange-300 focus-visible:ring-orange-300"
+            placeholder={t("add_notes")}
+            disabled={disabled}
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
+
+// Notes button for repeating questions (standalone icon button)
+function RepeatingNotesButton({
+  questionnaireResponse,
+  onUpdateNote,
+  disabled,
+}: {
+  questionnaireResponse: QuestionnaireResponse;
+  onUpdateNote: (note: string) => void;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
+  const [notesOpen, setNotesOpen] = useState(false);
+  const notes = questionnaireResponse.note || "";
+  const hasNotes = notes.length > 0;
+
+  return (
+    <Popover open={notesOpen} onOpenChange={setNotesOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          disabled={disabled}
+          className={cn(
+            "flex items-center justify-center w-10 h-10 border border-gray-300 rounded-md bg-gray-100/20",
+            hasNotes && "bg-orange-50 border-orange-300",
+          )}
+        >
+          <CareIcon
+            icon={hasNotes ? "l-notes" : "l-file-medical-alt"}
+            className={cn(
+              "size-4",
+              hasNotes ? "text-orange-600" : "text-gray-500",
+            )}
+          />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-72 bg-orange-50 border border-orange-200 shadow-lg p-2"
+        align="end"
+      >
+        <Textarea
+          value={notes}
+          onChange={(e) => onUpdateNote(e.target.value)}
+          className="bg-white border-orange-200 focus-visible:border-orange-300 focus-visible:ring-orange-300"
+          placeholder={t("add_notes")}
+          disabled={disabled}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 interface QuestionInputProps {
   question: Question;
@@ -274,26 +389,19 @@ export function QuestionInput({
               <p className="text-sm text-gray-500">{question.description}</p>
             )}
           </div>
-          <div
-            className={cn(
-              question.answer_value_set
-                ? "flex flex-col gap-4"
-                : "flex flex-row",
-            )}
+          <InputWithNotes
+            questionnaireResponse={questionnaireResponse}
+            onUpdateNote={(note) => {
+              updateQuestionnaireResponseCB(
+                [...questionnaireResponse.values],
+                questionnaireResponse.question_id,
+                note,
+              );
+            }}
+            disabled={disabled}
           >
-            <div className="flex-1 min-w-0">{renderSingleInput(0)}</div>
-            <NotesInput
-              questionnaireResponse={questionnaireResponse}
-              handleUpdateNote={(note) => {
-                updateQuestionnaireResponseCB(
-                  [...questionnaireResponse.values],
-                  questionnaireResponse.question_id,
-                  note,
-                );
-              }}
-              disabled={disabled}
-            />
-          </div>
+            {renderSingleInput(0)}
+          </InputWithNotes>
         </div>
       );
     }
@@ -339,29 +447,19 @@ export function QuestionInput({
                 )}
                 <div
                   className={cn("w-full", {
-                    "flex flex-col md:flex-row":
-                      !question.structured_type && question.type !== "choice",
                     "flex flex-col gap-2": question.type === "choice",
                     "flex-col gap-1":
                       question.repeats || question.type === "text",
                   })}
                 >
-                  <div className="flex-1 min-w-0">
-                    {renderSingleInput(index)}
-                  </div>
-                  {/* Notes are not available for structured questions */}
-                  {!question.structured_type && !question.repeats && (
-                    <NotesInput
-                      className={cn("w-min", {
-                        "bg-white border md:rounded-l-none md:-ml-2 mt-2 md:mt-0":
-                          !(
-                            question.type === "text" ||
-                            question.type === "choice"
-                          ),
-                        "mt-2": question.type === "text",
-                      })}
+                  {/* For basic types (not structured, not text/string, not repeating), use integrated notes */}
+                  {!question.structured_type &&
+                  !question.repeats &&
+                  question.type !== "text" &&
+                  question.type !== "string" ? (
+                    <InputWithNotes
                       questionnaireResponse={questionnaireResponse}
-                      handleUpdateNote={(note) => {
+                      onUpdateNote={(note) => {
                         updateQuestionnaireResponseCB(
                           [...questionnaireResponse.values],
                           questionnaireResponse.question_id,
@@ -369,7 +467,13 @@ export function QuestionInput({
                         );
                       }}
                       disabled={disabled}
-                    />
+                    >
+                      {renderSingleInput(index)}
+                    </InputWithNotes>
+                  ) : (
+                    <div className="flex-1 min-w-0">
+                      {renderSingleInput(index)}
+                    </div>
                   )}
                 </div>
               </div>
@@ -378,20 +482,19 @@ export function QuestionInput({
           );
         })}
         {question.repeats && (
-          <div className="mt-2 flex items-center">
+          <div className="mt-2 flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={handleAddValue}
-              className=""
               disabled={disabled}
             >
               <CareIcon icon="l-plus" className="mr-2 size-4" />
               {t("add_another")}
             </Button>
-            <NotesInput
+            <RepeatingNotesButton
               questionnaireResponse={questionnaireResponse}
-              handleUpdateNote={(note) => {
+              onUpdateNote={(note) => {
                 updateQuestionnaireResponseCB(
                   [...questionnaireResponse.values],
                   questionnaireResponse.question_id,

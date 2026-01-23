@@ -4,14 +4,19 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 import type { TemplateConfig } from "@/types/questionnaire/question";
 
@@ -19,30 +24,37 @@ interface TemplateSelectorProps {
   templates: TemplateConfig[];
   onAddTemplates: (contents: string[]) => void;
   disabled?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function TemplateSelector({
   templates,
   onAddTemplates,
   disabled = false,
+  open: controlledOpen,
+  onOpenChange,
 }: TemplateSelectorProps) {
   const { t } = useTranslation();
-  const [selectedTemplates, setSelectedTemplates] = useState<string[]>([]);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
 
-  const handleAddTemplates = () => {
-    if (selectedTemplates.length === 0) return;
+  // Support both controlled and uncontrolled modes
+  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setIsOpen = (value: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(value);
+    }
+    setInternalOpen(value);
+  };
 
-    const contents = selectedTemplates
-      .map((templateName) => {
-        const template = templates.find((t) => t.name === templateName);
-        return template?.content;
-      })
-      .filter((content): content is string => content !== undefined);
-
-    onAddTemplates(contents);
-    setSelectedTemplates([]);
-    setIsDropdownOpen(false);
+  const handleSelectTemplate = (
+    template: TemplateConfig,
+    keepOpen: boolean,
+  ) => {
+    onAddTemplates([template.content]);
+    if (!keepOpen) {
+      setIsOpen(false);
+    }
   };
 
   if (!templates || templates.length === 0) {
@@ -50,58 +62,65 @@ export function TemplateSelector({
   }
 
   return (
-    <div className="mt-2">
-      <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" disabled={disabled}>
-            <CareIcon icon="l-plus" className="mr-2 size-4" />
-            {t("add_template")}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="start">
-          <DropdownMenuLabel>{t("available_templates")}</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {templates.map((template) => (
-            <div
-              key={template.name}
-              className="flex items-center space-x-3 p-2 hover:bg-gray-100 rounded cursor-pointer"
-              onClick={() => {
-                setSelectedTemplates((prev) =>
-                  prev.includes(template.name)
-                    ? prev.filter((t) => t !== template.name)
-                    : [...prev, template.name],
-                );
-              }}
-            >
-              <Checkbox
-                checked={selectedTemplates.includes(template.name)}
-                onCheckedChange={(checked) => {
-                  setSelectedTemplates((prev) =>
-                    checked
-                      ? [...prev, template.name]
-                      : prev.filter((t) => t !== template.name),
-                  );
-                }}
-              />
-              <span className="text-sm font-medium text-gray-900">
-                {template.name}
-              </span>
-            </div>
-          ))}
-          <DropdownMenuSeparator />
-          <div className="p-1">
-            <Button
-              onClick={handleAddTemplates}
-              disabled={selectedTemplates.length === 0}
-              className="w-full"
-              size="sm"
-            >
-              <CareIcon icon="l-plus" className="mr-2 size-4" />
-              {t("add_template")}
-            </Button>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={disabled}
+          className="h-8 px-3 text-gray-900 hover:bg-transparent"
+        >
+          <CareIcon icon="l-file-upload-alt" className="size-4" />
+          <span className="font-semibold underline">
+            {t("insert_template")}
+          </span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-72 p-0" align="start">
+        <Command>
+          <CommandInput
+            placeholder={t("search_template")}
+            className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
+          />
+          <CommandList>
+            <CommandEmpty>{t("no_templates_found")}</CommandEmpty>
+            <CommandGroup>
+              {templates.map((template) => (
+                <CommandItem
+                  key={template.name}
+                  value={template.name}
+                  onSelect={() => handleSelectTemplate(template, false)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && e.shiftKey) {
+                      e.preventDefault();
+                      handleSelectTemplate(template, true);
+                    }
+                  }}
+                  className="cursor-pointer"
+                >
+                  {template.name}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+        <div className="flex items-center justify-between border-t px-3 py-2 text-xs text-gray-500 mt-2">
+          <div className="flex items-center gap-1">
+            <kbd className="rounded border bg-gray-100 px-1">↑</kbd>
+            <kbd className="rounded border bg-gray-100 px-1">↓</kbd>
+            <span>{t("navigate")}</span>
           </div>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+          <div className="flex items-center gap-1">
+            <kbd className="rounded border bg-gray-100 px-1">⇧</kbd>
+            <kbd className="rounded border bg-gray-100 px-1">↵</kbd>
+            <span>{t("keep_open")}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <kbd className="rounded border bg-gray-100 px-1">↵</kbd>
+            <span>{t("insert")}</span>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
