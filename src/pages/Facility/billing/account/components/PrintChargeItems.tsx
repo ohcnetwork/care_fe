@@ -328,7 +328,10 @@ export const PrintChargeItems = (props: {
                                   <TableHead className="font-bold w-24">
                                     {t("title")}
                                   </TableHead>
-                                  <TableHead className="font-bold text-right w-10">
+                                  <TableHead className="font-bold text-center w-8">
+                                    {t("status")}
+                                  </TableHead>
+                                  <TableHead className="font-bold w-10">
                                     {t("rate")}
                                   </TableHead>
                                   <TableHead className="font-bold text-right w-10">
@@ -453,6 +456,11 @@ export const PrintChargeItems = (props: {
                                                 {chargeItem.title}
                                               </span>
                                             </div>
+                                          </TableCell>
+                                          <TableCell className="text-center w-8">
+                                            <span className="text-xs">
+                                              {t(chargeItem.status)}
+                                            </span>
                                           </TableCell>
                                           <TableCell className="text-right w-10">
                                             <MonetaryDisplay
