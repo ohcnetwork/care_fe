@@ -159,7 +159,7 @@ export default function VerifyPatient() {
                   )}
 
                 <QuickAction
-                  icon={<Wallet className="size-4" />}
+                  icon={<Wallet />}
                   title={t("view_accounts")}
                   actionId="view-the-accounts"
                   href={`/facility/${facilityId}/billing/account?status=active&patient_filter=${patientData.id}&patient_name=${patientData.name}`}
