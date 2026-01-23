@@ -447,9 +447,7 @@ export function InvoiceShow({
                 onClick={() => setIsPaymentSheetOpen(true)}
               >
                 <CareIcon icon="l-plus" className="mr-2 size-4" />
-                {invoice.is_refund
-                  ? t("record_credit_note")
-                  : t("record_payment")}
+                {invoice.is_refund ? t("refund") : t("record_payment")}
                 <ShortcutBadge actionId="record-payment" />
               </Button>
               {isInvoiceRecordPaymentPluginsPresent && !invoice.is_refund && (

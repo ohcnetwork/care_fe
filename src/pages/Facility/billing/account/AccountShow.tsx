@@ -346,7 +346,7 @@ export function AccountShow({
                       }
                     >
                       <CareIcon icon="l-plus" className="size-4" />
-                      {t("add_credit")}
+                      {t("advance_receipt")}
                       <ShortcutBadge actionId="credit-payment-account" />
                     </Button>
                     <DropdownMenu>
@@ -369,7 +369,7 @@ export function AccountShow({
                           }
                         >
                           <CareIcon icon="l-plus" className="mr-2 size-4" />
-                          {t("record_credit_note")}
+                          {t("refund")}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -441,7 +441,7 @@ export function AccountShow({
                         })
                       }
                     >
-                      {t("record_credit_note")}
+                      {t("refund")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

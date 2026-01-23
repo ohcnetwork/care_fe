@@ -688,9 +688,7 @@ export function PaymentReconciliationSheet({
                 <Button
                   type="submit"
                   disabled={isPending || isExtensionsLoading}
-                  aria-label={
-                    isCreditNote ? t("record_credit_note") : t("record_payment")
-                  }
+                  aria-label={isCreditNote ? t("refund") : t("record_payment")}
                 >
                   {isPending ? (
                     <>
@@ -701,7 +699,7 @@ export function PaymentReconciliationSheet({
                       {t("processing_with_dots")}
                     </>
                   ) : isCreditNote ? (
-                    t("record_credit_note")
+                    t("refund")
                   ) : (
                     t("record_payment")
                   )}
