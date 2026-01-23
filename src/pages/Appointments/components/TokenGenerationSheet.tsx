@@ -162,7 +162,7 @@ export function TokenGenerationSheet({
                         )
                       ) : (
                         <SelectItem disabled value="no-options">
-                          {t("no_token_category_avaialable")}
+                          {t("no_token_category_available")}
                         </SelectItem>
                       )}
                     </SelectContent>
