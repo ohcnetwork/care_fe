@@ -533,7 +533,7 @@ export default function ManageResponseTemplatesSheet({
                     </button>
 
                     {/* Action buttons - inline */}
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center gap-4 shrink-0">
                       {isApplying && (
                         <span className="text-xs text-primary-600 flex items-center gap-1">
                           <Loader2 className="size-3 animate-spin" />
@@ -547,7 +547,7 @@ export default function ManageResponseTemplatesSheet({
                       {onTemplateSelect && !isApplied && !isApplying && (
                         <Button
                           size="sm"
-                          variant="ghost"
+                          variant="outline"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleApplyTemplate(template);
