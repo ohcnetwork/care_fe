@@ -58,6 +58,8 @@ export const FormDialog = ({
     queryFn: query(questionnaireApi.list, {
       queryParams: {
         favorite_list: "favorites_form",
+        silent: true,
+        limit: 5,
       },
     }),
   });
