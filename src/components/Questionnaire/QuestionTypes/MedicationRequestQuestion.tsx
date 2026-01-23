@@ -277,6 +277,7 @@ export function MedicationRequestQuestion({
               requested_product_internal: medication.requested_product,
               requested_product: medication.requested_product?.id,
               requester: medication.requester || currentUser,
+              dirty: false, // Existing medications are not dirty
             })),
           },
         ],
@@ -556,7 +557,7 @@ export function MedicationRequestQuestion({
   const addNewMedication = (medication: MedicationRequestCreate) => {
     const newMedications: MedicationRequestCreate[] = [
       ...medications,
-      medication,
+      { ...medication, dirty: true }, // Mark new medication as dirty
     ];
 
     updateQuestionnaireResponseCB(
@@ -592,6 +593,7 @@ export function MedicationRequestQuestion({
           requested_product_internal: requested_product,
           requester: currentUser,
           medication: requested_product?.id ? null : request.medication,
+          dirty: true, // Mark as dirty since it's being added as new
         } as MedicationRequestCreate;
       } else {
         const statement = record as MedicationStatementRead;
@@ -600,6 +602,7 @@ export function MedicationRequestQuestion({
           authored_on: new Date().toISOString(),
           note: statement.note,
           requester: currentUser,
+          dirty: true, // Mark as dirty since it's being added as new
         } as MedicationRequestCreate;
       }
     });
@@ -631,7 +634,7 @@ export function MedicationRequestQuestion({
       // For existing records, update status to entered_in_error
       const newMedications = medications.map((med, i) =>
         i === medicationToDelete
-          ? { ...med, status: "entered_in_error" as const }
+          ? { ...med, status: "entered_in_error" as const, dirty: true }
           : med,
       );
       updateQuestionnaireResponseCB(
@@ -656,7 +659,7 @@ export function MedicationRequestQuestion({
     updates: Partial<MedicationRequestCreate>,
   ) => {
     const newMedications = medications.map((medication, i) =>
-      i === index ? { ...medication, ...updates } : medication,
+      i === index ? { ...medication, ...updates, dirty: true } : medication,
     );
 
     updateQuestionnaireResponseCB(
@@ -703,6 +706,7 @@ export function MedicationRequestQuestion({
       requester: currentUser,
       requested_product: productId, // Use UUID
       requested_product_internal: productKnowledge,
+      dirty: true, // Mark as dirty since it's being added as new
     };
 
     const newMedications: MedicationRequestCreate[] = [
@@ -775,6 +779,7 @@ export function MedicationRequestQuestion({
             requester: currentUser,
             requested_product: productId, // Use UUID
             requested_product_internal: productKnowledge,
+            dirty: true, // Mark as dirty since it's being added as new
           };
         }),
       );
