@@ -516,7 +516,7 @@ export function RequestOrderShow({
 
               <div>
                 <label className="text-sm font-medium text-gray-700">
-                  {t("tags_other")}
+                  {t("tags_proper")}
                 </label>
                 <div className="flex flex-wrap gap-1">
                   <TagAssignmentSheet

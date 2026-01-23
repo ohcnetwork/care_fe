@@ -1,8 +1,11 @@
 import React from "react";
 
-import { GenericSelectedBadge } from "@/components/ui/multi-filter/genericFilter";
-import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { addDays, subDays, subMonths, subWeeks, subYears } from "date-fns";
+
+import { GenericSelectedBadge } from "@/components/ui/multi-filter/genericFilter";
+
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 
 // Generic color palette for cycling through options
 export const COLOR_PALETTE = [
@@ -30,7 +33,11 @@ export interface FilterOption {
   icon?: string;
 }
 
-export type FilterValues = string[] | TagConfig[] | FilterDateRange;
+export type FilterValues =
+  | string[]
+  | TagConfig[]
+  | FilterDateRange
+  | FacilityOrganizationRead[];
 
 export type FilterMode = "single" | "multi";
 
@@ -39,6 +46,9 @@ export type DateFilterMeta = {
 };
 export type TagFilterMeta = {
   resource: TagResource;
+};
+export type DepartmentFilterMeta = {
+  facilityId?: string;
 };
 
 export interface BaseFilterConfig {
@@ -74,10 +84,16 @@ export interface DateFilterConfig extends BaseFilterConfig {
   meta: DateFilterMeta;
 }
 
+export interface DepartmentFilterConfig extends BaseFilterConfig {
+  type: "department";
+  meta: DepartmentFilterMeta;
+}
+
 export type FilterConfig =
   | CommandFilterConfig
   | TagFilterConfig
-  | DateFilterConfig;
+  | DateFilterConfig
+  | DepartmentFilterConfig;
 
 export interface OperationConfig {
   selectedOperation: Operation | null;
@@ -127,7 +143,7 @@ function defaultGetOperations(_selected: FilterValues) {
 export function createFilterConfig(
   key: string,
   label: string,
-  type: "command" | "tag" | "date",
+  type: "command" | "tag" | "date" | "department",
   options: FilterOption[],
   meta?: {
     resource?: TagResource;
@@ -184,6 +200,12 @@ export function createFilterConfig(
         type: "tag",
         meta: { resource },
       } as TagFilterConfig;
+    case "department":
+      return {
+        ...baseConfig,
+        type: "department",
+        meta: {},
+      } as DepartmentFilterConfig;
     case "command":
       return {
         ...baseConfig,

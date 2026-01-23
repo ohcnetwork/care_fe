@@ -329,7 +329,10 @@ export default function MedicationReturnShow({
 
             {deliveryOrder.status === DeliveryOrderStatus.draft && (
               <Button variant="outline" asChild>
-                <Link href={`${basePath}/order/${deliveryOrderId}/edit`}>
+                <Link
+                  basePath="/"
+                  href={`${basePath}/order/${deliveryOrderId}/edit`}
+                >
                   <Edit /> {t("edit")}
                   <ShortcutBadge actionId="edit-order" />
                 </Link>
@@ -408,7 +411,7 @@ export default function MedicationReturnShow({
         {/* Medication Return Details */}
         <Card>
           <CardContent className="space-y-1 p-4">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
               {deliveryOrder.patient && (
                 <div>
                   <label className="text-sm font-medium text-gray-700">

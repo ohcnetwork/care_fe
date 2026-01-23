@@ -1,11 +1,23 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowUpRightSquare, ReceiptTextIcon } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ArrowUpRightSquare,
+  CheckCircle,
+  MoreVertical,
+  ReceiptTextIcon,
+} from "lucide-react";
 import { navigate } from "raviger";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -44,6 +56,7 @@ import {
   TagResource,
 } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime, formatName } from "@/Utils/utils";
@@ -118,6 +131,28 @@ export default function MedicationRequestList({
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
       },
     }),
+  });
+
+  const { mutate: completePrescription } = useMutation({
+    mutationFn: ({
+      patientId,
+      prescriptionId,
+    }: {
+      patientId: string;
+      prescriptionId: string;
+    }) =>
+      mutate(prescriptionApi.update, {
+        pathParams: { patientId, id: prescriptionId },
+      })({ status: "completed" }),
+    onSuccess: () => {
+      toast.success(t("prescription_marked_as_completed"));
+      queryClient.invalidateQueries({
+        queryKey: ["prescriptionQueue", facilityId, qParams],
+      });
+    },
+    onError: () => {
+      toast.error(t("prescription_marking_complete_failed"));
+    },
   });
 
   return (
@@ -311,6 +346,27 @@ export default function MedicationRequestList({
                         <ArrowUpRightSquare strokeWidth={1.5} />
                         {t("see_prescription")}
                       </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() =>
+                              completePrescription({
+                                patientId: item.encounter.patient.id,
+                                prescriptionId: item.id,
+                              })
+                            }
+                            disabled={item.status !== "active"}
+                          >
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            {t("mark_prescription_complete")}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </TableCell>
                 </TableRow>

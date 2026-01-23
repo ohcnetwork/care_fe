@@ -98,6 +98,7 @@ export interface PaymentReconciliationCreate extends Omit<
   account: string;
   is_credit_note?: boolean;
   location?: string;
+  extensions?: Record<string, Record<string, unknown>>;
 }
 
 export type PaymentReconciliationUpdate = Omit<PaymentReconciliationBase, "id">;
@@ -109,6 +110,7 @@ export interface PaymentReconciliationRead extends PaymentReconciliationBase {
   location: LocationRead | null;
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
+  extensions?: Record<string, Record<string, unknown>>;
 }
 
 export interface PaymentReconciliationCancel {

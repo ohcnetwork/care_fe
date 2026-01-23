@@ -278,7 +278,6 @@
     transform-origin: top left;
   }
 
-
   /* Print-specific logo sizing */
   .print-logo-small {
     max-width: 80px !important;
@@ -371,8 +370,6 @@
       margin: 0 !important;
       overflow: hidden !important;
     }
-
-
 
     /* Auto-fit content to page width */
     #section-to-print.print-fit-page {

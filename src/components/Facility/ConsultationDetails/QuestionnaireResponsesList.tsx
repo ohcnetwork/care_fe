@@ -189,13 +189,13 @@ function QuestionGroup({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-7 text-xs shrink-0"
+                    className="h-6 text-xs shrink-0 px-2"
                   >
                     {t("see_note")}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="max-w-[90vw] p-4">
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                <PopoverContent className="max-w-[90vw] p-3">
+                  <p className="text-xs text-gray-700 whitespace-pre-wrap">
                     {response.note}
                   </p>
                 </PopoverContent>
@@ -208,13 +208,13 @@ function QuestionGroup({
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg px-4 py-2">
-      <h3 className="text-base font-semibold text-gray-900 border-b border-gray-200 pb-1 mb-1">
+    <div className="border border-gray-200 rounded-md px-3 py-1.5">
+      <h3 className="text-sm font-semibold text-gray-900 border-b border-gray-200 pb-1 mb-1">
         {group.text}
       </h3>
       <div
         className={cn("w-full", {
-          "grid md:grid-cols-2 grid-cols-1 gap-8": shouldUseTwoColumns,
+          "grid md:grid-cols-2 grid-cols-1 gap-4": shouldUseTwoColumns,
         })}
       >
         {leftQuestions.length > 0 && (
@@ -261,7 +261,7 @@ function PrintButton({ item }: { item: QuestionnaireResponse }) {
         <Button
           variant="ghost"
           size="icon"
-          className="hover:bg-transparent text-gray-500 hover:text-gray-500"
+          className="h-7 w-7 hover:bg-gray-100 text-gray-500 hover:text-gray-700"
         >
           <Printer className="size-4" />
         </Button>
@@ -308,7 +308,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
         result.push(
           <div
             key={`group-${result.length}`}
-            className="border border-gray-200 rounded-lg px-4 py-2"
+            className="border border-gray-200 rounded-md px-3 py-1.5"
           >
             <div className="w-full">
               <Table className="table-fixed w-full">
@@ -367,13 +367,13 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    className="h-7 text-xs shrink-0"
+                                    className="h-6 text-xs shrink-0 px-2"
                                   >
                                     {t("see_note")}
                                   </Button>
                                 </PopoverTrigger>
-                                <PopoverContent className="max-w-[90vw] p-4">
-                                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                                <PopoverContent className="max-w-[90vw] p-3">
+                                  <p className="text-xs text-gray-700 whitespace-pre-wrap">
                                     {response.note}
                                   </p>
                                 </PopoverContent>
@@ -417,23 +417,23 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
   };
 
   return (
-    <div className="w-full p-3">
+    <div className="w-full">
       <div
         className={cn(
-          "grid gap-6",
+          "grid gap-3",
           shouldUseTwoColumns ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1",
         )}
       >
         {/* Left Column */}
-        <div className="space-y-3">{renderColumn(leftGroups)}</div>
+        <div className="space-y-2">{renderColumn(leftGroups)}</div>
 
         {/* Right Column */}
         {shouldUseTwoColumns && (
-          <div className="space-y-3">{renderColumn(rightGroups)}</div>
+          <div className="space-y-2">{renderColumn(rightGroups)}</div>
         )}
       </div>
 
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between border-t border-gray-200 mt-8 pt-4 text-sm text-gray-500 gap-2">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between border-gray-200 pt-2 text-xs text-gray-500">
         <div>
           <span className="text-gray-600">{t("filed_by")}</span>{" "}
           <span className="font-medium text-gray-700">
@@ -470,13 +470,14 @@ export function ResponseCard({
       : item.questionnaire?.title || "";
 
   return (
-    <Card className="shadow-none border rounded-lg">
-      <CardHeader className="flex flex-row items-center pb-2">
+    <Card className="shadow-none border rounded-md">
+      <CardHeader className="flex flex-row items-center py-2 px-3">
         {showTitle && (
           <CardTitle
             className={cn(
-              "text-lg font-medium",
-              onTitleClick && "cursor-pointer hover:bg-gray-100 rounded p-2",
+              "text-base font-medium",
+              onTitleClick &&
+                "cursor-pointer hover:bg-gray-100 rounded px-1.5 py-0.5",
             )}
             onClick={() => {
               if (item.questionnaire?.id && onTitleClick) {
@@ -493,7 +494,7 @@ export function ResponseCard({
           </div>
         )}
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-3 pb-3 pt-0">
         <ResponseCardContent item={item} />
       </CardContent>
     </Card>
@@ -556,25 +557,25 @@ export default function QuestionnaireResponsesList({
   }, [inView, hasNextPage, fetchNextPage]);
 
   return (
-    <div className="gap-4">
+    <div>
       <div className="max-w-full">
         {isLoading ? (
-          <div className="grid gap-5">
+          <div className="grid gap-3">
             <CardListSkeleton count={RESULTS_PER_PAGE_LIMIT} />
           </div>
         ) : responses.length === 0 ? (
           <Card
             className={cn(
-              "p-6",
+              "p-4",
               isPrintPreview && "shadow-none border-gray-200",
             )}
           >
-            <div className="text-lg font-medium text-gray-500">
+            <div className="text-sm font-medium text-gray-500">
               {t("no_responses_found")}
             </div>
           </Card>
         ) : (
-          <ul className="grid gap-4">
+          <ul className="grid gap-3">
             {responses.map((item: QuestionnaireResponse) => (
               <li key={item.id}>
                 {renderItem ? (
@@ -590,7 +591,7 @@ export default function QuestionnaireResponsesList({
             ))}
 
             {!isPrintPreview && hasNextPage && (
-              <li ref={ref} className="flex justify-center py-4">
+              <li ref={ref} className="flex justify-center py-2">
                 {isFetchingNextPage && (
                   <CardListSkeleton count={RESULTS_PER_PAGE_LIMIT} />
                 )}
