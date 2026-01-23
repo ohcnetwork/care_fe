@@ -26,7 +26,6 @@ import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconc
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import accountApi from "@/types/billing/account/accountApi";
 import {
-  CHARGE_ITEM_STATUS_COLORS,
   ChargeItemRead,
   ChargeItemStatus,
 } from "@/types/billing/chargeItem/chargeItem";
@@ -41,7 +40,6 @@ import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/pa
 import { add, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
-import { Badge } from "@/components/ui/badge";
 
 interface DetailRowProps {
   label: string;
@@ -460,16 +458,9 @@ export const PrintChargeItems = (props: {
                                             </div>
                                           </TableCell>
                                           <TableCell className="text-center w-8">
-                                            <Badge
-                                              variant={
-                                                CHARGE_ITEM_STATUS_COLORS[
-                                                  chargeItem.status
-                                                ]
-                                              }
-                                              className="text-xs py-0 px-1"
-                                            >
+                                            <span className="text-xs">
                                               {t(chargeItem.status)}
-                                            </Badge>
+                                            </span>
                                           </TableCell>
                                           <TableCell className="text-right w-10">
                                             <MonetaryDisplay
