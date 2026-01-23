@@ -1,5 +1,5 @@
 import { MedicationRequest } from "@/types/emr/medicationRequest/medicationRequest";
-import { ServiceRequestUpdateSpec } from "@/types/emr/serviceRequest/serviceRequest";
+import { BaseServiceRequestSpec } from "@/types/emr/serviceRequest/serviceRequest";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { UserReadMinimal } from "@/types/user/user";
 
@@ -9,9 +9,15 @@ interface QuestionnaireAnswer {
   meta: Record<string, unknown>;
 }
 
-interface ServiceRequestTemplateSpec {
+/**
+ * Service request data stored in templates.
+ * Omits instance-specific fields (id, encounter) that will be set when applied.
+ */
+export interface ServiceRequestTemplateSpec {
   slug: string;
-  service_request: ServiceRequestUpdateSpec;
+  service_request: Omit<BaseServiceRequestSpec, "id"> & {
+    locations?: string[];
+  };
 }
 
 interface TemplateData {
@@ -29,7 +35,7 @@ interface QuestionnaireResponseTemplateBaseSpec {
 }
 
 export interface QuestionnaireResponseTemplateCreateSpec extends QuestionnaireResponseTemplateBaseSpec {
-  questionnaire: string;
+  questionnaire?: string;
   facility?: string;
   users: string[];
   facility_organizations: string[];

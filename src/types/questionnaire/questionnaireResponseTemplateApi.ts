@@ -14,6 +14,7 @@ export const questionnaireResponseTemplateApi = {
     TQuery: Type<{
       questionnaire?: string; // questionnaire external_id
       name?: string;
+      key_filter?: "medication_request" | "service_request" | "questionnaire";
       limit?: number;
       offset?: number;
     }>(),

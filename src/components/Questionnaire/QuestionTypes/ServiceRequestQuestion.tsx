@@ -42,7 +42,10 @@ import {
 } from "@/types/emr/serviceRequest/serviceRequest";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
-import { QuestionnaireResponseTemplateReadSpec } from "@/types/questionnaire/questionnaireResponseTemplate";
+import {
+  QuestionnaireResponseTemplateReadSpec,
+  ServiceRequestTemplateSpec,
+} from "@/types/questionnaire/questionnaireResponseTemplate";
 import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
 import { Decimal } from "decimal.js";
 
@@ -70,7 +73,6 @@ interface ServiceRequestQuestionProps {
   ) => void;
   disabled?: boolean;
   errors?: QuestionValidationError[];
-  questionnaireId?: string;
   questionnaireSlug?: string;
 }
 
@@ -318,7 +320,6 @@ export function ServiceRequestQuestion({
   facilityId,
   encounterId,
   errors,
-  questionnaireId,
   questionnaireSlug,
 }: ServiceRequestQuestionProps) {
   const { t } = useTranslation();
@@ -461,19 +462,180 @@ export function ServiceRequestQuestion({
     setSelectedActivityDefinition(def?.slug || null);
   };
 
-  const handleApplyTemplate = (
+  // Handler for adding a single service request from a template
+  const handleAddSingleServiceRequest = async (
+    templateSR: ServiceRequestTemplateSpec,
+  ) => {
+    try {
+      const activityDefinitionData = await query(
+        activityDefinitionApi.retrieveActivityDefinition,
+        {
+          pathParams: {
+            facilityId: facilityId,
+            activityDefinitionSlug: templateSR.slug,
+          },
+        },
+      )({ signal: new AbortController().signal });
+
+      // Store the activity definition in the map
+      setActivityDefinitionsMap((prev) => ({
+        ...prev,
+        [templateSR.slug]: activityDefinitionData,
+      }));
+
+      const newServiceRequest: ServiceRequestApplyActivityDefinitionSpec = {
+        service_request: {
+          title:
+            templateSR.service_request?.title || activityDefinitionData.title,
+          status: templateSR.service_request?.status || Status.active,
+          intent: templateSR.service_request?.intent || Intent.order,
+          priority: templateSR.service_request?.priority || Priority.routine,
+          category:
+            templateSR.service_request?.category ||
+            activityDefinitionData.classification,
+          do_not_perform: templateSR.service_request?.do_not_perform ?? false,
+          note: templateSR.service_request?.note || null,
+          code: templateSR.service_request?.code || activityDefinitionData.code,
+          body_site:
+            templateSR.service_request?.body_site ||
+            activityDefinitionData.body_site,
+          occurance: templateSR.service_request?.occurance || null,
+          patient_instruction:
+            templateSR.service_request?.patient_instruction || null,
+          requester: currentUser,
+          locations:
+            templateSR.service_request?.locations ||
+            activityDefinitionData.locations?.map((location) => location.id) ||
+            [],
+        },
+        activity_definition: templateSR.slug,
+        encounter: encounterId,
+      };
+
+      const newServiceRequests = [...serviceRequests, newServiceRequest];
+      setServiceRequests(newServiceRequests);
+      updateQuestionnaireResponseCB(
+        [{ type: "service_request", value: newServiceRequests }],
+        questionnaireResponse.question_id,
+      );
+    } catch {
+      toast.error(t("failed_to_add_service_request"));
+    }
+  };
+
+  const handleApplyTemplate = async (
     template: QuestionnaireResponseTemplateReadSpec,
   ) => {
     const templateServiceRequests = template.template_data?.service_request;
     if (!templateServiceRequests?.length) {
       toast.info(t("template_has_no_service_requests"));
-      return;
+      throw new Error("Template has no service requests");
     }
 
-    // Note: Service requests in templates are stored differently (with slug and service_request)
-    // We need to fetch the activity definitions for each and create proper service requests
-    // For now, we'll display an info message that this feature requires activity definition lookup
-    toast.info(t("service_request_templates_coming_soon"));
+    try {
+      // Fetch activity definitions for each service request in the template
+      const newServiceRequestsPromises = templateServiceRequests.map(
+        async (templateSR) => {
+          try {
+            const activityDefinitionData = await query(
+              activityDefinitionApi.retrieveActivityDefinition,
+              {
+                pathParams: {
+                  facilityId: facilityId,
+                  activityDefinitionSlug: templateSR.slug,
+                },
+              },
+            )({ signal: new AbortController().signal });
+
+            // Store the activity definition in the map
+            setActivityDefinitionsMap((prev) => ({
+              ...prev,
+              [templateSR.slug]: activityDefinitionData,
+            }));
+
+            // Create the service request, merging template data with activity definition
+            const newServiceRequest: ServiceRequestApplyActivityDefinitionSpec =
+              {
+                service_request: {
+                  title:
+                    templateSR.service_request?.title ||
+                    activityDefinitionData.title,
+                  status: templateSR.service_request?.status || Status.active,
+                  intent: templateSR.service_request?.intent || Intent.order,
+                  priority:
+                    templateSR.service_request?.priority || Priority.routine,
+                  category:
+                    templateSR.service_request?.category ||
+                    activityDefinitionData.classification,
+                  do_not_perform:
+                    templateSR.service_request?.do_not_perform ?? false,
+                  note: templateSR.service_request?.note || null,
+                  code:
+                    templateSR.service_request?.code ||
+                    activityDefinitionData.code,
+                  body_site:
+                    templateSR.service_request?.body_site ||
+                    activityDefinitionData.body_site,
+                  occurance: templateSR.service_request?.occurance || null,
+                  patient_instruction:
+                    templateSR.service_request?.patient_instruction || null,
+                  requester: currentUser,
+                  locations:
+                    templateSR.service_request?.locations ||
+                    activityDefinitionData.locations?.map(
+                      (location) => location.id,
+                    ) ||
+                    [],
+                },
+                activity_definition: templateSR.slug,
+                encounter: encounterId,
+              };
+
+            return newServiceRequest;
+          } catch {
+            // If fetching fails, skip this service request but continue with others
+            return null;
+          }
+        },
+      );
+
+      const results = await Promise.all(newServiceRequestsPromises);
+      const validServiceRequests = results.filter(
+        (sr): sr is ServiceRequestApplyActivityDefinitionSpec => sr !== null,
+      );
+
+      if (validServiceRequests.length === 0) {
+        toast.error(t("failed_to_apply_template"));
+        throw new Error("Failed to apply template - no valid service requests");
+      }
+
+      const newServiceRequests = [...serviceRequests, ...validServiceRequests];
+      setServiceRequests(newServiceRequests);
+      updateQuestionnaireResponseCB(
+        [{ type: "service_request", value: newServiceRequests }],
+        questionnaireResponse.question_id,
+      );
+
+      // Show warning if some service requests failed
+      if (validServiceRequests.length < templateServiceRequests.length) {
+        toast.warning(
+          t("template_partially_applied", {
+            applied: validServiceRequests.length,
+            total: templateServiceRequests.length,
+          }),
+        );
+      } else {
+        toast.success(
+          t("template_applied_service_requests", {
+            count: validServiceRequests.length,
+            name: template.name,
+          }),
+        );
+      }
+    } catch (error) {
+      toast.error(t("failed_to_apply_template"));
+      throw error;
+    }
   };
 
   return (
@@ -532,13 +694,33 @@ export function ServiceRequestQuestion({
             translationBaseKey="activity_definition"
           />
         </div>
-        {questionnaireId && questionnaireSlug && (
+        {questionnaireSlug && (
           <ManageResponseTemplatesSheet
-            questionnaireId={questionnaireId}
             questionnaireSlug={questionnaireSlug}
             facilityId={facilityId}
             onTemplateSelect={handleApplyTemplate}
+            onServiceRequestSelect={handleAddSingleServiceRequest}
             disabled={disabled}
+            key_filter="service_request"
+            currentServiceRequests={serviceRequests.map(
+              (sr): ServiceRequestTemplateSpec => ({
+                slug: sr.activity_definition,
+                service_request: {
+                  title: sr.service_request.title,
+                  status: sr.service_request.status,
+                  intent: sr.service_request.intent,
+                  priority: sr.service_request.priority,
+                  category: sr.service_request.category,
+                  code: sr.service_request.code,
+                  do_not_perform: sr.service_request.do_not_perform,
+                  body_site: sr.service_request.body_site,
+                  note: sr.service_request.note,
+                  patient_instruction: sr.service_request.patient_instruction,
+                  occurance: sr.service_request.occurance,
+                  locations: sr.service_request.locations,
+                },
+              }),
+            )}
           />
         )}
       </div>

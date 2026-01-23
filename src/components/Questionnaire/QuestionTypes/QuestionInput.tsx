@@ -291,7 +291,6 @@ export function QuestionInput({
                   {...commonProps}
                   facilityId={facilityId}
                   encounterId={encounterId}
-                  questionnaireId={questionnaireId}
                   questionnaireSlug={questionnaireSlug}
                 />
               );
