@@ -14,6 +14,7 @@ import { VitalsList } from "@/components/Patient/vitals/list";
 import { ObservationPlotConfig } from "@/types/emr/observation/observation";
 
 import { ClinicalHistoryOverview } from "@/pages/Encounters/tabs/overview/clinical-history-overview";
+import { FavoriteFormsQuickActions } from "@/pages/Encounters/tabs/overview/FavoriteFormsQuickActions";
 import { FormSubmissionDrafts } from "@/pages/Encounters/tabs/overview/FormSubmissionDrafts";
 import { QuickActions } from "@/pages/Encounters/tabs/overview/quick-actions";
 import { SummaryPanel } from "@/pages/Encounters/tabs/overview/summary-panel";
@@ -45,8 +46,9 @@ export const EncounterOverviewTab = () => {
     <div className="flex gap-3 @max-md:w-full">
       {canReadClinicalData ? (
         <div className="flex-1 xl:pr-3 overflow-y-auto xl:h-[calc(100vh-14rem-var(--encounter-header-offset))]">
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4">
             {canWrite && <QuickActions />}
+            {canWrite && <FavoriteFormsQuickActions />}
             {<ClinicalHistoryOverview />}
             <div className="xl:hidden">
               <SummaryPanel />
