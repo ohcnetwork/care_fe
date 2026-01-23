@@ -150,22 +150,20 @@ export function TokenGenerationSheet({
                     <SelectValue placeholder={t("select_token_category")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectContent>
-                      {tokenCategories?.results?.length ? (
-                        tokenCategories.results.map(
-                          (category: TokenCategoryRead) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              {category.name}
-                              {category.default && ` (${t("default")})`}
-                            </SelectItem>
-                          ),
-                        )
-                      ) : (
-                        <SelectItem disabled value="no-options">
-                          {t("no_token_category_available")}
-                        </SelectItem>
-                      )}
-                    </SelectContent>
+                    {tokenCategories?.results?.length ? (
+                      tokenCategories.results.map(
+                        (category: TokenCategoryRead) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                            {category.default && ` (${t("default")})`}
+                          </SelectItem>
+                        ),
+                      )
+                    ) : (
+                      <SelectItem disabled value="no-options">
+                        {t("no_token_category_available")}
+                      </SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
