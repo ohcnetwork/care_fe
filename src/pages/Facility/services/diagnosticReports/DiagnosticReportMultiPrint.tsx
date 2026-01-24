@@ -1,23 +1,27 @@
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import careConfig from "@careConfig";
 import { useQueries } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Loader } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import PrintFooter from "@/components/Common/PrintFooter";
 
-import query from "@/Utils/request/query";
-import { formatName, formatPatientAge } from "@/Utils/utils";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import { ObservationStatus } from "@/types/emr/observation/observation";
+import { FileReadMinimal } from "@/types/files/file";
+import fileApi from "@/types/files/fileApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 
 import { DiagnosticReportResultsTable } from "./components/DiagnosticReportResultsTable";
+import { ImageRenderer, PDFRenderer } from "./components/FileRenderers";
 
 interface CategoryGroup {
   category: {
@@ -53,10 +57,116 @@ export default function DiagnosticReportMultiPrint({
     })),
   });
 
-  const isLoading = reportQueries.some((q) => q.isLoading);
+  const isLoadingReports = reportQueries.some((q) => q.isLoading);
   const reports = reportQueries
     .map((q) => q.data)
     .filter((r): r is DiagnosticReportRead => !!r);
+
+  // Fetch files for all reports in parallel
+  const fileQueries = useQueries({
+    queries: reports.map((report) => ({
+      queryKey: ["files", "diagnostic_report", report.id],
+      queryFn: query(fileApi.list, {
+        queryParams: {
+          file_type: "diagnostic_report",
+          associating_id: report.id,
+          limit: 100,
+          offset: 0,
+        },
+      }),
+      enabled: !!report.id,
+    })),
+  });
+
+  const isLoadingFiles = fileQueries.some((q) => q.isLoading);
+
+  // Organize files by report ID
+  const filesByReport = useMemo(() => {
+    const map = new Map<string, FileReadMinimal[]>();
+    reports.forEach((report, index) => {
+      const filesData = fileQueries[index]?.data as
+        | PaginatedResponse<FileReadMinimal>
+        | undefined;
+      if (filesData?.results) {
+        map.set(report.id, filesData.results);
+      }
+    });
+    return map;
+  }, [reports, fileQueries]);
+
+  // Store file URLs
+  const [fileUrls, setFileUrls] = useState<Record<string, string>>({});
+  const [isLoadingUrls, setIsLoadingUrls] = useState(false);
+  const fetchedFileIdsRef = useRef<Set<string>>(new Set());
+
+  // Function to get signed URL for a file
+  const getFileUrl = async (file: FileReadMinimal, reportId: string) => {
+    if (!file.id || !reportId) return null;
+
+    try {
+      const data = await query(fileApi.get, {
+        queryParams: {
+          file_type: "diagnostic_report",
+          associating_id: reportId,
+        },
+        pathParams: { fileId: file.id },
+      })({} as any);
+
+      return data?.read_signed_url as string;
+    } catch (error) {
+      console.error("Error fetching signed URL:", error);
+      return null;
+    }
+  };
+
+  // Get all file IDs that need to be fetched
+  const allFileIds = useMemo(() => {
+    const ids: string[] = [];
+    for (const files of filesByReport.values()) {
+      for (const file of files) {
+        if (file.id) ids.push(file.id);
+      }
+    }
+    return ids.sort().join(",");
+  }, [filesByReport]);
+
+  // Fetch signed URLs for all files
+  useEffect(() => {
+    if (isLoadingReports || isLoadingFiles) return;
+    if (filesByReport.size === 0) return;
+    if (!allFileIds) return;
+
+    // Check if we've already fetched these files
+    const currentFileIds = allFileIds.split(",").filter(Boolean);
+    const needsFetch = currentFileIds.some(
+      (id) => !fetchedFileIdsRef.current.has(id),
+    );
+    if (!needsFetch) return;
+
+    const fetchAllUrls = async () => {
+      setIsLoadingUrls(true);
+      const urls: Record<string, string> = {};
+
+      for (const [reportId, files] of filesByReport) {
+        for (const file of files) {
+          if (!file.id) continue;
+          // Skip if already fetched
+          if (fetchedFileIdsRef.current.has(file.id)) continue;
+
+          const url = await getFileUrl(file, reportId);
+          if (url) {
+            urls[file.id] = url;
+            fetchedFileIdsRef.current.add(file.id);
+          }
+        }
+      }
+
+      setFileUrls((prev) => ({ ...prev, ...urls }));
+      setIsLoadingUrls(false);
+    };
+
+    fetchAllUrls();
+  }, [allFileIds, isLoadingReports, isLoadingFiles]);
 
   // Group reports by category (using service_request.category which matches Classification enum)
   const groupedReports = useMemo(() => {
@@ -91,8 +201,36 @@ export default function DiagnosticReportMultiPrint({
     return groups;
   }, [reports, t]);
 
+  // Helper to get PDF and image files for a report
+  const getReportFiles = (reportId: string) => {
+    const files = filesByReport.get(reportId) || [];
+
+    const pdfFiles = files.filter((file) => {
+      if (!file.id || !fileUrls[file.id] || !file.extension || file.is_archived)
+        return false;
+      return file.extension.toLowerCase().endsWith("pdf");
+    });
+
+    const imageFiles = files.filter((file) => {
+      if (!file.id || !fileUrls[file.id] || !file.extension || file.is_archived)
+        return false;
+      const ext = file.extension.toLowerCase();
+      return (
+        ext.endsWith("jpg") ||
+        ext.endsWith("jpeg") ||
+        ext.endsWith("png") ||
+        ext.endsWith("gif") ||
+        ext.endsWith("webp")
+      );
+    });
+
+    return { pdfFiles, imageFiles };
+  };
+
   // Get patient info from first report
   const patient = reports[0]?.encounter?.patient;
+
+  const isLoading = isLoadingReports || isLoadingFiles || isLoadingUrls;
 
   if (isLoading) {
     return (
@@ -202,7 +340,7 @@ export default function DiagnosticReportMultiPrint({
               <div key={group.category.code} className="space-y-4">
                 {/* Category Header */}
                 <h3 className="text-lg font-semibold uppercase text-gray-700 border-b border-gray-300 pb-1">
-                  {group.category.display} {t("results")}
+                  {t(group.category.code)} {t("results")}
                 </h3>
 
                 {/* Combined Results Table - merge all observations from reports in this category */}
@@ -215,50 +353,91 @@ export default function DiagnosticReportMultiPrint({
                   )}
                 />
 
-                {/* Individual Report Details (notes, conclusions, requesters) */}
+                {/* Individual Report Details (notes, conclusions, requesters, files) */}
                 <div className="space-y-4 mt-4">
-                  {group.reports.map((report) => (
-                    <div key={report.id} className="text-sm">
-                      {/* Report Title */}
-                      <div className="font-medium text-gray-700">
-                        {report.code?.display}
-                        {report.requester && (
-                          <span className="text-gray-500 font-normal ml-2">
-                            ({t("requested_by")}: {formatName(report.requester)}
-                            )
-                          </span>
+                  {group.reports.map((report) => {
+                    const { pdfFiles, imageFiles } = getReportFiles(report.id);
+                    const hasFiles =
+                      pdfFiles.length > 0 || imageFiles.length > 0;
+
+                    return (
+                      <div key={report.id} className="text-sm">
+                        {/* Report Title */}
+                        <div className="font-medium text-gray-700">
+                          {report.code?.display}
+                          {report.requester && (
+                            <span className="text-gray-500 font-normal ml-2">
+                              ({t("requested_by")}:{" "}
+                              {formatName(report.requester)})
+                            </span>
+                          )}
+                          {report.created_date && (
+                            <span className="text-gray-500 font-normal ml-2">
+                              -{" "}
+                              {format(
+                                new Date(report.created_date),
+                                "dd-MM-yyyy",
+                              )}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Notes */}
+                        {report.note && (
+                          <div className="mt-1">
+                            <span className="text-gray-500">
+                              {t("notes")}:{" "}
+                            </span>
+                            <span className="whitespace-pre-wrap">
+                              {report.note}
+                            </span>
+                          </div>
+                        )}
+
+                        {report.conclusion && (
+                          <div className="mt-1">
+                            <span className="text-gray-500">
+                              {t("conclusion")}:{" "}
+                            </span>
+                            <span className="whitespace-pre-wrap">
+                              {report.conclusion}
+                            </span>
+                          </div>
+                        )}
+
+                        {hasFiles && (
+                          <div className="mt-4">
+                            {pdfFiles.length > 0 && (
+                              <div className="space-y-4">
+                                {pdfFiles.map((file) => (
+                                  <div key={`pdf-${file.id}`}>
+                                    <PDFRenderer fileUrl={fileUrls[file.id!]} />
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {imageFiles.length > 0 && (
+                              <div className="space-y-4">
+                                {imageFiles.map((file) => (
+                                  <div key={`img-${file.id}`}>
+                                    <ImageRenderer
+                                      fileUrl={fileUrls[file.id!]}
+                                      fileName={file.name}
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         )}
                       </div>
-
-                      {/* Notes */}
-                      {report.note && (
-                        <div className="mt-1">
-                          <span className="text-gray-500">{t("notes")}: </span>
-                          <span className="whitespace-pre-wrap">
-                            {report.note}
-                          </span>
-                        </div>
-                      )}
-
-                      {/* Conclusion */}
-                      {report.conclusion && (
-                        <div className="mt-1">
-                          <span className="text-gray-500">
-                            {t("conclusion")}:{" "}
-                          </span>
-                          <span className="whitespace-pre-wrap">
-                            {report.conclusion}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Footer */}
           <PrintFooter showPrintedBy className="mt-12 pt-4 border-t" />
         </div>
       </PrintPreview>

@@ -2454,6 +2454,7 @@
   "filter_by_patient": "Filter by Patient",
   "filter_by_priority": "Filter by Priority",
   "filter_by_product": "Filter by Product",
+  "filter_by_service_request_category": "Filter by Service Request category",
   "filter_by_status": "Filter by Status",
   "filter_by_tags": "Filter by Tags",
   "filter_by_type": "Filter by Type",

@@ -80,8 +80,16 @@ export function DiagnosticReportPrintSheet({
   };
 
   const selectAll = () => {
-    const allIds = reports.map((report) => report.id);
-    setSelectedReports(new Set(allIds));
+    const filteredIds = (
+      categoryFilter === "all"
+        ? reports
+        : reports.filter(
+            (report) => report.service_request?.category === categoryFilter,
+          )
+    ).map((report) => report.id);
+    const newSelected = new Set(selectedReports);
+    filteredIds.forEach((id) => newSelected.add(id));
+    setSelectedReports(newSelected);
   };
 
   const clearSelection = () => {
@@ -107,9 +115,19 @@ export function DiagnosticReportPrintSheet({
   };
 
   const handlePrint = () => {
-    if (selectedReports.size === 0) return;
+    const filteredIds = (
+      categoryFilter === "all"
+        ? reports
+        : reports.filter(
+            (report) => report.service_request?.category === categoryFilter,
+          )
+    )
+      .filter((report) => selectedReports.has(report.id))
+      .map((report) => report.id);
 
-    const ids = Array.from(selectedReports).join(",");
+    if (filteredIds.length === 0) return;
+
+    const ids = filteredIds.join(",");
     handleOpenChange(false);
     navigate(
       `/facility/${facilityId}/patient/${patientId}/diagnostic_reports/print?ids=${ids}`,
@@ -124,6 +142,11 @@ export function DiagnosticReportPrintSheet({
           (report) => report.service_request?.category === categoryFilter,
         );
 
+  // Count selected reports that are in the current filtered view
+  const selectedInFilterCount = filteredReports.filter((report) =>
+    selectedReports.has(report.id),
+  ).length;
+
   return (
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>{children}</SheetTrigger>
@@ -134,12 +157,12 @@ export function DiagnosticReportPrintSheet({
 
         <div className="flex flex-col gap-4 my-4">
           {/* Category Filter */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-1">
             <span className="text-sm text-gray-600">
-              {t("filter_by_category")}:
+              {t("filter_by_service_request_category")}
             </span>
             <Select value={categoryFilter} onValueChange={handleCategoryChange}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder={t("all_categories")} />
               </SelectTrigger>
               <SelectContent>
@@ -164,13 +187,13 @@ export function DiagnosticReportPrintSheet({
               </Button>
             </div>
             <span className="text-sm text-gray-600">
-              {t("selected_reports_count", { count: selectedReports.size })}
+              {t("selected_reports_count", { count: selectedInFilterCount })}
             </span>
           </div>
 
           {/* Print Button */}
           <Button
-            disabled={selectedReports.size === 0}
+            disabled={selectedInFilterCount === 0}
             onClick={handlePrint}
             className="w-full"
           >
@@ -198,14 +221,13 @@ export function DiagnosticReportPrintSheet({
                   key={report.id}
                   className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-center gap-3">
                     <Checkbox
                       id={`report-${report.id}`}
                       checked={selectedReports.has(report.id)}
                       onCheckedChange={() => toggleReport(report.id)}
-                      className="mt-1"
                     />
-                    <div className="flex flex-1 justify-between items-start">
+                    <div className="flex flex-1 justify-between items-center">
                       <label
                         htmlFor={`report-${report.id}`}
                         className="cursor-pointer flex-1"
