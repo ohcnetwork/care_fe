@@ -97,6 +97,8 @@ export interface ChargeItemRead extends ChargeItemBase {
   performer_actor?: UserReadMinimal;
   created_date: string;
   modified_date: string;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
 }
 
 export interface ChargeItemBatchResponse {
