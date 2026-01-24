@@ -762,6 +762,7 @@ export function AddSupplyDeliveryForm({
                                             enableSearch={true}
                                             multiSelect={false}
                                             className="w-full h-9"
+                                            dontRestrictExpired
                                           />
                                         </FormControl>
                                         <FormMessage />
@@ -780,11 +781,6 @@ export function AddSupplyDeliveryForm({
                                             type="number"
                                             min={1}
                                             {...field}
-                                            onChange={(e) =>
-                                              field.onChange(
-                                                parseInt(e.target.value),
-                                              )
-                                            }
                                           />
                                         </FormControl>
                                         <FormMessage />

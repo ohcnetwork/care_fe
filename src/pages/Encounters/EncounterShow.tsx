@@ -41,6 +41,7 @@ import {
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
+import { LocationTypeIcons } from "@/types/location/location";
 import { entriesOf } from "@/Utils/utils";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -279,9 +280,28 @@ export const EncounterShow = (props: Props) => {
                     )}
                   </h4>
                   <div className="text-sm text-gray-700 space-x-2">
-                    <span className="">{selectedEncounter?.facility.name}</span>
+                    {primaryEncounterId !== selectedEncounterId && (
+                      <>
+                        <span>{selectedEncounter?.facility.name}</span>
+                        <span>|</span>
+                      </>
+                    )}
 
-                    <span>|</span>
+                    {selectedEncounter.current_location && (
+                      <>
+                        <span className="inline-flex items-center gap-1">
+                          {(() => {
+                            const LocationIcon =
+                              LocationTypeIcons[
+                                selectedEncounter.current_location.form
+                              ];
+                            return <LocationIcon className="size-3" />;
+                          })()}
+                          {selectedEncounter.current_location.name}
+                        </span>
+                        <span>|</span>
+                      </>
+                    )}
 
                     <span className="whitespace-nowrap">
                       {selectedEncounter.period.start && (

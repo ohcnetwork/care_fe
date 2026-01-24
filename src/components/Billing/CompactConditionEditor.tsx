@@ -130,141 +130,129 @@ function RenderInput({
 
   // For patient_age with equality operation
   if (metric === "patient_age" && operation === ConditionOperation.equality) {
-    const value = form.getValues("value") as AgeOperationEqualityValue;
+    const value = form.watch("value") as AgeOperationEqualityValue;
     return (
       <div className="flex flex-1 gap-1 justify-between">
-        <FormField
-          control={form.control}
-          name="value.value"
-          render={({ field }) => (
-            <FormItem className="flex-1">
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder={t("value")}
-                  value={value.value ?? ""}
-                  onChange={(e) => {
-                    const inputValue = e.target.value;
-                    const newValue =
-                      inputValue === "" ? undefined : Number(inputValue);
-                    field.onChange(newValue);
-                  }}
-                  className="grow h-9!"
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+        <FormItem className="flex-1">
+          <FormControl>
+            <Input
+              type="number"
+              placeholder={t("value")}
+              value={value.value ?? ""}
+              onChange={(e) => {
+                const inputValue = e.target.value;
+                const newValue =
+                  inputValue === "" ? undefined : Number(inputValue);
+                form.setValue(
+                  "value",
+                  { ...value, value: newValue } as AgeOperationEqualityValue,
+                  { shouldValidate: false, shouldDirty: true },
+                );
+              }}
+              className="grow h-9!"
+            />
+          </FormControl>
+        </FormItem>
 
-        <FormField
-          control={form.control}
-          name="value.value_type"
-          render={({ field }) => (
-            <FormItem className="flex-1">
-              <FormControl>
-                <Select
-                  value={value.value_type || "years"}
-                  onValueChange={(value_type) => {
-                    field.onChange(value_type);
-                  }}
-                >
-                  <SelectTrigger className="h-9!">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CONDITION_AGE_VALUE_TYPES.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {t(`condition_age_value_type__${type}`)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-            </FormItem>
-          )}
-        />
+        <FormItem className="flex-1">
+          <FormControl>
+            <Select
+              value={value.value_type || "years"}
+              onValueChange={(value_type) => {
+                form.setValue(
+                  "value",
+                  { ...value, value_type },
+                  { shouldValidate: false, shouldDirty: true },
+                );
+              }}
+            >
+              <SelectTrigger className="h-9!">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CONDITION_AGE_VALUE_TYPES.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {t(`condition_age_value_type__${type}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormControl>
+        </FormItem>
       </div>
     );
   }
 
   // For patient_age with in_range operation
   if (metric === "patient_age" && operation === ConditionOperation.in_range) {
-    const value = form.getValues("value") as AgeOperationInRangeValue;
+    const value = form.watch("value") as AgeOperationInRangeValue;
     return (
       <div className="flex gap-1">
-        <FormField
-          control={form.control}
-          name="value.min"
-          render={({ field }) => (
-            <FormItem className="flex-1">
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder={t("min")}
-                  value={value.min ?? ""}
-                  onChange={(e) => {
-                    const inputValue = e.target.value;
-                    const min =
-                      inputValue === "" ? undefined : Number(inputValue);
-                    field.onChange(min);
-                  }}
-                  className="grow h-9"
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+        <FormItem className="flex-1">
+          <FormControl>
+            <Input
+              type="number"
+              placeholder={t("min")}
+              value={value.min ?? ""}
+              onChange={(e) => {
+                const inputValue = e.target.value;
+                const min = inputValue === "" ? undefined : Number(inputValue);
+                form.setValue(
+                  "value",
+                  { ...value, min },
+                  { shouldValidate: false, shouldDirty: true },
+                );
+              }}
+              className="grow h-9"
+            />
+          </FormControl>
+        </FormItem>
 
-        <FormField
-          control={form.control}
-          name="value.max"
-          render={({ field }) => (
-            <FormItem className="flex-1">
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder={t("max")}
-                  value={value.max ?? ""}
-                  onChange={(e) => {
-                    const inputValue = e.target.value;
-                    const max =
-                      inputValue === "" ? undefined : Number(inputValue);
-                    field.onChange(max);
-                  }}
-                  className="grow h-9"
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+        <FormItem className="flex-1">
+          <FormControl>
+            <Input
+              type="number"
+              placeholder={t("max")}
+              value={value.max ?? ""}
+              onChange={(e) => {
+                const inputValue = e.target.value;
+                const max = inputValue === "" ? undefined : Number(inputValue);
+                form.setValue(
+                  "value",
+                  { ...value, max },
+                  { shouldValidate: false, shouldDirty: true },
+                );
+              }}
+              className="grow h-9"
+            />
+          </FormControl>
+        </FormItem>
 
-        <FormField
-          control={form.control}
-          name="value.value_type"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Select
-                  value={field.value || "years"}
-                  onValueChange={(value_type) => {
-                    field.onChange(value_type);
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CONDITION_AGE_VALUE_TYPES.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {t(`condition_age_value_type__${type}`)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-            </FormItem>
-          )}
-        />
+        <FormItem>
+          <FormControl>
+            <Select
+              value={value.value_type || "years"}
+              onValueChange={(value_type) => {
+                form.setValue(
+                  "value",
+                  { ...value, value_type },
+                  { shouldValidate: false, shouldDirty: true },
+                );
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CONDITION_AGE_VALUE_TYPES.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {t(`condition_age_value_type__${type}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormControl>
+        </FormItem>
       </div>
     );
   }

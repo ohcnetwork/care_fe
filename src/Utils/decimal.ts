@@ -66,6 +66,13 @@ export function round(value: string | number | Decimal): string {
 }
 
 /**
+ * Round whole numbers to accounting precision
+ */
+export function roundWhole(value: string | number | Decimal): string {
+  return new Decimal(value).toFixed(0);
+}
+
+/**
  * Compare two decimal values
  * Returns: -1 if a < b, 0 if a == b, 1 if a > b
  */
@@ -133,6 +140,9 @@ export function isLessThan(
  * Check if value is zero
  */
 export function isZero(value: string | number | Decimal): boolean {
+  if (value === "") {
+    return false;
+  }
   return new Decimal(value).isZero();
 }
 
@@ -140,6 +150,9 @@ export function isZero(value: string | number | Decimal): boolean {
  * Check if value is positive (> 0)
  */
 export function isPositive(value: string | number | Decimal): boolean {
+  if (value === "") {
+    return false;
+  }
   return new Decimal(value).isPositive() && !new Decimal(value).isZero();
 }
 
@@ -147,6 +160,9 @@ export function isPositive(value: string | number | Decimal): boolean {
  * Check if value is negative (< 0)
  */
 export function isNegative(value: string | number | Decimal): boolean {
+  if (value === "") {
+    return false;
+  }
   return new Decimal(value).isNegative() && !new Decimal(value).isZero();
 }
 
@@ -190,3 +206,13 @@ export const zodDecimal = (options?: {
       message: `Must be at most ${options?.max}`,
     })
     .transform(round);
+
+/**
+ * Absolute value of a decimal value
+ */
+export function abs(value: string | number | Decimal): Decimal {
+  if (value === "") {
+    return new Decimal(0);
+  }
+  return new Decimal(value).abs();
+}

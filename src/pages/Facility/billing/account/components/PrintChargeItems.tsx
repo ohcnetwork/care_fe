@@ -8,6 +8,7 @@ import { formatPhoneNumberIntl } from "react-phone-number-input";
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import Loading from "@/components/Common/Loading";
+import PrintFooter from "@/components/Common/PrintFooter";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -18,8 +19,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-import useAuthUser from "@/hooks/useAuthUser";
 
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconciliation/paymentReconciliation";
@@ -36,7 +35,6 @@ import {
   PaymentReconciliationStatus,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
-import patientApi from "@/types/emr/patient/patientApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
 import { add, round } from "@/Utils/decimal";
@@ -76,18 +74,21 @@ export const PrintChargeItems = (props: {
   const { facilityId, accountId } = props;
   const { facility } = useCurrentFacility();
   const { t } = useTranslation();
-  const currentUser = useAuthUser();
   const [hideCategories, setHideCategories] = useState(false);
   const [hidePaymentTypeGrouping, setHidePaymentTypeGrouping] = useState(false);
   const [summaryMode, setSummaryMode] = useState(false);
   const [hideHeader, setHideHeader] = useState(false);
   const [preserveHeaderSpace, setPreserveHeaderSpace] = useState(true);
+  const [sortByName, setSortByName] = useState(false);
+  const [showCreatedBy, setShowCreatedBy] = useState(false);
 
   const hideCategoryLabel = `${t("hide_category_grouping")}`;
   const hidePaymentTypeLabel = `${t("hide_payment_type_grouping")}`;
   const summaryLabel = `${t("summary")}`;
   const hideHeaderLabel = `${t("hide_header")}`;
   const preserveHeaderSpaceLabel = `${t("preserve_header_space")}`;
+  const sortByNameLabel = `${t("sort_by_name")}`;
+  const showCreatedByLabel = `${t("show_created_by")}`;
 
   const { data: account } = useQuery({
     queryKey: ["account", accountId],
@@ -96,20 +97,13 @@ export const PrintChargeItems = (props: {
     }),
   });
 
-  const { data: patient } = useQuery({
-    queryKey: ["patient", account?.patient?.id],
-    queryFn: query(patientApi.get, {
-      pathParams: { id: account?.patient?.id || "" },
-    }),
-    enabled: !!account?.patient?.id,
-  });
-
   const { data: chargeItems, isLoading } = useQuery({
     queryKey: ["chargeItems", accountId],
     queryFn: query.paginated(chargeItemApi.listChargeItem, {
       pathParams: { facilityId },
       queryParams: {
         account: accountId,
+        status: "billable,billed,paid",
       },
       pageSize: 100,
     }),
@@ -215,6 +209,31 @@ export const PrintChargeItems = (props: {
                 </label>
               </div>
             )}
+
+            <div className="gap-2 flex items-center">
+              <Switch
+                id="sort-by-name"
+                checked={sortByName}
+                onCheckedChange={setSortByName}
+              />
+              <label htmlFor="sort-by-name" className="cursor-pointer text-sm">
+                {sortByNameLabel}
+              </label>
+            </div>
+
+            <div className="gap-2 flex items-center">
+              <Switch
+                id="show-created-by"
+                checked={showCreatedBy}
+                onCheckedChange={setShowCreatedBy}
+              />
+              <label
+                htmlFor="show-created-by"
+                className="cursor-pointer text-sm"
+              >
+                {showCreatedByLabel}
+              </label>
+            </div>
           </>
         )}
       </div>
@@ -231,13 +250,13 @@ export const PrintChargeItems = (props: {
                   {hideHeader && preserveHeaderSpace ? (
                     <div className="mb-4 pb-2 border-b border-gray-200 h-20" />
                   ) : !hideHeader ? (
-                    <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
+                    <div className="flex flex-col sm:flex-row print:flex-row print:items-start justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
                       <img
                         src={careConfig.mainLogo?.dark}
                         alt="Care Logo"
-                        className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2"
+                        className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2 print:mb-0 print:order-2"
                       />
-                      <div className="text-center sm:text-left sm:order-1">
+                      <div className="text-center sm:text-left sm:order-1 print:text-left">
                         <h1 className="text-3xl font-semibold">
                           {facility?.name}
                         </h1>
@@ -264,21 +283,21 @@ export const PrintChargeItems = (props: {
                     <div className="space-y-1">
                       <DetailRow
                         label={t("name")}
-                        value={patient?.name}
+                        value={account?.patient?.name}
                         width="w-16"
                       />
                       <DetailRow
                         label={`${t("age")} / ${t("sex")}`}
                         value={
-                          patient
-                            ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
+                          account?.patient
+                            ? `${formatPatientAge(account.patient, true)}, ${t(`GENDER__${account.patient.gender}`)}`
                             : undefined
                         }
                         width="w-16"
                       />
                       <DetailRow
                         label={`${t("address")}`}
-                        value={patient?.address}
+                        value={account?.patient?.address}
                         width="w-16"
                       />
                     </div>
@@ -288,7 +307,7 @@ export const PrintChargeItems = (props: {
                         value={formatDateTime(new Date(), "DD-MM-YYYY")}
                         width="w-24"
                       />
-                      {patient?.instance_identifiers
+                      {account?.patient?.instance_identifiers
                         ?.filter(
                           ({ config }) =>
                             config.config.use === PatientIdentifierUse.official,
@@ -304,7 +323,8 @@ export const PrintChargeItems = (props: {
                       <DetailRow
                         label={t("mobile_number")}
                         value={
-                          patient && formatPhoneNumberIntl(patient.phone_number)
+                          account?.patient &&
+                          formatPhoneNumberIntl(account.patient.phone_number)
                         }
                         width="w-24"
                       />
@@ -337,7 +357,15 @@ export const PrintChargeItems = (props: {
                                   <TableHead className="font-bold w-24">
                                     {t("title")}
                                   </TableHead>
-                                  <TableHead className="font-bold text-right w-10">
+                                  <TableHead className="font-bold text-center w-8">
+                                    {t("status")}
+                                  </TableHead>
+                                  {showCreatedBy && (
+                                    <TableHead className="font-bold w-16">
+                                      {t("created_by")}
+                                    </TableHead>
+                                  )}
+                                  <TableHead className="font-bold w-10">
                                     {t("rate")}
                                   </TableHead>
                                   <TableHead className="font-bold text-right w-10">
@@ -382,8 +410,13 @@ export const PrintChargeItems = (props: {
                               const rows: React.ReactNode[] = [];
 
                               sortedCategories.forEach((categoryTitle) => {
-                                const items: ChargeItemRead[] =
+                                const baseItems: ChargeItemRead[] =
                                   groups[categoryTitle] ?? [];
+                                const items = sortByName
+                                  ? baseItems.sort((a, b) =>
+                                      a.title.localeCompare(b.title),
+                                    )
+                                  : baseItems;
 
                                 const categoryTotal = add(
                                   ...items.map((i) => i.total_price || 0),
@@ -419,7 +452,7 @@ export const PrintChargeItems = (props: {
                                         className="font-bold hover:bg-transparent"
                                       >
                                         <TableCell
-                                          colSpan={5}
+                                          colSpan={showCreatedBy ? 6 : 5}
                                           className="capitalize"
                                         >
                                           {categoryTitle}
@@ -463,6 +496,19 @@ export const PrintChargeItems = (props: {
                                               </span>
                                             </div>
                                           </TableCell>
+                                          <TableCell className="text-center w-8">
+                                            <span className="text-xs">
+                                              {t(chargeItem.status)}
+                                            </span>
+                                          </TableCell>
+                                          {showCreatedBy && (
+                                            <TableCell className="w-16">
+                                              {
+                                                chargeItem.created_by
+                                                  ?.first_name
+                                              }
+                                            </TableCell>
+                                          )}
                                           <TableCell className="text-right w-10">
                                             <MonetaryDisplay
                                               amount={unitPrice}
@@ -490,7 +536,7 @@ export const PrintChargeItems = (props: {
                                   className="bg-muted/30 font-semibold"
                                 >
                                   <TableCell
-                                    colSpan={5}
+                                    colSpan={showCreatedBy ? 6 : 5}
                                     className="text-right pr-2"
                                   >
                                     {t("net_total")}
@@ -751,24 +797,7 @@ export const PrintChargeItems = (props: {
                   )}
 
                   {/* Footer Section */}
-                  <div className="mt-4 pt-2 border-t border-gray-200 text-sm text-gray-600">
-                    <div className="flex justify-between items-center">
-                      <div className="text-xs">
-                        <span className="font-medium text-xs">
-                          {t("prepared_by")}:{" "}
-                        </span>
-                        <span>{currentUser.username}</span>
-                      </div>
-                      <div className="text-xs">
-                        <span className="font-medium text-xs">
-                          {t("generated_on")}{" "}
-                        </span>
-                        <span>
-                          {formatDateTime(new Date(), "DD-MM-YYYY, hh:mm A")}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                  <PrintFooter className="mt-4 border-t border-gray-200" />
                 </td>
               </tr>
             </tbody>

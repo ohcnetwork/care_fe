@@ -36,6 +36,7 @@ import {
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { formatDoseRange, formatTotalUnits } from "@/components/Medicine/utils";
+import { PatientHeader } from "@/components/Patient/PatientHeader";
 
 import query from "@/Utils/request/query";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
@@ -201,14 +202,12 @@ function MedicationTable({
 interface Props {
   facilityId: string;
   patientId: string;
-  patientName?: string;
   prescriptionId: string;
 }
 
 export default function MedicationDispenseList({
   facilityId,
   patientId,
-  patientName,
   prescriptionId,
 }: Props) {
   const { t } = useTranslation();
@@ -333,7 +332,41 @@ export default function MedicationDispenseList({
 
   return (
     <div>
-      <div className="mb-4 flex flex-col gap-4">
+      {prescription.encounter.patient && (
+        <div className="rounded-none shadow-none bg-gray-100 p-4">
+          <PatientHeader
+            patient={prescription.encounter.patient}
+            facilityId={facilityId}
+          />
+          <div className="flex flex-wrap gap-4 mt-2 text-sm">
+            {prescription.encounter.current_location && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-gray-500">{t("location")}:</span>
+                <span className="font-medium">
+                  {prescription.encounter.current_location.name}
+                </span>
+              </div>
+            )}
+            {prescription.encounter.organizations &&
+              prescription.encounter.organizations.length > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-gray-500">
+                    {t("departments", {
+                      count: prescription.encounter.organizations.length,
+                    })}
+                    :
+                  </span>
+                  <span className="font-medium">
+                    {prescription.encounter.organizations
+                      .map((org) => org.name)
+                      .join(", ")}
+                  </span>
+                </div>
+              )}
+          </div>
+        </div>
+      )}
+      <div className="my-4 flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <div className="flex flex-col lg:flex-row items-stretch gap-2 w-full">
             <div className="w-full lg:w-64">
@@ -376,7 +409,7 @@ export default function MedicationDispenseList({
               className="w-full sm:w-auto border-gray-400 font-semibold"
             >
               <Link
-                href={`/facility/${facilityId}/locations/${locationId}/medication_dispense/?patientId=${patientId}&patient_name=${encodeURIComponent(patientName || "")}`}
+                href={`/facility/${facilityId}/locations/${locationId}/medication_dispense/?patientId=${patientId}&patient_name=${encodeURIComponent(prescription.encounter.patient.name || "")}`}
                 basePath="/"
               >
                 {t("dispenses")}
@@ -400,7 +433,7 @@ export default function MedicationDispenseList({
             <Button
               onClick={() =>
                 navigate(
-                  `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${patientId}/bill`,
+                  `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${patientId}/prescription/${prescriptionId}/bill`,
                 )
               }
               className="w-full sm:w-auto"

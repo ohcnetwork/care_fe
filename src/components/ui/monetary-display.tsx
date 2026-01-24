@@ -61,16 +61,24 @@ function MonetaryDisplay({
 
 function MonetaryAmountInput({
   hideCurrency = false,
+  allowNegative = false,
   ...props
 }: React.ComponentProps<typeof Input> & {
   hideCurrency?: boolean;
+  allowNegative?: boolean;
 }) {
-  const pattern = `^\\d*\\.?\\d{0,${ACCOUNTING_PRECISION}}$`;
+  const pattern = allowNegative
+    ? `^-?\\d*\\.?\\d{0,${ACCOUNTING_PRECISION}}$`
+    : `^\\d*\\.?\\d{0,${ACCOUNTING_PRECISION}}$`;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Allow empty value, numbers with up to ACCOUNTING_PRECISION decimal places
-    if (value === "" || new RegExp(pattern).test(value)) {
+    // Allow empty value, optional negative sign, numbers with up to ACCOUNTING_PRECISION decimal places
+    if (
+      value === "" ||
+      (allowNegative && value === "-") ||
+      new RegExp(pattern).test(value)
+    ) {
       props.onChange?.(e);
     }
   };

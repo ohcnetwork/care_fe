@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { EncounterListRead } from "@/types/emr/encounter/encounter";
 import { PatientListRead } from "@/types/emr/patient/patient";
 import {
   Appointment,
@@ -68,6 +69,7 @@ export type TokenRetrieve = TokenRead & {
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
   booking?: Appointment;
+  encounter?: EncounterListRead;
 } & ScheduleResource;
 
 export function renderTokenNumber(token: TokenRead) {

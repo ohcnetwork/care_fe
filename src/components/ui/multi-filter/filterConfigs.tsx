@@ -6,10 +6,12 @@ import {
   EncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
-import { CalendarFold, CircleDashed, Tag } from "lucide-react";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
+import { Building, CalendarFold, CircleDashed, Tag } from "lucide-react";
 
 import { t } from "i18next";
 import { SelectedDateBadge, getDateOperations } from "./dateFilter";
+import { SelectedDepartmentBadge } from "./departmentFilter";
 import { GenericSelectedBadge } from "./genericFilter";
 import { SelectedTagBadge } from "./tagFilter";
 import {
@@ -207,6 +209,30 @@ export const tagFilter = (
       mode,
       icon: <Tag className="w-4 h-4" />,
       operationKey: "tags_behavior",
+    },
+  );
+
+export const departmentFilter = (
+  key: string = "organization",
+  mode: FilterMode = "single",
+  label?: string,
+) =>
+  createFilterConfig(
+    key,
+    label ? t(label) : t("department"),
+    "department",
+    [],
+    {
+      renderSelected: (selected: FilterValues) => {
+        return (
+          <SelectedDepartmentBadge
+            selected={selected as FacilityOrganizationRead[]}
+          />
+        );
+      },
+      getOperations: () => [{ label: "is" }],
+      mode,
+      icon: <Building className="w-4 h-4" />,
     },
   );
 

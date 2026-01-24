@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import mutate from "@/Utils/request/mutate";
 import accountApi from "@/types/billing/account/accountApi";
+import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
@@ -28,7 +29,8 @@ export type TagEntityType =
   | "service_request"
   | "delivery_order"
   | "request_order"
-  | "account";
+  | "account"
+  | "charge_item_definition";
 
 // Mapping from entity types to tag resources
 const ENTITY_TO_RESOURCE_MAP = {
@@ -40,6 +42,7 @@ const ENTITY_TO_RESOURCE_MAP = {
   delivery_order: TagResource.DELIVERY_ORDER,
   request_order: TagResource.REQUEST_ORDER,
   account: TagResource.ACCOUNT,
+  charge_item_definition: TagResource.CHARGE_ITEM_DEFINITION,
 } as const;
 
 // Configuration for different entity types using their respective API files
@@ -85,6 +88,11 @@ const ENTITY_CONFIG = {
     removeTagsApi: accountApi.removeTags,
     displayName: "account",
   },
+  charge_item_definition: {
+    setTagsApi: chargeItemDefinitionApi.setTags,
+    removeTagsApi: chargeItemDefinitionApi.removeTags,
+    displayName: "charge_item_definition",
+  },
   // TODO: Add more entity configurations here
 
   // charge_item: {
@@ -102,6 +110,7 @@ const ENTITY_CONFIG = {
 interface TagAssignmentSheetProps {
   entityType: TagEntityType;
   entityId: string;
+  pathParamKey?: string; // Key to use for entityId in path params (e.g., 'slug', 'external_id')
   facilityId?: string;
   currentTags: TagConfig[];
   onUpdate: () => void;
@@ -113,6 +122,7 @@ interface TagAssignmentSheetProps {
 export default function TagAssignmentSheet({
   entityType,
   entityId,
+  pathParamKey = "external_id",
   facilityId,
   currentTags,
   onUpdate,
@@ -129,7 +139,7 @@ export default function TagAssignmentSheet({
   const { mutateAsync: setTags, isPending: isSettingTags } = useMutation({
     mutationFn: mutate(entityConfig.setTagsApi, {
       pathParams: {
-        external_id: entityId,
+        [pathParamKey]: entityId,
         ...(facilityId ? { facilityId } : {}),
         ...(patientId ? { patientId } : {}),
       },
@@ -145,9 +155,9 @@ export default function TagAssignmentSheet({
   const { mutateAsync: removeTags, isPending: isRemovingTags } = useMutation({
     mutationFn: mutate(entityConfig.removeTagsApi, {
       pathParams: {
-        external_id: entityId,
-        facilityId: facilityId || "",
-        patientId: patientId || "",
+        [pathParamKey]: entityId,
+        ...(facilityId ? { facilityId } : {}),
+        ...(patientId ? { patientId } : {}),
       },
     }),
     onError: (error: unknown) => {

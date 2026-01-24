@@ -121,7 +121,10 @@ const envSchema = z
     REACT_PAYMENT_LOCATION_REQUIRED: booleanAsStringSchema.optional(),
     REACT_ENCOUNTER_DEFAULT_DATE_FILTER: numberAsString.optional(),
     REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE: booleanAsStringSchema.optional(),
+    REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME:
+      booleanAsStringSchema.optional(),
     REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE: booleanAsStringSchema.optional(),
+    REACT_INVENTORY_EXPIRY_MONTH_OFFSET: numberAsString.optional(),
     REACT_OBSERVATION_PLOTS_CONFIG_URL: z.string().url().optional(),
     REACT_DEFAULT_COUNTRY: z.string().optional(),
     REACT_DEFAULT_COUNTRY_NAME: z.string().optional(),
@@ -200,27 +203,6 @@ const envSchema = z
       });
     }
 
-    if (data.REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG) {
-      // Use REACT_CARE_API_URL for validation, or first URL from map
-      const apiUrl =
-        data.REACT_CARE_API_URL ||
-        (data.REACT_CARE_URL_MAP
-          ? Object.values(data.REACT_CARE_URL_MAP)[0]
-          : null);
-
-      if (apiUrl) {
-        const response = await fetch(
-          `${apiUrl}/api/v1/govt/organization/${data.REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG}/`,
-        );
-        if (!response.ok) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Invalid geo organization",
-            path: ["REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG"],
-          });
-        }
-      }
-    }
     if (
       (data.REACT_SENTRY_DSN && !data.REACT_SENTRY_ENVIRONMENT) ||
       (data.REACT_SENTRY_ENVIRONMENT && !data.REACT_SENTRY_DSN)

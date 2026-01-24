@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import Loading from "@/components/Common/Loading";
+import PrintFooter from "@/components/Common/PrintFooter";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import {
   MonetaryDisplay,
@@ -24,18 +25,19 @@ import {
 import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
-import {
-  ChargeItemRead,
-  MRP_CODE,
-} from "@/types/billing/chargeItem/chargeItem";
-import { InvoiceRead } from "@/types/billing/invoice/invoice";
+import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
+import { InvoiceRead, InvoiceStatus } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
-import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconciliation/paymentReconciliation";
+import {
+  PAYMENT_RECONCILIATION_METHOD_MAP,
+  PaymentReconciliationStatus,
+} from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import { getPartialId } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { add, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 
 type PrintInvoiceProps = {
   facilityId: string;
@@ -109,8 +111,21 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
     );
   };
 
+  const getWatermark = () => {
+    if (invoice.status === InvoiceStatus.cancelled) {
+      return { text: t("cancelled"), color: "red" as const };
+    }
+    if (invoice.status === InvoiceStatus.entered_in_error) {
+      return { text: t("entered_in_error"), color: "red" as const };
+    }
+    return undefined;
+  };
+
   return (
-    <PrintPreview title={`${t("invoice")} ${invoice.number}`}>
+    <PrintPreview
+      title={`${t("invoice")} ${invoice.number}`}
+      watermark={getWatermark()}
+    >
       <div className="max-w-5xl mx-auto">
         {/* Header with Facility Name and Logo */}
         <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
@@ -122,18 +137,16 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                   {facility.address}
                   {facility.phone_number && (
                     <p className="text-gray-500 text-sm">
-                      {facility.phone_number}
+                      {t("phone")}: {facility.phone_number}
                     </p>
                   )}
                 </div>
               )}
             </div>
             <QRCodeSVG
-              value={JSON.stringify({
-                inv: invoiceId,
-              })}
+              value={invoice.account.patient.id}
               size={50}
-              level="M"
+              level="Q"
               marginSize={0}
             />
           </div>
@@ -152,7 +165,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
               {invoice.number}
             </div>
           </div>
-          <div className="text-right">
+          <div className="text-right flex">
             <div className="font-medium text-gray-700 text-sm">
               {t("issue_date")}:
             </div>
@@ -165,16 +178,39 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
         </div>
 
         <div className="space-y-4">
-          <div className="flex  justify-between items-center">
+          <div className="flex justify-between items-center">
             <div>
               <div className="font-medium text-gray-700 text-sm">
                 {t("bill_to")}:
               </div>
               <div>
-                <p className="font-medium text-base ml-2">
+                <p className="font-semibold text-base">
                   {invoice.account.patient.name}
+                  <span className="text-gray-600 ml-2 font-normal">
+                    ({t(`GENDER__${invoice.account.patient.gender}`)},{" "}
+                    {formatPatientAge(invoice.account.patient, true)})
+                  </span>
                 </p>
               </div>
+              {verifiedPatient &&
+                "instance_identifiers" in verifiedPatient &&
+                verifiedPatient.instance_identifiers
+                  .filter(
+                    ({ config }) =>
+                      config.config.use === PatientIdentifierUse.official &&
+                      !config.config.auto_maintained,
+                  )
+                  .map((identifier) => (
+                    <div
+                      key={identifier.config.id}
+                      className="text-base text-gray-700"
+                    >
+                      <span>{identifier.config.config.display}: </span>
+                      <span className="ml-2 font-semibold">
+                        {identifier.value}
+                      </span>
+                    </div>
+                  ))}
             </div>
             <div>
               <div className="flex gap-1 font-medium text-gray-700 text-sm ml-2">
@@ -187,23 +223,6 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                   )}
                 </p>
               </div>
-              {verifiedPatient &&
-                "instance_identifiers" in verifiedPatient &&
-                verifiedPatient.instance_identifiers
-                  .filter(
-                    ({ config }) =>
-                      config.config.use === PatientIdentifierUse.official &&
-                      !config.config.auto_maintained,
-                  )
-                  .map((identifier) => (
-                    <p
-                      key={identifier.config.id}
-                      className="font-medium text-gray-700 text-sm ml-2"
-                    >
-                      <span>{identifier.config.config.display}: </span>
-                      <span className="ml-2">{identifier.value}</span>
-                    </p>
-                  ))}
             </div>
           </div>
 
@@ -215,9 +234,6 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                   <TableHead className={tableHeadClass}>#</TableHead>
                   <TableHead className={cn(tableHeadClass, "text-left")}>
                     {t("item")}
-                  </TableHead>
-                  <TableHead className={tableHeadClass}>
-                    {t("mrp")} ({getCurrencySymbol()})
                   </TableHead>
                   <TableHead className={tableHeadClass}>
                     {t("unit_price")} ({getCurrencySymbol()})
@@ -250,12 +266,6 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                   invoice.charge_items.map((item, index) => {
                     const baseComponent = getBaseComponent(item);
                     const baseAmount = baseComponent?.amount || "0";
-                    const mrpAmount = item.unit_price_components.find(
-                      (c) =>
-                        c.monetary_component_type ===
-                          MonetaryComponentType.informational &&
-                        c.code?.code === MRP_CODE,
-                    )?.amount;
 
                     return (
                       <TableRow
@@ -271,9 +281,6 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                           className={cn(tableCellClass, "font-medium")}
                         >
                           {item.title}
-                        </TableCell>
-                        <TableCell className={cn(tableCellClass, "text-right")}>
-                          <MonetaryDisplay amount={mrpAmount} hideCurrency />
                         </TableCell>
                         <TableCell className={cn(tableCellClass, "text-right")}>
                           <MonetaryDisplay amount={baseAmount} hideCurrency />
@@ -367,7 +374,9 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
           <div
             className={cn(
               "border-x border-gray-300 p-2 -mt-4 border-t-none space-y-2",
-              invoice.payments?.length === 0 && "border-b rounded-b-md",
+              invoice.payments?.filter(
+                (p) => p.status === PaymentReconciliationStatus.active,
+              ).length === 0 && "border-b rounded-b-md",
             )}
           >
             <div className="flex flex-col items-end space-y-2 text-gray-950 font-normal text-sm mb-4">
@@ -472,7 +481,9 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
           </div>
 
           {/* Payments Section */}
-          {invoice.payments?.length > 0 && (
+          {invoice.payments?.filter(
+            (p) => p.status === PaymentReconciliationStatus.active,
+          ).length > 0 && (
             <>
               <div className="border-x border-b border-t border-gray-300 rounded-b-md -mt-4 space-y-2">
                 <Table>
@@ -494,40 +505,46 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {invoice.payments.map((payment, index) => (
-                      <TableRow
-                        key={payment.id}
-                        className="border-b border-gray-200"
-                      >
-                        <TableCell
-                          className={cn(tableCellClass, "text-center")}
+                    {invoice.payments
+                      .filter(
+                        (p) => p.status === PaymentReconciliationStatus.active,
+                      )
+                      .map((payment, index) => (
+                        <TableRow
+                          key={payment.id}
+                          className="border-b border-gray-200"
                         >
-                          {index + 1}
-                        </TableCell>
-                        <TableCell
-                          className={cn(tableCellClass, "font-medium")}
-                        >
-                          {payment.payment_datetime
-                            ? format(
-                                new Date(payment.payment_datetime),
-                                "d MMM yyyy, hh:mm a",
-                              )
-                            : "-"}
-                        </TableCell>
-                        <TableCell className={cn(tableCellClass, "text-left")}>
-                          {PAYMENT_RECONCILIATION_METHOD_MAP[payment.method]}
-                        </TableCell>
-                        <TableCell className={tableCellClass}>
-                          {payment.reference_number}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <MonetaryDisplay
-                            amount={payment.amount}
-                            hideCurrency
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          <TableCell
+                            className={cn(tableCellClass, "text-center")}
+                          >
+                            {index + 1}
+                          </TableCell>
+                          <TableCell
+                            className={cn(tableCellClass, "font-medium")}
+                          >
+                            {payment.payment_datetime
+                              ? format(
+                                  new Date(payment.payment_datetime),
+                                  "d MMM yyyy, hh:mm a",
+                                )
+                              : "-"}
+                          </TableCell>
+                          <TableCell
+                            className={cn(tableCellClass, "text-left")}
+                          >
+                            {PAYMENT_RECONCILIATION_METHOD_MAP[payment.method]}
+                          </TableCell>
+                          <TableCell className={tableCellClass}>
+                            {payment.reference_number}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <MonetaryDisplay
+                              amount={payment.amount}
+                              hideCurrency
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </div>
@@ -556,11 +573,22 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
         )}
 
         {/* Generated Info */}
-        <div className="mt-12 pt-4 border-t text-[10px] text-gray-500 flex justify-between">
-          <p>
-            {t("generated_on")} {format(new Date(), "PPP 'at' p")}
-          </p>
-        </div>
+        <PrintFooter
+          leftContent={
+            <>
+              <span className="font-semibold">{t("created_by")}: </span>
+              {formatName(invoice.created_by)}
+            </>
+          }
+          rightContent={
+            invoice.payments?.[0]?.location?.name ? (
+              <>
+                <span className="font-semibold">{t("location")}: </span>
+                <span>{invoice.payments[0].location.name}</span>
+              </>
+            ) : undefined
+          }
+        />
       </div>
     </PrintPreview>
   );
