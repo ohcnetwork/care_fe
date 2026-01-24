@@ -217,7 +217,7 @@ export default function QuickAddChargeItemsSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-lg flex flex-col p-0 gap-0">
+      <SheetContent className="w-full sm:max-w-lg flex flex-col p-0 gap-0 overflow-y-auto">
         <SheetHeader className="px-6 py-4 border-b">
           <SheetTitle>{t("quick_add")}</SheetTitle>
           <SheetDescription>
