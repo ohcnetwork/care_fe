@@ -34,6 +34,7 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { buildEncounterUrl } from "@/pages/Encounters/utils/utils";
+import { DiagnosticReportPrintSheet } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportPrintSheet";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
 import { ObservationHistorySheet } from "@/pages/Facility/services/serviceRequests/components/ObservationHistorySheet";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
@@ -302,6 +303,7 @@ interface LeftPanelProps {
   selectedReportId?: string;
   selectedActivityDefinition?: string;
   facilityId: string;
+  patientId: string;
   onReportClick: (report: DiagnosticReportRead) => void;
   onActivityDefinitionChange: (activityDefinition: string | undefined) => void;
   scrollRef: (node?: Element | null) => void;
@@ -315,6 +317,7 @@ function LeftPanel({
   selectedReportId,
   selectedActivityDefinition,
   facilityId,
+  patientId,
   onReportClick,
   onActivityDefinitionChange,
   scrollRef,
@@ -340,7 +343,7 @@ function LeftPanel({
 
   return (
     <>
-      <div className="relative w-full pb-2">
+      <div className="relative w-full pb-2 space-y-2">
         <Autocomplete
           value={selectedActivityDefinition || ""}
           onChange={(value) => onActivityDefinitionChange(value || undefined)}
@@ -351,6 +354,18 @@ function LeftPanel({
           inputPlaceholder={t("search")}
           noOptionsMessage={t("no_results_found")}
         />
+        {reports.length > 0 && (
+          <DiagnosticReportPrintSheet
+            reports={reports}
+            facilityId={facilityId}
+            patientId={patientId}
+          >
+            <Button variant="outline" size="sm" className="w-full">
+              <Printer className="h-4 w-4 mr-2" />
+              {t("print_multiple")}
+            </Button>
+          </DiagnosticReportPrintSheet>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -491,6 +506,7 @@ export const EncounterDiagnosticReportsTab = () => {
           selectedReportId={selectedReport?.id}
           selectedActivityDefinition={activityDefinition}
           facilityId={facilityId || ""}
+          patientId={patientId}
           onReportClick={handleReportClick}
           onActivityDefinitionChange={handleActivityDefinitionChange}
           scrollRef={ref}
@@ -520,6 +536,7 @@ export const EncounterDiagnosticReportsTab = () => {
                     selectedReportId={selectedReport?.id}
                     selectedActivityDefinition={activityDefinition}
                     facilityId={facilityId || ""}
+                    patientId={patientId}
                     onReportClick={handleReportClick}
                     onActivityDefinitionChange={handleActivityDefinitionChange}
                     scrollRef={ref}
