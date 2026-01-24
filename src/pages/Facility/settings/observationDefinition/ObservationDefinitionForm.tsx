@@ -154,7 +154,7 @@ function ObservationDefinitionFormContent({
           z.object({
             code: CodeSchema,
             permitted_data_type: z.nativeEnum(QuestionType),
-            permitted_unit: CodeSchema,
+            permitted_unit: CodeSchema.nullable(),
             qualified_ranges: qualifiedRangeSchema.default([]),
           }),
         )
@@ -207,6 +207,7 @@ function ObservationDefinitionFormContent({
             component:
               existingData.component?.map((c) => ({
                 ...c,
+                permitted_unit: c.permitted_unit || null,
                 qualified_ranges:
                   c.qualified_ranges?.map((range, index) => ({
                     ...range,
@@ -329,6 +330,7 @@ function ObservationDefinitionFormContent({
       component: data.component?.map((c) => ({
         ...c,
         qualified_ranges: removeConditionType(c.qualified_ranges || []),
+        permitted_unit: c.permitted_unit || null,
       })),
     };
     if (isEditMode && observationSlug) {
@@ -756,11 +758,7 @@ function ObservationDefinitionFormContent({
                           {
                             code: { code: "", display: "", system: "" },
                             permitted_data_type: QuestionType.quantity,
-                            permitted_unit: {
-                              code: "",
-                              display: "",
-                              system: "",
-                            },
+                            permitted_unit: null,
                             qualified_ranges: [],
                           },
                         ]);
@@ -865,9 +863,7 @@ function ObservationDefinitionFormContent({
                               name={`component.${index}.permitted_unit`}
                               render={({ field }) => (
                                 <FormItem className="flex flex-col gap-1">
-                                  <FormLabel aria-required>
-                                    {t("unit")}
-                                  </FormLabel>
+                                  <FormLabel>{t("unit")}</FormLabel>
                                   <FormControl>
                                     <ValueSetSelect
                                       {...field}
@@ -944,11 +940,7 @@ function ObservationDefinitionFormContent({
                           {
                             code: { code: "", display: "", system: "" },
                             permitted_data_type: QuestionType.quantity,
-                            permitted_unit: {
-                              code: "",
-                              display: "",
-                              system: "",
-                            },
+                            permitted_unit: null,
                             qualified_ranges: [],
                           },
                         ]);
