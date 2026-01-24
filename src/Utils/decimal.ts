@@ -66,6 +66,13 @@ export function round(value: string | number | Decimal): string {
 }
 
 /**
+ * Round whole numbers to accounting precision
+ */
+export function roundWhole(value: string | number | Decimal): string {
+  return new Decimal(value).toFixed(0);
+}
+
+/**
  * Compare two decimal values
  * Returns: -1 if a < b, 0 if a == b, 1 if a > b
  */
@@ -199,3 +206,13 @@ export const zodDecimal = (options?: {
       message: `Must be at most ${options?.max}`,
     })
     .transform(round);
+
+/**
+ * Absolute value of a decimal value
+ */
+export function abs(value: string | number | Decimal): Decimal {
+  if (value === "") {
+    return new Decimal(0);
+  }
+  return new Decimal(value).abs();
+}

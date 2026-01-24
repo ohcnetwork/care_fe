@@ -15,6 +15,7 @@ export enum ExtensionEntityType {
   account = "account",
   encounter = "encounter",
   patient = "patient",
+  payment_reconciliation = "payment_reconciliation",
   supply_delivery = "supply_delivery",
   supply_delivery_order = "supply_delivery_order",
   product = "product",

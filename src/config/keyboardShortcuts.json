@@ -17,7 +17,8 @@
     { "key": "shift+7", "action": "tab-index-7", "description": "Switch to Tab 7", "when": "always" },
     { "key": "shift+8", "action": "tab-index-8", "description": "Switch to Tab 8", "when": "always" },
     { "key": "shift+9", "action": "tab-index-9", "description": "Switch to Tab 9", "when": "always" },
-    { "key": "shift+f", "action": "scan-patient", "description": "Scan Patient QR Code", "when": "always" }
+    { "key": "shift+f", "action": "scan-patient", "description": "Scan Patient QR Code", "when": "always" },
+    { "key": "arrowDown", "action": "keydown-action", "description": "Move Down", "when": "always" }
   ],
 
   "facility": [
@@ -89,6 +90,7 @@
     { "key": "s", "action": "settle-close-account", "description": "Settle and Close Account", "when": "always" },
     { "key": "i", "action": "create-invoice", "description": "Create Invoice", "when": "always" },
     { "key": "r", "action": "record-payment-account", "description": "Record Payment", "when": "always" },
+    { "key": "c", "action": "credit-payment-account", "description": "Add Credit", "when": "always" },
     { "key": "e", "action": "edit-account", "description": "Edit Account", "when": "always" },
     { "key": "shift+1", "action": "switch-to-invoices-tab", "description": "Switch to Invoices Tab", "when": "always" },
     { "key": "shift+2", "action": "switch-to-charge-items-tab", "description": "Switch to Charge Items Tab", "when": "always" },

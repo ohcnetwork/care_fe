@@ -30,16 +30,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  ChargeItemRead,
-  MRP_CODE,
-} from "@/types/billing/chargeItem/chargeItem";
+import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import {
   INVOICE_STATUS_COLORS,
   InvoiceCreate,
   InvoiceRead,
   InvoiceStatus,
 } from "@/types/billing/invoice/invoice";
+import { PaymentReconciliationStatus } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BadgeCheck,
@@ -274,7 +272,13 @@ export function InvoiceShow({
             : invoice?.issue_date,
       };
 
-      updateInvoice(data);
+      updateInvoice(data, {
+        onSuccess: () => {
+          if (status === InvoiceStatus.issued) {
+            setIsPaymentSheetOpen(true);
+          }
+        },
+      });
     }
   };
 
@@ -304,6 +308,9 @@ export function InvoiceShow({
   const [{ sourceUrl }] = useQueryParams();
 
   const alertButtonText = (() => {
+    if (sourceUrl?.includes("medication_return")) {
+      return t("back_to_medication_return");
+    }
     if (sourceUrl?.includes("medication_dispense")) {
       return t("medication_dispense_invoice_alert");
     }
@@ -440,10 +447,12 @@ export function InvoiceShow({
                 onClick={() => setIsPaymentSheetOpen(true)}
               >
                 <CareIcon icon="l-plus" className="mr-2 size-4" />
-                {t("record_payment")}
+                {invoice.is_refund
+                  ? t("record_credit_note")
+                  : t("record_payment")}
                 <ShortcutBadge actionId="record-payment" />
               </Button>
-              {isInvoiceRecordPaymentPluginsPresent && (
+              {isInvoiceRecordPaymentPluginsPresent && !invoice.is_refund && (
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -669,9 +678,6 @@ export function InvoiceShow({
                       {t("performer")}
                     </TableHead>
                     <TableHead className={tableHeadClass}>
-                      {t("mrp")} ({getCurrencySymbol()})
-                    </TableHead>
-                    <TableHead className={tableHeadClass}>
                       {t("unit_price")} ({getCurrencySymbol()})
                     </TableHead>
                     <TableHead className={tableHeadClass}>{t("qty")}</TableHead>
@@ -717,12 +723,6 @@ export function InvoiceShow({
                     invoice.charge_items.flatMap((item, index) => {
                       const baseComponent = getBaseComponent(item);
                       const baseAmount = baseComponent?.amount || "0";
-                      const mrpAmount = item.unit_price_components.find(
-                        (c) =>
-                          c.monetary_component_type ===
-                            MonetaryComponentType.informational &&
-                          c.code?.code === MRP_CODE,
-                      )?.amount;
 
                       const mainRow = (
                         <TableRow
@@ -741,11 +741,6 @@ export function InvoiceShow({
                           </TableCell>
                           <TableCell className={cn(tableCellClass)}>
                             {formatName(item.performer_actor)}
-                          </TableCell>
-                          <TableCell
-                            className={cn(tableCellClass, "text-right")}
-                          >
-                            <MonetaryDisplay amount={mrpAmount} hideCurrency />
                           </TableCell>
                           <TableCell
                             className={cn(tableCellClass, "text-right")}
@@ -882,7 +877,9 @@ export function InvoiceShow({
             <div
               className={cn(
                 "border-x border-gray-300 p-2 -mt-4 border-t-none space-y-2",
-                invoice.payments?.length === 0 && "border-b rounded-b-md",
+                invoice.payments?.filter(
+                  (p) => p.status === PaymentReconciliationStatus.active,
+                ).length === 0 && "border-b rounded-b-md",
               )}
             >
               {invoice.status === InvoiceStatus.draft && (
@@ -1009,11 +1006,15 @@ export function InvoiceShow({
               </div>
             </div>
 
-            {invoice.payments?.length > 0 && (
+            {invoice.payments?.filter(
+              (p) => p.status === PaymentReconciliationStatus.active,
+            ).length > 0 && (
               <>
                 <div className="border-x border-b border-t border-gray-300 rounded-b-md -mt-4 space-y-2">
                   <div className="-mt-7 px-3 font-medium ">
-                    {t("payments_received_against_this_invoice")}
+                    {invoice.is_refund
+                      ? t("refunds_given_against_this_invoice")
+                      : t("payments_received_against_this_invoice")}
                   </div>
                   <Table>
                     <TableHeader>
@@ -1040,94 +1041,103 @@ export function InvoiceShow({
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {invoice.payments.map((payment, index) => {
-                        const mainRow = (
-                          <TableRow
-                            key={payment.id}
-                            className="border-b border-gray-200 hover:bg-muted/50"
-                          >
-                            <TableCell
-                              className={cn(tableCellClass, "text-center")}
+                      {invoice.payments
+                        .filter(
+                          (p) =>
+                            p.status === PaymentReconciliationStatus.active,
+                        )
+                        .map((payment, index) => {
+                          const mainRow = (
+                            <TableRow
+                              key={payment.id}
+                              className="border-b border-gray-200 hover:bg-muted/50"
                             >
-                              {index + 1}
-                            </TableCell>
-                            <TableCell
-                              className={cn(tableCellClass, "font-medium")}
-                            >
-                              <span className="flex justify-between items-center flex-wrap gap-2">
-                                {payment.payment_datetime
-                                  ? format(
-                                      new Date(payment.payment_datetime),
-                                      "d MMM yyyy, hh:mm a",
-                                    )
-                                  : "-"}
+                              <TableCell
+                                className={cn(tableCellClass, "text-center")}
+                              >
+                                {index + 1}
+                              </TableCell>
+                              <TableCell
+                                className={cn(tableCellClass, "font-medium")}
+                              >
+                                <span className="flex justify-between items-center flex-wrap gap-2">
+                                  {payment.payment_datetime
+                                    ? format(
+                                        new Date(payment.payment_datetime),
+                                        "d MMM yyyy, hh:mm a",
+                                      )
+                                    : "-"}
 
-                                <div className="flex gap-2">
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="text-gray-800 font-semibold text-xs p-2"
-                                    onClick={() => {
-                                      navigate(
-                                        `/facility/${facilityId}/billing/payments/${payment.id}`,
-                                      );
-                                    }}
-                                  >
-                                    <>
-                                      <EyeIcon className="size-3" />
-                                      {t("view")}
-                                    </>
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="text-gray-800 font-semibold text-xs p-2"
-                                    onClick={() => {
-                                      navigate(
-                                        `/facility/${facilityId}/billing/payments/${payment.id}/print`,
-                                      );
-                                    }}
-                                  >
-                                    <>
-                                      <PrinterIcon className="size-3" />
-                                      {t("print")}
-                                    </>
-                                  </Button>
-                                </div>
-                              </span>
-                            </TableCell>
-                            <TableCell
-                              className={cn(tableCellClass, "text-left")}
-                            >
-                              {
-                                PAYMENT_RECONCILIATION_METHOD_MAP[
-                                  payment.method
-                                ]
-                              }
-                            </TableCell>
-                            <TableCell className={tableCellClass}>
-                              {payment.reference_number}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <MonetaryDisplay
-                                amount={payment.amount}
-                                hideCurrency
-                              />
-                            </TableCell>
-                          </TableRow>
-                        );
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="text-gray-800 font-semibold text-xs p-2"
+                                      onClick={() => {
+                                        navigate(
+                                          `/facility/${facilityId}/billing/payments/${payment.id}`,
+                                        );
+                                      }}
+                                    >
+                                      <>
+                                        <EyeIcon className="size-3" />
+                                        {t("view")}
+                                      </>
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="text-gray-800 font-semibold text-xs p-2"
+                                      onClick={() => {
+                                        navigate(
+                                          `/facility/${facilityId}/billing/payments/${payment.id}/print`,
+                                        );
+                                      }}
+                                    >
+                                      <>
+                                        <PrinterIcon className="size-3" />
+                                        {t("print")}
+                                      </>
+                                    </Button>
+                                  </div>
+                                </span>
+                              </TableCell>
+                              <TableCell
+                                className={cn(tableCellClass, "text-left")}
+                              >
+                                {
+                                  PAYMENT_RECONCILIATION_METHOD_MAP[
+                                    payment.method
+                                  ]
+                                }
+                              </TableCell>
+                              <TableCell className={tableCellClass}>
+                                {payment.reference_number}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <MonetaryDisplay
+                                  amount={payment.amount}
+                                  hideCurrency
+                                />
+                              </TableCell>
+                            </TableRow>
+                          );
 
-                        return [mainRow];
-                      })}
+                          return [mainRow];
+                        })}
                     </TableBody>
                   </Table>
                 </div>
                 <div className="flex flex-col items-end space-y-2 text-gray-950 font-mormal text-sm mb-4">
                   <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
 
-                  {/* Total Received */}
+                  {/* Total Received/Refunded */}
                   <div className="flex w-64 justify-between font-bold">
-                    <span>{t("total_received")}</span>
+                    <span>
+                      {invoice.is_refund
+                        ? t("total_refunded")
+                        : t("total_received")}
+                    </span>
                     <MonetaryDisplay amount={invoice.total_payments} />
                   </div>
                   <div className="p-1 border-b-2 border-dashed border-gray-200 w-full" />
@@ -1156,6 +1166,7 @@ export function InvoiceShow({
         facilityId={facilityId}
         invoice={invoice}
         accountId={invoice.account.id}
+        isCreditNote={invoice.is_refund}
       />
 
       <AlertDialog

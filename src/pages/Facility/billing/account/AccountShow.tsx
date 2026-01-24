@@ -346,8 +346,8 @@ export function AccountShow({
                       }
                     >
                       <CareIcon icon="l-plus" className="size-4" />
-                      {t("record_payment")}
-                      <ShortcutBadge actionId="record-payment-account" />
+                      {t("add_credit")}
+                      <ShortcutBadge actionId="credit-payment-account" />
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -405,7 +405,7 @@ export function AccountShow({
                   }
                 >
                   <CareIcon icon="l-plus" className="size-4" />
-                  {t("payment")}
+                  {t("credit")}
                   <ShortcutBadge actionId="record-payment-account" />
                 </Button>
                 <DropdownMenu>
@@ -492,7 +492,7 @@ export function AccountShow({
             </div>
             <div>
               <p className="text-sm text-gray-700 font-medium">
-                {t("tags_other")}
+                {t("tags_proper")}
               </p>
               <div className="flex flex-wrap gap-1">
                 <TagAssignmentSheet
