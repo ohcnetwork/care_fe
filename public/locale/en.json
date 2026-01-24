@@ -1025,6 +1025,7 @@
   "category_description": "Choose the category  ",
   "category_description_help": "Optional description for this category",
   "category_is_required": "Please select a token category",
+  "category_required_at_row": "Category is required at row {{row}}",
   "category_required_for_item": "Category is required for {{item}}",
   "category_updated_successfully": "Category updated successfully",
   "caution": "Caution",
