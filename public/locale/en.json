@@ -3140,6 +3140,7 @@
   "medication_dispenses": "Medication Dispenses",
   "medication_history": "Medication History",
   "medication_list": "Medication List",
+  "medication_list_truncated_warning": "Showing {{shown}} of {{total}} medications. Some older medications may not be displayed due to the large number of records.",
   "medication_request_prescription": "Medication Request Prescription",
   "medication_request_status_updated_successfully": "Medication request status updated successfully",
   "medication_requests": "Medication Requests",

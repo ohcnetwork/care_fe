@@ -74,6 +74,7 @@ import {
 import { questionnaireResponseTemplateApi } from "@/types/questionnaire/questionnaireResponseTemplateApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { filterStructuredQuestionnaireSlugs } from "./data/StructuredFormData";
 
 // Check if a string looks like a product slug (starts with 'f-' prefix)
 function isProductSlug(value: string | undefined): boolean {
@@ -338,7 +339,7 @@ export default function ManageResponseTemplatesSheet({
     const createData: QuestionnaireResponseTemplateCreateSpec = {
       name: data.name,
       description: data.description || "",
-      questionnaire: questionnaireSlug,
+      questionnaire: filterStructuredQuestionnaireSlugs(questionnaireSlug),
       facility: facilityId,
       template_data: {
         medication_request: medicationsForTemplate,
