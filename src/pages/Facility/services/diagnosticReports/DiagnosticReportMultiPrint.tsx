@@ -324,13 +324,6 @@ export default function DiagnosticReportMultiPrint({
                   </span>
                 </span>
               </div>
-              <div className="grid grid-cols-[6rem_auto_1fr] items-center">
-                <span className="text-gray-600">{t("report_date")}</span>
-                <span className="text-gray-600">:</span>
-                <span className="font-semibold ml-2">
-                  {format(new Date(), "dd-MM-yyyy")}
-                </span>
-              </div>
             </div>
           )}
 

@@ -65,7 +65,6 @@ const FacilityRoutes: AppRoutes = {
     />
   ),
 
-  // Multi-print diagnostic reports route (must be before single report route)
   "/facility/:facilityId/patient/:patientId/diagnostic_reports/print": ({
     patientId,
   }) => {
