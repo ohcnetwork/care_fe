@@ -37,6 +37,7 @@ import {
 
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
+import batchApi from "@/types/base/batch/batchApi";
 import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import {
@@ -44,7 +45,6 @@ import {
   SupplyDeliveryStatus,
   SupplyDeliveryType,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
-import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { round, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
@@ -157,8 +157,8 @@ export function AddMedicationReturnItemForm({
     setSelectedDispenses([]);
   };
 
-  const { mutateAsync: createSupplyDelivery } = useMutation({
-    mutationFn: mutate(supplyDeliveryApi.createSupplyDelivery),
+  const { mutateAsync: createSupplyDeliveries } = useMutation({
+    mutationFn: mutate(batchApi.batchRequest),
   });
 
   const validateFormWithToasts = useCallback(
@@ -191,11 +191,13 @@ export function AddMedicationReturnItemForm({
 
     setIsProcessing(true);
 
-    const results = await Promise.allSettled(
-      data.items.map(async (item, index) => {
-        // For medication returns (no origin), we use supplied_item (Product ID)
-        // not supplied_inventory_item (InventoryItem ID)
-        const deliveryPayload = {
+    try {
+      // Build batch request for all supply deliveries
+      const requests = data.items.map((item, index) => ({
+        url: `/api/v1/supply_delivery/`,
+        method: "POST",
+        reference_id: `supply_delivery_${index}`,
+        body: {
           status: SupplyDeliveryStatus.in_progress,
           supplied_item_type: SupplyDeliveryType.product,
           supplied_item_condition: SupplyDeliveryCondition.normal,
@@ -204,40 +206,50 @@ export function AddMedicationReturnItemForm({
           destination: locationId,
           order: deliveryOrderId,
           extensions: {},
-        };
+        },
+      }));
 
-        await createSupplyDelivery(deliveryPayload);
-        return index;
-      }),
-    );
+      const response = await createSupplyDeliveries({ requests });
 
-    const successfulIndices = results
-      .map((result) => (result.status === "fulfilled" ? result.value : null))
-      .filter((index): index is number => index !== null);
-
-    const failedCount = results.filter(
-      (result) => result.status === "rejected",
-    ).length;
-
-    // Remove successful rows from form (in reverse order to maintain correct indices)
-    [...successfulIndices].sort((a, b) => b - a).forEach((idx) => remove(idx));
-
-    if (successfulIndices.length > 0) {
-      queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
-    }
-
-    setIsProcessing(false);
-
-    if (failedCount === 0) {
-      toast.success(
-        t("items_created_successfully", { count: successfulIndices.length }),
+      // Check for any failures in the batch response
+      const failedRequests = response.results.filter(
+        (result) => result.status_code >= 400,
       );
-      onSuccess();
-      form.reset();
-    } else if (successfulIndices.length > 0) {
-      toast.success(
-        t("items_created_successfully", { count: successfulIndices.length }),
-      );
+
+      if (failedRequests.length === 0) {
+        // All succeeded
+        toast.success(
+          t("medication_return_completed_successfully", {
+            count: data.items.length,
+          }),
+        );
+        queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
+        onSuccess();
+        form.reset();
+      } else if (failedRequests.length < response.results.length) {
+        // Partial success
+        const successCount = response.results.length - failedRequests.length;
+        toast.success(
+          t("partially_completed_medication_return", { count: successCount }),
+        );
+        queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
+
+        // Remove successful items from form (in reverse order)
+        const successfulIndices = response.results
+          .map((result, index) => (result.status_code < 400 ? index : null))
+          .filter((index): index is number => index !== null);
+
+        [...successfulIndices]
+          .sort((a, b) => b - a)
+          .forEach((idx) => remove(idx));
+      } else {
+        // All failed
+        toast.error(t("error_completing_medication_return_items"));
+      }
+    } catch (_) {
+      toast.error(t("error_completing_medication_return_items"));
+    } finally {
+      setIsProcessing(false);
     }
   }
 
