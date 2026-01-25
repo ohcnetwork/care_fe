@@ -6,6 +6,7 @@ import { Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 
 import Loading from "@/components/Common/Loading";
+import ProductionWarningBanner from "@/components/Common/ProductionWarningBanner";
 
 import Integrations from "@/Integrations";
 import PluginEngine from "@/PluginEngine";
@@ -33,6 +34,7 @@ const App = () => {
 
   return (
     <>
+      <ProductionWarningBanner />
       <QueryClientProvider client={queryClient}>
         <ScrollToTop />
         <Suspense fallback={<Loading />}>

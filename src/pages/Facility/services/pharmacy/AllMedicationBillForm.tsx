@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import { ArrowLeft, Eye, Info, MoreVertical, Shuffle } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -80,7 +80,6 @@ import useFilters from "@/hooks/useFilters";
 import BackButton from "@/components/Common/BackButton";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import batchApi from "@/types/base/batch/batchApi";
@@ -96,9 +95,10 @@ import {
 import accountApi from "@/types/billing/account/accountApi";
 import {
   ChargeItemBatchResponse,
-  ChargeItemRead,
   extractChargeItemsFromBatchResponse,
 } from "@/types/billing/chargeItem/chargeItem";
+import { InvoiceStatus } from "@/types/billing/invoice/invoice";
+import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import {
   DispenseOrderBatchResponse,
   extractDispenseOrderFromBatchResponse,
@@ -690,10 +690,6 @@ export default function AllMedicationBillForm({ patientId }: Props) {
   const [{ encounterId }] = useQueryParams();
   const [productKnowledgeInventoriesMap, setProductKnowledgeInventoriesMap] =
     useState<Record<string, InventoryRead[] | undefined>>({});
-  const [isInvoiceSheetOpen, setIsInvoiceSheetOpen] = useState(false);
-  const [extractedChargeItems, setExtractedChargeItems] = useState<
-    ChargeItemRead[]
-  >([]);
   const [selectedProduct, setSelectedProduct] = useState<
     ProductKnowledgeBase | undefined
   >();
@@ -724,7 +720,8 @@ export default function AllMedicationBillForm({ patientId }: Props) {
   const [alternateIdentifier, _setAlternateIdentifier] = useState<string>(
     `${patientId}-${new Date().toISOString().replace(/[:.]/g, "-")}`,
   );
-  const [dispenseOrderId, setDispenseOrderId] = useState<string | null>(null);
+  const [_dispenseOrderId, setDispenseOrderId] = useState<string | null>(null);
+  const dispenseOrderIdRef = useRef<string | null>(null);
 
   const { mutate: updateMedicationRequest } = useMutation({
     mutationFn: (medication: MedicationRequestRead) => {
@@ -1046,6 +1043,32 @@ export default function AllMedicationBillForm({ patientId }: Props) {
     return round(multiply(doseValue, numberOfDoses));
   }
 
+  // Mutation to create invoice automatically after dispensing
+  const { mutate: createInvoice, isPending: isCreatingInvoice } = useMutation({
+    mutationFn: mutate(invoiceApi.createInvoice, {
+      pathParams: { facilityId },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      toast.success(t("invoice_created_successfully"));
+      // Navigate to the dispense page
+      if (dispenseOrderIdRef.current) {
+        navigate(
+          `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderIdRef.current}`,
+        );
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message || t("failed_to_create_invoice"));
+      // Still navigate to dispense page even if invoice creation fails
+      if (dispenseOrderIdRef.current) {
+        navigate(
+          `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderIdRef.current}`,
+        );
+      }
+    },
+  });
+
   const { mutate: dispense, isPending } = useMutation({
     mutationFn: mutate(batchApi.batchRequest),
     onSuccess: (response: any) => {
@@ -1054,15 +1077,16 @@ export default function AllMedicationBillForm({ patientId }: Props) {
         queryKey: ["medication_requests", patientId, "dispense"],
       });
 
-      let dispenseOrderId: string | null = null;
+      let newDispenseOrderId: string | null = null;
 
       const dispenseOrder = extractDispenseOrderFromBatchResponse(
         response as DispenseOrderBatchResponse,
       );
 
       if (dispenseOrder) {
-        dispenseOrderId = dispenseOrder.id;
-        setDispenseOrderId(dispenseOrderId);
+        newDispenseOrderId = dispenseOrder.id;
+        setDispenseOrderId(newDispenseOrderId);
+        dispenseOrderIdRef.current = newDispenseOrderId;
       }
 
       if (!account?.results[0]) {
@@ -1071,19 +1095,32 @@ export default function AllMedicationBillForm({ patientId }: Props) {
         });
       }
 
-      // Extract charge items and open invoice sheet
+      // Extract charge items and create invoice automatically
       const chargeItems = extractChargeItemsFromBatchResponse(
         response as unknown as ChargeItemBatchResponse,
       );
+
       if (chargeItems.length === 0) {
-        if (dispenseOrderId) {
+        // No billable items, navigate directly to dispense page
+        if (newDispenseOrderId) {
           navigate(
-            `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}?status=preparation&payment_status=unpaid`,
+            `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${newDispenseOrderId}`,
           );
         }
+      } else if (account?.results[0]) {
+        // Create invoice automatically with the charge items
+        createInvoice({
+          status: InvoiceStatus.draft,
+          account: account.results[0].id,
+          charge_items: chargeItems.map((item) => item.id),
+        });
       } else {
-        setIsInvoiceSheetOpen(true);
-        setExtractedChargeItems(chargeItems);
+        // No account available, navigate to dispense page
+        if (newDispenseOrderId) {
+          navigate(
+            `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${newDispenseOrderId}`,
+          );
+        }
       }
     },
     onError: (error) => {
@@ -1350,11 +1387,15 @@ export default function AllMedicationBillForm({ patientId }: Props) {
             <Button
               onClick={handleDispense}
               disabled={
-                !form.watch("items").some((q) => q.isSelected) || isPending
+                !form.watch("items").some((q) => q.isSelected) ||
+                isPending ||
+                isCreatingInvoice
               }
             >
               <ShortcutBadge actionId="billing-action" />
-              {isPending ? t("billing") : t("bill_selected")}
+              {isPending || isCreatingInvoice
+                ? t("billing")
+                : t("bill_selected")}
             </Button>
           </div>
         </div>
@@ -2198,25 +2239,6 @@ export default function AllMedicationBillForm({ patientId }: Props) {
               </Table>
             </form>
           </Form>
-        )}
-
-        {account?.results[0] && (
-          <CreateInvoiceSheet
-            facilityId={facilityId}
-            accountId={account?.results[0].id}
-            open={isInvoiceSheetOpen}
-            onOpenChange={setIsInvoiceSheetOpen}
-            preSelectedChargeItems={extractedChargeItems}
-            onSuccess={() => {
-              setIsInvoiceSheetOpen(false);
-              navigate(
-                `/facility/${facilityId}/locations/${locationId}/medication_dispense/${dispenseOrderId ? `order/${dispenseOrderId}?status=preparation` : ""}`,
-              );
-            }}
-            sourceUrl={`/facility/${facilityId}/locations/${locationId}/medication_dispense/${dispenseOrderId ? `order/${dispenseOrderId}?status=preparation` : ""}`}
-            locationId={locationId}
-            dispenseOrderId={dispenseOrderId ?? undefined}
-          />
         )}
 
         <AddMedicationSheet

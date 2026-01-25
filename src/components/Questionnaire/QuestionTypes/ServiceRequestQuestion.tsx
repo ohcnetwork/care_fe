@@ -43,8 +43,8 @@ import {
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import {
+  ActivityDefinitionTemplateSpec,
   QuestionnaireResponseTemplateReadSpec,
-  ServiceRequestTemplateSpec,
 } from "@/types/questionnaire/questionnaireResponseTemplate";
 import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
 import { Decimal } from "decimal.js";
@@ -464,7 +464,7 @@ export function ServiceRequestQuestion({
 
   // Handler for adding a single service request from a template
   const handleAddSingleServiceRequest = async (
-    templateSR: ServiceRequestTemplateSpec,
+    templateSR: ActivityDefinitionTemplateSpec,
   ) => {
     try {
       const activityDefinitionData = await query(
@@ -526,7 +526,7 @@ export function ServiceRequestQuestion({
   const handleApplyTemplate = async (
     template: QuestionnaireResponseTemplateReadSpec,
   ) => {
-    const templateServiceRequests = template.template_data?.service_request;
+    const templateServiceRequests = template.template_data?.activity_definition;
     if (!templateServiceRequests?.length) {
       toast.info(t("template_has_no_service_requests"));
       throw new Error("Template has no service requests");
@@ -703,25 +703,23 @@ export function ServiceRequestQuestion({
             onServiceRequestSelect={handleAddSingleServiceRequest}
             disabled={disabled}
             key_filter="service_request"
-            currentServiceRequests={serviceRequests.map(
-              (sr): ServiceRequestTemplateSpec => ({
-                slug: sr.activity_definition,
-                service_request: {
-                  title: sr.service_request.title,
-                  status: sr.service_request.status,
-                  intent: sr.service_request.intent,
-                  priority: sr.service_request.priority,
-                  category: sr.service_request.category,
-                  code: sr.service_request.code,
-                  do_not_perform: sr.service_request.do_not_perform,
-                  body_site: sr.service_request.body_site,
-                  note: sr.service_request.note,
-                  patient_instruction: sr.service_request.patient_instruction,
-                  occurance: sr.service_request.occurance,
-                  locations: sr.service_request.locations,
-                },
-              }),
-            )}
+            currentServiceRequests={serviceRequests.map((sr) => ({
+              slug: sr.activity_definition,
+              service_request: {
+                title: sr.service_request.title,
+                status: sr.service_request.status,
+                intent: sr.service_request.intent,
+                priority: sr.service_request.priority,
+                category: sr.service_request.category,
+                code: sr.service_request.code,
+                do_not_perform: sr.service_request.do_not_perform,
+                body_site: sr.service_request.body_site,
+                note: sr.service_request.note,
+                patient_instruction: sr.service_request.patient_instruction,
+                occurance: sr.service_request.occurance,
+                locations: sr.service_request.locations,
+              },
+            }))}
           />
         )}
       </div>

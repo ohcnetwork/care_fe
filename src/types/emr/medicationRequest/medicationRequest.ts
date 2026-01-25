@@ -220,6 +220,18 @@ export interface MedicationRequest {
   requester: UserReadMinimal;
 }
 
+export type MedicationRequestTemplateSpec = Omit<
+  MedicationRequest,
+  | "id"
+  | "created_by"
+  | "authored_on"
+  | "requested_product_internal"
+  | "encounter"
+  | "authored_on"
+  | "requester"
+  | "dispense_status"
+>;
+
 export interface MedicationRequestCreate extends MedicationRequest {
   create_prescription?: PrescriptionCreate;
   dirty?: boolean;

@@ -95,33 +95,52 @@ function LeftCard({ report, isActive, onClick }: LeftCardProps) {
 }
 
 interface DiagnosticReportDetailCardProps {
-  report: DiagnosticReportRead;
+  reportId: string;
   patientId: string;
   facilityId?: string;
 }
 
 function DiagnosticReportDetailCard({
-  report,
+  reportId,
   patientId,
   facilityId,
 }: DiagnosticReportDetailCardProps) {
   const { t } = useTranslation();
 
+  const { data: report, isLoading: isReportLoading } = useQuery({
+    queryKey: ["diagnosticReport", reportId],
+    queryFn: query(diagnosticReportApi.retrieveDiagnosticReport, {
+      pathParams: {
+        patient_external_id: patientId,
+        external_id: reportId,
+      },
+    }),
+    enabled: !!reportId && !!patientId,
+  });
+
   // Query to fetch files for the diagnostic report
   const { data: filesData } = useQuery<PaginatedResponse<FileReadMinimal>>({
-    queryKey: ["files", "diagnostic_report", report.id],
+    queryKey: ["files", "diagnostic_report", report?.id],
     queryFn: query(fileApi.list, {
       queryParams: {
         file_type: "diagnostic_report",
-        associating_id: report.id,
+        associating_id: report?.id,
         limit: 100,
         offset: 0,
       },
     }),
-    enabled: !!report.id,
+    enabled: !!report?.id,
   });
 
   const files = filesData?.results || [];
+
+  if (isReportLoading) {
+    return <CardListSkeleton count={1} />;
+  }
+
+  if (!report) {
+    return null;
+  }
 
   const filteredObservations = report.observations?.filter(
     (obs) => obs.status !== ObservationStatus.ENTERED_IN_ERROR,
@@ -155,6 +174,7 @@ function DiagnosticReportDetailCard({
                       ),
                     )
                   }
+                  data-shortcut-id="print-button"
                 >
                   <Printer className="size-4" />
                 </Button>
@@ -245,6 +265,15 @@ function DiagnosticReportDetailCard({
           )}
         </div>
 
+        {filteredObservations && filteredObservations.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-semibold text-gray-700">
+              {t("test_results")}
+            </h4>
+            <DiagnosticReportResultsTable observations={filteredObservations} />
+          </div>
+        )}
+
         {files.length > 0 && (
           <div className="space-y-2">
             <h4 className="text-sm font-semibold text-gray-700">
@@ -257,36 +286,6 @@ function DiagnosticReportDetailCard({
               canEdit={false}
               showHeader={false}
             />
-          </div>
-        )}
-
-        {filteredObservations && filteredObservations.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-gray-700">
-              {t("test_results")}
-            </h4>
-            <DiagnosticReportResultsTable observations={filteredObservations} />
-          </div>
-        )}
-
-        {files.length < 0 && (
-          <div className="flex justify-end pt-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                navigate(
-                  buildEncounterUrl(
-                    patientId,
-                    `/diagnostic_reports/${report.id}`,
-                    facilityId,
-                  ),
-                )
-              }
-              hidden={files.length > 0}
-            >
-              {t("view_details")}
-            </Button>
           </div>
         )}
       </CardContent>
@@ -543,7 +542,7 @@ export const EncounterDiagnosticReportsTab = () => {
             ) : (
               selectedReport && (
                 <DiagnosticReportDetailCard
-                  report={selectedReport}
+                  reportId={selectedReport.id}
                   patientId={patientId}
                   facilityId={facilityId}
                 />

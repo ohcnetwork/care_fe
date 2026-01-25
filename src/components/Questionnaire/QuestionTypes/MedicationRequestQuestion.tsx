@@ -84,6 +84,7 @@ import {
   MedicationRequestDosageInstruction,
   MedicationRequestIntent,
   MedicationRequestRead,
+  MedicationRequestTemplateSpec,
   UCUM_TIME_UNITS,
   displayMedicationName,
   parseMedicationStringToRequest,
@@ -110,26 +111,88 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 
+import { filterStructuredQuestionnaireSlugs } from "@/components/Questionnaire/data/StructuredFormData";
+
 function formatDoseRange(range?: DoseRange): string {
   if (!range?.high?.value) return "";
   return `${round(range.low?.value)} → ${round(range.high?.value)} ${range.high?.unit?.display}`;
 }
 
-// Check if a string looks like a product slug (starts with 'f-' prefix)
-function isProductSlug(value: string | undefined): boolean {
-  if (!value) return false;
-  return value.startsWith("f-") && value.includes("-");
+/**
+ * Builds a medication object suitable for storing in a template.
+ * Converts internal representations to template-friendly format.
+ */
+export function buildMedicationForTemplate(
+  medication: MedicationRequestCreate,
+): Record<string, unknown> {
+  const medicationForTemplate: Record<string, unknown> = {
+    ...medication,
+    requested_product: medication.requested_product_internal?.slug || undefined,
+  };
+
+  // Handle medication field based on whether we have a product slug
+  if (medication.requested_product) {
+    delete medicationForTemplate.medication;
+  } else if (medication.medication?.code) {
+    medicationForTemplate.medication = medication.medication;
+  } else {
+    delete medicationForTemplate.medication;
+  }
+
+  // Remove internal objects that shouldn't be stored in templates
+  delete medicationForTemplate.requested_product_internal;
+  delete medicationForTemplate.id;
+
+  return medicationForTemplate;
 }
 
-// Extract readable name from a product slug
-// Slug format: f-{uuid}-{readable-part} -> extract last part and format
-function extractNameFromSlug(slug: string | undefined): string | null {
-  if (!slug || !isProductSlug(slug)) return null;
-  const match = slug.match(/^f-[a-f0-9-]{36}-(.+)$/i);
-  if (match) {
-    return match[1].replace(/-/g, " ").toUpperCase();
+/**
+ * Fetches product knowledge by slug and builds a medication request.
+ * Accepts template medication specs and returns a full MedicationRequestCreate.
+ */
+async function fetchProductAndBuildMedication(
+  med: MedicationRequestTemplateSpec,
+  currentUser: UserReadMinimal,
+): Promise<MedicationRequestCreate> {
+  let productKnowledge: ProductKnowledgeBase | undefined;
+
+  // Templates store SLUG in requested_product (not UUID)
+  const requestedProduct =
+    typeof med.requested_product === "string"
+      ? med.requested_product
+      : undefined;
+
+  if (requestedProduct) {
+    try {
+      productKnowledge = await query(
+        productKnowledgeApi.retrieveProductKnowledge,
+        {
+          pathParams: { slug: requestedProduct },
+        },
+      )({ signal: new AbortController().signal });
+    } catch (error) {
+      console.warn(
+        `Failed to fetch product knowledge for slug: ${requestedProduct}`,
+        error,
+      );
+    }
   }
-  return null;
+
+  // Use product knowledge ID (UUID) for the actual medication request
+  const productId = productKnowledge?.id;
+
+  return {
+    ...med,
+    id: undefined,
+    do_not_perform: med.do_not_perform ?? false,
+    dosage_instruction: med.dosage_instruction ?? [
+      { as_needed_boolean: false },
+    ],
+    authored_on: new Date().toISOString(),
+    requester: currentUser,
+    requested_product: productId,
+    requested_product_internal: productKnowledge,
+  };
 }
 
 interface MedicationRequestQuestionProps {
@@ -319,13 +382,9 @@ export function MedicationRequestQuestion({
       templateSearchQuery,
     ],
     queryFn: query(questionnaireResponseTemplateApi.list, {
-      pathParams: {
-        ...(questionnaireSlug && questionnaireSlug !== "medication_request"
-          ? { questionnaire: questionnaireSlug }
-          : {}),
-        key_filter: "medication_request",
-      },
       queryParams: {
+        questionnaire: filterStructuredQuestionnaireSlugs(questionnaireSlug),
+        key_filter: "medication_request",
         name: templateSearchQuery || undefined,
         limit: 20,
       },
@@ -340,49 +399,10 @@ export function MedicationRequestQuestion({
       medication: MedicationRequestCreate;
     }) => {
       const existingMedications =
-        (params.template.template_data
-          ?.medication_request as MedicationRequestCreate[]) || [];
-
-      const productInternal = params.medication.requested_product_internal;
-      // Use product ID (UUID) for the template, not the slug
-      const productId =
-        productInternal?.id || params.medication.requested_product;
-
-      // Get the slug for display name extraction if needed
-      const productSlug =
-        productInternal?.slug ||
-        (isProductSlug(params.medication.requested_product)
-          ? params.medication.requested_product
-          : undefined);
-
-      // Get display name for the medication - ensure we always have a name
-      const displayName =
-        productInternal?.name ||
-        params.medication.medication?.display ||
-        extractNameFromSlug(productSlug) ||
-        "Medication";
-
-      // Build template medication
-      // If requested_product is present, don't include medication field
-      const medicationForTemplate: Record<string, unknown> = {
-        ...params.medication,
-        requested_product: productId,
-        display_name: displayName,
-      };
-
-      // Remove medication field if we have requested_product
-      if (productId) {
-        delete medicationForTemplate.medication;
-      } else if (params.medication.medication?.code) {
-        // Keep medication only if it has a valid code and no product
-        medicationForTemplate.medication = params.medication.medication;
-      } else {
-        delete medicationForTemplate.medication;
-      }
-
-      // Remove internal objects that shouldn't be stored in templates
-      delete medicationForTemplate.requested_product_internal;
-      delete medicationForTemplate.id;
+        params.template.template_data?.medication_request || [];
+      const medicationForTemplate = buildMedicationForTemplate(
+        params.medication,
+      );
 
       return mutate(questionnaireResponseTemplateApi.update, {
         pathParams: {
@@ -425,49 +445,14 @@ export function MedicationRequestQuestion({
       name: string;
       medication: MedicationRequestCreate;
     }) => {
-      const productInternal = params.medication.requested_product_internal;
-      // Use product ID (UUID) for the template, not the slug
-      const productId =
-        productInternal?.id || params.medication.requested_product;
-
-      // Get the slug for display name extraction if needed
-      const productSlug =
-        productInternal?.slug ||
-        (isProductSlug(params.medication.requested_product)
-          ? params.medication.requested_product
-          : undefined);
-
-      // Get display name for the medication - ensure we always have a name
-      const displayName =
-        productInternal?.name ||
-        params.medication.medication?.display ||
-        extractNameFromSlug(productSlug) ||
-        "Medication";
-
-      // Build template medication
-      const medicationForTemplate: Record<string, unknown> = {
-        ...params.medication,
-        requested_product: productId,
-        display_name: displayName,
-      };
-
-      // Remove medication field if we have requested_product
-      if (productId) {
-        delete medicationForTemplate.medication;
-      } else if (params.medication.medication?.code) {
-        medicationForTemplate.medication = params.medication.medication;
-      } else {
-        delete medicationForTemplate.medication;
-      }
-
-      // Remove internal objects
-      delete medicationForTemplate.requested_product_internal;
-      delete medicationForTemplate.id;
+      const medicationForTemplate = buildMedicationForTemplate(
+        params.medication,
+      );
 
       return mutate(questionnaireResponseTemplateApi.create)({
         name: params.name,
         description: "",
-        questionnaire: questionnaireSlug!,
+        questionnaire: filterStructuredQuestionnaireSlugs(questionnaireSlug),
         facility: facilityId,
         template_data: {
           medication_request: [medicationForTemplate],
@@ -673,44 +658,10 @@ export function MedicationRequestQuestion({
 
   // Handler for adding a single medication from a template
   const handleAddSingleMedication = async (med: MedicationRequestCreate) => {
-    let productKnowledge: ProductKnowledgeBase | undefined;
-    const requestedProduct = med.requested_product;
-
-    if (requestedProduct && typeof requestedProduct === "string") {
-      // Check if it's a slug (starts with "f-") or UUID
-      const isSlug =
-        requestedProduct.startsWith("f-") && requestedProduct.includes("-");
-
-      if (isSlug) {
-        try {
-          productKnowledge = await query(
-            productKnowledgeApi.retrieveProductKnowledge,
-            {
-              pathParams: { slug: requestedProduct },
-            },
-          )({ signal: new AbortController().signal });
-        } catch {
-          // If fetching fails, continue without product knowledge
-        }
-      }
-    }
-
-    // Use product knowledge ID (UUID) if available, otherwise keep the original
-    const productId = productKnowledge?.id || requestedProduct;
-
-    const medicationToAdd: MedicationRequestCreate = {
-      ...med,
-      id: undefined,
-      do_not_perform: med.do_not_perform ?? false,
-      dosage_instruction: med.dosage_instruction ?? [
-        { as_needed_boolean: false },
-      ],
-      authored_on: new Date().toISOString(),
-      requester: currentUser,
-      requested_product: productId, // Use UUID
-      requested_product_internal: productKnowledge,
-      dirty: true, // Mark as dirty since it's being added as new
-    };
+    const medicationToAdd = await fetchProductAndBuildMedication(
+      med,
+      currentUser,
+    );
 
     const newMedications: MedicationRequestCreate[] = [
       ...medications,
@@ -735,56 +686,11 @@ export function MedicationRequestQuestion({
     }
 
     try {
-      // Fetch product knowledge for each medication that has a requested_product
-      // Template may store either UUID or slug in requested_product
+      // Fetch product knowledge for each medication using the stored slug
       const medicationsWithProductKnowledge = await Promise.all(
-        templateMedications.map(async (med) => {
-          let productKnowledge: ProductKnowledgeBase | undefined;
-          const requestedProduct = med.requested_product;
-
-          if (requestedProduct && typeof requestedProduct === "string") {
-            // Check if it's a slug (starts with "f-") or UUID
-            const isSlug =
-              requestedProduct.startsWith("f-") &&
-              requestedProduct.includes("-");
-
-            if (isSlug) {
-              // Fetch by slug
-              try {
-                productKnowledge = await query(
-                  productKnowledgeApi.retrieveProductKnowledge,
-                  {
-                    pathParams: { slug: requestedProduct },
-                  },
-                )({ signal: new AbortController().signal });
-              } catch {
-                // If fetching fails, continue without product knowledge
-              }
-            } else {
-              // It's a UUID - fetch by listing with ID filter or use the UUID directly
-              // For now, we'll keep the UUID and not fetch (product knowledge not strictly needed)
-              // The UUID will be used as requested_product
-            }
-          }
-
-          // Use product knowledge ID (UUID) if available, otherwise keep the original
-          // (which should already be a UUID for newer templates)
-          const productId = productKnowledge?.id || requestedProduct;
-
-          return {
-            ...med,
-            id: undefined, // Remove IDs so they're created as new
-            do_not_perform: med.do_not_perform ?? false,
-            dosage_instruction: med.dosage_instruction ?? [
-              { as_needed_boolean: false },
-            ],
-            authored_on: new Date().toISOString(),
-            requester: currentUser,
-            requested_product: productId, // Use UUID
-            requested_product_internal: productKnowledge,
-            dirty: true, // Mark as dirty since it's being added as new
-          };
-        }),
+        templateMedications.map((med) =>
+          fetchProductAndBuildMedication(med, currentUser),
+        ),
       );
 
       const newMedications: MedicationRequestCreate[] = [
@@ -1048,7 +954,8 @@ export function MedicationRequestQuestion({
                       const existingMedCount =
                         template.template_data?.medication_request?.length ?? 0;
                       const existingServiceCount =
-                        template.template_data?.service_request?.length ?? 0;
+                        template.template_data?.activity_definition?.length ??
+                        0;
                       const hasMedications = existingMedCount > 0;
 
                       return (
