@@ -122,10 +122,10 @@ export default function PaymentsData({
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         status: qParams.status,
-        created_date__after: qParams.created_date_after
+        created_date_after: qParams.created_date_after
           ? new Date(qParams.created_date_after).toISOString()
           : undefined,
-        created_date__before: qParams.created_date_before
+        created_date_before: qParams.created_date_before
           ? new Date(qParams.created_date_before).toISOString()
           : undefined,
         reconciliation_type: qParams.reconciliation_type,
@@ -197,7 +197,7 @@ export default function PaymentsData({
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row justify-between w-full mb-4 -mt-2 gap-2">
+      <div className="flex flex-col sm:flex-row justify-between w-full my-4 gap-2">
         <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
           <div className="w-full sm:w-fit">
             <UserSelector
