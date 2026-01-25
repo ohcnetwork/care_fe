@@ -32,6 +32,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 
 import { cn } from "@/lib/utils";
 
+import { add, isPositive, round } from "@/Utils/decimal";
 import { MonetaryComponentSelector } from "@/components/Billing/MonetaryComponentSelector";
 import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPicker";
 import { SchemaField } from "@/components/Extensions/SchemaField";
@@ -55,6 +56,8 @@ interface Props {
   onProductSelectOpened?: () => void;
   /** All processed extensions with owner and schema info */
   processedExtensions: ProcessedExtension[];
+  /** Location ID for fetching inventory (origin location for internal transfers) */
+  locationId?: string;
   onRemove?: () => void;
 }
 
@@ -65,6 +68,7 @@ export function SmartExternalDeliveryRow({
   autoOpenProductSelect = false,
   onProductSelectOpened,
   processedExtensions,
+  locationId,
   onRemove,
 }: Props) {
   const { facilityId } = useCurrentFacility();
@@ -96,6 +100,7 @@ export function SmartExternalDeliveryRow({
     isCreatingNew,
     isLoadingProducts,
     products,
+    inventoryByProductId,
     availableTaxes,
     availableDiscounts,
     setField,
@@ -103,7 +108,7 @@ export function SmartExternalDeliveryRow({
     markAsEdited,
     fillFromProduct,
     updateInformationalComponent,
-  } = useDeliveryRowItem({ form, index });
+  } = useDeliveryRowItem({ form, index, locationId });
 
   const handleProductSelect = (product: ProductRead) => {
     fillFromProduct(product);
@@ -215,42 +220,97 @@ export function SmartExternalDeliveryRow({
                     <CommandEmpty>{t("type_batch_number")}</CommandEmpty>
                   )
                 ) : (
-                  <CommandGroup heading={t("existing_batches")}>
-                    {products
-                      .filter(
-                        (p) =>
-                          !batchNumber ||
-                          p.batch?.lot_number
-                            ?.toLowerCase()
-                            .includes(batchNumber.toLowerCase()),
-                      )
-                      .map((product) => (
-                        <CommandItem
-                          key={product.id}
-                          value={product.id}
-                          onSelect={() => handleProductSelect(product)}
-                          className="cursor-pointer"
-                        >
-                          <div className="flex w-full items-center justify-between">
-                            <div className="flex flex-col">
-                              <span className="font-medium">
-                                #{product.batch?.lot_number || "N/A"}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {t("expiry_short")}:{" "}
-                                {getExpirationDisplay(product)}
-                              </span>
-                            </div>
-                            {suppliedItem?.id === product.id && (
-                              <CareIcon
-                                icon="l-check"
-                                className="size-4 text-green-600"
-                              />
+                  (() => {
+                    const filteredProducts = products.filter(
+                      (p) =>
+                        !batchNumber ||
+                        p.batch?.lot_number
+                          ?.toLowerCase()
+                          .includes(batchNumber.toLowerCase()),
+                    );
+                    const totalNetContent =
+                      locationId && filteredProducts.length > 0
+                        ? add(
+                            ...filteredProducts.map(
+                              (p) =>
+                                inventoryByProductId.get(p.id)?.net_content ||
+                                "0",
+                            ),
+                          )
+                        : null;
+                    const unit =
+                      productKnowledge?.base_unit?.display || t("units");
+
+                    return (
+                      <CommandGroup
+                        heading={
+                          <span className="flex items-center justify-between w-full">
+                            <span>{t("existing_batches")}</span>
+                            {totalNetContent !== null && (
+                              <Badge
+                                variant={
+                                  isPositive(totalNetContent)
+                                    ? "primary"
+                                    : "secondary"
+                                }
+                                className="text-xs ml-2"
+                              >
+                                {round(totalNetContent)} {unit}
+                              </Badge>
                             )}
-                          </div>
-                        </CommandItem>
-                      ))}
-                  </CommandGroup>
+                          </span>
+                        }
+                      >
+                        {filteredProducts.map((product) => {
+                          const inventory = inventoryByProductId.get(
+                            product.id,
+                          );
+                          const netContent = inventory?.net_content;
+
+                          return (
+                            <CommandItem
+                              key={product.id}
+                              value={product.id}
+                              onSelect={() => handleProductSelect(product)}
+                              className="cursor-pointer"
+                            >
+                              <div className="flex w-full items-center justify-between">
+                                <div className="flex flex-col">
+                                  <span className="font-medium">
+                                    #{product.batch?.lot_number || "N/A"}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {t("expiry_short")}:{" "}
+                                    {getExpirationDisplay(product)}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {locationId && netContent !== undefined && (
+                                    <Badge
+                                      variant={
+                                        isPositive(netContent)
+                                          ? "primary"
+                                          : "destructive"
+                                      }
+                                      className="text-xs"
+                                    >
+                                      {round(netContent)} {unit}
+                                    </Badge>
+                                  )}
+                                  {suppliedItem?.id === product.id && (
+                                    <CareIcon
+                                      icon="l-check"
+                                      className="size-4 text-green-600"
+                                    />
+                                  )}
+                                </div>
+                              </div>
+                            </CommandItem>
+                          );
+                        })}
+                      </CommandGroup>
+                    );
+                  })()
                 )}
               </CommandList>
             </Command>

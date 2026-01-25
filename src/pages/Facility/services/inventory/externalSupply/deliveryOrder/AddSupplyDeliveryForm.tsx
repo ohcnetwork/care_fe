@@ -813,6 +813,7 @@ export function AddSupplyDeliveryForm({
                                   setNewlyAddedRowIndex(null)
                                 }
                                 processedExtensions={processedExtensions}
+                                locationId={destination}
                                 onRemove={() => remove(index)}
                               />
                             ),
