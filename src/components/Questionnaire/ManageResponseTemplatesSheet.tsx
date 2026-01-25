@@ -70,9 +70,9 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 import {
+  ActivityDefinitionTemplateSpec,
   QuestionnaireResponseTemplateCreateSpec,
   QuestionnaireResponseTemplateReadSpec,
-  ServiceRequestTemplateSpec,
 } from "@/types/questionnaire/questionnaireResponseTemplate";
 import { questionnaireResponseTemplateApi } from "@/types/questionnaire/questionnaireResponseTemplateApi";
 import mutate from "@/Utils/request/mutate";
@@ -245,12 +245,12 @@ function MedicationsPreview({
 function ServiceRequestsPreview({
   serviceRequests,
   variant = "compact",
-  onServiceRequestSelect,
+  onActivityDefinitionSelect,
   t,
 }: {
-  serviceRequests: ServiceRequestTemplateSpec[];
+  serviceRequests: ActivityDefinitionTemplateSpec[];
   variant?: "compact" | "form";
-  onServiceRequestSelect?: (serviceRequest: ServiceRequestTemplateSpec) => void;
+  onActivityDefinitionSelect?: (ad: ActivityDefinitionTemplateSpec) => void;
   t: (key: string, options?: Record<string, unknown>) => string;
 }) {
   if (serviceRequests.length === 0) return null;
@@ -307,14 +307,14 @@ function ServiceRequestsPreview({
                   sr.slug ||
                   t("unknown_service_request")}
               </span>
-              {onServiceRequestSelect && (
+              {onActivityDefinitionSelect && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onServiceRequestSelect(sr);
+                        onActivityDefinitionSelect(sr);
                         toast.success(t("service_request_added"));
                       }}
                       className="opacity-0 group-hover/item:opacity-100 transition-opacity p-0.5 rounded hover:bg-purple-100 text-purple-600"
@@ -353,12 +353,14 @@ interface ManageResponseTemplatesSheetProps {
   /** Callback when a single medication is selected from a template */
   onMedicationSelect?: (medication: MedicationRequestCreate) => void;
   /** Callback when a single service request is selected from a template */
-  onServiceRequestSelect?: (serviceRequest: ServiceRequestTemplateSpec) => void;
+  onServiceRequestSelect?: (
+    serviceRequest: ActivityDefinitionTemplateSpec,
+  ) => void;
   disabled?: boolean;
   /** Current medications to allow saving as template */
   currentMedications?: MedicationRequestCreate[];
   /** Current service requests to allow saving as template */
-  currentServiceRequests?: ServiceRequestTemplateSpec[];
+  currentServiceRequests?: ActivityDefinitionTemplateSpec[];
   key_filter: string;
 }
 
@@ -485,7 +487,7 @@ export default function ManageResponseTemplatesSheet({
       facility: facilityId,
       template_data: {
         medication_request: medicationsForTemplate,
-        service_request: serviceRequestsForTemplate,
+        activity_definition: serviceRequestsForTemplate,
       },
       users: [currentUser.username],
       facility_organizations: [],
@@ -591,14 +593,15 @@ export default function ManageResponseTemplatesSheet({
             {templates.map((template) => {
               const medications =
                 template.template_data?.medication_request ?? [];
-              const serviceRequests =
-                template.template_data?.service_request ?? [];
+              const activityDefinitions =
+                template.template_data?.activity_definition ?? [];
               const medicationCount = medications.length;
-              const serviceRequestCount = serviceRequests.length;
+              const activityDefinitionsCount = activityDefinitions.length;
               const isApplied = recentlyApplied === template.id;
               const isApplying = applyingTemplateId === template.id;
               const isExpanded = expandedTemplateId === template.id;
-              const hasContent = medicationCount > 0 || serviceRequestCount > 0;
+              const hasContent =
+                medicationCount > 0 || activityDefinitionsCount > 0;
 
               return (
                 <div
@@ -663,13 +666,13 @@ export default function ManageResponseTemplatesSheet({
                             {medicationCount}
                           </Badge>
                         )}
-                        {serviceRequestCount > 0 && (
+                        {activityDefinitionsCount > 0 && (
                           <Badge
                             variant="purple"
                             className="text-[10px] gap-0.5 px-1 py-0 shrink-0"
                           >
                             <ClipboardListIcon className="size-2.5" />
-                            {serviceRequestCount}
+                            {activityDefinitionsCount}
                           </Badge>
                         )}
                       </div>
@@ -732,9 +735,9 @@ export default function ManageResponseTemplatesSheet({
                         t={t}
                       />
                       <ServiceRequestsPreview
-                        serviceRequests={serviceRequests}
+                        serviceRequests={activityDefinitions}
                         variant="compact"
-                        onServiceRequestSelect={onServiceRequestSelect}
+                        onActivityDefinitionSelect={onServiceRequestSelect}
                         t={t}
                       />
                     </div>
