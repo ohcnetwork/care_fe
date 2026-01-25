@@ -34,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -64,6 +65,7 @@ import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import { Label } from "@/components/ui/label";
 import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./AddChargeItemsBillingSheet";
@@ -134,6 +136,7 @@ export function ChargeItemsTable({
       queryParams: {
         account: accountId,
         status: qParams.charge_item_status,
+        ordering: qParams.ordering,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
       },
@@ -230,6 +233,16 @@ export function ChargeItemsTable({
         </Select>
 
         <div className="flex items-center gap-2">
+          <div className="gap-2 flex items-center whitespace-nowrap">
+            <Label htmlFor="sort-by-title">{t("sort_by_title")}</Label>
+            <Switch
+              id="sort-by-title"
+              checked={qParams.ordering === "title"}
+              onCheckedChange={(checked) =>
+                updateQuery({ ordering: checked ? "title" : undefined })
+              }
+            />
+          </div>
           <Button
             variant="outline"
             onClick={() => navigate(`../${accountId}/charge_items/print`)}
@@ -471,7 +484,11 @@ export function ChargeItemsTable({
                     <TableCell className="p-3">
                       <MonetaryDisplay amount={item.total_price} />
                     </TableCell>
-                    <TableCell></TableCell>
+                    <TableCell>
+                      {t("created_by_user", {
+                        name: formatName(item.created_by),
+                      })}
+                    </TableCell>
                   </TableRow>
                 );
 
