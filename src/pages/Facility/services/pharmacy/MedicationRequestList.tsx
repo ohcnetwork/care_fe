@@ -179,8 +179,20 @@ export default function MedicationRequestList({
           </TabsList>
         </Tabs>
       </div>
-      {/* Encounter class filter tabs */}
-      <div className="mb-4">
+      {/* Search and filter */}
+      <div className="flex flex-wrap items-center gap-2">
+        <PatientIdentifierFilter
+          onSelect={(patientId, patientName) =>
+            updateQuery({
+              patient_external_id: patientId,
+              patient_name: patientName,
+            })
+          }
+          placeholder={t("filter_by_identifier")}
+          className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
+          patientId={qParams.patient_external_id}
+          patientName={qParams.patient_name}
+        />
         <FilterTabs
           value={
             qParams.encounter_class
@@ -206,38 +218,16 @@ export default function MedicationRequestList({
             "encounter_class__emer",
           ]}
         />
-      </div>
-
-      {/* Search and filter */}
-      <div className="flex flex-col md:flex-row items-start gap-2">
-        <div className="w-full md:w-auto">
-          <PatientIdentifierFilter
-            onSelect={(patientId, patientName) =>
-              updateQuery({
-                patient_external_id: patientId,
-                patient_name: patientName,
-              })
-            }
-            placeholder={t("filter_by_identifier")}
-            className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
-            patientId={qParams.patient_external_id}
-            patientName={qParams.patient_name}
-          />
-        </div>
-        <div className="flex flex-col sm:flex-row">
-          <MultiFilter
-            selectedFilters={selectedFilters}
-            onFilterChange={handleFilterChange}
-            onOperationChange={handleOperationChange}
-            onClearAll={handleClearAll}
-            onClearFilter={handleClearFilter}
-            placeholder={t("filters")}
-            className="flex sm:flex-row flex-wrap sm:items-center"
-            triggerButtonClassName="self-start sm:self-center"
-            clearAllButtonClassName="self-center"
-            facilityId={facilityId}
-          />
-        </div>
+        <MultiFilter
+          selectedFilters={selectedFilters}
+          onFilterChange={handleFilterChange}
+          onOperationChange={handleOperationChange}
+          onClearAll={handleClearAll}
+          onClearFilter={handleClearFilter}
+          placeholder={t("filters")}
+          className="flex flex-wrap items-center"
+          facilityId={facilityId}
+        />
       </div>
 
       {/* Table section */}
