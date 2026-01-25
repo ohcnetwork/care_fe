@@ -271,9 +271,7 @@ function DiagnosticReportDetailCard({
               {t("test_results")}
             </h4>
             <DiagnosticReportResultsTable
-              observations={report.observations.filter(
-                (obs) => obs.status !== ObservationStatus.ENTERED_IN_ERROR,
-              )}
+              observations={filteredObservations}
             />
           </div>
         )}
