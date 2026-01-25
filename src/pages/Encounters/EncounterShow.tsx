@@ -154,6 +154,16 @@ export const EncounterShow = (props: Props) => {
         />
       ),
     },
+    service_requests: {
+      label: t(`ENCOUNTER_TAB__service_requests`),
+      visible: canReadClinicalData,
+      component: <EncounterServiceRequestTab />,
+    },
+    diagnostic_reports: {
+      label: t(`ENCOUNTER_TAB__diagnostic_reports`),
+      visible: canReadClinicalData,
+      component: <EncounterDiagnosticReportsTab />,
+    },
     files: {
       label: t(`ENCOUNTER_TAB__files`),
       visible: canReadClinicalData,
@@ -171,16 +181,6 @@ export const EncounterShow = (props: Props) => {
     consents: {
       label: t(`ENCOUNTER_TAB__consents`),
       component: <EncounterConsentsTab />,
-    },
-    service_requests: {
-      label: t(`ENCOUNTER_TAB__service_requests`),
-      visible: canReadClinicalData,
-      component: <EncounterServiceRequestTab />,
-    },
-    diagnostic_reports: {
-      label: t(`ENCOUNTER_TAB__diagnostic_reports`),
-      visible: canReadClinicalData,
-      component: <EncounterDiagnosticReportsTab />,
     },
 
     ...Object.fromEntries(
