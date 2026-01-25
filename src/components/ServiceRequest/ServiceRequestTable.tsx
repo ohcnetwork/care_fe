@@ -18,7 +18,7 @@ import {
 
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
-import { LocationNode } from "@/src/components/Location/LocationTree";
+import { LocationNode } from "@/components/Location/LocationTree";
 import {
   SERVICE_REQUEST_PRIORITY_COLORS,
   SERVICE_REQUEST_STATUS_COLORS,
