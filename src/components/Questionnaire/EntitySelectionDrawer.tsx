@@ -30,7 +30,6 @@ import {
 import { Code } from "@/types/base/code/code";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 
-import { isAppleDevice } from "@/Utils/utils";
 import MedicationValueSetSelect from "./MedicationValueSetSelect";
 import ValueSetSelect from "./ValueSetSelect";
 
@@ -182,11 +181,7 @@ export function EntitySelectionDrawer({
           }
         />
       )}
-      <Drawer
-        open={open}
-        onOpenChange={onOpenChange}
-        repositionInputs={!isAppleDevice}
-      >
+      <Drawer open={open} onOpenChange={onOpenChange} repositionInputs>
         <DrawerContent className="min-h-[60vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg">
           {selectedEntity ? (
             <div className="flex-1 overflow-y-auto pb-[env(safe-area-inset-bottom)] mt-2">
