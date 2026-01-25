@@ -85,8 +85,8 @@ export const ClinicalHistoryOverview = (props: React.ComponentProps<"div">) => {
           <Link
             href={
               facilityId
-                ? `/facility/${facilityId}/patient/${patientId}/history/symptoms?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
-                : `/patient/${patientId}/history/symptoms?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
+                ? `/facility/${facilityId}/patient/${patientId}/history/responses?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
+                : `/patient/${patientId}/history/responses?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
             }
           >
             <img
