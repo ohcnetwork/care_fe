@@ -270,9 +270,7 @@ function DiagnosticReportDetailCard({
             <h4 className="text-sm font-semibold text-gray-700">
               {t("test_results")}
             </h4>
-            <DiagnosticReportResultsTable
-              observations={filteredObservations}
-            />
+            <DiagnosticReportResultsTable observations={filteredObservations} />
           </div>
         )}
 
@@ -288,27 +286,6 @@ function DiagnosticReportDetailCard({
               canEdit={false}
               showHeader={false}
             />
-          </div>
-        )}
-
-        {files.length < 0 && (
-          <div className="flex justify-end pt-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                navigate(
-                  buildEncounterUrl(
-                    patientId,
-                    `/diagnostic_reports/${report.id}`,
-                    facilityId,
-                  ),
-                )
-              }
-              hidden={files.length > 0}
-            >
-              {t("view_details")}
-            </Button>
           </div>
         )}
       </CardContent>
