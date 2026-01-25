@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
@@ -37,13 +38,13 @@ import useFilters from "@/hooks/useFilters";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
-import {
-  encounterClassFilter,
-  tagFilter,
-} from "@/components/ui/multi-filter/filterConfigs";
+import { tagFilter } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
-import { ENCOUNTER_CLASSES_COLORS } from "@/types/emr/encounter/encounter";
+import {
+  ENCOUNTER_CLASS,
+  ENCOUNTER_CLASSES_COLORS,
+} from "@/types/emr/encounter/encounter";
 import {
   PRESCRIPTION_STATUS_STYLES,
   PrescriptionStatus,
@@ -82,10 +83,7 @@ export default function MedicationRequestList({
 
   // Create filter configurations
   const filters = useMemo(
-    () => [
-      tagFilter("tags", TagResource.PRESCRIPTION, "multi", "tags"),
-      encounterClassFilter(),
-    ],
+    () => [tagFilter("tags", TagResource.PRESCRIPTION, "multi", "tags")],
     [],
   );
 
@@ -181,6 +179,35 @@ export default function MedicationRequestList({
           </TabsList>
         </Tabs>
       </div>
+      {/* Encounter class filter tabs */}
+      <div className="mb-4">
+        <FilterTabs
+          value={
+            qParams.encounter_class
+              ? `encounter_class__${qParams.encounter_class}`
+              : ""
+          }
+          onValueChange={(value) =>
+            updateQuery({
+              encounter_class: value
+                ? value.replace("encounter_class__", "")
+                : "",
+            })
+          }
+          options={[...ENCOUNTER_CLASS].map((ec) => `encounter_class__${ec}`)}
+          showAllOption={true}
+          allOptionLabel="all"
+          variant="background"
+          showMoreDropdown={true}
+          maxVisibleTabs={3}
+          defaultVisibleOptions={[
+            "encounter_class__imp",
+            "encounter_class__amb",
+            "encounter_class__emer",
+          ]}
+        />
+      </div>
+
       {/* Search and filter */}
       <div className="flex flex-col md:flex-row items-start gap-2">
         <div className="w-full md:w-auto">
