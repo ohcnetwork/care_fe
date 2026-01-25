@@ -106,8 +106,7 @@ const Login = (props: LoginProps) => {
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState<string>("");
   const [otpValidationError, setOtpValidationError] = useState<string>("");
-  const [resendOtpCountdown, setResendOtpCountdown] =
-    useState(resendOtpTimeout);
+  const [resendOtpCountdown, setResendOtpCountdown] = useState(0);
 
   // Timer Function for resend OTP
   useEffect(() => {
@@ -120,7 +119,7 @@ const Login = (props: LoginProps) => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [resendOtpCountdown]);
 
   // Remember the last login mode
   useEffect(() => {
@@ -279,6 +278,8 @@ const Login = (props: LoginProps) => {
   };
   const handleForgetSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setResendOtpCountdown(resendOtpTimeout);
+
     const valid = validateForgetData();
     if (!valid) return;
 
@@ -493,7 +494,7 @@ const Login = (props: LoginProps) => {
                             type="submit"
                             className="w-full"
                             variant="primary"
-                            disabled={isLoading}
+                            disabled={isLoading || resendOtpCountdown > 0}
                           >
                             {isLoading ? (
                               <CircularProgress className="text-white" />
@@ -594,7 +595,7 @@ const Login = (props: LoginProps) => {
                             type="submit"
                             className="w-full"
                             variant="primary"
-                            disabled={isLoading}
+                            disabled={isLoading || resendOtpCountdown > 0}
                           >
                             {isLoading ? (
                               <CircularProgress className="text-white" />
@@ -655,7 +656,7 @@ const Login = (props: LoginProps) => {
                               type="submit"
                               className="w-full"
                               variant="primary"
-                              disabled={isLoading}
+                              disabled={isLoading || resendOtpCountdown > 0}
                             >
                               {isLoading ? (
                                 <CircularProgress className="text-white" />
