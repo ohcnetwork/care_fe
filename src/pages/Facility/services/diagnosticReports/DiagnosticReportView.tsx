@@ -79,9 +79,6 @@ export default function DiagnosticReportView({
     return null;
   }
 
-  console.log("report", report?.service_request);
-  console.log("report.code", report?.code);
-
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="space-y-6 flex justify-between">
