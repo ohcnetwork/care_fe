@@ -261,11 +261,6 @@ export default function MedicationRequestList({
                 <TableRow key={item.id}>
                   <TableCell className="font-semibold">
                     {item.encounter.patient.name}
-                    {item.encounter.current_location && (
-                      <div className="text-xs text-gray-500">
-                        {t("location")}: {item.encounter.current_location.name}
-                      </div>
-                    )}
                     <div className="text-xs text-gray-500">
                       {t("by")}: {formatName(item.prescribed_by)}
                     </div>
@@ -280,19 +275,26 @@ export default function MedicationRequestList({
                   </TableCell>
 
                   <TableCell className="text-sm">
-                    <div>
-                      <Badge
-                        size="sm"
-                        variant={
-                          ENCOUNTER_CLASSES_COLORS[
-                            item.encounter.encounter_class
-                          ]
-                        }
-                      >
-                        {t(
-                          `encounter_class__${item.encounter.encounter_class}`,
-                        )}
-                      </Badge>
+                    <div className="flex flex-col gap-1">
+                      <div>
+                        <Badge
+                          size="sm"
+                          variant={
+                            ENCOUNTER_CLASSES_COLORS[
+                              item.encounter.encounter_class
+                            ]
+                          }
+                        >
+                          {t(
+                            `encounter_class__${item.encounter.encounter_class}`,
+                          )}
+                        </Badge>
+                      </div>
+                      {item.encounter.current_location && (
+                        <span className="text-xs text-gray-600">
+                          {item.encounter.current_location.name}
+                        </span>
+                      )}
                     </div>
                   </TableCell>
 
