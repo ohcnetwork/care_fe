@@ -3904,6 +3904,7 @@
   "patient_information": "Patient Information",
   "patient_instruction": "Patient Instruction",
   "patient_is_deceased": "Patient is deceased",
+  "patient_location": "Patient Location",
   "patient_login": "Log in as Patient",
   "patient_login_description": "For patients to book and manage their appointments.",
   "patient_name": "Patient Name",
