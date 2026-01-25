@@ -237,7 +237,7 @@ export default function DiagnosticReportPrint({
           </div>
 
           <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold my-2">
-            {t("diagnostic_report")}
+            {report.service_request?.title || t("diagnostic_report")}
           </h2>
 
           {/* Patient Details */}
