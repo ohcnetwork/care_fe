@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowUpRightSquare,
   CheckCircle,
+  MapPin,
   MoreVertical,
   ReceiptTextIcon,
 } from "lucide-react";
@@ -284,9 +285,10 @@ export default function MedicationRequestList({
                         </Badge>
                       </div>
                       {item.encounter.current_location && (
-                        <span className="text-xs text-gray-600">
-                          {item.encounter.current_location.name}
-                        </span>
+                        <div className="flex items-center gap-1 text-sm text-gray-700">
+                          <MapPin className="size-3.5 text-gray-500" />
+                          <span>{item.encounter.current_location.name}</span>
+                        </div>
                       )}
                     </div>
                   </TableCell>
