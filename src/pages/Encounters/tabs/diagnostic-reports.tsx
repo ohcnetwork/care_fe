@@ -36,6 +36,7 @@ import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { buildEncounterUrl } from "@/pages/Encounters/utils/utils";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
 import { ObservationHistorySheet } from "@/pages/Facility/services/serviceRequests/components/ObservationHistorySheet";
+import { Status } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import {
   DIAGNOSTIC_REPORT_STATUS_COLORS,
@@ -326,7 +327,11 @@ function LeftPanel({
     queryKey: ["activityDefinitions", facilityId, searchQuery],
     queryFn: query.debounced(activityDefinitionApi.listActivityDefinition, {
       pathParams: { facilityId },
-      queryParams: { title: searchQuery || undefined, limit: 50 },
+      queryParams: {
+        title: searchQuery || undefined,
+        limit: 50,
+        status: Status.active,
+      },
     }),
     enabled: !!facilityId,
   });

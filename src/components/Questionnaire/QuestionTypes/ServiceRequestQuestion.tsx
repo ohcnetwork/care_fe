@@ -690,6 +690,7 @@ export function ServiceRequestQuestion({
             listDefinitions={{
               queryFn: activityDefinitionApi.listActivityDefinition,
               pathParams: { facilityId },
+              queryParams: { status: Status.active },
             }}
             translationBaseKey="activity_definition"
           />

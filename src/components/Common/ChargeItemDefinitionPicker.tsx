@@ -90,7 +90,7 @@ export function ChargeItemDefinitionPicker({
         pathParams: { facilityId },
         queryParams: {
           limit: 1000,
-          status: "active",
+          status: ChargeItemDefinitionStatus.active,
           ordering: "title",
         },
       }),
