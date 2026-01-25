@@ -137,8 +137,9 @@ export default function AppointmentPrint(props: Props) {
               <div className="p-2 border border-gray-200 bg-gray-100 w-full h-full rounded-md flex flex-col">
                 <div className="flex flex-row items-center justify-between px-1">
                   <p className="font-semibold text-sm">{t("charges")}</p>
-                  {!chargeItems.results.some((item) =>
-                    EXCLUDED_CHARGE_ITEM_STATUSES.includes(item.status),
+                  {chargeItems.results.every(
+                    (item) =>
+                      !EXCLUDED_CHARGE_ITEM_STATUSES.includes(item.status),
                   ) && (
                     <Badge className="text-xs">
                       {chargeItems.results.every(
