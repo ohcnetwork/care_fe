@@ -70,14 +70,13 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 import {
+  ActivityDefinitionTemplateSpec,
   QuestionnaireResponseTemplateCreateSpec,
   QuestionnaireResponseTemplateReadSpec,
-  ServiceRequestTemplateSpec,
 } from "@/types/questionnaire/questionnaireResponseTemplate";
 import { questionnaireResponseTemplateApi } from "@/types/questionnaire/questionnaireResponseTemplateApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { filterStructuredQuestionnaireSlugs } from "./data/StructuredFormData";
 
 import { t } from "i18next";
 import { buildMedicationForTemplate } from "./QuestionTypes/MedicationRequestQuestion";
@@ -240,25 +239,27 @@ function MedicationsPreview({
 }
 
 /**
- * Reusable component for displaying a list of service requests in previews
+ * Reusable component for displaying a list of activity definitions in previews
  */
-function ServiceRequestsPreview({
-  serviceRequests,
+function ActivityDefinitionsPreview({
+  activityDefinitions,
   variant = "compact",
-  onServiceRequestSelect,
+  onActivityDefinitionSelect,
   t,
 }: {
-  serviceRequests: ServiceRequestTemplateSpec[];
+  activityDefinitions: ActivityDefinitionTemplateSpec[];
   variant?: "compact" | "form";
-  onServiceRequestSelect?: (serviceRequest: ServiceRequestTemplateSpec) => void;
+  onActivityDefinitionSelect?: (
+    activityDefinition: ActivityDefinitionTemplateSpec,
+  ) => void;
   t: (key: string, options?: Record<string, unknown>) => string;
 }) {
-  if (serviceRequests.length === 0) return null;
+  if (activityDefinitions.length === 0) return null;
 
   const isFormVariant = variant === "form";
   const displayLimit = 5;
-  const displayedRequests = serviceRequests.slice(0, displayLimit);
-  const remainingCount = serviceRequests.length - displayLimit;
+  const displayedItems = activityDefinitions.slice(0, displayLimit);
+  const remainingCount = activityDefinitions.length - displayLimit;
 
   return (
     <div
@@ -276,11 +277,11 @@ function ServiceRequestsPreview({
       >
         <ClipboardListIcon className={isFormVariant ? "size-4" : "size-3"} />
         {isFormVariant
-          ? t("service_requests_to_include")
-          : t("service_requests")}
+          ? t("activity_definitions_to_include")
+          : t("activity_definitions")}
       </div>
       <div className={cn("space-y-0.5", isFormVariant ? "space-y-2" : "pl-4")}>
-        {displayedRequests.map((sr, idx) => {
+        {displayedItems.map((ad, idx) => {
           if (isFormVariant) {
             return (
               <div
@@ -289,7 +290,8 @@ function ServiceRequestsPreview({
               >
                 <CheckCircle2Icon className="size-3.5 text-purple-500" />
                 <span className="truncate">
-                  {sr.service_request?.title || t("unknown_service_request")}
+                  {ad.service_request?.title ||
+                    t("unknown_activity_definition")}
                 </span>
               </div>
             );
@@ -303,19 +305,19 @@ function ServiceRequestsPreview({
             >
               <span className="size-1 rounded-full bg-purple-400 shrink-0" />
               <span className="text-gray-800 truncate flex-1">
-                {sr.service_request?.title ||
-                  sr.slug ||
-                  t("unknown_service_request")}
+                {ad.service_request?.title ||
+                  ad.slug ||
+                  t("unknown_activity_definition")}
               </span>
-              {onServiceRequestSelect && (
+              {onActivityDefinitionSelect && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onServiceRequestSelect(sr);
-                        toast.success(t("service_request_added"));
+                        onActivityDefinitionSelect(ad);
+                        toast.success(t("activity_definition_added"));
                       }}
                       className="opacity-0 group-hover/item:opacity-100 transition-opacity p-0.5 rounded hover:bg-purple-100 text-purple-600"
                     >
@@ -323,7 +325,7 @@ function ServiceRequestsPreview({
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="left">
-                    {t("add_this_service_request")}
+                    {t("add_this_activity_definition")}
                   </TooltipContent>
                 </Tooltip>
               )}
@@ -333,7 +335,7 @@ function ServiceRequestsPreview({
         {remainingCount > 0 && (
           <p className={cn("text-xs text-purple-500", isFormVariant && "pl-6")}>
             {isFormVariant
-              ? t("and_more_service_requests", { count: remainingCount })
+              ? t("and_more_activity_definitions", { count: remainingCount })
               : `+${remainingCount} ${t("more")}`}
           </p>
         )}
@@ -353,12 +355,14 @@ interface ManageResponseTemplatesSheetProps {
   /** Callback when a single medication is selected from a template */
   onMedicationSelect?: (medication: MedicationRequestCreate) => void;
   /** Callback when a single service request is selected from a template */
-  onServiceRequestSelect?: (serviceRequest: ServiceRequestTemplateSpec) => void;
+  onActivityDefinitionSelect?: (
+    activityDefinition: ActivityDefinitionTemplateSpec,
+  ) => void;
   disabled?: boolean;
   /** Current medications to allow saving as template */
   currentMedications?: MedicationRequestCreate[];
   /** Current service requests to allow saving as template */
-  currentServiceRequests?: ServiceRequestTemplateSpec[];
+  currentActivityDefinitions?: ActivityDefinitionTemplateSpec[];
   key_filter: string;
 }
 
@@ -377,10 +381,10 @@ export default function ManageResponseTemplatesSheet({
   trigger,
   onTemplateSelect,
   onMedicationSelect,
-  onServiceRequestSelect,
+  onActivityDefinitionSelect,
   disabled,
   currentMedications = [],
-  currentServiceRequests = [],
+  currentActivityDefinitions = [],
   key_filter = "medication_request",
 }: ManageResponseTemplatesSheetProps) {
   const { t } = useTranslation();
@@ -471,21 +475,22 @@ export default function ManageResponseTemplatesSheet({
 
     // Prepare service requests for template
     const serviceRequestsForTemplate =
-      isSavingCurrent && currentServiceRequests.length > 0
-        ? currentServiceRequests
+      isSavingCurrent && currentActivityDefinitions.length > 0
+        ? currentActivityDefinitions
         : [];
 
     const createData: QuestionnaireResponseTemplateCreateSpec = {
       name: data.name,
       description: data.description || "",
       ...(questionnaireSlug &&
-      !filterStructuredQuestionnaireSlugs(questionnaireSlug)
+      questionnaireSlug !== "service_request" &&
+      questionnaireSlug !== "medication_request"
         ? { questionnaire: questionnaireSlug }
         : {}),
       facility: facilityId,
       template_data: {
         medication_request: medicationsForTemplate,
-        service_request: serviceRequestsForTemplate,
+        activity_definition: serviceRequestsForTemplate,
       },
       users: [currentUser.username],
       facility_organizations: [],
@@ -531,9 +536,9 @@ export default function ManageResponseTemplatesSheet({
 
   const templates = templatesResponse?.results ?? [];
   const hasItemsToSave =
-    currentMedications.length > 0 || currentServiceRequests.length > 0;
+    currentMedications.length > 0 || currentActivityDefinitions.length > 0;
   const totalItemsToSave =
-    currentMedications.length + currentServiceRequests.length;
+    currentMedications.length + currentActivityDefinitions.length;
 
   const renderList = () => (
     <div className="space-y-3">
@@ -592,7 +597,7 @@ export default function ManageResponseTemplatesSheet({
               const medications =
                 template.template_data?.medication_request ?? [];
               const serviceRequests =
-                template.template_data?.service_request ?? [];
+                template.template_data?.activity_definition ?? [];
               const medicationCount = medications.length;
               const serviceRequestCount = serviceRequests.length;
               const isApplied = recentlyApplied === template.id;
@@ -731,10 +736,10 @@ export default function ManageResponseTemplatesSheet({
                         onMedicationSelect={onMedicationSelect}
                         t={t}
                       />
-                      <ServiceRequestsPreview
-                        serviceRequests={serviceRequests}
+                      <ActivityDefinitionsPreview
+                        activityDefinitions={serviceRequests}
                         variant="compact"
-                        onServiceRequestSelect={onServiceRequestSelect}
+                        onActivityDefinitionSelect={onActivityDefinitionSelect}
                         t={t}
                       />
                     </div>
@@ -788,8 +793,8 @@ export default function ManageResponseTemplatesSheet({
               variant="form"
               t={t}
             />
-            <ServiceRequestsPreview
-              serviceRequests={currentServiceRequests}
+            <ActivityDefinitionsPreview
+              activityDefinitions={currentActivityDefinitions}
               variant="form"
               t={t}
             />
