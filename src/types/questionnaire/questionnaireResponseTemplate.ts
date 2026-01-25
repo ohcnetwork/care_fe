@@ -1,4 +1,4 @@
-import { MedicationRequest } from "@/types/emr/medicationRequest/medicationRequest";
+import { MedicationRequestTemplateSpec } from "@/types/emr/medicationRequest/medicationRequest";
 import { BaseServiceRequestSpec } from "@/types/emr/serviceRequest/serviceRequest";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { UserReadMinimal } from "@/types/user/user";
@@ -21,7 +21,7 @@ export interface ServiceRequestTemplateSpec {
 }
 
 interface TemplateData {
-  medication_request?: MedicationRequest[];
+  medication_request?: MedicationRequestTemplateSpec[];
   questionnaire?: QuestionnaireAnswer[];
   service_request?: ServiceRequestTemplateSpec[];
   meta?: Record<string, unknown>;
