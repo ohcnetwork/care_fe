@@ -108,6 +108,7 @@ const Login = (props: LoginProps) => {
   const [otpValidationError, setOtpValidationError] = useState<string>("");
   const [resendOtpCountdown, setResendOtpCountdown] =
     useState(resendOtpTimeout);
+  const [resendPasswordCountdown, setResendPasswordCountdown] = useState(0);
 
   // Timer Function for resend OTP
   useEffect(() => {
@@ -120,7 +121,20 @@ const Login = (props: LoginProps) => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [resendOtpCountdown]);
+
+  // Timer Function for resend Password
+  useEffect(() => {
+    if (resendPasswordCountdown <= 0) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setResendPasswordCountdown((prevTime) => prevTime - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [resendPasswordCountdown]);
 
   // Remember the last login mode
   useEffect(() => {
@@ -193,6 +207,7 @@ const Login = (props: LoginProps) => {
     mutationFn: mutate(authApi.forgotPassword),
     onSuccess: () => {
       toast.success(t("password_sent"));
+      setResendPasswordCountdown(60);
     },
   });
 
@@ -655,10 +670,16 @@ const Login = (props: LoginProps) => {
                               type="submit"
                               className="w-full"
                               variant="primary"
-                              disabled={isLoading}
+                              disabled={
+                                isLoading || resendPasswordCountdown > 0
+                              }
                             >
                               {isLoading ? (
                                 <CircularProgress className="text-white" />
+                              ) : resendPasswordCountdown > 0 ? (
+                                t("resend_link_timer", {
+                                  time: resendPasswordCountdown,
+                                })
                               ) : (
                                 t("send_reset_link")
                               )}
