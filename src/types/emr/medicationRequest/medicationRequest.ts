@@ -234,6 +234,7 @@ export type MedicationRequestTemplateSpec = Omit<
 
 export interface MedicationRequestCreate extends MedicationRequest {
   create_prescription?: PrescriptionCreate;
+  dirty?: boolean;
 }
 
 export interface MedicationRequestRequest extends Omit<

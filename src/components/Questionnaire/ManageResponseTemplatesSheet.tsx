@@ -77,6 +77,7 @@ import {
 import { questionnaireResponseTemplateApi } from "@/types/questionnaire/questionnaireResponseTemplateApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { filterStructuredQuestionnaireSlugs } from "./data/StructuredFormData";
 
 import { t } from "i18next";
 import { buildMedicationForTemplate } from "./QuestionTypes/MedicationRequestQuestion";
@@ -478,8 +479,7 @@ export default function ManageResponseTemplatesSheet({
       name: data.name,
       description: data.description || "",
       ...(questionnaireSlug &&
-      questionnaireSlug != "medication_request" &&
-      questionnaireSlug != "service_request"
+      !filterStructuredQuestionnaireSlugs(questionnaireSlug)
         ? { questionnaire: questionnaireSlug }
         : {}),
       facility: facilityId,

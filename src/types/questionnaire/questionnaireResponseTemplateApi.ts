@@ -12,7 +12,7 @@ export const questionnaireResponseTemplateApi = {
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<QuestionnaireResponseTemplateReadSpec>>(),
     TQuery: Type<{
-      questionnaire?: string; // questionnaire external_id
+      questionnaire?: string;
       name?: string;
       key_filter?: "medication_request" | "service_request" | "questionnaire";
       limit?: number;
