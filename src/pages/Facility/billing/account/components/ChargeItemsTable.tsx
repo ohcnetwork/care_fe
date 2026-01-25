@@ -62,7 +62,7 @@ import {
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Label } from "@/components/ui/label";
@@ -484,10 +484,13 @@ export function ChargeItemsTable({
                     <TableCell className="p-3">
                       <MonetaryDisplay amount={item.total_price} />
                     </TableCell>
-                    <TableCell>
-                      {t("created_by_user", {
-                        name: formatName(item.created_by),
-                      })}
+                    <TableCell className="text-gray-700 text-xs">
+                      <p>
+                        {t("created_by_user", {
+                          name: formatName(item.created_by),
+                        })}
+                      </p>
+                      <p>{formatDateTime(item.created_date)}</p>
                     </TableCell>
                   </TableRow>
                 );
