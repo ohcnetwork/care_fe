@@ -32,6 +32,11 @@ import {
   AccountStatus,
 } from "@/types/billing/account/Account";
 import {
+  CHARGE_ITEM_STATUS_COLORS,
+  ChargeItemServiceResource,
+  ChargeItemStatus,
+} from "@/types/billing/chargeItem/chargeItem";
+import {
   INVOICE_STATUS_COLORS,
   InvoiceStatus,
 } from "@/types/billing/invoice/invoice";
@@ -455,5 +460,75 @@ export const paymentMethodFilter = (
       mode,
       icon: <CircleDashed className="size-4" />,
       showColorIndicators: false,
+    },
+  );
+
+export const chargeItemStatusFilter = (
+  key: string = "status",
+  mode: FilterMode = "single",
+  customOperations?: Operation[],
+) =>
+  createFilterConfig(
+    key,
+    t("status"),
+    "command",
+    Object.values(ChargeItemStatus).map((value) => ({
+      value: value,
+      label: t(value),
+      color: getVariantColorClasses(CHARGE_ITEM_STATUS_COLORS[value]),
+    })),
+    {
+      renderSelected: (selected: FilterValues) => {
+        const selectedStatus = selected as string[];
+        if (typeof selectedStatus[0] === "string") {
+          const option = selectedStatus[0];
+          const variant = CHARGE_ITEM_STATUS_COLORS[option as ChargeItemStatus];
+          return (
+            <GenericSelectedBadge
+              selectedValue={option}
+              selectedLength={selectedStatus.length}
+              variant={variant}
+            />
+          );
+        }
+        return <></>;
+      },
+      getOperations: () => customOperations || [{ label: "is" }],
+      mode,
+      icon: <CircleDashed className="size-4" />,
+      showColorIndicators: true,
+    },
+  );
+
+export const chargeItemServiceResourceFilter = (
+  key: string = "service_resource",
+  mode: FilterMode = "multi",
+  customOperations?: Operation[],
+) =>
+  createFilterConfig(
+    key,
+    t("service_resource"),
+    "command",
+    Object.values(ChargeItemServiceResource).map((value) => ({
+      value: value,
+      label: t(value),
+    })),
+    {
+      renderSelected: (selected: FilterValues) => {
+        const selectedValues = selected as string[];
+        if (typeof selectedValues[0] === "string") {
+          const option = selectedValues[0];
+          return (
+            <GenericSelectedBadge
+              selectedValue={option}
+              selectedLength={selectedValues.length}
+            />
+          );
+        }
+        return <></>;
+      },
+      getOperations: () => customOperations || [{ label: "includes" }],
+      mode,
+      icon: <CircleDashed className="size-4" />,
     },
   );

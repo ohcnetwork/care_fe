@@ -5241,6 +5241,7 @@
   "service_requests": "Service Requests",
   "service_requests_count": "{{count}} service request(s)",
   "service_requests_to_include": "Service requests to include",
+  "service_resource": "Service Resource",
   "service_type": "Service Type",
   "serviced_on": "Serviced on",
   "services": "Services",

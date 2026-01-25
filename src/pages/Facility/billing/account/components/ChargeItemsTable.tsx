@@ -28,13 +28,13 @@ import {
 import { EmptyState } from "@/components/ui/empty-state";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+  chargeItemServiceResourceFilter,
+  chargeItemStatusFilter,
+  dateFilter,
+} from "@/components/ui/multi-filter/filterConfigs";
+import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
+import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
+import { FilterDateRange } from "@/components/ui/multi-filter/utils/Utils";
 import {
   Table,
   TableBody,
@@ -43,7 +43,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -57,7 +56,6 @@ import {
   CHARGE_ITEM_STATUS_COLORS,
   ChargeItemRead,
   ChargeItemServiceResource,
-  ChargeItemStatus,
   MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
@@ -66,6 +64,7 @@ import { formatDateTime, formatName } from "@/Utils/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./AddChargeItemsBillingSheet";
@@ -129,6 +128,56 @@ export function ChargeItemsTable({
     disableCache: true,
   });
 
+  // MultiFilter configuration
+  const filters = [
+    chargeItemStatusFilter("status"),
+    chargeItemServiceResourceFilter("service_resource"),
+    dateFilter("created_date", t("created_date")),
+  ];
+
+  const onFilterUpdate = (query: Record<string, unknown>) => {
+    updateQuery(query);
+  };
+
+  const {
+    selectedFilters,
+    handleFilterChange,
+    handleOperationChange,
+    handleClearAll,
+    handleClearFilter,
+  } = useMultiFilterState(filters, onFilterUpdate, {
+    ...qParams,
+    status: qParams.status ? [qParams.status] : undefined,
+    service_resource: qParams.service_resource
+      ? Array.isArray(qParams.service_resource)
+        ? qParams.service_resource
+        : [qParams.service_resource]
+      : undefined,
+    created_date:
+      qParams.created_date_after || qParams.created_date_before
+        ? {
+            from: qParams.created_date_after
+              ? new Date(qParams.created_date_after as string)
+              : undefined,
+            to: qParams.created_date_before
+              ? new Date(qParams.created_date_before as string)
+              : undefined,
+          }
+        : undefined,
+  });
+
+  // Convert date filter values to API query params
+  const getDateQueryParams = () => {
+    const dateRange = selectedFilters.created_date?.selected as
+      | FilterDateRange
+      | undefined;
+    if (!dateRange) return {};
+    return {
+      created_date_after: dateRange.from?.toISOString(),
+      created_date_before: dateRange.to?.toISOString(),
+    };
+  };
+
   const { data: chargeItems, isLoading } = useQuery({
     queryKey: ["chargeItems", accountId, qParams],
     queryFn: query(chargeItemApi.listChargeItem, {
@@ -136,9 +185,11 @@ export function ChargeItemsTable({
       queryParams: {
         account: accountId,
         status: qParams.charge_item_status,
+        service_resource: qParams.service_resource,
         ordering: qParams.ordering,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        ...getDateQueryParams(),
       },
     }),
   }) as {
@@ -191,46 +242,15 @@ export function ChargeItemsTable({
   return (
     <div>
       <div className="mb-4 flex flex-col sm:flex-row justify-between items-center gap-2">
-        {/* Desktop Tabs */}
-        <Tabs
-          value={qParams.charge_item_status ?? "all"}
-          onValueChange={(value) =>
-            updateQuery({
-              charge_item_status: value === "all" ? undefined : value,
-            })
-          }
-          className="max-sm:hidden w-2/3 md:w-full overflow-x-auto"
-        >
-          <TabsList className="overflow-x-auto">
-            <TabsTrigger value="all">{t("all")}</TabsTrigger>
-            {Object.values(ChargeItemStatus).map((status) => (
-              <TabsTrigger key={status} value={status}>
-                {t(status)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-        {/* Mobile Select */}
-        <Select
-          value={qParams.charge_item_status ?? "all"}
-          onValueChange={(value) =>
-            updateQuery({
-              charge_item_status: value === "all" ? undefined : value,
-            })
-          }
-        >
-          <SelectTrigger className="sm:hidden w-full">
-            <SelectValue placeholder={t("filter_by_status")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("all")}</SelectItem>
-            {Object.values(ChargeItemStatus).map((status) => (
-              <SelectItem key={status} value={status}>
-                {t(status)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <MultiFilter
+          selectedFilters={selectedFilters}
+          onFilterChange={handleFilterChange}
+          onOperationChange={handleOperationChange}
+          onClearAll={handleClearAll}
+          onClearFilter={handleClearFilter}
+          className="flex flex-row-reverse flex-wrap sm:items-center"
+          facilityId={facilityId}
+        />
 
         <div className="flex items-center gap-2">
           <div className="gap-2 flex items-center whitespace-nowrap">
