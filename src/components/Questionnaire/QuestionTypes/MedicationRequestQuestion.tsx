@@ -954,7 +954,8 @@ export function MedicationRequestQuestion({
                       const existingMedCount =
                         template.template_data?.medication_request?.length ?? 0;
                       const existingServiceCount =
-                        template.template_data?.service_request?.length ?? 0;
+                        template.template_data?.activity_definition?.length ??
+                        0;
                       const hasMedications = existingMedCount > 0;
 
                       return (
@@ -1187,18 +1188,17 @@ export function MedicationRequestQuestion({
           />
         )}
       </div>
-      {patientMedications?.count !== undefined &&
-        patientMedications.count > 100 && (
-          <Alert className="bg-yellow-50 border-yellow-200">
-            <AlertTriangle className="h-4 w-4 text-yellow-600" />
-            <AlertDescription className="text-yellow-800">
-              {t("medication_list_truncated_warning", {
-                shown: 100,
-                total: patientMedications.count,
-              })}
-            </AlertDescription>
-          </Alert>
-        )}
+      {!!patientMedications?.count && patientMedications.count > 100 && (
+        <Alert className="bg-yellow-50 border-yellow-200">
+          <AlertTriangle className="h-4 w-4 text-yellow-600" />
+          <AlertDescription className="text-yellow-800">
+            {t("medication_list_truncated_warning", {
+              shown: 100,
+              total: patientMedications.count,
+            })}
+          </AlertDescription>
+        </Alert>
+      )}
       {medications.length > 0 && (
         <div className="md:overflow-x-auto w-auto">
           <div className="min-w-fit">

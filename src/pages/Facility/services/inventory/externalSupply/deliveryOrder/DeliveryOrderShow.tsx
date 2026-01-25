@@ -455,7 +455,11 @@ export function DeliveryOrderShow({
                       DeliveryOrderStatus.completed,
                     )
                   }
-                  disabled={isUpdating || selectedDeliveries.length !== 0}
+                  disabled={
+                    isUpsertingDeliveries ||
+                    isUpdating ||
+                    selectedDeliveries.length !== 0
+                  }
                 >
                   {isUpdating ? t("updating") : t("mark_as_completed")}
                   <ShortcutBadge actionId="mark-as" />

@@ -118,7 +118,7 @@ export default function DiagnosticReportView({
                   </span>
                 </p>
               ) : (
-                t("diagnostic_report")
+                report.service_request?.title || t("diagnostic_report")
               )}
             </CardTitle>
           </CardHeader>

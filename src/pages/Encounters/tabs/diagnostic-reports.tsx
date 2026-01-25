@@ -326,7 +326,10 @@ function LeftPanel({
     queryKey: ["activityDefinitions", facilityId, searchQuery],
     queryFn: query.debounced(activityDefinitionApi.listActivityDefinition, {
       pathParams: { facilityId },
-      queryParams: { title: searchQuery || undefined, limit: 50 },
+      queryParams: {
+        title: searchQuery || undefined,
+        limit: 50,
+      },
     }),
     enabled: !!facilityId,
   });
