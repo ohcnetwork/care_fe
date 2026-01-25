@@ -136,19 +136,13 @@ export default function AppointmentPrint(props: Props) {
               <div className="p-2 border border-gray-200 bg-gray-100 w-full h-full rounded-md flex flex-col">
                 <div className="flex flex-row items-center  justify-between px-1">
                   <p className="font-semibold text-sm">{t("charges")}</p>
-                  <div className="flex items-center">
-                    <Badge className="text-xs">
-                      {chargeItems?.results?.every(
-                        (item) => item.status === ChargeItemStatus.paid,
-                      )
-                        ? t("paid")
-                        : chargeItems?.results?.some(
-                              (item) => item.status === ChargeItemStatus.billed,
-                            )
-                          ? t("billed")
-                          : t("billable")}
-                    </Badge>
-                  </div>
+                  {chargeItems?.results?.every(
+                    (item) => item.status === ChargeItemStatus.paid,
+                  ) && (
+                    <div className="flex items-center">
+                      <Badge className="text-xs">{t("paid")}</Badge>
+                    </div>
+                  )}
                 </div>
 
                 <div className="bg-white rounded-md p-3 shadow-md mt-2 h-full">
