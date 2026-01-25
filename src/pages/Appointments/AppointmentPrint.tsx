@@ -20,6 +20,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import {
   ChargeItemServiceResource,
   ChargeItemStatus,
+  EXCLUDED_CHARGE_ITEM_STATUSES,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import scheduleApis from "@/types/scheduling/scheduleApi";
@@ -134,14 +135,22 @@ export default function AppointmentPrint(props: Props) {
           {hasChargeItems && (
             <div className="flex justify-center w-2/5">
               <div className="p-2 border border-gray-200 bg-gray-100 w-full h-full rounded-md flex flex-col">
-                <div className="flex flex-row items-center  justify-between px-1">
+                <div className="flex flex-row items-center justify-between px-1">
                   <p className="font-semibold text-sm">{t("charges")}</p>
-                  {chargeItems?.results?.every(
-                    (item) => item.status === ChargeItemStatus.paid,
+                  {!chargeItems.results.some((item) =>
+                    EXCLUDED_CHARGE_ITEM_STATUSES.includes(item.status),
                   ) && (
-                    <div className="flex items-center">
-                      <Badge className="text-xs">{t("paid")}</Badge>
-                    </div>
+                    <Badge className="text-xs">
+                      {chargeItems.results.every(
+                        (item) => item.status === ChargeItemStatus.paid,
+                      )
+                        ? t("paid")
+                        : chargeItems.results.every(
+                              (item) => item.status === ChargeItemStatus.billed,
+                            )
+                          ? t("billed")
+                          : t("billable")}
+                    </Badge>
                   )}
                 </div>
 

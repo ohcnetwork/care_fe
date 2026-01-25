@@ -17,6 +17,12 @@ export enum ChargeItemStatus {
   entered_in_error = "entered_in_error",
 }
 
+export const EXCLUDED_CHARGE_ITEM_STATUSES = [
+  ChargeItemStatus.not_billable,
+  ChargeItemStatus.entered_in_error,
+  ChargeItemStatus.aborted,
+];
+
 export const CHARGE_ITEM_STATUS_COLORS = {
   // planned: "blue",
   billable: "indigo",
