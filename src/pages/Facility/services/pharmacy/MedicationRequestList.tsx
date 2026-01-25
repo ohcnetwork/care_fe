@@ -46,7 +46,6 @@ import {
   ENCOUNTER_CLASSES_COLORS,
 } from "@/types/emr/encounter/encounter";
 import {
-  PRESCRIPTION_STATUS_STYLES,
   PrescriptionStatus,
   PrescriptionSummary,
 } from "@/types/emr/prescription/prescription";
@@ -250,7 +249,6 @@ export default function MedicationRequestList({
             <TableHeader>
               <TableRow>
                 <TableHead>{t("patient_name")}</TableHead>
-                <TableHead>{t("status")}</TableHead>
                 <TableHead>{t("by")}</TableHead>
                 <TableHead>{t("tags", { count: 2 })}</TableHead>
                 <TableHead>{t("action")}</TableHead>
@@ -267,11 +265,6 @@ export default function MedicationRequestList({
                     <div className="text-xs text-gray-500">
                       {t("at")}: {formatDateTime(item.created_date)}
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={PRESCRIPTION_STATUS_STYLES[item.status]}>
-                      {t(`prescription_status__${item.status}`)}
-                    </Badge>
                   </TableCell>
 
                   <TableCell className="text-sm">
