@@ -2,14 +2,14 @@ import { AlertTriangleIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-const STORAGE_KEY = "show-prod-warning";
+export const DEVELOPER_MODE_KEY = "care:developer_mode";
 
 export default function ProductionWarningBanner() {
   const { t } = useTranslation();
   const [showWarning, setShowWarning] = useState(false);
 
   useEffect(() => {
-    const value = localStorage.getItem(STORAGE_KEY);
+    const value = localStorage.getItem(DEVELOPER_MODE_KEY);
     setShowWarning(value === "true");
   }, []);
 
