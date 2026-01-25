@@ -430,6 +430,7 @@ export function DeliveryOrderShow({
             <Button variant="outline" asChild>
               <Link href={`${deliveryOrderId}/print`}>
                 <Printer className="size-4" /> {t("print")}
+                <ShortcutBadge actionId="print-delivery-order" />
               </Link>
             </Button>
 

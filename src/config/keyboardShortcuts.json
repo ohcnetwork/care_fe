@@ -117,7 +117,8 @@
 
   ],
   "facility:inventory:delivery": [
-    { "key": "l", "action": "load-from-order", "description": "Load from Order", "when": "always" }
+    { "key": "l", "action": "load-from-order", "description": "Load from Order", "when": "always" },
+    { "key": "p", "action": "print-delivery-order", "description": "Print Delivery Order", "when": "always" }
   ],
   "facility:service": [
     { "key": "s", "action": "scan-button", "description": "Scan the QR code", "when": "always" },
