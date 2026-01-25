@@ -100,7 +100,7 @@ export function useEncounterShortcuts() {
         navigate(buildEncounterUrl("/diagnostic_reports")),
       "clinical-history": () =>
         navigate(
-          `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/history/symptoms?sourceUrl=${encodeURIComponent(
+          `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/history/responses?sourceUrl=${encodeURIComponent(
             buildEncounterUrl("/updates"),
           )}`,
         ),

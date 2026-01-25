@@ -25,6 +25,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 import Page from "@/components/Common/Page";
+import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
 
@@ -113,6 +114,7 @@ export function EncounterList({
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     cacheBlacklist: [
+      "name",
       "encounter_id",
       "external_identifier",
       "tags",
@@ -200,6 +202,7 @@ export function EncounterList({
         tags: qParams.tags,
         tags_behavior: qParams.tags_behavior,
         patient_filter: patient_filter,
+        name: qParams.name,
       },
     }),
     enabled: !propEncounters && !encounter_id,
@@ -414,6 +417,20 @@ export function EncounterList({
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
+                <SearchInput
+                  id="patient-name-search"
+                  options={[
+                    {
+                      key: "name",
+                      type: "text",
+                      placeholder: t("search_by_patient_name"),
+                      value: qParams.name || "",
+                      display: t("patient_name"),
+                    },
+                  ]}
+                  className="w-full sm:w-auto sm:min-w-64"
+                  onSearch={(key, value) => updateQuery({ [key]: value })}
+                />
                 <PatientIdentifierFilter
                   onSelect={(patientId, patientName) =>
                     updateQuery({

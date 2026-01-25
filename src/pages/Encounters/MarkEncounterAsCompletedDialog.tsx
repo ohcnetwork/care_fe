@@ -1,4 +1,3 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -15,26 +14,16 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import mutate from "@/Utils/request/mutate";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { EncounterStatus } from "@/types/emr/encounter/encounter";
-import encounterApi from "@/types/emr/encounter/encounterApi";
 
 export function MarkEncounterAsCompletedDialog(
   props: React.ComponentProps<typeof AlertDialog>,
 ) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const { selectedEncounter: encounter } = useEncounter();
-
-  const { mutate: updateEncounter } = useMutation({
-    mutationFn: mutate(encounterApi.update, {
-      pathParams: { id: encounter?.id || "" },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["encounter", encounter?.id] });
-    },
-  });
+  const {
+    selectedEncounter: encounter,
+    actions: { endEncounter },
+  } = useEncounter();
 
   if (!encounter) return null;
 
@@ -57,23 +46,7 @@ export function MarkEncounterAsCompletedDialog(
           <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
           <AlertDialogAction
             className={buttonVariants({ variant: "primary" })}
-            onClick={() => {
-              updateEncounter({
-                ...encounter,
-                status: EncounterStatus.COMPLETED,
-                encounter_class: encounter.encounter_class,
-                period: {
-                  start: encounter.period.start,
-                  end: encounter.period.end
-                    ? encounter.period.end
-                    : new Date().toISOString(),
-                },
-                hospitalization: encounter.hospitalization,
-                priority: encounter.priority,
-                external_identifier: encounter.external_identifier,
-                discharge_summary_advice: encounter.discharge_summary_advice,
-              });
-            }}
+            onClick={() => endEncounter(encounter, true)}
           >
             {t("mark_as_complete")}
           </AlertDialogAction>

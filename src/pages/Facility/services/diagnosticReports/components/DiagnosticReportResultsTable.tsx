@@ -26,6 +26,29 @@ interface DiagnosticReportResultsTableProps {
 export function DiagnosticReportResultsTable({
   observations,
 }: DiagnosticReportResultsTableProps) {
+  const hasReferenceRange = observations.some(
+    (observation) =>
+      observation.reference_range && observation.reference_range.length > 0,
+  );
+  const hasInterpretation = observations.some(
+    (observation) => observation.interpretation,
+  );
+  const hasComponentReferenceRange = observations.some(
+    (observation) =>
+      observation.component &&
+      observation.component.some(
+        (component) =>
+          component.reference_range && component.reference_range.length > 0,
+      ),
+  );
+  const hasComponentInterpretation = observations.some(
+    (observation) =>
+      observation.component &&
+      observation.component.some((component) => component.interpretation),
+  );
+  const showReferenceRange = hasReferenceRange || hasComponentReferenceRange;
+  const showInterpretation = hasInterpretation || hasComponentInterpretation;
+
   const renderReferenceRange = (
     referenceRange: ObservationReferenceRange[],
     value: QuestionnaireSubmitResultValue,
@@ -124,13 +147,18 @@ export function DiagnosticReportResultsTable({
             )}
           </div>
         </TableCell>
-        <TableCell className="border-r border-b border-gray-300 whitespace-normal wrap-break-word">
-          {component.reference_range &&
-            renderReferenceRange(component.reference_range, component.value)}
-        </TableCell>
-        <TableCell className="border-b border-gray-300 whitespace-normal wrap-break-word">
-          {renderInterpretation(component.interpretation || "")}
-        </TableCell>
+        {showReferenceRange && (
+          <TableCell className="border-r border-b border-gray-300 whitespace-normal wrap-break-word">
+            {component.reference_range &&
+              renderReferenceRange(component.reference_range, component.value)}
+          </TableCell>
+        )}
+        {showInterpretation && (
+          <TableCell className="border-b border-gray-300 whitespace-normal wrap-break-word">
+            {component.interpretation &&
+              renderInterpretation(component.interpretation)}
+          </TableCell>
+        )}
       </TableRow>
     ));
   };
@@ -166,18 +194,23 @@ export function DiagnosticReportResultsTable({
               </div>
             )}
           </TableCell>
-          <TableCell className="whitespace-normal wrap-break-word">
-            {!hasComponents &&
-              renderReferenceRange(
-                observation.reference_range || [],
-                observation.value,
-              )}
-          </TableCell>
-          <TableCell className="whitespace-normal wrap-break-word">
-            {!hasComponents &&
-              observation.interpretation &&
-              renderInterpretation(observation.interpretation)}
-          </TableCell>
+          {showReferenceRange && (
+            <TableCell className="whitespace-normal wrap-break-word">
+              {!hasComponents &&
+                observation.reference_range &&
+                renderReferenceRange(
+                  observation.reference_range,
+                  observation.value,
+                )}
+            </TableCell>
+          )}
+          {showInterpretation && (
+            <TableCell className="whitespace-normal wrap-break-word">
+              {!hasComponents &&
+                observation.interpretation &&
+                renderInterpretation(observation.interpretation)}
+            </TableCell>
+          )}
         </TableRow>
         {hasComponents &&
           observation.component &&
@@ -201,12 +234,16 @@ export function DiagnosticReportResultsTable({
             <TableHead className="font-medium text-sm text-gray-700 w-[25%]">
               {t("result")}
             </TableHead>
-            <TableHead className="font-medium text-sm text-gray-700 w-[25%] whitespace-normal wrap-break-word">
-              {t("reference_range")}
-            </TableHead>
-            <TableHead className="font-medium text-sm text-gray-700 w-[25%] whitespace-normal wrap-break-word">
-              {t("interpretation")}
-            </TableHead>
+            {showReferenceRange && (
+              <TableHead className="font-medium text-sm text-gray-700 w-[25%] whitespace-normal wrap-break-word">
+                {t("reference_range")}
+              </TableHead>
+            )}
+            {showInterpretation && (
+              <TableHead className="font-medium text-sm text-gray-700 w-[25%] whitespace-normal wrap-break-word">
+                {t("interpretation")}
+              </TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
