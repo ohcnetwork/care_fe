@@ -160,18 +160,14 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
           setField("informational_components", informational);
         }
 
-        // Get taxes from charge item, fallback to category's configured_monetary_components
         const taxes = getComponentsFromChargeItem(
           chargeItemDef,
           MonetaryComponentType.tax,
         );
-        const categoryTaxes =
-          chargeItemDef.category?.configured_monetary_components?.filter(
-            (c) => c.monetary_component_type === MonetaryComponentType.tax,
-          ) || [];
-        setField("tax_components", taxes.length ? taxes : categoryTaxes);
+        if (taxes.length) {
+          setField("tax_components", taxes);
+        }
 
-        // Get discounts from charge item, fallback to category's configured_monetary_components
         const discounts = getComponentsFromChargeItem(
           chargeItemDef,
           MonetaryComponentType.discount,
