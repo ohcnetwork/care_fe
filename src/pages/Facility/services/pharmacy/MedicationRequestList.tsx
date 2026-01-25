@@ -261,6 +261,11 @@ export default function MedicationRequestList({
                 <TableRow key={item.id}>
                   <TableCell className="font-semibold">
                     {item.encounter.patient.name}
+                    {item.encounter.current_location && (
+                      <div className="text-xs text-gray-500">
+                        {t("location")}: {item.encounter.current_location.name}
+                      </div>
+                    )}
                     <div className="text-xs text-gray-500">
                       {t("by")}: {formatName(item.prescribed_by)}
                     </div>
