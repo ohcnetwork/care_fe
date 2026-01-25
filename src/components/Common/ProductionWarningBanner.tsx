@@ -1,19 +1,24 @@
+import { useAtom } from "jotai";
 import { AlertTriangleIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-export const DEVELOPER_MODE_KEY = "care:developer_mode";
+import { developerModeAtom } from "@/atoms/developerMode";
+import { useQueryParams } from "raviger";
 
 export default function ProductionWarningBanner() {
   const { t } = useTranslation();
-  const [showWarning, setShowWarning] = useState(false);
+  const [developerMode, setDeveloperMode] = useAtom(developerModeAtom);
+  const [{ debug }] = useQueryParams();
 
   useEffect(() => {
-    const value = localStorage.getItem(DEVELOPER_MODE_KEY);
-    setShowWarning(value === "true");
-  }, []);
+    // Auto-enable developer mode if ?debug=true is in the URL
+    if (debug === "true") {
+      setDeveloperMode(true);
+    }
+  }, [debug, setDeveloperMode]);
 
-  if (!showWarning) {
+  if (!developerMode) {
     return null;
   }
 

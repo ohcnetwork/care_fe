@@ -1,3 +1,4 @@
+import { useAtom } from "jotai";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -8,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
-import { DEVELOPER_MODE_KEY } from "@/components/Common/ProductionWarningBanner";
+import { developerModeAtom } from "@/atoms/developerMode";
 
 import LanguageSelector from "@/components/Common/LanguageSelector";
 import UserColumns, { userChildProps } from "@/components/Common/UserColumns";
@@ -210,18 +211,7 @@ export default function UserSummaryTab({
 
 function DeveloperModeSection() {
   const { t } = useTranslation();
-  const [enabled, setEnabled] = useState(() => {
-    return localStorage.getItem(DEVELOPER_MODE_KEY) === "true";
-  });
-
-  const handleToggle = (checked: boolean) => {
-    setEnabled(checked);
-    if (checked) {
-      localStorage.setItem(DEVELOPER_MODE_KEY, "true");
-    } else {
-      localStorage.removeItem(DEVELOPER_MODE_KEY);
-    }
-  };
+  const [developerMode, setDeveloperMode] = useAtom(developerModeAtom);
 
   return (
     <Card className="border-amber-500">
@@ -241,8 +231,8 @@ function DeveloperModeSection() {
           <div className="flex items-center gap-2">
             <Switch
               id="developer-mode"
-              checked={enabled}
-              onCheckedChange={handleToggle}
+              checked={developerMode}
+              onCheckedChange={setDeveloperMode}
             />
             <Label htmlFor="developer-mode" className="sr-only">
               {t("developer_mode")}
