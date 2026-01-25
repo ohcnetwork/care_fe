@@ -702,7 +702,7 @@ export function ServiceRequestQuestion({
             onTemplateSelect={handleApplyTemplate}
             onServiceRequestSelect={handleAddSingleServiceRequest}
             disabled={disabled}
-            key_filter="service_request"
+            key_filter="activity_definition"
             currentServiceRequests={serviceRequests.map((sr) => ({
               slug: sr.activity_definition,
               service_request: {
