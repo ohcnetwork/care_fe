@@ -37,7 +37,7 @@ import {
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
-import { add, round } from "@/Utils/decimal";
+import { add, multiply, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 
@@ -743,7 +743,10 @@ export const PrintChargeItems = (props: {
                                           </TableCell>
                                           <TableCell className="text-right">
                                             <MonetaryDisplay
-                                              amount={payment.amount}
+                                              amount={multiply(
+                                                payment.amount,
+                                                payment.is_credit_note ? -1 : 1,
+                                              )}
                                             />
                                           </TableCell>
                                         </TableRow>,
