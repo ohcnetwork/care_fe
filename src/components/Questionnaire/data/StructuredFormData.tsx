@@ -283,3 +283,12 @@ export const FIXED_QUESTIONNAIRES: Record<string, QuestionnaireRead> =
 
 export type StructuredQuestionType =
   (typeof STRUCTURED_QUESTIONS)[number]["value"];
+
+export function filterStructuredQuestionnaireSlugs(slug?: string) {
+  return slug &&
+    STRUCTURED_QUESTIONS.map(
+      (question) => question.questionnaire.slug,
+    ).includes(slug)
+    ? undefined
+    : slug;
+}

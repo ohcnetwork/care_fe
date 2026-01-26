@@ -79,12 +79,16 @@ export const PrintChargeItems = (props: {
   const [summaryMode, setSummaryMode] = useState(false);
   const [hideHeader, setHideHeader] = useState(false);
   const [preserveHeaderSpace, setPreserveHeaderSpace] = useState(true);
+  const [sortByName, setSortByName] = useState(false);
+  const [showCreatedBy, setShowCreatedBy] = useState(false);
 
   const hideCategoryLabel = `${t("hide_category_grouping")}`;
   const hidePaymentTypeLabel = `${t("hide_payment_type_grouping")}`;
   const summaryLabel = `${t("summary")}`;
   const hideHeaderLabel = `${t("hide_header")}`;
   const preserveHeaderSpaceLabel = `${t("preserve_header_space")}`;
+  const sortByNameLabel = `${t("sort_by_name")}`;
+  const showCreatedByLabel = `${t("show_created_by")}`;
 
   const { data: account } = useQuery({
     queryKey: ["account", accountId],
@@ -205,6 +209,31 @@ export const PrintChargeItems = (props: {
                 </label>
               </div>
             )}
+
+            <div className="gap-2 flex items-center">
+              <Switch
+                id="sort-by-name"
+                checked={sortByName}
+                onCheckedChange={setSortByName}
+              />
+              <label htmlFor="sort-by-name" className="cursor-pointer text-sm">
+                {sortByNameLabel}
+              </label>
+            </div>
+
+            <div className="gap-2 flex items-center">
+              <Switch
+                id="show-created-by"
+                checked={showCreatedBy}
+                onCheckedChange={setShowCreatedBy}
+              />
+              <label
+                htmlFor="show-created-by"
+                className="cursor-pointer text-sm"
+              >
+                {showCreatedByLabel}
+              </label>
+            </div>
           </>
         )}
       </div>
@@ -331,6 +360,11 @@ export const PrintChargeItems = (props: {
                                   <TableHead className="font-bold text-center w-8">
                                     {t("status")}
                                   </TableHead>
+                                  {showCreatedBy && (
+                                    <TableHead className="font-bold w-16">
+                                      {t("created_by")}
+                                    </TableHead>
+                                  )}
                                   <TableHead className="font-bold w-10">
                                     {t("rate")}
                                   </TableHead>
@@ -376,8 +410,13 @@ export const PrintChargeItems = (props: {
                               const rows: React.ReactNode[] = [];
 
                               sortedCategories.forEach((categoryTitle) => {
-                                const items: ChargeItemRead[] =
+                                const baseItems: ChargeItemRead[] =
                                   groups[categoryTitle] ?? [];
+                                const items = sortByName
+                                  ? baseItems.sort((a, b) =>
+                                      a.title.localeCompare(b.title),
+                                    )
+                                  : baseItems;
 
                                 const categoryTotal = add(
                                   ...items.map((i) => i.total_price || 0),
@@ -413,7 +452,7 @@ export const PrintChargeItems = (props: {
                                         className="font-bold hover:bg-transparent"
                                       >
                                         <TableCell
-                                          colSpan={5}
+                                          colSpan={showCreatedBy ? 6 : 5}
                                           className="capitalize"
                                         >
                                           {categoryTitle}
@@ -462,6 +501,14 @@ export const PrintChargeItems = (props: {
                                               {t(chargeItem.status)}
                                             </span>
                                           </TableCell>
+                                          {showCreatedBy && (
+                                            <TableCell className="w-16">
+                                              {
+                                                chargeItem.created_by
+                                                  ?.first_name
+                                              }
+                                            </TableCell>
+                                          )}
                                           <TableCell className="text-right w-10">
                                             <MonetaryDisplay
                                               amount={unitPrice}
@@ -489,7 +536,7 @@ export const PrintChargeItems = (props: {
                                   className="bg-muted/30 font-semibold"
                                 >
                                   <TableCell
-                                    colSpan={5}
+                                    colSpan={showCreatedBy ? 6 : 5}
                                     className="text-right pr-2"
                                   >
                                     {t("net_total")}

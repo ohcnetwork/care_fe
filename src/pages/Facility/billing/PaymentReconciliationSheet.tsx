@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
-import { locationAtomFamily } from "@/atoms/location-atom";
+import { paymentReconcilationLocationAtom } from "@/atoms/paymentReconcilationLocationAtom";
 import { LocationPicker } from "@/components/Location/LocationPicker";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -185,7 +185,7 @@ export function PaymentReconciliationSheet({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedLocationObject, setSelectedLocationObject] = useAtom(
-    locationAtomFamily(facilityId),
+    paymentReconcilationLocationAtom(facilityId),
   );
   useShortcutSubContext();
 
