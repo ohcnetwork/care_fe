@@ -1,6 +1,9 @@
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 
+import RenderActivityDefinitionFilter, {
+  ActivityDefinitionFilterValue,
+} from "./activityDefinitionFilter";
 import RenderDateFilter from "./dateFilter";
 import RenderDepartmentFilter from "./departmentFilter";
 import GenericFilter from "./genericFilter";
@@ -57,6 +60,17 @@ export default function FilterRenderer({
           <RenderDepartmentFilter
             {...commonProps}
             selectedOrgs={selected as FacilityOrganizationRead[]}
+          />
+          <NavigationHelper isActiveFilter={true} />
+        </>
+      );
+    case "activity_definition":
+      return (
+        <>
+          <RenderActivityDefinitionFilter
+            {...commonProps}
+            facilityId={facilityId || ""}
+            selectedDefinitions={selected as ActivityDefinitionFilterValue[]}
           />
           <NavigationHelper isActiveFilter={true} />
         </>

@@ -3489,6 +3489,7 @@
   "no_matching_discount_codes": "No discount codes matches this search",
   "no_matching_discount_components": "No discount components matches this search",
   "no_matching_informational_codes": "No matching informational codes",
+  "no_matching_items_found": "No matching items found",
   "no_matching_permissions": "No permissions match your search",
   "no_matching_tax_codes": "No matching tax codes found",
   "no_matching_tax_components": "No matching tax components found",

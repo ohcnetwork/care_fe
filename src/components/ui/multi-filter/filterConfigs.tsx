@@ -7,9 +7,19 @@ import {
 } from "@/types/emr/encounter/encounter";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
-import { Building, CalendarFold, CircleDashed, Tag } from "lucide-react";
+import {
+  Beaker,
+  Building,
+  CalendarFold,
+  CircleDashed,
+  Tag,
+} from "lucide-react";
 
 import { t } from "i18next";
+import {
+  ActivityDefinitionFilterValue,
+  SelectedActivityDefinitionBadge,
+} from "./activityDefinitionFilter";
 import { SelectedDateBadge, getDateOperations } from "./dateFilter";
 import { SelectedDepartmentBadge } from "./departmentFilter";
 import { GenericSelectedBadge } from "./genericFilter";
@@ -455,5 +465,29 @@ export const paymentMethodFilter = (
       mode,
       icon: <CircleDashed className="size-4" />,
       showColorIndicators: false,
+    },
+  );
+
+export const activityDefinitionFilter = (
+  key: string = "activity_definition",
+  mode: FilterMode = "single",
+  label?: string,
+) =>
+  createFilterConfig(
+    key,
+    label ? t(label) : t("activity_definition"),
+    "activity_definition",
+    [],
+    {
+      renderSelected: (selected: FilterValues) => {
+        return (
+          <SelectedActivityDefinitionBadge
+            selected={selected as ActivityDefinitionFilterValue[]}
+          />
+        );
+      },
+      getOperations: () => [{ label: "is" }],
+      mode,
+      icon: <Beaker className="size-4" />,
     },
   );
