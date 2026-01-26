@@ -42,10 +42,7 @@ import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { tagFilter } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
-import {
-  ENCOUNTER_CLASS,
-  ENCOUNTER_CLASSES_COLORS,
-} from "@/types/emr/encounter/encounter";
+import { ENCOUNTER_CLASSES_COLORS } from "@/types/emr/encounter/encounter";
 import {
   PrescriptionStatus,
   PrescriptionSummary,
@@ -61,6 +58,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import careConfig from "@careConfig";
 
 export default function MedicationRequestList({
   facilityId,
@@ -206,7 +204,9 @@ export default function MedicationRequestList({
                 : "",
             })
           }
-          options={[...ENCOUNTER_CLASS].map((ec) => `encounter_class__${ec}`)}
+          options={[...careConfig.encounterClasses].map(
+            (ec) => `encounter_class__${ec}`,
+          )}
           showAllOption={true}
           allOptionLabel="all"
           variant="background"

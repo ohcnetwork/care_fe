@@ -1,5 +1,4 @@
 import {
-  ENCOUNTER_CLASS,
   ENCOUNTER_PRIORITY,
   EncounterClass,
   EncounterPriority,
@@ -47,6 +46,7 @@ import {
   ENCOUNTER_PRIORITY_FILTER_COLORS,
   ENCOUNTER_STATUS_FILTER_COLORS,
 } from "@/types/emr/encounter/encounter";
+import careConfig from "@careConfig";
 export const encounterStatusFilter = (
   key: string = "encounter_status",
   mode: FilterMode = "single",
@@ -92,10 +92,10 @@ export const encounterClassFilter = (
     key,
     t("encounter_class"),
     "command",
-    Array.from(ENCOUNTER_CLASS).map((value) => ({
+    careConfig.encounterClasses.map((value) => ({
       value: value,
       label: t(`encounter_class__${value}`),
-      color: ENCOUNTER_CLASS_FILTER_COLORS[value as EncounterClass],
+      color: ENCOUNTER_CLASS_FILTER_COLORS[value],
     })),
     {
       renderSelected: (selected: FilterValues) => {
