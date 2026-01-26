@@ -16,7 +16,7 @@ interface Options {
  */
 export default function useAutoPrint({
   enabled = true,
-  delay = 500,
+  delay = 1000,
   window: printWindow = window,
 }: Options) {
   useEffect(() => {
