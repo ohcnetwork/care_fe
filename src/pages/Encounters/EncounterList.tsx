@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useAtom } from "jotai";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
+
+import { encounterListFiltersAtom } from "@/atoms/encounterFilterAtom";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -8,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import {
   dateFilter,
+  departmentFilter,
   encounterPriorityFilter,
   encounterStatusFilter,
   tagFilter,
@@ -21,6 +25,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 import Page from "@/components/Common/Page";
+import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
 
@@ -35,6 +40,7 @@ import {
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import query from "@/Utils/request/query";
 import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
 import careConfig from "@careConfig";
@@ -52,6 +58,7 @@ const buildQueryParams = (
   priority?: string,
   created_date_after?: string,
   created_date_before?: string,
+  organization?: string,
 ) => {
   const params: Record<string, string | undefined> = {};
   if (facilityId) {
@@ -77,6 +84,9 @@ const buildQueryParams = (
       new Date(created_date_before),
       true,
     );
+  }
+  if (organization) {
+    params.organization = organization;
   }
   return params;
 };
@@ -104,6 +114,7 @@ export function EncounterList({
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     cacheBlacklist: [
+      "name",
       "encounter_id",
       "external_identifier",
       "tags",
@@ -111,6 +122,9 @@ export function EncounterList({
     ],
   });
   const { t } = useTranslation();
+  const [, setSavedFilters] = useAtom(encounterListFiltersAtom);
+  const hasRestoredFilters = useRef(false);
+
   const {
     status,
     priority,
@@ -119,7 +133,55 @@ export function EncounterList({
     patient_filter,
     created_date_after,
     created_date_before,
+    organization,
   } = qParams;
+
+  // Restore filters from sessionStorage on mount if URL params are empty
+  useEffect(() => {
+    if (hasRestoredFilters.current) return;
+    hasRestoredFilters.current = true;
+
+    // Check if URL has no meaningful filters
+    const hasUrlFilters =
+      status || priority || organization || qParams.tags || patient_filter;
+
+    if (!hasUrlFilters) {
+      // Read directly from sessionStorage to avoid dependency issues
+      try {
+        const stored = sessionStorage.getItem("encounter_list_filters");
+        if (stored) {
+          const filters = JSON.parse(stored);
+          const restoredParams: Record<string, string | undefined> = {};
+
+          if (filters.status) restoredParams.status = filters.status;
+          if (filters.priority) restoredParams.priority = filters.priority;
+          if (filters.selectedOrg)
+            restoredParams.organization = filters.selectedOrg.id;
+          if (filters.selectedTags?.length > 0)
+            restoredParams.tags = filters.selectedTags
+              .map((t: TagConfig) => t.id)
+              .join(",");
+          if (filters.tagsBehavior)
+            restoredParams.tags_behavior = filters.tagsBehavior;
+          if (filters.dateFrom)
+            restoredParams.created_date_after = dateQueryString(
+              new Date(filters.dateFrom),
+            );
+          if (filters.dateTo)
+            restoredParams.created_date_before = dateQueryString(
+              new Date(filters.dateTo),
+            );
+
+          if (Object.keys(restoredParams).length > 0) {
+            updateQuery(restoredParams);
+          }
+        }
+      } catch {
+        // Ignore parsing errors
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const { data: queryEncounters, isFetching } = useQuery({
     queryKey: ["encounters", facilityId, qParams, encounterClass],
@@ -131,6 +193,7 @@ export function EncounterList({
           priority,
           created_date_after,
           created_date_before,
+          organization,
         ),
         encounter_class: encounterClass,
         external_identifier,
@@ -139,6 +202,7 @@ export function EncounterList({
         tags: qParams.tags,
         tags_behavior: qParams.tags_behavior,
         patient_filter: patient_filter,
+        name: qParams.name,
       },
     }),
     enabled: !propEncounters && !encounter_id,
@@ -166,9 +230,30 @@ export function EncounterList({
     .map((query) => query.data)
     .filter(Boolean) as TagConfig[];
 
+  // Fetch organization data if organization ID is in URL params
+  const { data: selectedOrg } = useQuery({
+    queryKey: ["facilityOrganization", facilityId, organization],
+    queryFn: query(
+      {
+        path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/",
+        method: "GET",
+        TRes: {} as FacilityOrganizationRead,
+      },
+      {
+        pathParams: { facilityId, organizationId: organization },
+      },
+    ),
+    enabled: !!organization && !!facilityId,
+  });
+
   useEffect(() => {
-    // Set default date range if no dates are present and no patient filter is active
-    if (!created_date_after && !created_date_before && !patient_filter) {
+    // Set default date range if no dates are present and no patient filter is active, and not an inpatient encounter
+    if (
+      !created_date_after &&
+      !created_date_before &&
+      !patient_filter &&
+      encounterClass !== "imp"
+    ) {
       const today = new Date();
       const defaultDays = careConfig.encounterDateFilter;
       if (defaultDays === 0) {
@@ -184,29 +269,84 @@ export function EncounterList({
         });
       }
     }
-  }, [created_date_after, created_date_before, patient_filter, updateQuery]);
+  }, [
+    created_date_after,
+    created_date_before,
+    patient_filter,
+    encounterClass,
+    updateQuery,
+  ]);
 
   const filters = [
     encounterStatusFilter("status"),
     encounterPriorityFilter("priority"),
+    departmentFilter("organization"),
     tagFilter("tags", TagResource.ENCOUNTER, "multi", t("tags", { count: 2 })),
     dateFilter("created_date", t("date"), longDateRangeOptions, true),
   ];
 
-  const onFilterUpdate = (query: Record<string, unknown>) => {
-    for (const [key, value] of Object.entries(query)) {
+  const onFilterUpdate = (filterQuery: Record<string, unknown>) => {
+    // Save to sessionStorage atom
+    setSavedFilters((prev) => {
+      const updates = { ...prev };
+      for (const [key, value] of Object.entries(filterQuery)) {
+        switch (key) {
+          case "status":
+            updates.status = (value as string) || undefined;
+            break;
+          case "priority":
+            updates.priority = (value as string) || undefined;
+            break;
+          case "tags":
+            updates.selectedTags = (value as TagConfig[]) ?? [];
+            break;
+          case "tags_behavior":
+            updates.tagsBehavior = (value as string) || "any";
+            break;
+          case "organization":
+            updates.selectedOrg =
+              (value as FacilityOrganizationRead) || undefined;
+            break;
+          case "created_date":
+            if (
+              value &&
+              typeof value === "object" &&
+              "from" in value &&
+              "to" in value
+            ) {
+              const dateRange = value as FilterDateRange;
+              updates.dateFrom = dateRange.from?.toISOString();
+              updates.dateTo = dateRange.to?.toISOString();
+            } else {
+              updates.dateFrom = undefined;
+              updates.dateTo = undefined;
+            }
+            break;
+        }
+      }
+      return updates;
+    });
+
+    // Update URL query params
+    for (const [key, value] of Object.entries(filterQuery)) {
       switch (key) {
         case "tags":
-          query.tags = (value as TagConfig[])?.map((tag) => tag.id).join(",");
+          filterQuery.tags = (value as TagConfig[])
+            ?.map((tag) => tag.id)
+            .join(",");
           break;
         case "tags_behavior":
           // tags_behavior is already handled by the filter system
           break;
+        case "organization":
+          filterQuery.organization =
+            (value as FacilityOrganizationRead)?.id || undefined;
+          break;
         case "created_date":
           {
             const dateRange = value as FilterDateRange;
-            query = {
-              ...query,
+            filterQuery = {
+              ...filterQuery,
               created_date: undefined,
               created_date_after: dateRange?.from
                 ? dateQueryString(dateRange?.from as Date)
@@ -219,7 +359,7 @@ export function EncounterList({
           break;
       }
     }
-    updateQuery(query);
+    updateQuery(filterQuery);
   };
 
   const {
@@ -231,6 +371,7 @@ export function EncounterList({
   } = useMultiFilterState(filters, onFilterUpdate, {
     ...qParams,
     tags: selectedTags,
+    organization: selectedOrg ? [selectedOrg] : undefined,
     created_date:
       created_date_after || created_date_before
         ? {
@@ -241,7 +382,9 @@ export function EncounterList({
   });
 
   const displaySelectedFilters =
-    patient_filter && !created_date_after && !created_date_before
+    (patient_filter || encounterClass === "imp") &&
+    !created_date_after &&
+    !created_date_before
       ? {
           ...selectedFilters,
           created_date: {
@@ -274,6 +417,20 @@ export function EncounterList({
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
+                <SearchInput
+                  id="patient-name-search"
+                  options={[
+                    {
+                      key: "name",
+                      type: "text",
+                      placeholder: t("search_by_patient_name"),
+                      value: qParams.name || "",
+                      display: t("patient_name"),
+                    },
+                  ]}
+                  className="w-full sm:w-auto sm:min-w-64"
+                  onSearch={(key, value) => updateQuery({ [key]: value })}
+                />
                 <PatientIdentifierFilter
                   onSelect={(patientId, patientName) =>
                     updateQuery({

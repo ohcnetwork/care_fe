@@ -8,7 +8,7 @@ import {
   Printer,
   Truck,
 } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { Link, navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -40,6 +40,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { AddMedicationReturnItemForm } from "@/pages/Facility/services/pharmacy/components/AddMedicationReturnItemForm";
 import { MedicationReturnItemsTable } from "@/pages/Facility/services/pharmacy/components/MedicationReturnItemsTable";
+import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
   DeliveryOrderRetrieve,
@@ -82,6 +83,7 @@ export default function MedicationReturnShow({
     open: false,
     status: null,
   });
+  const [{ dispenseOrderId }] = useQueryParams<{ dispenseOrderId?: string }>();
 
   const { data: deliveryOrder, isLoading } = useQuery({
     queryKey: ["medicationReturns", deliveryOrderId],
@@ -143,6 +145,18 @@ export default function MedicationReturnShow({
             }),
       );
     },
+  });
+
+  const { data: medicationDispensesResponse } = useQuery({
+    queryKey: ["medication_dispense", dispenseOrderId, locationId],
+    queryFn: query(medicationDispenseApi.list, {
+      queryParams: {
+        location: locationId,
+        limit: 100,
+        order: dispenseOrderId,
+      },
+    }),
+    enabled: !!dispenseOrderId && !!locationId,
   });
 
   function handleSupplyDeliverySuccess() {
@@ -220,6 +234,9 @@ export default function MedicationReturnShow({
 
     const selectedSupplyDeliveries = supplyDeliveries.results
       .filter((delivery) => selectedDeliveries.includes(delivery.id))
+      .filter(
+        (delivery) => delivery.status === SupplyDeliveryStatus.in_progress,
+      )
       .map((delivery) => ({
         id: delivery.id,
         status: confirmDialog.status,
@@ -617,6 +634,11 @@ export default function MedicationReturnShow({
                     facilityId={facilityId}
                     locationId={locationId}
                     onSuccess={handleSupplyDeliverySuccess}
+                    medicationDispenses={
+                      dispenseOrderId && medicationDispensesResponse?.results
+                        ? medicationDispensesResponse.results
+                        : []
+                    }
                   />
                 )}
               </div>

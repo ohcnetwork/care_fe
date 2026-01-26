@@ -240,6 +240,7 @@ export function AccountList({
               <TableRow>
                 <TableHead>{t("account")}</TableHead>
                 <TableHead>{t("balance")}</TableHead>
+                <TableHead>{t("billable")}</TableHead>
                 <TableHead>{t("account_status")}</TableHead>
                 <TableHead>{t("billing_status")}</TableHead>
                 <TableHead>{t("period")}</TableHead>
@@ -274,6 +275,11 @@ export function AccountList({
                     )}
                   >
                     <MonetaryDisplay amount={account.total_balance} />
+                  </TableCell>
+                  <TableCell className="text-base font-medium leading-6 text-gray-950">
+                    <MonetaryDisplay
+                      amount={account.total_billable_charge_items}
+                    />
                   </TableCell>
                   <TableCell>
                     <Badge variant={ACCOUNT_STATUS_COLORS[account.status]}>

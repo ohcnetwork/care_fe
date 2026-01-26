@@ -45,18 +45,20 @@ export const BookAppointmentDetails = ({
       resource_type: SchedulableResourceType.Practitioner,
     });
 
-  const { mutateAsync: createAppointment } = useMutation({
-    mutationFn: mutate(scheduleApi.slots.createAppointment, {
-      pathParams: { facilityId, slotId: selectedSlotId ?? "" },
-    }),
-    onSuccess: (data: Appointment) => {
-      toast.success(t("appointment_created_successfully"));
-      onSuccess?.();
-      navigate(
-        `/facility/${facilityId}/patient/${patientId}/appointments/${data.id}?showSuccess=true`,
-      );
+  const { mutateAsync: createAppointment, isPending: isCreating } = useMutation(
+    {
+      mutationFn: mutate(scheduleApi.slots.createAppointment, {
+        pathParams: { facilityId, slotId: selectedSlotId ?? "" },
+      }),
+      onSuccess: (data: Appointment) => {
+        toast.success(t("appointment_created_successfully"));
+        onSuccess?.();
+        navigate(
+          `/facility/${facilityId}/patient/${patientId}/appointments/${data.id}?showSuccess=true`,
+        );
+      },
     },
-  });
+  );
 
   const handleSubmit = async () => {
     if (!selectedResource || !selectedSlotId) {
@@ -130,6 +132,7 @@ export const BookAppointmentDetails = ({
               size="sm"
               onClick={handleSubmit}
               type="submit"
+              disabled={isCreating}
             >
               {t("confirm_appointment")}
             </Button>
@@ -199,7 +202,7 @@ export const BookAppointmentDetails = ({
                   variant="primary"
                   className="w-full"
                   onClick={handleSubmit}
-                  disabled={!selectedSlotId}
+                  disabled={!selectedSlotId || isCreating}
                 >
                   {t("confirm_appointment")}
                 </Button>
