@@ -782,7 +782,7 @@ export function MedicationRequestQuestion({
           }
         }}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <div className="rounded-lg bg-blue-100 p-1.5">
@@ -801,12 +801,12 @@ export function MedicationRequestQuestion({
 
           {/* Medication preview */}
           {medicationToAddToTemplate && (
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
-              <div className="rounded-full bg-blue-100 p-2">
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+              <div className="rounded-full bg-blue-100 p-2 shrink-0">
                 <PillIcon className="size-4 text-blue-600" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-blue-900 truncate">
+                <p className="font-medium text-blue-900">
                   {displayMedicationName(medicationToAddToTemplate)}
                 </p>
                 <p className="text-xs text-blue-600">

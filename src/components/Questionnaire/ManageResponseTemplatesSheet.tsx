@@ -125,11 +125,15 @@ function MedicationsPreview({
   onMedicationSelect?: (medication: MedicationRequestCreate) => void;
   t: (key: string, options?: Record<string, unknown>) => string;
 }) {
+  const [showAll, setShowAll] = useState(false);
+
   if (medications.length === 0) return null;
 
   const isFormVariant = variant === "form";
   const displayLimit = 5;
-  const displayedMeds = medications.slice(0, displayLimit);
+  const displayedMeds = showAll
+    ? medications
+    : medications.slice(0, displayLimit);
   const remainingCount = medications.length - displayLimit;
 
   return (
@@ -137,13 +141,13 @@ function MedicationsPreview({
       className={cn(
         "space-y-1",
         isFormVariant &&
-          "rounded-lg border border-blue-200 bg-blue-50/50 p-4 space-y-3",
+          "rounded-lg border border-primary-200 bg-primary-50/50 p-4 space-y-3",
       )}
     >
       <div
         className={cn(
-          "flex items-center gap-1.5 text-xs font-medium text-blue-700",
-          isFormVariant && "text-sm text-blue-800 gap-2",
+          "flex items-center gap-1.5 text-xs font-medium text-primary-700",
+          isFormVariant && "text-sm text-primary-800 gap-2",
         )}
       >
         <PillIcon className={isFormVariant ? "size-4" : "size-3"} />
@@ -157,10 +161,10 @@ function MedicationsPreview({
             return (
               <div
                 key={idx}
-                className="flex items-center gap-2 text-sm text-blue-700 bg-white/60 rounded-md px-3 py-2"
+                className="flex items-start gap-2 text-sm text-primary-700 bg-white/60 rounded-md px-3 py-2"
               >
-                <CheckCircle2Icon className="size-3.5 text-blue-500" />
-                <span className="truncate">
+                <CheckCircle2Icon className="size-3.5 text-primary-500 shrink-0 mt-0.5" />
+                <span className="flex-1 min-w-0">
                   {(
                     med as MedicationRequestTemplateSpec & {
                       requested_product_internal?: { name?: string };
@@ -176,7 +180,7 @@ function MedicationsPreview({
           // Compact variant (for expanded template view)
           const dosage = med.dosage_instruction?.[0];
           const doseQty = dosage?.dose_and_rate?.dose_quantity;
-          const timing = dosage?.timing?.code?.display;
+          const timing = dosage?.timing?.code?.code;
           const duration = dosage?.timing?.repeat?.bounds_duration;
 
           const dosageParts = [
@@ -192,17 +196,19 @@ function MedicationsPreview({
           return (
             <div
               key={idx}
-              className="group/item flex items-center gap-1 text-sm py-0.5"
+              className="group/item flex items-start gap-1.5 text-sm py-0.5"
             >
-              <span className="size-1 rounded-full bg-blue-400 shrink-0" />
-              <span className="text-gray-800 truncate flex-1">
-                <MedicationName medication={medWithExtra} />
-              </span>
-              {dosageParts.length > 0 && (
-                <span className="text-xs text-gray-400 shrink-0">
-                  ({dosageParts.join(" • ")})
+              <span className="size-1 rounded-full bg-primary-400 shrink-0 mt-1.5" />
+              <div className="flex-1 min-w-0">
+                <span className="text-gray-800">
+                  <MedicationName medication={medWithExtra} />
                 </span>
-              )}
+                {dosageParts.length > 0 && (
+                  <span className="text-xs text-gray-400 ml-1">
+                    ({dosageParts.join(" • ")})
+                  </span>
+                )}
+              </div>
               {onMedicationSelect && (
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -213,7 +219,7 @@ function MedicationsPreview({
                         onMedicationSelect(med as MedicationRequestCreate);
                         toast.success(t("medication_added"));
                       }}
-                      className="opacity-0 group-hover/item:opacity-100 transition-opacity p-0.5 rounded hover:bg-blue-100 text-blue-600"
+                      className="p-0.5 rounded hover:bg-primary-100 text-primary-600 shrink-0 mt-0.5"
                     >
                       <PlusCircleIcon className="size-3.5" />
                     </button>
@@ -226,12 +232,31 @@ function MedicationsPreview({
             </div>
           );
         })}
-        {remainingCount > 0 && (
-          <p className={cn("text-xs text-blue-500", isFormVariant && "pl-6")}>
+        {remainingCount > 0 && !showAll && (
+          <Button
+            variant="ghost"
+            onClick={() => setShowAll(true)}
+            className={cn(
+              "text-xs text-primary-500 hover:text-primary-700 hover:underline cursor-pointer",
+              isFormVariant && "pl-6",
+            )}
+          >
             {isFormVariant
               ? t("and_more_medications", { count: remainingCount })
               : `+${remainingCount} ${t("more")}`}
-          </p>
+          </Button>
+        )}
+        {showAll && medications.length > displayLimit && (
+          <Button
+            variant="ghost"
+            onClick={() => setShowAll(false)}
+            className={cn(
+              "text-xs text-primary-500 hover:text-primary-700 hover:underline cursor-pointer",
+              isFormVariant && "pl-6",
+            )}
+          >
+            {t("show_less")}
+          </Button>
         )}
       </div>
     </div>
@@ -254,11 +279,15 @@ function ActivityDefinitionsPreview({
   ) => void;
   t: (key: string, options?: Record<string, unknown>) => string;
 }) {
+  const [showAll, setShowAll] = useState(false);
+
   if (activityDefinitions.length === 0) return null;
 
   const isFormVariant = variant === "form";
   const displayLimit = 5;
-  const displayedItems = activityDefinitions.slice(0, displayLimit);
+  const displayedItems = showAll
+    ? activityDefinitions
+    : activityDefinitions.slice(0, displayLimit);
   const remainingCount = activityDefinitions.length - displayLimit;
 
   return (
@@ -266,13 +295,13 @@ function ActivityDefinitionsPreview({
       className={cn(
         "space-y-1",
         isFormVariant &&
-          "rounded-lg border border-purple-200 bg-purple-50/50 p-4 space-y-3",
+          "rounded-lg border border-primary-200 bg-primary-50/50 p-4 space-y-3",
       )}
     >
       <div
         className={cn(
-          "flex items-center gap-1.5 text-xs font-medium text-purple-700",
-          isFormVariant && "text-sm text-purple-800 gap-2",
+          "flex items-center gap-1.5 text-xs font-medium text-primary-700",
+          isFormVariant && "text-sm text-primary-800 gap-2",
         )}
       >
         <ClipboardListIcon className={isFormVariant ? "size-4" : "size-3"} />
@@ -286,10 +315,10 @@ function ActivityDefinitionsPreview({
             return (
               <div
                 key={idx}
-                className="flex items-center gap-2 text-sm text-purple-700 bg-white/60 rounded-md px-3 py-2"
+                className="flex items-start gap-2 text-sm text-primary-700 bg-white/60 rounded-md px-3 py-2"
               >
-                <CheckCircle2Icon className="size-3.5 text-purple-500" />
-                <span className="truncate">
+                <CheckCircle2Icon className="size-3.5 text-primary-500 shrink-0 mt-0.5" />
+                <span className="flex-1 min-w-0">
                   {ad.service_request?.title ||
                     t("unknown_activity_definition")}
                 </span>
@@ -301,10 +330,10 @@ function ActivityDefinitionsPreview({
           return (
             <div
               key={idx}
-              className="group/item flex items-center gap-1 text-sm py-0.5"
+              className="group/item flex items-start gap-1.5 text-sm py-0.5"
             >
-              <span className="size-1 rounded-full bg-purple-400 shrink-0" />
-              <span className="text-gray-800 truncate flex-1">
+              <span className="size-1 rounded-full bg-primary-400 shrink-0 mt-1.5" />
+              <span className="text-gray-800 flex-1 min-w-0">
                 {ad.service_request?.title ||
                   ad.slug ||
                   t("unknown_activity_definition")}
@@ -312,17 +341,17 @@ function ActivityDefinitionsPreview({
               {onActivityDefinitionSelect && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button
-                      type="button"
+                    <Button
+                      variant="ghost"
                       onClick={(e) => {
                         e.stopPropagation();
                         onActivityDefinitionSelect(ad);
                         toast.success(t("activity_definition_added"));
                       }}
-                      className="opacity-0 group-hover/item:opacity-100 transition-opacity p-0.5 rounded hover:bg-purple-100 text-purple-600"
+                      className="p-0.5 rounded hover:bg-primary-100 text-primary-600 shrink-0 mt-0.5"
                     >
                       <PlusCircleIcon className="size-3.5" />
-                    </button>
+                    </Button>
                   </TooltipTrigger>
                   <TooltipContent side="left">
                     {t("add_this_activity_definition")}
@@ -332,12 +361,31 @@ function ActivityDefinitionsPreview({
             </div>
           );
         })}
-        {remainingCount > 0 && (
-          <p className={cn("text-xs text-purple-500", isFormVariant && "pl-6")}>
+        {remainingCount > 0 && !showAll && (
+          <Button
+            variant="ghost"
+            onClick={() => setShowAll(true)}
+            className={cn(
+              "text-xs text-primary-500 hover:text-primary-700 hover:underline cursor-pointer",
+              isFormVariant && "pl-6",
+            )}
+          >
             {isFormVariant
               ? t("and_more_activity_definitions", { count: remainingCount })
               : `+${remainingCount} ${t("more")}`}
-          </p>
+          </Button>
+        )}
+        {showAll && activityDefinitions.length > displayLimit && (
+          <Button
+            variant="ghost"
+            onClick={() => setShowAll(false)}
+            className={cn(
+              "text-xs text-primary-500 hover:text-primary-700 hover:underline cursor-pointer",
+              isFormVariant && "pl-6",
+            )}
+          >
+            {t("show_less")}
+          </Button>
         )}
       </div>
     </div>
@@ -715,7 +763,6 @@ export default function ManageResponseTemplatesSheet({
                               e.stopPropagation();
                               handleDeleteTemplate(template);
                             }}
-                            className="text-gray-400 hover:text-destructive size-6 opacity-0 group-hover:opacity-100 transition-opacity"
                             disabled={!!applyingTemplateId}
                             aria-label={t("delete_template")}
                           >
@@ -729,7 +776,7 @@ export default function ManageResponseTemplatesSheet({
 
                   {/* Expanded content - shows template items */}
                   {isExpanded && hasContent && (
-                    <div className="px-2 pb-2 ml-6 space-y-1.5 border-t border-gray-100 pt-2 animate-in slide-in-from-top-2 duration-200">
+                    <div className="px-2 pb-2 ml-6 space-y-1.5 border-t border-gray-100 pt-2">
                       <MedicationsPreview
                         medications={medications}
                         variant="compact"
