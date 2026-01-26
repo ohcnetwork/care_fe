@@ -1,5 +1,4 @@
 import {
-  ENCOUNTER_CLASS,
   ENCOUNTER_PRIORITY,
   EncounterClass,
   EncounterPriority,
@@ -9,6 +8,7 @@ import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationRead } from "@/types/location/location";
 import {
+  Beaker,
   Building,
   CalendarFold,
   CircleDashed,
@@ -17,6 +17,10 @@ import {
 } from "lucide-react";
 
 import { t } from "i18next";
+import {
+  ActivityDefinitionFilterValue,
+  SelectedActivityDefinitionBadge,
+} from "./activityDefinitionFilter";
 import { SelectedDateBadge, getDateOperations } from "./dateFilter";
 import { SelectedDepartmentBadge } from "./departmentFilter";
 import { GenericSelectedBadge } from "./genericFilter";
@@ -54,6 +58,7 @@ import {
   ENCOUNTER_PRIORITY_FILTER_COLORS,
   ENCOUNTER_STATUS_FILTER_COLORS,
 } from "@/types/emr/encounter/encounter";
+import careConfig from "@careConfig";
 export const encounterStatusFilter = (
   key: string = "encounter_status",
   mode: FilterMode = "single",
@@ -99,10 +104,10 @@ export const encounterClassFilter = (
     key,
     t("encounter_class"),
     "command",
-    Array.from(ENCOUNTER_CLASS).map((value) => ({
+    careConfig.encounterClasses.map((value) => ({
       value: value,
       label: t(`encounter_class__${value}`),
-      color: ENCOUNTER_CLASS_FILTER_COLORS[value as EncounterClass],
+      color: ENCOUNTER_CLASS_FILTER_COLORS[value],
     })),
     {
       renderSelected: (selected: FilterValues) => {
@@ -491,5 +496,29 @@ export const paymentMethodFilter = (
       mode,
       icon: <CircleDashed className="size-4" />,
       showColorIndicators: false,
+    },
+  );
+
+export const activityDefinitionFilter = (
+  key: string = "activity_definition",
+  mode: FilterMode = "single",
+  label?: string,
+) =>
+  createFilterConfig(
+    key,
+    label ? t(label) : t("activity_definition"),
+    "activity_definition",
+    [],
+    {
+      renderSelected: (selected: FilterValues) => {
+        return (
+          <SelectedActivityDefinitionBadge
+            selected={selected as ActivityDefinitionFilterValue[]}
+          />
+        );
+      },
+      getOperations: () => [{ label: "is" }],
+      mode,
+      icon: <Beaker className="size-4" />,
     },
   );

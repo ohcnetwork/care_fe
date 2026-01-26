@@ -92,6 +92,7 @@ interface CreateInvoicePageProps {
   locationId?: string;
   disableCreateChargeItems?: boolean;
   dispenseOrderId?: string;
+  skipNavigation?: boolean;
 }
 
 interface PriceComponentRowProps {
@@ -149,6 +150,7 @@ export function CreateInvoicePage({
   locationId,
   disableCreateChargeItems = false,
   dispenseOrderId,
+  skipNavigation = false,
 }: CreateInvoicePageProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -238,6 +240,13 @@ export function CreateInvoicePage({
     onSuccess: (invoice: InvoiceRead) => {
       queryClient.invalidateQueries({ queryKey: ["invoices", accountId] });
       toast.success(t("invoice_created_successfully"));
+
+      // If skipNavigation is true, just call onSuccess without navigating
+      if (skipNavigation) {
+        onSuccess?.();
+        return;
+      }
+
       // Navigate to the new invoice
       const invoiceUrl = `/facility/${facilityId}/billing/invoices/${invoice.id}?${sourceUrl ? `sourceUrl=${sourceUrl}` : ""}`;
       if (redirectInNewTab) {
@@ -700,7 +709,7 @@ export function CreateInvoicePage({
                 variant="outline_primary"
                 onClick={() =>
                   navigate(
-                    `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}?status=preparation&payment_status=unpaid`,
+                    `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}`,
                   )
                 }
               >

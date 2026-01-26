@@ -1,7 +1,6 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
@@ -67,16 +66,6 @@ export default function AppointmentPrint(props: Props) {
     enabled: !!facilityId && !!props.appointmentId,
   });
 
-  // Auto-print when page loads and data is ready
-  useEffect(() => {
-    if (appointment && !isLoading) {
-      const timer = setTimeout(() => {
-        window.print();
-      }, 1000); // Give time for content to render
-      return () => clearTimeout(timer);
-    }
-  }, [appointment, isLoading]);
-
   if (isLoading || !appointment || !facility) {
     return (
       <PrintPreview title={t("appointment_details")} disabled>
@@ -95,7 +84,7 @@ export default function AppointmentPrint(props: Props) {
   const hasChargeItems = chargeItems?.results && chargeItems.results.length > 0;
 
   return (
-    <PrintPreview title={t("appointment_details")}>
+    <PrintPreview title={t("appointment_details")} autoPrint>
       <div className="max-w-7xl mx-auto text-sm">
         {/* Header with Facility Name and Logo */}
         <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">

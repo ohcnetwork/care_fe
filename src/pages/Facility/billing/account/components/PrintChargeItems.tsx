@@ -37,7 +37,7 @@ import {
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
-import { add, round } from "@/Utils/decimal";
+import { add, multiply, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 
@@ -300,6 +300,15 @@ export const PrintChargeItems = (props: {
                         value={account?.patient?.address}
                         width="w-16"
                       />
+                      {account?.primary_encounter?.current_location && (
+                        <DetailRow
+                          label={`${t("location")}`}
+                          value={
+                            account?.primary_encounter?.current_location?.name
+                          }
+                          width="w-16"
+                        />
+                      )}
                     </div>
                     <div className="space-y-1">
                       <DetailRow
@@ -328,6 +337,32 @@ export const PrintChargeItems = (props: {
                         }
                         width="w-24"
                       />
+                      {account?.primary_encounter && (
+                        <>
+                          <DetailRow
+                            label={t("start_date")}
+                            value={
+                              account?.primary_encounter &&
+                              account?.primary_encounter.period.start &&
+                              new Date(
+                                account?.primary_encounter.period.start,
+                              ).toLocaleDateString("en-IN")
+                            }
+                            width="w-24"
+                          />
+                          <DetailRow
+                            label={t("end_date")}
+                            value={
+                              account?.primary_encounter &&
+                              account?.primary_encounter.period.end &&
+                              new Date(
+                                account?.primary_encounter.period.end,
+                              ).toLocaleDateString("en-IN")
+                            }
+                            width="w-24"
+                          />
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -708,7 +743,10 @@ export const PrintChargeItems = (props: {
                                           </TableCell>
                                           <TableCell className="text-right">
                                             <MonetaryDisplay
-                                              amount={payment.amount}
+                                              amount={multiply(
+                                                payment.amount,
+                                                payment.is_credit_note ? -1 : 1,
+                                              )}
                                             />
                                           </TableCell>
                                         </TableRow>,

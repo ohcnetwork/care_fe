@@ -1,4 +1,4 @@
-import { MedicationRequest } from "@/types/emr/medicationRequest/medicationRequest";
+import { MedicationRequestTemplateSpec } from "@/types/emr/medicationRequest/medicationRequest";
 import { BaseServiceRequestSpec } from "@/types/emr/serviceRequest/serviceRequest";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { UserReadMinimal } from "@/types/user/user";
@@ -13,7 +13,7 @@ interface QuestionnaireAnswer {
  * Service request data stored in templates.
  * Omits instance-specific fields (id, encounter) that will be set when applied.
  */
-export interface ServiceRequestTemplateSpec {
+export interface ActivityDefinitionTemplateSpec {
   slug: string;
   service_request: Omit<BaseServiceRequestSpec, "id"> & {
     locations?: string[];
@@ -21,9 +21,9 @@ export interface ServiceRequestTemplateSpec {
 }
 
 interface TemplateData {
-  medication_request?: MedicationRequest[];
+  medication_request?: MedicationRequestTemplateSpec[];
   questionnaire?: QuestionnaireAnswer[];
-  service_request?: ServiceRequestTemplateSpec[];
+  activity_definition?: ActivityDefinitionTemplateSpec[];
   meta?: Record<string, unknown>;
 }
 
