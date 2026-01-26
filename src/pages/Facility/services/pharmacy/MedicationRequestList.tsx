@@ -42,6 +42,7 @@ import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { tagFilter } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import {
   ENCOUNTER_CLASS,
   ENCOUNTER_CLASSES_COLORS,
@@ -73,7 +74,12 @@ export default function MedicationRequestList({
   const queryClient = useQueryClient();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
-    disableCache: true,
+    cacheBlacklist: ["patient_external_id", "patient_name"],
+  });
+  const encounterClassFilterVisibleTabs = useBreakpoints({
+    default: 2,
+    md: 3,
+    xl: 4,
   });
   const tagIds = qParams.tags?.split(",") || [];
   const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
@@ -211,7 +217,7 @@ export default function MedicationRequestList({
           allOptionLabel="all"
           variant="background"
           showMoreDropdown={true}
-          maxVisibleTabs={3}
+          maxVisibleTabs={encounterClassFilterVisibleTabs}
           defaultVisibleOptions={[
             "encounter_class__imp",
             "encounter_class__amb",
@@ -225,7 +231,7 @@ export default function MedicationRequestList({
           onClearAll={handleClearAll}
           onClearFilter={handleClearFilter}
           placeholder={t("filters")}
-          className="flex flex-wrap items-center"
+          className="flex flex-wrap md:flex-row items-start"
           facilityId={facilityId}
         />
       </div>
