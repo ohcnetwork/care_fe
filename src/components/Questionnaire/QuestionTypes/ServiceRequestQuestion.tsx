@@ -700,10 +700,10 @@ export function ServiceRequestQuestion({
             questionnaireSlug={questionnaireSlug}
             facilityId={facilityId}
             onTemplateSelect={handleApplyTemplate}
-            onServiceRequestSelect={handleAddSingleServiceRequest}
+            onActivityDefinitionSelect={handleAddSingleServiceRequest}
             disabled={disabled}
-            key_filter="service_request"
-            currentServiceRequests={serviceRequests.map((sr) => ({
+            key_filter="activity_definition"
+            currentActivityDefinitions={serviceRequests.map((sr) => ({
               slug: sr.activity_definition,
               service_request: {
                 title: sr.service_request.title,

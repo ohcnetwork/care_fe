@@ -15,11 +15,11 @@ import query from "@/Utils/request/query";
 import { MedicationHistory } from "@/pages/Patient/History/MedicationHistory";
 import patientApi from "@/types/emr/patient/patientApi";
 
+import { Separator } from "@radix-ui/react-separator";
 import { AllergyHistory } from "./AllergyHistory";
 import { DiagnosesHistory } from "./DiagnosesHistory";
 import { ResponsesHistory } from "./ResponsesHistory";
 import { SymptomsHistory } from "./SymptomsHistory";
-import { Separator } from "@radix-ui/react-separator";
 
 export function ClinicalHistoryPage({
   patientId,
@@ -104,7 +104,9 @@ export function ClinicalHistoryPage({
           <div className="min-w-0">
             {patient ? (
               <h5 className="text-lg font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
-                {t("patient_clinical_history_page_title", { name: patient.name })}
+                {t("patient_clinical_history_page_title", {
+                  name: patient.name,
+                })}
               </h5>
             ) : (
               <Skeleton className="w-20 h-4" />

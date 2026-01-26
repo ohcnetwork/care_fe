@@ -452,7 +452,11 @@ export function MedicationRequestQuestion({
       return mutate(questionnaireResponseTemplateApi.create)({
         name: params.name,
         description: "",
-        questionnaire: filterStructuredQuestionnaireSlugs(questionnaireSlug),
+        ...(questionnaireSlug &&
+        questionnaireSlug !== "service_request" &&
+        questionnaireSlug !== "medication_request"
+          ? { questionnaire: questionnaireSlug }
+          : {}),
         facility: facilityId,
         template_data: {
           medication_request: [medicationForTemplate],
