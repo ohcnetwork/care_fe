@@ -6,10 +6,12 @@ import {
   EncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
-import { CalendarFold, CircleDashed, Tag } from "lucide-react";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
+import { Building, CalendarFold, CircleDashed, Tag } from "lucide-react";
 
 import { t } from "i18next";
 import { SelectedDateBadge, getDateOperations } from "./dateFilter";
+import { SelectedDepartmentBadge } from "./departmentFilter";
 import { GenericSelectedBadge } from "./genericFilter";
 import { SelectedTagBadge } from "./tagFilter";
 import {
@@ -20,6 +22,7 @@ import {
   FilterValues,
   Operation,
   createFilterConfig,
+  getVariantColorClasses,
 } from "./utils/Utils";
 
 import {
@@ -32,6 +35,13 @@ import {
   INVOICE_STATUS_COLORS,
   InvoiceStatus,
 } from "@/types/billing/invoice/invoice";
+import {
+  PAYMENT_RECONCILIATION_METHOD_MAP,
+  PAYMENT_RECONCILIATION_STATUS_COLORS,
+  PaymentReconciliationPaymentMethod,
+  PaymentReconciliationStatus,
+  PaymentReconciliationType,
+} from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import {
   ENCOUNTER_CLASS_FILTER_COLORS,
   ENCOUNTER_PRIORITY_FILTER_COLORS,
@@ -202,6 +212,30 @@ export const tagFilter = (
     },
   );
 
+export const departmentFilter = (
+  key: string = "organization",
+  mode: FilterMode = "single",
+  label?: string,
+) =>
+  createFilterConfig(
+    key,
+    label ? t(label) : t("department"),
+    "department",
+    [],
+    {
+      renderSelected: (selected: FilterValues) => {
+        return (
+          <SelectedDepartmentBadge
+            selected={selected as FacilityOrganizationRead[]}
+          />
+        );
+      },
+      getOperations: () => [{ label: "is" }],
+      mode,
+      icon: <Building className="w-4 h-4" />,
+    },
+  );
+
 export const accountBillingStatusFilter = (
   key: string = "billing_status",
   mode: FilterMode = "single",
@@ -214,7 +248,7 @@ export const accountBillingStatusFilter = (
     Object.values(AccountBillingStatus).map((value) => ({
       value: value,
       label: t(value),
-      color: ACCOUNT_BILLING_STATUS_COLORS[value],
+      color: getVariantColorClasses(ACCOUNT_BILLING_STATUS_COLORS[value]),
     })),
     {
       renderSelected: (selected: FilterValues) => {
@@ -236,7 +270,6 @@ export const accountBillingStatusFilter = (
       getOperations: () => customOperations || [{ label: "is" }],
       mode,
       icon: <CircleDashed className="w-4 h-4" />,
-      showColorIndicators: false,
     },
   );
 
@@ -252,7 +285,7 @@ export const accountStatusFilter = (
     Object.values(AccountStatus).map((value) => ({
       value: value,
       label: t(value),
-      color: ACCOUNT_STATUS_COLORS[value],
+      color: getVariantColorClasses(ACCOUNT_STATUS_COLORS[value]),
     })),
     {
       renderSelected: (selected: FilterValues) => {
@@ -273,7 +306,6 @@ export const accountStatusFilter = (
       getOperations: () => customOperations || [{ label: "is" }],
       mode,
       icon: <CircleDashed className="w-4 h-4" />,
-      showColorIndicators: false,
     },
   );
 
@@ -289,7 +321,7 @@ export const invoiceStatusFilter = (
     Object.values(InvoiceStatus).map((value) => ({
       value: value,
       label: t(value),
-      color: INVOICE_STATUS_COLORS[value],
+      color: getVariantColorClasses(INVOICE_STATUS_COLORS[value]),
     })),
     {
       renderSelected: (selected: FilterValues) => {
@@ -302,6 +334,118 @@ export const invoiceStatusFilter = (
               selectedValue={option}
               selectedLength={selectedStatus.length}
               variant={variant}
+            />
+          );
+        }
+        return <></>;
+      },
+      getOperations: () => customOperations || [{ label: "is" }],
+      mode,
+      icon: <CircleDashed className="size-4" />,
+    },
+  );
+
+export const paymentStatusFilter = (
+  key: string = "payment_status",
+  mode: FilterMode = "single",
+  customOperations?: Operation[],
+) =>
+  createFilterConfig(
+    key,
+    t("payment_status"),
+    "command",
+    Object.values(PaymentReconciliationStatus).map((value) => ({
+      value: value,
+      label: t(value),
+      color: getVariantColorClasses(
+        PAYMENT_RECONCILIATION_STATUS_COLORS[value],
+      ),
+    })),
+    {
+      renderSelected: (selected: FilterValues) => {
+        const selectedStatus = selected as string[];
+        if (typeof selectedStatus[0] === "string") {
+          const option = selectedStatus[0];
+          const variant =
+            PAYMENT_RECONCILIATION_STATUS_COLORS[
+              option as PaymentReconciliationStatus
+            ];
+          return (
+            <GenericSelectedBadge
+              selectedValue={option}
+              selectedLength={selectedStatus.length}
+              variant={variant}
+            />
+          );
+        }
+        return <></>;
+      },
+      getOperations: () => customOperations || [{ label: "is" }],
+      mode,
+      icon: <CircleDashed className="size-4" />,
+      showColorIndicators: true,
+    },
+  );
+
+export const paymentTypeFilter = (
+  key: string = "payment_type",
+  mode: FilterMode = "single",
+  customOperations?: Operation[],
+) =>
+  createFilterConfig(
+    key,
+    t("payment_type"),
+    "command",
+    Object.values(PaymentReconciliationType).map((value) => ({
+      value: value,
+      label: t(value),
+    })),
+    {
+      renderSelected: (selected: FilterValues) => {
+        const selectedStatus = selected as string[];
+        if (typeof selectedStatus[0] === "string") {
+          const option = selectedStatus[0];
+          return (
+            <GenericSelectedBadge
+              selectedValue={option}
+              selectedLength={selectedStatus.length}
+            />
+          );
+        }
+        return <></>;
+      },
+      getOperations: () => customOperations || [{ label: "is" }],
+      mode,
+      icon: <CircleDashed className="size-4" />,
+      showColorIndicators: false,
+    },
+  );
+
+export const paymentMethodFilter = (
+  key: string = "payment_method",
+  mode: FilterMode = "single",
+  customOperations?: Operation[],
+) =>
+  createFilterConfig(
+    key,
+    t("payment_method"),
+    "command",
+    Object.values(PaymentReconciliationPaymentMethod).map((value) => ({
+      value: value,
+      label: t(PAYMENT_RECONCILIATION_METHOD_MAP[value]),
+    })),
+    {
+      renderSelected: (selected: FilterValues) => {
+        const selectedStatus = selected as string[];
+        if (typeof selectedStatus[0] === "string") {
+          const option =
+            PAYMENT_RECONCILIATION_METHOD_MAP[
+              selectedStatus[0] as PaymentReconciliationPaymentMethod
+            ];
+          return (
+            <GenericSelectedBadge
+              selectedValue={option}
+              selectedLength={selectedStatus.length}
             />
           );
         }

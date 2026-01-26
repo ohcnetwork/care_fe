@@ -29,6 +29,19 @@ export function handleHttpError(error: Error) {
   }
 
   if (isBadRequest(error)) {
+    if (Array.isArray(cause)) {
+      let handled = false;
+      for (const obj of cause) {
+        const errs = obj.errors;
+        if (isPydanticError(errs)) {
+          handled = true;
+          handlePydanticErrors(errs);
+          continue;
+        }
+      }
+      if (handled) return;
+    }
+
     const errs = cause?.errors;
     if (isPydanticError(errs)) {
       handlePydanticErrors(errs);

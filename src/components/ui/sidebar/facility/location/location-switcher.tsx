@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, MapPinIcon } from "lucide-react";
+import { Loader2, MapPinIcon, X } from "lucide-react";
 import { navigate, usePath } from "raviger";
 import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -176,22 +176,19 @@ export function LocationSelectorDialog({
   };
 
   const handleConfirmSelection = (newLocation: LocationRead) => {
-    const oldLocationId = location?.id;
     setLocation(newLocation);
     setLocationLevel([]);
     setOpen(false);
     setSearchValue("");
     setCurrentPage(1);
-    if (newLocation.id !== oldLocationId) {
-      if (onLocationSelect) {
-        onLocationSelect(newLocation);
-      } else if (navigateUrl) {
-        navigate(navigateUrl(newLocation));
-      } else {
-        navigate(
-          `/facility/${facilityId}/locations/${newLocation.id}/${subPath}`,
-        );
-      }
+    if (onLocationSelect) {
+      onLocationSelect(newLocation);
+    } else if (navigateUrl) {
+      navigate(navigateUrl(newLocation));
+    } else {
+      navigate(
+        `/facility/${facilityId}/locations/${newLocation.id}/${subPath}`,
+      );
     }
   };
 
@@ -271,7 +268,7 @@ export function LocationSelectorDialog({
           <DialogTitle>{getCurrentLocation()}</DialogTitle>
         </DialogHeader>
         {locationLevel.length > 0 && (
-          <div className="flex flex-row justify-between gap-1 bg-gray-100 p-1">
+          <div className="flex flex-row justify-between gap-1 bg-gray-100 p-1 overflow-auto">
             <div className="flex flex-row gap-1 items-center">
               {locationLevel.map((level, index) => (
                 <>
@@ -301,37 +298,35 @@ export function LocationSelectorDialog({
             </div>
             <div className="flex flex-row gap-2">
               <Button
-                variant="link"
+                variant="ghost"
                 size="icon"
-                className="p-2 w-full"
                 onClick={() => {
                   setLocationLevel([]);
                   setSearchValue("");
                   setCurrentPage(1);
                 }}
+                aria-label={t("clear")}
               >
-                <CareIcon icon="l-multiply" />
-                <span>{t("clear")}</span>
+                <X />
               </Button>
               <Button
                 variant="primary"
-                size="icon"
-                className="p-2 w-full"
                 onClick={() =>
                   handleConfirmSelection(
                     locationLevel[locationLevel.length - 1],
                   )
                 }
               >
+                <span>{t("select")}</span>
                 <ShortcutBadge actionId="submit-action" />
               </Button>
             </div>
           </div>
         )}
-        <Command className="pt-3 pb-2" shouldFilter={false}>
+        <Command className="pt-3" shouldFilter={false}>
           <div className="border border-gray-200">
             <CommandInput
-              className="border-0 ring-0"
+              className="border-0 ring-0 sm:text-sm text-base"
               placeholder={t("search")}
               onValueChange={(value) => {
                 setSearchValue(value);
@@ -341,7 +336,6 @@ export function LocationSelectorDialog({
               autoFocus
             />
             <CommandList
-              className="max-h-[calc(100vh-30rem)]"
               onWheel={(e) => {
                 e.stopPropagation();
               }}
@@ -371,7 +365,7 @@ export function LocationSelectorDialog({
             </CommandList>
           </div>
         </Command>
-        <div className="flex w-full justify-center mt-4">
+        <div className="flex w-full justify-center">
           <PaginationComponent
             cPage={currentPage}
             defaultPerPage={resultsPerPage}

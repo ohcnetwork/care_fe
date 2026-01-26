@@ -58,7 +58,10 @@ export const structuredHandlers: {
   },
   medication_request: {
     getRequests: async (medications, { patientId, encounterId }) => {
-      if (medications.length === 0) {
+      // Only submit medications that have been modified (dirty)
+      const dirtyMedications = medications.filter((m) => m.dirty);
+
+      if (dirtyMedications.length === 0) {
         return [];
       }
 
@@ -69,7 +72,7 @@ export const structuredHandlers: {
           url: `/api/v1/patient/${patientId}/medication/request/upsert/`,
           method: "POST",
           body: {
-            datapoints: medications.map((medication) => ({
+            datapoints: dirtyMedications.map((medication) => ({
               ...medication,
               ...(!medication.id && {
                 create_prescription: {

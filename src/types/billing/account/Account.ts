@@ -51,6 +51,7 @@ export interface AccountRead extends AccountBase {
   total_gross: string;
   total_paid: string;
   total_balance: string;
+  total_billable_charge_items: string;
   created_date: string;
   tags: TagConfig[];
 }

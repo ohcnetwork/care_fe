@@ -52,6 +52,7 @@ import accountApi from "@/types/billing/account/accountApi";
 import query from "@/Utils/request/query";
 import { dateTimeQueryString } from "@/Utils/utils";
 
+import { isPositive } from "@/Utils/decimal";
 import AccountSheet from "./AccountSheet";
 
 function formatDate(date?: string) {
@@ -239,10 +240,11 @@ export function AccountList({
               <TableRow>
                 <TableHead>{t("account")}</TableHead>
                 <TableHead>{t("balance")}</TableHead>
+                <TableHead>{t("billable")}</TableHead>
                 <TableHead>{t("account_status")}</TableHead>
                 <TableHead>{t("billing_status")}</TableHead>
                 <TableHead>{t("period")}</TableHead>
-                <TableHead>{t("tags_other")}</TableHead>
+                <TableHead>{t("tags_proper")}</TableHead>
                 <TableHead>{t("action")}</TableHead>
               </TableRow>
             </TableHeader>
@@ -253,11 +255,11 @@ export function AccountList({
                     <div className="flex items-center gap-3">
                       <Avatar name={account.name} className="size-8 shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <div className="text-base font-semibold leading-6 break-words">
+                        <div className="text-base font-semibold leading-6 wrap-break-word">
                           {account.name}
                         </div>
                         {!hidePatientName && (
-                          <div className="flex items-center gap-1 text-sm text-gray-600 break-words">
+                          <div className="flex items-center gap-1 text-sm text-gray-600 wrap-break-word">
                             {account.patient.name}
                           </div>
                         )}
@@ -267,12 +269,17 @@ export function AccountList({
                   <TableCell
                     className={cn(
                       "border-x p-3 text-base font-medium leading-6",
-                      Number(account.total_balance) > 0
+                      isPositive(account.total_balance)
                         ? "text-gray-950"
                         : "text-green-700 italic",
                     )}
                   >
                     <MonetaryDisplay amount={account.total_balance} />
+                  </TableCell>
+                  <TableCell className="text-base font-medium leading-6 text-gray-950">
+                    <MonetaryDisplay
+                      amount={account.total_billable_charge_items}
+                    />
                   </TableCell>
                   <TableCell>
                     <Badge variant={ACCOUNT_STATUS_COLORS[account.status]}>

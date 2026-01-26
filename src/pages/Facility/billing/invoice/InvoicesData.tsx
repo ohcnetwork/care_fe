@@ -125,8 +125,9 @@ export default function InvoicesData({
           onOperationChange={handleOperationChange}
           onClearAll={handleClearAll}
           onClearFilter={handleClearFilter}
-          className="flex flex-row flex-wrap sm:items-center"
+          className="flex flex-row-reverse flex-wrap sm:items-center"
           facilityId={facilityId}
+          align="end"
         />
       </div>
       {isLoading ? (
@@ -189,7 +190,7 @@ export default function InvoicesData({
                     ) : (
                       <MonetaryDisplay
                         className="font-medium"
-                        amount={String(invoice.total_gross)}
+                        amount={invoice.total_gross}
                       />
                     )}
                   </TableCell>

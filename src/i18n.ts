@@ -74,8 +74,10 @@ export async function initI18n() {
         if (namespace === DEFAULT_NAMESPACE && careConfig.i18nUrl) {
           const remoteUrl = `${careConfig.i18nUrl}/${language}.json`;
           const localUrl = `/locale/${language}.json`;
+          const fetchOptions =
+            language === "en" ? { cache: "no-store" as RequestCache } : {};
           Promise.all([
-            fetch(remoteUrl)
+            fetch(remoteUrl, fetchOptions)
               .then((response) => {
                 if (!response.ok) {
                   throw new Error(`HTTP error! status: ${response.status}`);
@@ -89,7 +91,7 @@ export async function initI18n() {
                 );
                 return {};
               }),
-            fetch(localUrl)
+            fetch(localUrl, fetchOptions)
               .then((response) => {
                 if (!response.ok) {
                   throw new Error(`HTTP error! status: ${response.status}`);
@@ -125,7 +127,9 @@ export async function initI18n() {
           return;
         }
 
-        fetch(`${baseUrl}/locale/${language}.json`)
+        const fetchOptions =
+          language === "en" ? { cache: "no-store" as RequestCache } : {};
+        fetch(`${baseUrl}/locale/${language}.json`, fetchOptions)
           .then((response) => {
             if (!response.ok) {
               throw new Error(`HTTP error! status: ${response.status}`);

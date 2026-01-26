@@ -28,6 +28,7 @@ export interface UserReadMinimal extends UserBase {
   profile_picture_url: string;
   mfa_enabled: boolean;
   deleted: boolean;
+  is_service_account: boolean;
 }
 
 export interface UserRead extends UserReadMinimal {
@@ -63,4 +64,16 @@ export interface UserUpdate extends Omit<UserBase, "id"> {
 export interface UserCreate extends UserUpdate {
   password?: string;
   email: string;
+  is_service_account?: boolean;
+}
+
+export interface GetServiceAccountsResponse {
+  external_id: string;
+  username: string;
+}
+
+export interface GenerateServiceAccountTokenResponse {
+  token: string;
+  user: string;
+  created: string;
 }

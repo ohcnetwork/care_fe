@@ -1,6 +1,6 @@
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
@@ -19,26 +19,17 @@ import {
 
 import Loading from "@/components/Common/Loading";
 
+import PrintFooter from "@/components/Common/PrintFooter";
 import {
+  PAYMENT_RECONCILIATION_METHOD_MAP,
   PAYMENT_RECONCILIATION_OUTCOME_COLORS,
-  PAYMENT_RECONCILIATION_STATUS_COLORS,
   PaymentReconciliationOutcome,
-  PaymentReconciliationPaymentMethod,
   PaymentReconciliationStatus,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import query from "@/Utils/request/query";
-import { formatPatientAge } from "@/Utils/utils";
-
-const statusMap: Record<
-  PaymentReconciliationStatus,
-  { label: string; color: string }
-> = {
-  active: { label: "Active", color: "success" },
-  cancelled: { label: "Cancelled", color: "destructive" },
-  draft: { label: "Draft", color: "secondary" },
-  entered_in_error: { label: "Error", color: "destructive" },
-};
+import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 
 const outcomeMap: Record<
   PaymentReconciliationOutcome,
@@ -50,19 +41,35 @@ const outcomeMap: Record<
   partial: { label: "Partial", color: "warning" },
 };
 
-const methodMap: Record<PaymentReconciliationPaymentMethod, string> = {
-  cash: "Cash",
-  ccca: "Credit Card",
-  cchk: "Credit Check",
-  cdac: "Credit Account",
-  chck: "Check",
-  ddpo: "Direct Deposit",
-  debc: "Debit Card",
-};
-
 type PrintPaymentReconciliationProps = {
   facilityId: string;
   paymentReconciliationId: string;
+};
+
+interface DetailRowProps {
+  label: string;
+  value?: string | null;
+  isStrong?: boolean;
+  width?: string;
+}
+
+const DetailRow = ({
+  label,
+  value,
+  isStrong = false,
+  width = "w-32",
+}: DetailRowProps) => {
+  return (
+    <div className="flex">
+      <span className={`text-gray-600 ${width}`}>{label}</span>
+      <span className="text-gray-600">: </span>
+      <span
+        className={`ml-1 whitespace-pre-wrap ${isStrong ? "font-semibold" : ""}`}
+      >
+        {value || "-"}
+      </span>
+    </div>
+  );
 };
 
 export function PrintPaymentReconciliation({
@@ -70,6 +77,7 @@ export function PrintPaymentReconciliation({
   paymentReconciliationId,
 }: PrintPaymentReconciliationProps) {
   const { t } = useTranslation();
+  const { facility } = useCurrentFacility();
 
   const { data: payment, isLoading } = useQuery({
     queryKey: ["paymentReconciliation", paymentReconciliationId],
@@ -82,95 +90,115 @@ export function PrintPaymentReconciliation({
     return <Loading />;
   }
 
+  const getWatermark = () => {
+    if (payment.status === PaymentReconciliationStatus.cancelled) {
+      return { text: t("cancelled"), color: "red" as const };
+    }
+    if (payment.status === PaymentReconciliationStatus.entered_in_error) {
+      return { text: t("entered_in_error"), color: "red" as const };
+    }
+    return undefined;
+  };
+
   return (
     <PrintPreview
       title={`${t(payment.is_credit_note ? "refund_receipt" : "payment_receipt")}`}
+      watermark={getWatermark()}
     >
-      <div className="md:p-2 max-w-4xl mx-auto md:min-w-2xl">
+      <div className="max-w-5xl mx-auto">
         <div>
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
-            <img
-              src={careConfig.mainLogo?.dark}
-              alt="Care Logo"
-              className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2"
-            />
-            <div className="text-center sm:text-left sm:order-1">
-              <h1 className="text-3xl font-semibold">
-                {t(
-                  payment.is_credit_note ? "refund_receipt" : "payment_receipt",
-                )}
-              </h1>
-              <h2 className="text-gray-500 uppercase text-sm tracking-wide mt-1 font-semibold">
-                <span className="ml-2">
-                  <Badge
-                    variant={
-                      PAYMENT_RECONCILIATION_STATUS_COLORS[payment.status]
-                    }
-                  >
-                    {statusMap[payment.status]?.label}
-                  </Badge>
-                  <Badge
-                    variant={
-                      PAYMENT_RECONCILIATION_OUTCOME_COLORS[payment.outcome]
-                    }
-                    className="ml-2"
-                  >
-                    {outcomeMap[payment.outcome]?.label}
-                  </Badge>
-                </span>
-              </h2>
-            </div>
-          </div>
-          <div className="text-sm space-y-2">
-            <div className="flex justify-between">
-              <div>
-                <span className="text-gray-600">{t("payment_date")}: </span>
-                <span className="font-medium">
-                  {payment.payment_datetime
-                    ? format(new Date(payment.payment_datetime), "MMM dd, yyyy")
-                    : format(new Date(), "MMM dd, yyyy")}
-                </span>
-              </div>
-              <div>
-                <span className="text-gray-600">{t("payment_method")}: </span>
-                <span className="font-medium">{methodMap[payment.method]}</span>
-              </div>
-            </div>
-          </div>
-          {/* Patient Information - Similar to PrintInvoice */}
-          {payment.account?.patient && (
-            <div className="text-sm space-y-2">
-              <div className="flex justify-between">
-                <div>
-                  <span className="text-gray-600">{t("name")}: </span>
-                  <span className="font-medium">
-                    {payment.account.patient.name.toUpperCase()}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-600">
-                    {t("age")} / {t("sex")}:{" "}
-                  </span>
-                  <span className="font-medium">
-                    {formatPatientAge(payment.account.patient, true)},{" "}
-                    {t(`GENDER__${payment.account.patient.gender}`)}
-                  </span>
-                </div>
-                {payment.account.patient.address && (
-                  <div>
-                    <span className="text-gray-600">{t("address")}: </span>
-                    <span className="font-medium">
-                      {payment.account.patient.address}
-                    </span>
+          <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
+            <div className="flex items-start gap-4">
+              <div className="text-left">
+                <h1 className="text-2xl font-medium">{facility?.name}</h1>
+                {facility?.address && (
+                  <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
+                    {facility.address}
+                    {facility.phone_number && (
+                      <p className="text-gray-500 text-sm">
+                        {t("phone")}: {facility.phone_number}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
             </div>
-          )}
+            <img
+              src={careConfig.mainLogo?.dark}
+              alt="Logo"
+              className="h-10 w-auto object-contain mb-2 sm:mb-0 text-end"
+            />
+          </div>
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row print:flex-row print:items-start justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
+            <div className="text-center sm:text-left sm:order-1 print:text-left">
+              <span className="text-xl font-semibold uppercase">
+                {t(
+                  payment.is_credit_note ? "refund_receipt" : "payment_receipt",
+                )}
+              </span>
+
+              <Badge
+                variant={PAYMENT_RECONCILIATION_OUTCOME_COLORS[payment.outcome]}
+                className="ml-2 uppercase"
+              >
+                {outcomeMap[payment.outcome]?.label}
+              </Badge>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 print:grid-cols-2 gap-x-8 gap-y-4 mb-4 text-xs">
+            <div className="space-y-1">
+              <DetailRow
+                label={t("name")}
+                value={payment.account.patient.name}
+                width="w-16"
+                isStrong
+              />
+              <DetailRow
+                label={`${t("age")} / ${t("sex")}`}
+                value={
+                  payment.account.patient
+                    ? `${formatPatientAge(payment.account.patient, true)}, ${t(`GENDER__${payment.account.patient.gender}`)}`
+                    : undefined
+                }
+                width="w-16"
+              />
+              <DetailRow
+                label={`${t("address")}`}
+                value={payment.account.patient?.address}
+                width="w-16"
+              />
+            </div>
+            <div className="space-y-1">
+              <DetailRow
+                label={`${t("date")}`}
+                value={formatDateTime(new Date(), "DD-MM-YYYY")}
+                width="w-24"
+              />
+              {payment.account.patient?.instance_identifiers
+                ?.filter(
+                  ({ config }) =>
+                    config.config.use === PatientIdentifierUse.official,
+                )
+                .map((identifier) => (
+                  <DetailRow
+                    key={identifier.config.id}
+                    label={identifier.config.config.display}
+                    value={identifier.value}
+                    width="w-24"
+                    isStrong
+                  />
+                ))}
+              <DetailRow
+                label={t("payment_method")}
+                value={PAYMENT_RECONCILIATION_METHOD_MAP[payment.method]}
+                width="w-24"
+              />
+            </div>
+          </div>
 
           <Separator className="mt-4 mb-2" />
-
           {/* Related Invoice */}
           {payment.target_invoice && (
             <>
@@ -178,20 +206,20 @@ export function PrintPaymentReconciliation({
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>{t("invoice_number")}</TableHead>
-                      <TableHead>{t("title")}</TableHead>
+                      <TableHead>{t("invoice_no")}</TableHead>
                       <TableHead>{t("status")}</TableHead>
-                      <TableHead>{t("amount")}</TableHead>
+                      <TableHead className="text-right">
+                        {t("amount")}
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     <TableRow>
-                      <TableCell>#{payment.target_invoice.id}</TableCell>
                       <TableCell>{payment.target_invoice.number}</TableCell>
                       <TableCell>{payment.target_invoice.status}</TableCell>
                       <TableCell className="text-right">
                         <MonetaryDisplay
-                          amount={String(payment.target_invoice.total_gross)}
+                          amount={payment.target_invoice.total_gross}
                         />
                       </TableCell>
                     </TableRow>
@@ -201,9 +229,7 @@ export function PrintPaymentReconciliation({
               <Separator className="mb-4" />
             </>
           )}
-
           {/* Additional Details */}
-
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
@@ -235,7 +261,6 @@ export function PrintPaymentReconciliation({
               </TableBody>
             </Table>
           </div>
-
           {/* Totals */}
           <div className="flex flex-col items-end space-y-2 mt-6">
             <div className="flex w-48 justify-between">
@@ -259,7 +284,6 @@ export function PrintPaymentReconciliation({
               <MonetaryDisplay amount={payment.amount} />
             </div>
           </div>
-
           {/* Notes */}
           {payment.note && (
             <div className="mt-8 text-sm text-gray-600 border-t pt-4">
@@ -267,12 +291,24 @@ export function PrintPaymentReconciliation({
               <p>{payment.note}</p>
             </div>
           )}
-
           {/* Footer */}
-          <div className="mt-12 border-t pt-4 text-center text-sm text-gray-500">
-            <p>{t("thank_you_for_your_payment")}</p>
-            <p>{format(new Date(), "PPP")}</p>
-          </div>
+          <PrintFooter
+            leftContent={
+              <>
+                <span className="font-semibold">{t("generated_by")} </span>
+                {formatName(payment.updated_by)}
+              </>
+            }
+            rightContent={
+              payment.location?.name ? (
+                <>
+                  <span className="font-semibold">{t("location")}: </span>
+                  <span>{payment.location.name}</span>
+                </>
+              ) : undefined
+            }
+            className="border-t pt-4"
+          />
         </div>
       </div>
     </PrintPreview>

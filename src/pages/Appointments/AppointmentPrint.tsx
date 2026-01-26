@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
+import PrintFooter from "@/components/Common/PrintFooter";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -19,9 +20,11 @@ import { usePermissions } from "@/context/PermissionContext";
 import {
   ChargeItemServiceResource,
   ChargeItemStatus,
+  EXCLUDED_CHARGE_ITEM_STATUSES,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import scheduleApis from "@/types/scheduling/scheduleApi";
+import { add, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 
 interface Props {
@@ -99,7 +102,7 @@ export default function AppointmentPrint(props: Props) {
           <div className="text-left">
             <h1 className="text-2xl font-semibold">{facility.name}</h1>
             {facility.address && (
-              <div className="text-gray-500 whitespace-pre-wrap break-words text-xs">
+              <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-xs">
                 {facility.address}
                 {facility.phone_number && (
                   <p className="text-gray-500 text-xs">
@@ -132,21 +135,24 @@ export default function AppointmentPrint(props: Props) {
           {hasChargeItems && (
             <div className="flex justify-center w-2/5">
               <div className="p-2 border border-gray-200 bg-gray-100 w-full h-full rounded-md flex flex-col">
-                <div className="flex flex-row items-center  justify-between px-1">
+                <div className="flex flex-row items-center justify-between px-1">
                   <p className="font-semibold text-sm">{t("charges")}</p>
-                  <div className="flex items-center">
+                  {chargeItems.results.every(
+                    (item) =>
+                      !EXCLUDED_CHARGE_ITEM_STATUSES.includes(item.status),
+                  ) && (
                     <Badge className="text-xs">
-                      {chargeItems?.results?.every(
+                      {chargeItems.results.every(
                         (item) => item.status === ChargeItemStatus.paid,
                       )
                         ? t("paid")
-                        : chargeItems?.results?.some(
+                        : chargeItems.results.every(
                               (item) => item.status === ChargeItemStatus.billed,
                             )
                           ? t("billed")
                           : t("billable")}
                     </Badge>
-                  </div>
+                  )}
                 </div>
 
                 <div className="bg-white rounded-md p-3 shadow-md mt-2 h-full">
@@ -164,12 +170,12 @@ export default function AppointmentPrint(props: Props) {
                               </Label>
                             </div>
                             <p className="text-xs text-gray-600">
-                              {t("qty")}: {item.quantity}
+                              {t("qty")}: {round(item.quantity)}
                             </p>
                           </div>
                           <div className="text-right">
                             <p className="text-sm font-semibold">
-                              ₹{item.total_price}
+                              <MonetaryDisplay amount={item.total_price} />
                             </p>
                             {item.paid_invoice && (
                               <p className="text-xs text-gray-600">
@@ -187,13 +193,11 @@ export default function AppointmentPrint(props: Props) {
                         <Label className="text-sm">{t("total_amount")}</Label>
                         <p className="text-sm">
                           <MonetaryDisplay
-                            amount={chargeItems?.results
-                              ?.reduce(
-                                (sum, item) =>
-                                  sum + parseFloat(item.total_price || "0"),
-                                0,
-                              )
-                              .toFixed(2)}
+                            amount={add(
+                              ...chargeItems.results.map(
+                                (i) => i.total_price || 0,
+                              ),
+                            )}
                           />
                         </p>
                       </div>
@@ -220,12 +224,11 @@ export default function AppointmentPrint(props: Props) {
         <Separator className="my-4" />
 
         {/* Footer */}
-        <div className="text-center text-xs text-gray-500 flex justify-between items-center">
-          <div>
-            {t("generated_on")} {format(new Date(), "dd MMM yyyy 'at' h:mm a")}
-          </div>
-          <div>{facility.name}</div>
-        </div>
+        <PrintFooter
+          leftContent={format(new Date(), "PP 'at' p")}
+          rightContent={facility.name}
+          className="text-xs"
+        />
       </div>
     </PrintPreview>
   );

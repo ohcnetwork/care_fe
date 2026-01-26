@@ -1,6 +1,7 @@
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 import {
   CurrentUserRead,
+  GenerateServiceAccountTokenResponse,
   UserCreate,
   UserRead,
   UserReadMinimal,
@@ -57,5 +58,15 @@ export default {
     method: HttpMethod.DELETE,
     TRes: Type<void>(),
     TBody: Type<void>(),
+  },
+  generateServiceAccountToken: {
+    path: "/api/v1/users/{username}/generate_service_account_token/",
+    method: HttpMethod.POST,
+    TRes: Type<GenerateServiceAccountTokenResponse>(),
+  },
+  revokeServiceAccountToken: {
+    path: "/api/v1/users/{username}/revoke_service_account_token/",
+    method: HttpMethod.DELETE,
+    TRes: Type<void>(),
   },
 } as const;
