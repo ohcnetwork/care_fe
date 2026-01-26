@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowUpRightSquare,
   CheckCircle,
-  MapPin,
   MoreVertical,
   ReceiptTextIcon,
 } from "lucide-react";
@@ -37,6 +36,7 @@ import {
 import useFilters from "@/hooks/useFilters";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import { LocationNode } from "@/components/Location/LocationTree";
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { tagFilter } from "@/components/ui/multi-filter/filterConfigs";
@@ -285,10 +285,10 @@ export default function MedicationRequestList({
                         </Badge>
                       </div>
                       {item.encounter.current_location && (
-                        <div className="flex items-center gap-1 text-sm text-gray-700">
-                          <MapPin className="size-3.5 text-gray-500" />
-                          <span>{item.encounter.current_location.name}</span>
-                        </div>
+                        <LocationNode
+                          location={item.encounter.current_location}
+                          isLast={true}
+                        />
                       )}
                     </div>
                   </TableCell>
