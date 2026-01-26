@@ -262,7 +262,7 @@ export default function ServiceRequestList({
         "single",
         "activity_definition",
       ),
-      dateFilter("created_date", t("date"), longDateRangeOptions, true),
+      dateFilter("created_date", t("date"), longDateRangeOptions),
     ],
     [],
   );
