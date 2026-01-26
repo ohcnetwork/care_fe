@@ -136,6 +136,13 @@ export function ChargeItemsTable({
   ];
 
   const onFilterUpdate = (query: Record<string, unknown>) => {
+    for (const [key, value] of Object.entries(query)) {
+      switch (key) {
+        case "service_resource":
+          query.service_resource = (value as string[])?.join(",");
+          break;
+      }
+    }
     updateQuery(query);
   };
 
@@ -149,9 +156,7 @@ export function ChargeItemsTable({
     ...qParams,
     status: qParams.status ? [qParams.status] : undefined,
     service_resource: qParams.service_resource
-      ? Array.isArray(qParams.service_resource)
-        ? qParams.service_resource
-        : [qParams.service_resource]
+      ? qParams.service_resource.split(",")
       : undefined,
     created_date:
       qParams.created_date_after || qParams.created_date_before
