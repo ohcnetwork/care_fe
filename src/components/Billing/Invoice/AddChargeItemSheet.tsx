@@ -133,9 +133,26 @@ export default function AddChargeItemSheet({
     }
   }, [items]);
 
-  const handleSelectAll = (checked: boolean) => {
+  const handleSelectAll = async (checked: boolean) => {
     if (checked) {
-      setSelectedItems(new Set(items.map((item) => item.id)));
+      const totalCount = response?.count || 0;
+      if (totalCount > 0) {
+        const result = await queryClient.fetchQuery({
+          queryKey: ["charge-items-all", accountId, qParams.search],
+          queryFn: query(chargeItemApi.listChargeItem, {
+            pathParams: { facilityId },
+            queryParams: {
+              limit: totalCount,
+              account: accountId,
+              status: "billable",
+            },
+          }),
+        });
+        if (result?.results) {
+          const allIds = result.results.map((item: ChargeItemRead) => item.id);
+          setSelectedItems(new Set(allIds));
+        }
+      }
     } else {
       setSelectedItems(new Set());
     }
@@ -202,14 +219,24 @@ export default function AddChargeItemSheet({
                       <TableHead className="w-12">
                         <Checkbox
                           checked={
-                            items.length > 0 &&
-                            items.every((item) => selectedItems.has(item.id))
+                            (response?.count ?? 0) > 0 &&
+                            selectedItems.size === response?.count
                           }
                           onCheckedChange={handleSelectAll}
                           className="align-middle"
                         />
                       </TableHead>
-                      <TableHead>{t("item")}</TableHead>
+                      <TableHead>
+                        {t("item")}
+                        {response?.count &&
+                          response.count > resultsPerPage &&
+                          selectedItems.size > 0 && (
+                            <span className="ml-2 text-xs text-muted-foreground">
+                              ({selectedItems.size}/{response.count}{" "}
+                              {t("selected")})
+                            </span>
+                          )}
+                      </TableHead>
                       <TableHead>{t("quantity")}</TableHead>
                       <TableHead>{t("unit_price")}</TableHead>
                       <TableHead>{t("performer")}</TableHead>
