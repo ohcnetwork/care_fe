@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowUpRightSquare,
   CheckCircle,
-  MapPin,
   MoreVertical,
   ReceiptTextIcon,
 } from "lucide-react";
@@ -57,6 +56,7 @@ import {
   TagResource,
 } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
+import { getLocationPath } from "@/types/location/utils";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -286,8 +286,9 @@ export default function MedicationRequestList({
                       </div>
                       {item.encounter.current_location && (
                         <div className="flex items-center gap-1 text-sm text-gray-700">
-                          <MapPin className="size-3.5 text-gray-500" />
-                          <span>{item.encounter.current_location.name}</span>
+                          <span>
+                            {getLocationPath(item.encounter.current_location)}
+                          </span>
                         </div>
                       )}
                     </div>
