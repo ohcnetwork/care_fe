@@ -1,7 +1,6 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
@@ -17,6 +16,7 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { getPermissions } from "@/common/Permissions";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { usePermissions } from "@/context/PermissionContext";
+import useAutoPrint from "@/hooks/useAutoPrint";
 import {
   ChargeItemServiceResource,
   ChargeItemStatus,
@@ -67,15 +67,7 @@ export default function AppointmentPrint(props: Props) {
     enabled: !!facilityId && !!props.appointmentId,
   });
 
-  // Auto-print when page loads and data is ready
-  useEffect(() => {
-    if (appointment && !isLoading) {
-      const timer = setTimeout(() => {
-        window.print();
-      }, 1000); // Give time for content to render
-      return () => clearTimeout(timer);
-    }
-  }, [appointment, isLoading]);
+  useAutoPrint({ enabled: appointment && !isLoading });
 
   if (isLoading || !appointment || !facility) {
     return (
