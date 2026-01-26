@@ -15,6 +15,7 @@ import query from "@/Utils/request/query";
 import { MedicationHistory } from "@/pages/Patient/History/MedicationHistory";
 import patientApi from "@/types/emr/patient/patientApi";
 
+import { DiagnosticReportsTab } from "@/pages/Encounters/tabs/diagnostic-reports";
 import { Separator } from "@radix-ui/react-separator";
 import { AllergyHistory } from "./AllergyHistory";
 import { DiagnosesHistory } from "./DiagnosesHistory";
@@ -23,10 +24,12 @@ import { SymptomsHistory } from "./SymptomsHistory";
 
 export function ClinicalHistoryPage({
   patientId,
+  facilityId,
   tab = "symptoms",
   fallBackUrl,
 }: {
   fallBackUrl?: string;
+  facilityId?: string;
   patientId: string;
   tab: string;
 }) {
@@ -62,6 +65,12 @@ export function ClinicalHistoryPage({
     responses: {
       label: t("responses"),
       component: <ResponsesHistory patientId={patientId} />,
+    },
+    diagnostic_reports: {
+      label: t("diagnostic_report_other", { count: 2 }),
+      component: (
+        <DiagnosticReportsTab patientId={patientId} facilityId={facilityId} />
+      ),
     },
     symptoms: {
       label: t("past_symptoms"),

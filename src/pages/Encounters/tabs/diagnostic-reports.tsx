@@ -342,18 +342,20 @@ function LeftPanel({
 
   return (
     <>
-      <div className="relative w-full pb-2">
-        <Autocomplete
-          value={selectedActivityDefinition || ""}
-          onChange={(value) => onActivityDefinitionChange(value || undefined)}
-          onSearch={setSearchQuery}
-          options={options}
-          isLoading={isSearching}
-          placeholder={t("all")}
-          inputPlaceholder={t("search")}
-          noOptionsMessage={t("no_results_found")}
-        />
-      </div>
+      {facilityId && (
+        <div className="relative w-full pb-2">
+          <Autocomplete
+            value={selectedActivityDefinition || ""}
+            onChange={(value) => onActivityDefinitionChange(value || undefined)}
+            onSearch={setSearchQuery}
+            options={options}
+            isLoading={isSearching}
+            placeholder={t("all")}
+            inputPlaceholder={t("search")}
+            noOptionsMessage={t("no_results_found")}
+          />
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto">
         {isLoading ? (
@@ -383,14 +385,19 @@ function LeftPanel({
 
 const LIMIT = 14;
 
-export const EncounterDiagnosticReportsTab = () => {
+interface DiagnosticReportsTabProps {
+  patientId: string;
+  encounterId?: string;
+  facilityId?: string;
+}
+
+export const DiagnosticReportsTab = ({
+  patientId,
+  encounterId,
+  facilityId,
+}: DiagnosticReportsTabProps) => {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
-  const {
-    selectedEncounterId: encounterId,
-    facilityId,
-    patientId,
-  } = useEncounter();
 
   const [qParams, setQueryParams] = useQueryParams<{
     reportId?: string;
@@ -552,5 +559,21 @@ export const EncounterDiagnosticReportsTab = () => {
         </ScrollArea>
       </div>
     </div>
+  );
+};
+
+export const EncounterDiagnosticReportsTab = () => {
+  const {
+    selectedEncounterId: encounterId,
+    facilityId,
+    patientId,
+  } = useEncounter();
+
+  return (
+    <DiagnosticReportsTab
+      patientId={patientId}
+      encounterId={encounterId}
+      facilityId={facilityId}
+    />
   );
 };
