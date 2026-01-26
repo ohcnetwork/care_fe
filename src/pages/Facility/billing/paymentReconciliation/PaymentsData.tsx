@@ -35,6 +35,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import { multiply } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
+import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
 import UserSelector from "@/components/Common/UserSelector";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import {
@@ -125,10 +126,10 @@ export default function PaymentsData({
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         status: qParams.status,
         created_date_after: qParams.created_date_after
-          ? new Date(qParams.created_date_after).toISOString()
+          ? dateTimeQueryString(new Date(qParams.created_date_after))
           : undefined,
         created_date_before: qParams.created_date_before
-          ? new Date(qParams.created_date_before).toISOString()
+          ? dateTimeQueryString(new Date(qParams.created_date_before), true)
           : undefined,
         reconciliation_type: qParams.reconciliation_type,
         method: qParams.method,
@@ -146,7 +147,7 @@ export default function PaymentsData({
     paymentTypeFilter("reconciliation_type"),
     paymentMethodFilter("method"),
     locationFilter("location"),
-    dateFilter("created_date", t("date"), longDateRangeOptions, true),
+    dateFilter("created_date", t("date"), longDateRangeOptions),
   ];
 
   const onFilterUpdate = (filterQuery: Record<string, unknown>) => {
@@ -160,10 +161,10 @@ export default function PaymentsData({
               ...query,
               created_date: undefined,
               created_date_after: dateRange?.from
-                ? new Date(dateRange?.from).toISOString()
+                ? dateQueryString(dateRange?.from as Date)
                 : undefined,
               created_date_before: dateRange?.to
-                ? new Date(dateRange?.to).toISOString()
+                ? dateQueryString(dateRange?.to as Date)
                 : undefined,
             };
           }
