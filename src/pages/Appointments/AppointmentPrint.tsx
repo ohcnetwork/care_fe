@@ -16,7 +16,6 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { getPermissions } from "@/common/Permissions";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { usePermissions } from "@/context/PermissionContext";
-import useAutoPrint from "@/hooks/useAutoPrint";
 import {
   ChargeItemServiceResource,
   ChargeItemStatus,
@@ -67,8 +66,6 @@ export default function AppointmentPrint(props: Props) {
     enabled: !!facilityId && !!props.appointmentId,
   });
 
-  useAutoPrint({ enabled: appointment && !isLoading });
-
   if (isLoading || !appointment || !facility) {
     return (
       <PrintPreview title={t("appointment_details")} disabled>
@@ -87,7 +84,7 @@ export default function AppointmentPrint(props: Props) {
   const hasChargeItems = chargeItems?.results && chargeItems.results.length > 0;
 
   return (
-    <PrintPreview title={t("appointment_details")}>
+    <PrintPreview title={t("appointment_details")} autoPrint>
       <div className="max-w-7xl mx-auto text-sm">
         {/* Header with Facility Name and Logo */}
         <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
