@@ -7,7 +7,14 @@ import {
 } from "@/types/emr/encounter/encounter";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
-import { Building, CalendarFold, CircleDashed, Tag } from "lucide-react";
+import { LocationRead } from "@/types/location/location";
+import {
+  Building,
+  CalendarFold,
+  CircleDashed,
+  MapPin,
+  Tag,
+} from "lucide-react";
 
 import { t } from "i18next";
 import { SelectedDateBadge, getDateOperations } from "./dateFilter";
@@ -235,6 +242,35 @@ export const departmentFilter = (
       icon: <Building className="w-4 h-4" />,
     },
   );
+
+export const locationFilter = (
+  key: string = "location",
+  mode: FilterMode = "single",
+  label?: string,
+) =>
+  createFilterConfig(key, label ? t(label) : t("location"), "location", [], {
+    renderSelected: (selected: FilterValues) => {
+      const locations = selected as LocationRead[];
+      if (locations.length === 0) return null;
+      const location = locations[0];
+      return (
+        <div className="flex items-center gap-2 min-w-0 shrink-0">
+          <MapPin className="h-3 w-3 text-gray-600 shrink-0" />
+          <span className="text-sm whitespace-nowrap truncate max-w-[150px]">
+            {location.name}
+          </span>
+          {locations.length > 1 && (
+            <span className="text-xs text-gray-500">
+              +{locations.length - 1}
+            </span>
+          )}
+        </div>
+      );
+    },
+    getOperations: () => [{ label: "is" }],
+    mode,
+    icon: <MapPin className="w-4 h-4" />,
+  });
 
 export const accountBillingStatusFilter = (
   key: string = "billing_status",

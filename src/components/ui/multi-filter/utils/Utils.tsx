@@ -6,6 +6,7 @@ import { GenericSelectedBadge } from "@/components/ui/multi-filter/genericFilter
 
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
+import { LocationRead } from "@/types/location/location";
 
 // Generic color palette for cycling through options
 export const COLOR_PALETTE = [
@@ -37,7 +38,8 @@ export type FilterValues =
   | string[]
   | TagConfig[]
   | FilterDateRange
-  | FacilityOrganizationRead[];
+  | FacilityOrganizationRead[]
+  | LocationRead[];
 
 export type FilterMode = "single" | "multi";
 
@@ -48,6 +50,10 @@ export type TagFilterMeta = {
   resource: TagResource;
 };
 export type DepartmentFilterMeta = {
+  facilityId?: string;
+};
+
+export type LocationFilterMeta = {
   facilityId?: string;
 };
 
@@ -89,11 +95,17 @@ export interface DepartmentFilterConfig extends BaseFilterConfig {
   meta: DepartmentFilterMeta;
 }
 
+export interface LocationFilterConfig extends BaseFilterConfig {
+  type: "location";
+  meta: LocationFilterMeta;
+}
+
 export type FilterConfig =
   | CommandFilterConfig
   | TagFilterConfig
   | DateFilterConfig
-  | DepartmentFilterConfig;
+  | DepartmentFilterConfig
+  | LocationFilterConfig;
 
 export interface OperationConfig {
   selectedOperation: Operation | null;
@@ -143,7 +155,7 @@ function defaultGetOperations(_selected: FilterValues) {
 export function createFilterConfig(
   key: string,
   label: string,
-  type: "command" | "tag" | "date" | "department",
+  type: "command" | "tag" | "date" | "department" | "location",
   options: FilterOption[],
   meta?: {
     resource?: TagResource;
@@ -206,6 +218,12 @@ export function createFilterConfig(
         type: "department",
         meta: {},
       } as DepartmentFilterConfig;
+    case "location":
+      return {
+        ...baseConfig,
+        type: "location",
+        meta: {},
+      } as LocationFilterConfig;
     case "command":
       return {
         ...baseConfig,

@@ -39,6 +39,7 @@ import UserSelector from "@/components/Common/UserSelector";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import {
   dateFilter,
+  locationFilter,
   paymentMethodFilter,
   paymentStatusFilter,
   paymentTypeFilter,
@@ -55,6 +56,7 @@ import {
   PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import { LocationRead } from "@/types/location/location";
 import { UserReadMinimal } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
 
@@ -130,6 +132,7 @@ export default function PaymentsData({
           : undefined,
         reconciliation_type: qParams.reconciliation_type,
         method: qParams.method,
+        location: qParams.location,
         ordering: qParams.ordering,
         created_by: qParams.created_by,
       },
@@ -142,6 +145,7 @@ export default function PaymentsData({
     paymentStatusFilter("status"),
     paymentTypeFilter("reconciliation_type"),
     paymentMethodFilter("method"),
+    locationFilter("location"),
     dateFilter("created_date", t("date"), longDateRangeOptions, true),
   ];
 
@@ -161,6 +165,19 @@ export default function PaymentsData({
               created_date_before: dateRange?.to
                 ? new Date(dateRange?.to).toISOString()
                 : undefined,
+            };
+          }
+          break;
+        case "location":
+          {
+            // value can be LocationRead (single mode) or LocationRead[] (multi mode)
+            const locationValue = value as LocationRead | LocationRead[];
+            const locationId = Array.isArray(locationValue)
+              ? locationValue[0]?.id
+              : (locationValue as LocationRead)?.id;
+            query = {
+              ...query,
+              location: locationId || undefined,
             };
           }
           break;
@@ -193,6 +210,7 @@ export default function PaymentsData({
       ? [qParams.reconciliation_type]
       : undefined,
     method: qParams.method ? [qParams.method] : undefined,
+    location: [],
   });
 
   return (
