@@ -86,6 +86,10 @@ export function useEncounterShortcuts() {
     }
 
     return {
+      "add-service-request": () =>
+        navigate(buildEncounterUrl("/questionnaire/service_request")),
+      "add-medication-request": () =>
+        navigate(buildEncounterUrl("/questionnaire/medication_request")),
       "add-allergy": () =>
         navigate(buildEncounterUrl("/questionnaire/allergy_intolerance")),
       "add-symptoms": () =>
