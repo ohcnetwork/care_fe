@@ -132,14 +132,14 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
   };
 
   return (
-    <DisablingCover
-      disabled={isLoadingDispenses}
-      message={t("loading_medication_details")}
+    <PrintPreview
+      title={`${t("invoice")} ${invoice.number}`}
+      watermark={getWatermark()}
+      autoPrint={!isLoadingDispenses}
     >
-      <PrintPreview
-        title={`${t("invoice")} ${invoice.number}`}
-        watermark={getWatermark()}
-        autoPrint={!isLoadingDispenses}
+      <DisablingCover
+        disabled={isLoadingDispenses}
+        message={t("loading_medication_details")}
       >
         <div className="max-w-5xl mx-auto">
           {/* Header with Facility Name and Logo */}
@@ -620,8 +620,8 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
             }
           />
         </div>
-      </PrintPreview>
-    </DisablingCover>
+      </DisablingCover>
+    </PrintPreview>
   );
 }
 
