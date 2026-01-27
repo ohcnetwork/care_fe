@@ -38,9 +38,16 @@ import useFilters from "@/hooks/useFilters";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
-import { tagFilter } from "@/components/ui/multi-filter/filterConfigs";
+import {
+  dateFilter,
+  tagFilter,
+} from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
+import {
+  FilterDateRange,
+  longDateRangeOptions,
+} from "@/components/ui/multi-filter/utils/Utils";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { ENCOUNTER_CLASSES_COLORS } from "@/types/emr/encounter/encounter";
 import {
@@ -58,7 +65,12 @@ import { getLocationPath } from "@/types/location/utils";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { formatDateTime, formatName } from "@/Utils/utils";
+import {
+  dateQueryString,
+  dateTimeQueryString,
+  formatDateTime,
+  formatName,
+} from "@/Utils/utils";
 import careConfig from "@careConfig";
 
 export default function MedicationRequestList({
@@ -87,17 +99,36 @@ export default function MedicationRequestList({
 
   // Create filter configurations
   const filters = useMemo(
-    () => [tagFilter("tags", TagResource.PRESCRIPTION, "multi", "tags")],
-    [],
+    () => [
+      tagFilter("tags", TagResource.PRESCRIPTION, "multi", "tags"),
+      dateFilter("created_date", t("date"), longDateRangeOptions),
+    ],
+    [t],
   );
 
   // Handle filter updates
-  const onFilterUpdate = (query: Record<string, unknown>) => {
+  const onFilterUpdate = (filterQuery: Record<string, unknown>) => {
     // Update the query parameters based on filter changes
-    for (const [key, value] of Object.entries(query)) {
+    let query = { ...filterQuery };
+    for (const [key, value] of Object.entries(filterQuery)) {
       switch (key) {
         case "tags":
-          query.tags = (value as TagConfig[])?.map((tag) => tag.id);
+          query.tags = (value as TagConfig[])?.map((tag) => tag.id).join(",");
+          break;
+        case "created_date":
+          {
+            const dateRange = value as FilterDateRange;
+            query = {
+              ...query,
+              created_date: undefined,
+              created_date_after: dateRange?.from
+                ? dateQueryString(dateRange?.from as Date)
+                : undefined,
+              created_date_before: dateRange?.to
+                ? dateQueryString(dateRange?.to as Date)
+                : undefined,
+            };
+          }
           break;
       }
     }
@@ -114,6 +145,17 @@ export default function MedicationRequestList({
   } = useMultiFilterState(filters, onFilterUpdate, {
     ...qParams,
     tags: selectedTags,
+    created_date:
+      qParams.created_date_after || qParams.created_date_before
+        ? {
+            from: qParams.created_date_after
+              ? new Date(qParams.created_date_after)
+              : undefined,
+            to: qParams.created_date_before
+              ? new Date(qParams.created_date_before)
+              : undefined,
+          }
+        : undefined,
   });
 
   const { data: prescriptionQueue, isLoading } = useQuery<
@@ -129,6 +171,12 @@ export default function MedicationRequestList({
         encounter_class: qParams.encounter_class,
         tags: qParams.tags,
         tags_behavior: qParams.tags_behavior,
+        created_date_after: qParams.created_date_after
+          ? dateTimeQueryString(new Date(qParams.created_date_after))
+          : undefined,
+        created_date_before: qParams.created_date_before
+          ? dateTimeQueryString(new Date(qParams.created_date_before), true)
+          : undefined,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
       },
