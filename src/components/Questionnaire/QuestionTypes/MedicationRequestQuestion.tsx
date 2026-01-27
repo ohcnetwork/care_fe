@@ -107,7 +107,7 @@ import {
   validateFields,
 } from "@/types/questionnaire/validation";
 import { UserReadMinimal } from "@/types/user/user";
-import { isZero, round } from "@/Utils/decimal";
+import { isPositive, isZero, round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
@@ -219,8 +219,9 @@ const MEDICATION_REQUEST_FIELDS = {
       const dosageInstruction =
         value as MedicationRequestCreate["dosage_instruction"][0];
       return !!(
-        Number(dosageInstruction?.dose_and_rate?.dose_quantity?.value) > 0 ||
-        dosageInstruction?.dose_and_rate?.dose_range
+        isPositive(
+          dosageInstruction?.dose_and_rate?.dose_quantity?.value ?? "0",
+        ) || dosageInstruction?.dose_and_rate?.dose_range
       );
     },
   },
