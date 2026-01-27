@@ -219,7 +219,7 @@ const MEDICATION_REQUEST_FIELDS = {
       const dosageInstruction =
         value as MedicationRequestCreate["dosage_instruction"][0];
       return !!(
-        dosageInstruction?.dose_and_rate?.dose_quantity ||
+        Number(dosageInstruction?.dose_and_rate?.dose_quantity?.value) > 0 ||
         dosageInstruction?.dose_and_rate?.dose_range
       );
     },
