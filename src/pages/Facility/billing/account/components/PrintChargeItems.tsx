@@ -39,7 +39,7 @@ import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/pa
 
 import useFilters from "@/hooks/useFilters";
 
-import { add, round } from "@/Utils/decimal";
+import { add, multiply, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 
@@ -82,6 +82,7 @@ export const PrintChargeItems = (props: {
   const [hideHeader, setHideHeader] = useState(false);
   const [preserveHeaderSpace, setPreserveHeaderSpace] = useState(true);
   const [showCreatedBy, setShowCreatedBy] = useState(false);
+  const [groupByParentCategory, setGroupByParentCategory] = useState(false);
 
   const { qParams, updateQuery } = useFilters({ disableCache: true });
 
@@ -91,6 +92,7 @@ export const PrintChargeItems = (props: {
   const hideHeaderLabel = `${t("hide_header")}`;
   const preserveHeaderSpaceLabel = `${t("preserve_header_space")}`;
   const showCreatedByLabel = `${t("show_created_by")}`;
+  const groupByParentCategoryLabel = `${t("group_by_parent_category")}`;
 
   const { data: account } = useQuery({
     queryKey: ["account", accountId],
@@ -196,6 +198,22 @@ export const PrintChargeItems = (props: {
                 {hideCategoryLabel}
               </label>
             </div>
+
+            {!hideCategories && (
+              <div className="gap-2 flex items-center">
+                <Switch
+                  id="group-by-parent-category"
+                  checked={groupByParentCategory}
+                  onCheckedChange={setGroupByParentCategory}
+                />
+                <label
+                  htmlFor="group-by-parent-category"
+                  className="cursor-pointer text-sm"
+                >
+                  {groupByParentCategoryLabel}
+                </label>
+              </div>
+            )}
 
             {payments.length > 0 && (
               <div className="gap-2 flex items-center">
@@ -305,6 +323,15 @@ export const PrintChargeItems = (props: {
                         value={account?.patient?.address}
                         width="w-16"
                       />
+                      {account?.primary_encounter?.current_location && (
+                        <DetailRow
+                          label={`${t("location")}`}
+                          value={
+                            account?.primary_encounter?.current_location?.name
+                          }
+                          width="w-16"
+                        />
+                      )}
                     </div>
                     <div className="space-y-1">
                       <DetailRow
@@ -333,6 +360,32 @@ export const PrintChargeItems = (props: {
                         }
                         width="w-24"
                       />
+                      {account?.primary_encounter && (
+                        <>
+                          <DetailRow
+                            label={t("start_date")}
+                            value={
+                              account?.primary_encounter &&
+                              account?.primary_encounter.period.start &&
+                              new Date(
+                                account?.primary_encounter.period.start,
+                              ).toLocaleDateString("en-IN")
+                            }
+                            width="w-24"
+                          />
+                          <DetailRow
+                            label={t("end_date")}
+                            value={
+                              account?.primary_encounter &&
+                              account?.primary_encounter.period.end &&
+                              new Date(
+                                account?.primary_encounter.period.end,
+                              ).toLocaleDateString("en-IN")
+                            }
+                            width="w-24"
+                          />
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -392,14 +445,22 @@ export const PrintChargeItems = (props: {
                                   ChargeItemStatus.entered_in_error,
                               );
 
+                              // In summary mode, default to grouping by parent category
+                              const useParentCategory =
+                                groupByParentCategory || summaryMode;
+
                               const groups = validItems.reduce(
                                 (
                                   acc: Record<string, ChargeItemRead[]>,
                                   item: ChargeItemRead,
                                 ) => {
-                                  const categoryTitle =
-                                    item.charge_item_definition?.category
-                                      ?.title || t("uncategorized");
+                                  const category =
+                                    item.charge_item_definition?.category;
+                                  const categoryTitle = useParentCategory
+                                    ? category?.parent?.title ||
+                                      category?.title ||
+                                      t("uncategorized")
+                                    : category?.title || t("uncategorized");
                                   const list = acc[categoryTitle] ?? [];
                                   list.push(item);
                                   acc[categoryTitle] = list;
@@ -708,7 +769,10 @@ export const PrintChargeItems = (props: {
                                           </TableCell>
                                           <TableCell className="text-right">
                                             <MonetaryDisplay
-                                              amount={payment.amount}
+                                              amount={multiply(
+                                                payment.amount,
+                                                payment.is_credit_note ? -1 : 1,
+                                              )}
                                             />
                                           </TableCell>
                                         </TableRow>,

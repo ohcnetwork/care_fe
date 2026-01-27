@@ -2,10 +2,12 @@ import React from "react";
 
 import { addDays, subDays, subMonths, subWeeks, subYears } from "date-fns";
 
+import { ActivityDefinitionFilterValue } from "@/components/ui/multi-filter/activityDefinitionFilter";
 import { GenericSelectedBadge } from "@/components/ui/multi-filter/genericFilter";
 
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
+import { LocationRead } from "@/types/location/location";
 
 // Generic color palette for cycling through options
 export const COLOR_PALETTE = [
@@ -37,7 +39,9 @@ export type FilterValues =
   | string[]
   | TagConfig[]
   | FilterDateRange
-  | FacilityOrganizationRead[];
+  | FacilityOrganizationRead[]
+  | LocationRead[]
+  | ActivityDefinitionFilterValue[];
 
 export type FilterMode = "single" | "multi";
 
@@ -48,6 +52,13 @@ export type TagFilterMeta = {
   resource: TagResource;
 };
 export type DepartmentFilterMeta = {
+  facilityId?: string;
+};
+
+export type LocationFilterMeta = {
+  facilityId?: string;
+};
+export type ActivityDefinitionFilterMeta = {
   facilityId?: string;
 };
 
@@ -89,11 +100,22 @@ export interface DepartmentFilterConfig extends BaseFilterConfig {
   meta: DepartmentFilterMeta;
 }
 
+export interface LocationFilterConfig extends BaseFilterConfig {
+  type: "location";
+  meta: LocationFilterMeta;
+}
+export interface ActivityDefinitionFilterConfig extends BaseFilterConfig {
+  type: "activity_definition";
+  meta: ActivityDefinitionFilterMeta;
+}
+
 export type FilterConfig =
   | CommandFilterConfig
   | TagFilterConfig
   | DateFilterConfig
-  | DepartmentFilterConfig;
+  | DepartmentFilterConfig
+  | LocationFilterConfig
+  | ActivityDefinitionFilterConfig;
 
 export interface OperationConfig {
   selectedOperation: Operation | null;
@@ -143,7 +165,13 @@ function defaultGetOperations(_selected: FilterValues) {
 export function createFilterConfig(
   key: string,
   label: string,
-  type: "command" | "tag" | "date" | "department",
+  type:
+    | "command"
+    | "tag"
+    | "date"
+    | "department"
+    | "location"
+    | "activity_definition",
   options: FilterOption[],
   meta?: {
     resource?: TagResource;
@@ -159,6 +187,7 @@ export function createFilterConfig(
     operationKey?: string;
     disableClear?: boolean;
     showColorIndicators?: boolean;
+    facilityId?: string;
   },
 ): FilterConfig {
   const {
@@ -171,6 +200,7 @@ export function createFilterConfig(
     operationKey,
     disableClear,
     showColorIndicators,
+    facilityId,
   } = meta || {};
   const baseConfig: BaseFilterConfig = {
     key,
@@ -206,6 +236,18 @@ export function createFilterConfig(
         type: "department",
         meta: {},
       } as DepartmentFilterConfig;
+    case "location":
+      return {
+        ...baseConfig,
+        type: "location",
+        meta: {},
+      } as LocationFilterConfig;
+    case "activity_definition":
+      return {
+        ...baseConfig,
+        type: "activity_definition",
+        meta: { facilityId },
+      } as ActivityDefinitionFilterConfig;
     case "command":
       return {
         ...baseConfig,

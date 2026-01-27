@@ -98,7 +98,11 @@ function MonetaryAmountInput({
         data-care-input="monetary-amount"
         {...props}
         onChange={handleChange}
-        className={cn(!hideCurrency && "pl-8", props.className)}
+        className={cn(
+          "font-bold tracking-widest",
+          !hideCurrency && "pl-8",
+          props.className,
+        )}
       />
     </div>
   );

@@ -161,6 +161,7 @@ export function SupplyDeliveryTable({
             </TableHead>
           )}
           <TableHead>{t("item")}</TableHead>
+          <TableHead>{t("batch")}</TableHead>
           <TableHead>{t("requested_qty")}</TableHead>
           {!internal && <TableHead>{t("pack_size")}</TableHead>}
           {!internal && <TableHead>{t("pack_qty")}</TableHead>}
@@ -211,6 +212,10 @@ export function SupplyDeliveryTable({
                       ?.name
                   : delivery.supplied_item?.product_knowledge?.name}
               </div>
+            </TableCell>
+            <TableCell>
+              {delivery.supplied_inventory_item?.product?.batch?.lot_number ||
+                "-"}
             </TableCell>
             <TableCell>
               {delivery.supply_request

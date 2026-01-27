@@ -35,13 +35,20 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import { multiply } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
+import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
 import UserSelector from "@/components/Common/UserSelector";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import {
+  dateFilter,
+  locationFilter,
   paymentMethodFilter,
   paymentStatusFilter,
   paymentTypeFilter,
 } from "@/components/ui/multi-filter/filterConfigs";
+import {
+  FilterDateRange,
+  longDateRangeOptions,
+} from "@/components/ui/multi-filter/utils/Utils";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import {
   PAYMENT_RECONCILIATION_METHOD_MAP,
@@ -50,6 +57,7 @@ import {
   PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import { LocationRead } from "@/types/location/location";
 import { UserReadMinimal } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
 
@@ -117,8 +125,15 @@ export default function PaymentsData({
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         status: qParams.status,
+        created_date_after: qParams.created_date_after
+          ? dateTimeQueryString(new Date(qParams.created_date_after))
+          : undefined,
+        created_date_before: qParams.created_date_before
+          ? dateTimeQueryString(new Date(qParams.created_date_before), true)
+          : undefined,
         reconciliation_type: qParams.reconciliation_type,
         method: qParams.method,
+        location: qParams.location,
         ordering: qParams.ordering,
         created_by: qParams.created_by,
       },
@@ -131,9 +146,44 @@ export default function PaymentsData({
     paymentStatusFilter("status"),
     paymentTypeFilter("reconciliation_type"),
     paymentMethodFilter("method"),
+    locationFilter("location"),
+    dateFilter("created_date", t("date"), longDateRangeOptions),
   ];
 
-  const onFilterUpdate = (query: Record<string, unknown>) => {
+  const onFilterUpdate = (filterQuery: Record<string, unknown>) => {
+    let query = { ...filterQuery };
+    for (const [key, value] of Object.entries(filterQuery)) {
+      switch (key) {
+        case "created_date":
+          {
+            const dateRange = value as FilterDateRange;
+            query = {
+              ...query,
+              created_date: undefined,
+              created_date_after: dateRange?.from
+                ? dateQueryString(dateRange?.from as Date)
+                : undefined,
+              created_date_before: dateRange?.to
+                ? dateQueryString(dateRange?.to as Date)
+                : undefined,
+            };
+          }
+          break;
+        case "location":
+          {
+            // value can be LocationRead (single mode) or LocationRead[] (multi mode)
+            const locationValue = value as LocationRead | LocationRead[];
+            const locationId = Array.isArray(locationValue)
+              ? locationValue[0]?.id
+              : (locationValue as LocationRead)?.id;
+            query = {
+              ...query,
+              location: locationId || undefined,
+            };
+          }
+          break;
+      }
+    }
     updateQuery(query);
   };
 
@@ -145,17 +195,29 @@ export default function PaymentsData({
     handleClearFilter,
   } = useMultiFilterState(filters, onFilterUpdate, {
     ...qParams,
+    created_date:
+      qParams.created_date_after || qParams.created_date_before
+        ? {
+            from: qParams.created_date_after
+              ? new Date(qParams.created_date_after)
+              : undefined,
+            to: qParams.created_date_before
+              ? new Date(qParams.created_date_before)
+              : undefined,
+          }
+        : undefined,
     status: qParams.status ? [qParams.status] : undefined,
     reconciliation_type: qParams.reconciliation_type
       ? [qParams.reconciliation_type]
       : undefined,
     method: qParams.method ? [qParams.method] : undefined,
+    location: [],
   });
 
   return (
     <>
-      <div className="flex flex-col justify-between gap-3 w-full my-2">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 w-full">
+      <div className="flex flex-col sm:flex-row justify-between w-full my-4 gap-2">
+        <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
           <div className="w-full sm:w-fit">
             <UserSelector
               selected={createdBy}
@@ -171,37 +233,37 @@ export default function PaymentsData({
             />
           </div>
           <div className="w-full sm:w-fit">
-            <Select
-              value={qParams.ordering || ""}
-              onValueChange={(value) => {
-                updateQuery({ ordering: value });
-              }}
-            >
-              <SelectTrigger className="border-gray-400 text-gray-950 rounded-sm">
-                <SelectValue placeholder={t("sort_by")} />
-              </SelectTrigger>
-              <SelectContent align="end">
-                {Object.entries(SORT_OPTIONS).map(([value, text]) => (
-                  <SelectItem key={text} value={value}>
-                    {t(text)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <MultiFilter
+              selectedFilters={selectedFilters}
+              onFilterChange={handleFilterChange}
+              onOperationChange={handleOperationChange}
+              onClearAll={handleClearAll}
+              onClearFilter={handleClearFilter}
+              className="flex sm:flex-row flex-wrap sm:items-center"
+              triggerButtonClassName="self-start sm:self-center"
+              clearAllButtonClassName="self-start"
+              facilityId={facilityId}
+            />
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row">
-          <MultiFilter
-            selectedFilters={selectedFilters}
-            onFilterChange={handleFilterChange}
-            onOperationChange={handleOperationChange}
-            onClearAll={handleClearAll}
-            onClearFilter={handleClearFilter}
-            className="flex sm:flex-row flex-wrap sm:items-center"
-            triggerButtonClassName="self-start sm:self-center"
-            clearAllButtonClassName="self-start"
-            facilityId={facilityId}
-          />
+        <div className="w-full sm:w-fit">
+          <Select
+            value={qParams.ordering || ""}
+            onValueChange={(value) => {
+              updateQuery({ ordering: value });
+            }}
+          >
+            <SelectTrigger className="border-gray-400 text-gray-950 rounded-sm">
+              <SelectValue placeholder={t("sort_by")} />
+            </SelectTrigger>
+            <SelectContent align="end">
+              {Object.entries(SORT_OPTIONS).map(([value, text]) => (
+                <SelectItem key={text} value={value}>
+                  {t(text)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
       {isLoading ? (

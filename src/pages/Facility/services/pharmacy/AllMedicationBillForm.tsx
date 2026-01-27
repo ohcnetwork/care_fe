@@ -71,8 +71,8 @@ import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { SubstitutionSheet } from "@/components/Medication/SubstitutionSheet";
 import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
+import { MedicationTimingSelect } from "@/components/Medicine/MedicationTimingSelect";
 import { formatDoseRange, formatTotalUnits } from "@/components/Medicine/utils";
-import { reverseFrequencyOption } from "@/components/Questionnaire/QuestionTypes/MedicationRequestQuestion";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useFilters from "@/hooks/useFilters";
@@ -119,7 +119,6 @@ import {
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import {
   DoseRange,
-  MEDICATION_REQUEST_TIMING_OPTIONS,
   MedicationRequestDispenseStatus,
   MedicationRequestDosageInstruction,
   MedicationRequestRead,
@@ -431,48 +430,16 @@ const AddMedicationSheet = ({
                           {t("frequency")}
                           <span className="text-red-500 ml-0.5">*</span>
                         </Label>
-                        <Select
-                          value={
-                            localDosageInstruction?.as_needed_boolean
-                              ? "PRN"
-                              : reverseFrequencyOption(
-                                  localDosageInstruction?.timing,
-                                )
-                          }
-                          onValueChange={(value) => {
-                            if (value === "PRN") {
-                              handleUpdateDosageInstruction({
-                                as_needed_boolean: true,
-                                timing: undefined,
-                              });
-                            } else {
-                              const timingOption =
-                                MEDICATION_REQUEST_TIMING_OPTIONS[
-                                  value as keyof typeof MEDICATION_REQUEST_TIMING_OPTIONS
-                                ];
-                              handleUpdateDosageInstruction({
-                                as_needed_boolean: false,
-                                timing: timingOption.timing,
-                              });
-                            }
+                        <MedicationTimingSelect
+                          timing={localDosageInstruction?.timing}
+                          asNeeded={localDosageInstruction?.as_needed_boolean}
+                          onTimingChange={(timing, asNeeded) => {
+                            handleUpdateDosageInstruction({
+                              as_needed_boolean: asNeeded,
+                              timing,
+                            });
                           }}
-                        >
-                          <SelectTrigger className={cn("h-9 text-sm")}>
-                            <SelectValue placeholder={t("select_frequency")} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="PRN">
-                              {t("as_needed_prn")}
-                            </SelectItem>
-                            {Object.entries(
-                              MEDICATION_REQUEST_TIMING_OPTIONS,
-                            ).map(([key, option]) => (
-                              <SelectItem key={key} value={key}>
-                                {option.display}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        />
                       </div>
                     </div>
 
@@ -1810,7 +1777,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
                                           </div>
                                         ) : (
                                           <div
-                                            className="text-sm text-gray-500 cursor-pointer hover:text-gray-900"
+                                            className="text-sm text-gray-500 cursor-pointer hover:text-gray-900 underline"
                                             onClick={() => {
                                               setSelectedProduct(
                                                 productKnowledge,

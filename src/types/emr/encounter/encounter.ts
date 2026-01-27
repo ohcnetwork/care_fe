@@ -41,6 +41,9 @@ export const ENCOUNTER_ADMIT_SOURCE = [
   "other",
 ] as const;
 
+/**
+ * Do not use this constant directly. Use `careConfig.encounterClasses` instead.
+ */
 export const ENCOUNTER_CLASS = [
   "imp",
   "amb",
