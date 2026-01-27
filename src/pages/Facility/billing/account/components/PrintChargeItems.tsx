@@ -37,7 +37,7 @@ import {
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
-import { add, round } from "@/Utils/decimal";
+import { add, multiply, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 
@@ -79,12 +79,18 @@ export const PrintChargeItems = (props: {
   const [summaryMode, setSummaryMode] = useState(false);
   const [hideHeader, setHideHeader] = useState(false);
   const [preserveHeaderSpace, setPreserveHeaderSpace] = useState(true);
+  const [sortByName, setSortByName] = useState(false);
+  const [showCreatedBy, setShowCreatedBy] = useState(false);
+  const [groupByParentCategory, setGroupByParentCategory] = useState(false);
 
   const hideCategoryLabel = `${t("hide_category_grouping")}`;
   const hidePaymentTypeLabel = `${t("hide_payment_type_grouping")}`;
   const summaryLabel = `${t("summary")}`;
   const hideHeaderLabel = `${t("hide_header")}`;
   const preserveHeaderSpaceLabel = `${t("preserve_header_space")}`;
+  const sortByNameLabel = `${t("sort_by_name")}`;
+  const showCreatedByLabel = `${t("show_created_by")}`;
+  const groupByParentCategoryLabel = `${t("group_by_parent_category")}`;
 
   const { data: account } = useQuery({
     queryKey: ["account", accountId],
@@ -190,6 +196,22 @@ export const PrintChargeItems = (props: {
               </label>
             </div>
 
+            {!hideCategories && (
+              <div className="gap-2 flex items-center">
+                <Switch
+                  id="group-by-parent-category"
+                  checked={groupByParentCategory}
+                  onCheckedChange={setGroupByParentCategory}
+                />
+                <label
+                  htmlFor="group-by-parent-category"
+                  className="cursor-pointer text-sm"
+                >
+                  {groupByParentCategoryLabel}
+                </label>
+              </div>
+            )}
+
             {payments.length > 0 && (
               <div className="gap-2 flex items-center">
                 <Switch
@@ -205,6 +227,31 @@ export const PrintChargeItems = (props: {
                 </label>
               </div>
             )}
+
+            <div className="gap-2 flex items-center">
+              <Switch
+                id="sort-by-name"
+                checked={sortByName}
+                onCheckedChange={setSortByName}
+              />
+              <label htmlFor="sort-by-name" className="cursor-pointer text-sm">
+                {sortByNameLabel}
+              </label>
+            </div>
+
+            <div className="gap-2 flex items-center">
+              <Switch
+                id="show-created-by"
+                checked={showCreatedBy}
+                onCheckedChange={setShowCreatedBy}
+              />
+              <label
+                htmlFor="show-created-by"
+                className="cursor-pointer text-sm"
+              >
+                {showCreatedByLabel}
+              </label>
+            </div>
           </>
         )}
       </div>
@@ -271,6 +318,15 @@ export const PrintChargeItems = (props: {
                         value={account?.patient?.address}
                         width="w-16"
                       />
+                      {account?.primary_encounter?.current_location && (
+                        <DetailRow
+                          label={`${t("location")}`}
+                          value={
+                            account?.primary_encounter?.current_location?.name
+                          }
+                          width="w-16"
+                        />
+                      )}
                     </div>
                     <div className="space-y-1">
                       <DetailRow
@@ -299,6 +355,32 @@ export const PrintChargeItems = (props: {
                         }
                         width="w-24"
                       />
+                      {account?.primary_encounter && (
+                        <>
+                          <DetailRow
+                            label={t("start_date")}
+                            value={
+                              account?.primary_encounter &&
+                              account?.primary_encounter.period.start &&
+                              new Date(
+                                account?.primary_encounter.period.start,
+                              ).toLocaleDateString("en-IN")
+                            }
+                            width="w-24"
+                          />
+                          <DetailRow
+                            label={t("end_date")}
+                            value={
+                              account?.primary_encounter &&
+                              account?.primary_encounter.period.end &&
+                              new Date(
+                                account?.primary_encounter.period.end,
+                              ).toLocaleDateString("en-IN")
+                            }
+                            width="w-24"
+                          />
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -328,7 +410,15 @@ export const PrintChargeItems = (props: {
                                   <TableHead className="font-bold w-24">
                                     {t("title")}
                                   </TableHead>
-                                  <TableHead className="font-bold text-right w-10">
+                                  <TableHead className="font-bold text-center w-8">
+                                    {t("status")}
+                                  </TableHead>
+                                  {showCreatedBy && (
+                                    <TableHead className="font-bold w-16">
+                                      {t("created_by")}
+                                    </TableHead>
+                                  )}
+                                  <TableHead className="font-bold w-10">
                                     {t("rate")}
                                   </TableHead>
                                   <TableHead className="font-bold text-right w-10">
@@ -350,14 +440,22 @@ export const PrintChargeItems = (props: {
                                   ChargeItemStatus.entered_in_error,
                               );
 
+                              // In summary mode, default to grouping by parent category
+                              const useParentCategory =
+                                groupByParentCategory || summaryMode;
+
                               const groups = validItems.reduce(
                                 (
                                   acc: Record<string, ChargeItemRead[]>,
                                   item: ChargeItemRead,
                                 ) => {
-                                  const categoryTitle =
-                                    item.charge_item_definition?.category
-                                      ?.title || t("uncategorized");
+                                  const category =
+                                    item.charge_item_definition?.category;
+                                  const categoryTitle = useParentCategory
+                                    ? category?.parent?.title ||
+                                      category?.title ||
+                                      t("uncategorized")
+                                    : category?.title || t("uncategorized");
                                   const list = acc[categoryTitle] ?? [];
                                   list.push(item);
                                   acc[categoryTitle] = list;
@@ -373,8 +471,13 @@ export const PrintChargeItems = (props: {
                               const rows: React.ReactNode[] = [];
 
                               sortedCategories.forEach((categoryTitle) => {
-                                const items: ChargeItemRead[] =
+                                const baseItems: ChargeItemRead[] =
                                   groups[categoryTitle] ?? [];
+                                const items = sortByName
+                                  ? baseItems.sort((a, b) =>
+                                      a.title.localeCompare(b.title),
+                                    )
+                                  : baseItems;
 
                                 const categoryTotal = add(
                                   ...items.map((i) => i.total_price || 0),
@@ -410,7 +513,7 @@ export const PrintChargeItems = (props: {
                                         className="font-bold hover:bg-transparent"
                                       >
                                         <TableCell
-                                          colSpan={5}
+                                          colSpan={showCreatedBy ? 6 : 5}
                                           className="capitalize"
                                         >
                                           {categoryTitle}
@@ -454,6 +557,19 @@ export const PrintChargeItems = (props: {
                                               </span>
                                             </div>
                                           </TableCell>
+                                          <TableCell className="text-center w-8">
+                                            <span className="text-xs">
+                                              {t(chargeItem.status)}
+                                            </span>
+                                          </TableCell>
+                                          {showCreatedBy && (
+                                            <TableCell className="w-16">
+                                              {
+                                                chargeItem.created_by
+                                                  ?.first_name
+                                              }
+                                            </TableCell>
+                                          )}
                                           <TableCell className="text-right w-10">
                                             <MonetaryDisplay
                                               amount={unitPrice}
@@ -481,7 +597,7 @@ export const PrintChargeItems = (props: {
                                   className="bg-muted/30 font-semibold"
                                 >
                                   <TableCell
-                                    colSpan={5}
+                                    colSpan={showCreatedBy ? 6 : 5}
                                     className="text-right pr-2"
                                   >
                                     {t("net_total")}
@@ -653,7 +769,10 @@ export const PrintChargeItems = (props: {
                                           </TableCell>
                                           <TableCell className="text-right">
                                             <MonetaryDisplay
-                                              amount={payment.amount}
+                                              amount={multiply(
+                                                payment.amount,
+                                                payment.is_credit_note ? -1 : 1,
+                                              )}
                                             />
                                           </TableCell>
                                         </TableRow>,

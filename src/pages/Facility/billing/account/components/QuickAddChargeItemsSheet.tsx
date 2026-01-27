@@ -44,7 +44,10 @@ import {
 } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
-import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
+import {
+  ChargeItemDefinitionRead,
+  ChargeItemDefinitionStatus,
+} from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
@@ -217,7 +220,7 @@ export default function QuickAddChargeItemsSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-lg flex flex-col p-0 gap-0">
+      <SheetContent className="w-full sm:max-w-lg flex flex-col p-0 gap-0 overflow-y-auto">
         <SheetHeader className="px-6 py-4 border-b">
           <SheetTitle>{t("quick_add")}</SheetTitle>
           <SheetDescription>
@@ -473,7 +476,7 @@ function PackageCard({
     queryFn: query(chargeItemDefinitionApi.listChargeItemDefinition, {
       pathParams: { facilityId },
       queryParams: {
-        status: "active",
+        status: ChargeItemDefinitionStatus.active,
         tags: tag.id,
         limit: 100,
       },

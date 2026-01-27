@@ -8,10 +8,10 @@ import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
 import { Permissions, getPermissions } from "@/common/Permissions";
 
-import query from "@/Utils/request/query";
 import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { usePermissions } from "@/context/PermissionContext";
 import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounterAsCompletedDialog";
+import { useEndEncounter } from "@/pages/Encounters/utils/utils";
 import {
   EncounterRead,
   inactiveEncounterStatus,
@@ -19,6 +19,7 @@ import {
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
+import query from "@/Utils/request/query";
 
 type EncounterContextType = {
   facilityId?: string;
@@ -45,8 +46,11 @@ type EncounterContextType = {
   canWriteSelectedEncounter: boolean;
   canWriteClinicalData: boolean;
 
+  isEndEncounterPending: boolean;
+
   actions: {
     markAsCompleted: () => void;
+    endEncounter: (encounter: EncounterRead, closeEncounter: boolean) => void;
     assignLocation: () => void;
     viewLocationHistory: () => void;
     manageCareTeam: () => void;
@@ -58,6 +62,7 @@ type EncounterContextType = {
 
 enum EncounterAction {
   MarkAsCompleted,
+  ConfirmMarkAsCompleted,
   AssignLocation,
   LocationHistory,
   ManageCareTeam,
@@ -172,6 +177,8 @@ export function EncounterProvider({
     null,
   );
 
+  const { endEncounter, isPending: isEndEncounterPending } = useEndEncounter();
+
   return (
     <encounterContext.Provider
       value={{
@@ -195,10 +202,12 @@ export function EncounterProvider({
         canWritePrimaryEncounter,
         canReadClinicalData,
         canWriteClinicalData,
+        isEndEncounterPending,
         actions: {
           markAsCompleted: () => {
             setActiveAction(EncounterAction.MarkAsCompleted);
           },
+          endEncounter,
           assignLocation: () => {
             setActiveAction(EncounterAction.AssignLocation);
           },

@@ -1,4 +1,3 @@
-/* eslint-disable i18next/no-literal-string */
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -105,6 +104,8 @@ export function TemplateSelector({
             </CommandGroup>
           </CommandList>
         </Command>
+        {/* Keyboard shortcuts - not translatable text */}
+        {/* eslint-disable i18next/no-literal-string */}
         <div className="flex items-center justify-between border-t px-3 py-2 text-xs text-gray-500 mt-2">
           <div className="flex items-center gap-1">
             <kbd className="rounded border bg-gray-100 px-1">↑</kbd>
@@ -121,6 +122,7 @@ export function TemplateSelector({
             <span>{t("insert")}</span>
           </div>
         </div>
+        {/* eslint-enable i18next/no-literal-string */}
       </PopoverContent>
     </Popover>
   );

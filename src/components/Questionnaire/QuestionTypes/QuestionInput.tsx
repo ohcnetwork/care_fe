@@ -166,6 +166,8 @@ interface QuestionInputProps {
   facilityId?: string;
   patientId: string;
   isSubQuestion?: boolean;
+  questionnaireId?: string;
+  questionnaireSlug?: string;
 }
 
 export function QuestionInput({
@@ -179,6 +181,8 @@ export function QuestionInput({
   facilityId,
   patientId,
   isSubQuestion,
+  questionnaireId,
+  questionnaireSlug,
 }: QuestionInputProps) {
   const { t } = useTranslation();
   const questionnaireResponse = questionnaireResponses.find(
@@ -258,6 +262,8 @@ export function QuestionInput({
                 <MedicationRequestQuestion
                   {...commonProps}
                   encounterId={encounterId}
+                  questionnaireId={questionnaireId}
+                  questionnaireSlug={questionnaireSlug}
                 />
               );
             }
@@ -285,6 +291,7 @@ export function QuestionInput({
                   {...commonProps}
                   facilityId={facilityId}
                   encounterId={encounterId}
+                  questionnaireSlug={questionnaireSlug}
                 />
               );
             }

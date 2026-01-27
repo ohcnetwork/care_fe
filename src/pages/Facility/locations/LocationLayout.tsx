@@ -19,6 +19,7 @@ import { RequestOrderShow } from "@/pages/Facility/services/inventory/externalSu
 import DeliveryOrderForm from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderForm";
 import { DeliveryOrderList } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderList";
 import { DeliveryOrderShow } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderShow";
+import { PrintDeliveryOrder } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/PrintDeliveryOrder";
 import { ToDispatch } from "@/pages/Facility/services/inventory/ToDispatch";
 import { ToReceive } from "@/pages/Facility/services/inventory/ToReceive";
 import AllMedicationBillForm from "@/pages/Facility/services/pharmacy/AllMedicationBillForm";
@@ -201,6 +202,19 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       internal={true}
     />
   ),
+  // Print Delivery
+  "/inventory/internal/:type/deliveries/:id/print": ({
+    id,
+  }: {
+    id: string;
+  }) => (
+    <PrintDeliveryOrder
+      facilityId={facilityId}
+      locationId={locationId}
+      deliveryOrderId={id}
+      internal={true}
+    />
+  ),
   // Edit Delivery
   "/inventory/internal/:type/deliveries/:id/edit": ({ id }: { id: string }) => (
     <DeliveryOrderForm
@@ -297,6 +311,15 @@ const getRoutes = (facilityId: string, locationId: string) => ({
   // View External Delivery
   "/inventory/external/deliveries/:tab/:id": ({ id }: { id: string }) => (
     <DeliveryOrderShow
+      facilityId={facilityId}
+      locationId={locationId}
+      deliveryOrderId={id}
+      internal={false}
+    />
+  ),
+  // Print External Delivery
+  "/inventory/external/deliveries/:tab/:id/print": ({ id }: { id: string }) => (
+    <PrintDeliveryOrder
       facilityId={facilityId}
       locationId={locationId}
       deliveryOrderId={id}

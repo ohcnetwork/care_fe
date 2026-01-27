@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-import { AccountSheetButton } from "@/components/Patient/AccountSheet";
+import { AccountSheetButton } from "@/components/Patient/AccountSheetButton";
 
 import query from "@/Utils/request/query";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";

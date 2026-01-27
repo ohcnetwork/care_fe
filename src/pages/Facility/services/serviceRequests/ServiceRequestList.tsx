@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Hash, ScanQrCode } from "lucide-react";
 import { navigate } from "raviger";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -23,7 +23,10 @@ import useFilters from "@/hooks/useFilters";
 
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
+import { ActivityDefinitionFilterValue } from "@/components/ui/multi-filter/activityDefinitionFilter";
 import {
+  activityDefinitionFilter,
+  dateFilter,
   encounterClassFilter,
   tagFilter,
 } from "@/components/ui/multi-filter/filterConfigs";
@@ -31,9 +34,12 @@ import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import {
   createFilterConfig,
+  FilterDateRange,
   getVariantColorClasses,
+  longDateRangeOptions,
 } from "@/components/ui/multi-filter/utils/Utils";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import {
   Priority,
   SERVICE_REQUEST_PRIORITY_COLORS,
@@ -47,6 +53,7 @@ import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import locationApi from "@/types/location/locationApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
+import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
 
 function EmptyState() {
   const { t } = useTranslation();
@@ -203,6 +210,38 @@ export default function ServiceRequestList({
     .map((query) => query.data)
     .filter(Boolean) as TagConfig[];
 
+  const [selectedActivityDefinition, setSelectedActivityDefinition] = useState<
+    ActivityDefinitionFilterValue | undefined
+  >(undefined);
+
+  const { data: activityDefinitionData } = useQuery({
+    queryKey: ["activityDefinition", facilityId, qParams.activity_definition],
+    queryFn: query(activityDefinitionApi.retrieveActivityDefinition, {
+      pathParams: {
+        facilityId,
+        activityDefinitionSlug: qParams.activity_definition,
+      },
+    }),
+    enabled: !!qParams.activity_definition && !selectedActivityDefinition,
+  });
+
+  useEffect(() => {
+    if (activityDefinitionData && !selectedActivityDefinition) {
+      setSelectedActivityDefinition({
+        id: activityDefinitionData.id,
+        slug: activityDefinitionData.slug,
+        title: activityDefinitionData.title,
+        category: activityDefinitionData.category,
+      });
+    } else if (!qParams.activity_definition && selectedActivityDefinition) {
+      setSelectedActivityDefinition(undefined);
+    }
+  }, [
+    activityDefinitionData,
+    qParams.activity_definition,
+    selectedActivityDefinition,
+  ]);
+
   // Create filter configurations
   const filters = useMemo(
     () => [
@@ -218,20 +257,52 @@ export default function ServiceRequestList({
         })),
       ),
       encounterClassFilter(),
+      activityDefinitionFilter(
+        "activity_definition",
+        "single",
+        "activity_definition",
+      ),
+      dateFilter("created_date", t("date"), longDateRangeOptions),
     ],
     [],
   );
 
   // Handle filter updates
-  const onFilterUpdate = (query: Record<string, unknown>) => {
-    for (const [key, value] of Object.entries(query)) {
+  const onFilterUpdate = (updates: Record<string, unknown>) => {
+    for (const [key, value] of Object.entries(updates)) {
       switch (key) {
         case "tags":
-          query.tags = (value as TagConfig[])?.map((tag) => tag.id);
+          updates.tags = (value as TagConfig[])?.map((tag) => tag.id);
+          break;
+        case "activity_definition": {
+          const adValue = Array.isArray(value)
+            ? (value as ActivityDefinitionFilterValue[])[0]
+            : (value as ActivityDefinitionFilterValue | undefined);
+
+          setSelectedActivityDefinition(adValue);
+
+          if (adValue) {
+            updates.activity_definition = adValue.slug;
+          } else {
+            updates.activity_definition = undefined;
+          }
+          break;
+        }
+        case "created_date":
+          {
+            const dateRange = value as FilterDateRange;
+            updates.created_date = undefined;
+            updates.created_date_after = dateRange?.from
+              ? dateQueryString(dateRange.from)
+              : undefined;
+            updates.created_date_before = dateRange?.to
+              ? dateQueryString(dateRange.to)
+              : undefined;
+          }
           break;
       }
     }
-    updateQuery(query);
+    updateQuery(updates);
   };
 
   // Use the multi-filter state hook
@@ -244,6 +315,20 @@ export default function ServiceRequestList({
   } = useMultiFilterState(filters, onFilterUpdate, {
     ...qParams,
     tags: selectedTags,
+    activity_definition: selectedActivityDefinition
+      ? [selectedActivityDefinition]
+      : [],
+    created_date:
+      qParams.created_date_after || qParams.created_date_before
+        ? {
+            from: qParams.created_date_after
+              ? new Date(qParams.created_date_after)
+              : undefined,
+            to: qParams.created_date_before
+              ? new Date(qParams.created_date_before)
+              : undefined,
+          }
+        : undefined,
   });
 
   const { data: location } = useQuery({
@@ -268,6 +353,13 @@ export default function ServiceRequestList({
         patient: qParams.patient,
         tags_behavior: qParams.tags_behavior,
         encounter_class: qParams.encounter_class,
+        activity_definition: qParams.activity_definition,
+        created_date_after: qParams.created_date_after
+          ? dateTimeQueryString(new Date(qParams.created_date_after))
+          : undefined,
+        created_date_before: qParams.created_date_before
+          ? dateTimeQueryString(new Date(qParams.created_date_before))
+          : undefined,
       },
     }),
   });

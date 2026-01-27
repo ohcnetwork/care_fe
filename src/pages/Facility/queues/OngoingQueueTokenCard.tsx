@@ -90,20 +90,7 @@ export function OngoingQueueTokenCard({
             {token ? (
               <Link
                 basePath="/"
-                href={
-                  token.patient
-                    ? `/facility/${facilityId}/patients/verify?${new URLSearchParams(
-                        {
-                          phone_number: token.patient.phone_number,
-                          year_of_birth:
-                            token.patient.year_of_birth?.toString() ?? "",
-                          partial_id: token.patient.id.slice(0, 5),
-                          queue_id: token.queue.id,
-                          token_id: token.id,
-                        },
-                      ).toString()}`
-                    : "#"
-                }
+                href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
                 className="font-semibold hover:underline transition-colors"
               >
                 <span className="font-semibold flex items-center gap-1">
@@ -120,10 +107,20 @@ export function OngoingQueueTokenCard({
           </div>
           <div className="flex items-center gap-3">
             {token ? (
-              <div className="flex gap-2 items-center justify-center p-2 bg-gray-100 border border-gray-200 rounded-lg">
-                <span className="text-lg font-bold text-black">
-                  {renderTokenNumber(token)}
-                </span>
+              <div className="flex gap-3 justify-center items-center">
+                <Button variant="outline" asChild>
+                  <Link
+                    basePath="/"
+                    href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
+                  >
+                    {t("encounter")}
+                  </Link>
+                </Button>
+                <div className="flex gap-2 items-center justify-center p-2 bg-gray-100 border border-gray-200 rounded-lg">
+                  <span className="text-lg font-bold text-black">
+                    {renderTokenNumber(token)}
+                  </span>
+                </div>
               </div>
             ) : (
               <Skeleton className="h-12 w-20" />

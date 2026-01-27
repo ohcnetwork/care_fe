@@ -39,7 +39,7 @@ export default function VerifyPatient() {
   const [qParams] = useQueryParams();
   const queryClient = useQueryClient();
 
-  const { phone_number, year_of_birth, partial_id } = qParams;
+  const { phone_number, year_of_birth, partial_id, from_queue } = qParams;
   const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
   const { hasPermission } = usePermissions();
@@ -119,6 +119,7 @@ export default function VerifyPatient() {
                     patientId={patientData.id}
                     facilityId={facilityId}
                     patientName={patientData.name}
+                    defaultOpen={from_queue === "true"}
                     trigger={
                       <QuickAction
                         icon={<SquareActivity className="text-orange-500" />}
