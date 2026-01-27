@@ -7,8 +7,12 @@ import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
+import { getPermissions } from "@/common/Permissions";
+import { usePermissions } from "@/context/PermissionContext";
+
 import Loading from "@/components/Common/Loading";
 import PrintFooter from "@/components/Common/PrintFooter";
+import { Button } from "@/components/ui/button";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   Select,
@@ -26,6 +30,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+import useAppHistory from "@/hooks/useAppHistory";
 
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconciliation/paymentReconciliation";
@@ -81,6 +87,12 @@ export const PrintChargeItems = (props: {
   const { facilityId, accountId } = props;
   const { facility } = useCurrentFacility();
   const { t } = useTranslation();
+  const { goBack } = useAppHistory();
+  const { hasPermission } = usePermissions();
+  const { canManageLockedInvoice } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
+  );
   const [hideCategories, setHideCategories] = useState(false);
   const [hidePaymentTypeGrouping, setHidePaymentTypeGrouping] = useState(false);
   const [summaryMode, setSummaryMode] = useState(false);
@@ -145,6 +157,23 @@ export const PrintChargeItems = (props: {
     return (
       <div className="flex h-[200px] items-center justify-center  border-2 border-dashed p-4 text-gray-500 border-gray-200">
         {t("no_charge_items_found_for_this_account")}
+      </div>
+    );
+  }
+
+  const hasLockedInvoice = chargeItems.results.some(
+    (item) => item.paid_invoice?.locked,
+  );
+
+  if (hasLockedInvoice && !canManageLockedInvoice) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[200px] gap-4">
+        <p className="text-gray-500">
+          {t("no_permission_to_print_charge_items")}
+        </p>
+        <Button variant="outline" onClick={() => goBack()}>
+          {t("go_back")}
+        </Button>
       </div>
     );
   }
