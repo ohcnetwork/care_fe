@@ -63,8 +63,7 @@ export default function AddChargeItemSheet({
   );
   const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = React.useState(false);
   const queryClient = useQueryClient();
-  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
-    limit: 15,
+  const { qParams, updateQuery } = useFilters({
     disableCache: true,
   });
   useShortcutSubContext("facility:billing:invoice");
@@ -80,7 +79,7 @@ export default function AddChargeItemSheet({
 
   const handleChargeItemsAdded = () => {
     queryClient.invalidateQueries({
-      queryKey: ["charge-items", qParams],
+      queryKey: ["charge-items", accountId],
     });
   };
 
@@ -91,14 +90,11 @@ export default function AddChargeItemSheet({
   };
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["charge-items", qParams],
-    queryFn: query.debounced(chargeItemApi.listChargeItem, {
+    queryKey: ["charge-items", accountId],
+    queryFn: query.paginated(chargeItemApi.listChargeItem, {
       pathParams: { facilityId },
       queryParams: {
-        limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         account: accountId,
-        title: qParams.search,
         status: "billable",
       },
     }),
@@ -121,41 +117,31 @@ export default function AddChargeItemSheet({
     },
   });
 
-  const items = React.useMemo(
-    () => (response?.results as ChargeItemRead[]) || [],
-    [response?.results],
-  );
+  const items = React.useMemo(() => {
+    const allItems = (response?.results as ChargeItemRead[]) || [];
+    if (!qParams.search) return allItems;
+    const searchLower = qParams.search.toLowerCase();
+    return allItems.filter((item) =>
+      item.title?.toLowerCase().includes(searchLower),
+    );
+  }, [response?.results, qParams.search]);
 
   // select all by default
   useEffect(() => {
-    if (items.length > 0) {
-      setSelectedItems(new Set(items.map((item) => item.id)));
+    const allItems = (response?.results as ChargeItemRead[]) || [];
+    if (allItems.length > 0) {
+      setSelectedItems(new Set(allItems.map((item) => item.id)));
     }
-  }, [items]);
+  }, [response?.results]);
 
-  const handleSelectAll = async (checked: boolean) => {
+  const handleSelectAll = (checked: boolean) => {
+    const newSelected = new Set(selectedItems);
     if (checked) {
-      const totalCount = response?.count || 0;
-      if (totalCount > 0) {
-        const result = await queryClient.fetchQuery({
-          queryKey: ["charge-items-all", accountId, qParams.search],
-          queryFn: query(chargeItemApi.listChargeItem, {
-            pathParams: { facilityId },
-            queryParams: {
-              limit: totalCount,
-              account: accountId,
-              status: "billable",
-            },
-          }),
-        });
-        if (result?.results) {
-          const allIds = result.results.map((item: ChargeItemRead) => item.id);
-          setSelectedItems(new Set(allIds));
-        }
-      }
+      items.forEach((item) => newSelected.add(item.id));
     } else {
-      setSelectedItems(new Set());
+      items.forEach((item) => newSelected.delete(item.id));
     }
+    setSelectedItems(newSelected);
   };
 
   const handleSelectItem = (id: string, checked: boolean) => {
@@ -219,8 +205,8 @@ export default function AddChargeItemSheet({
                       <TableHead className="w-12">
                         <Checkbox
                           checked={
-                            (response?.count ?? 0) > 0 &&
-                            selectedItems.size === response?.count
+                            items.length > 0 &&
+                            items.every((item) => selectedItems.has(item.id))
                           }
                           onCheckedChange={handleSelectAll}
                           className="align-middle"
@@ -228,14 +214,16 @@ export default function AddChargeItemSheet({
                       </TableHead>
                       <TableHead>
                         {t("item")}
-                        {response?.count &&
-                          response.count > resultsPerPage &&
-                          selectedItems.size > 0 && (
-                            <span className="ml-2 text-xs text-muted-foreground">
-                              ({selectedItems.size}/{response.count}{" "}
-                              {t("selected")})
-                            </span>
-                          )}
+                        {items.length > 0 && (
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            (
+                            {
+                              items.filter((item) => selectedItems.has(item.id))
+                                .length
+                            }
+                            /{items.length} {t("selected")})
+                          </span>
+                        )}
                       </TableHead>
                       <TableHead>{t("quantity")}</TableHead>
                       <TableHead>{t("unit_price")}</TableHead>
@@ -282,8 +270,6 @@ export default function AddChargeItemSheet({
                 </Table>
               </div>
             )}
-
-            <Pagination totalCount={response?.count || 0} />
           </div>
         </div>
         <SheetFooter className="bg-white p-3 gap-2">
