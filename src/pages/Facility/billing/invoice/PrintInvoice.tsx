@@ -293,7 +293,10 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                             {index + 1}
                           </TableCell>
                           <TableCell
-                            className={cn(tableCellClass, "font-medium")}
+                            className={cn(
+                              tableCellClass,
+                              "font-medium whitespace-pre-wrap",
+                            )}
                           >
                             <InvoiceChargeItemTitle
                               item={item}
