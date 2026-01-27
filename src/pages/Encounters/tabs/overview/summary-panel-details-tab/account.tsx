@@ -12,11 +12,7 @@ import { AccountSheetButton } from "@/components/Patient/AccountSheetButton";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import {
-  ACCOUNT_BILLING_STATUS_COLORS,
-  AccountBillingStatus,
-  AccountStatus,
-} from "@/types/billing/account/Account";
+import { ACCOUNT_BILLING_STATUS_COLORS } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
 
 import { cn } from "@/lib/utils";
@@ -33,29 +29,20 @@ export const Account = () => {
   } = useEncounter();
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["accounts", patientId],
-    queryFn: query(accountApi.listAccount, {
+    queryKey: ["defaultAccount", facilityId, patientId],
+    queryFn: query(accountApi.defaultAccount, {
       pathParams: { facilityId: facilityId || "" },
-      queryParams: {
-        patient: patientId,
-        status: AccountStatus.active,
-        billing_status: AccountBillingStatus.open,
-        limit: 1,
+      body: {
+        patient: patientId || "",
+        facility: facilityId || "",
+        encounter: encounter?.id || "",
       },
     }),
-
-    enabled: !!facilityId,
+    enabled: !!facilityId && !!patientId && !!encounter?.id,
   });
 
-  const accountId = response?.results[0]?.id;
-
-  const { data: accountDetails, isLoading: isLoadingDetails } = useQuery({
-    queryKey: ["account", accountId],
-    queryFn: query(accountApi.retrieveAccount, {
-      pathParams: { facilityId: facilityId || "", accountId: accountId || "" },
-    }),
-    enabled: !!facilityId && !!accountId,
-  });
+  const account = response;
+  const accountId = account?.id;
 
   const { mutate: setPrimaryEncounter, isPending } = useMutation({
     mutationFn: mutate(accountApi.updateAccount, {
@@ -65,21 +52,18 @@ export const Account = () => {
       },
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["accounts"] });
-      queryClient.invalidateQueries({ queryKey: ["account", accountId] });
+      queryClient.invalidateQueries({ queryKey: ["defaultAccount"] });
       toast.success(t("encounter_set_as_primary_success"));
     },
   });
 
   if (!encounter) return <CardListSkeleton count={3} />;
 
-  if (isLoading || isLoadingDetails) {
+  if (isLoading) {
     return <CardListSkeleton count={1} />;
   }
 
   if (facilityId !== encounter.facility.id) return null;
-
-  const account = accountDetails;
 
   const handleSetPrimaryEncounter = () => {
     if (!account) return;
