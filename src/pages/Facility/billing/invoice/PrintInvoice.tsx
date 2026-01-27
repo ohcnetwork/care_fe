@@ -40,7 +40,7 @@ import {
 import { getPartialId } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
-import { add, round } from "@/Utils/decimal";
+import { add, multiply, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 
@@ -569,7 +569,10 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                             </TableCell>
                             <TableCell className="text-right">
                               <MonetaryDisplay
-                                amount={payment.amount}
+                                amount={multiply(
+                                  payment.amount,
+                                  payment.is_credit_note ? -1 : 1,
+                                )}
                                 hideCurrency
                               />
                             </TableCell>

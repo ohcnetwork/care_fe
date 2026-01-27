@@ -81,7 +81,7 @@ import patientApi from "@/types/emr/patient/patientApi";
 import facilityApi from "@/types/facility/facilityApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import dayjs from "@/Utils/dayjs";
-import { add, round } from "@/Utils/decimal";
+import { add, multiply, round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -1163,7 +1163,10 @@ export function InvoiceShow({
                                 </TableCell>
                                 <TableCell className="text-right">
                                   <MonetaryDisplay
-                                    amount={payment.amount}
+                                    amount={multiply(
+                                      payment.amount,
+                                      payment.is_credit_note ? -1 : 1,
+                                    )}
                                     hideCurrency
                                   />
                                 </TableCell>
