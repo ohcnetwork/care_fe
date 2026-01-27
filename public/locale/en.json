@@ -902,6 +902,7 @@
   "bed_count_validation_error": "Number of beds must be greater than 0",
   "bed_created_notification_one": "{{count}} Bed created successfully",
   "bed_created_notification_other": "{{count}} Beds created successfully",
+  "bed_currently_reserved": "Bed is currently reserved for another patient",
   "bed_history": "Bed History",
   "bed_hold": "Bed Hold",
   "bed_layout": "Bed Layout",
