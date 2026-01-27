@@ -170,6 +170,18 @@ export function EncounterCommandDialog({
             icon: <Plus />,
           },
           {
+            id: "add-service-request",
+            label: t("service_request"),
+            shortcut: getShortcutDisplay("add-service-request"),
+            icon: <Plus />,
+          },
+          {
+            id: "add-medication-request",
+            label: t("add_medication"),
+            shortcut: getShortcutDisplay("add-medication-request"),
+            icon: <Plus />,
+          },
+          {
             id: "update-encounter",
             label: t("update_encounter_details"),
             shortcut: getShortcutDisplay("update-encounter"),

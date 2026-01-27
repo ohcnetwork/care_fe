@@ -188,7 +188,7 @@ export interface MedicationDispenseCreate extends Omit<
   authorizing_request: string | null;
   item: string;
   quantity: string;
-  days_supply: string;
+  days_supply?: string;
   fully_dispensed: boolean;
   create_dispense_order: MedicationDispenseOrderCreate;
 }

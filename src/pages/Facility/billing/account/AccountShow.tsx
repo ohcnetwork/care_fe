@@ -346,7 +346,7 @@ export function AccountShow({
                       }
                     >
                       <CareIcon icon="l-plus" className="size-4" />
-                      {t("add_credit")}
+                      {t("add_credit_payment")}
                       <ShortcutBadge actionId="credit-payment-account" />
                     </Button>
                     <DropdownMenu>
@@ -492,7 +492,7 @@ export function AccountShow({
             </div>
             <div>
               <p className="text-sm text-gray-700 font-medium">
-                {t("tags_other")}
+                {t("tags_proper")}
               </p>
               <div className="flex flex-wrap gap-1">
                 <TagAssignmentSheet
@@ -661,6 +661,7 @@ export function AccountShow({
         open={sheetOpen}
         onOpenChange={setSheetOpen}
         facilityId={facilityId}
+        patientId={account.patient.id}
         initialValues={account}
         isEdit
       />

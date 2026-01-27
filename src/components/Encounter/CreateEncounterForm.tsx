@@ -63,6 +63,7 @@ interface Props {
   trigger?: React.ReactNode;
   onSuccess?: () => void;
   disableRedirectOnSuccess?: boolean;
+  defaultOpen?: boolean;
   defaultStatus?:
     | EncounterStatus.PLANNED
     | EncounterStatus.IN_PROGRESS
@@ -77,9 +78,10 @@ export default function CreateEncounterForm({
   trigger,
   onSuccess,
   disableRedirectOnSuccess = false,
+  defaultOpen = false,
   defaultStatus = EncounterStatus.PLANNED,
 }: Props) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(defaultOpen);
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   useShortcutSubContext();

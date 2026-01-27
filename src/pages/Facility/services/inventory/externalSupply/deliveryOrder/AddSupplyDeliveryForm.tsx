@@ -399,6 +399,11 @@ export function AddSupplyDeliveryForm({
               hasErrors = true;
               break;
             }
+            if (!item.charge_item_category) {
+              toast.error(t("category_required_at_row", { row: index + 1 }));
+              hasErrors = true;
+              break;
+            }
           }
           if (item.unit_price === undefined) {
             toast.error(t("unit_price_required_at_row", { row: index + 1 }));
@@ -813,6 +818,7 @@ export function AddSupplyDeliveryForm({
                                   setNewlyAddedRowIndex(null)
                                 }
                                 processedExtensions={processedExtensions}
+                                locationId={destination}
                                 onRemove={() => remove(index)}
                               />
                             ),
