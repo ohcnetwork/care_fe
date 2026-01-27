@@ -10,6 +10,13 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import Loading from "@/components/Common/Loading";
 import PrintFooter from "@/components/Common/PrintFooter";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import {
   Table,
@@ -81,7 +88,9 @@ export const PrintChargeItems = (props: {
   const [preserveHeaderSpace, setPreserveHeaderSpace] = useState(true);
   const [sortByName, setSortByName] = useState(false);
   const [showCreatedBy, setShowCreatedBy] = useState(false);
+  const [showStatus, setShowStatus] = useState(false);
   const [groupByParentCategory, setGroupByParentCategory] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const hideCategoryLabel = `${t("hide_category_grouping")}`;
   const hidePaymentTypeLabel = `${t("hide_payment_type_grouping")}`;
@@ -90,6 +99,7 @@ export const PrintChargeItems = (props: {
   const preserveHeaderSpaceLabel = `${t("preserve_header_space")}`;
   const sortByNameLabel = `${t("sort_by_name")}`;
   const showCreatedByLabel = `${t("show_created_by")}`;
+  const showStatusLabel = `${t("show_status")}`;
   const groupByParentCategoryLabel = `${t("group_by_parent_category")}`;
 
   const { data: account } = useQuery({
@@ -252,8 +262,76 @@ export const PrintChargeItems = (props: {
                 {showCreatedByLabel}
               </label>
             </div>
+
+            <div className="gap-2 flex items-center">
+              <Switch
+                id="show-status"
+                checked={showStatus}
+                onCheckedChange={setShowStatus}
+              />
+              <label htmlFor="show-status" className="cursor-pointer text-sm">
+                {showStatusLabel}
+              </label>
+            </div>
           </>
         )}
+
+        {/* Category Filter */}
+        {chargeItems?.results &&
+          chargeItems.results.length > 0 &&
+          (() => {
+            const useParentCategory = groupByParentCategory || summaryMode;
+            const categories = [
+              ...new Set(
+                chargeItems.results
+                  .filter(
+                    (item) => item.status !== ChargeItemStatus.entered_in_error,
+                  )
+                  .map((item) => {
+                    const category = item.charge_item_definition?.category;
+                    return useParentCategory
+                      ? category?.parent?.title ||
+                          category?.title ||
+                          t("uncategorized")
+                      : category?.title || t("uncategorized");
+                  }),
+              ),
+            ].sort();
+
+            return (
+              <div className="gap-2 flex items-center">
+                <label
+                  htmlFor="category-filter"
+                  className="text-sm whitespace-nowrap"
+                >
+                  {t("filter_by_category")}:
+                </label>
+                <Select
+                  value={selectedCategory ?? "__all__"}
+                  onValueChange={(value) =>
+                    setSelectedCategory(value === "__all__" ? null : value)
+                  }
+                >
+                  <SelectTrigger
+                    id="category-filter"
+                    className="w-48 h-8 text-sm"
+                  >
+                    <SelectValue placeholder={t("all_categories")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">
+                      {t("all_categories")}
+                    </SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            );
+          })()}
       </div>
       <PrintPreview
         title={t("charge_items")}
@@ -410,9 +488,11 @@ export const PrintChargeItems = (props: {
                                   <TableHead className="font-bold w-24">
                                     {t("title")}
                                   </TableHead>
-                                  <TableHead className="font-bold text-center w-8">
-                                    {t("status")}
-                                  </TableHead>
+                                  {showStatus && (
+                                    <TableHead className="font-bold text-center w-8">
+                                      {t("status")}
+                                    </TableHead>
+                                  )}
                                   {showCreatedBy && (
                                     <TableHead className="font-bold w-16">
                                       {t("created_by")}
@@ -434,15 +514,30 @@ export const PrintChargeItems = (props: {
                           <TableBody className="[&_tr]:border-0 [&_td]:p-0.5">
                             {(() => {
                               // Group charge items by category, excluding entered_in_error items
-                              const validItems = chargeItems.results.filter(
-                                (item) =>
-                                  item.status !==
-                                  ChargeItemStatus.entered_in_error,
-                              );
+                              const validItemsBeforeFilter =
+                                chargeItems.results.filter(
+                                  (item) =>
+                                    item.status !==
+                                    ChargeItemStatus.entered_in_error,
+                                );
 
                               // In summary mode, default to grouping by parent category
                               const useParentCategory =
                                 groupByParentCategory || summaryMode;
+
+                              // Apply category filter
+                              const validItems = selectedCategory
+                                ? validItemsBeforeFilter.filter((item) => {
+                                    const category =
+                                      item.charge_item_definition?.category;
+                                    const categoryTitle = useParentCategory
+                                      ? category?.parent?.title ||
+                                        category?.title ||
+                                        t("uncategorized")
+                                      : category?.title || t("uncategorized");
+                                    return categoryTitle === selectedCategory;
+                                  })
+                                : validItemsBeforeFilter;
 
                               const groups = validItems.reduce(
                                 (
@@ -513,7 +608,11 @@ export const PrintChargeItems = (props: {
                                         className="font-bold hover:bg-transparent"
                                       >
                                         <TableCell
-                                          colSpan={showCreatedBy ? 6 : 5}
+                                          colSpan={
+                                            5 +
+                                            (showStatus ? 1 : 0) +
+                                            (showCreatedBy ? 1 : 0)
+                                          }
                                           className="capitalize"
                                         >
                                           {categoryTitle}
@@ -557,11 +656,13 @@ export const PrintChargeItems = (props: {
                                               </span>
                                             </div>
                                           </TableCell>
-                                          <TableCell className="text-center w-8">
-                                            <span className="text-xs">
-                                              {t(chargeItem.status)}
-                                            </span>
-                                          </TableCell>
+                                          {showStatus && (
+                                            <TableCell className="text-center w-8">
+                                              <span className="text-xs">
+                                                {t(chargeItem.status)}
+                                              </span>
+                                            </TableCell>
+                                          )}
                                           {showCreatedBy && (
                                             <TableCell className="w-16">
                                               {
@@ -597,7 +698,11 @@ export const PrintChargeItems = (props: {
                                   className="bg-muted/30 font-semibold"
                                 >
                                   <TableCell
-                                    colSpan={showCreatedBy ? 6 : 5}
+                                    colSpan={
+                                      5 +
+                                      (showStatus ? 1 : 0) +
+                                      (showCreatedBy ? 1 : 0)
+                                    }
                                     className="text-right pr-2"
                                   >
                                     {t("net_total")}
@@ -621,7 +726,7 @@ export const PrintChargeItems = (props: {
                     </div>
                   )}
 
-                  {payments.length > 0 && (
+                  {payments.length > 0 && !selectedCategory && (
                     <div className="mt-4">
                       <hr className="border-gray-300 py-2" />
                       <h2 className="text-sm font-semibold mb-1">
@@ -697,7 +802,12 @@ export const PrintChargeItems = (props: {
                                 const paymentsOfType: PaymentReconciliationRead[] =
                                   paymentGroups[paymentType] ?? [];
                                 const typeTotal = add(
-                                  ...paymentsOfType.map((p) => p.amount || 0),
+                                  ...paymentsOfType.map((p) =>
+                                    multiply(
+                                      p.amount || 0,
+                                      p.is_credit_note ? -1 : 1,
+                                    ),
+                                  ),
                                 );
 
                                 if (summaryMode) {
@@ -801,8 +911,11 @@ export const PrintChargeItems = (props: {
                                   <TableCell className="text-right">
                                     <MonetaryDisplay
                                       amount={add(
-                                        ...validPayments.map(
-                                          (p) => p.amount || 0,
+                                        ...validPayments.map((p) =>
+                                          multiply(
+                                            p.amount || 0,
+                                            p.is_credit_note ? -1 : 1,
+                                          ),
                                         ),
                                       )}
                                     />

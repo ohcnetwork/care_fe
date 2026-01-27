@@ -49,7 +49,7 @@ export const ClinicalHistoryOverview = (props: React.ComponentProps<"div">) => {
             <span className="text-sm font-medium text-gray-600">
               {t("blood_group")}:
             </span>
-            <Badge variant="destructive">
+            <Badge variant="yellow">
               <DropletIcon className="size-4" strokeWidth={1.5} />
               <span>
                 {t(`BLOOD_GROUP_LONG__${patient?.blood_group || "unknown"}`)}
@@ -61,7 +61,7 @@ export const ClinicalHistoryOverview = (props: React.ComponentProps<"div">) => {
               <span className="text-sm font-medium text-gray-600">
                 {t("allergies")}:
               </span>
-              <Badge variant="yellow">
+              <Badge variant="destructive">
                 <div>
                   <AllergyIcon className="size-4" />
                 </div>
