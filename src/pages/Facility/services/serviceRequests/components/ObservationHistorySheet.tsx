@@ -94,15 +94,15 @@ export function ObservationHistorySheet({
                         <p>
                           {observation.effective_datetime
                             ? new Date(
-                                observation.effective_datetime,
-                              ).toLocaleString()
+                              observation.effective_datetime,
+                            ).toLocaleString()
                             : "-"}
                         </p>
                       </div>
                       <div>
                         <p className="text-gray-500">{t("interpretation")}</p>
                         <p className="capitalize">
-                          {observation.interpretation || "-"}
+                          {observation.interpretation?.display || "-"}
                         </p>
                       </div>
                       <div>
@@ -133,9 +133,8 @@ export function ObservationHistorySheet({
                                 </p>
                                 <p>
                                   {comp.value?.value
-                                    ? `${comp.value.value} ${
-                                        comp.value.unit?.code || ""
-                                      }`
+                                    ? `${comp.value.value} ${comp.value.unit?.code || ""
+                                    }`
                                     : "-"}
                                 </p>
                               </div>

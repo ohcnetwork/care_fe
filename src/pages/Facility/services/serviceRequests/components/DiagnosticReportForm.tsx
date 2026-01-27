@@ -72,6 +72,7 @@ import {
 import fileApi from "@/types/files/fileApi";
 
 import { PLUGIN_Component } from "@/PluginEngine";
+import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
 
 interface DiagnosticReportFormProps {
   patientId: string;
@@ -92,7 +93,7 @@ interface DiagnosticReportFormProps {
 interface ComponentValue {
   value: string;
   unit: string;
-  interpretation: string;
+  interpretation?: Interpretation;
 }
 
 // Interface for observation values
@@ -100,7 +101,7 @@ interface ObservationValue {
   id: string;
   value: string;
   unit: string;
-  interpretation: string;
+  interpretation?: Interpretation;
   status: ObservationStatus;
   components: Record<string, ComponentValue>;
 }
@@ -308,7 +309,7 @@ export function DiagnosticReportForm({
                   components[comp.code.code] = {
                     value: comp.value.value || "",
                     unit: comp.value.unit?.code || "",
-                    interpretation: comp.interpretation || "",
+                    interpretation: comp.interpretation,
                   };
                 }
               });
@@ -318,7 +319,7 @@ export function DiagnosticReportForm({
               id: obs.id,
               value: obs.value.value || "",
               unit: obs.value.unit?.code || "",
-              interpretation: obs.interpretation || "",
+              interpretation: obs.interpretation,
               status: obs.status,
               components,
             };
@@ -351,7 +352,6 @@ export function DiagnosticReportForm({
           id: "",
           value: "",
           unit: "",
-          interpretation: "",
           status: ObservationStatus.AMENDED,
           components: {},
         };
@@ -375,7 +375,6 @@ export function DiagnosticReportForm({
           id: "",
           value: "",
           unit: "",
-          interpretation: "",
           status: ObservationStatus.AMENDED,
           components: {},
         };
@@ -405,7 +404,6 @@ export function DiagnosticReportForm({
           id: "",
           value: "",
           unit: "",
-          interpretation: "",
           status: ObservationStatus.AMENDED,
           components: {},
         };
@@ -444,7 +442,6 @@ export function DiagnosticReportForm({
           id: "",
           value: "",
           unit: "",
-          interpretation: "",
           status: ObservationStatus.AMENDED,
           components: {},
         };
@@ -640,7 +637,6 @@ export function DiagnosticReportForm({
                   observationDefinition?.permitted_data_type || "decimal",
                 effective_datetime: new Date().toISOString(),
                 value,
-                interpretation: obsData.interpretation || "",
                 component: components.length > 0 ? components : undefined,
               },
             };
@@ -697,15 +693,14 @@ export function DiagnosticReportForm({
           newList.length > 0
             ? newList
             : [
-                {
-                  id: "",
-                  value: "",
-                  unit: "",
-                  interpretation: "",
-                  status: ObservationStatus.AMENDED,
-                  components: {},
-                },
-              ],
+              {
+                id: "",
+                value: "",
+                unit: "",
+                status: ObservationStatus.AMENDED,
+                components: {},
+              },
+            ],
       };
     });
   }
@@ -796,7 +791,7 @@ export function DiagnosticReportForm({
                     placeholder={t("component_value")}
                     type={
                       component.permitted_data_type === "decimal" ||
-                      component.permitted_data_type === "integer"
+                        component.permitted_data_type === "integer"
                         ? "number"
                         : "text"
                     }
@@ -1033,7 +1028,7 @@ export function DiagnosticReportForm({
                                           type={
                                             definition.permitted_data_type ===
                                               "decimal" ||
-                                            definition.permitted_data_type ===
+                                              definition.permitted_data_type ===
                                               "integer"
                                               ? "number"
                                               : "text"
@@ -1071,7 +1066,6 @@ export function DiagnosticReportForm({
                                         id: "",
                                         value: "",
                                         unit: "",
-                                        interpretation: "",
                                         status: ObservationStatus.AMENDED,
                                         components: {},
                                       },
@@ -1115,17 +1109,17 @@ export function DiagnosticReportForm({
                 <div className="space-y-4">
                   {fullReport?.status ===
                     DiagnosticReportStatus.preliminary && (
-                    <div className="flex justify-end space-x-4">
-                      <Button
-                        variant="primary"
-                        onClick={handleSubmit}
-                        disabled={isSubmitting || disableEdit}
-                      >
-                        <Save className="size-4 mr-2" />
-                        {t("save_results")}
-                      </Button>
-                    </div>
-                  )}
+                      <div className="flex justify-end space-x-4">
+                        <Button
+                          variant="primary"
+                          onClick={handleSubmit}
+                          disabled={isSubmitting || disableEdit}
+                        >
+                          <Save className="size-4 mr-2" />
+                          {t("save_results")}
+                        </Button>
+                      </div>
+                    )}
 
                   {files?.results && files.results.length > 0 && (
                     <div className="mt-6">
@@ -1144,59 +1138,59 @@ export function DiagnosticReportForm({
 
                   {fullReport?.status ===
                     DiagnosticReportStatus.preliminary && (
-                    <Card className="mt-4 bg-gray-50 border-gray-200 shadow-none cursor-auto">
-                      <CardContent className="p-4">
-                        <div className="space-y-4">
-                          <div className="flex flex-col items-center justify-between gap-1">
-                            <CloudUpload className="size-10 border border-gray-100 rounded-md p-2 bg-white" />
-                            <Label className="text-base font-medium">
-                              {t("choose_file")}
-                            </Label>
-                            <div className="text-sm text-gray-500 mb-2">
-                              {t("allowed_formats_are", {
-                                formats:
-                                  BACKEND_ALLOWED_EXTENSIONS.slice(0, 5).join(
-                                    ", ",
-                                  ) +
-                                  ", " +
-                                  t("etc"),
-                              })}
-                            </div>
-                            <Label
-                              htmlFor="file_upload_diagnostic_report"
-                              className="inline-flex items-center px-4 py-2 cursor-pointer border rounded-md hover:bg-accent hover:text-accent-foreground border-gray-300 shadow-sm"
-                            >
-                              <Upload className="mr-2 size-4" />
-                              <span
-                                className="truncate font-semibold"
-                                title={fileUpload.files
-                                  .map((file) => file.name)
-                                  .join(", ")}
+                      <Card className="mt-4 bg-gray-50 border-gray-200 shadow-none cursor-auto">
+                        <CardContent className="p-4">
+                          <div className="space-y-4">
+                            <div className="flex flex-col items-center justify-between gap-1">
+                              <CloudUpload className="size-10 border border-gray-100 rounded-md p-2 bg-white" />
+                              <Label className="text-base font-medium">
+                                {t("choose_file")}
+                              </Label>
+                              <div className="text-sm text-gray-500 mb-2">
+                                {t("allowed_formats_are", {
+                                  formats:
+                                    BACKEND_ALLOWED_EXTENSIONS.slice(0, 5).join(
+                                      ", ",
+                                    ) +
+                                    ", " +
+                                    t("etc"),
+                                })}
+                              </div>
+                              <Label
+                                htmlFor="file_upload_diagnostic_report"
+                                className="inline-flex items-center px-4 py-2 cursor-pointer border rounded-md hover:bg-accent hover:text-accent-foreground border-gray-300 shadow-sm"
                               >
-                                {fileUpload.files.length > 0
-                                  ? fileUpload.files
+                                <Upload className="mr-2 size-4" />
+                                <span
+                                  className="truncate font-semibold"
+                                  title={fileUpload.files
+                                    .map((file) => file.name)
+                                    .join(", ")}
+                                >
+                                  {fileUpload.files.length > 0
+                                    ? fileUpload.files
                                       .map((file) => file.name)
                                       .join(", ")
-                                  : t("select_files")}
-                              </span>
-                              {fileUpload.Input({ className: "hidden" })}
-                            </Label>
-                          </div>
+                                    : t("select_files")}
+                                </span>
+                                {fileUpload.Input({ className: "hidden" })}
+                              </Label>
+                            </div>
 
-                          {fileUpload.files.length > 0 && (
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className="w-full"
-                              onClick={() => fileUpload.clearFiles()}
-                            >
-                              {t("clear")}
-                            </Button>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
+                            {fileUpload.files.length > 0 && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="w-full"
+                                onClick={() => fileUpload.clearFiles()}
+                              >
+                                {t("clear")}
+                              </Button>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
                 </div>
               </div>
             ) : (
