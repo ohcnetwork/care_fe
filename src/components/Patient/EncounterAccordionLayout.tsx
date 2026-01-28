@@ -63,6 +63,7 @@ export function EncounterAccordionLayout({
               <div className="flex">
                 <CollapsibleTrigger asChild>
                   <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     className="hover:bg-transparent text-gray-500 hover:text-gray-500"
