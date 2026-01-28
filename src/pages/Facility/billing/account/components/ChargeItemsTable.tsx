@@ -44,6 +44,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import SearchInput from "@/components/Common/SearchInput";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
@@ -192,6 +193,7 @@ export function ChargeItemsTable({
         status: qParams.charge_item_status,
         service_resource: qParams.service_resource,
         ordering: qParams.ordering,
+        title: qParams.title,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         ...getDateQueryParams(),
@@ -256,8 +258,7 @@ export function ChargeItemsTable({
           className="flex flex-row-reverse flex-wrap sm:items-center"
           facilityId={facilityId}
         />
-
-        <div className="flex items-center gap-2">
+        <div className="flex sm:flex-row flex-col sm:items-center gap-2 w-full sm:w-auto">
           <div className="gap-2 flex items-center whitespace-nowrap">
             <Label htmlFor="sort-by-title">{t("sort_by_title")}</Label>
             <Switch
@@ -295,6 +296,22 @@ export function ChargeItemsTable({
             <ShortcutBadge actionId="add-charge-item" />
           </Button>
         </div>
+      </div>
+      <div className="mb-4">
+        <SearchInput
+          id="charge-item-title-search"
+          options={[
+            {
+              key: "title",
+              type: "text",
+              placeholder: t("search_by_item"),
+              value: qParams.title || "",
+              display: t("title"),
+            },
+          ]}
+          className="w-full sm:w-80"
+          onSearch={(key, value) => updateQuery({ [key]: value })}
+        />
       </div>
       {isLoading ? (
         <TableSkeleton count={3} />
