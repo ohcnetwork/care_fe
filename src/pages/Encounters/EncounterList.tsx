@@ -36,6 +36,7 @@ import {
   EncounterClass,
   EncounterListRead,
   EncounterRead,
+  EncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
@@ -113,6 +114,7 @@ export function EncounterList({
 }: EncounterListProps) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
+    disableCache: true,
     cacheBlacklist: [
       "name",
       "encounter_id",
@@ -124,6 +126,7 @@ export function EncounterList({
   const { t } = useTranslation();
   const [, setSavedFilters] = useAtom(encounterListFiltersAtom);
   const hasRestoredFilters = useRef(false);
+  const hasAppliedDefaultStatus = useRef(false);
 
   const {
     status,
@@ -136,23 +139,34 @@ export function EncounterList({
     organization,
   } = qParams;
 
-  // Restore filters from sessionStorage on mount if URL params are empty
+  const getDefaultDateRange = () => {
+    const today = new Date();
+    const defaultDays = careConfig.encounterDateFilter;
+    return {
+      created_date_after: dateQueryString(
+        defaultDays === 0 ? today : subDays(today, defaultDays),
+      ),
+      created_date_before: dateQueryString(today),
+    };
+  };
+
+  // Restore filters from sessionStorage on mount AND set default dates if needed
   useEffect(() => {
     if (hasRestoredFilters.current) return;
     hasRestoredFilters.current = true;
 
-    // Check if URL has no meaningful filters
+    const urlParams = new URLSearchParams(window.location.search);
+    const restoredParams: Record<string, string | undefined> = {};
+
+    // Restore filters from session storage if no URL filters
     const hasUrlFilters =
       status || priority || organization || qParams.tags || patient_filter;
 
     if (!hasUrlFilters) {
-      // Read directly from sessionStorage to avoid dependency issues
       try {
         const stored = sessionStorage.getItem("encounter_list_filters");
         if (stored) {
           const filters = JSON.parse(stored);
-          const restoredParams: Record<string, string | undefined> = {};
-
           if (filters.status) restoredParams.status = filters.status;
           if (filters.priority) restoredParams.priority = filters.priority;
           if (filters.selectedOrg)
@@ -171,14 +185,25 @@ export function EncounterList({
             restoredParams.created_date_before = dateQueryString(
               new Date(filters.dateTo),
             );
-
-          if (Object.keys(restoredParams).length > 0) {
-            updateQuery(restoredParams);
-          }
         }
       } catch {
         // Ignore parsing errors
       }
+    }
+
+    const hasAnyDates =
+      urlParams.get("created_date_after") ||
+      urlParams.get("created_date_before") ||
+      restoredParams.created_date_after ||
+      restoredParams.created_date_before;
+    const hasPatientFilter = urlParams.get("patient_filter");
+
+    if (!hasAnyDates && !hasPatientFilter && encounterClass !== "imp") {
+      Object.assign(restoredParams, getDefaultDateRange());
+    }
+
+    if (Object.keys(restoredParams).length > 0) {
+      updateQuery(restoredParams);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -246,39 +271,8 @@ export function EncounterList({
     enabled: !!organization && !!facilityId,
   });
 
-  useEffect(() => {
-    // Set default date range if no dates are present and no patient filter is active, and not an inpatient encounter
-    if (
-      !created_date_after &&
-      !created_date_before &&
-      !patient_filter &&
-      encounterClass !== "imp"
-    ) {
-      const today = new Date();
-      const defaultDays = careConfig.encounterDateFilter;
-      if (defaultDays === 0) {
-        // Today only
-        updateQuery({
-          created_date_after: dateQueryString(today),
-          created_date_before: dateQueryString(today),
-        });
-      } else {
-        updateQuery({
-          created_date_after: dateQueryString(subDays(today, defaultDays)),
-          created_date_before: dateQueryString(today),
-        });
-      }
-    }
-  }, [
-    created_date_after,
-    created_date_before,
-    patient_filter,
-    encounterClass,
-    updateQuery,
-  ]);
-
   const filters = [
-    encounterStatusFilter("status"),
+    encounterStatusFilter("status", "multi"),
     encounterPriorityFilter("priority"),
     departmentFilter("organization"),
     tagFilter("tags", TagResource.ENCOUNTER, "multi", t("tags", { count: 2 })),
@@ -292,7 +286,9 @@ export function EncounterList({
       for (const [key, value] of Object.entries(filterQuery)) {
         switch (key) {
           case "status":
-            updates.status = (value as string) || undefined;
+            updates.status = Array.isArray(value)
+              ? (value as string[]).join(",")
+              : (value as string) || undefined;
             break;
           case "priority":
             updates.priority = (value as string) || undefined;
@@ -330,6 +326,11 @@ export function EncounterList({
     // Update URL query params
     for (const [key, value] of Object.entries(filterQuery)) {
       switch (key) {
+        case "status":
+          filterQuery.status = Array.isArray(value)
+            ? (value as string[]).join(",")
+            : value;
+          break;
         case "tags":
           filterQuery.tags = (value as TagConfig[])
             ?.map((tag) => tag.id)
@@ -370,6 +371,7 @@ export function EncounterList({
     handleClearFilter,
   } = useMultiFilterState(filters, onFilterUpdate, {
     ...qParams,
+    status: status ? status.split(",") : undefined,
     tags: selectedTags,
     organization: selectedOrg ? [selectedOrg] : undefined,
     created_date:
@@ -380,6 +382,42 @@ export function EncounterList({
           }
         : undefined,
   });
+
+  useEffect(() => {
+    if (encounterClass === "imp") {
+      if (!status && !hasAppliedDefaultStatus.current) {
+        hasAppliedDefaultStatus.current = true;
+        handleFilterChange("status", [
+          EncounterStatus.PLANNED,
+          EncounterStatus.IN_PROGRESS,
+        ]);
+      }
+    } else {
+      hasAppliedDefaultStatus.current = false;
+    }
+  }, [encounterClass, status, handleFilterChange]);
+
+  useEffect(() => {
+    if (!hasRestoredFilters.current) return;
+    if (created_date_after || created_date_before || patient_filter) return;
+    if (encounterClass === "imp") return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (
+      urlParams.get("created_date_after") ||
+      urlParams.get("created_date_before")
+    ) {
+      return;
+    }
+
+    updateQuery(getDefaultDateRange());
+  }, [
+    created_date_after,
+    created_date_before,
+    patient_filter,
+    encounterClass,
+    updateQuery,
+  ]);
 
   const displaySelectedFilters =
     (patient_filter || encounterClass === "imp") &&

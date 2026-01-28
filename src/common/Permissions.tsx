@@ -114,6 +114,10 @@ export const PERMISSION_CREATE_ACCOUNT = "can_create_account";
 export const PERMISSION_UPDATE_ACCOUNT = "can_update_account";
 export const PERMISSION_READ_ACCOUNT = "can_read_account";
 
+// Invoice Permissions
+export const PERMISSION_MANAGE_LOCKED_INVOICE =
+  "can_manage_locked_invoice_in_facility";
+
 export interface Permissions {
   // Patient Permissions
   /** Permission slug: "can_create_patient" */
@@ -272,6 +276,9 @@ export interface Permissions {
   canUpdateAccount: boolean;
   /** Permission slug: "can_read_account" */
   canReadAccount: boolean;
+
+  /** Permission slug: "can_manage_locked_invoice_in_facility" */
+  canManageLockedInvoice: boolean;
 }
 
 export type HasPermissionFn = (
@@ -495,5 +502,11 @@ export function getPermissions(
     canCreateAccount: hasPermission(PERMISSION_CREATE_ACCOUNT, permissions),
     canUpdateAccount: hasPermission(PERMISSION_UPDATE_ACCOUNT, permissions),
     canReadAccount: hasPermission(PERMISSION_READ_ACCOUNT, permissions),
+
+    // Invoice
+    canManageLockedInvoice: hasPermission(
+      PERMISSION_MANAGE_LOCKED_INVOICE,
+      permissions,
+    ),
   };
 }

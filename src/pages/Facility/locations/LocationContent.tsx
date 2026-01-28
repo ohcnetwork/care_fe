@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Bed } from "lucide-react";
+import { ArrowRight, Bed, Lock } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -30,7 +30,9 @@ interface BedCardProps {
 
 function BedCard({ location, facilityId }: BedCardProps) {
   const { t } = useTranslation();
-  const isOccupied = !!location.current_encounter;
+  const isOccupied =
+    !!location.current_encounter ||
+    location.system_availability_status === "reserved";
 
   return (
     <div
@@ -71,18 +73,28 @@ function BedCard({ location, facilityId }: BedCardProps) {
       </div>
 
       <div className="h-full">
-        {!location.current_encounter ? (
-          <div className="flex flex-col items-center justify-center py-4 h-auto">
-            <p className="text-sm text-gray-600 mb-3">
-              {t("ready_for_admission")}
-            </p>
-          </div>
-        ) : (
+        {location.current_encounter ? (
           <EncounterInfoCard
             encounter={location.current_encounter}
             facilityId={facilityId}
             hideBorder={true}
           />
+        ) : location.system_availability_status === "reserved" ? (
+          <div className="flex flex-col items-center justify-center py-8 h-auto">
+            <div className="rounded-full bg-yellow-100 p-3 mb-3">
+              <Lock className="size-6 text-yellow-700" />
+            </div>
+            <p className="text-sm font-medium text-gray-700">{t("reserved")}</p>
+            <p className="text-xs text-gray-500 mt-1">
+              {t("bed_currently_reserved")}
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-4 h-auto">
+            <p className="text-sm text-gray-600 mb-3">
+              {t("ready_for_admission")}
+            </p>
+          </div>
         )}
       </div>
     </div>

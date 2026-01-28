@@ -81,7 +81,7 @@ import patientApi from "@/types/emr/patient/patientApi";
 import facilityApi from "@/types/facility/facilityApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import dayjs from "@/Utils/dayjs";
-import { add, round } from "@/Utils/decimal";
+import { add, multiply, round, subtract } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -495,7 +495,76 @@ export function InvoiceShow({
           </div>
         </div>
 
-        <div className="md:col-span-2 overflow-x-auto max-w-4xl mx-auto">
+        <div className="md:col-span-2 overflow-x-auto max-w-5xl mx-auto">
+          <div className="bg-gray-50 border border-gray-200 rounded-md p-3 mb-3">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-600">
+                  {t("invoice_summary")}
+                </span>
+                <Badge variant={INVOICE_STATUS_COLORS[invoice.status]}>
+                  {t(invoice.status)}
+                </Badge>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="text-center">
+                  <div className="text-xs text-gray-500">
+                    {t("total_amount")}
+                  </div>
+                  <div className="text-base font-semibold text-gray-900">
+                    <MonetaryDisplay amount={invoice.total_gross} />
+                  </div>
+                </div>
+                <div className="h-6 w-px bg-gray-300" />
+                <div className="text-center">
+                  <div className="text-xs text-gray-500">
+                    {t("total_payments_received")}
+                  </div>
+                  <div className="text-base font-semibold text-green-600">
+                    <MonetaryDisplay amount={invoice.total_payments} />
+                  </div>
+                </div>
+                <div className="h-6 w-px bg-gray-300" />
+                <div className="text-center">
+                  <div className="text-xs text-gray-500">
+                    {t("balance_due")}
+                  </div>
+                  <div className="text-base font-semibold text-gray-900">
+                    <MonetaryDisplay
+                      amount={subtract(
+                        invoice.total_gross,
+                        invoice.total_payments,
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {invoice.status === InvoiceStatus.balanced &&
+            parseFloat(
+              subtract(invoice.total_gross, invoice.total_payments).toString(),
+            ) > 0 && (
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-2 mb-3 flex gap-2 items-center">
+                <CareIcon
+                  icon="l-info-circle"
+                  className="text-blue-600 size-4 shrink-0"
+                />
+                <p className="text-xs text-blue-800">
+                  <span className="font-semibold">
+                    <MonetaryDisplay
+                      amount={subtract(
+                        invoice.total_gross,
+                        invoice.total_payments,
+                      )}
+                    />
+                  </span>{" "}
+                  {t("unpaid_moved_to_account")}
+                </p>
+              </div>
+            )}
+
           <div className="flex sm:flex-row flex-col sm:items-center gap-4 justify-between items-start mb-4">
             <div className="flex flex-row items-center gap-2">
               <span className="font-semibold text-gray-950 text-base">
@@ -761,7 +830,10 @@ export function InvoiceShow({
                               {index + 1}
                             </TableCell>
                             <TableCell
-                              className={cn(tableCellClass, "font-medium")}
+                              className={cn(
+                                tableCellClass,
+                                "font-medium whitespace-pre-wrap",
+                              )}
                             >
                               <InvoiceChargeItemTitle
                                 item={item}
@@ -1163,7 +1235,10 @@ export function InvoiceShow({
                                 </TableCell>
                                 <TableCell className="text-right">
                                   <MonetaryDisplay
-                                    amount={payment.amount}
+                                    amount={multiply(
+                                      payment.amount,
+                                      payment.is_credit_note ? -1 : 1,
+                                    )}
                                     hideCurrency
                                   />
                                 </TableCell>
@@ -1258,12 +1333,65 @@ export function InvoiceShow({
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>{t("confirm")}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {selectedStatus === InvoiceStatus.balanced
-                  ? t("are_you_sure_want_to_mark_as_balanced")
-                  : selectedStatus === InvoiceStatus.entered_in_error
-                    ? t("are_you_sure_want_to_mark_as_error")
-                    : t("are_you_sure_want_to_cancel_invoice")}
+              <AlertDialogDescription asChild>
+                <div className="space-y-4">
+                  {selectedStatus === InvoiceStatus.balanced ? (
+                    <>
+                      <p>{t("are_you_sure_want_to_mark_as_balanced")}</p>
+                      <div className="bg-gray-50 border border-gray-200 rounded-md p-3 space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">
+                            {t("invoice_total")}
+                          </span>
+                          <span className="font-medium text-gray-900">
+                            <MonetaryDisplay amount={invoice.total_gross} />
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">
+                            {t("total_payments_received")}
+                          </span>
+                          <span className="font-medium text-green-600">
+                            <MonetaryDisplay amount={invoice.total_payments} />
+                          </span>
+                        </div>
+                        <div className="border-t border-gray-200 pt-2 flex justify-between text-sm">
+                          <span className="text-gray-600">
+                            {t("outstanding_balance")}
+                          </span>
+                          <span className="font-semibold text-gray-900">
+                            <MonetaryDisplay
+                              amount={subtract(
+                                invoice.total_gross,
+                                invoice.total_payments,
+                              )}
+                            />
+                          </span>
+                        </div>
+                      </div>
+                      {parseFloat(
+                        subtract(
+                          invoice.total_gross,
+                          invoice.total_payments,
+                        ).toString(),
+                      ) > 0 && (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 flex gap-2 items-start">
+                          <CareIcon
+                            icon="l-exclamation-triangle"
+                            className="text-yellow-600 size-5 mt-0.5 shrink-0"
+                          />
+                          <p className="text-sm text-yellow-800">
+                            {t("mark_as_balanced_warning")}
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  ) : selectedStatus === InvoiceStatus.entered_in_error ? (
+                    <p>{t("are_you_sure_want_to_mark_as_error")}</p>
+                  ) : (
+                    <p>{t("are_you_sure_want_to_cancel_invoice")}</p>
+                  )}
+                </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

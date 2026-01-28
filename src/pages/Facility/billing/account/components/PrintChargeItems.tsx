@@ -1,5 +1,6 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
+import { AlertTriangle } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -7,9 +8,20 @@ import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
+import { getPermissions } from "@/common/Permissions";
+import { usePermissions } from "@/context/PermissionContext";
+
 import Loading from "@/components/Common/Loading";
 import PrintFooter from "@/components/Common/PrintFooter";
+import { Button } from "@/components/ui/button";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import {
   Table,
@@ -19,6 +31,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+import useAppHistory from "@/hooks/useAppHistory";
 
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconciliation/paymentReconciliation";
@@ -30,6 +44,7 @@ import {
   ChargeItemStatus,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { InvoiceStatus } from "@/types/billing/invoice/invoice";
 import {
   PaymentReconciliationRead,
   PaymentReconciliationStatus,
@@ -74,6 +89,12 @@ export const PrintChargeItems = (props: {
   const { facilityId, accountId } = props;
   const { facility } = useCurrentFacility();
   const { t } = useTranslation();
+  const { goBack } = useAppHistory();
+  const { hasPermission } = usePermissions();
+  const { canManageLockedInvoice } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
+  );
   const [hideCategories, setHideCategories] = useState(false);
   const [hidePaymentTypeGrouping, setHidePaymentTypeGrouping] = useState(false);
   const [summaryMode, setSummaryMode] = useState(false);
@@ -81,7 +102,9 @@ export const PrintChargeItems = (props: {
   const [preserveHeaderSpace, setPreserveHeaderSpace] = useState(true);
   const [sortByName, setSortByName] = useState(false);
   const [showCreatedBy, setShowCreatedBy] = useState(false);
+  const [showStatus, setShowStatus] = useState(false);
   const [groupByParentCategory, setGroupByParentCategory] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const hideCategoryLabel = `${t("hide_category_grouping")}`;
   const hidePaymentTypeLabel = `${t("hide_payment_type_grouping")}`;
@@ -90,6 +113,7 @@ export const PrintChargeItems = (props: {
   const preserveHeaderSpaceLabel = `${t("preserve_header_space")}`;
   const sortByNameLabel = `${t("sort_by_name")}`;
   const showCreatedByLabel = `${t("show_created_by")}`;
+  const showStatusLabel = `${t("show_status")}`;
   const groupByParentCategoryLabel = `${t("group_by_parent_category")}`;
 
   const { data: account } = useQuery({
@@ -135,6 +159,23 @@ export const PrintChargeItems = (props: {
     return (
       <div className="flex h-[200px] items-center justify-center  border-2 border-dashed p-4 text-gray-500 border-gray-200">
         {t("no_charge_items_found_for_this_account")}
+      </div>
+    );
+  }
+
+  const hasLockedInvoice = chargeItems.results.some(
+    (item) => item.paid_invoice?.locked,
+  );
+
+  if (hasLockedInvoice && !canManageLockedInvoice) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[200px] gap-4">
+        <p className="text-gray-500">
+          {t("no_permission_to_print_charge_items")}
+        </p>
+        <Button variant="outline" onClick={() => goBack()}>
+          {t("go_back")}
+        </Button>
       </div>
     );
   }
@@ -252,8 +293,76 @@ export const PrintChargeItems = (props: {
                 {showCreatedByLabel}
               </label>
             </div>
+
+            <div className="gap-2 flex items-center">
+              <Switch
+                id="show-status"
+                checked={showStatus}
+                onCheckedChange={setShowStatus}
+              />
+              <label htmlFor="show-status" className="cursor-pointer text-sm">
+                {showStatusLabel}
+              </label>
+            </div>
           </>
         )}
+
+        {/* Category Filter */}
+        {chargeItems?.results &&
+          chargeItems.results.length > 0 &&
+          (() => {
+            const useParentCategory = groupByParentCategory || summaryMode;
+            const categories = [
+              ...new Set(
+                chargeItems.results
+                  .filter(
+                    (item) => item.status !== ChargeItemStatus.entered_in_error,
+                  )
+                  .map((item) => {
+                    const category = item.charge_item_definition?.category;
+                    return useParentCategory
+                      ? category?.parent?.title ||
+                          category?.title ||
+                          t("uncategorized")
+                      : category?.title || t("uncategorized");
+                  }),
+              ),
+            ].sort();
+
+            return (
+              <div className="gap-2 flex items-center">
+                <label
+                  htmlFor="category-filter"
+                  className="text-sm whitespace-nowrap"
+                >
+                  {t("filter_by_category")}:
+                </label>
+                <Select
+                  value={selectedCategory ?? "__all__"}
+                  onValueChange={(value) =>
+                    setSelectedCategory(value === "__all__" ? null : value)
+                  }
+                >
+                  <SelectTrigger
+                    id="category-filter"
+                    className="w-48 h-8 text-sm"
+                  >
+                    <SelectValue placeholder={t("all_categories")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">
+                      {t("all_categories")}
+                    </SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            );
+          })()}
       </div>
       <PrintPreview
         title={t("charge_items")}
@@ -410,9 +519,11 @@ export const PrintChargeItems = (props: {
                                   <TableHead className="font-bold w-24">
                                     {t("title")}
                                   </TableHead>
-                                  <TableHead className="font-bold text-center w-8">
-                                    {t("status")}
-                                  </TableHead>
+                                  {showStatus && (
+                                    <TableHead className="font-bold text-center w-8">
+                                      {t("status")}
+                                    </TableHead>
+                                  )}
                                   {showCreatedBy && (
                                     <TableHead className="font-bold w-16">
                                       {t("created_by")}
@@ -434,15 +545,30 @@ export const PrintChargeItems = (props: {
                           <TableBody className="[&_tr]:border-0 [&_td]:p-0.5">
                             {(() => {
                               // Group charge items by category, excluding entered_in_error items
-                              const validItems = chargeItems.results.filter(
-                                (item) =>
-                                  item.status !==
-                                  ChargeItemStatus.entered_in_error,
-                              );
+                              const validItemsBeforeFilter =
+                                chargeItems.results.filter(
+                                  (item) =>
+                                    item.status !==
+                                    ChargeItemStatus.entered_in_error,
+                                );
 
                               // In summary mode, default to grouping by parent category
                               const useParentCategory =
                                 groupByParentCategory || summaryMode;
+
+                              // Apply category filter
+                              const validItems = selectedCategory
+                                ? validItemsBeforeFilter.filter((item) => {
+                                    const category =
+                                      item.charge_item_definition?.category;
+                                    const categoryTitle = useParentCategory
+                                      ? category?.parent?.title ||
+                                        category?.title ||
+                                        t("uncategorized")
+                                      : category?.title || t("uncategorized");
+                                    return categoryTitle === selectedCategory;
+                                  })
+                                : validItemsBeforeFilter;
 
                               const groups = validItems.reduce(
                                 (
@@ -513,7 +639,11 @@ export const PrintChargeItems = (props: {
                                         className="font-bold hover:bg-transparent"
                                       >
                                         <TableCell
-                                          colSpan={showCreatedBy ? 6 : 5}
+                                          colSpan={
+                                            5 +
+                                            (showStatus ? 1 : 0) +
+                                            (showCreatedBy ? 1 : 0)
+                                          }
                                           className="capitalize"
                                         >
                                           {categoryTitle}
@@ -535,16 +665,31 @@ export const PrintChargeItems = (props: {
                                             c.monetary_component_type ===
                                             MonetaryComponentType.base,
                                         )?.amount;
+                                      const hasIssuedOrBalancedInvoice =
+                                        chargeItem.paid_invoice &&
+                                        (chargeItem.paid_invoice.status ===
+                                          InvoiceStatus.issued ||
+                                          chargeItem.paid_invoice.status ===
+                                            InvoiceStatus.balanced);
                                       rows.push(
                                         <TableRow
                                           key={chargeItem.id}
-                                          className="bg-transparent hover:bg-transparent"
+                                          className={
+                                            hasIssuedOrBalancedInvoice
+                                              ? "bg-transparent hover:bg-transparent"
+                                              : "bg-red-50 hover:bg-red-50 text-red-700 print:bg-red-50"
+                                          }
                                         >
                                           <TableCell className="w-10 text-left">
-                                            {formatDateTime(
-                                              chargeItem.created_date,
-                                              "DD/MM/YY",
-                                            )}
+                                            <div className="flex items-center gap-1">
+                                              {!hasIssuedOrBalancedInvoice && (
+                                                <AlertTriangle className="h-3 w-3 text-red-600 flex-shrink-0" />
+                                              )}
+                                              {formatDateTime(
+                                                chargeItem.created_date,
+                                                "DD/MM/YY",
+                                              )}
+                                            </div>
                                           </TableCell>
                                           <TableCell className="w-10 text-left">
                                             {chargeItem.paid_invoice?.number ||
@@ -557,11 +702,13 @@ export const PrintChargeItems = (props: {
                                               </span>
                                             </div>
                                           </TableCell>
-                                          <TableCell className="text-center w-8">
-                                            <span className="text-xs">
-                                              {t(chargeItem.status)}
-                                            </span>
-                                          </TableCell>
+                                          {showStatus && (
+                                            <TableCell className="text-center w-8">
+                                              <span className="text-xs">
+                                                {t(chargeItem.status)}
+                                              </span>
+                                            </TableCell>
+                                          )}
                                           {showCreatedBy && (
                                             <TableCell className="w-16">
                                               {
@@ -597,7 +744,11 @@ export const PrintChargeItems = (props: {
                                   className="bg-muted/30 font-semibold"
                                 >
                                   <TableCell
-                                    colSpan={showCreatedBy ? 6 : 5}
+                                    colSpan={
+                                      5 +
+                                      (showStatus ? 1 : 0) +
+                                      (showCreatedBy ? 1 : 0)
+                                    }
                                     className="text-right pr-2"
                                   >
                                     {t("net_total")}
@@ -621,7 +772,7 @@ export const PrintChargeItems = (props: {
                     </div>
                   )}
 
-                  {payments.length > 0 && (
+                  {payments.length > 0 && !selectedCategory && (
                     <div className="mt-4">
                       <hr className="border-gray-300 py-2" />
                       <h2 className="text-sm font-semibold mb-1">
@@ -697,7 +848,12 @@ export const PrintChargeItems = (props: {
                                 const paymentsOfType: PaymentReconciliationRead[] =
                                   paymentGroups[paymentType] ?? [];
                                 const typeTotal = add(
-                                  ...paymentsOfType.map((p) => p.amount || 0),
+                                  ...paymentsOfType.map((p) =>
+                                    multiply(
+                                      p.amount || 0,
+                                      p.is_credit_note ? -1 : 1,
+                                    ),
+                                  ),
                                 );
 
                                 if (summaryMode) {
@@ -801,8 +957,11 @@ export const PrintChargeItems = (props: {
                                   <TableCell className="text-right">
                                     <MonetaryDisplay
                                       amount={add(
-                                        ...validPayments.map(
-                                          (p) => p.amount || 0,
+                                        ...validPayments.map((p) =>
+                                          multiply(
+                                            p.amount || 0,
+                                            p.is_credit_note ? -1 : 1,
+                                          ),
                                         ),
                                       )}
                                     />
