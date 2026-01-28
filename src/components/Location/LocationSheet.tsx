@@ -388,6 +388,14 @@ export function LocationSheet({
           );
         }
       });
+    } else if (location.status === "reserved") {
+      requests.push(
+        createLocationUpdateOperationalStatusRequest(
+          location.location,
+          facilityId,
+          "U",
+        ),
+      );
     }
 
     if (requests.length > 0) {
