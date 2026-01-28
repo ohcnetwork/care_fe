@@ -1222,7 +1222,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
     }
 
     const requests = [];
-    const defaultEncounterId = response?.results[0]?.encounter;
+    const defaultEncounterId = response?.results[0]?.encounter ?? encounterId;
 
     // Add all dispense requests - now one per lot
     selectedItems.forEach((item) => {

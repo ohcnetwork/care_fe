@@ -64,6 +64,7 @@ interface Props {
   patientName?: string;
   align?: "start" | "center" | "end";
   hideScanButton?: boolean;
+  open?: boolean;
 }
 
 interface IdentifierConfig {
@@ -277,10 +278,11 @@ export default function PatientIdentifierFilter({
   patientName,
   align = "start",
   hideScanButton = false,
+  open: externalOpen = false,
 }: Props) {
   const { t } = useTranslation();
   const { facility, facilityId } = useCurrentFacility();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(externalOpen);
   const [selectedPatient, setSelectedPatient] = useState<
     PatientListRead | PartialPatientModel | null
   >(null);
@@ -293,6 +295,10 @@ export default function PatientIdentifierFilter({
   const [verificationOpen, setVerificationOpen] = useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
   const [scanDialogOpen, setScanDialogOpen] = useState(false);
+
+  useEffect(() => {
+    setOpen(externalOpen);
+  }, [externalOpen]);
 
   // Enable external scanner detection when not in a dialog
   useBarcodeScanner({
