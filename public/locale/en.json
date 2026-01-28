@@ -5024,6 +5024,7 @@
   "select_definition_to_copy_description": "Choose an existing charge item definition to copy its details",
   "select_department": "Select Department",
   "select_department_description": "Select Department Description",
+  "select_departments_to_share_template": "Select departments to share this template with. Leave empty to keep it personal.",
   "select_destination": "Select Destination",
   "select_destination_question": "Select Destination Question",
   "select_device": "Select device...",
