@@ -69,6 +69,7 @@ export const EncounterShow = (props: Props) => {
     primaryEncounterId,
     selectedEncounterId,
     isPrimaryEncounterLoading,
+    patientId,
     patient,
     isPatientLoading,
     canWriteSelectedEncounter,
@@ -148,8 +149,8 @@ export const EncounterShow = (props: Props) => {
       visible: canReadClinicalData,
       component: (
         <EncounterResponsesTab
-          patientId={patient?.id}
-          encounterId={selectedEncounter?.id}
+          patientId={patientId}
+          encounterId={selectedEncounterId}
           canAccess={canAccess}
         />
       ),
