@@ -170,30 +170,32 @@ export function LocationSheet({
       );
     }
 
-    activeLocations
-      .filter((loc) => loc.id !== locationBeingDeleted?.id)
-      .filter((loc) => loc.status === "reserved")
-      .forEach((reservedLocation) => {
-        requests.push(
-          createLocationAssociationUpdateRequest(
-            reservedLocation,
-            {
-              start: new Date(reservedLocation.start_datetime),
-              end: new Date(),
-              status: "completed",
-            },
-            facilityId,
-            encounter.id,
-          ),
-        );
-        requests.push(
-          createLocationUpdateOperationalStatusRequest(
-            reservedLocation.location,
-            facilityId,
-            "U",
-          ),
-        );
-      });
+    if (locationBeingDeleted?.status === "active") {
+      activeLocations
+        .filter((loc) => loc.id !== locationBeingDeleted?.id)
+        .filter((loc) => loc.status === "reserved")
+        .forEach((reservedLocation) => {
+          requests.push(
+            createLocationAssociationUpdateRequest(
+              reservedLocation,
+              {
+                start: new Date(reservedLocation.start_datetime),
+                end: new Date(),
+                status: "completed",
+              },
+              facilityId,
+              encounter.id,
+            ),
+          );
+          requests.push(
+            createLocationUpdateOperationalStatusRequest(
+              reservedLocation.location,
+              facilityId,
+              "U",
+            ),
+          );
+        });
+    }
 
     // Delete the location association
     requests.push(
@@ -357,45 +359,44 @@ export function LocationSheet({
     );
 
     // If completing an active location, also complete all reserved locations
-    if (
-      location.status === "active" &&
-      assignment.editingState.timeConfig.status === "completed"
-    ) {
-      requests.push(
-        createLocationUpdateOperationalStatusRequest(
-          location.location,
-          facilityId,
-          "U",
-        ),
-      );
+    if (assignment.editingState.timeConfig.status === "completed") {
+      if (location.status === "active") {
+        requests.push(
+          createLocationUpdateOperationalStatusRequest(
+            location.location,
+            facilityId,
+            "U",
+          ),
+        );
 
-      activeLocations.forEach((activeLocation) => {
-        if (activeLocation.status === "reserved") {
-          requests.push(
-            completeCurrentLocationAssociation(
-              activeLocation,
-              facilityId,
-              encounter.id,
-              new Date(),
-            ),
-          );
-          requests.push(
-            createLocationUpdateOperationalStatusRequest(
-              activeLocation.location,
-              facilityId,
-              "U",
-            ),
-          );
-        }
-      });
-    } else if (location.status === "reserved") {
-      requests.push(
-        createLocationUpdateOperationalStatusRequest(
-          location.location,
-          facilityId,
-          "U",
-        ),
-      );
+        activeLocations.forEach((activeLocation) => {
+          if (activeLocation.status === "reserved") {
+            requests.push(
+              completeCurrentLocationAssociation(
+                activeLocation,
+                facilityId,
+                encounter.id,
+                new Date(),
+              ),
+            );
+            requests.push(
+              createLocationUpdateOperationalStatusRequest(
+                activeLocation.location,
+                facilityId,
+                "U",
+              ),
+            );
+          }
+        });
+      } else if (location.status === "reserved") {
+        requests.push(
+          createLocationUpdateOperationalStatusRequest(
+            location.location,
+            facilityId,
+            "U",
+          ),
+        );
+      }
     }
 
     if (requests.length > 0) {
