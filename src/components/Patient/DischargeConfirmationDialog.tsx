@@ -12,6 +12,7 @@ import {
 } from "@/types/emr/encounter/encounter";
 
 interface DischargeConfirmationDialogProps {
+  defaultOpen?: boolean;
   encounter: EncounterEdit;
   onConfirm: (updates: Partial<Omit<EncounterEdit, "patient">>) => void;
   disabled?: boolean;
@@ -19,13 +20,14 @@ interface DischargeConfirmationDialogProps {
 }
 
 const DischargeConfirmationDialog = ({
+  defaultOpen = false,
   encounter,
   onConfirm,
   disabled = false,
   trigger,
 }: DischargeConfirmationDialogProps) => {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
 
   const confirmationText = "Discharge Patient";
 
