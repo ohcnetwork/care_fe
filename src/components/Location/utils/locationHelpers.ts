@@ -3,7 +3,7 @@ import {
   LocationAssociationRead,
   LocationAssociationStatus,
 } from "@/types/location/association";
-import { LocationRead } from "@/types/location/location";
+import { LocationRead, OperationalStatus } from "@/types/location/location";
 
 export type LocationScreen = "view" | "assign" | "modify";
 export type LocationAction = "move" | "complete" | "cancel" | "new";
@@ -123,6 +123,21 @@ export function createLocationAssociationRequest(
         end_datetime: timeConfig.end.toISOString(),
       }),
       status: timeConfig.status,
+    },
+  };
+}
+
+export function createLocationUpdateOperationalStatusRequest(
+  location: LocationRead,
+  facilityId: string,
+  operationalStatus: OperationalStatus,
+) {
+  return {
+    url: `/api/v1/facility/${facilityId}/location/${location.id}/`,
+    method: "PUT" as const,
+    reference_id: "updateOperationalStatus",
+    body: {
+      operational_status: operationalStatus,
     },
   };
 }

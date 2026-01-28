@@ -193,6 +193,7 @@ async function fetchProductAndBuildMedication(
     requester: currentUser,
     requested_product: productId,
     requested_product_internal: productKnowledge,
+    dirty: true, // Mark as dirty so it gets sent to the API
   };
 }
 
@@ -387,6 +388,7 @@ export function MedicationRequestQuestion({
         questionnaire: filterStructuredQuestionnaireSlugs(questionnaireSlug),
         key_filter: "medication_request",
         name: templateSearchQuery || undefined,
+        facility: facilityId,
         limit: 20,
       },
     }),

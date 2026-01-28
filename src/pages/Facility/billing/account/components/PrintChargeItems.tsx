@@ -1,5 +1,6 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
+import { AlertTriangle } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -43,6 +44,7 @@ import {
   ChargeItemStatus,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { InvoiceStatus } from "@/types/billing/invoice/invoice";
 import {
   PaymentReconciliationRead,
   PaymentReconciliationStatus,
@@ -663,16 +665,31 @@ export const PrintChargeItems = (props: {
                                             c.monetary_component_type ===
                                             MonetaryComponentType.base,
                                         )?.amount;
+                                      const hasIssuedOrBalancedInvoice =
+                                        chargeItem.paid_invoice &&
+                                        (chargeItem.paid_invoice.status ===
+                                          InvoiceStatus.issued ||
+                                          chargeItem.paid_invoice.status ===
+                                            InvoiceStatus.balanced);
                                       rows.push(
                                         <TableRow
                                           key={chargeItem.id}
-                                          className="bg-transparent hover:bg-transparent"
+                                          className={
+                                            hasIssuedOrBalancedInvoice
+                                              ? "bg-transparent hover:bg-transparent"
+                                              : "bg-red-50 hover:bg-red-50 text-red-700 print:bg-red-50"
+                                          }
                                         >
                                           <TableCell className="w-10 text-left">
-                                            {formatDateTime(
-                                              chargeItem.created_date,
-                                              "DD/MM/YY",
-                                            )}
+                                            <div className="flex items-center gap-1">
+                                              {!hasIssuedOrBalancedInvoice && (
+                                                <AlertTriangle className="h-3 w-3 text-red-600 flex-shrink-0" />
+                                              )}
+                                              {formatDateTime(
+                                                chargeItem.created_date,
+                                                "DD/MM/YY",
+                                              )}
+                                            </div>
                                           </TableCell>
                                           <TableCell className="w-10 text-left">
                                             {chargeItem.paid_invoice?.number ||

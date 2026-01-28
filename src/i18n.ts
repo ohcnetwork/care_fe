@@ -127,8 +127,7 @@ export async function initI18n() {
           return;
         }
 
-        const fetchOptions =
-          language === "en" ? { cache: "no-store" as RequestCache } : {};
+        const fetchOptions = { cache: "no-store" as RequestCache };
         fetch(`${baseUrl}/locale/${language}.json`, fetchOptions)
           .then((response) => {
             if (!response.ok) {

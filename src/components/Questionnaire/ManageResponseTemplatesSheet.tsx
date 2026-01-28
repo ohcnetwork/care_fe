@@ -469,6 +469,7 @@ export default function ManageResponseTemplatesSheet({
           ? { questionnaire: questionnaireSlug }
           : {}),
         limit: 50,
+        facility: facilityId,
         key_filter: key_filter,
       },
     }),
