@@ -479,6 +479,35 @@ export function LocationSheet({
     assignment.startNewAssignment("active", !!currentLocation);
   };
 
+  const getDeleteDialogDescription = () => {
+    const isReservedBed = activeLocations.some(
+      (loc) =>
+        loc.id === dialogs.locationToDelete?.associationId &&
+        loc.status === "reserved",
+    );
+    if (dialogs.locationToDelete?.status === "active") {
+      return activeLocations.length > 0 ? (
+        <Trans
+          i18nKey="are_you_sure_mark_as_error_multiple_beds"
+          values={{
+            beds: activeLocations.map((loc) => loc.location.name).join(", "),
+          }}
+          components={{
+            strong: (
+              <strong className="inline-block align-bottom truncate max-w-72 sm:max-w-full md:max-w-full lg:max-w-full xl:max-w-full" />
+            ),
+            br: <br />,
+          }}
+        />
+      ) : (
+        t("are_you_sure_mark_as_error_active_bed")
+      );
+    } else if (isReservedBed) {
+      return t("are_you_sure_cancel_reserved_bed");
+    }
+    return t("are_you_sure_cancel_planned_bed");
+  };
+
   // Create handler objects
   const assignmentHandlers = {
     sheetState: assignment.sheetState,
@@ -629,30 +658,7 @@ export function LocationSheet({
           }
         }}
         title={t("confirm")}
-        description={
-          dialogs.locationToDelete?.status === "active" ? (
-            activeLocations.length > 0 ? (
-              <Trans
-                i18nKey="are_you_sure_mark_as_error_multiple_beds"
-                values={{
-                  beds: activeLocations
-                    .map((loc) => loc.location.name)
-                    .join(", "),
-                }}
-                components={{
-                  strong: (
-                    <strong className="inline-block align-bottom truncate max-w-72 sm:max-w-full md:max-w-full lg:max-w-full xl:max-w-full" />
-                  ),
-                  br: <br />,
-                }}
-              />
-            ) : (
-              t("are_you_sure_mark_as_error_active_bed")
-            )
-          ) : (
-            t("are_you_sure_cancel_planned_bed")
-          )
-        }
+        description={getDeleteDialogDescription()}
         onConfirm={handleConfirmDelete}
         confirmText={t("confirm")}
         variant="destructive"
