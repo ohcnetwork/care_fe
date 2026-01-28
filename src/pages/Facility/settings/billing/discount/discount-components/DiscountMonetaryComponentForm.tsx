@@ -104,7 +104,14 @@ export function DiscountMonetaryComponentForm({
       factor: defaultValues?.factor ? round(defaultValues.factor) : null,
       amount: defaultValues?.amount ? round(defaultValues.amount) : null,
       title: defaultValues?.title || "",
-      conditions: defaultValues?.conditions || [],
+      conditions:
+        defaultValues?.conditions?.map((condition) => ({
+          ...condition,
+          _conditionType: getConditionDiscriminatorValue(
+            condition.metric,
+            condition.operation,
+          ),
+        })) || [],
     },
   });
 
