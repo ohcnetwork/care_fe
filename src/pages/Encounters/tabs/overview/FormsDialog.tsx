@@ -59,7 +59,6 @@ export const FormDialog = ({
       queryParams: {
         favorite_list: "favorites_form",
         silent: true,
-        limit: 5,
       },
     }),
   });
