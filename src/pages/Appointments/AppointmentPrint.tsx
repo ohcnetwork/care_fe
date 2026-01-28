@@ -84,7 +84,10 @@ export default function AppointmentPrint(props: Props) {
   const hasChargeItems = chargeItems?.results && chargeItems.results.length > 0;
 
   return (
-    <PrintPreview title={t("appointment_details")} autoPrint>
+    <PrintPreview
+      title={t("appointment_details")}
+      autoPrint={{ enabled: true }}
+    >
       <div className="max-w-7xl mx-auto text-sm">
         {/* Header with Facility Name and Logo */}
         <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
