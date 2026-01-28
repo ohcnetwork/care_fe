@@ -1,5 +1,7 @@
+import Editor, { OnMount } from "@monaco-editor/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Monaco from "monaco-editor";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -28,7 +30,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -92,7 +93,7 @@ export default function TemplateBuilder({
 }) {
   const isEditing = !!slug;
   const { t } = useTranslation();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
   const [selectedContext, setSelectedContext] = useState<ContextSchema | null>(
     null,
   );
@@ -240,16 +241,39 @@ export default function TemplateBuilder({
     createTemplatePreview(previewData);
   };
 
-  // Get cursor position
+  // Handle Monaco Editor mount
+  const handleEditorMount: OnMount = (editor) => {
+    editorRef.current = editor;
+
+    // Auto-format the document after a short delay to ensure content is loaded
+    setTimeout(() => {
+      editor.getAction("editor.action.formatDocument")?.run();
+    }, 100);
+  };
+
+  // Get cursor position from Monaco editor
   const getCursorPosition = (): number => {
-    const text = textareaRef.current?.value || "";
-    const textContent = "<!-- Add your content here -->";
-    let bodyStart = text.indexOf(textContent);
-    bodyStart += textContent.length + "\n".length;
-    const selectionStart = textareaRef.current?.selectionStart ?? text.length;
-    const cursorPosition =
-      selectionStart === text.length ? bodyStart : selectionStart;
-    return cursorPosition;
+    const editor = editorRef.current;
+    if (!editor) return 0;
+
+    const model = editor.getModel();
+    if (!model) return 0;
+
+    const text = model.getValue();
+    const position = editor.getPosition();
+
+    if (!position) {
+      // If no cursor position, find the default insertion point
+      const textContent = "<!-- Add your content here -->";
+      let bodyStart = text.indexOf(textContent);
+      if (bodyStart !== -1) {
+        bodyStart += textContent.length + "\n".length;
+      }
+      return bodyStart !== -1 ? bodyStart : text.length;
+    }
+
+    // Convert position to offset
+    return model.getOffsetAt(position);
   };
 
   // Toggle nested field expansion
@@ -321,12 +345,17 @@ export default function TemplateBuilder({
 
     form.setValue("template_data", newTemplate);
 
-    // Set cursor position after React renders
+    // Set cursor position in Monaco editor after React renders
     setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.selectionStart = newCursorPos;
-        textareaRef.current.selectionEnd = newCursorPos;
-        textareaRef.current.focus();
+      const editor = editorRef.current;
+      if (editor) {
+        const model = editor.getModel();
+        if (model) {
+          const newPosition = model.getPositionAt(newCursorPos);
+          editor.setPosition(newPosition);
+          editor.focus();
+          editor.revealPositionInCenter(newPosition);
+        }
       }
     }, 0);
   };
@@ -507,27 +536,27 @@ export default function TemplateBuilder({
         </Form>
       </div>
 
-      <div className="flex-1 flex flex-col sm:flex-row">
+      <div className="flex-1 flex flex-col sm:flex-row overflow-hidden min-h-0">
         {/* Main Editor - 3/4 of screen */}
-        <div className="flex-2! p-4 overflow-auto">
+        <div className="flex-2! p-4 overflow-hidden flex flex-col min-h-0">
           {previewState.isActive ? (
             <PreviewContent
               previewData={previewState.data}
               format={previewState.format}
             />
           ) : (
-            <TemplateEditor form={form} textareaRef={textareaRef} />
+            <TemplateEditor form={form} onEditorMount={handleEditorMount} />
           )}
         </div>
 
         {/* Sidebar - 1/4 of screen */}
-        <div className="flex-1 border-l p-4 overflow-auto flex flex-col gap-4">
+        <div className="flex-1 border-l p-4 overflow-hidden flex flex-col gap-4 min-h-0">
           {/* Context Selector */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">{t("select_context")}</CardTitle>
+          <Card className="shrink-0">
+            <CardHeader className="py-2 px-3">
+              <CardTitle className="text-base">{t("select_context")}</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-3 pb-3 pt-0">
               <Select
                 value={selectedContext?.slug}
                 onValueChange={(value) =>
@@ -546,7 +575,7 @@ export default function TemplateBuilder({
                 </SelectContent>
               </Select>
               {selectedContext?.description && (
-                <p className="text-sm text-muted-foreground mt-2">
+                <p className="text-xs text-muted-foreground mt-1">
                   {selectedContext.description}
                 </p>
               )}
@@ -555,12 +584,12 @@ export default function TemplateBuilder({
 
           {/* Fields List */}
           {selectedContext && (
-            <Card className="flex-1 flex flex-col overflow-hidden">
-              <CardHeader>
+            <Card className="flex-1 flex flex-col overflow-hidden min-h-0">
+              <CardHeader className="shrink-0 py-3">
                 <CardTitle className="text-lg">{t("fields")}</CardTitle>
               </CardHeader>
-              <CardContent className="flex-1 overflow-hidden p-0">
-                <ScrollArea className="h-full">
+              <CardContent className="flex-1 overflow-hidden p-0 min-h-0">
+                <ScrollArea className="h-full max-h-full">
                   <div className="p-4 space-y-1">
                     {selectedContext.fields.map((field) => (
                       <FieldItem
@@ -680,28 +709,58 @@ function FieldItem({
 
 function TemplateEditor({
   form,
-  textareaRef,
+  onEditorMount,
 }: {
   form: UseFormReturn<z.infer<typeof templateBuilderSchema>>;
-  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
+  onEditorMount: OnMount;
 }) {
   const { t } = useTranslation();
+
   return (
     <Form {...form}>
       <FormField
         control={form.control}
         name="template_data"
-        render={({ field: { ...field } }) => (
-          <FormItem className="h-full flex flex-col">
-            <FormLabel>{t("template_html")}</FormLabel>
+        render={({ field }) => (
+          <FormItem className="h-full flex flex-col min-h-0">
+            <FormLabel className="shrink-0">{t("template_html")}</FormLabel>
             <FormControl>
-              <Textarea
-                {...field}
-                ref={textareaRef}
-                className="flex-1 font-mono text-sm resize-none"
-                placeholder={t("enter_template_html")}
-                spellCheck={false}
-              />
+              <div className="flex-1 min-h-0 h-full border rounded-md overflow-hidden">
+                <Editor
+                  height="100%"
+                  defaultLanguage="html"
+                  value={field.value}
+                  onChange={(value) => field.onChange(value ?? "")}
+                  onMount={onEditorMount}
+                  theme="vs-dark"
+                  options={{
+                    minimap: { enabled: false },
+                    fontSize: 14,
+                    fontFamily: "monospace",
+                    lineNumbers: "on",
+                    wordWrap: "on",
+                    automaticLayout: true,
+                    scrollBeyondLastLine: false,
+                    tabSize: 2,
+                    formatOnPaste: true,
+                    formatOnType: true,
+                    bracketPairColorization: { enabled: true },
+                    autoClosingBrackets: "always",
+                    autoClosingQuotes: "always",
+                    folding: true,
+                    foldingHighlight: true,
+                    scrollbar: {
+                      vertical: "hidden",
+                      horizontal: "hidden",
+                      alwaysConsumeMouseWheel: false,
+                    },
+                    suggest: {
+                      showKeywords: true,
+                      showSnippets: true,
+                    },
+                  }}
+                />
+              </div>
             </FormControl>
           </FormItem>
         )}
