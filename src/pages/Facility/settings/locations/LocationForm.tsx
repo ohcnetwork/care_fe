@@ -90,7 +90,7 @@ export default function LocationForm({
     name: "",
     description: "",
     status: "active",
-    operational_status: "O",
+    operational_status: "U",
     form: "ro",
     parent: null,
     enableBulkCreation: false,
@@ -260,7 +260,7 @@ export default function LocationForm({
     { value: "H", label: "Housekeeping" },
     { value: "I", label: "Isolated" },
     { value: "K", label: "Contaminated" },
-    { value: "O", label: "Operational" },
+    { value: "O", label: "Occupied" },
     { value: "U", label: "Unoccupied" },
   ];
 

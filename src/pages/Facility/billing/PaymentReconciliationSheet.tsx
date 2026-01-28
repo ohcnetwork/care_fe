@@ -9,7 +9,13 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
-import { Banknote, CreditCard, Landmark, Signature } from "lucide-react";
+import {
+  Banknote,
+  BanknoteArrowUp,
+  CreditCard,
+  Landmark,
+  Signature,
+} from "lucide-react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -99,6 +105,11 @@ const PAYMENT_METHODS = [
     value: PaymentReconciliationPaymentMethod.chck,
     icon: Signature,
     label: "check",
+  },
+  {
+    value: PaymentReconciliationPaymentMethod.cdac,
+    icon: BanknoteArrowUp,
+    label: "credit_account",
   },
 ] as const;
 
