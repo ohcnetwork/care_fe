@@ -48,7 +48,7 @@ function ProductKnowledgeCard({
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <div className="flex flex-col gap-3">
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
               <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
@@ -56,7 +56,7 @@ function ProductKnowledgeCard({
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center space-x-2 mb-1">
+              <div className="flex items-center flex-wrap gap-2 mb-1">
                 <Badge
                   variant={PRODUCT_KNOWLEDGE_TYPE_COLORS[product.product_type]}
                   className="text-xs"
@@ -70,7 +70,7 @@ function ProductKnowledgeCard({
                   {t(product.status)}
                 </Badge>
               </div>
-              <h3 className="font-medium text-gray-900 truncate text-lg">
+              <h3 className="font-medium text-gray-900 text-lg">
                 {product.name}
               </h3>
               {product.alternate_identifier && (
@@ -86,7 +86,7 @@ function ProductKnowledgeCard({
               )}
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 ml-auto">
+          <div className="flex justify-end gap-2 sm:justify-start sm:pl-14">
             <ProductKnowledgeActionButtons
               product={product}
               facilityId={facilityId}
