@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 
 import Loading from "@/components/Common/Loading";
+import PrintFooter from "@/components/Common/PrintFooter";
 
 import query from "@/Utils/request/query";
 import {
@@ -223,11 +224,7 @@ export function PrintAppointments({
         </div>
 
         {/* Footer */}
-        <div className="mt-12 pt-4 border-t text-[10px] text-gray-500 flex justify-between">
-          <p>
-            {t("generated_on")} {format(new Date(), "PPP 'at' p")}
-          </p>
-        </div>
+        <PrintFooter className="mt-12 pt-4 border-t" />
       </div>
     </PrintPreview>
   );

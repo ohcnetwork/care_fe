@@ -1,36 +1,37 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, SquareActivity, Stethoscope, Ticket } from "lucide-react";
-import { useQueryParams } from "raviger";
-import { useTranslation } from "react-i18next";
-
-import { useShortcutSubContext } from "@/context/ShortcutContext";
-
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-
 import {
   CardGridSkeleton,
   CardListSkeleton,
 } from "@/components/Common/SkeletonLoading";
-import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
-import CreateTokenForm from "@/components/Tokens/CreateTokenForm";
-import PatientTokensList from "@/components/Tokens/PatientTokensList";
-import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
-import PatientHomeTabs from "./home/PatientHomeTabs";
-
-import useAppHistory from "@/hooks/useAppHistory";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  AlertCircle,
+  SquareActivity,
+  Stethoscope,
+  Ticket,
+  Wallet,
+} from "lucide-react";
 
 import { getPermissions } from "@/common/Permissions";
-
-import { usePermissions } from "@/context/PermissionContext";
-
+import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
+import CreateTokenForm from "@/components/Tokens/CreateTokenForm";
+import PatientTokensList from "@/components/Tokens/PatientTokensList";
+import { Button } from "@/components/ui/button";
+import { usePermissions } from "@/context/PermissionContext";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
+import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { PLUGIN_Component } from "@/PluginEngine";
 import patientApi from "@/types/emr/patient/patientApi";
 import query from "@/Utils/request/query";
+import careConfig from "@careConfig";
+import { useQueryParams } from "raviger";
+import { useTranslation } from "react-i18next";
+import PatientHomeTabs from "./home/PatientHomeTabs";
 
 export default function VerifyPatient() {
   useShortcutSubContext("facility:patient:home");
@@ -38,7 +39,7 @@ export default function VerifyPatient() {
   const [qParams] = useQueryParams();
   const queryClient = useQueryClient();
 
-  const { phone_number, year_of_birth, partial_id } = qParams;
+  const { phone_number, year_of_birth, partial_id, from_queue } = qParams;
   const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
   const { hasPermission } = usePermissions();
@@ -59,9 +60,9 @@ export default function VerifyPatient() {
   } = useQuery({
     queryKey: ["patient-verify", phone_number, year_of_birth, partial_id],
     queryFn: query(patientApi.searchRetrieve, {
-      body: { phone_number, year_of_birth, partial_id },
+      body: { phone_number: phone_number ?? "", year_of_birth, partial_id },
     }),
-    enabled: !!(phone_number && year_of_birth && partial_id),
+    enabled: !!(year_of_birth && partial_id),
   });
 
   if (isVerifyingPatient || !facility) {
@@ -74,7 +75,7 @@ export default function VerifyPatient() {
   }
   return (
     <div>
-      {!phone_number || !year_of_birth || !partial_id ? (
+      {!year_of_birth || !partial_id ? (
         <Alert variant="destructive">
           <AlertCircle className="size-4" />
           <AlertDescription>
@@ -118,6 +119,7 @@ export default function VerifyPatient() {
                     patientId={patientData.id}
                     facilityId={facilityId}
                     patientName={patientData.name}
+                    defaultOpen={from_queue === "true"}
                     trigger={
                       <QuickAction
                         icon={<SquareActivity className="text-orange-500" />}
@@ -142,19 +144,27 @@ export default function VerifyPatient() {
                   />
                 )}
 
-                {canWriteToken && (
-                  <CreateTokenForm
-                    patient={patientData}
-                    facilityId={facilityId}
-                    trigger={
-                      <QuickAction
-                        icon={<Ticket className="text-gray-500" />}
-                        title={t("generate_token")}
-                        actionId="generate-token"
-                      />
-                    }
-                  />
-                )}
+                {canWriteToken &&
+                  careConfig.enableTokenGenerationInPatientHome && (
+                    <CreateTokenForm
+                      patient={patientData}
+                      facilityId={facilityId}
+                      trigger={
+                        <QuickAction
+                          icon={<Ticket className="text-gray-500" />}
+                          title={t("generate_token")}
+                          actionId="generate-token"
+                        />
+                      }
+                    />
+                  )}
+
+                <QuickAction
+                  icon={<Wallet />}
+                  title={t("view_accounts")}
+                  actionId="view-the-accounts"
+                  href={`/facility/${facilityId}/billing/account?status=active&patient_filter=${patientData.id}&patient_name=${patientData.name}`}
+                />
               </div>
 
               <PatientHomeTabs

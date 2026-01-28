@@ -421,7 +421,7 @@ export default function DeliveryOrderForm({
                     name="tags"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("tags_other")}</FormLabel>
+                        <FormLabel>{t("tags_proper")}</FormLabel>
                         <FormControl>
                           <TagSelectorPopover
                             selected={selectedTags}

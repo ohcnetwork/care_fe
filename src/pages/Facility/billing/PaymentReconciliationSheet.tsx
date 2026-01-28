@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 import { useAtom } from "jotai";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -40,11 +40,18 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
-import { locationAtomFamily } from "@/atoms/location-atom";
+import { paymentReconcilationLocationAtom } from "@/atoms/paymentReconcilationLocationAtom";
 import { LocationPicker } from "@/components/Location/LocationPicker";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import {
+  ExtensionEntityType,
+  getCombinedExtensionProps,
+  NamespacedExtensionData,
+  useEntityExtensions,
+  useExtensionSchemas,
+} from "@/hooks/useExtensions";
 import { AccountRead } from "@/types/billing/account/Account";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import {
@@ -57,8 +64,15 @@ import {
   PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import {
+  isGreaterThanOrEqual,
+  isPositive,
+  round,
+  zodDecimal,
+} from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
+import Decimal from "decimal.js";
 
 const PAYMENT_METHODS = [
   {
@@ -114,52 +128,49 @@ interface PaymentReconciliationSheetProps {
   isCreditNote?: boolean;
 }
 
-const createFormSchema = () =>
-  z
-    .object({
-      reconciliation_type: z.nativeEnum(PaymentReconciliationType),
-      status: z.nativeEnum(PaymentReconciliationStatus),
-      kind: z.nativeEnum(PaymentReconciliationKind),
-      issuer_type: z.nativeEnum(PaymentReconciliationIssuerType),
-      outcome: z.nativeEnum(PaymentReconciliationOutcome),
-      method: z.nativeEnum(PaymentReconciliationPaymentMethod),
-      payment_datetime: z
-        .string()
-        .refine((val) => new Date(val) <= new Date(), {
-          message: t("payment_date_cannot_be_in_future"),
-        }),
-      amount: z.string().refine(
-        (val) => {
-          const num = Number(val);
-          return !isNaN(num) && num > 0 && /^\d+(\.\d{0,2})?$/.test(val);
-        },
-        { message: t("enter_valid_amount") },
-      ),
-      tendered_amount: z.string().refine(
-        (val) => {
-          const num = Number(val);
-          return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
-        },
-        {
-          message: t("enter_valid_amount"),
-        },
-      ),
-      returned_amount: z.string().optional(),
-      target_invoice: z.string().optional(),
-      reference_number: z.string().optional(),
-      authorization: z.string().optional(),
-      disposition: z.string().optional(),
-      note: z.string().optional(),
-      account: z.string(),
-      is_credit_note: z.boolean().optional(),
-      location: careConfig.paymentLocationRequired
-        ? z.string().min(1)
-        : z.string().optional(),
+const createBaseSchema = () =>
+  z.object({
+    reconciliation_type: z.nativeEnum(PaymentReconciliationType),
+    status: z.nativeEnum(PaymentReconciliationStatus),
+    kind: z.nativeEnum(PaymentReconciliationKind),
+    issuer_type: z.nativeEnum(PaymentReconciliationIssuerType),
+    outcome: z.nativeEnum(PaymentReconciliationOutcome),
+    method: z.nativeEnum(PaymentReconciliationPaymentMethod),
+    payment_datetime: z.string().refine((val) => new Date(val) <= new Date(), {
+      message: t("payment_date_cannot_be_in_future"),
+    }),
+    amount: zodDecimal({ min: 0 }),
+    tendered_amount: zodDecimal({ min: 0 }),
+    returned_amount: zodDecimal({ min: 0 }).optional(),
+    target_invoice: z.string().optional(),
+    reference_number: z.string().optional(),
+    authorization: z.string().optional(),
+    disposition: z.string().optional(),
+    note: z.string().optional(),
+    account: z.string(),
+    is_credit_note: z.boolean().optional(),
+    location: careConfig.paymentLocationRequired
+      ? z.string().min(1, t("field_required"))
+      : z.string().optional(),
+  });
+
+const createFormSchema = (extValidation: z.ZodType<Record<string, unknown>>) =>
+  createBaseSchema()
+    .extend({
+      extensions: extValidation.optional(),
     })
-    .refine((data) => Number(data.tendered_amount) >= Number(data.amount), {
-      message: t("tender_amount_cannot_be_less_than_payment_amount"),
-      path: ["tendered_amount"],
-    });
+    .refine(
+      (data) => {
+        if (!data.tendered_amount || !data.amount) {
+          return true;
+        }
+        return isGreaterThanOrEqual(data.tendered_amount, data.amount);
+      },
+      {
+        message: t("tender_amount_cannot_be_less_than_payment_amount"),
+        path: ["tendered_amount"],
+      },
+    );
 
 export function PaymentReconciliationSheet({
   open,
@@ -174,13 +185,35 @@ export function PaymentReconciliationSheet({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedLocationObject, setSelectedLocationObject] = useAtom(
-    locationAtomFamily(facilityId),
+    paymentReconcilationLocationAtom(facilityId),
   );
   useShortcutSubContext();
 
-  const formSchema = createFormSchema();
-  const form = useForm<z.infer<typeof formSchema>>({
+  const { getExtensions, isLoading: isExtensionsLoading } =
+    useExtensionSchemas();
+
+  const ext = useMemo(
+    () =>
+      getCombinedExtensionProps(
+        getExtensions(ExtensionEntityType.payment_reconciliation, "write"),
+      ),
+    [getExtensions],
+  );
+
+  const formSchema = useMemo(
+    () => createFormSchema(ext.validation),
+    [ext.validation],
+  );
+
+  type FormValues = z.infer<typeof formSchema>;
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+  });
+
+  const extensions = useEntityExtensions({
+    entityType: ExtensionEntityType.payment_reconciliation,
+    schemaType: "write",
+    form,
   });
 
   // Watch for payment method changes
@@ -196,10 +229,10 @@ export function PaymentReconciliationSheet({
   useEffect(() => {
     if (isCashPayment) {
       // For cash payments, calculate change to return
-      const returned = String(
-        Math.max(0, Number(tenderedAmount || 0) - (Number(amount) || 0)),
+      form.setValue(
+        "returned_amount",
+        round(Decimal.max(0, tenderedAmount || "0").minus(amount || "0")),
       );
-      form.setValue("returned_amount", returned);
     } else {
       // For non-cash payments, tendered amount equals payment amount and returned is 0
       form.setValue("tendered_amount", amount || "0");
@@ -219,7 +252,11 @@ export function PaymentReconciliationSheet({
       pathParams: { facilityId },
     }),
     onSuccess: () => {
-      toast.success(t("payment_recorded_successfully"));
+      toast.success(
+        isCreditNote
+          ? t("refund_recorded_successfully")
+          : t("payment_recorded_successfully"),
+      );
 
       // Invalidate relevant queries
       if (invoice) {
@@ -249,22 +286,26 @@ export function PaymentReconciliationSheet({
   });
 
   const handleSubmit = form.handleSubmit((data) => {
+    const { extensions: formExtensions, ...restData } = data;
+    const cleanedExtensions = extensions.prepareForSubmit(
+      formExtensions as NamespacedExtensionData,
+    );
+
     // Convert form data to PaymentReconciliationCreate type
     const submissionData: PaymentReconciliationCreate = {
-      ...data,
-      // Ensure amount strings are properly formatted
-      amount: Number(data.amount).toFixed(2),
-      tendered_amount: Number(data.tendered_amount).toFixed(2),
-      returned_amount: Number(data.returned_amount).toFixed(2),
+      ...restData,
       is_credit_note: isCreditNote,
-      location: data.location,
+      location: restData.location,
+      extensions: cleanedExtensions,
     };
     submitPayment(submissionData);
   });
 
   useEffect(() => {
     if (open) {
-      const initialAmount = String(invoice?.total_gross || "0");
+      const initialAmount = invoice?.total_gross
+        ? round(new Decimal(invoice.total_gross).abs())
+        : "";
       form.reset({
         reconciliation_type: invoice
           ? PaymentReconciliationType.payment
@@ -273,7 +314,7 @@ export function PaymentReconciliationSheet({
         kind: PaymentReconciliationKind.deposit,
         issuer_type: PaymentReconciliationIssuerType.patient,
         outcome: PaymentReconciliationOutcome.complete,
-        method: PaymentReconciliationPaymentMethod.cash,
+        method: undefined,
         payment_datetime: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
         amount: initialAmount,
         tendered_amount: initialAmount,
@@ -286,21 +327,31 @@ export function PaymentReconciliationSheet({
         account: accountId,
         is_credit_note: isCreditNote,
         location: selectedLocationObject?.id,
+        extensions: ext.defaults,
       });
     }
-  }, [open, invoice, accountId, isCreditNote]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, invoice, accountId, isCreditNote, ext.defaults]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full max-w-md sm:max-w-lg overflow-y-auto pb-0">
         <SheetHeader>
-          <SheetTitle className="m-0">{t("record_payment")}</SheetTitle>
+          <SheetTitle className="m-0">
+            {isCreditNote ? t("record_credit_note") : t("record_payment")}
+          </SheetTitle>
           <SheetDescription className="text-gray-700">
             {invoice
-              ? t("recording_payment_for_invoice", {
-                  id: invoice.number,
-                })
-              : t("recording_payment")}
+              ? isCreditNote
+                ? t("recording_refund_for_invoice", {
+                    id: invoice.number,
+                  })
+                : t("recording_payment_for_invoice", {
+                    id: invoice.number,
+                  })
+              : isCreditNote
+                ? t("recording_refund")
+                : t("recording_payment")}
           </SheetDescription>
         </SheetHeader>
 
@@ -312,7 +363,7 @@ export function PaymentReconciliationSheet({
                   <div className="flex text-sm justify-center text-gray-700">
                     {t("invoice_total")}:
                     <p className="font-bold ml-1">
-                      <MonetaryDisplay amount={String(invoice.total_gross)} />
+                      <MonetaryDisplay amount={invoice.total_gross} />
                     </p>
                   </div>
                 )}
@@ -321,12 +372,12 @@ export function PaymentReconciliationSheet({
                   {invoice ? (
                     <>
                       <p className="text-sm text-gray-600 mb-1">
-                        {t("payment_received")}
+                        {isCreditNote
+                          ? t("refund_given")
+                          : t("payment_received")}
                       </p>
                       <p className="text-3xl font-bold text-gray-900">
-                        <MonetaryDisplay
-                          amount={String(invoice.total_payments)}
-                        />
+                        <MonetaryDisplay amount={invoice.total_payments} />
                       </p>
                     </>
                   ) : (
@@ -335,9 +386,7 @@ export function PaymentReconciliationSheet({
                         {t("balance_due")}
                       </p>
                       <p className="text-3xl font-bold text-gray-900">
-                        <MonetaryDisplay
-                          amount={String(account?.total_balance)}
-                        />
+                        <MonetaryDisplay amount={account?.total_balance} />
                       </p>
                     </>
                   )}
@@ -425,6 +474,43 @@ export function PaymentReconciliationSheet({
                 )}
               />
 
+              {!isCreditNote && (
+                <FormField
+                  control={form.control}
+                  name="issuer_type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-950">
+                        {t("issuer_type")}
+                      </FormLabel>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        className="flex flex-wrap"
+                      >
+                        {Object.values(PaymentReconciliationIssuerType).map(
+                          (type) => (
+                            <Label
+                              key={type}
+                              className="flex cursor-pointer gap-2 items-center justify-center rounded-md border border-gray-400 shadow-sm p-2.5 outline-none has-checked:border-primary-600 has-checked:bg-primary-100/50"
+                            >
+                              <RadioGroupItem
+                                value={type}
+                                aria-label={`issuer-type-${type}`}
+                              />
+                              <span className="text-sm font-medium text-gray-950">
+                                {t(type)}
+                              </span>
+                            </Label>
+                          ),
+                        )}
+                      </RadioGroup>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
               <FormField
                 control={form.control}
                 name="location"
@@ -456,7 +542,7 @@ export function PaymentReconciliationSheet({
                 render={({ field }) => (
                   <FormItem className="gap-1.5">
                     <FormLabel className="text-gray-950">
-                      {t("amount_paid")}
+                      {isCreditNote ? t("refund_amount") : t("amount_paid")}
                     </FormLabel>
                     <FormControl>
                       <MonetaryAmountInput
@@ -502,7 +588,7 @@ export function PaymentReconciliationSheet({
                     )}
                   />
 
-                  {Number(form.watch("returned_amount")) > 0 && (
+                  {isPositive(form.watch("returned_amount") || "0") && (
                     <div className="rounded-md bg-yellow-50 border border-yellow-500 p-2 mt-2">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-yellow-950">
@@ -583,6 +669,8 @@ export function PaymentReconciliationSheet({
                   </FormItem>
                 )}
               />
+
+              {extensions.fields}
             </div>
 
             <SheetFooter className="sticky bottom-0 bg-white p-4 border-t border-gray-200 -mx-6">
@@ -599,8 +687,10 @@ export function PaymentReconciliationSheet({
 
                 <Button
                   type="submit"
-                  disabled={isPending}
-                  aria-label={t("record_payment")}
+                  disabled={isPending || isExtensionsLoading}
+                  aria-label={
+                    isCreditNote ? t("record_credit_note") : t("record_payment")
+                  }
                 >
                   {isPending ? (
                     <>
@@ -610,6 +700,8 @@ export function PaymentReconciliationSheet({
                       />
                       {t("processing_with_dots")}
                     </>
+                  ) : isCreditNote ? (
+                    t("record_credit_note")
                   ) : (
                     t("record_payment")
                   )}

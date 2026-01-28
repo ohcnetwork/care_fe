@@ -1,13 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { EyeIcon } from "lucide-react";
+import { ArrowUpRightSquare } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -23,14 +21,15 @@ import {
 import useFilters from "@/hooks/useFilters";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
+import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  ENCOUNTER_CLASSES_COLORS,
-  ENCOUNTER_STATUS_COLORS,
-} from "@/types/emr/encounter/encounter";
-import { MedicationDispenseSummary } from "@/types/emr/medicationDispense/medicationDispense";
-import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
+  DISPENSE_ORDER_STATUS_STYLES,
+  DispenseOrderRead,
+} from "@/types/emr/dispenseOrder/dispenseOrder";
+import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
+import query from "@/Utils/request/query";
+import { formatDateTime } from "@/Utils/utils";
 
 export default function MedicationDispenseHistory({
   facilityId,
@@ -40,28 +39,24 @@ export default function MedicationDispenseHistory({
   locationId: string;
 }) {
   const { t } = useTranslation();
-  const { qParams, updateQuery } = useFilters({
+  const { qParams, Pagination, updateQuery, resultsPerPage } = useFilters({
     limit: 14,
     disableCache: true,
   });
 
-  const { data: prescriptionQueue, isLoading } = useQuery<
-    PaginatedResponse<MedicationDispenseSummary>
-  >({
-    queryKey: ["medicationDispenseSummary", facilityId, locationId, qParams],
-    queryFn: query.debounced(medicationDispenseApi.summary, {
+  const { data: dispenseOrderQueue, isLoading } = useQuery({
+    queryKey: ["dispenseOrderQueue", facilityId, locationId, qParams],
+    queryFn: query.debounced(dispenseOrderApi.list, {
       pathParams: { facilityId },
       queryParams: {
         location: locationId,
-        search: qParams.search,
-        priority: qParams.priority,
-        encounter_class: qParams.category,
-        limit: qParams.limit,
-        offset: ((qParams.page ?? 1) - 1) * (qParams.limit ?? 14),
+        patient: qParams.patientId,
         status:
           qParams.exclude_status === "history"
-            ? "completed,cancelled,entered_in_error,stopped,declined"
-            : "preparation,in_progress,on_hold",
+            ? "completed,entered_in_error,abandoned"
+            : "draft,in_progress",
+        limit: resultsPerPage,
+        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
       },
     }),
   });
@@ -76,7 +71,7 @@ export default function MedicationDispenseHistory({
   } as const;
 
   return (
-    <Page title={t("medication_dispense")}>
+    <Page title={t("dispense_orders")}>
       <div className="mb-4 pt-6">
         <Tabs
           value={qParams.exclude_status || "pending"}
@@ -97,20 +92,23 @@ export default function MedicationDispenseHistory({
         </Tabs>
       </div>
       <div className="flex items-center gap-4 mb-6">
-        <div className="flex-1">
-          <Input
-            placeholder={t("search_by_patient_name_id_or_prescription")}
-            value={qParams.search}
-            onChange={(e) => updateQuery({ search: e.target.value })}
-            className="w-full"
-          />
-        </div>
+        <PatientIdentifierFilter
+          onSelect={(patientId, patientName) =>
+            updateQuery({
+              patientId: patientId,
+              patient_name: patientName,
+            })
+          }
+          placeholder={t("filter_by_identifier")}
+          className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
+          patientId={qParams.patientId}
+          patientName={qParams.patient_name}
+        />
       </div>
-
-      <div>
+      <div className="mt-4">
         {isLoading ? (
           <TableSkeleton count={5} />
-        ) : prescriptionQueue?.results?.length === 0 ? (
+        ) : dispenseOrderQueue?.results?.length === 0 ? (
           <EmptyState
             icon={
               <CareIcon
@@ -118,68 +116,62 @@ export default function MedicationDispenseHistory({
                 className="text-primary size-6"
               />
             }
-            title={t("no_prescriptions_found")}
-            description={t("no_prescriptions_found_description")}
+            title={t("no_dispense_orders_found")}
+            description={t("no_dispense_orders_found_description")}
           />
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>{t("patient_name")}</TableHead>
-                <TableHead>{t("category")}</TableHead>
-                <TableHead>{t("encounter_status")}</TableHead>
-                <TableHead>{t("medications")}</TableHead>
+                <TableHead>{t("status")}</TableHead>
+                <TableHead>{t("location")}</TableHead>
                 <TableHead>{t("action")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {prescriptionQueue?.results?.map(
-                (item: MedicationDispenseSummary) => (
-                  <TableRow key={item.encounter.id}>
-                    <TableCell className="font-semibold">
-                      {item.encounter.patient.name}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          ENCOUNTER_CLASSES_COLORS[
-                            item.encounter.encounter_class
-                          ]
-                        }
-                      >
-                        {t(
-                          `encounter_class__${item.encounter.encounter_class}`,
-                        )}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={ENCOUNTER_STATUS_COLORS[item.encounter.status]}
-                      >
-                        {t(`encounter_status__${item.encounter.status}`)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{item.count}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outline"
-                        className="font-semibold"
-                        onClick={() => {
-                          navigate(
-                            `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${item.encounter.patient.id}/preparation`,
-                          );
-                        }}
-                      >
-                        <EyeIcon />
-                        {t("view")}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ),
-              )}
+              {dispenseOrderQueue?.results?.map((item: DispenseOrderRead) => (
+                <TableRow key={item.id}>
+                  <TableCell className="font-semibold">
+                    {item.patient.name}
+                    <div className="text-xs text-gray-500">
+                      {t("created_at")}: {formatDateTime(item.created_date)}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={DISPENSE_ORDER_STATUS_STYLES[item.status]}>
+                      {t(`dispense_order_status__${item.status}`)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    <div className="font-medium">{item.location.name}</div>
+                    <div className="text-xs text-gray-500">
+                      {item.location.description}
+                    </div>
+                  </TableCell>
+
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      className="font-semibold"
+                      onClick={() => {
+                        navigate(
+                          `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${item.id}`,
+                        );
+                      }}
+                    >
+                      <ArrowUpRightSquare strokeWidth={1.5} />
+                      {t("view_order")}
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         )}
+      </div>
+      <div className="mt-8 flex justify-center">
+        <Pagination totalCount={dispenseOrderQueue?.count || 0} />
       </div>
     </Page>
   );

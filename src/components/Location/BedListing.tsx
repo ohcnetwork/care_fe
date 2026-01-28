@@ -31,7 +31,7 @@ export function BedListing({
       className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
     >
       {beds.map((bed) => {
-        const isAvailable = !bed.current_encounter;
+        const isAvailable = bed.system_availability_status === "available";
         const isDischargedBed = bed.current_encounter?.status === "discharged";
         const isSelected = selectedBed === bed.id;
         const isClickable = isAvailable || isDischargedBed;

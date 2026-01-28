@@ -17,6 +17,7 @@ import {
   SPECIMEN_STATUS_COLORS,
   SpecimenRead,
 } from "@/types/emr/specimen/specimen";
+import { round } from "@/Utils/decimal";
 
 interface SpecimenHistorySheetProps {
   specimens: SpecimenRead[];
@@ -79,7 +80,7 @@ export function SpecimenHistorySheet({
                         <p className="text-gray-500">{t("quantity")}</p>
                         <p>
                           {specimen.collection?.quantity
-                            ? `${specimen.collection.quantity.value} ${specimen.collection.quantity.unit.display}`
+                            ? `${round(specimen.collection.quantity.value)} ${specimen.collection.quantity.unit.display}`
                             : "-"}
                         </p>
                       </div>

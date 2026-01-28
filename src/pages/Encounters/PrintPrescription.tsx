@@ -5,9 +5,7 @@ import Loading from "@/components/Common/Loading";
 import { PrescriptionPreview } from "@/components/Prescription/PrescriptionPreview";
 
 import query from "@/Utils/request/query";
-import encounterApi from "@/types/emr/encounter/encounterApi";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
-import patientApi from "@/types/emr/patient/patientApi";
 import { groupMedicationsByPrescription } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 
@@ -29,23 +27,6 @@ export const PrintPrescription = (props: {
     enabled: !!prescriptionId,
   });
 
-  const { data: encounter } = useQuery({
-    queryKey: ["encounter", encounterId],
-    queryFn: query(encounterApi.get, {
-      pathParams: { id: encounterId || prescription?.encounter?.id || "" },
-      queryParams: { facility: facilityId },
-    }),
-    enabled: !!encounterId || !!prescription?.encounter?.id,
-  });
-
-  const { data: patient, isLoading: patientLoading } = useQuery({
-    queryKey: ["patient", patientId],
-    queryFn: query(patientApi.get, {
-      pathParams: { id: patientId || "" },
-    }),
-    enabled: !!patientId,
-  });
-
   const { data: activeMedications, isLoading: medicationLoading } = useQuery({
     queryKey: ["medication_requests_active", patientId],
     queryFn: query.paginated(medicationRequestApi.list, {
@@ -60,11 +41,10 @@ export const PrintPrescription = (props: {
     enabled: !!patientId && !!encounterId && !!facilityId && !prescriptionId,
   });
 
-  if (patientLoading || isLoading || medicationLoading) return <Loading />;
+  if (isLoading || medicationLoading) return <Loading />;
 
   if (
-    (!encounter && !prescription) ||
-    !patient ||
+    !prescription ||
     (!prescriptionId && !activeMedications?.results?.length) ||
     (prescriptionId && !prescription)
   ) {
@@ -83,9 +63,9 @@ export const PrintPrescription = (props: {
 
   return (
     <PrescriptionPreview
-      encounter={encounter}
+      encounter={prescription.encounter}
       prescriptions={groupedByPrescription}
-      patient={patient}
+      patient={prescription.encounter.patient}
     />
   );
 };

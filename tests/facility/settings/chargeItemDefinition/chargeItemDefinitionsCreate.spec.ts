@@ -32,9 +32,7 @@ test.describe("Charge Item Definition Creation", () => {
     await page.goto(
       `/facility/${facilityId}/settings/charge_item_definitions/`,
     );
-    await page
-      .getByRole("textbox", { name: "Search categories..." })
-      .fill(categoryName);
+    await page.getByRole("textbox", { name: "Search" }).fill(categoryName);
     await page.getByRole("heading", { name: categoryName }).click();
   });
 
