@@ -267,7 +267,7 @@ export function ChargeItemsTable({
             {
               key: "title",
               type: "text",
-              placeholder: t("search_by_title"),
+              placeholder: t("search_by_item"),
               value: qParams.title || "",
               display: t("title"),
             },
