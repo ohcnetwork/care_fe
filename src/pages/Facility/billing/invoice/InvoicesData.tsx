@@ -161,7 +161,7 @@ export default function InvoicesData({
                   <TableCell>
                     <div>
                       {formatDateTime(
-                        invoice.modified_date,
+                        invoice.created_date,
                         "DD/MM/YY, hh:mm A",
                       )}
                     </div>
