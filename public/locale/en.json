@@ -460,6 +460,7 @@
   "add_medication_other": "Add another Medication",
   "add_medication_to_template_description": "Select a template to add \"{{medication}}\" to:",
   "add_medications_after_creating": "You can add medications to this template after creating it, by using the 'Add to template' option in the medication row actions.",
+  "add_medications_to_bill_description": "Use the field below to add medications to this bill",
   "add_medications_to_prefill": "Add medications to prefill",
   "add_member": "Add Member",
   "add_more_instructions": "Add more instructions",
