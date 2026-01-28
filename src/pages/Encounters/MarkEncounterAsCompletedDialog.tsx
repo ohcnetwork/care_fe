@@ -27,13 +27,20 @@ export function MarkEncounterAsCompletedDialog(
 
   if (!encounter) return null;
 
+  const toDischarge =
+    encounter.encounter_class === "imp" && encounter.status !== "discharged";
+
   return (
     <AlertDialog {...props}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{t("mark_as_complete")}</AlertDialogTitle>
+          <AlertDialogTitle>
+            {toDischarge ? t("mark_for_discharge") : t("mark_as_complete")}
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            {t("mark_encounter_as_complete_confirmation")}
+            {toDischarge
+              ? t("mark_encounter_as_discharge_confirmation")
+              : t("mark_encounter_as_complete_confirmation")}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -48,7 +55,7 @@ export function MarkEncounterAsCompletedDialog(
             className={buttonVariants({ variant: "primary" })}
             onClick={() => endEncounter(encounter, true)}
           >
-            {t("mark_as_complete")}
+            {toDischarge ? t("mark_for_discharge") : t("mark_as_complete")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

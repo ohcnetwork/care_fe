@@ -38,6 +38,7 @@ type CompleteEncounterVariables = {
     AppointmentUpdateRequest | TokenUpdate | EncounterEdit
   >["requests"];
   encounter?: EncounterRead;
+  toDischarge?: boolean;
 };
 
 export function useEndEncounter() {
@@ -67,7 +68,11 @@ export function useEndEncounter() {
             (result) => result.reference_id === "encounter-closed",
           )
         ) {
-          toast.success(t("encounter_marked_as_complete"));
+          toast.success(
+            variables.toDischarge
+              ? t("encounter_discharged_successfully")
+              : t("encounter_marked_as_complete"),
+          );
           return;
         }
         if (
@@ -89,6 +94,9 @@ export function useEndEncounter() {
       AppointmentUpdateRequest | TokenUpdate | EncounterEdit
     >["requests"] = [];
 
+    const toDischarge =
+      encounter.encounter_class === "imp" && encounter.status !== "discharged";
+
     if (completeEncounter) {
       requests.push({
         url: encounterApi.update.path.replace("{id}", encounter.id),
@@ -96,7 +104,9 @@ export function useEndEncounter() {
         reference_id: "encounter-closed",
         body: {
           ...encounter,
-          status: EncounterStatus.COMPLETED,
+          status: toDischarge
+            ? EncounterStatus.DISCHARGED
+            : EncounterStatus.COMPLETED,
           period: {
             start: encounter.period.start,
             end: encounter.period.end
@@ -137,8 +147,11 @@ export function useEndEncounter() {
       });
     }
 
-    batchRequest({ requests, encounter });
+    batchRequest({ requests, encounter, toDischarge });
   };
 
-  return { endEncounter, isPending: isBatchRequestPending };
+  return {
+    endEncounter,
+    isPending: isBatchRequestPending,
+  };
 }
