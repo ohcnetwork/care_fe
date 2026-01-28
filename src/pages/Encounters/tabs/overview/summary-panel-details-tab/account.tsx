@@ -33,12 +33,12 @@ export const Account = () => {
     queryFn: query(accountApi.defaultAccount, {
       pathParams: { facilityId: facilityId || "" },
       body: {
-        patient: patientId || "",
+        patient: patientId,
         facility: facilityId || "",
         encounter: encounter?.id || "",
       },
     }),
-    enabled: !!facilityId && !!patientId && !!encounter?.id,
+    enabled: !!facilityId && !!encounter?.id,
   });
 
   const account = response;
