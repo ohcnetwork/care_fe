@@ -14,7 +14,6 @@ import { usePermissions } from "@/context/PermissionContext";
 import { DisablingCover } from "@/components/Common/DisablingCover";
 import PrintFooter from "@/components/Common/PrintFooter";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   Select,
@@ -55,7 +54,7 @@ import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/pa
 
 import { add, multiply, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
-import { formatDateTime, formatPatientAge } from "@/Utils/utils";
+import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 
 interface DetailRowProps {
   label: string;
@@ -106,11 +105,21 @@ export const PrintChargeItems = (props: {
   const [showStatus, setShowStatus] = useState(false);
   const [groupByParentCategory, setGroupByParentCategory] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedStatuses, setSelectedStatuses] = useState<ChargeItemStatus[]>([
-    ChargeItemStatus.billable,
-    ChargeItemStatus.billed,
-    ChargeItemStatus.paid,
-  ]);
+  const [showAllStatuses, setShowAllStatuses] = useState(false);
+  const selectedStatuses = showAllStatuses
+    ? [
+        ChargeItemStatus.billable,
+        ChargeItemStatus.billed,
+        ChargeItemStatus.paid,
+        ChargeItemStatus.entered_in_error,
+        ChargeItemStatus.not_billable,
+        ChargeItemStatus.aborted,
+      ]
+    : [
+        ChargeItemStatus.billable,
+        ChargeItemStatus.billed,
+        ChargeItemStatus.paid,
+      ];
 
   const hideCategoryLabel = `${t("hide_category_grouping")}`;
   const hidePaymentTypeLabel = `${t("hide_payment_type_grouping")}`;
@@ -308,6 +317,20 @@ export const PrintChargeItems = (props: {
                 {showStatusLabel}
               </label>
             </div>
+
+            <div className="gap-2 flex items-center">
+              <Switch
+                id="show-all-statuses"
+                checked={showAllStatuses}
+                onCheckedChange={setShowAllStatuses}
+              />
+              <label
+                htmlFor="show-all-statuses"
+                className="cursor-pointer text-sm"
+              >
+                {t("include_cancelled")}
+              </label>
+            </div>
           </>
         )}
 
@@ -318,18 +341,14 @@ export const PrintChargeItems = (props: {
             const useParentCategory = groupByParentCategory || summaryMode;
             const categories = [
               ...new Set(
-                chargeItems.results
-                  .filter(
-                    (item) => item.status !== ChargeItemStatus.entered_in_error,
-                  )
-                  .map((item) => {
-                    const category = item.charge_item_definition?.category;
-                    return useParentCategory
-                      ? category?.parent?.title ||
-                          category?.title ||
-                          t("uncategorized")
-                      : category?.title || t("uncategorized");
-                  }),
+                chargeItems.results.map((item) => {
+                  const category = item.charge_item_definition?.category;
+                  return useParentCategory
+                    ? category?.parent?.title ||
+                        category?.title ||
+                        t("uncategorized")
+                    : category?.title || t("uncategorized");
+                }),
               ),
             ].sort();
 
@@ -367,35 +386,6 @@ export const PrintChargeItems = (props: {
               </div>
             );
           })()}
-
-        <div className="gap-4 flex items-center flex-wrap">
-          <label className="text-sm whitespace-nowrap">
-            {t("filter_by_status")}:
-          </label>
-          {Object.values(ChargeItemStatus).map((status) => (
-            <div key={status} className="flex items-center gap-1">
-              <Checkbox
-                id={`status-${status}`}
-                checked={selectedStatuses.includes(status)}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setSelectedStatuses([...selectedStatuses, status]);
-                  } else {
-                    setSelectedStatuses(
-                      selectedStatuses.filter((s) => s !== status),
-                    );
-                  }
-                }}
-              />
-              <label
-                htmlFor={`status-${status}`}
-                className="text-xs cursor-pointer uppercase"
-              >
-                {t(status)}
-              </label>
-            </div>
-          ))}
-        </div>
       </div>
       <PrintPreview
         title={t("charge_items")}
@@ -523,6 +513,15 @@ export const PrintChargeItems = (props: {
                               }
                               width="w-24"
                             />
+                            {account?.primary_encounter?.care_team?.[0] && (
+                              <DetailRow
+                                label={t("doctor")}
+                                value={formatName(
+                                  account.primary_encounter.care_team[0].member,
+                                )}
+                                width="w-24"
+                              />
+                            )}
                           </>
                         )}
                       </div>
@@ -583,13 +582,9 @@ export const PrintChargeItems = (props: {
                               </TableHeader>
                               <TableBody className="[&_tr]:border-0 [&_td]:p-0.5">
                                 {(() => {
-                                  // Group charge items by category, excluding entered_in_error items
+                                  // Group charge items by category
                                   const validItemsBeforeFilter =
-                                    chargeItems.results.filter(
-                                      (item) =>
-                                        item.status !==
-                                        ChargeItemStatus.entered_in_error,
-                                    );
+                                    chargeItems.results;
 
                                   // In summary mode, default to grouping by parent category
                                   const useParentCategory =
@@ -1073,7 +1068,10 @@ export const PrintChargeItems = (props: {
                     )}
 
                     {/* Footer Section */}
-                    <PrintFooter className="mt-4 border-t border-gray-200" />
+                    <PrintFooter
+                      showPreparedBy
+                      className="mt-4 border-t border-gray-200"
+                    />
                   </td>
                 </tr>
               </tbody>

@@ -2664,6 +2664,7 @@
   "in_transit": "In Transit",
   "inactive": "Inactive",
   "include": "Include",
+  "include_cancelled": "Include Cancelled",
   "include_rules": "Include rules",
   "includes_all_taxes": "Includes all applicable taxes",
   "incoming": "Incoming",
