@@ -35,6 +35,7 @@ import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/cha
 import {
   ChargeItemDefinitionBase,
   ChargeItemDefinitionRead,
+  ChargeItemDefinitionStatus,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
@@ -330,7 +331,7 @@ export function ChargeItemQuestion({
           listDefinitions={{
             queryFn: chargeItemDefinitionApi.listChargeItemDefinition,
             pathParams: { facilityId },
-            queryParams: { status: "active" },
+            queryParams: { status: ChargeItemDefinitionStatus.active },
           }}
           translationBaseKey="charge_item_definition"
         />

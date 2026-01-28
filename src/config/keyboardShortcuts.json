@@ -117,13 +117,15 @@
 
   ],
   "facility:inventory:delivery": [
-    { "key": "l", "action": "load-from-order", "description": "Load from Order", "when": "always" }
+    { "key": "l", "action": "load-from-order", "description": "Load from Order", "when": "always" },
+    { "key": "p", "action": "print-delivery-order", "description": "Print Delivery Order", "when": "always" }
   ],
   "facility:service": [
     { "key": "s", "action": "scan-button", "description": "Scan the QR code", "when": "always" },
     { "key": "c", "action": "collect-specimen", "description": "Collect Specimen", "when": "always" },
     { "key": "m", "action": "mark-as-complete", "description": "Mark as Complete", "when": "always" },
-    { "key": "r", "action": "view-report", "description": "View Report", "when": "always" }
+    { "key": "r", "action": "view-report", "description": "View Report", "when": "always" },
+    { "key": "p", "action": "print-report", "description": "Print Report", "when": "always" }
   ],
 
   "encounter": [

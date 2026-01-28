@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Pencil, Trash2 } from "lucide-react";
+import { ChevronDown, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -43,8 +43,8 @@ import {
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import {
+  ActivityDefinitionTemplateSpec,
   QuestionnaireResponseTemplateReadSpec,
-  ServiceRequestTemplateSpec,
 } from "@/types/questionnaire/questionnaireResponseTemplate";
 import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
 import { Decimal } from "decimal.js";
@@ -134,6 +134,8 @@ interface ServiceRequestFormProps {
   index?: number;
   activityDefinition?: ActivityDefinitionReadSpec;
   facilityId?: string;
+  requester?: UserReadMinimal;
+  onRequesterChange?: (user: UserReadMinimal | undefined) => void;
 }
 
 function ServiceRequestForm({
@@ -146,6 +148,8 @@ function ServiceRequestForm({
   index,
   activityDefinition,
   facilityId = "",
+  requester,
+  onRequesterChange,
 }: ServiceRequestFormProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -289,8 +293,13 @@ function ServiceRequestForm({
               <div className="space-y-2">
                 <Label>{t("requester")}</Label>
                 <UserSelector
-                  selected={serviceRequest.service_request.requester}
-                  onChange={(user) => onUpdate?.({ requester: user })}
+                  selected={
+                    requester || serviceRequest.service_request.requester
+                  }
+                  onChange={(user) => {
+                    onRequesterChange?.(user);
+                    onUpdate?.({ requester: user });
+                  }}
                   placeholder={t("select_requester")}
                   facilityId={facilityId}
                 />
@@ -336,6 +345,45 @@ export function ServiceRequestQuestion({
   const [activityDefinitionsMap, setActivityDefinitionsMap] = useState<
     Record<string, ActivityDefinitionReadSpec>
   >({});
+
+  const handleRequesterChange = (
+    index: number,
+    user: UserReadMinimal | undefined,
+  ) => {
+    handleUpdateServiceRequest(index, { requester: user || currentUser });
+  };
+
+  const handleApplyRequesterToAll = (user: UserReadMinimal | undefined) => {
+    const newServiceRequests = serviceRequests.map((sr) => ({
+      ...sr,
+      service_request: {
+        ...sr.service_request,
+        requester: user || currentUser,
+      },
+    }));
+
+    setServiceRequests(newServiceRequests);
+    updateQuestionnaireResponseCB(
+      [{ type: "service_request", value: newServiceRequests }],
+      questionnaireResponse.question_id,
+    );
+  };
+
+  const handleClearAllRequesters = () => {
+    const newServiceRequests = serviceRequests.map((sr) => ({
+      ...sr,
+      service_request: {
+        ...sr.service_request,
+        requester: currentUser,
+      },
+    }));
+
+    setServiceRequests(newServiceRequests);
+    updateQuestionnaireResponseCB(
+      [{ type: "service_request", value: newServiceRequests }],
+      questionnaireResponse.question_id,
+    );
+  };
 
   const {
     data: selectedActivityDefinitionData,
@@ -464,7 +512,7 @@ export function ServiceRequestQuestion({
 
   // Handler for adding a single service request from a template
   const handleAddSingleServiceRequest = async (
-    templateSR: ServiceRequestTemplateSpec,
+    templateSR: ActivityDefinitionTemplateSpec,
   ) => {
     try {
       const activityDefinitionData = await query(
@@ -526,7 +574,7 @@ export function ServiceRequestQuestion({
   const handleApplyTemplate = async (
     template: QuestionnaireResponseTemplateReadSpec,
   ) => {
-    const templateServiceRequests = template.template_data?.service_request;
+    const templateServiceRequests = template.template_data?.activity_definition;
     if (!templateServiceRequests?.length) {
       toast.info(t("template_has_no_service_requests"));
       throw new Error("Template has no service requests");
@@ -654,6 +702,8 @@ export function ServiceRequestQuestion({
           activityDefinition={
             activityDefinitionsMap[serviceRequest.activity_definition]
           }
+          requester={serviceRequest.service_request.requester}
+          onRequesterChange={(user) => handleRequesterChange(index, user)}
         />
       ))}
 
@@ -690,37 +740,62 @@ export function ServiceRequestQuestion({
             listDefinitions={{
               queryFn: activityDefinitionApi.listActivityDefinition,
               pathParams: { facilityId },
+              queryParams: { status: Status.active },
             }}
             translationBaseKey="activity_definition"
           />
         </div>
+        {serviceRequests.length > 1 && (
+          <div className="flex items-center gap-2 border border-gray-400 rounded-md">
+            <span className="text-xs font-medium text-gray-800 whitespace-nowrap pl-3">
+              {t("requester")}:
+            </span>
+            <UserSelector
+              selected={undefined}
+              onChange={handleApplyRequesterToAll}
+              facilityId={facilityId}
+              trigger={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-3 text-xs"
+                  disabled={disabled}
+                >
+                  {t("apply_to_all")}
+                  <ChevronDown className="size-3" />
+                </Button>
+              }
+              contentAlign="center"
+              contentClassName="w-80"
+              onClear={handleClearAllRequesters}
+            />
+          </div>
+        )}
         {questionnaireSlug && (
           <ManageResponseTemplatesSheet
             questionnaireSlug={questionnaireSlug}
             facilityId={facilityId}
             onTemplateSelect={handleApplyTemplate}
-            onServiceRequestSelect={handleAddSingleServiceRequest}
+            onActivityDefinitionSelect={handleAddSingleServiceRequest}
             disabled={disabled}
-            key_filter="service_request"
-            currentServiceRequests={serviceRequests.map(
-              (sr): ServiceRequestTemplateSpec => ({
-                slug: sr.activity_definition,
-                service_request: {
-                  title: sr.service_request.title,
-                  status: sr.service_request.status,
-                  intent: sr.service_request.intent,
-                  priority: sr.service_request.priority,
-                  category: sr.service_request.category,
-                  code: sr.service_request.code,
-                  do_not_perform: sr.service_request.do_not_perform,
-                  body_site: sr.service_request.body_site,
-                  note: sr.service_request.note,
-                  patient_instruction: sr.service_request.patient_instruction,
-                  occurance: sr.service_request.occurance,
-                  locations: sr.service_request.locations,
-                },
-              }),
-            )}
+            key_filter="activity_definition"
+            currentActivityDefinitions={serviceRequests.map((sr) => ({
+              slug: sr.activity_definition,
+              service_request: {
+                title: sr.service_request.title,
+                status: sr.service_request.status,
+                intent: sr.service_request.intent,
+                priority: sr.service_request.priority,
+                category: sr.service_request.category,
+                code: sr.service_request.code,
+                do_not_perform: sr.service_request.do_not_perform,
+                body_site: sr.service_request.body_site,
+                note: sr.service_request.note,
+                patient_instruction: sr.service_request.patient_instruction,
+                occurance: sr.service_request.occurance,
+                locations: sr.service_request.locations,
+              },
+            }))}
           />
         )}
       </div>

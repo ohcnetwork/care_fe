@@ -87,6 +87,11 @@ export interface ServiceRequestApplyActivityDefinitionSpec {
   };
 }
 
+export interface ServiceRequestTemplateSpec {
+  slug: string;
+  service_request: Omit<BaseServiceRequestSpec, "id" | "requester">;
+}
+
 export interface ServiceRequestApplyActivityDefinitionForm {
   encounter: string;
   activity_definition: string;

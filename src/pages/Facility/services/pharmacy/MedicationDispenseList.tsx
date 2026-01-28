@@ -158,7 +158,7 @@ function MedicationTable({
                   {formatTotalUnits(medication.dosage_instruction, t("units"))}
                 </TableCell>
                 <TableCell>
-                  <Badge>{t(medication.dispense_status || "pending")}</Badge>
+                  <Badge>{t(medication.dispense_status || "incomplete")}</Badge>
                 </TableCell>
                 <TableCell>
                   <Badge
@@ -286,13 +286,13 @@ export default function MedicationDispenseList({
 
   const countsInit = {
     total: allMedications.length,
-    pending: 0,
+    incomplete: 0,
     partial: 0,
     complete: 0,
   };
   for (const med of allMedications) {
-    const key = (med.dispense_status || "pending") as
-      | "pending"
+    const key = (med.dispense_status || "incomplete") as
+      | "incomplete"
       | "partial"
       | "complete";
     countsInit[key] += 1;
@@ -308,23 +308,23 @@ export default function MedicationDispenseList({
     .filter(
       (m) =>
         dispenseFilter === "all" ||
-        (m.dispense_status || "pending") === dispenseFilter,
+        (m.dispense_status || "incomplete") === dispenseFilter,
     )
     .sort((a, b) =>
       displayMedicationName(a).localeCompare(displayMedicationName(b)),
     );
 
   const groupedByDispense: Record<
-    "pending" | "partial" | "complete",
+    "incomplete" | "partial" | "complete",
     MedicationRequestRead[]
   > = {
-    pending: [],
+    incomplete: [],
     partial: [],
     complete: [],
   };
   for (const m of filteredMedications) {
-    const key = (m.dispense_status || "pending") as
-      | "pending"
+    const key = (m.dispense_status || "incomplete") as
+      | "incomplete"
       | "partial"
       | "complete";
     groupedByDispense[key]?.push(m);
@@ -386,7 +386,7 @@ export default function MedicationDispenseList({
                       | keyof typeof MedicationRequestDispenseStatus) ?? "all",
                   )
                 }
-                options={["all", "pending", "partial", "complete"]}
+                options={["all", "incomplete", "partial", "complete"]}
                 label={t("dispense_status") as string}
                 onClear={() => setDispenseFilter("all")}
               />
@@ -533,15 +533,15 @@ export default function MedicationDispenseList({
                 <span>
                   {t("total")}: {dispenseCounts.total} • {t("complete")}:{" "}
                   {dispenseCounts.complete} • {t("partial")}:{" "}
-                  {dispenseCounts.partial} • {t("pending")}:{" "}
-                  {dispenseCounts.pending}
+                  {dispenseCounts.partial} • {t("incomplete")}:{" "}
+                  {dispenseCounts.incomplete}
                 </span>
               </div>
             </div>
 
             {groupByDispense ? (
               <div className="space-y-6">
-                {(["pending", "partial", "complete"] as const).map((key) =>
+                {(["incomplete", "partial", "complete"] as const).map((key) =>
                   groupedByDispense[key].length > 0 ? (
                     <div key={key} className="space-y-2">
                       <div className="flex items-center justify-between">

@@ -188,7 +188,7 @@ export function SpecimenForm({
     const quantity = specimenData.specimen.collection?.quantity;
     const newErrors: typeof errors = {};
 
-    if (quantity?.value && !quantity.unit) {
+    if (quantity?.value && !quantity.unit && !defaultUnit) {
       newErrors.quantityUnit = t("field_required");
     }
 
@@ -196,7 +196,7 @@ export function SpecimenForm({
       newErrors.quantityValue = t("invalid_quantity");
     }
 
-    if (quantity?.unit && !quantity.value) {
+    if ((quantity?.unit || defaultUnit) && !quantity?.value) {
       newErrors.quantityValue = t("field_required");
     }
 

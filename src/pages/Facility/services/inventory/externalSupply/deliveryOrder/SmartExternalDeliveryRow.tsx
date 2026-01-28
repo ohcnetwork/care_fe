@@ -41,7 +41,10 @@ import { ProcessedExtension } from "@/hooks/useExtensions";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
-import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import {
+  MonetaryComponent,
+  MonetaryComponentType,
+} from "@/types/base/monetaryComponent/monetaryComponent";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ProductRead } from "@/types/inventory/product/product";
 
@@ -360,6 +363,19 @@ export function SmartExternalDeliveryRow({
             value={chargeItemCategory}
             onValueChange={(category) => {
               setField("charge_item_category", category?.slug || "");
+
+              // Auto-apply configured monetary components from category
+              if (category?.configured_monetary_components) {
+                const taxes = category.configured_monetary_components.filter(
+                  (c): c is MonetaryComponent =>
+                    c.monetary_component_type === MonetaryComponentType.tax,
+                );
+                setField("tax_components", taxes);
+              } else {
+                // Clear components when category is cleared
+                setField("tax_components", []);
+              }
+              markAsEdited();
             }}
             placeholder={t("select_category")}
             className="w-full min-w-[140px]"

@@ -25,6 +25,7 @@ import {
   createCompleteLocationRequest,
   createLocationAssociationRequest,
   createLocationHistoryFromBed,
+  createLocationUpdateOperationalStatusRequest,
   createLocationUpdateRequest,
   getCurrentLocations,
 } from "@/components/Location/utils/locationHelpers";
@@ -188,6 +189,13 @@ export function LocationSheet({
             new Date(),
           ),
         );
+        requests.push(
+          createLocationUpdateOperationalStatusRequest(
+            currentLocation.location,
+            facilityId,
+            "U",
+          ),
+        );
       }
       // Update current location to reserved if keepBedActive is checked
       else {
@@ -260,6 +268,13 @@ export function LocationSheet({
             new Date(),
           ),
         );
+        requests.push(
+          createLocationUpdateOperationalStatusRequest(
+            currentLocation.location,
+            facilityId,
+            "U",
+          ),
+        );
       } else {
         requests.push(
           createLocationUpdateRequest(
@@ -321,6 +336,13 @@ export function LocationSheet({
             },
             facilityId,
             encounter.id,
+          ),
+        );
+        requests.push(
+          createLocationUpdateOperationalStatusRequest(
+            currentLocation.location,
+            facilityId,
+            "O",
           ),
         );
       } else {

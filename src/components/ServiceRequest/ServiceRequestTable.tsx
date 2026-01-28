@@ -18,6 +18,7 @@ import {
 
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
+import { LocationNode } from "@/components/Location/LocationTree";
 import {
   SERVICE_REQUEST_PRIORITY_COLORS,
   SERVICE_REQUEST_STATUS_COLORS,
@@ -57,6 +58,7 @@ export default function ServiceRequestTable({
             <TableHead>{t("status")}</TableHead>
             <TableHead>{t("priority")}</TableHead>
             <TableHead>{t("tags", { count: 2 })}</TableHead>
+            <TableHead>{t("location")}</TableHead>
             <TableHead>{t("actions")}</TableHead>
           </TableRow>
         </TableHeader>
@@ -97,11 +99,16 @@ export default function ServiceRequestTable({
               </TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1">
-                  {request.tags.map((tag) => (
+                  {request.tags.slice(0, 2).map((tag) => (
                     <Badge key={tag.id} variant="secondary" className="text-xs">
                       {tag.display}
                     </Badge>
                   ))}
+                  {request.tags.length > 2 && (
+                    <Badge variant="secondary" className="text-xs">
+                      +{request.tags.length - 2}
+                    </Badge>
+                  )}
                   <TagAssignmentSheet
                     entityType="service_request"
                     entityId={request.id}
@@ -125,6 +132,16 @@ export default function ServiceRequestTable({
                       )
                     }
                   />
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="text-xs text-gray-500">
+                  {request.encounter.current_location && (
+                    <LocationNode
+                      location={request.encounter.current_location}
+                      isLast={true}
+                    />
+                  )}
                 </div>
               </TableCell>
               <TableCell className="text-left">
