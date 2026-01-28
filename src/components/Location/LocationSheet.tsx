@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -176,15 +176,10 @@ export function LocationSheet({
         .filter((loc) => loc.status === "reserved")
         .forEach((reservedLocation) => {
           requests.push(
-            createLocationAssociationUpdateRequest(
-              reservedLocation,
-              {
-                start: new Date(reservedLocation.start_datetime),
-                end: new Date(),
-                status: "completed",
-              },
+            createDeleteLocationAssociationRequest(
+              reservedLocation.location.id,
+              reservedLocation.id,
               facilityId,
-              encounter.id,
             ),
           );
           requests.push(
@@ -635,9 +630,28 @@ export function LocationSheet({
         }}
         title={t("confirm")}
         description={
-          dialogs.locationToDelete?.status === "active"
-            ? t("are_you_sure_mark_as_error_active_bed")
-            : t("are_you_sure_cancel_planned_bed")
+          dialogs.locationToDelete?.status === "active" ? (
+            activeLocations.length > 0 ? (
+              <Trans
+                i18nKey="are_you_sure_mark_as_error_multiple_beds"
+                values={{
+                  beds: activeLocations
+                    .map((loc) => loc.location.name)
+                    .join(", "),
+                }}
+                components={{
+                  strong: (
+                    <strong className="inline-block align-bottom truncate max-w-72 sm:max-w-full md:max-w-full lg:max-w-full xl:max-w-full" />
+                  ),
+                  br: <br />,
+                }}
+              />
+            ) : (
+              t("are_you_sure_mark_as_error_active_bed")
+            )
+          ) : (
+            t("are_you_sure_cancel_planned_bed")
+          )
         }
         onConfirm={handleConfirmDelete}
         confirmText={t("confirm")}
