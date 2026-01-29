@@ -502,29 +502,29 @@ function InvoiceCard({
                   {t("print")}
                 </Link>
               </Button>
-              <Button variant="outline" size="sm" asChild>
-                <Link
-                  basePath="/"
-                  href={`/facility/${facilityId}/billing/invoices/${invoice.id}`}
-                >
-                  <ArrowUpRightSquare className="size-4" />
-                  {t("view")}
-                </Link>
-              </Button>
-              {invoice.status !== InvoiceStatus.cancelled &&
-                invoice.status !== InvoiceStatus.balanced && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                        disabled={isCancellingInvoice}
-                      >
-                        <CareIcon icon="l-ellipsis-v" className="size-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    disabled={isCancellingInvoice}
+                  >
+                    <CareIcon icon="l-ellipsis-v" className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link
+                      basePath="/"
+                      href={`/facility/${facilityId}/billing/invoices/${invoice.id}`}
+                    >
+                      <ArrowUpRightSquare className="size-4" />
+                      {t("view_invoice")}
+                    </Link>
+                  </DropdownMenuItem>
+                  {invoice.status !== InvoiceStatus.cancelled &&
+                    invoice.status !== InvoiceStatus.balanced && (
                       <DropdownMenuItem
                         onClick={() => setCancelInvoiceDialogOpen(true)}
                         className="text-red-600 focus:text-red-600"
@@ -532,9 +532,9 @@ function InvoiceCard({
                         <CareIcon icon="l-times-circle" className="size-4" />
                         {t("cancel_invoice")}
                       </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
+                    )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 
