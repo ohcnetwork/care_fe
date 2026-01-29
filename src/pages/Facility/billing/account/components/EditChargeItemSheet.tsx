@@ -124,9 +124,8 @@ export function EditChargeItemSheet({
   };
 
   const isLocked =
-    LOCKED_RESOURCES.includes(
-      item.service_resource as ChargeItemServiceResource,
-    ) ||
+    (item.service_resource &&
+      LOCKED_RESOURCES.includes(item.service_resource)) ||
     item.status === ChargeItemStatus.billed ||
     item.status === ChargeItemStatus.paid;
 
