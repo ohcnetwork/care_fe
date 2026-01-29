@@ -111,10 +111,10 @@ import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 
 import { filterStructuredQuestionnaireSlugs } from "@/components/Questionnaire/data/StructuredFormData";
+import ManageResponseTemplatesSheet from "@/components/Questionnaire/ManageResponseTemplatesSheet";
 import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Question } from "@/types/questionnaire/question";
-import ManageResponseTemplatesSheet from "../ManageResponseTemplatesSheet";
 
 function formatDoseRange(range?: DoseRange): string {
   if (!range?.high?.value) return "";
@@ -1193,18 +1193,18 @@ export function MedicationRequestQuestion({
             onAddSelected={handleAddHistoricalMedications}
             disableAPI={isPreview}
           />
+          {questionnaireSlug && (
+            <ManageResponseTemplatesSheet
+              questionnaireSlug={questionnaireSlug}
+              facilityId={facilityId}
+              onTemplateSelect={handleApplyTemplate}
+              onMedicationSelect={handleAddSingleMedication}
+              disabled={disabled || isPreview}
+              currentMedications={medications}
+              key_filter="medication_request"
+            />
+          )}
         </div>
-        {questionnaireSlug && (
-          <ManageResponseTemplatesSheet
-            questionnaireSlug={questionnaireSlug}
-            facilityId={facilityId}
-            onTemplateSelect={handleApplyTemplate}
-            onMedicationSelect={handleAddSingleMedication}
-            disabled={disabled || isPreview}
-            currentMedications={medications}
-            key_filter="medication_request"
-          />
-        )}
       </div>
       {!!patientMedications?.count && patientMedications.count > 100 && (
         <Alert className="bg-yellow-50 border-yellow-200">
