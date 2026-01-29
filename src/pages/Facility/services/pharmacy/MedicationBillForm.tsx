@@ -7,6 +7,7 @@ import {
   Info,
   LoaderCircle,
   MoreVertical,
+  Pill,
   Shuffle,
 } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
@@ -27,6 +28,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Form,
   FormControl,
@@ -1500,6 +1502,18 @@ export default function MedicationBillForm({
                             </span>
                           </div>
                         </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {/* Empty State */}
+                  {fields.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={7} className="p-0">
+                        <EmptyState
+                          icon={<Pill className="text-primary size-6" />}
+                          title={t("no_medications")}
+                          description={t("add_medications_to_bill_description")}
+                        />
                       </TableCell>
                     </TableRow>
                   )}
