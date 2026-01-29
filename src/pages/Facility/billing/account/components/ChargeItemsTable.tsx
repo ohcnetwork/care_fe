@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import SearchInput from "@/components/Common/SearchInput";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
@@ -134,6 +135,7 @@ export function ChargeItemsTable({
       queryParams: {
         account: accountId,
         status: qParams.charge_item_status,
+        title: qParams.title,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
       },
@@ -229,7 +231,7 @@ export function ChargeItemsTable({
           </SelectContent>
         </Select>
 
-        <div className="flex items-center gap-2">
+        <div className="flex sm:flex-row flex-col sm:items-center gap-2 w-full sm:w-auto">
           <Button
             variant="outline"
             onClick={() => navigate(`../${accountId}/charge_items/print`)}
@@ -257,6 +259,22 @@ export function ChargeItemsTable({
             <ShortcutBadge actionId="add-charge-item" />
           </Button>
         </div>
+      </div>
+      <div className="mb-4">
+        <SearchInput
+          id="charge-item-title-search"
+          options={[
+            {
+              key: "title",
+              type: "text",
+              placeholder: t("search_by_item"),
+              value: qParams.title || "",
+              display: t("title"),
+            },
+          ]}
+          className="w-full sm:w-80"
+          onSearch={(key, value) => updateQuery({ [key]: value })}
+        />
       </div>
       {isLoading ? (
         <TableSkeleton count={3} />

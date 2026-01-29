@@ -35,6 +35,7 @@ import {
 } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import query from "@/Utils/request/query";
+import { formatDateTime } from "@/Utils/utils";
 
 export default function InvoicesData({
   facilityId,
@@ -144,6 +145,7 @@ export default function InvoicesData({
             <TableHeader>
               <TableRow>
                 <TableHead>{t("invoice_number")}</TableHead>
+                <TableHead>{t("invoice_date")}</TableHead>
                 <TableHead>{t("account")}</TableHead>
                 <TableHead>{t("status")}</TableHead>
                 <TableHead>{t("total")}</TableHead>
@@ -155,6 +157,14 @@ export default function InvoicesData({
                 <TableRow key={invoice.id}>
                   <TableCell>
                     <div>{invoice.number}</div>
+                  </TableCell>
+                  <TableCell>
+                    <div>
+                      {formatDateTime(
+                        invoice.created_date,
+                        "DD/MM/YY, hh:mm A",
+                      )}
+                    </div>
                   </TableCell>
 
                   <TableCell>

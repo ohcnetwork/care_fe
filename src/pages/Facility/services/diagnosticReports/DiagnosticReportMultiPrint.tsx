@@ -252,7 +252,9 @@ export default function DiagnosticReportMultiPrint({
 
   return (
     <div className="flex justify-center items-center">
-      <PrintPreview title={`${t("diagnostic_reports")} - ${t("multi_print")}`}>
+      <PrintPreview
+        title={`${t("diagnostic_report_other")} - ${t("multi_print")}`}
+      >
         <div className="max-w-4xl mx-auto">
           {/* Header with Facility Name and Logo */}
           <div className="flex justify-between items-start pb-2 border-b border-gray-200">
@@ -279,7 +281,7 @@ export default function DiagnosticReportMultiPrint({
           </div>
 
           <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold my-2">
-            {t("diagnostic_reports")}
+            {t("diagnostic_report_other")}
           </h2>
 
           {/* Patient Details */}

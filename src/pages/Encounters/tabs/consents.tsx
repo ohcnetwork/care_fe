@@ -191,16 +191,6 @@ export const EncounterConsentsTab = () => {
     return <Loading />;
   }
 
-  if (!filteredConsents || filteredConsents.length === 0) {
-    return (
-      <EmptyState
-        title={t("no_consent_found")}
-        description={t("no_consent_description")}
-        className="size-full p-2"
-      />
-    );
-  }
-
   return (
     <div className="py-4">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -217,15 +207,23 @@ export const EncounterConsentsTab = () => {
         {canWriteSelectedEncounter && <ConsentFormSheet />}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredConsents.map((consent) => (
-          <ConsentCard
-            key={consent.id}
-            consent={consent}
-            patientId={patientId}
-          />
-        ))}
-      </div>
+      {!filteredConsents || filteredConsents.length === 0 ? (
+        <EmptyState
+          title={t("no_consent_found")}
+          description={t("no_consent_description")}
+          className="h-full py-40"
+        />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {filteredConsents.map((consent) => (
+            <ConsentCard
+              key={consent.id}
+              consent={consent}
+              patientId={patientId}
+            />
+          ))}
+        </div>
+      )}
 
       <Pagination totalCount={existingConsents?.count || 0} />
     </div>

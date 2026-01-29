@@ -69,6 +69,7 @@ export const EncounterShow = (props: Props) => {
     primaryEncounterId,
     selectedEncounterId,
     isPrimaryEncounterLoading,
+    patientId,
     patient,
     isPatientLoading,
     canWriteSelectedEncounter,
@@ -148,11 +149,21 @@ export const EncounterShow = (props: Props) => {
       visible: canReadClinicalData,
       component: (
         <EncounterResponsesTab
-          patientId={patient?.id}
-          encounterId={selectedEncounter?.id}
+          patientId={patientId}
+          encounterId={selectedEncounterId}
           canAccess={canAccess}
         />
       ),
+    },
+    service_requests: {
+      label: t(`ENCOUNTER_TAB__service_requests`),
+      visible: canReadClinicalData,
+      component: <EncounterServiceRequestTab />,
+    },
+    diagnostic_reports: {
+      label: t(`ENCOUNTER_TAB__diagnostic_reports`),
+      visible: canReadClinicalData,
+      component: <EncounterDiagnosticReportsTab />,
     },
     files: {
       label: t(`ENCOUNTER_TAB__files`),
@@ -171,16 +182,6 @@ export const EncounterShow = (props: Props) => {
     consents: {
       label: t(`ENCOUNTER_TAB__consents`),
       component: <EncounterConsentsTab />,
-    },
-    service_requests: {
-      label: t(`ENCOUNTER_TAB__service_requests`),
-      visible: canReadClinicalData,
-      component: <EncounterServiceRequestTab />,
-    },
-    diagnostic_reports: {
-      label: t(`ENCOUNTER_TAB__diagnostic_reports`),
-      visible: canReadClinicalData,
-      component: <EncounterDiagnosticReportsTab />,
     },
 
     ...Object.fromEntries(

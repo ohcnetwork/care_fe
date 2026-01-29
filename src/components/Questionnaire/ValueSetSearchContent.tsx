@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
-import { isAppleDevice } from "@/Utils/utils";
+import { isIOSDevice } from "@/Utils/utils";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -220,7 +220,7 @@ export default function ValueSetSearchContent({
           className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
           onValueChange={onSearchChange}
           value={search}
-          autoFocus={!isAppleDevice}
+          autoFocus={!isIOSDevice}
         />
       </div>
       {searchQuery.isFetching ? (

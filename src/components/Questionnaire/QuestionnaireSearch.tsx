@@ -32,7 +32,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { conditionalAttribute, isAppleDevice } from "@/Utils/utils";
+import { conditionalAttribute } from "@/Utils/utils";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
@@ -84,7 +84,7 @@ export function QuestionnaireSearch({
         placeholder={t("search_forms")}
         className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
         onValueChange={setSearch}
-        autoFocus={!isAppleDevice}
+        autoFocus
       />
       <CommandList className="overflow-y-auto">
         <CommandEmpty>
