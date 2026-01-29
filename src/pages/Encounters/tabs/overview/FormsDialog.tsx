@@ -19,6 +19,7 @@ import { Star } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 export const FormDialog = ({
   subjectType,
@@ -59,6 +60,7 @@ export const FormDialog = ({
       queryParams: {
         favorite_list: "favorites_form",
         silent: true,
+        limit: 5,
       },
     }),
   });
@@ -99,6 +101,10 @@ export const FormDialog = ({
     if (isFavorited) {
       removeFavoriteMutation.mutate(slug);
     } else {
+      if (favorites.length >= 5) {
+        toast.error(t("max_favorites_reached", { count: 5 }));
+        return;
+      }
       addFavoriteMutation.mutate(slug);
     }
   };
