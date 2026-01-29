@@ -890,7 +890,7 @@ const AdditionalDetailsContent = ({
                     <DateTimeInput
                       id="death-datetime"
                       value={field.value ?? ""}
-                      onDateChange={field.onChange}
+                      onDateChange={(val) => field.onChange(val ?? null)}
                       max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
                     />
                   </FormControl>
