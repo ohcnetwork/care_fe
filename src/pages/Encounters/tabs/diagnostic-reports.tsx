@@ -69,7 +69,7 @@ function LeftCard({ report, isActive, onClick }: LeftCardProps) {
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
           <div className="font-medium pb-1 truncate">
-            {report.service_request?.title || t("diagnostic_report")}
+            {report.service_request?.title || t("diagnostic_report_one")}
           </div>
           <div className="text-xs text-gray-600">
             {formatDateTime(report.created_date)}
@@ -152,7 +152,7 @@ function DiagnosticReportDetailCard({
         <CardTitle className="text-base font-medium">
           {report.service_request?.title ||
             report.code?.display ||
-            t("diagnostic_report")}
+            t("diagnostic_report_one")}
         </CardTitle>
         <div className="flex items-center gap-2">
           <Badge variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}>

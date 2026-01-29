@@ -429,7 +429,7 @@ export default function ActivityDefinitionView({
         {definition.diagnostic_report_codes?.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>{t("diagnostic_report")}</CardTitle>
+              <CardTitle>{t("diagnostic_report_one")}</CardTitle>
               <CardDescription>
                 {t("diagnostic_report_codes_description")}
               </CardDescription>
