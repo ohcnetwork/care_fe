@@ -47,9 +47,9 @@ import { Avatar } from "@/components/Common/Avatar";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
   ChargeItemRead,
+  ChargeItemServiceResource,
   ChargeItemStatus,
   ChargeItemUpdate,
-  LOCKED_RESOURCES,
   MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
@@ -86,6 +86,11 @@ export function EditChargeItemSheet({
   const [isOpen, setIsOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
+  const LOCKED_RESOURCES = [
+    ChargeItemServiceResource.appointment,
+    ChargeItemServiceResource.medication_dispense,
+  ];
+
   // Register shortcuts for this sheet
   useShortcutSubContext("facility:billing:invoice");
 
@@ -119,7 +124,9 @@ export function EditChargeItemSheet({
   };
 
   const isLocked =
-    LOCKED_RESOURCES.includes(item.service_resource ?? "") ||
+    LOCKED_RESOURCES.includes(
+      item.service_resource as ChargeItemServiceResource,
+    ) ||
     item.status === ChargeItemStatus.billed ||
     item.status === ChargeItemStatus.paid;
 

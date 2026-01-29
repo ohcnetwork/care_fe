@@ -7,8 +7,6 @@ import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/c
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import { UserReadMinimal } from "@/types/user/user";
 
-export const LOCKED_RESOURCES = ["medication_dispense"];
-
 export enum ChargeItemStatus {
   // planned = "planned",
   billable = "billable",
