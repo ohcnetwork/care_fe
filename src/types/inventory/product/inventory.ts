@@ -15,7 +15,7 @@ interface InventoryBase {
 
 export interface InventoryRead extends InventoryBase {
   id: string;
-  net_content: number;
+  net_content: string;
   product: ProductRead;
   location: LocationRead;
 }

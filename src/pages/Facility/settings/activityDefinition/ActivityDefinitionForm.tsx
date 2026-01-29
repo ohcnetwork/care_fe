@@ -40,13 +40,13 @@ import { HealthcareServiceSelector } from "@/pages/Facility/services/HealthcareS
 import { CodeSchema } from "@/types/base/code/code";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import { generateSlug } from "@/Utils/utils";
 import ObservationDefinitionForm from "@/pages/Facility/settings/observationDefinition/ObservationDefinitionForm";
 import { CreateSpecimenDefinition } from "@/pages/Facility/settings/specimen-definitions/CreateSpecimenDefinition";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
-import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
+import {
+  ChargeItemDefinitionBase,
+  ChargeItemDefinitionStatus,
+} from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import {
   type ActivityDefinitionCreateSpec,
   type ActivityDefinitionReadSpec,
@@ -60,6 +60,10 @@ import observationDefinitionApi from "@/types/emr/observationDefinition/observat
 import { SpecimenDefinitionStatus } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
+import { round } from "@/Utils/decimal";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import { generateSlug } from "@/Utils/utils";
 
 export default function ActivityDefinitionForm({
   facilityId,
@@ -265,7 +269,7 @@ function ActivityDefinitionFormContent({
                     value:
                       s.type_tested?.container?.minimum_volume?.string ||
                       (s.type_tested?.container?.minimum_volume?.quantity
-                        ? `${s.type_tested.container.minimum_volume.quantity.value} ${s.type_tested.container.minimum_volume.quantity.unit.display}`
+                        ? `${round(s.type_tested.container.minimum_volume.quantity.value)} ${s.type_tested.container.minimum_volume.quantity.unit.display}`
                         : undefined),
                   },
                   {
@@ -771,7 +775,7 @@ function ActivityDefinitionFormContent({
                                     ?.string ??
                                   (spec.type_tested?.container?.minimum_volume
                                     ?.quantity
-                                    ? `${spec.type_tested.container.minimum_volume.quantity.value} ${spec.type_tested.container.minimum_volume.quantity.unit.display}`
+                                    ? `${round(spec.type_tested.container.minimum_volume.quantity.value)} ${spec.type_tested.container.minimum_volume.quantity.unit.display}`
                                     : undefined),
                               },
                               {
@@ -887,6 +891,9 @@ function ActivityDefinitionFormContent({
                           queryFn:
                             chargeItemDefinitionApi.listChargeItemDefinition,
                           pathParams: { facilityId },
+                          queryParams: {
+                            status: ChargeItemDefinitionStatus.active,
+                          },
                         }}
                         translationBaseKey="charge_item_definition"
                         mapper={(item) => ({

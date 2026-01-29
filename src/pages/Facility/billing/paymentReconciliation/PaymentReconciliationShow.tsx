@@ -366,7 +366,7 @@ export function PaymentReconciliationShow({
                     </div>
                     <div className="font-bold">
                       <MonetaryDisplay
-                        amount={String(payment.target_invoice.total_gross)}
+                        amount={payment.target_invoice.total_gross}
                       />
                     </div>
                   </div>

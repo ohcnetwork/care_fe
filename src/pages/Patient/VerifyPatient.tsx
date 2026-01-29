@@ -1,46 +1,65 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, SquareActivity, Stethoscope, Ticket } from "lucide-react";
-import { useQueryParams } from "raviger";
-import { useTranslation } from "react-i18next";
-
-import { useShortcutSubContext } from "@/context/ShortcutContext";
-
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-
 import {
   CardGridSkeleton,
   CardListSkeleton,
 } from "@/components/Common/SkeletonLoading";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  AlertCircle,
+  ArrowRight,
+  SquareActivity,
+  Stethoscope,
+  Ticket,
+  Wallet,
+} from "lucide-react";
+
+import { pharmacyDispenseServiceAtom } from "@/atoms/pharmacy";
+import { getPermissions } from "@/common/Permissions";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
+import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
 import CreateTokenForm from "@/components/Tokens/CreateTokenForm";
 import PatientTokensList from "@/components/Tokens/PatientTokensList";
-import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
-import PatientHomeTabs from "./home/PatientHomeTabs";
-
-import useAppHistory from "@/hooks/useAppHistory";
-
-import { getPermissions } from "@/common/Permissions";
-
+import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/context/PermissionContext";
-
-import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
+import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { PLUGIN_Component } from "@/PluginEngine";
 import patientApi from "@/types/emr/patient/patientApi";
 import query from "@/Utils/request/query";
+import careConfig from "@careConfig";
+import { useAtomValue } from "jotai";
+import { Link, navigate, useQueryParams } from "raviger";
+import { useTranslation } from "react-i18next";
+import PatientHomeTabs from "./home/PatientHomeTabs";
+
+interface QParams {
+  phone_number?: string;
+  year_of_birth: string;
+  partial_id: string;
+  flow?: "queue" | "dispense";
+}
 
 export default function VerifyPatient() {
   useShortcutSubContext("facility:patient:home");
   const { t } = useTranslation();
-  const [qParams] = useQueryParams();
+  const [{ phone_number, year_of_birth, partial_id, flow }] =
+    useQueryParams<QParams>();
   const queryClient = useQueryClient();
 
-  const { phone_number, year_of_birth, partial_id } = qParams;
   const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
+
+  const pharmacyDispenseService = useAtomValue(
+    pharmacyDispenseServiceAtom(facilityId),
+  );
+
+  const isQueueFlow = flow === "queue";
+  const isDispenseFlow = flow === "dispense" && pharmacyDispenseService != null;
+
   const { hasPermission } = usePermissions();
   const isTab = useBreakpoints({ default: true, lg: false });
 
@@ -59,9 +78,9 @@ export default function VerifyPatient() {
   } = useQuery({
     queryKey: ["patient-verify", phone_number, year_of_birth, partial_id],
     queryFn: query(patientApi.searchRetrieve, {
-      body: { phone_number, year_of_birth, partial_id },
+      body: { phone_number: phone_number ?? "", year_of_birth, partial_id },
     }),
-    enabled: !!(phone_number && year_of_birth && partial_id),
+    enabled: !!(year_of_birth && partial_id),
   });
 
   if (isVerifyingPatient || !facility) {
@@ -74,7 +93,7 @@ export default function VerifyPatient() {
   }
   return (
     <div>
-      {!phone_number || !year_of_birth || !partial_id ? (
+      {!year_of_birth || !partial_id ? (
         <Alert variant="destructive">
           <AlertCircle className="size-4" />
           <AlertDescription>
@@ -118,6 +137,7 @@ export default function VerifyPatient() {
                     patientId={patientData.id}
                     facilityId={facilityId}
                     patientName={patientData.name}
+                    defaultOpen={isQueueFlow}
                     trigger={
                       <QuickAction
                         icon={<SquareActivity className="text-orange-500" />}
@@ -125,6 +145,14 @@ export default function VerifyPatient() {
                         actionId="create-encounter"
                       />
                     }
+                    disableRedirectOnSuccess={isDispenseFlow}
+                    onSuccess={(encounter) => {
+                      if (isDispenseFlow && pharmacyDispenseService) {
+                        navigate(
+                          `/facility/${facilityId}/locations/${pharmacyDispenseService.locationId}/medication_requests/patient/${patientData.id}/bill?encounterId=${encounter.id}`,
+                        );
+                      }
+                    }}
                   />
                 )}
 
@@ -142,19 +170,27 @@ export default function VerifyPatient() {
                   />
                 )}
 
-                {canWriteToken && (
-                  <CreateTokenForm
-                    patient={patientData}
-                    facilityId={facilityId}
-                    trigger={
-                      <QuickAction
-                        icon={<Ticket className="text-gray-500" />}
-                        title={t("generate_token")}
-                        actionId="generate-token"
-                      />
-                    }
-                  />
-                )}
+                {canWriteToken &&
+                  careConfig.enableTokenGenerationInPatientHome && (
+                    <CreateTokenForm
+                      patient={patientData}
+                      facilityId={facilityId}
+                      trigger={
+                        <QuickAction
+                          icon={<Ticket className="text-gray-500" />}
+                          title={t("generate_token")}
+                          actionId="generate-token"
+                        />
+                      }
+                    />
+                  )}
+
+                <QuickAction
+                  icon={<Wallet />}
+                  title={t("view_accounts")}
+                  actionId="view-the-accounts"
+                  href={`/facility/${facilityId}/billing/account?status=active&patient_filter=${patientData.id}&patient_name=${patientData.name}`}
+                />
               </div>
 
               <PatientHomeTabs
@@ -164,6 +200,21 @@ export default function VerifyPatient() {
                 canListEncounters={canListEncounters}
                 canWriteAppointment={canWriteAppointment}
                 canListTokens={canListTokens}
+                actions={(encounter) => (
+                  <div className="flex gap-2 items-center">
+                    {flow === "dispense" && pharmacyDispenseService && (
+                      <Button variant="outline">
+                        <Link
+                          href={`/facility/${facilityId}/locations/${pharmacyDispenseService.locationId}/medication_requests/patient/${patientData.id}/bill?encounterId=${encounter.id}`}
+                          className="flex items-center gap-2"
+                        >
+                          <span>{t("dispense_medicine")}</span>
+                          <ArrowRight />
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
+                )}
               />
             </div>
 

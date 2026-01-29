@@ -98,6 +98,7 @@ export function DeliveryOrderList({
         origin_isnull: !internal,
         supplier: qParams.supplier,
         priority: qParams.priority,
+        patient_isnull: true,
       },
     }),
   });

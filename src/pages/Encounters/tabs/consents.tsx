@@ -5,8 +5,6 @@ import { useNavigate, usePathParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -19,33 +17,13 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { buildEncounterUrl } from "@/pages/Encounters/utils/utils";
 import { ConsentModel } from "@/types/consent/consent";
 import consentApi from "@/types/consent/consentApi";
 
 const CONSENTS_PER_PAGE = 12;
-
-export const EmptyState = () => {
-  const { t } = useTranslation();
-
-  return (
-    <div className="flex min-h-[12.5rem] flex-col items-center justify-center gap-4 p-8 text-center">
-      <div className="rounded-full bg-secondary/10 ">
-        <CareIcon
-          icon="l-file-exclamation-alt"
-          className="text-3xl text-gray-500"
-        />
-      </div>
-      <div className="max-w-[300px] space-y-1">
-        <h3 className="font-medium">{t("no_consent_found")}</h3>
-        <p className="text-sm text-gray-500 whitespace-nowrap">
-          {t("no_consent_description")}
-        </p>
-      </div>
-    </div>
-  );
-};
 
 function ConsentCard({
   consent,
@@ -229,23 +207,25 @@ export const EncounterConsentsTab = () => {
         {canWriteSelectedEncounter && <ConsentFormSheet />}
       </div>
 
-      {filteredConsents && filteredConsents.length > 0 ? (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredConsents.map((consent) => (
-              <ConsentCard
-                key={consent.id}
-                consent={consent}
-                patientId={patientId}
-              />
-            ))}
-          </div>
-
-          <Pagination totalCount={existingConsents?.count || 0} />
-        </>
+      {!filteredConsents || filteredConsents.length === 0 ? (
+        <EmptyState
+          title={t("no_consent_found")}
+          description={t("no_consent_description")}
+          className="h-full py-40"
+        />
       ) : (
-        <EmptyState />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {filteredConsents.map((consent) => (
+            <ConsentCard
+              key={consent.id}
+              consent={consent}
+              patientId={patientId}
+            />
+          ))}
+        </div>
       )}
+
+      <Pagination totalCount={existingConsents?.count || 0} />
     </div>
   );
 };

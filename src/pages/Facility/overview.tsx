@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Box, Calendar, Users } from "lucide-react";
+import { Box, Calendar, Database, Users } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -76,6 +76,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     Calendar,
     Users,
     Box,
+    Database,
   };
 
   const context: DashboardLinkContext = {

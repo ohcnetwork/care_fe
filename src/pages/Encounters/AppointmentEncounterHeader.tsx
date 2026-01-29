@@ -7,13 +7,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
-  BatchRequestBody,
-  BatchRequestResponse,
-} from "@/types/base/batch/batch";
-import batchApi from "@/types/base/batch/batchApi";
-import {
-  EncounterEdit,
   EncounterRead,
   EncounterStatus,
   inactiveEncounterStatus,
@@ -22,46 +17,24 @@ import encounterApi from "@/types/emr/encounter/encounterApi";
 import {
   AppointmentRead,
   AppointmentStatus,
-  AppointmentUpdateRequest,
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
-import scheduleApi from "@/types/scheduling/scheduleApi";
 
-import {
-  renderTokenNumber,
-  TokenRead,
-  TokenStatus,
-  TokenUpdate,
-} from "@/types/tokens/token/token";
-import tokenApi from "@/types/tokens/token/tokenApi";
+import { renderTokenNumber, TokenRead } from "@/types/tokens/token/token";
 import mutate from "@/Utils/request/mutate";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, ExternalLinkIcon } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 const getOptions = (encounter: EncounterRead) => {
-  const options: (
-    | "mark_token_fulfilled"
-    | "close_appointment"
-    | "mark_as_complete"
-  )[] = [];
+  const options: ("close_appointment" | "mark_as_complete")[] = [];
 
   if (
     encounter.status === EncounterStatus.PLANNED ||
     encounter.status === EncounterStatus.ON_HOLD
   ) {
     return ["start_encounter"];
-  }
-
-  if (
-    encounter.appointment?.token &&
-    [TokenStatus.CREATED, TokenStatus.IN_PROGRESS].includes(
-      encounter.appointment.token.status,
-    )
-  ) {
-    options.push("mark_token_fulfilled");
   }
 
   if (encounter.appointment?.status !== AppointmentStatus.FULFILLED) {
@@ -118,58 +91,7 @@ const AppointmentEncounterHeaderActions = ({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const { mutate: updateToken, isPending: isUpdateTokenPending } = useMutation({
-    mutationFn: mutate(tokenApi.update, {
-      pathParams: {
-        facility_id: encounter.facility.id || "",
-        queue_id: appointment?.token?.queue.id || "",
-        id: appointment?.token?.id || "",
-      },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["encounter", encounter.id],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["tokens", appointment?.token?.id],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["appointments", appointment?.id],
-      });
-      toast.success(t("token_closed_successfully"));
-    },
-  });
-
-  const { mutate: batchRequest, isPending: isBatchRequestPending } =
-    useMutation({
-      mutationFn: mutate(batchApi.batchRequest),
-      onSuccess: (results: BatchRequestResponse) => {
-        queryClient.invalidateQueries({
-          queryKey: ["encounter", encounter.id],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["appointment", encounter?.appointment?.id],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["tokens", encounter?.appointment?.token?.id],
-        });
-        if (
-          results.results.some(
-            (result) => result.reference_id === "encounter-closed",
-          )
-        ) {
-          toast.success(t("encounter_marked_as_complete"));
-          return;
-        }
-        if (
-          results.results.some(
-            (result) => result.reference_id === "appointment-closed",
-          )
-        ) {
-          toast.success(t("appointment_closed_successfully"));
-        }
-      },
-    });
+  const { actions, isEndEncounterPending } = useEncounter();
 
   const { mutate: startEncounter } = useMutation({
     mutationFn: mutate(encounterApi.update, {
@@ -182,105 +104,6 @@ const AppointmentEncounterHeaderActions = ({
     },
   });
 
-  const handleCloseToken = () => {
-    if (!appointment?.token) return;
-    updateToken({
-      note: appointment.token.note,
-      sub_queue: appointment.token.sub_queue?.id || null,
-      status: TokenStatus.FULFILLED,
-    });
-  };
-
-  const handleCloseAppointment = () => {
-    if (!encounter || !appointment) return;
-
-    const requests: BatchRequestBody<
-      AppointmentUpdateRequest | TokenUpdate
-    >["requests"] = [
-      {
-        url: scheduleApi.appointments.update.path
-          .replace("{facilityId}", encounter.facility.id)
-          .replace("{id}", appointment.id),
-        method: scheduleApi.appointments.update.method,
-        reference_id: "appointment-closed",
-        body: {
-          status: AppointmentStatus.FULFILLED,
-          note: appointment.note,
-        },
-      },
-    ];
-
-    if (appointment.token) {
-      requests.push({
-        url: tokenApi.update.path
-          .replace("{facility_id}", encounter.facility.id)
-          .replace("{queue_id}", appointment.token.queue.id)
-          .replace("{id}", appointment.token.id),
-        method: tokenApi.update.method,
-        reference_id: "token-closed",
-        body: {
-          ...appointment.token,
-          note: appointment.token.note,
-          status: TokenStatus.FULFILLED,
-          sub_queue: appointment.token.sub_queue?.id || null,
-        },
-      });
-    }
-
-    batchRequest({ requests });
-  };
-  const handleCompleteEncounter = () => {
-    if (!encounter || !appointment) return;
-    const requests: BatchRequestBody<
-      AppointmentUpdateRequest | TokenUpdate | EncounterEdit
-    >["requests"] = [
-      {
-        url: encounterApi.update.path.replace("{id}", encounter.id),
-        method: encounterApi.update.method,
-        reference_id: "encounter-closed",
-        body: {
-          ...encounter,
-          status: EncounterStatus.COMPLETED,
-          period: {
-            start: encounter.period.start,
-            end: encounter.period.end
-              ? encounter.period.end
-              : new Date().toISOString(),
-          },
-        },
-      },
-      {
-        url: scheduleApi.appointments.update.path
-          .replace("{facilityId}", encounter.facility.id)
-          .replace("{id}", appointment.id),
-        method: scheduleApi.appointments.update.method,
-        reference_id: "appointment-closed",
-        body: {
-          status: AppointmentStatus.FULFILLED,
-          note: appointment.note,
-        },
-      },
-    ];
-
-    if (appointment.token) {
-      requests.push({
-        url: tokenApi.update.path
-          .replace("{facility_id}", encounter.facility.id)
-          .replace("{queue_id}", appointment.token.queue.id)
-          .replace("{id}", appointment.token.id),
-        method: tokenApi.update.method,
-        reference_id: "token-closed",
-        body: {
-          ...appointment.token,
-          note: appointment.token.note,
-          sub_queue: appointment.token.sub_queue?.id || null,
-          status: TokenStatus.FULFILLED,
-        },
-      });
-    }
-
-    batchRequest({ requests });
-  };
   const handleStartEncounter = () => {
     startEncounter({
       ...encounter,
@@ -313,7 +136,7 @@ const AppointmentEncounterHeaderActions = ({
           className="w-full sm:w-auto text-sm font-semibold text-black"
           onClick={
             option === "mark_as_complete"
-              ? handleCompleteEncounter
+              ? actions.markAsCompleted
               : handleStartEncounter
           }
         >
@@ -339,8 +162,8 @@ const AppointmentEncounterHeaderActions = ({
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            disabled={isBatchRequestPending || isUpdateTokenPending}
             className="w-full sm:w-auto"
+            disabled={isEndEncounterPending}
           >
             <span className="text-sm font-semibold text-black">
               {t("end_actions")}
@@ -355,11 +178,9 @@ const AppointmentEncounterHeaderActions = ({
               className="p-2.5"
               onClick={() => {
                 if (option === "mark_as_complete") {
-                  handleCompleteEncounter();
+                  actions.markAsCompleted();
                 } else if (option === "close_appointment") {
-                  handleCloseAppointment();
-                } else if (option === "mark_token_fulfilled") {
-                  handleCloseToken();
+                  actions.endEncounter(encounter, false);
                 }
               }}
             >
