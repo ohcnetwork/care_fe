@@ -59,6 +59,17 @@ import {
   insertAtCursor,
 } from "./templateUtils";
 
+interface TemplateBuilderFormValues {
+  name: string;
+  slug_value: string;
+  status: TemplateStatus;
+  template_type: string;
+  default_format: TemplateFormat;
+  context: string;
+  description?: string;
+  template_data: string;
+}
+
 export default function TemplateBuilder({
   facilityId,
   slug,
@@ -101,7 +112,7 @@ export default function TemplateBuilder({
     template_data: z.string().min(1, t("field_required")),
   });
 
-  const form = useForm({
+  const form = useForm<TemplateBuilderFormValues>({
     resolver: zodResolver(templateBuilderSchema),
     defaultValues: {
       name: "",
@@ -681,7 +692,7 @@ function TemplateEditor({
   form,
   textareaRef,
 }: {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<TemplateBuilderFormValues>;
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
 }) {
   const { t } = useTranslation();
