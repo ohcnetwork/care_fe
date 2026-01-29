@@ -49,7 +49,7 @@ import {
   ChargeItemRead,
   ChargeItemStatus,
   ChargeItemUpdate,
-  LINKED_RESOURCE,
+  LOCKED_RESOURCES,
   MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
@@ -118,9 +118,10 @@ export function EditChargeItemSheet({
     );
   };
 
-  const isLinkedResource = LINKED_RESOURCE.includes(
-    item.service_resource ?? "",
-  );
+  const isLocked =
+    LOCKED_RESOURCES.includes(item.service_resource ?? "") ||
+    item.status === ChargeItemStatus.billed ||
+    item.status === ChargeItemStatus.paid;
 
   const getTotalComponentsByType = (type: MonetaryComponentType) => {
     return (
@@ -252,7 +253,7 @@ export function EditChargeItemSheet({
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
-                            disabled={isLinkedResource}
+                            disabled={isLocked}
                           >
                             <FormControl>
                               <SelectTrigger ref={field.ref}>
@@ -283,11 +284,7 @@ export function EditChargeItemSheet({
                               type="number"
                               min={1}
                               {...field}
-                              disabled={
-                                item.status === ChargeItemStatus.billed ||
-                                item.status === ChargeItemStatus.paid ||
-                                isLinkedResource
-                              }
+                              disabled={isLocked}
                             />
                           </FormControl>
                           <FormMessage />
@@ -310,11 +307,7 @@ export function EditChargeItemSheet({
                         onClick={() => {
                           setIsEditDialogOpen(true);
                         }}
-                        disabled={
-                          item.status === ChargeItemStatus.billed ||
-                          item.status === ChargeItemStatus.paid ||
-                          isLinkedResource
-                        }
+                        disabled={isLocked}
                       >
                         <CareIcon icon="l-edit" className="size-4" />
                         {t("edit")}
