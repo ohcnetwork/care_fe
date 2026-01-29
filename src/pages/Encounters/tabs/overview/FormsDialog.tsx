@@ -21,6 +21,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+const MAX_FAVORITES = 5;
+
 export const FormDialog = ({
   subjectType,
   questionnaireTag,
@@ -101,8 +103,8 @@ export const FormDialog = ({
     if (isFavorited) {
       removeFavoriteMutation.mutate(slug);
     } else {
-      if (favorites.length >= 5) {
-        toast.error(t("max_favorites_reached", { count: 5 }));
+      if (favorites.length >= MAX_FAVORITES) {
+        toast.error(t("max_favorites_reached", { count: MAX_FAVORITES }));
         return;
       }
       addFavoriteMutation.mutate(slug);
