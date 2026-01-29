@@ -359,12 +359,12 @@ export function ChargeItemsTable({
                           href={linkedResource}
                           className="flex items-center gap-0.5 underline text-gray-600"
                         >
-                          {t(item.service_resource)}
+                          {t(item.service_resource ?? "")}
                           <ExternalLinkIcon className="size-3" />
                         </Link>
                       ) : (
                         <span className="text-gray-500">
-                          {t(item.service_resource)}
+                          {t(item.service_resource ?? "")}
                         </span>
                       )}
                     </TableCell>

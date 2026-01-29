@@ -49,6 +49,7 @@ import {
   ChargeItemRead,
   ChargeItemStatus,
   ChargeItemUpdate,
+  LINKED_RESOURCE,
   MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
@@ -116,6 +117,10 @@ export function EditChargeItemSheet({
       ) || []
     );
   };
+
+  const isLinkedResource = LINKED_RESOURCE.includes(
+    item.service_resource ?? "",
+  );
 
   const getTotalComponentsByType = (type: MonetaryComponentType) => {
     return (
@@ -247,6 +252,7 @@ export function EditChargeItemSheet({
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
+                            disabled={isLinkedResource}
                           >
                             <FormControl>
                               <SelectTrigger ref={field.ref}>
@@ -279,7 +285,8 @@ export function EditChargeItemSheet({
                               {...field}
                               disabled={
                                 item.status === ChargeItemStatus.billed ||
-                                item.status === ChargeItemStatus.paid
+                                item.status === ChargeItemStatus.paid ||
+                                isLinkedResource
                               }
                             />
                           </FormControl>
@@ -305,7 +312,8 @@ export function EditChargeItemSheet({
                         }}
                         disabled={
                           item.status === ChargeItemStatus.billed ||
-                          item.status === ChargeItemStatus.paid
+                          item.status === ChargeItemStatus.paid ||
+                          isLinkedResource
                         }
                       >
                         <CareIcon icon="l-edit" className="size-4" />
