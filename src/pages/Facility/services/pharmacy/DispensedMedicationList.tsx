@@ -1268,20 +1268,6 @@ export default function DispensedMedicationList({
                 {t("prescriptions")}
               </Link>
             </Button>
-            {billableItems && billableItems.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setBillableChargeItems(billableItems);
-                  setCreateInvoiceSheetOpen(true);
-                }}
-              >
-                <ReceiptIcon className="size-4" />
-                {t("bill_medication")}
-                <ShortcutBadge actionId="billing-action" />
-              </Button>
-            )}
             {(dispenseOrder.status === DispenseOrderStatus.draft ||
               dispenseOrder.status === DispenseOrderStatus.in_progress) && (
               <>
