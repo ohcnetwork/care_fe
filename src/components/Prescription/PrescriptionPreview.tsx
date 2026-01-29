@@ -180,6 +180,7 @@ export const PrescriptionPreview = ({
     <PrintPreview
       title={`${t("prescriptions")} - ${patient.name}`}
       disabled={!prescriptions?.length}
+      autoPrint={{ enabled: !!prescriptions?.length }}
     >
       <div className="max-w-4xl mx-auto">
         <div>
