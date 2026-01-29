@@ -253,7 +253,7 @@ export default function DiagnosticReportMultiPrint({
   return (
     <div className="flex justify-center items-center">
       <PrintPreview
-        title={`${t("diagnostic_report_other")} - ${t("multi_print")}`}
+        title={`${t("diagnostic_report_other")} - ${t("print_multiple")}`}
       >
         <div className="max-w-4xl mx-auto">
           {/* Header with Facility Name and Logo */}
