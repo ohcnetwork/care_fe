@@ -147,7 +147,7 @@ function MedicationTable({ medications }: MedicationTableProps) {
       !charge_item?.paid_invoice ||
       charge_item?.paid_invoice?.status === InvoiceStatus.draft
     ) {
-      statusOptions.push(MedicationDispenseStatus.declined);
+      statusOptions.push(MedicationDispenseStatus.cancelled);
     }
     return statusOptions;
   };
