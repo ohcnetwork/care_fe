@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import PatientTokensList from "@/components/Tokens/PatientTokensList";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { BookingsList } from "@/pages/Appointments/BookAppointment/BookingsList";
+import { EncounterListRead } from "@/types/emr/encounter/encounter";
 import { FacilityRead } from "@/types/facility/facility";
 import PatientHomeEncounters from "./PatientHomeEncounters";
 
@@ -14,6 +15,7 @@ interface PatientHomeTabsProps {
   canListEncounters: boolean;
   canWriteAppointment: boolean;
   canListTokens: boolean;
+  actions?: (encounter: EncounterListRead) => React.ReactNode;
 }
 
 export default function PatientHomeTabs({
@@ -23,6 +25,7 @@ export default function PatientHomeTabs({
   canListEncounters,
   canWriteAppointment,
   canListTokens,
+  actions,
 }: PatientHomeTabsProps) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("encounters");
@@ -78,6 +81,7 @@ export default function PatientHomeTabs({
             facilityId={facility.id}
             facilityPermissions={facilityPermissions}
             canListEncounters={canListEncounters}
+            actions={actions}
           />
         )}
         {activeTab === "appointments" && canWriteAppointment && (

@@ -1,7 +1,14 @@
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
+import { LocationRead } from "@/types/location/location";
 
+import RenderActivityDefinitionFilter, {
+  ActivityDefinitionFilterValue,
+} from "./activityDefinitionFilter";
 import RenderDateFilter from "./dateFilter";
+import RenderDepartmentFilter from "./departmentFilter";
 import GenericFilter from "./genericFilter";
+import RenderLocationFilter from "./locationFilter";
 import RenderTagFilter from "./tagFilter";
 import NavigationHelper from "./utils/navigation-helper";
 import { FilterDateRange, FilterState, FilterValues } from "./utils/Utils";
@@ -45,6 +52,40 @@ export default function FilterRenderer({
           <RenderTagFilter
             {...commonProps}
             selectedTags={selected as TagConfig[]}
+          />
+          <NavigationHelper isActiveFilter={true} />
+        </>
+      );
+    case "department":
+      return (
+        <>
+          <RenderDepartmentFilter
+            {...commonProps}
+            selectedOrgs={selected as FacilityOrganizationRead[]}
+          />
+          <NavigationHelper isActiveFilter={true} />
+        </>
+      );
+    case "location":
+      return (
+        <>
+          <RenderLocationFilter
+            filter={filter}
+            selectedLocations={selected as LocationRead[]}
+            onFilterChange={onFilterChange}
+            handleBack={handleBack}
+            facilityId={facilityId}
+          />
+          <NavigationHelper isActiveFilter={true} />
+        </>
+      );
+    case "activity_definition":
+      return (
+        <>
+          <RenderActivityDefinitionFilter
+            {...commonProps}
+            facilityId={facilityId || ""}
+            selectedDefinitions={selected as ActivityDefinitionFilterValue[]}
           />
           <NavigationHelper isActiveFilter={true} />
         </>

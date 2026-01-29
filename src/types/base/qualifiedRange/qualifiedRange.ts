@@ -67,7 +67,7 @@ export const qualifiedRangeSchema = z.array(
             (data) => {
               // Only validate if both min and max exist
               if (data.min === undefined || data.max === undefined) return true;
-              return data.min <= data.max;
+              return Number(data.min) <= Number(data.max);
             },
             {
               message: t("min_less_max_error"),

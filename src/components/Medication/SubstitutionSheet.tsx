@@ -168,9 +168,8 @@ export function SubstitutionSheet({
                 name="substitutedProductKnowledge"
                 render={() => (
                   <FormItem>
-                    <FormLabel className="text-base font-medium">
+                    <FormLabel className="text-base font-medium" aria-required>
                       {t("select_substitute_product")}
-                      <span className="text-destructive ml-1">*</span>
                     </FormLabel>
 
                     <div className="space-y-3">

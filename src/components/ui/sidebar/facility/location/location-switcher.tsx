@@ -29,8 +29,6 @@ import PaginationComponent from "@/components/Common/Pagination";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
-import { useShortcutSubContext } from "@/context/ShortcutContext";
-
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
@@ -126,9 +124,6 @@ export function LocationSelectorDialog({
   onLocationSelect?: (location: LocationRead) => void;
 }) {
   const { t } = useTranslation();
-  useShortcutSubContext(open ? "patient:search:-global" : undefined, {
-    ignoreInputFields: open,
-  });
   const [locationLevel, setLocationLevel] = useState<LocationRead[]>([]);
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -176,22 +171,19 @@ export function LocationSelectorDialog({
   };
 
   const handleConfirmSelection = (newLocation: LocationRead) => {
-    const oldLocationId = location?.id;
     setLocation(newLocation);
     setLocationLevel([]);
     setOpen(false);
     setSearchValue("");
     setCurrentPage(1);
-    if (newLocation.id !== oldLocationId) {
-      if (onLocationSelect) {
-        onLocationSelect(newLocation);
-      } else if (navigateUrl) {
-        navigate(navigateUrl(newLocation));
-      } else {
-        navigate(
-          `/facility/${facilityId}/locations/${newLocation.id}/${subPath}`,
-        );
-      }
+    if (onLocationSelect) {
+      onLocationSelect(newLocation);
+    } else if (navigateUrl) {
+      navigate(navigateUrl(newLocation));
+    } else {
+      navigate(
+        `/facility/${facilityId}/locations/${newLocation.id}/${subPath}`,
+      );
     }
   };
 
@@ -207,9 +199,15 @@ export function LocationSelectorDialog({
     setCurrentPage(1);
   };
 
-  useKeyboardShortcut(["Shift", "Enter"], () => {
-    handleConfirmSelection(locationLevel[locationLevel.length - 1]);
-  });
+  useKeyboardShortcut(
+    ["Shift", "Enter"],
+    () => {
+      if (open && locationLevel.length > 0) {
+        handleConfirmSelection(locationLevel[locationLevel.length - 1]);
+      }
+    },
+    { ignoreInputFields: false },
+  );
 
   const getCurrentLocation = () => {
     if (!location) return <></>;

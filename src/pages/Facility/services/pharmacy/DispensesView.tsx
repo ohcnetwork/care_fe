@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeftIcon, PrinterIcon } from "lucide-react";
+import { ArrowLeftIcon, PrinterIcon, RotateCcw } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -25,6 +25,7 @@ import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import { PaginatedResponse } from "@/Utils/request/types";
 import DispensedMedicationList from "./DispensedMedicationList";
+import { MedicationReturnSheet } from "./MedicationReturnSheet";
 
 interface Props {
   facilityId: string;
@@ -165,6 +166,26 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
               {t("status")}:{" "}
               {t(`dispense_order_status__${dispenseOrder.status}`)}
             </Badge>
+            <MedicationReturnSheet
+              facilityId={facilityId}
+              locationId={locationId}
+              patient={dispenseOrder.patient}
+              onSuccess={(deliveryOrder) => {
+                // Navigate to the medication return detail page
+                navigate(
+                  `/facility/${facilityId}/locations/${locationId}/medication_return/order/${deliveryOrder.id}/?dispenseOrderId=${dispenseOrderId}`,
+                );
+              }}
+              trigger={
+                <Button
+                  variant="outline"
+                  className="border-gray-400 font-semibold"
+                >
+                  <RotateCcw className="size-4" />
+                  Medication Return
+                </Button>
+              }
+            />
             <Button
               variant="outline"
               className="border-gray-400 font-semibold"

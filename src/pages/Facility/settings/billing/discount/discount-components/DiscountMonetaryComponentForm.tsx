@@ -104,7 +104,14 @@ export function DiscountMonetaryComponentForm({
       factor: defaultValues?.factor ? round(defaultValues.factor) : null,
       amount: defaultValues?.amount ? round(defaultValues.amount) : null,
       title: defaultValues?.title || "",
-      conditions: defaultValues?.conditions || [],
+      conditions:
+        defaultValues?.conditions?.map((condition) => ({
+          ...condition,
+          _conditionType: getConditionDiscriminatorValue(
+            condition.metric,
+            condition.operation,
+          ),
+        })) || [],
     },
   });
 
@@ -248,35 +255,37 @@ export function DiscountMonetaryComponentForm({
           <FormField
             control={form.control}
             name="code"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("discount_code")}</FormLabel>
-                <FormControl>
-                  <Autocomplete
-                    options={discountCodes.map((code) => ({
-                      label: `${code.display} (${code.code})`,
-                      value: code.code,
-                    }))}
-                    value={field.value?.code ?? ""}
-                    onChange={(value) => {
-                      if (value === "") {
-                        form.setValue("code", undefined);
-                        return;
-                      }
-                      form.setValue(
-                        "code",
-                        discountCodes.find((code) => code.code === value),
-                      );
-                    }}
-                    className="w-full"
-                  />
-                </FormControl>
-                <FormDescription>
-                  {t("discount_component_code_description")}
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              const codeValue = form.watch("code");
+              return (
+                <FormItem>
+                  <FormLabel>{t("discount_code")}</FormLabel>
+                  <FormControl>
+                    <Autocomplete
+                      options={discountCodes.map((code) => ({
+                        label: `${code.display} (${code.code})`,
+                        value: code.code,
+                      }))}
+                      value={codeValue?.code ?? ""}
+                      onChange={(value) => {
+                        if (value === "") {
+                          field.onChange(undefined);
+                          return;
+                        }
+                        field.onChange(
+                          discountCodes.find((code) => code.code === value),
+                        );
+                      }}
+                      className="w-full"
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {t("discount_component_code_description")}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
         </div>
 

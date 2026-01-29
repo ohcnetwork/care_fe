@@ -17,6 +17,7 @@ import { displayMedicationName } from "@/types/emr/medicationRequest/medicationR
 import { PatientRead } from "@/types/emr/patient/patient";
 import { PrescriptionGroup } from "@/types/emr/prescription/prescription";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import { QRCodeSVG } from "qrcode.react";
 
 interface DetailRowProps {
   label: string;
@@ -199,6 +200,7 @@ export const PrescriptionPreview = ({
                 )}
               </div>
             </div>
+            <QRCodeSVG value={patient.id} size={50} level="Q" marginSize={0} />
             <img
               src={careConfig.mainLogo?.dark}
               alt="Logo"

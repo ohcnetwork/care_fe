@@ -15,6 +15,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { OngoingQueueTokenCardsList } from "@/pages/Facility/queues/OngoingQueueTokenCard";
@@ -26,7 +27,13 @@ import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { DoorOpenIcon, EyeIcon, Megaphone, SettingsIcon } from "lucide-react";
+import {
+  DoorOpenIcon,
+  EyeIcon,
+  Megaphone,
+  SearchIcon,
+  SettingsIcon,
+} from "lucide-react";
 import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -44,7 +51,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
   const { preferredServicePointCategories } = usePreferredServicePointCategory({
     facilityId,
   });
-  const [{ autoRefresh }] = useQueryParams();
+  const [{ autoRefresh, search }, setQueryParams] = useQueryParams();
   const { data: summary } = useQuery({
     queryKey: ["token-queue-summary", facilityId, queueId],
     queryFn: query(tokenQueueApi.summary, {
@@ -55,12 +62,30 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-2 mt-4">
-        <Label className="text-gray-950 text-sm font-medium">
-          {t("service_points")}
-        </Label>
-        <ServicePointsDropDown />
+      <div className="flex justify-between items-end gap-4">
+        <div className="flex flex-col gap-2">
+          <Label className="text-gray-950 text-sm font-medium">
+            {t("search_patients")}
+          </Label>
+          <div className="relative w-64">
+            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
+            <Input
+              type="search"
+              placeholder={t("search_by_patient_name")}
+              value={search || ""}
+              onChange={(e) => setQueryParams({ search: e.target.value || "" })}
+              className="pl-10"
+            />
+          </div>
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label className="text-gray-950 text-sm font-medium">
+            {t("service_points")}
+          </Label>
+          <ServicePointsDropDown />
+        </div>
       </div>
+
       <div className="flex space-x-4 overflow-x-auto w-full">
         {/* Waiting tokens list */}
         <QueueColumn title={t("waiting")}>
@@ -70,6 +95,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
             qParams={{
               sub_queue_is_null: true,
               status: TokenStatus.CREATED,
+              patient_name: search || "",
             }}
             emptyState={
               <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-10 border border-gray-100">

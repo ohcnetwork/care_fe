@@ -40,6 +40,7 @@ import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import {
   ChargeItemDefinitionBase,
   ChargeItemDefinitionRead,
+  ChargeItemDefinitionStatus,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import { UserReadMinimal } from "@/types/user/user";
@@ -364,9 +365,10 @@ export default function AddChargeItemsBillingSheet({
                 listDefinitions={{
                   queryFn: chargeItemDefinitionApi.listChargeItemDefinition,
                   pathParams: { facilityId },
-                  queryParams: { status: "active" },
+                  queryParams: { status: ChargeItemDefinitionStatus.active },
                 }}
                 translationBaseKey="charge_item_definition"
+                data-shortcut-id="keydown-action"
               />
             </div>
 

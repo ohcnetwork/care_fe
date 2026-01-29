@@ -14,6 +14,8 @@ import {
   MRP_CODE,
   getComponentsFromChargeItem,
 } from "@/types/billing/chargeItem/chargeItem";
+import { InventoryRead } from "@/types/inventory/product/inventory";
+import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductRead } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
 import query from "@/Utils/request/query";
@@ -29,13 +31,19 @@ type ItemPath = `items.${number}.${keyof SupplyDeliveryItemValues}`;
 interface UseDeliveryRowItemProps {
   form: UseFormReturn<SupplyDeliveryFormValues>;
   index: number;
+  /** Location ID for fetching inventory (origin location for internal transfers) */
+  locationId?: string;
 }
 
 /**
  * Custom hook that manages all state and logic for a delivery row item.
  * Consolidates multiple useWatch calls and provides clean APIs for mutations.
  */
-export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
+export function useDeliveryRowItem({
+  form,
+  index,
+  locationId,
+}: UseDeliveryRowItemProps) {
   const { facilityId, facility: facilityData } = useCurrentFacility();
   const [isCreatingNew, setIsCreatingNew] = useState(false);
 
@@ -120,6 +128,28 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
     () => productsResponse?.results || [],
     [productsResponse?.results],
   );
+
+  // Fetch inventory for location to get net_content (stock levels)
+  const { data: inventoryResponse, isLoading: isLoadingInventory } = useQuery({
+    queryKey: ["inventory", facilityId, locationId, productKnowledge?.slug],
+    queryFn: query(inventoryApi.list, {
+      pathParams: { facilityId, locationId: locationId! },
+      queryParams: {
+        product_knowledge: productKnowledge?.id,
+        limit: 100,
+      },
+    }),
+    enabled: !!facilityId && !!locationId && !!productKnowledge?.id,
+  });
+
+  // Map product IDs to their inventory net_content
+  const inventoryByProductId = useMemo(() => {
+    const map = new Map<string, InventoryRead>();
+    inventoryResponse?.results?.forEach((inv) => {
+      map.set(inv.product.id, inv);
+    });
+    return map;
+  }, [inventoryResponse?.results]);
 
   // Fill form from existing product
   const fillFromProduct = useCallback(
@@ -306,7 +336,9 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
     needsCategorySelection,
     isCreatingNew,
     isLoadingProducts,
+    isLoadingInventory,
     products,
+    inventoryByProductId,
     availableTaxes,
     availableDiscounts,
 

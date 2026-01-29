@@ -425,7 +425,7 @@ export function ResourceCategoryList<
                 variant="outline"
                 onClick={handleCreateCategory}
                 disabled={isLeafCategory && !allowCategoryCreate}
-                hidden={isLeafCategory}
+                hidden={isLeafCategory && !allowCategoryCreate}
                 className="w-full sm:w-auto"
               >
                 <CareIcon icon="l-folder-plus" className="mr-2" />
