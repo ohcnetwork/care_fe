@@ -1,3 +1,4 @@
+import { Mic } from "lucide-react";
 import { Link } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -5,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 import {
-  AllergyIcon,
   HealthWorkerIcon,
   MedicineIcon,
   TestTubeIcon,
@@ -17,11 +17,13 @@ import {
 } from "@/Utils/keyboardShortcutComponents";
 
 import { useEncounterShortcutDisplays } from "@/hooks/useEncounterShortcuts";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { FormDialog } from "./FormsDialog";
 
 export const QuickActions = (props: React.ComponentProps<"div">) => {
   const { t } = useTranslation();
   const getShortcutDisplay = useEncounterShortcutDisplays();
+  const { actions } = useEncounter();
 
   return (
     <div
@@ -29,10 +31,9 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
       className={cn("grid grid-cols-2 sm:grid-cols-4 gap-3", props.className)}
     >
       <QuickAction
-        icon={<AllergyIcon className="text-red-700" />}
-        title={t("allergy")}
-        shortcut={getShortcutDisplay("add-allergy")}
-        href={`questionnaire/allergy_intolerance`}
+        icon={<Mic className="text-purple-700 size-8" />}
+        title={t("scribe")}
+        onClick={actions.openScribe}
       />
       <QuickAction
         icon={<TestTubeIcon className="text-pink-700 size-8" />}

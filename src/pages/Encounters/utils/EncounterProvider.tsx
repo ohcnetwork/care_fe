@@ -5,6 +5,7 @@ import { createContext, useContext, useState } from "react";
 import { CareTeamSheet } from "@/components/CareTeam/CareTeamSheet";
 import { LocationSheet } from "@/components/Location/LocationSheet";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
+import { AudioRecorder } from "@/components/Scribe";
 
 import { Permissions, getPermissions } from "@/common/Permissions";
 
@@ -57,6 +58,7 @@ type EncounterContextType = {
     manageDepartments: () => void;
     dispenseMedicine: () => void;
     dispense: () => void;
+    openScribe: () => void;
   };
 };
 
@@ -69,6 +71,7 @@ enum EncounterAction {
   ManageDepartments,
   DispenseMedicine,
   Dispense,
+  Scribe,
 }
 
 const encounterContext = createContext<EncounterContextType | undefined>(
@@ -226,6 +229,9 @@ export function EncounterProvider({
           dispense: () => {
             setActiveAction(EncounterAction.Dispense);
           },
+          openScribe: () => {
+            setActiveAction(EncounterAction.Scribe);
+          },
         },
       }}
     >
@@ -290,6 +296,13 @@ export function EncounterProvider({
             setActiveAction(open ? EncounterAction.Dispense : null);
           }}
           facilityId={facilityId}
+        />
+      )}
+
+      {activeAction === EncounterAction.Scribe && (
+        <AudioRecorder
+          encounterId={selectedEncounterId}
+          onClose={() => setActiveAction(null)}
         />
       )}
     </encounterContext.Provider>

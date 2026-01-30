@@ -226,7 +226,7 @@ export default function ServiceRequestShow({
     );
   }
 
-  if (!request || !activityDefinition) {
+  if (!request) {
     return <div className="p-4">{t("error_loading_sq_or_ad")}</div>;
   }
 
@@ -246,9 +246,9 @@ export default function ServiceRequestShow({
     return specimen;
   }
 
-  const specimenRequirements = activityDefinition.specimen_requirements ?? [];
+  const specimenRequirements = activityDefinition?.specimen_requirements ?? [];
   const observationRequirements =
-    activityDefinition.observation_result_requirements ?? [];
+    activityDefinition?.observation_result_requirements ?? [];
   const diagnosticReports = request.diagnostic_reports || [];
 
   const assignedSpecimenIds = new Set<string>();

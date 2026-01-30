@@ -41,7 +41,7 @@ function formatSpecimenRequirements(
 
 interface ServiceRequestDetailsProps {
   request: ServiceRequestReadSpec;
-  activityDefinition: ActivityDefinitionReadSpec;
+  activityDefinition?: ActivityDefinitionReadSpec;
 }
 
 export function ServiceRequestDetails({
@@ -59,7 +59,7 @@ export function ServiceRequestDetails({
           <div className="font-semibold text-gray-600 text-xl flex items-center gap-2">
             <div className="h-8 w-1.5 bg-gray-400 rounded-r-sm" />
             <div className="flex items-center gap-2 text-gray-700">
-              {activityDefinition.title}
+              {request.title}
             </div>
           </div>
           <div className="font-medium px-3">
@@ -128,7 +128,7 @@ export function ServiceRequestDetails({
           </div>
           <div className="border-l border-gray-200 mx-4" />
           <div className="flex flex-col gap-6">
-            {activityDefinition.healthcare_service && (
+            {activityDefinition?.healthcare_service && (
               <div>
                 <div className="text-sm text-gray-600 mb-1">
                   {t("healthcare_service")}
