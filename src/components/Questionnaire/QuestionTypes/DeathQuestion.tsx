@@ -40,7 +40,7 @@ export function TimeOfDeathQuestion(props: TimeOfDeathQuestionProps) {
   return (
     <DateTimeInput
       value={values[0]}
-      onDateChange={(val) => handleUpdate(val)}
+      onDateChange={(val) => val !== undefined && handleUpdate(val)}
       max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
       disabled={props.disabled}
     />

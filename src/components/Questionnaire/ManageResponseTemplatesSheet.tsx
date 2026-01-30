@@ -78,6 +78,7 @@ import { questionnaireResponseTemplateApi } from "@/types/questionnaire/question
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
+import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import { t } from "i18next";
 import { buildMedicationForTemplate } from "./QuestionTypes/MedicationRequestQuestion";
 
@@ -412,6 +413,7 @@ interface ManageResponseTemplatesSheetProps {
   /** Current service requests to allow saving as template */
   currentActivityDefinitions?: ActivityDefinitionTemplateSpec[];
   key_filter: string;
+  facilityOrganizations?: string[];
 }
 
 type ViewState = "list" | "create" | "save-current";
@@ -434,6 +436,7 @@ export default function ManageResponseTemplatesSheet({
   currentMedications = [],
   currentActivityDefinitions = [],
   key_filter = "medication_request",
+  facilityOrganizations = [],
 }: ManageResponseTemplatesSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -449,6 +452,9 @@ export default function ManageResponseTemplatesSheet({
   const [expandedTemplateId, setExpandedTemplateId] = useState<string | null>(
     null,
   );
+  const [selectedOrganizations, setSelectedOrganizations] = useState<
+    string[] | null
+  >(facilityOrganizations.length > 0 ? facilityOrganizations : null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -542,7 +548,7 @@ export default function ManageResponseTemplatesSheet({
         activity_definition: serviceRequestsForTemplate,
       },
       users: [currentUser.username],
-      facility_organizations: [],
+      facility_organizations: selectedOrganizations ?? [],
     };
     createTemplate(createData);
   };
@@ -893,6 +899,20 @@ export default function ManageResponseTemplatesSheet({
                 </FormItem>
               )}
             />
+
+            {facilityId && (
+              <div className="space-y-2">
+                <FacilityOrganizationSelector
+                  facilityId={facilityId}
+                  value={selectedOrganizations}
+                  onChange={setSelectedOrganizations}
+                  optional
+                />
+                <p className="text-xs text-muted-foreground">
+                  {t("select_departments_to_share_template")}
+                </p>
+              </div>
+            )}
 
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button

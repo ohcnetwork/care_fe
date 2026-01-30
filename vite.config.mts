@@ -91,6 +91,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
             logLevel: ["error"],
           },
         },
+        enableBuild: false,
       }),
       treeShakeCareIcons({
         iconWhitelist: ["default"],

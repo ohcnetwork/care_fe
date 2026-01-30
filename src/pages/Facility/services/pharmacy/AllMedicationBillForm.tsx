@@ -1,7 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { ArrowLeft, Eye, Info, MoreVertical, Shuffle } from "lucide-react";
+import {
+  ArrowLeft,
+  Eye,
+  Info,
+  MoreVertical,
+  Pill,
+  Shuffle,
+} from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -79,6 +86,7 @@ import useFilters from "@/hooks/useFilters";
 
 import BackButton from "@/components/Common/BackButton";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -1222,7 +1230,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
     }
 
     const requests = [];
-    const defaultEncounterId = response?.results[0]?.encounter;
+    const defaultEncounterId = response?.results[0]?.encounter ?? encounterId;
 
     // Add all dispense requests - now one per lot
     selectedItems.forEach((item) => {
@@ -1491,6 +1499,22 @@ export default function AllMedicationBillForm({ patientId }: Props) {
                         if (!b.date) return -1;
                         return b.date.getTime() - a.date.getTime();
                       });
+
+                    if (prescriptionGroups.length === 0) {
+                      return (
+                        <TableRow>
+                          <TableCell colSpan={7} className="p-0">
+                            <EmptyState
+                              icon={<Pill className="text-primary size-6" />}
+                              title={t("no_medications")}
+                              description={t(
+                                "add_medications_to_bill_description",
+                              )}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      );
+                    }
 
                     return prescriptionGroups.map(
                       ({ key, label, fields: groupFields }) => {
