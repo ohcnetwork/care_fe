@@ -134,6 +134,7 @@ import {
   UCUM_TIME_UNITS,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
@@ -1284,32 +1285,17 @@ export default function MedicationBillForm({
       });
     });
 
-    // Get unique prescription IDs from selected items and mark them as completed (only if checked)
-    const prescriptionIds = new Set(
-      selectedItems
-        .filter(
-          (item) =>
-            item.medication?.prescription?.id &&
-            item.prescriptionId !== "no-prescription" &&
-            prescriptionCompletionMap[item.prescriptionId || ""], // Only if prescription is checked for completion
-        )
-        .map((item) => item.medication.prescription!.id),
-    );
-
     // Add prescription completion request using upsert
-    if (prescriptionIds.size > 0) {
-      requests.push({
-        url: `/api/v1/patient/${patientId}/medication/prescription/upsert/`,
-        method: "POST",
-        reference_id: "prescription_completion_upsert",
-        body: {
-          datapoints: Array.from(prescriptionIds).map((prescriptionId) => ({
-            id: prescriptionId,
-            status: "completed",
-          })),
-        },
-      });
-    }
+    requests.push({
+      url: `/api/v1/patient/${patientId}/medication/prescription/upsert/`,
+      method: "POST",
+      reference_id: "prescription_completion_upsert",
+      body: {
+        datapoints: [
+          { id: prescriptionId, status: PrescriptionStatus.completed },
+        ],
+      },
+    });
 
     dispense({ requests });
   };

@@ -133,7 +133,10 @@ import {
   UCUM_TIME_UNITS,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
-import { PrescriptionRead } from "@/types/emr/prescription/prescription";
+import {
+  PrescriptionRead,
+  PrescriptionStatus,
+} from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
@@ -1316,7 +1319,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
         body: {
           datapoints: Array.from(prescriptionIds).map((prescriptionId) => ({
             id: prescriptionId,
-            status: "completed",
+            status: PrescriptionStatus.completed,
           })),
         },
       });
