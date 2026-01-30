@@ -1,4 +1,4 @@
-import { differenceInMinutes, format, subDays } from "date-fns";
+import { differenceInMinutes, format } from "date-fns";
 import { CalendarDays, CalendarOff } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -27,7 +27,6 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { dateQueryString } from "@/Utils/utils";
 import { Avatar } from "@/components/Common/Avatar";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
@@ -43,7 +42,6 @@ interface BookingsListProps {
 
 export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
   const { t } = useTranslation();
-  const today = new Date();
   return (
     <div className="mt-2">
       <Tabs defaultValue="upcoming">
@@ -73,7 +71,6 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
               patientId={patientId}
               facilityId={facilityId}
               statuses={UpcomingAppointmentStatuses}
-              date_after={today}
             />
           </TabsContent>
           <TabsContent value="past" className="space-y-4 overflow-x-auto">
@@ -81,7 +78,6 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
               patientId={patientId}
               facilityId={facilityId}
               statuses={PastAppointmentStatuses}
-              date_before={subDays(today, 1)}
             />
           </TabsContent>
           <TabsContent value="cancelled" className="space-y-4 overflow-x-auto">
@@ -293,14 +289,10 @@ export const BookingListContent = ({
   patientId,
   facilityId,
   statuses,
-  date_after,
-  date_before,
 }: {
   patientId: string;
   facilityId?: string;
   statuses?: readonly AppointmentStatus[];
-  date_after?: Date;
-  date_before?: Date;
 }) => {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
@@ -321,8 +313,6 @@ export const BookingListContent = ({
           offset: pageParam,
           limit: 15,
           facility: facilityId,
-          ...(date_after && { date_after: dateQueryString(date_after) }),
-          ...(date_before && { date_before: dateQueryString(date_before) }),
           status: statuses?.join(","),
         },
       })({ signal });
