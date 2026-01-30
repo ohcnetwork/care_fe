@@ -33,11 +33,15 @@ const PrescriptionContent = ({ prescription }: PrescriptionContentProps) => {
   const medications = prescription.requests;
   const { t } = useTranslation();
 
-  const medicationsWithProduct = medications.filter(
+  const medicationsOnly = medications.filter(
+    (med) => med.requested_product?.product_type !== "consumable",
+  );
+
+  const medicationsWithProduct = medicationsOnly.filter(
     (med) => med.requested_product,
   );
 
-  const medicationsWithoutProduct = medications.filter(
+  const medicationsWithoutProduct = medicationsOnly.filter(
     (med) => !med.requested_product,
   );
 

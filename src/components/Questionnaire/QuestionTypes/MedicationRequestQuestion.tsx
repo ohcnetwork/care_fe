@@ -55,6 +55,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
@@ -329,6 +330,7 @@ export function MedicationRequestQuestion({
         ordering: "-modified_date",
         limit: 100,
         facility: facilityId,
+        product_type: "medication",
       },
     }),
     enabled: !isPreview,
@@ -352,6 +354,7 @@ export function MedicationRequestQuestion({
         questionnaireResponse.question_id,
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patientMedications]);
 
   const [expandedMedicationIndex, setExpandedMedicationIndex] = useState<
@@ -363,6 +366,11 @@ export function MedicationRequestQuestion({
   );
   const [showAdvancedFields, setShowAdvancedFields] = useState(false);
   const desktopLayout = useBreakpoints({ lg: true, default: false });
+
+  // Tab state for medications vs consumables
+  const [activeTab, setActiveTab] = useState<"medications" | "consumables">(
+    "medications",
+  );
 
   const [newMedicationInSheet, setNewMedicationInSheet] =
     useState<MedicationRequestCreate | null>(null);
@@ -522,6 +530,8 @@ export function MedicationRequestQuestion({
       requester: currentUser,
     };
 
+    setActiveTab("medications");
+
     if (desktopLayout) {
       addNewMedication(initialDetails);
     } else {
@@ -541,6 +551,20 @@ export function MedicationRequestQuestion({
       authored_on: new Date().toISOString(),
       requester: currentUser,
     };
+
+    if (productKnowledge.product_type === "consumable") {
+      initialDetails.dosage_instruction = [
+        {
+          ...initialDetails.dosage_instruction[0],
+          as_needed_boolean: true,
+          timing: undefined,
+        },
+      ];
+
+      setActiveTab("consumables");
+    } else {
+      setActiveTab("medications");
+    }
 
     if (desktopLayout) {
       addNewMedication(initialDetails);
@@ -601,6 +625,9 @@ export function MedicationRequestQuestion({
         } as MedicationRequestCreate;
       }
     });
+
+    setActiveTab("medications");
+
     const newMedications: MedicationRequestCreate[] = [
       ...medications,
       ...medicationRequests,
@@ -616,7 +643,6 @@ export function MedicationRequestQuestion({
     );
     setExpandedMedicationIndex(medications.length);
   };
-
   const handleRemoveMedication = (index: number) => {
     setMedicationToDelete(index);
   };
@@ -670,6 +696,14 @@ export function MedicationRequestQuestion({
       currentUser,
     );
 
+    if (
+      medicationToAdd.requested_product_internal?.product_type === "consumable"
+    ) {
+      setActiveTab("consumables");
+    } else {
+      setActiveTab("medications");
+    }
+
     const newMedications: MedicationRequestCreate[] = [
       ...medications,
       medicationToAdd,
@@ -699,6 +733,19 @@ export function MedicationRequestQuestion({
           fetchProductAndBuildMedication(med, currentUser),
         ),
       );
+
+      const hasConsumables = medicationsWithProductKnowledge.some(
+        (med) => med.requested_product_internal?.product_type === "consumable",
+      );
+      const hasMedications = medicationsWithProductKnowledge.some(
+        (med) => med.requested_product_internal?.product_type !== "consumable",
+      );
+
+      if (hasConsumables && !hasMedications) {
+        setActiveTab("consumables");
+      } else {
+        setActiveTab("medications");
+      }
 
       const newMedications: MedicationRequestCreate[] = [
         ...medications,
@@ -1111,6 +1158,7 @@ export function MedicationRequestQuestion({
                   queryParams: {
                     limit,
                     offset,
+                    product_type: "medication",
                     status:
                       "active,on_hold,draft,unknown,ended,completed,cancelled",
                   },
@@ -1206,274 +1254,370 @@ export function MedicationRequestQuestion({
           </AlertDescription>
         </Alert>
       )}
-      {medications.length > 0 && (
-        <div className="md:overflow-x-auto w-auto">
-          <div className="min-w-fit">
-            <div
-              className={cn(
-                "relative lg:border border-gray-200 rounded-md",
-                showAdvancedFields ? "max-w-[2678px]" : "max-w-[1108px]",
-                {
-                  "bg-gray-50/50": !desktopLayout,
-                },
+
+      {/* Separate medications and consumables */}
+      {(() => {
+        const medicationsOnly = medications.filter(
+          (med) =>
+            med.requested_product_internal?.product_type !== "consumable",
+        );
+        const consumablesOnly = medications.filter(
+          (med) =>
+            med.requested_product_internal?.product_type === "consumable",
+        );
+
+        const showTabs =
+          medicationsOnly.length > 0 && consumablesOnly.length > 0;
+
+        const itemsToDisplay = showTabs
+          ? activeTab === "medications"
+            ? medicationsOnly
+            : consumablesOnly
+          : medications;
+
+        const renderMedicationTable = (
+          items: MedicationRequestCreate[],
+          title?: string,
+        ) => {
+          if (items.length === 0) return null;
+
+          return (
+            <div key={title} className="space-y-2">
+              {title && (
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  {title}
+                  <span className="text-sm font-normal text-gray-600">
+                    ({items.length})
+                  </span>
+                </h3>
               )}
-            >
-              {/* Header - Only show on desktop */}
-              <div
-                className={cn(
-                  "hidden lg:grid bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500",
-                  showAdvancedFields
-                    ? "grid-cols-[280px_220px_180px_160px_40px_300px_180px_250px_180px_160px_220px_280px_180px_48px]"
-                    : "grid-cols-[280px_220px_180px_160px_40px_180px_48px]",
-                )}
-              >
-                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
-                  {t("medicine")}
-                </div>
-                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
-                  {t("dosage")}
-                  <span className="text-red-500 ml-0.5">*</span>
-                </div>
-                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
-                  {t("frequency")}
-                  <span className="text-red-500 ml-0.5">*</span>
-                </div>
-                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
-                  {t("duration")}
-                </div>
-                {/* Expand/Collapse bar for advanced fields */}
-                <div
-                  className={cn(
-                    "flex items-center justify-center border-r border-gray-200 cursor-pointer transition-colors",
-                    showAdvancedFields
-                      ? "bg-primary-50 hover:bg-primary-100"
-                      : "bg-gray-100 hover:bg-gray-200",
-                  )}
-                  onClick={() => setShowAdvancedFields(!showAdvancedFields)}
-                  title={
-                    showAdvancedFields
-                      ? t("hide_advanced_fields")
-                      : t("show_advanced_fields")
-                  }
-                >
-                  {showAdvancedFields ? (
-                    <ChevronsDownUp className="h-4 w-4 text-primary-600 rotate-90" />
-                  ) : (
-                    <ChevronsUpDown className="h-4 w-4 text-gray-500 rotate-90" />
-                  )}
-                </div>
-                {/* Advanced fields - inserted between bar and notes when expanded */}
-                {showAdvancedFields && (
-                  <>
-                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
-                      {t("instructions")}
+              <div className="md:overflow-x-auto w-auto">
+                <div className="min-w-fit">
+                  <div
+                    className={cn(
+                      "relative lg:border border-gray-200 rounded-md",
+                      showAdvancedFields ? "max-w-[2678px]" : "max-w-[1108px]",
+                      {
+                        "bg-gray-50/50": !desktopLayout,
+                      },
+                    )}
+                  >
+                    {/* Header - Only show on desktop */}
+                    <div
+                      className={cn(
+                        "hidden lg:grid bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500",
+                        showAdvancedFields
+                          ? "grid-cols-[280px_220px_180px_160px_40px_300px_180px_250px_180px_160px_220px_280px_180px_48px]"
+                          : "grid-cols-[280px_220px_180px_160px_40px_180px_48px]",
+                      )}
+                    >
+                      <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                        {t("medicine")}
+                      </div>
+                      <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                        {t("dosage")}
+                        <span className="text-red-500 ml-0.5">*</span>
+                      </div>
+                      <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                        {t("frequency")}
+                        <span className="text-red-500 ml-0.5">*</span>
+                      </div>
+                      <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                        {t("duration")}
+                      </div>
+                      {/* Expand/Collapse bar for advanced fields */}
+                      <div
+                        className={cn(
+                          "flex items-center justify-center border-r border-gray-200 cursor-pointer transition-colors",
+                          showAdvancedFields
+                            ? "bg-primary-50 hover:bg-primary-100"
+                            : "bg-gray-100 hover:bg-gray-200",
+                        )}
+                        onClick={() =>
+                          setShowAdvancedFields(!showAdvancedFields)
+                        }
+                        title={
+                          showAdvancedFields
+                            ? t("hide_advanced_fields")
+                            : t("show_advanced_fields")
+                        }
+                      >
+                        {showAdvancedFields ? (
+                          <ChevronsDownUp className="h-4 w-4 text-primary-600 rotate-90" />
+                        ) : (
+                          <ChevronsUpDown className="h-4 w-4 text-gray-500 rotate-90" />
+                        )}
+                      </div>
+                      {/* Advanced fields - inserted between bar and notes when expanded */}
+                      {showAdvancedFields && (
+                        <>
+                          <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                            {t("instructions")}
+                          </div>
+                          <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                            {t("route")}
+                          </div>
+                          <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                            {t("site")}
+                          </div>
+                          <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                            {t("method")}
+                          </div>
+                          <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                            {t("intent")}
+                          </div>
+                          <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                            {t("authored_on")}
+                          </div>
+                          <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                            {t("requester")}
+                          </div>
+                        </>
+                      )}
+                      {/* Notes - Always visible, at the end before remove button */}
+                      <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                        {t("note")}
+                      </div>
+                      <div className="font-semibold text-gray-600 p-3 sticky right-0 bg-gray-50 shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)] w-12" />
                     </div>
-                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
-                      {t("route")}
-                    </div>
-                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
-                      {t("site")}
-                    </div>
-                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
-                      {t("method")}
-                    </div>
-                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
-                      {t("intent")}
-                    </div>
-                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
-                      {t("authored_on")}
-                    </div>
-                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
-                      {t("requester")}
-                    </div>
-                  </>
-                )}
-                {/* Notes - Always visible, at the end before remove button */}
-                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
-                  {t("note")}
-                </div>
-                <div className="font-semibold text-gray-600 p-3 sticky right-0 bg-gray-50 shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)] w-12" />
-              </div>
 
-              {/* Body */}
-              <div
-                className={cn("bg-white", {
-                  "bg-transparent": !desktopLayout,
-                })}
-              >
-                {medications.map((medication, index) => {
-                  const isInactive = INACTIVE_MEDICATION_STATUSES.includes(
-                    medication.status as (typeof INACTIVE_MEDICATION_STATUSES)[number],
-                  );
-                  const dosageInstruction =
-                    medication.dosage_instruction[0] || {};
+                    {/* Body */}
+                    <div
+                      className={cn("bg-white", {
+                        "bg-transparent": !desktopLayout,
+                      })}
+                    >
+                      {items.map((medication, _originalIndex) => {
+                        // Find the original index in the full medications array
+                        const index = medications.indexOf(medication);
+                        const isInactive =
+                          INACTIVE_MEDICATION_STATUSES.includes(
+                            medication.status as (typeof INACTIVE_MEDICATION_STATUSES)[number],
+                          );
+                        const dosageInstruction =
+                          medication.dosage_instruction[0] || {};
 
-                  return (
-                    <React.Fragment key={medication.id || index}>
-                      {!desktopLayout ? (
-                        <Card
-                          className={cn(
-                            "mb-2 rounded-lg border-0 shadow-none",
-                            expandedMedicationIndex === index &&
-                              "border border-primary-500",
-                          )}
-                        >
-                          <Collapsible
-                            open={expandedMedicationIndex === index}
-                            onOpenChange={() => {
-                              setExpandedMedicationIndex(
-                                expandedMedicationIndex === index
-                                  ? null
-                                  : index,
-                              );
-                            }}
-                            className="w-full"
-                          >
-                            <CollapsibleTrigger asChild>
-                              <CardHeader
+                        return (
+                          <React.Fragment key={medication.id || index}>
+                            {!desktopLayout ? (
+                              <Card
                                 className={cn(
-                                  "p-2 rounded-lg shadow-none bg-gray-50 cursor-pointer active:bg-gray-100 transition-colors",
-                                  {
-                                    "bg-gray-200 border border-gray-300":
-                                      expandedMedicationIndex !== index,
-                                  },
+                                  "mb-2 rounded-lg border-0 shadow-none",
+                                  expandedMedicationIndex === index &&
+                                    "border border-primary-500",
                                 )}
                               >
-                                <div className="flex flex-col space-y-1">
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex-1 min-w-0 mr-2">
-                                      <CardTitle
-                                        className={cn(
-                                          "text-base text-gray-950 wrap-break-word",
-                                          isInactive &&
-                                            medication.status !== "ended" &&
-                                            "line-through",
+                                <Collapsible
+                                  open={expandedMedicationIndex === index}
+                                  onOpenChange={() => {
+                                    setExpandedMedicationIndex(
+                                      expandedMedicationIndex === index
+                                        ? null
+                                        : index,
+                                    );
+                                  }}
+                                  className="w-full"
+                                >
+                                  <CollapsibleTrigger asChild>
+                                    <CardHeader
+                                      className={cn(
+                                        "p-2 rounded-lg shadow-none bg-gray-50 cursor-pointer active:bg-gray-100 transition-colors",
+                                        {
+                                          "bg-gray-200 border border-gray-300":
+                                            expandedMedicationIndex !== index,
+                                        },
+                                      )}
+                                    >
+                                      <div className="flex flex-col space-y-1">
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex-1 min-w-0 mr-2">
+                                            <CardTitle
+                                              className={cn(
+                                                "text-base text-gray-950 wrap-break-word",
+                                                isInactive &&
+                                                  medication.status !==
+                                                    "ended" &&
+                                                  "line-through",
+                                              )}
+                                              title={
+                                                medication.medication
+                                                  ?.display ||
+                                                medication
+                                                  .requested_product_internal
+                                                  ?.name
+                                              }
+                                            >
+                                              {medication.medication?.display ||
+                                                medication
+                                                  .requested_product_internal
+                                                  ?.name}
+                                            </CardTitle>
+                                          </div>
+                                          <div className="flex items-center gap-2 shrink-0">
+                                            {expandedMedicationIndex ===
+                                            index ? (
+                                              <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  handleRemoveMedication(index);
+                                                }}
+                                                disabled={
+                                                  isInactive || disabled
+                                                }
+                                                className="size-10 p-4 border border-gray-400 bg-white shadow text-destructive"
+                                                aria-label="Remove medication"
+                                              >
+                                                <MinusCircledIcon className="size-5" />
+                                              </Button>
+                                            ) : null}
+                                            <Button
+                                              variant="ghost"
+                                              size="icon"
+                                              className="size-10 border border-gray-400 bg-white shadow p-4 pointer-events-none"
+                                              aria-label={
+                                                expandedMedicationIndex ===
+                                                index
+                                                  ? "Collapse medication"
+                                                  : "Expand medication"
+                                              }
+                                            >
+                                              {expandedMedicationIndex ===
+                                              index ? (
+                                                <ChevronsDownUp className="size-5" />
+                                              ) : (
+                                                <ChevronsUpDown className="size-5" />
+                                              )}
+                                            </Button>
+                                          </div>
+                                        </div>
+                                        {expandedMedicationIndex !== index && (
+                                          <div className="text-sm mt-1 text-gray-600">
+                                            {dosageInstruction?.dose_and_rate
+                                              ?.dose_quantity &&
+                                              `${round(dosageInstruction.dose_and_rate.dose_quantity.value)} ${dosageInstruction.dose_and_rate.dose_quantity.unit?.display || ""}`}
+
+                                            {dosageInstruction?.dose_and_rate
+                                              ?.dose_range &&
+                                              formatDoseRange(
+                                                dosageInstruction.dose_and_rate
+                                                  .dose_range,
+                                              )}
+
+                                            {dosageInstruction?.as_needed_boolean
+                                              ? ` · ${t("as_needed_prn")}`
+                                              : dosageInstruction?.timing?.code
+                                                  ?.code &&
+                                                ` · ${MEDICATION_REQUEST_TIMING_OPTIONS[dosageInstruction.timing.code.code]?.display || ""}`}
+
+                                            {dosageInstruction?.timing?.repeat
+                                              ?.bounds_duration?.value &&
+                                              ` · ${dosageInstruction.timing.repeat.bounds_duration.value} ${dosageInstruction.timing.repeat.bounds_duration.unit}`}
+                                          </div>
                                         )}
-                                        title={
-                                          medication.medication?.display ||
-                                          medication.requested_product_internal
-                                            ?.name
+                                      </div>
+                                    </CardHeader>
+                                  </CollapsibleTrigger>
+                                  <CollapsibleContent>
+                                    <CardContent className="p-2 pt-2 space-y-3 rounded-lg bg-gray-50">
+                                      <MedicationRequestGridRow
+                                        medication={medication}
+                                        disabled={disabled}
+                                        onUpdate={(updates) =>
+                                          handleUpdateMedication(index, updates)
                                         }
-                                      >
-                                        {medication.medication?.display ||
-                                          medication.requested_product_internal
-                                            ?.name}
-                                      </CardTitle>
-                                    </div>
-                                    <div className="flex items-center gap-2 shrink-0">
-                                      {expandedMedicationIndex === index ? (
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleRemoveMedication(index);
-                                          }}
-                                          disabled={isInactive || disabled}
-                                          className="size-10 p-4 border border-gray-400 bg-white shadow text-destructive"
-                                          aria-label="Remove medication"
-                                        >
-                                          <MinusCircledIcon className="size-5" />
-                                        </Button>
-                                      ) : null}
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="size-10 border border-gray-400 bg-white shadow p-4 pointer-events-none"
-                                        aria-label={
-                                          expandedMedicationIndex === index
-                                            ? "Collapse medication"
-                                            : "Expand medication"
+                                        onRemove={() =>
+                                          handleRemoveMedication(index)
                                         }
-                                      >
-                                        {expandedMedicationIndex === index ? (
-                                          <ChevronsDownUp className="size-5" />
-                                        ) : (
-                                          <ChevronsUpDown className="size-5" />
-                                        )}
-                                      </Button>
-                                    </div>
-                                  </div>
-                                  {expandedMedicationIndex !== index && (
-                                    <div className="text-sm mt-1 text-gray-600">
-                                      {dosageInstruction?.dose_and_rate
-                                        ?.dose_quantity &&
-                                        `${round(dosageInstruction.dose_and_rate.dose_quantity.value)} ${dosageInstruction.dose_and_rate.dose_quantity.unit?.display || ""}`}
-
-                                      {dosageInstruction?.dose_and_rate
-                                        ?.dose_range &&
-                                        formatDoseRange(
-                                          dosageInstruction.dose_and_rate
-                                            .dose_range,
-                                        )}
-
-                                      {dosageInstruction?.as_needed_boolean
-                                        ? ` · ${t("as_needed_prn")}`
-                                        : dosageInstruction?.timing?.code
-                                            ?.code &&
-                                          ` · ${MEDICATION_REQUEST_TIMING_OPTIONS[dosageInstruction.timing.code.code]?.display || ""}`}
-
-                                      {dosageInstruction?.timing?.repeat
-                                        ?.bounds_duration?.value &&
-                                        ` · ${dosageInstruction.timing.repeat.bounds_duration.value} ${dosageInstruction.timing.repeat.bounds_duration.unit}`}
-                                    </div>
-                                  )}
-                                </div>
-                              </CardHeader>
-                            </CollapsibleTrigger>
-                            <CollapsibleContent>
-                              <CardContent className="p-2 pt-2 space-y-3 rounded-lg bg-gray-50">
-                                <MedicationRequestGridRow
-                                  medication={medication}
-                                  disabled={disabled}
-                                  onUpdate={(updates) =>
-                                    handleUpdateMedication(index, updates)
-                                  }
-                                  onRemove={() => handleRemoveMedication(index)}
-                                  onAddToTemplate={
-                                    questionnaireSlug
-                                      ? handleAddToTemplate
-                                      : undefined
-                                  }
-                                  index={index}
-                                  questionId={questionnaireResponse.question_id}
-                                  errors={errors}
-                                  facilityId={facilityId}
-                                  showAdvancedFields={true}
-                                />
-                              </CardContent>
-                            </CollapsibleContent>
-                          </Collapsible>
-                        </Card>
-                      ) : (
-                        <MedicationRequestGridRow
-                          medication={medication}
-                          disabled={disabled || isInactive}
-                          onUpdate={(updates) =>
-                            handleUpdateMedication(index, updates)
-                          }
-                          onRemove={() => handleRemoveMedication(index)}
-                          onAddToTemplate={
-                            questionnaireSlug ? handleAddToTemplate : undefined
-                          }
-                          index={index}
-                          questionId={questionnaireResponse.question_id}
-                          errors={errors}
-                          facilityId={facilityId}
-                          showAdvancedFields={showAdvancedFields}
-                          onToggleAdvanced={() =>
-                            setShowAdvancedFields(!showAdvancedFields)
-                          }
-                        />
-                      )}
-                    </React.Fragment>
-                  );
-                })}
+                                        onAddToTemplate={
+                                          questionnaireSlug
+                                            ? handleAddToTemplate
+                                            : undefined
+                                        }
+                                        index={index}
+                                        questionId={
+                                          questionnaireResponse.question_id
+                                        }
+                                        errors={errors}
+                                        facilityId={facilityId}
+                                        showAdvancedFields={true}
+                                      />
+                                    </CardContent>
+                                  </CollapsibleContent>
+                                </Collapsible>
+                              </Card>
+                            ) : (
+                              <MedicationRequestGridRow
+                                medication={medication}
+                                disabled={disabled || isInactive}
+                                onUpdate={(updates) =>
+                                  handleUpdateMedication(index, updates)
+                                }
+                                onRemove={() => handleRemoveMedication(index)}
+                                onAddToTemplate={
+                                  questionnaireSlug
+                                    ? handleAddToTemplate
+                                    : undefined
+                                }
+                                index={index}
+                                questionId={questionnaireResponse.question_id}
+                                errors={errors}
+                                facilityId={facilityId}
+                                showAdvancedFields={showAdvancedFields}
+                                onToggleAdvanced={() =>
+                                  setShowAdvancedFields(!showAdvancedFields)
+                                }
+                              />
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+          );
+        };
+
+        // Render medications and consumables with tabs if both types exist
+        return (
+          <div className="space-y-6">
+            {showTabs ? (
+              <>
+                <Tabs
+                  value={activeTab}
+                  onValueChange={(value) =>
+                    setActiveTab(value as "medications" | "consumables")
+                  }
+                >
+                  <TabsList>
+                    <TabsTrigger value="medications">
+                      {t("medications")} ({medicationsOnly.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="consumables">
+                      {t("consumables")} ({consumablesOnly.length})
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                {renderMedicationTable(itemsToDisplay)}
+              </>
+            ) : (
+              <>
+                {renderMedicationTable(
+                  medicationsOnly,
+                  medicationsOnly.length > 0 ? t("medications") : undefined,
+                )}
+                {renderMedicationTable(
+                  consumablesOnly,
+                  consumablesOnly.length > 0 ? t("consumables") : undefined,
+                )}
+              </>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {!desktopLayout ? (
         <EntitySelectionDrawer
