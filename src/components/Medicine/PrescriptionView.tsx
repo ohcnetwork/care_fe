@@ -9,7 +9,6 @@ import Loading from "@/components/Common/Loading";
 import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
@@ -33,9 +32,6 @@ export default function PrescriptionView({
 }: PrescriptionViewProps) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [activeTab, setActiveTab] = React.useState<
-    "medications" | "consumables"
-  >("medications");
 
   const { data: prescription, isLoading } = useQuery({
     queryKey: ["prescription", patientId, prescriptionId],
@@ -68,20 +64,6 @@ export default function PrescriptionView({
   const hasMedications = prescriptionId
     ? (prescription?.medications?.length ?? 0) > 0
     : (medicationRequests?.results?.length ?? 0) > 0;
-
-  // Determine if we should show tabs
-  const allMedications =
-    prescriptionId && prescription
-      ? prescription.medications
-      : medicationRequests?.results || [];
-
-  const hasMedicationsOnly = allMedications.some(
-    (med) => med.requested_product?.product_type !== "consumable",
-  );
-  const hasConsumables = allMedications.some(
-    (med) => med.requested_product?.product_type === "consumable",
-  );
-  const showTabs = hasMedicationsOnly && hasConsumables;
 
   return (
     <div className="space-y-4">
@@ -150,21 +132,6 @@ export default function PrescriptionView({
         </div>
       </div>
       <div className="flex flex-col gap-4 px-2">
-        {/* Tabs for switching between medications and consumables - only show if both exist */}
-        {showTabs && (
-          <Tabs
-            value={activeTab}
-            onValueChange={(value) =>
-              setActiveTab(value as "medications" | "consumables")
-            }
-          >
-            <TabsList>
-              <TabsTrigger value="medications">{t("medications")}</TabsTrigger>
-              <TabsTrigger value="consumables">{t("consumables")}</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        )}
-
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
             <CareIcon
@@ -194,29 +161,15 @@ export default function PrescriptionView({
             (prescriptionId && prescription
               ? prescription.medications
               : medicationRequests?.results || []
-            )
-              .filter((medication) => {
-                // Only filter by product type if tabs are shown
-                if (!showTabs) return true;
-
-                // Filter by product type based on active tab
-                const isConsumable =
-                  medication.requested_product?.product_type === "consumable";
-                if (activeTab === "consumables") {
-                  return isConsumable;
-                } else {
-                  return !isConsumable;
-                }
-              })
-              .filter((medication) =>
-                (
-                  medication.medication.display ||
-                  medication.requested_product?.name ||
-                  ""
-                )
-                  .toLowerCase()
-                  .includes(searchQuery.toLowerCase()),
-              ) || []
+            ).filter((medication) =>
+              (
+                medication.medication.display ||
+                medication.requested_product?.name ||
+                ""
+              )
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()),
+            ) || []
           }
           showActiveOnly={false}
         />
