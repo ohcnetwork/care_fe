@@ -59,11 +59,13 @@ interface CreateDispenseSheetProps {
   facilityId: string;
   locationId: string;
   trigger?: React.ReactNode;
+  patientId?: string;
 }
 
 export function CreateDispenseSheet({
   facilityId,
   trigger,
+  patientId,
 }: CreateDispenseSheetProps) {
   const { t } = useTranslation();
   const { facility } = useCurrentFacility();
@@ -79,6 +81,28 @@ export function CreateDispenseSheet({
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [verificationOpen, setVerificationOpen] = useState(false);
   const [scanDialogOpen, setScanDialogOpen] = useState(false);
+
+  // Fetch patient data when patientId is provided
+  const { data: preselectedPatient } = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: query(patientApi.get, {
+      pathParams: { id: patientId! },
+    }),
+    enabled: !!patientId,
+  });
+
+  // Direct navigation handler when patient is preselected
+  const handleDirectDispense = () => {
+    if (!preselectedPatient) return;
+    navigate(
+      `/facility/${facilityId}/patients/verify?${new URLSearchParams({
+        phone_number: preselectedPatient.phone_number,
+        year_of_birth: preselectedPatient.year_of_birth?.toString() || "",
+        partial_id: preselectedPatient.id.slice(0, 5),
+        flow: "dispense",
+      }).toString()}`,
+    );
+  };
 
   // Combine instance and facility identifier configs
   const allIdentifierConfigs = useMemo(
@@ -239,6 +263,22 @@ export function CreateDispenseSheet({
 
     return null;
   })();
+
+  // When patientId is provided, render a simple button that navigates directly
+  if (patientId && preselectedPatient) {
+    const triggerElement = trigger || (
+      <Button>
+        <Plus className="size-4 mr-1" />
+        {t("new_dispense")}
+      </Button>
+    );
+
+    return (
+      <span onClick={handleDirectDispense} className="cursor-pointer">
+        {triggerElement}
+      </span>
+    );
+  }
 
   return (
     <>
