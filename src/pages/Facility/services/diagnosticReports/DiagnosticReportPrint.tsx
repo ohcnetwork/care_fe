@@ -1,3 +1,4 @@
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -8,12 +9,15 @@ import { Document, Page, pdfjs } from "react-pdf";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
+import PrintFooter from "@/components/Common/PrintFooter";
+
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { formatName } from "@/Utils/utils";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import { FileReadMinimal } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
+import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
 import { ObservationStatus } from "@/types/emr/observation/observation";
 import { DiagnosticReportResultsTable } from "./components/DiagnosticReportResultsTable";
@@ -26,23 +30,61 @@ function PDFRenderer({ fileUrl }: { fileUrl: string }) {
   const { t } = useTranslation();
 
   return (
-    <Document
-      file={fileUrl}
-      onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-      error={<div className="text-red-500">{t("error_loading_pdf")}</div>}
-      loading={<div className="text-gray-500">{t("loading")}</div>}
-    >
-      <div className="flex flex-col justify-center w-full">
-        {Array.from(new Array(numPages), (_, index) => (
-          <Page
-            key={`page_${index + 1}`}
-            pageNumber={index + 1}
-            width={Math.min(window.innerWidth * 0.9, 600)}
-            scale={1.2}
-          />
-        ))}
-      </div>
-    </Document>
+    <div className="break-before-page">
+      <Document
+        file={fileUrl}
+        onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+        error={<div className="text-red-500">{t("error_loading_pdf")}</div>}
+        loading={<div className="text-gray-500">{t("loading")}</div>}
+      >
+        <div className="flex flex-col justify-center w-full">
+          {Array.from(new Array(numPages), (_, index) => (
+            <Page
+              key={`page_${index + 1}`}
+              pageNumber={index + 1}
+              width={Math.min(window.innerWidth * 0.9, 600)}
+              scale={1.2}
+            />
+          ))}
+        </div>
+      </Document>
+    </div>
+  );
+}
+
+function ImageRenderer({
+  fileUrl,
+  fileName,
+}: {
+  fileUrl: string;
+  fileName?: string;
+}) {
+  const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  return (
+    <div className="break-before-page flex flex-col justify-center w-full">
+      {isLoading && (
+        <div className="text-gray-500 text-center py-4">{t("loading")}</div>
+      )}
+      {hasError && (
+        <div className="text-red-500 text-center py-4">
+          {t("error_loading_image")}
+        </div>
+      )}
+      <img
+        src={fileUrl}
+        alt={fileName || t("diagnostic_report_image")}
+        className={`max-w-full h-auto mx-auto ${isLoading || hasError ? "hidden" : ""}`}
+        style={{ maxWidth: "600px" }}
+        onLoad={() => setIsLoading(false)}
+        onError={() => {
+          setIsLoading(false);
+          setHasError(true);
+        }}
+      />
+    </div>
   );
 }
 
@@ -54,6 +96,7 @@ export default function DiagnosticReportPrint({
   diagnosticReportId: string;
 }) {
   const { t } = useTranslation();
+  const { facility } = useCurrentFacility();
 
   const { data: report, isLoading } = useQuery({
     queryKey: ["diagnosticReport", diagnosticReportId],
@@ -143,28 +186,47 @@ export default function DiagnosticReportPrint({
     );
   }
 
-  // Filter files - only include PDFs with URLs
+  // Filter files - separate PDFs and images with URLs
   const pdfFiles = files.results.filter((file) => {
-    if (!file.id || !fileUrls[file.id] || !file.extension) return false;
+    if (!file.id || !fileUrls[file.id] || !file.extension || file.is_archived)
+      return false;
     return file.extension.toLowerCase().endsWith("pdf");
+  });
+
+  const imageFiles = files.results.filter((file) => {
+    if (!file.id || !fileUrls[file.id] || !file.extension || file.is_archived)
+      return false;
+    const ext = file.extension.toLowerCase();
+    return (
+      ext.endsWith("jpg") ||
+      ext.endsWith("jpeg") ||
+      ext.endsWith("png") ||
+      ext.endsWith("gif") ||
+      ext.endsWith("webp")
+    );
   });
 
   return (
     <div className="flex justify-center items-center">
       <PrintPreview
-        title={`${t("diagnostic_report")} - ${report.code?.display || t("diagnostic_report")}`}
+        title={`${t("diagnostic_report")} - ${report.code?.display || report.service_request?.title || t("diagnostic_report")}`}
       >
-        <div className="py-8 max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           {/* Header with Facility Name and Logo */}
-          <div className="flex justify-between items-start pb-6 border-b border-gray-200">
-            <div className="space-y-4 flex-1">
-              <div>
-                <h1 className="text-3xl font-semibold">
-                  {report.encounter?.facility?.name}
-                </h1>
-                <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold mt-1">
-                  {t("diagnostic_report")}
-                </h2>
+          <div className="flex justify-between items-start pb-2 border-b border-gray-200">
+            <div className="flex items-start gap-4">
+              <div className="text-left">
+                <h1 className="text-2xl font-medium">{facility?.name}</h1>
+                {facility?.address && (
+                  <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
+                    {facility.address}
+                    {facility.phone_number && (
+                      <p className="text-gray-500 text-sm">
+                        {t("phone")}: {facility.phone_number}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
             <img
@@ -174,46 +236,72 @@ export default function DiagnosticReportPrint({
             />
           </div>
 
+          <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold my-2">
+            {report.service_request?.title || t("diagnostic_report")}
+          </h2>
+
           {/* Patient Details */}
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
-            <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
+          <div className="grid md:grid-cols-2 print:grid-cols-2 gap-x-6 gap-y-1 border-t border-gray-200 pt-2">
+            <div className="grid grid-cols-[6rem_auto_1fr] items-center">
               <span className="text-gray-600">{t("patient")}</span>
               <span className="text-gray-600">:</span>
-              <span className="font-semibold break-words">
+              <span className="font-semibold ml-2 wrap-break-word">
                 {report.encounter?.patient?.name}
               </span>
             </div>
-            <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
+            {report.encounter?.patient &&
+              "instance_identifiers" in report.encounter.patient &&
+              report.encounter.patient.instance_identifiers
+                .filter(
+                  ({ config }) =>
+                    config.config.use === PatientIdentifierUse.official,
+                )
+                .map((identifier) => (
+                  <div
+                    key={identifier.config.id}
+                    className="grid grid-cols-[6rem_auto_1fr] items-center"
+                  >
+                    <span className="text-gray-600">
+                      {identifier.config.config.display}
+                    </span>
+                    <span className="text-gray-600">:</span>
+                    <span className="font-semibold ml-2">
+                      {identifier.value}
+                    </span>
+                  </div>
+                ))}
+            <div className="grid grid-cols-[6rem_auto_1fr] items-center">
+              <span className="text-gray-600">
+                {t("age")} / {t("sex")}
+              </span>
+              <span className="text-gray-600">:</span>
+              <span className="font-semibold ml-2">
+                {formatPatientAge(report.encounter.patient, true)} /
+                <span className="capitalize ml-1">
+                  {t(`GENDER__${report.encounter.patient.gender}`)}
+                </span>
+              </span>
+            </div>
+            <div className="grid grid-cols-[6rem_auto_1fr] items-center">
               <span className="text-gray-600">{t("category")}</span>
               <span className="text-gray-600">:</span>
-              <span className="font-semibold break-words">
+              <span className="font-semibold ml-2 wrap-break-word">
                 {report.category?.display || "-"}
               </span>
             </div>
-            <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-              <span className="text-gray-600">{t("status")}</span>
+            <div className="grid grid-cols-[6rem_auto_1fr] items-center">
+              <span className="text-gray-600">{t("report_date")}</span>
               <span className="text-gray-600">:</span>
-              <span className="font-semibold capitalize">
-                {t(report.status)}
+              <span className="font-semibold ml-2">
+                {report.created_date &&
+                  format(new Date(report.created_date), "dd-MM-yyyy")}
               </span>
             </div>
-
-            <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-              <span className="text-gray-600">{t("date")}</span>
+            <div className="grid grid-cols-[6rem_auto_1fr] items-center">
+              <span className="text-gray-600">{t("requested_by")}</span>
               <span className="text-gray-600">:</span>
-              <span className="font-semibold">
-                {report.encounter?.created_date &&
-                  format(
-                    new Date(report.encounter.created_date),
-                    "dd MMM yyyy, EEEE",
-                  )}
-              </span>
-            </div>
-            <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-              <span className="text-gray-600">{t("report_created_by")}</span>
-              <span className="text-gray-600">:</span>
-              <span className="font-semibold">
-                {formatName(report.created_by)}
+              <span className="font-semibold ml-2">
+                {formatName(report.requester)}
               </span>
             </div>
           </div>
@@ -266,18 +354,25 @@ export default function DiagnosticReportPrint({
                   </div>
                 </div>
               )}
+              {imageFiles.length > 0 && (
+                <div className="mt-8">
+                  <div className="space-y-12">
+                    {imageFiles.map((file) => (
+                      <div key={`content-${file.id}`}>
+                        <ImageRenderer
+                          fileUrl={fileUrls[file.id!]}
+                          fileName={file.name}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
           {/* Footer */}
-          <div className="mt-12 pt-4 border-t text-[10px] text-gray-500 flex justify-between">
-            <p>
-              {t("generated_on")} {format(new Date(), "PPP 'at' p")}
-            </p>
-            <p>
-              {t("generated_by")} {formatName(report.created_by)}
-            </p>
-          </div>
+          <PrintFooter showPrintedBy className="mt-12 pt-4 border-t" />
         </div>
       </PrintPreview>
     </div>

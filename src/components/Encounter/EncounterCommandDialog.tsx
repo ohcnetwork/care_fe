@@ -1,3 +1,4 @@
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import {
   CommandDialog,
   CommandEmpty,
@@ -67,7 +68,7 @@ export function EncounterCommandDialog({
 
   const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
 
-  const { data: questionnaires } = useQuery({
+  const { data: questionnaires, isLoading } = useQuery({
     queryKey: ["questionnaires", search, "encounter"],
     queryFn: query.debounced(questionnaireApi.list, {
       queryParams: {
@@ -166,6 +167,18 @@ export function EncounterCommandDialog({
             id: "add-questionnaire",
             label: t("add_form"),
             shortcut: getShortcutDisplay("add-questionnaire"),
+            icon: <Plus />,
+          },
+          {
+            id: "add-service-request",
+            label: t("service_request"),
+            shortcut: getShortcutDisplay("add-service-request"),
+            icon: <Plus />,
+          },
+          {
+            id: "add-medication-request",
+            label: t("add_medication"),
+            shortcut: getShortcutDisplay("add-medication-request"),
             icon: <Plus />,
           },
           {
@@ -310,7 +323,14 @@ export function EncounterCommandDialog({
         ],
       },
     ],
-    [t, questionnaireOptions, questionnaires, search, getShortcutDisplay],
+    [
+      t,
+      questionnaireOptions,
+      questionnaires,
+      search,
+      getShortcutDisplay,
+      isLoading,
+    ],
   );
 
   const findRecentActions = useCallback(
@@ -367,7 +387,15 @@ export function EncounterCommandDialog({
           />
         </div>
         <CommandList className="h-[80vh] max-h-[80vh] w-full">
-          <CommandEmpty>{t("no_results")}</CommandEmpty>
+          <CommandEmpty>
+            {isLoading && search.length > 0 ? (
+              <div className="space-y-2">
+                <CardListSkeleton count={3} />
+              </div>
+            ) : (
+              t("no_results")
+            )}
+          </CommandEmpty>
           {encounterActions.map((group) => (
             <div key={group.group}>
               <CommandGroup heading={group.group} className="px-2">

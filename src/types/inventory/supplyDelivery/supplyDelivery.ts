@@ -39,16 +39,18 @@ export interface SupplyDeliveryBase {
 }
 
 export interface SupplyDeliveryCreate extends Omit<SupplyDeliveryBase, "id"> {
-  supplied_item_quantity: number;
+  supplied_item_quantity: string;
   supplied_item?: string; // Product ID
   supplied_inventory_item?: string; // Inventory Item ID
   supply_request?: string; // Supply Request ID
   extensions: Record<string, unknown>;
+  supplied_item_pack_quantity?: number;
+  supplied_item_pack_size?: number;
 }
 
 export interface SupplyDeliveryUpsert extends Omit<SupplyDeliveryBase, "id"> {
   id?: string;
-  supplied_item_quantity: number;
+  supplied_item_quantity: string;
   supplied_item?: string; // Product ID
   supplied_inventory_item?: string; // Inventory Item ID
   supply_request?: string; // Supply Request ID
@@ -62,7 +64,9 @@ export interface SupplyDeliveryUpdate {
 }
 
 export interface SupplyDeliveryRead extends SupplyDeliveryBase {
-  supplied_item_quantity: number;
+  supplied_item_quantity: string;
+  supplied_item_pack_quantity?: number;
+  supplied_item_pack_size?: number;
   supplied_item: ProductRead;
   supplied_inventory_item?: InventoryRead;
   created_date?: string;

@@ -5,6 +5,7 @@ import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import { getPermissions } from "@/common/Permissions";
 import Loading from "@/components/Common/Loading";
+import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
@@ -19,6 +20,7 @@ import medicationStatementApi from "@/types/emr/medicationStatement/medicationSt
 import patientApi from "@/types/emr/patient/patientApi";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import symptomApi from "@/types/emr/symptom/symptomApi";
+import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import query from "@/Utils/request/query";
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
@@ -294,6 +296,24 @@ export default function TreatmentSummary({
 
               {/* Right Column */}
               <div className="space-y-3">
+                {encounter?.patient?.instance_identifiers
+                  ?.filter(
+                    ({ config }) =>
+                      config.config.use === PatientIdentifierUse.official,
+                  )
+                  .map((identifier) => (
+                    <div
+                      key={identifier.config.id}
+                      className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center"
+                    >
+                      <span className="text-gray-600">
+                        {identifier.config.config.display}
+                      </span>
+                      <span className="text-gray-600">:</span>
+                      <span className="font-semibold">{identifier.value}</span>
+                    </div>
+                  ))}
+
                 <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
                   <span className="text-gray-600">{t("mobile_number")}</span>
                   <span className="text-gray-600">:</span>
@@ -630,11 +650,7 @@ export default function TreatmentSummary({
           </div>
 
           {/* Footer */}
-          <div className="mt-8 space-y-1 pt-2 text-[10px] text-gray-500 flex justify-between">
-            <p>
-              {t("generated_on")} {format(new Date(), "PPP 'at' p")}
-            </p>
-          </div>
+          <PrintFooter showPrintedBy />
         </div>
       </PrintPreview>
     </div>

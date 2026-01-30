@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Edit, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { navigate } from "raviger";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -39,13 +39,10 @@ export function AccountSheetButton({
   const queryClient = useQueryClient();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [createAccountOpen, setCreateAccountOpen] = useState(false);
-  const [editingAccount, setEditingAccount] = useState<AccountRead | null>(
-    null,
-  );
 
   const { facility } = useCurrentFacility();
   const { hasPermission } = usePermissions();
-  const { canCreateAccount, canUpdateAccount } = getPermissions(
+  const { canCreateAccount } = getPermissions(
     hasPermission,
     facility?.permissions ?? [],
   );
@@ -72,11 +69,6 @@ export function AccountSheetButton({
 
   const handleCreateAccountClick = () => {
     setCreateAccountOpen(true);
-  };
-
-  const handleEditAccount = (account: AccountRead, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setEditingAccount(account);
   };
 
   const handleViewAccount = (account: AccountRead, e: React.MouseEvent) => {
@@ -117,17 +109,6 @@ export function AccountSheetButton({
                     <ExternalLink className="size-4" />
                     {t("more_details")}
                   </Button>
-                  {canUpdateAccount && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center gap-1"
-                      onClick={(e) => handleEditAccount(accounts[0], e)}
-                    >
-                      <Edit className="size-4" />
-                      {t("edit")}
-                    </Button>
-                  )}
                 </div>
               )}
             </SheetTitle>
@@ -259,6 +240,16 @@ export function AccountSheetButton({
                             <MonetaryDisplay amount={accounts[0].total_paid} />
                           </span>
                         </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">
+                            {t("total_billable")}
+                          </span>
+                          <span className="font-medium">
+                            <MonetaryDisplay
+                              amount={accounts[0].total_billable_charge_items}
+                            />
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -282,23 +273,6 @@ export function AccountSheetButton({
         }}
         facilityId={encounter.facility.id}
         patientId={encounter.patient.id}
-      />
-
-      <AccountSheet
-        open={!!editingAccount}
-        onOpenChange={(open) => {
-          if (!open) {
-            setEditingAccount(null);
-            queryClient.invalidateQueries({
-              queryKey: ["accounts", encounter.patient.id],
-            });
-            refetch();
-          }
-        }}
-        facilityId={encounter.facility.id}
-        patientId={encounter.patient.id}
-        initialValues={editingAccount || undefined}
-        isEdit={true}
       />
     </>
   );

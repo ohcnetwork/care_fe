@@ -1,6 +1,7 @@
 import { AccountRead } from "@/types/billing/account/Account";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import { LocationRead } from "@/types/location/location";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum PaymentReconciliationType {
   payment = "payment",
@@ -31,7 +32,7 @@ export enum PaymentReconciliationKind {
 
 export enum PaymentReconciliationIssuerType {
   patient = "patient",
-  insurance = "insurance",
+  insurer = "insurer",
 }
 
 export enum PaymentReconciliationOutcome {
@@ -57,6 +58,19 @@ export enum PaymentReconciliationPaymentMethod {
   ddpo = "ddpo",
   debc = "debc",
 }
+
+export const PAYMENT_RECONCILIATION_METHOD_MAP: Record<
+  PaymentReconciliationPaymentMethod,
+  string
+> = {
+  cash: "Cash",
+  ccca: "Credit Card",
+  cchk: "Credit Check",
+  cdac: "Credit Account",
+  chck: "Check",
+  ddpo: "Direct Deposit",
+  debc: "Debit Card",
+};
 
 export interface PaymentReconciliationBase {
   id: string;
@@ -84,6 +98,7 @@ export interface PaymentReconciliationCreate extends Omit<
   account: string;
   is_credit_note?: boolean;
   location?: string;
+  extensions?: Record<string, Record<string, unknown>>;
 }
 
 export type PaymentReconciliationUpdate = Omit<PaymentReconciliationBase, "id">;
@@ -93,6 +108,9 @@ export interface PaymentReconciliationRead extends PaymentReconciliationBase {
   account: AccountRead;
   is_credit_note: boolean;
   location: LocationRead | null;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
+  extensions?: Record<string, Record<string, unknown>>;
 }
 
 export interface PaymentReconciliationCancel {
