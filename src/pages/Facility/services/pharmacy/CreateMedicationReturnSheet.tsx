@@ -56,6 +56,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   getPartialId,
@@ -69,6 +70,7 @@ import {
   DeliveryOrderStatus,
 } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import careConfig from "@careConfig";
@@ -157,6 +159,8 @@ export function CreateMedicationReturnSheet({
       !!searchTerm &&
       (!isPhoneNumberConfig || isValidPhoneNumber(searchTerm)),
   });
+
+  useShortcutSubContext("facility:pharmacy");
 
   // Patient verification query
   const { data: verifiedPatient, refetch: verifyPatient } = useQuery({
@@ -325,6 +329,7 @@ export function CreateMedicationReturnSheet({
             <Button>
               <Plus className="size-4 mr-1" />
               {t("create_medication_return")}
+              <ShortcutBadge actionId="medication-return" />
             </Button>
           )}
         </SheetTrigger>
