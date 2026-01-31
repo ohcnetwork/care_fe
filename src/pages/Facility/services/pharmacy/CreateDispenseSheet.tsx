@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Plus, QrCode, Search, UserPlus, X } from "lucide-react";
 import { navigate } from "raviger";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
@@ -44,6 +44,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   getPartialId,
@@ -52,6 +53,7 @@ import {
   PatientRead,
 } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import careConfig from "@careConfig";
 
@@ -66,6 +68,7 @@ export function CreateDispenseSheet({
   trigger,
 }: CreateDispenseSheetProps) {
   const { t } = useTranslation();
+  const inputRef = useRef<HTMLInputElement>(null);
   const { facility } = useCurrentFacility();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<
@@ -160,6 +163,19 @@ export function CreateDispenseSheet({
       setPendingPatient(null);
     }
   }, [verifiedPatient, handleSelectPatient]);
+
+  // Auto-focus input when search type changes
+  useEffect(() => {
+    if (searchType) {
+      // Small delay to ensure the input is rendered after type change
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [searchType]);
+
+  useShortcutSubContext("facility:pharmacy");
 
   const handlePatientSelect = (
     patient: PatientListRead | PartialPatientModel,
@@ -273,6 +289,7 @@ export function CreateDispenseSheet({
             <Button>
               <Plus className="size-4 mr-1" />
               {t("new_dispense")}
+              <ShortcutBadge actionId="dispense-button" />
             </Button>
           )}
         </SheetTrigger>
@@ -354,6 +371,7 @@ export function CreateDispenseSheet({
                   <div className="relative">
                     {isPhoneNumberConfig ? (
                       <PhoneInput
+                        ref={inputRef}
                         placeholder={
                           selectedConfig?.config.display || t("search")
                         }
@@ -366,6 +384,7 @@ export function CreateDispenseSheet({
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none z-10" />
                         <Input
                           type="text"
+                          ref={inputRef}
                           placeholder={
                             selectedConfig?.config.display || t("search")
                           }
