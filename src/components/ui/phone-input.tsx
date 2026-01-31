@@ -1,4 +1,6 @@
 import careConfig from "@careConfig";
+import { CountryCode, getExampleNumber } from "libphonenumber-js";
+import examples from "libphonenumber-js/mobile/examples";
 import { CheckIcon, ChevronsUpDown } from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
@@ -24,6 +26,15 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+/**
+ * Gets the maximum length for a formatted national phone number
+ * (excluding country code) based on the country code.
+ */
+function getMaxPhoneLength(countryCode: CountryCode): number {
+  const example = getExampleNumber(countryCode, examples);
+  return example?.formatNational().length ?? 15;
+}
+
 type PhoneInputProps = Omit<
   React.ComponentProps<"input">,
   "onChange" | "value" | "ref"
@@ -32,40 +43,59 @@ type PhoneInputProps = Omit<
     onChange?: (value: RPNInput.Value) => void;
   };
 
+const PhoneInputContext = React.createContext<{
+  country: CountryCode;
+  setCountry: (country: CountryCode) => void;
+}>({
+  country: careConfig.defaultCountry.code,
+  setCountry: () => {},
+});
+
 function PhoneInput({
   className,
   onChange,
   value,
   ...props
 }: React.ComponentProps<typeof RPNInput.default> & PhoneInputProps) {
+  const [country, setCountry] = React.useState<CountryCode>(
+    careConfig.defaultCountry.code,
+  );
+
   return (
-    <RPNInput.default
-      className={cn(
-        "flex rounded-md focus-within:ring-1",
-        className,
-        props.value &&
-          !RPNInput.isValidPhoneNumber((props.value ?? "") as string)
-          ? "ring-red-500"
-          : "ring-primary-700",
-      )}
-      flagComponent={FlagComponent}
-      countrySelectComponent={CountrySelect}
-      inputComponent={InputComponent}
-      defaultCountry={careConfig.defaultCountry.code}
-      value={value || undefined}
-      smartCaret={true}
-      /**
-       * Handles the onChange event.
-       *
-       * react-phone-number-input might trigger the onChange event as undefined
-       * when a valid phone number is not entered. To prevent this,
-       * the value is coerced to an empty string.
-       *
-       * @param {E164Number | undefined} value - The entered value
-       */
-      onChange={(value) => onChange?.(value || ("" as RPNInput.Value))}
-      {...props}
-    />
+    <PhoneInputContext.Provider value={{ country, setCountry }}>
+      <RPNInput.default
+        className={cn(
+          "flex rounded-md focus-within:ring-1",
+          className,
+          props.value &&
+            !RPNInput.isValidPhoneNumber((props.value ?? "") as string)
+            ? "ring-red-500"
+            : "ring-primary-700",
+        )}
+        flagComponent={FlagComponent}
+        countrySelectComponent={CountrySelect}
+        inputComponent={InputComponent}
+        defaultCountry={careConfig.defaultCountry.code}
+        value={value || undefined}
+        smartCaret={true}
+        onCountryChange={(newCountry) => {
+          if (newCountry) {
+            setCountry(newCountry as CountryCode);
+          }
+        }}
+        /**
+         * Handles the onChange event.
+         *
+         * react-phone-number-input might trigger the onChange event as undefined
+         * when a valid phone number is not entered. To prevent this,
+         * the value is coerced to an empty string.
+         *
+         * @param {E164Number | undefined} value - The entered value
+         */
+        onChange={(value) => onChange?.(value || ("" as RPNInput.Value))}
+        {...props}
+      />
+    </PhoneInputContext.Provider>
   );
 }
 PhoneInput.displayName = "PhoneInput";
@@ -74,12 +104,16 @@ function InputComponent({
   className,
   ...props
 }: React.ComponentProps<"input">) {
+  const { country } = React.useContext(PhoneInputContext);
+  const maxLength = getMaxPhoneLength(country);
+
   return (
     <Input
       className={cn(
         "rounded-e-md rounded-s-none focus-visible:ring-0 focus-visible:outline-hidden focus-visible:border-gray-200",
         className,
       )}
+      maxLength={maxLength}
       {...props}
     />
   );
