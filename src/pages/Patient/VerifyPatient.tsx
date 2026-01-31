@@ -41,12 +41,13 @@ interface QParams {
   year_of_birth: string;
   partial_id: string;
   flow?: "queue" | "dispense";
+  createEncounter?: "true";
 }
 
 export default function VerifyPatient() {
   useShortcutSubContext("facility:patient:home");
   const { t } = useTranslation();
-  const [{ phone_number, year_of_birth, partial_id, flow }] =
+  const [{ phone_number, year_of_birth, partial_id, flow, createEncounter }] =
     useQueryParams<QParams>();
   const queryClient = useQueryClient();
 
@@ -137,7 +138,7 @@ export default function VerifyPatient() {
                     patientId={patientData.id}
                     facilityId={facilityId}
                     patientName={patientData.name}
-                    defaultOpen={isQueueFlow}
+                    defaultOpen={isQueueFlow || createEncounter === "true"}
                     trigger={
                       <QuickAction
                         icon={<SquareActivity className="text-orange-500" />}
