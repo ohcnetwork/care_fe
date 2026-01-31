@@ -127,10 +127,12 @@ import {
 } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import {
+  ACTIVE_MEDICATION_STATUSES,
   DoseRange,
   MedicationRequestDispenseStatus,
   MedicationRequestDosageInstruction,
   MedicationRequestRead,
+  MedicationRequestStatus,
   UCUM_TIME_UNITS,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
@@ -679,6 +681,15 @@ const AddMedicationSheet = ({
   );
 };
 
+const canIncludeMedicationRequest = (medication: MedicationRequestRead) => {
+  return (
+    medication.requested_product &&
+    (ACTIVE_MEDICATION_STATUSES as readonly MedicationRequestStatus[]).includes(
+      medication.status,
+    )
+  );
+};
+
 export default function MedicationBillForm({
   patientId,
   prescriptionId,
@@ -777,7 +788,7 @@ export default function MedicationBillForm({
       })({ signal });
 
       const productKnowledgeIds = prescriptionResponse.medications
-        .filter((medication) => medication.requested_product)
+        .filter(canIncludeMedicationRequest)
         .reduce(
           (acc, medication) => ({
             ...acc,
@@ -860,8 +871,7 @@ export default function MedicationBillForm({
   }, [productKnowledgeInventoriesMap, fields, form]);
 
   const medications = useMemo(
-    () =>
-      prescription?.medications.filter((med) => med.requested_product) || [],
+    () => prescription?.medications.filter(canIncludeMedicationRequest) || [],
     [prescription?.medications],
   );
 

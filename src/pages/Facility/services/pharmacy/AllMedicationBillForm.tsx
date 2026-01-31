@@ -126,6 +126,7 @@ import {
 } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import {
+  ACTIVE_MEDICATION_STATUSES,
   DoseRange,
   MedicationRequestDispenseStatus,
   MedicationRequestDosageInstruction,
@@ -750,7 +751,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
         queryParams: {
           facility: facilityId,
           limit: 100,
-          status: "active,on_hold,draft,unknown,ended,completed,cancelled",
+          status: ACTIVE_MEDICATION_STATUSES.join(","),
           exclude_dispense_status: "complete,incomplete",
         },
       })({ signal });
