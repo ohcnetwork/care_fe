@@ -55,6 +55,8 @@ import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
 
+import queryClient from "@/Utils/request/queryClient";
+
 export interface QuestionnaireFormState {
   questionnaire: QuestionnaireRead;
   responses: QuestionnaireResponse[];
@@ -400,7 +402,7 @@ export function QuestionnaireForm({
   // Fetch draft if continue_draft query param is present
   const {
     data: draftData,
-    isLoading: isDraftLoading,
+    isFetching: isDraftFetching,
     error: draftError,
   } = useQuery({
     queryKey: ["formSubmission", continueDraftId],
@@ -530,6 +532,9 @@ export function QuestionnaireForm({
     onSuccess: () => {
       setIsDirty(false);
       toast.success(t("draft_saved_successfully"));
+      queryClient.invalidateQueries({
+        queryKey: ["formSubmission", continueDraftId],
+      });
       navigate(
         `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
       );
@@ -579,7 +584,7 @@ export function QuestionnaireForm({
 
       // If we have a draft to continue, wait for it to load
       if (continueDraftId) {
-        if (draftData && questionnaire) {
+        if (draftData && questionnaire && !isDraftFetching) {
           // Extract the questionnaire from the draft
           const draftQuestionnaireResponses = draftData.response_dump
             ?.questionnaireResponses as QuestionnaireFormState | undefined;
@@ -622,10 +627,11 @@ export function QuestionnaireForm({
     questionnaireSlug,
     continueDraftId,
     draftData,
+    isDraftFetching,
   ]);
 
   // Show loading while fetching questionnaire or draft
-  if (isQuestionnaireLoading || (continueDraftId && isDraftLoading)) {
+  if (isQuestionnaireLoading || (continueDraftId && isDraftFetching)) {
     return <Loading />;
   }
 

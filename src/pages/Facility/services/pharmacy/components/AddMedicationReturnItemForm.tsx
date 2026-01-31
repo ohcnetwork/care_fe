@@ -489,7 +489,7 @@ export function AddMedicationReturnItemForm({
       </Card>
       {medicationDispenses.length > 0 && (
         <Dialog open={isSelectDialogOpen} onOpenChange={setIsSelectDialogOpen}>
-          <DialogContent className="sm:max-w-xl">
+          <DialogContent className="sm:max-w-xl overflow-y-auto max-h-[80vh]">
             <DialogHeader>
               <DialogTitle>{t("select_items_to_add")}</DialogTitle>
             </DialogHeader>

@@ -358,7 +358,7 @@ export default function ServiceRequestList({
           ? dateTimeQueryString(new Date(qParams.created_date_after))
           : undefined,
         created_date_before: qParams.created_date_before
-          ? dateTimeQueryString(new Date(qParams.created_date_before))
+          ? dateTimeQueryString(new Date(qParams.created_date_before), true)
           : undefined,
       },
     }),

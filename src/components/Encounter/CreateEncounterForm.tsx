@@ -61,7 +61,7 @@ interface Props {
   patientName: string;
   appointment?: string;
   trigger?: React.ReactNode;
-  onSuccess?: () => void;
+  onSuccess?: (encounter: EncounterRead) => void;
   disableRedirectOnSuccess?: boolean;
   defaultOpen?: boolean;
   defaultStatus?:
@@ -126,7 +126,7 @@ export default function CreateEncounterForm({
       setIsOpen(false);
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["encounters", patientId] });
-      onSuccess?.();
+      onSuccess?.(data);
       if (!disableRedirectOnSuccess) {
         navigate(
           `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates`,
