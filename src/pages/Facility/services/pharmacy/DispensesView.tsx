@@ -90,6 +90,8 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
       medicationDispenseStatus ? med.status === medicationDispenseStatus : true,
     ) || [];
 
+  console.log("dispenseOrderId", dispenseOrderId);
+
   return (
     <Page title={t("pharmacy_medications")} hideTitleOnPage>
       <div>

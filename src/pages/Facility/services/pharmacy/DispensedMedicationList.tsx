@@ -25,6 +25,7 @@ import {
 import {
   MEDICATION_DISPENSE_STATUS_COLORS,
   MedicationDispenseCategory,
+  MedicationDispenseCreate,
   MedicationDispenseRead,
   MedicationDispenseStatus,
   MedicationDispenseUpdate,
@@ -37,9 +38,10 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import Decimal from "decimal.js";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AddMedicationSheet } from "@/components/Medicine/AddMedicationSheet";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -60,11 +62,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
 import ViewDefaultAccountButton from "@/pages/Facility/billing/account/ViewDefaultAccountButton";
 import { PaymentReconciliationSheet } from "@/pages/Facility/billing/PaymentReconciliationSheet";
+import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
+import StockLotSelector, {
+  SelectedLot,
+} from "@/pages/Facility/services/inventory/StockLotSelector";
 import batchApi from "@/types/base/batch/batchApi";
 import accountApi from "@/types/billing/account/accountApi";
 import {
@@ -84,8 +92,12 @@ import {
   DispenseOrderRead,
   DispenseOrderStatus,
 } from "@/types/emr/dispenseOrder/dispenseOrder";
+import { EncounterStatus } from "@/types/emr/encounter/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
+import { MedicationRequestDosageInstruction } from "@/types/emr/medicationRequest/medicationRequest";
 import { PatientListRead } from "@/types/emr/patient/patient";
+import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
@@ -96,6 +108,7 @@ import {
   CheckCircleIcon,
   ClockIcon,
   PillIcon,
+  PlusIcon,
   PrinterIcon,
   ReceiptIcon,
   SendIcon,
@@ -126,6 +139,7 @@ function MedicationTable({ medications }: MedicationTableProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });
+      queryClient.invalidateQueries({ queryKey: ["invoice"] });
       toast.success(t("dispense_status_updated"));
     },
   });
@@ -308,7 +322,6 @@ function InvoiceCard({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [paymentSheetOpen, setPaymentSheetOpen] = useState(false);
-  const [cancelInvoiceDialogOpen, setCancelInvoiceDialogOpen] = useState(false);
   const [cancelPaymentId, setCancelPaymentId] = useState<string | null>(null);
 
   const invalidateQueries = () => {
@@ -344,22 +357,6 @@ function InvoiceCard({
       toast.error(t("failed_to_mark_invoice_as_balanced"));
     },
   });
-
-  const { mutate: cancelInvoice, isPending: isCancellingInvoice } = useMutation(
-    {
-      mutationFn: mutate(invoiceApi.cancelInvoice, {
-        pathParams: { facilityId, invoiceId: invoice.id },
-      }),
-      onSuccess: () => {
-        toast.success(t("invoice_cancelled_successfully"));
-        invalidateQueries();
-        onPaymentSuccess();
-      },
-      onError: () => {
-        toast.error(t("failed_to_cancel_invoice"));
-      },
-    },
-  );
 
   const { mutate: cancelPayment, isPending: isCancellingPayment } = useMutation(
     {
@@ -397,10 +394,6 @@ function InvoiceCard({
       account: invoice.account?.id || "",
       charge_items: invoice.charge_items?.map((item) => item.id) || [],
     });
-  };
-
-  const handleCancelInvoice = () => {
-    cancelInvoice({ reason: "cancelled" });
   };
 
   const getPaymentLabel = (payment: PaymentReconciliationRead) => {
@@ -504,12 +497,7 @@ function InvoiceCard({
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                    disabled={isCancellingInvoice}
-                  >
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                     <CareIcon icon="l-ellipsis-v" className="size-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -523,16 +511,6 @@ function InvoiceCard({
                       {t("view_invoice")}
                     </Link>
                   </DropdownMenuItem>
-                  {invoice.status !== InvoiceStatus.cancelled &&
-                    invoice.status !== InvoiceStatus.balanced && (
-                      <DropdownMenuItem
-                        onClick={() => setCancelInvoiceDialogOpen(true)}
-                        className="text-red-600 focus:text-red-600"
-                      >
-                        <CareIcon icon="l-times-circle" className="size-4" />
-                        {t("cancel_invoice")}
-                      </DropdownMenuItem>
-                    )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -752,35 +730,6 @@ function InvoiceCard({
           onSuccess={handlePaymentSuccess}
         />
       )}
-
-      {/* Cancel Invoice Confirmation Dialog */}
-      <AlertDialog
-        open={cancelInvoiceDialogOpen}
-        onOpenChange={setCancelInvoiceDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("cancel_invoice")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("cancel_invoice_confirmation", {
-                invoiceNumber: invoice.number,
-              })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("no_go_back")}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                handleCancelInvoice();
-                setCancelInvoiceDialogOpen(false);
-              }}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
-              {isCancellingInvoice ? t("cancelling") : t("yes_cancel_invoice")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       {/* Cancel Payment Confirmation Dialog */}
       <AlertDialog
@@ -1060,6 +1009,20 @@ export default function DispensedMedicationList({
     ChargeItemRead[]
   >([]);
   const [createInvoiceSheetOpen, setCreateInvoiceSheetOpen] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+
+  // Add medication form state
+  const [isAddMedicationOpen, setIsAddMedicationOpen] = useState(false);
+  const [isDosageSheetOpen, setIsDosageSheetOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<
+    ProductKnowledgeBase | undefined
+  >(undefined);
+  const [selectedLots, setSelectedLots] = useState<SelectedLot[]>([]);
+  const [dispenseQuantity, setDispenseQuantity] = useState<string>("1");
+  const [dosageInstructions, setDosageInstructions] = useState<
+    MedicationRequestDosageInstruction[]
+  >([]);
+  const productSelectRef = useRef<HTMLButtonElement>(null);
 
   const { data: account } = useQuery({
     queryKey: ["accounts", patient.id],
@@ -1074,6 +1037,87 @@ export default function DispensedMedicationList({
       },
     }),
   });
+
+  // Fetch patient's active encounter for medication dispense
+  const { data: encounterData } = useQuery({
+    queryKey: ["encounters", patient.id, "in_progress"],
+    queryFn: query(encounterApi.list, {
+      queryParams: {
+        patient: patient.id,
+        status: EncounterStatus.IN_PROGRESS,
+        limit: 1,
+      },
+    }),
+    enabled: isAddMedicationOpen,
+  });
+
+  const activeEncounter = encounterData?.results?.[0];
+
+  // Mutation for creating medication dispense
+  const {
+    mutate: createMedicationDispense,
+    isPending: isCreatingMedicationDispense,
+  } = useMutation({
+    mutationFn: mutate(medicationDispenseApi.create),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["medication_dispense", dispenseOrder.id, locationId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["dispenseOrder", facilityId, dispenseOrder.id],
+      });
+      toast.success(t("medication_dispense_created"));
+      // Reset form
+      setSelectedProduct(undefined);
+      setSelectedLots([]);
+      setDispenseQuantity("1");
+      setDosageInstructions([]);
+      setIsAddMedicationOpen(false);
+      setIsDosageSheetOpen(false);
+    },
+    onError: () => {
+      toast.error(t("error_creating_medication_dispense"));
+    },
+  });
+
+  // Handle dosage configuration from the AddMedicationSheet
+  const handleDosageConfigured = (
+    _product: ProductKnowledgeBase,
+    instructions: MedicationRequestDosageInstruction[],
+  ) => {
+    setDosageInstructions(instructions);
+    setIsDosageSheetOpen(false);
+  };
+
+  // Handle final submit to create the dispense
+  const handleSubmitDispense = () => {
+    if (!selectedProduct || selectedLots.length === 0 || !activeEncounter) {
+      toast.error(t("please_fill_all_required_fields"));
+      return;
+    }
+
+    const selectedInventoryId = selectedLots[0].selectedInventoryId;
+    if (!selectedInventoryId) {
+      toast.error(t("please_select_a_lot"));
+      return;
+    }
+
+    const dispenseData: MedicationDispenseCreate = {
+      status: MedicationDispenseStatus.preparation,
+      category: MedicationDispenseCategory.outpatient,
+      when_prepared: new Date(),
+      dosage_instruction: dosageInstructions,
+      encounter: activeEncounter.id,
+      location: locationId,
+      authorizing_request: null,
+      item: selectedInventoryId,
+      quantity: dispenseQuantity,
+      fully_dispensed: true,
+      order: dispenseOrder.id,
+    };
+
+    createMedicationDispense(dispenseData);
+  };
 
   const { mutate: updateDispenseOrder, isPending: isUpdatingDispenseOrder } =
     useMutation({
@@ -1225,6 +1269,40 @@ export default function DispensedMedicationList({
       .map((q) => q.data as InvoiceRead);
   }, [invoiceQueries]);
 
+  // Get active invoices that need to be cancelled
+  const activeInvoicesToCancel = useMemo(() => {
+    return relatedInvoices.filter(
+      (invoice) =>
+        invoice.status !== InvoiceStatus.cancelled &&
+        invoice.status !== InvoiceStatus.entered_in_error &&
+        invoice.status !== InvoiceStatus.balanced,
+    );
+  }, [relatedInvoices]);
+
+  const { mutateAsync: cancelInvoice, isPending: isCancellingInvoice } =
+    useMutation({
+      mutationFn: (invoiceId: string) =>
+        mutate(invoiceApi.cancelInvoice, {
+          pathParams: { facilityId, invoiceId },
+        })({ reason: "cancelled" }),
+    });
+
+  const handleCancelDispenseAndInvoices = async () => {
+    try {
+      // First cancel all active invoices in sequence
+      for (const invoice of activeInvoicesToCancel) {
+        await cancelInvoice(invoice.id);
+      }
+
+      // Then cancel the dispense order
+      handleUpdateDispenseOrder(DispenseOrderStatus.abandoned);
+      setCancelDialogOpen(false);
+      toast.success(t("dispense_and_invoices_cancelled"));
+    } catch {
+      toast.error(t("failed_to_cancel_dispense"));
+    }
+  };
+
   const handlePaymentSuccess = () => {
     queryClient.invalidateQueries({
       queryKey: ["medication_dispense", dispenseOrder.id, locationId],
@@ -1271,30 +1349,15 @@ export default function DispensedMedicationList({
             {(dispenseOrder.status === DispenseOrderStatus.draft ||
               dispenseOrder.status === DispenseOrderStatus.in_progress) && (
               <>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <CareIcon icon="l-ellipsis-v" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {Object.values(DispenseOrderStatus)
-                      .filter((s) => s !== dispenseOrder.status)
-                      .filter((s) => s !== DispenseOrderStatus.completed)
-                      .map((s) => (
-                        <DropdownMenuItem asChild key={s}>
-                          <Button
-                            variant="ghost"
-                            onClick={() => handleUpdateDispenseOrder(s)}
-                            className="w-full justify-start"
-                            disabled={isUpdatingDispenseOrder}
-                          >
-                            {t(`mark_as_${s}`)}
-                          </Button>
-                        </DropdownMenuItem>
-                      ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCancelDialogOpen(true)}
+                  disabled={isUpdatingDispenseOrder || isCancellingInvoice}
+                >
+                  <CareIcon icon="l-times-circle" className="size-4" />
+                  {t("cancel")}
+                </Button>
                 <Button
                   onClick={() =>
                     handleUpdateDispenseOrder(DispenseOrderStatus.completed)
@@ -1341,6 +1404,175 @@ export default function DispensedMedicationList({
         ) : (
           <MedicationTable medications={filteredMedications} />
         )}
+
+        {/* Add Medication Section */}
+        {(dispenseOrder.status === DispenseOrderStatus.draft ||
+          dispenseOrder.status === DispenseOrderStatus.in_progress) && (
+          <Card className="border-dashed border-2 border-gray-300 bg-gray-50/50">
+            <CardContent className="p-4">
+              {!isAddMedicationOpen ? (
+                <Button
+                  variant="ghost"
+                  className="w-full h-12 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                  onClick={() => setIsAddMedicationOpen(true)}
+                >
+                  <PlusIcon className="size-5 mr-2" />
+                  {t("add_medication")}
+                </Button>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-gray-900">
+                      {t("add_medication")}
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setIsAddMedicationOpen(false);
+                        setSelectedProduct(undefined);
+                        setSelectedLots([]);
+                        setDispenseQuantity("1");
+                        setDosageInstructions([]);
+                      }}
+                    >
+                      <CareIcon icon="l-times" className="size-4" />
+                    </Button>
+                  </div>
+
+                  {!activeEncounter && encounterData ? (
+                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-md">
+                      <p className="text-sm text-amber-800">
+                        {t("no_active_encounter_for_patient")}
+                      </p>
+                      <p className="text-xs text-amber-600 mt-1">
+                        {t("no_active_encounter_description")}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {/* Product Selection */}
+                      <div className="space-y-1.5">
+                        <Label className="text-sm font-medium">
+                          {t("product")}
+                          <span className="text-red-500 ml-0.5">*</span>
+                        </Label>
+                        <ProductKnowledgeSelect
+                          value={selectedProduct}
+                          onChange={(product) => {
+                            setSelectedProduct(product);
+                            setSelectedLots([]);
+                            setDosageInstructions([]);
+                            if (product) {
+                              setIsDosageSheetOpen(true);
+                            }
+                          }}
+                          ref={productSelectRef}
+                          placeholder={t("select_medication")}
+                          className="w-full"
+                        />
+                        {/* Add Medication Sheet for Dosage Instructions */}
+                        <AddMedicationSheet
+                          open={isDosageSheetOpen}
+                          onOpenChange={setIsDosageSheetOpen}
+                          selectedProduct={selectedProduct}
+                          onAdd={handleDosageConfigured}
+                          isEditing={false}
+                        />
+                      </div>
+
+                      {/* Stock Lot Selection */}
+                      {selectedProduct && (
+                        <div className="space-y-1.5">
+                          <Label className="text-sm font-medium">
+                            {t("select_lot")}
+                            <span className="text-red-500 ml-0.5">*</span>
+                          </Label>
+                          <StockLotSelector
+                            selectedLots={selectedLots}
+                            onLotSelectionChange={setSelectedLots}
+                            placeholder={t("select_stock_lot")}
+                            facilityId={facilityId}
+                            locationId={locationId}
+                            productKnowledge={selectedProduct}
+                            className="w-full"
+                            showexpiry={true}
+                            enableSearch={true}
+                            multiSelect={false}
+                            net_content_gt={0}
+                          />
+                        </div>
+                      )}
+
+                      {/* Quantity Input */}
+                      {selectedLots.length > 0 && (
+                        <div className="space-y-1.5">
+                          <Label className="text-sm font-medium">
+                            {t("quantity")}
+                            <span className="text-red-500 ml-0.5">*</span>
+                          </Label>
+                          <Input
+                            type="number"
+                            min="1"
+                            value={dispenseQuantity}
+                            onChange={(e) =>
+                              setDispenseQuantity(e.target.value)
+                            }
+                            placeholder={t("enter_quantity")}
+                            className="w-full"
+                          />
+                        </div>
+                      )}
+
+                      {/* Submit Button */}
+                      <div className="flex justify-end gap-2 pt-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setIsAddMedicationOpen(false);
+                            setSelectedProduct(undefined);
+                            setSelectedLots([]);
+                            setDispenseQuantity("1");
+                            setDosageInstructions([]);
+                          }}
+                        >
+                          {t("cancel")}
+                        </Button>
+                        <Button
+                          variant="primary"
+                          onClick={handleSubmitDispense}
+                          disabled={
+                            !selectedProduct ||
+                            selectedLots.length === 0 ||
+                            !dispenseQuantity ||
+                            isCreatingMedicationDispense ||
+                            !activeEncounter ||
+                            dosageInstructions.length === 0
+                          }
+                        >
+                          {isCreatingMedicationDispense ? (
+                            <>
+                              <CareIcon
+                                icon="l-spinner"
+                                className="size-4 animate-spin"
+                              />
+                              {t("adding")}
+                            </>
+                          ) : (
+                            <>
+                              <PlusIcon className="size-4" />
+                              {t("add_medication")}
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Right Panel - Billing Summary */}
@@ -1378,6 +1610,34 @@ export default function DispensedMedicationList({
           }}
         />
       )}
+
+      {/* Cancel Dispense and Invoices Confirmation Dialog */}
+      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("cancel_dispense")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {activeInvoicesToCancel.length > 0
+                ? t("cancel_dispense_with_invoices_confirmation", {
+                    count: activeInvoicesToCancel.length,
+                  })
+                : t("cancel_dispense_confirmation")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("no_go_back")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCancelDispenseAndInvoices}
+              className="bg-red-600 hover:bg-red-700 text-white"
+              disabled={isCancellingInvoice || isUpdatingDispenseOrder}
+            >
+              {isCancellingInvoice || isUpdatingDispenseOrder
+                ? t("cancelling")
+                : t("yes_cancel")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
