@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Plus, QrCode, Search, X } from "lucide-react";
+import { Plus, QrCode, Search, UserPlus, X } from "lucide-react";
 import { navigate } from "raviger";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -194,6 +194,17 @@ export function CreateDispenseSheet({
     setSearchTerm("");
   };
 
+  const handleRegisterNewPatient = () => {
+    setIsOpen(false);
+    resetState();
+    navigate(`/facility/${facilityId}/patient/create`, {
+      query:
+        isPhoneNumberConfig && isValidPhoneNumber(searchTerm)
+          ? { phone_number: searchTerm, flow: "dispense" }
+          : { flow: "dispense" },
+    });
+  };
+
   const handleProceedToDispense = () => {
     if (!selectedPatient) {
       toast.error(t("select_patient_first"));
@@ -215,6 +226,14 @@ export function CreateDispenseSheet({
   };
 
   const selectedConfig = allIdentifierConfigs.find((c) => c.id === searchType);
+
+  // Check if we have a valid search that returned no results
+  const hasNoResults =
+    searchType &&
+    searchTerm &&
+    (!isPhoneNumberConfig || isValidPhoneNumber(searchTerm)) &&
+    !isPatientFetching &&
+    !patientList?.results.length;
 
   const searchStateMessage = (() => {
     if (!searchType) {
@@ -371,10 +390,22 @@ export function CreateDispenseSheet({
 
                   {/* Search Results */}
                   {searchStateMessage ? (
-                    <Card className="flex items-center justify-center border bg-gray-50 rounded-sm shadow-none">
+                    <Card className="flex flex-col items-center justify-center border bg-gray-50 rounded-sm shadow-none">
                       <div className="text-sm text-gray-950 text-center p-5">
                         {searchStateMessage}
                       </div>
+                      {hasNoResults && (
+                        <div className="pb-4">
+                          <Button
+                            variant="outline_primary"
+                            size="sm"
+                            onClick={handleRegisterNewPatient}
+                          >
+                            <UserPlus className="size-4 mr-1" />
+                            {t("add_new_patient")}
+                          </Button>
+                        </div>
+                      )}
                     </Card>
                   ) : (
                     <>
@@ -410,6 +441,14 @@ export function CreateDispenseSheet({
                           </CommandGroup>
                         </CommandList>
                       </Command>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleRegisterNewPatient}
+                      >
+                        <UserPlus className="size-4 mr-1" />
+                        {t("add_new_patient")}
+                      </Button>
                     </>
                   )}
                 </CardContent>
