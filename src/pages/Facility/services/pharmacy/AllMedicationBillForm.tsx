@@ -1436,7 +1436,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
                     }
 
                     return prescriptionGroups.map(
-                      ({ key, label, fields: groupFields, prescription }) => {
+                      ({ key, label, fields: groupFields }) => {
                         if (!groupFields || groupFields.length === 0)
                           return null;
 
@@ -1454,11 +1454,6 @@ export default function AllMedicationBillForm({ patientId }: Props) {
                                       {label} ({groupFields.length}{" "}
                                       {t("medications")})
                                     </span>
-                                    {prescription?.note && (
-                                      <span className="text-sm font-normal text-gray-600 italic">
-                                        {t("note")}: {prescription.note}
-                                      </span>
-                                    )}
                                   </div>
                                   {key !== "no-prescription" && (
                                     <div className="flex items-center gap-2">
