@@ -40,7 +40,7 @@ type CompleteEncounterVariables = {
   encounter?: EncounterRead;
 };
 
-export function useEndEncounter() {
+export function useEncounterProgressController() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -140,5 +140,8 @@ export function useEndEncounter() {
     batchRequest({ requests, encounter });
   };
 
-  return { endEncounter, isPending: isBatchRequestPending };
+  return {
+    endEncounter,
+    isPending: isBatchRequestPending,
+  };
 }

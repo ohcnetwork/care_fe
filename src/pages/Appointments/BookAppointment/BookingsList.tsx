@@ -1,4 +1,4 @@
-import { differenceInMinutes, format, subDays } from "date-fns";
+import { differenceInMinutes, format } from "date-fns";
 import { CalendarDays, CalendarOff } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -81,7 +81,7 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
               patientId={patientId}
               facilityId={facilityId}
               statuses={PastAppointmentStatuses}
-              date_before={subDays(today, 1)}
+              date_before={today}
             />
           </TabsContent>
           <TabsContent value="cancelled" className="space-y-4 overflow-x-auto">
