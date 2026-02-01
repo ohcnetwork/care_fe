@@ -1408,11 +1408,6 @@ export default function MedicationBillForm({
                                 : prescriptionId}{" "}
                               ({fields.length} {t("medications")})
                             </span>
-                            {prescription.note && (
-                              <span className="text-sm font-normal text-gray-600 italic">
-                                {t("note")}: {prescription.note}
-                              </span>
-                            )}
                           </div>
                           <div className="flex items-center gap-2">
                             <Checkbox
@@ -1435,6 +1430,7 @@ export default function MedicationBillForm({
                       </TableCell>
                     </TableRow>
                   )}
+
                   {/* Empty State */}
                   {fields.length === 0 && (
                     <TableRow>
