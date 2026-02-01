@@ -18,7 +18,6 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import { PrescriptionGroup } from "@/types/emr/prescription/prescription";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { QRCodeSVG } from "qrcode.react";
-import { useEffect } from "react";
 
 interface DetailRowProps {
   label: string;
@@ -41,10 +40,6 @@ const PrescriptionContent = ({ prescription }: PrescriptionContentProps) => {
   const medicationsWithoutProduct = medications.filter(
     (med) => !med.requested_product,
   );
-
-  useEffect(() => {
-    console.log(prescription);
-  }, [prescription]);
 
   return (
     <div>
