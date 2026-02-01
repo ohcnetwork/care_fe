@@ -47,7 +47,11 @@ export default function PrescriptionView({
       queryKey: ["medication_requests", patientId, encounterId],
       queryFn: query.paginated(medicationRequestApi.list, {
         pathParams: { patientId },
-        queryParams: { encounter: encounterId, facility: facilityId },
+        queryParams: {
+          encounter: encounterId,
+          facility: facilityId,
+          product_type: "medication",
+        },
         pageSize: 100,
       }),
       enabled: !!patientId && !!encounterId && !!facilityId && !prescriptionId,

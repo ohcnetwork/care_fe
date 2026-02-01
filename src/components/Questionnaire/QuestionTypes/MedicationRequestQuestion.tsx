@@ -1586,7 +1586,7 @@ export function MedicationRequestQuestion({
       {/* Prescription Note Field - show when editing, or when creating with at least one medication */}
       {(prescriptionId || medications.length > 0) && (
         <div className="max-w-4xl space-y-2">
-          <Label htmlFor="prescription-note">{t("prescription_note")}</Label>
+          <Label htmlFor="prescription-note">{t("note")}</Label>
           {prescriptionId ? (
             <div className="p-3 bg-gray-50 border border-gray-200 rounded-md min-h-[80px] text-sm text-gray-700 whitespace-pre-wrap">
               {prescription?.note || (

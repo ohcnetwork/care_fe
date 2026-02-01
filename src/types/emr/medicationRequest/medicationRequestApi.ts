@@ -9,6 +9,7 @@ export default {
     TQuery: Type<{
       encounter?: string;
       prescription?: string;
+      product_type?: string;
     }>(),
     defaultQueryParams: {
       ordering: "-created_date",
