@@ -79,6 +79,11 @@ export default function PrescriptionView({
               ? `${t("prescribed_by")}: ${formatName(prescription.prescribed_by)}`
               : t("medications_from_all_prescriptions")}
           </p>
+          {prescription?.note && (
+            <p className="text-sm text-gray-600 mt-1 italic">
+              {t("note")}: {prescription.note}
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {canWrite && (
@@ -88,16 +93,22 @@ export default function PrescriptionView({
               size="sm"
               className="text-gray-950 hover:text-gray-700 h-9"
             >
-              <Link href={`questionnaire/medication_request`}>
-                {!hasMedications ? (
-                  <>
-                    <PlusIcon className="mr-2 size-4" />
-                    {t("add")}
-                  </>
-                ) : (
+              <Link
+                href={
+                  prescriptionId
+                    ? `questionnaire/medication_request?prescription=${prescriptionId}`
+                    : `questionnaire/medication_request`
+                }
+              >
+                {prescriptionId ? (
                   <>
                     <PencilIcon className="mr-2 size-4" />
                     {t("edit")}
+                  </>
+                ) : (
+                  <>
+                    <PlusIcon className="mr-2 size-4" />
+                    {t("create")}
                   </>
                 )}
               </Link>

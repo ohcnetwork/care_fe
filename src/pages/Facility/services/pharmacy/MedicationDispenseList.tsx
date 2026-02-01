@@ -456,7 +456,7 @@ export default function MedicationDispenseList({
           <div className="space-y-2">
             <div className="bg-white border rounded-md p-1">
               <div className="flex md:flex-row flex-col items-start md:items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-1">
                   <div className="text-sm text-gray-700 flex items-center gap-2">
                     <UserIcon className="size-4 text-gray-600" />
                     <span className="text-gray-900">
@@ -467,6 +467,11 @@ export default function MedicationDispenseList({
                       {formatDateTime(prescription.created_date)}
                     </span>
                   </div>
+                  {prescription.note && (
+                    <p className="text-sm text-gray-600 italic">
+                      {t("note")}: {prescription.note}
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge

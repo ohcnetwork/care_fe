@@ -8,6 +8,7 @@ export default {
     TRes: Type<PaginatedResponse<MedicationRequestRead>>(),
     TQuery: Type<{
       encounter?: string;
+      prescription?: string;
     }>(),
     defaultQueryParams: {
       ordering: "-created_date",

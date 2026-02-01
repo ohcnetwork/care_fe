@@ -18,6 +18,7 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import { PrescriptionGroup } from "@/types/emr/prescription/prescription";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { QRCodeSVG } from "qrcode.react";
+import { useEffect } from "react";
 
 interface DetailRowProps {
   label: string;
@@ -41,6 +42,10 @@ const PrescriptionContent = ({ prescription }: PrescriptionContentProps) => {
     (med) => !med.requested_product,
   );
 
+  useEffect(() => {
+    console.log(prescription);
+  }, [prescription]);
+
   return (
     <div>
       {/* Prescription Symbol */}
@@ -48,12 +53,16 @@ const PrescriptionContent = ({ prescription }: PrescriptionContentProps) => {
         <p>{t("℞")}</p>
         <p className="text-sm text-gray-600 font-semibold ">
           {formatDateTime(
-            prescription.prescription?.created_date ||
-              medications[0].created_date,
+            prescription.prescription?.created_date,
             "DD/MM/YYYY hh:mm A",
           )}
         </p>
       </div>
+      {prescription.prescription?.note && (
+        <p className="text-sm text-gray-600 mb-3 italic">
+          {t("note")}: {prescription.prescription.note}
+        </p>
+      )}
       {/* Medications Table */}
       {medicationsWithProduct && medicationsWithProduct.length > 0 && (
         <div className="mt-4">

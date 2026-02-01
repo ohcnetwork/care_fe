@@ -126,8 +126,6 @@ import {
 } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import {
-  ACTIVE_MEDICATION_STATUSES,
-  computeMedicationDispenseQuantity,
   DoseRange,
   MedicationRequestDispenseStatus,
   MedicationRequestDosageInstruction,
@@ -135,15 +133,20 @@ import {
   UCUM_TIME_UNITS,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
-import {
-  PrescriptionRead,
-  PrescriptionStatus,
-} from "@/types/emr/prescription/prescription";
+import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
-import { isGreaterThan, isZero, round, zodDecimal } from "@/Utils/decimal";
+import {
+  add,
+  divide,
+  isGreaterThan,
+  isZero,
+  multiply,
+  round,
+  zodDecimal,
+} from "@/Utils/decimal";
 import { isLotAllowedForDispensing } from "@/Utils/inventory";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
@@ -747,7 +750,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
         queryParams: {
           facility: facilityId,
           limit: 100,
-          status: ACTIVE_MEDICATION_STATUSES.join(","),
+          status: "active,on_hold,draft,unknown,ended,completed,cancelled",
           exclude_dispense_status: "complete,incomplete",
         },
       })({ signal });
@@ -835,7 +838,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
             {
               selectedInventoryId: validLot.id,
               quantity: medication
-                ? computeMedicationDispenseQuantity(medication)
+                ? computeInitialQuantity(medication)
                 : currentLots[0]?.quantity || "1",
             },
           ]);
@@ -930,7 +933,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
                 selectedInventoryId:
                   (medication.inventory_items_internal?.[0]?.id as string) ||
                   "",
-                quantity: computeMedicationDispenseQuantity(medication),
+                quantity: computeInitialQuantity(medication),
               },
             ],
             prescriptionId,
@@ -939,6 +942,81 @@ export default function AllMedicationBillForm({ patientId }: Props) {
       },
     );
   }, [medications.length, append, form, groupedMedications]);
+
+  function computeInitialQuantity(medication: MedicationRequestRead) {
+    const instruction = medication.dosage_instruction[0];
+    if (!instruction) {
+      return "0";
+    }
+
+    if (instruction.as_needed_boolean) {
+      return "0";
+    }
+
+    const doseValue = instruction.dose_and_rate?.dose_quantity?.value;
+    if (!doseValue) {
+      return "0";
+    }
+
+    const repeat = instruction.timing?.repeat;
+    if (!repeat?.bounds_duration || !repeat.period_unit) {
+      return doseValue;
+    }
+
+    const convertToHours = (value: string, unit: string) => {
+      switch (unit) {
+        case "h":
+          return new Decimal(value);
+        case "d":
+          return multiply(value, 24);
+        case "wk":
+          return multiply(value, 24 * 7);
+        case "mo":
+          return multiply(value, 24 * 30);
+        case "a":
+          return multiply(value, 24 * 365);
+        default:
+          return 0;
+      }
+    };
+
+    const {
+      frequency = 1,
+      period = "1",
+      period_unit,
+      bounds_duration,
+    } = repeat;
+
+    const totalDurationInHours = convertToHours(
+      bounds_duration.value,
+      bounds_duration.unit,
+    );
+    const periodInHours = convertToHours(period, period_unit);
+
+    if (periodInHours === 0) {
+      return doseValue;
+    }
+
+    const doseIntervalInHours = divide(periodInHours, frequency);
+
+    if (isZero(doseIntervalInHours)) {
+      return doseValue;
+    }
+
+    const numberOfDoses = divide(
+      totalDurationInHours,
+      doseIntervalInHours,
+    ).ceil();
+
+    if (instruction.dose_and_rate?.dose_range) {
+      const lowDose = instruction.dose_and_rate.dose_range.low.value || "0";
+      const highDose = instruction.dose_and_rate.dose_range.high.value || "0";
+      const avgDose = divide(add(lowDose, highDose), 2);
+      return round(multiply(avgDose, numberOfDoses));
+    }
+
+    return round(multiply(doseValue, numberOfDoses));
+  }
 
   // Mutation to create invoice automatically after dispensing
   const { mutate: createInvoice, isPending: isCreatingInvoice } = useMutation({
@@ -1238,7 +1316,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
         body: {
           datapoints: Array.from(prescriptionIds).map((prescriptionId) => ({
             id: prescriptionId,
-            status: PrescriptionStatus.completed,
+            status: "completed",
           })),
         },
       });
@@ -1410,6 +1488,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
                           label: prescriptionLabel,
                           fields: groupFields,
                           date: date,
+                          prescription,
                         };
                       })
                       .sort((a, b) => {
@@ -1439,7 +1518,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
                     }
 
                     return prescriptionGroups.map(
-                      ({ key, label, fields: groupFields }) => {
+                      ({ key, label, fields: groupFields, prescription }) => {
                         if (!groupFields || groupFields.length === 0)
                           return null;
 
@@ -1452,9 +1531,16 @@ export default function AllMedicationBillForm({ patientId }: Props) {
                                 className="py-2 px-4 font-semibold text-gray-800 border-b"
                               >
                                 <div className="flex items-center justify-between">
-                                  <div>
-                                    {label} ({groupFields.length}{" "}
-                                    {t("medications")})
+                                  <div className="flex flex-col gap-1">
+                                    <span>
+                                      {label} ({groupFields.length}{" "}
+                                      {t("medications")})
+                                    </span>
+                                    {prescription?.note && (
+                                      <span className="text-sm font-normal text-gray-600 italic">
+                                        {t("note")}: {prescription.note}
+                                      </span>
+                                    )}
                                   </div>
                                   {key !== "no-prescription" && (
                                     <div className="flex items-center gap-2">
@@ -1839,7 +1925,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
                                                 return {
                                                   ...lot,
                                                   quantity: medication
-                                                    ? computeMedicationDispenseQuantity(
+                                                    ? computeInitialQuantity(
                                                         medication,
                                                       )
                                                     : lot.quantity,
@@ -2196,7 +2282,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
                         dosageInstructions;
                     }
 
-                    const newQuantity = computeMedicationDispenseQuantity(
+                    const newQuantity = computeInitialQuantity(
                       medicationDataForQuantity,
                     );
 
@@ -2220,7 +2306,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
               : undefined
           }
           onAdd={(product, dosageInstructions) => {
-            const newQuantity = computeMedicationDispenseQuantity({
+            const newQuantity = computeInitialQuantity({
               dosage_instruction: dosageInstructions,
             } as MedicationRequestRead);
 
@@ -2297,7 +2383,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
                   | MedicationRequestRead
                   | undefined;
                 const initialQuantity = originalMedication
-                  ? computeMedicationDispenseQuantity(originalMedication)
+                  ? computeInitialQuantity(originalMedication)
                   : "0";
                 form.setValue(
                   `items.${substitutingItemIndex}.lots`,
