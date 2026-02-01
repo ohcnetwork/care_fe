@@ -10,6 +10,7 @@ import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+import { Markdown } from "@/src/components/ui/markdown";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import query from "@/Utils/request/query";
@@ -83,11 +84,6 @@ export default function PrescriptionView({
               ? `${t("prescribed_by")}: ${formatName(prescription.prescribed_by)}`
               : t("medications_from_all_prescriptions")}
           </p>
-          {prescription?.note && (
-            <p className="text-sm text-gray-600 mt-1 italic">
-              {t("note")}: {prescription.note}
-            </p>
-          )}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {canWrite && (
@@ -146,6 +142,7 @@ export default function PrescriptionView({
           )}
         </div>
       </div>
+
       <div className="flex flex-col gap-4 px-2">
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
@@ -171,6 +168,16 @@ export default function PrescriptionView({
             </Button>
           )}
         </div>
+        {prescription?.note && (
+          <div className="text-sm text-gray-600">
+            <p className="font-semibold mb-1">{t("note")}</p>
+            <Markdown
+              content={prescription?.note}
+              prose={false}
+              className="text-sm"
+            />
+          </div>
+        )}
         <MedicationsTable
           medications={
             (prescriptionId && prescription

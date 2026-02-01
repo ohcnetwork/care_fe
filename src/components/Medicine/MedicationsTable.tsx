@@ -134,8 +134,8 @@ export const MedicationsTable = ({
                     {duration ? `${duration.value} ${duration.unit}` : "-"}
                   </TableCell>
                   <TableCell className="py-2 px-3 break-words whitespace-normal">
-                    {remarks || "-"}
-                    {notes ? ` (${t("note")}: ${notes})` : ""}
+                    {remarks ? `${remarks}\n` : ""}
+                    {notes ?? notes}
                   </TableCell>
                 </TableRow>
               );
