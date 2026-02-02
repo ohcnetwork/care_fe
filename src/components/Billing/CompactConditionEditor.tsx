@@ -360,8 +360,7 @@ export function CompactConditionEditor({
   const { t } = useTranslation();
   const [isAdding, setIsAdding] = useState(false);
 
-  const metrics =
-    availableMetrics?.filter((m) => !m.name.includes("encounter_tag")) || [];
+  const metrics = availableMetrics || [];
 
   const defaultCondition = getDefaultCondition(metrics);
 

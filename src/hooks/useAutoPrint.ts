@@ -1,6 +1,7 @@
+import { sleep } from "@/Utils/utils";
 import { useEffect } from "react";
 
-interface Options {
+export interface AutoPrintOptions {
   enabled?: boolean;
   delay?: number;
   window?: Window;
@@ -17,13 +18,14 @@ interface Options {
 export default function useAutoPrint({
   enabled = true,
   delay = 300,
-
   window: printWindow = window,
-}: Options) {
+}: AutoPrintOptions) {
   useEffect(() => {
     if (enabled) {
-      const timer = setTimeout(() => {
+      const timer = setTimeout(async () => {
         printWindow.print();
+        await sleep(300);
+        window.history.go(-1);
       }, delay); // Delay to ensure content is rendered
 
       return () => clearTimeout(timer);

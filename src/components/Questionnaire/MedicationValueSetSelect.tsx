@@ -117,7 +117,6 @@ export default function MedicationValueSetSelect({
         limit: 100,
         offset: 0,
         name: search,
-        product_type: "medication",
         category: search ? undefined : currentCategory,
         status: ProductKnowledgeStatus.active,
       },
