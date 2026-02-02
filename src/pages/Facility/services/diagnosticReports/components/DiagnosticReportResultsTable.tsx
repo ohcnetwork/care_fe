@@ -83,42 +83,15 @@ export function DiagnosticReportResultsTable({
     );
   };
 
-  const parseInterpretationValue = (value: string): Interpretation | string => {
-    if (typeof value === "object") {
-      return value as Interpretation;
-    }
-
-    if (typeof value === "string" && value.startsWith("{")) {
-      try {
-        const jsonString = value.replace(/'/g, '"');
-        return JSON.parse(jsonString) as Interpretation;
-      } catch {
-        return value;
-      }
-    }
-
-    return value;
-  };
-
-  const renderInterpretation = (interpretationValue: string) => {
+  const renderInterpretation = (interpretationValue: Interpretation) => {
     if (!interpretationValue) return "-";
 
-    const parsedInterpretation = parseInterpretationValue(interpretationValue);
-
-    if (typeof parsedInterpretation === "object") {
-      const { display, color = "#000000" } = parsedInterpretation;
-      return (
-        <div className="flex items-center gap-1">
-          <span className="capitalize" style={{ color }}>
-            {display}
-          </span>
-        </div>
-      );
-    }
-
+    const { display, color = "#000000" } = interpretationValue;
     return (
-      <div className="flex items-center gap-1 text-gray-500">
-        <span className="capitalize">{parsedInterpretation}</span>
+      <div className="flex items-center gap-1">
+        <span className="capitalize" style={{ color }}>
+          {display}
+        </span>
       </div>
     );
   };

@@ -29,7 +29,7 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
       className={cn("grid grid-cols-2 sm:grid-cols-4 gap-3", props.className)}
     >
       <QuickAction
-        icon={<AllergyIcon className="text-yellow-700" />}
+        icon={<AllergyIcon className="text-red-700" />}
         title={t("allergy")}
         shortcut={getShortcutDisplay("add-allergy")}
         href={`questionnaire/allergy_intolerance`}
