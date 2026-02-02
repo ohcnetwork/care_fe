@@ -37,6 +37,7 @@ export const Account = () => {
         facility: facilityId || "",
         encounter: encounter?.id || "",
       },
+      silent: true,
     }),
     enabled: !!facilityId && !!encounter?.id,
   });
