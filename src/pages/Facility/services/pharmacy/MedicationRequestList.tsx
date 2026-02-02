@@ -210,7 +210,11 @@ export default function MedicationRequestList({
     <Page
       title={t("prescription_queue")}
       options={
-        <CreateDispenseSheet facilityId={facilityId} locationId={locationId} />
+        <CreateDispenseSheet
+          facilityId={facilityId}
+          locationId={locationId}
+          patientId={qParams.patient_external_id}
+        />
       }
     >
       {/* Priority tabs with original styling */}
