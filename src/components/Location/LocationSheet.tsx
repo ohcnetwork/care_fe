@@ -27,7 +27,6 @@ import {
   createLocationAssociationRequest,
   createLocationAssociationUpdateRequest,
   createLocationHistoryFromBed,
-  createLocationUpdateOperationalStatusRequest,
   getCurrentLocations,
 } from "@/components/Location/utils/locationHelpers";
 import { LocationAssignmentView } from "@/components/Location/views/LocationAssignmentView";
@@ -159,17 +158,6 @@ export function LocationSheet({
       (loc) => loc.id === dialogs.locationToDelete?.associationId,
     );
 
-    // Mark the deleted location as unoccupied
-    if (locationBeingDeleted) {
-      requests.push(
-        createLocationUpdateOperationalStatusRequest(
-          locationBeingDeleted.location,
-          facilityId,
-          "U",
-        ),
-      );
-    }
-
     if (locationBeingDeleted?.status === "active") {
       activeLocations
         .filter((loc) => loc.id !== locationBeingDeleted?.id)
@@ -180,13 +168,6 @@ export function LocationSheet({
               reservedLocation.location.id,
               reservedLocation.id,
               facilityId,
-            ),
-          );
-          requests.push(
-            createLocationUpdateOperationalStatusRequest(
-              reservedLocation.location,
-              facilityId,
-              "U",
             ),
           );
         });
@@ -230,13 +211,6 @@ export function LocationSheet({
             new Date(),
           ),
         );
-        requests.push(
-          createLocationUpdateOperationalStatusRequest(
-            currentLocation.location,
-            facilityId,
-            "U",
-          ),
-        );
       }
       // Update current location to reserved if keepBedActive is checked
       else {
@@ -265,14 +239,6 @@ export function LocationSheet({
           encounter.id,
         ),
       );
-      // Mark location as occupied for active assignments
-      requests.push(
-        createLocationUpdateOperationalStatusRequest(
-          selectedBed as LocationRead,
-          facilityId,
-          "O",
-        ),
-      );
     }
     // Update planned location to active
     else if (assignment.sheetState.action === "new" && currentPlannedLocation) {
@@ -285,13 +251,6 @@ export function LocationSheet({
           },
           facilityId,
           encounter.id,
-        ),
-      );
-      requests.push(
-        createLocationUpdateOperationalStatusRequest(
-          currentPlannedLocation.location,
-          facilityId,
-          "O",
         ),
       );
     }
@@ -324,13 +283,6 @@ export function LocationSheet({
             new Date(),
           ),
         );
-        requests.push(
-          createLocationUpdateOperationalStatusRequest(
-            currentLocation.location,
-            facilityId,
-            "U",
-          ),
-        );
       } else {
         requests.push(
           createLocationAssociationUpdateRequest(
@@ -356,14 +308,6 @@ export function LocationSheet({
     // If completing an active location, also complete all reserved locations
     if (assignment.editingState.timeConfig.status === "completed") {
       if (location.status === "active") {
-        requests.push(
-          createLocationUpdateOperationalStatusRequest(
-            location.location,
-            facilityId,
-            "U",
-          ),
-        );
-
         activeLocations.forEach((activeLocation) => {
           if (activeLocation.status === "reserved") {
             requests.push(
@@ -374,23 +318,8 @@ export function LocationSheet({
                 new Date(),
               ),
             );
-            requests.push(
-              createLocationUpdateOperationalStatusRequest(
-                activeLocation.location,
-                facilityId,
-                "U",
-              ),
-            );
           }
         });
-      } else if (location.status === "reserved") {
-        requests.push(
-          createLocationUpdateOperationalStatusRequest(
-            location.location,
-            facilityId,
-            "U",
-          ),
-        );
       }
     }
 
@@ -416,13 +345,6 @@ export function LocationSheet({
             encounter.id,
           ),
         );
-        requests.push(
-          createLocationUpdateOperationalStatusRequest(
-            currentLocation.location,
-            facilityId,
-            "O",
-          ),
-        );
       } else {
         requests.push(
           completeCurrentLocationAssociation(
@@ -430,13 +352,6 @@ export function LocationSheet({
             facilityId,
             encounter.id,
             new Date(),
-          ),
-        );
-        requests.push(
-          createLocationUpdateOperationalStatusRequest(
-            currentLocation.location,
-            facilityId,
-            "U",
           ),
         );
       }

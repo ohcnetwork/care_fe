@@ -31,7 +31,8 @@ interface BedCardProps {
 function BedCard({ location, facilityId }: BedCardProps) {
   const { t } = useTranslation();
   const isOccupied =
-    !!location.current_encounter || location.operational_status !== "U";
+    !!location.current_encounter ||
+    location.system_availability_status !== "available";
 
   return (
     <div
@@ -78,7 +79,7 @@ function BedCard({ location, facilityId }: BedCardProps) {
             facilityId={facilityId}
             hideBorder={true}
           />
-        ) : location.operational_status !== "U" ? (
+        ) : location.system_availability_status !== "available" ? (
           <div className="flex flex-col items-center justify-center py-8 h-auto">
             <div className="rounded-full bg-yellow-100 p-3 mb-3">
               <Lock className="size-6 text-yellow-700" />
