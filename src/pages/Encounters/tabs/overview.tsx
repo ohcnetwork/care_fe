@@ -14,10 +14,13 @@ import { VitalsList } from "@/components/Patient/vitals/list";
 import { ObservationPlotConfig } from "@/types/emr/observation/observation";
 
 import { ClinicalHistoryOverview } from "@/pages/Encounters/tabs/overview/clinical-history-overview";
+import { FavoriteFormsQuickActions } from "@/pages/Encounters/tabs/overview/FavoriteFormsQuickActions";
+import { FormSubmissionDrafts } from "@/pages/Encounters/tabs/overview/FormSubmissionDrafts";
 import { QuickActions } from "@/pages/Encounters/tabs/overview/quick-actions";
 import { SummaryPanel } from "@/pages/Encounters/tabs/overview/summary-panel";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import EncounterOverviewDevices from "@/pages/Facility/settings/devices/components/EncounterOverviewDevices";
+import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 
 export const EncounterOverviewTab = () => {
   const { t } = useTranslation();
@@ -43,8 +46,9 @@ export const EncounterOverviewTab = () => {
     <div className="flex gap-3 @max-md:w-full">
       {canReadClinicalData ? (
         <div className="flex-1 xl:pr-3 overflow-y-auto xl:h-[calc(100vh-14rem-var(--encounter-header-offset))]">
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4">
             {canWrite && <QuickActions />}
+            {canWrite && <FavoriteFormsQuickActions />}
             {<ClinicalHistoryOverview />}
             <div className="xl:hidden">
               <SummaryPanel />
@@ -56,6 +60,14 @@ export const EncounterOverviewTab = () => {
                 {encounter && (
                   <EncounterOverviewDevices encounter={encounter} />
                 )}
+                {encounter &&
+                  !inactiveEncounterStatus.includes(encounter.status) && (
+                    <FormSubmissionDrafts
+                      facilityId={encounter.facility.id}
+                      patientId={patientId}
+                      encounterId={encounterId}
+                    />
+                  )}
                 {/* Clinical informations */}
                 <AllergyList
                   patientId={patientId}

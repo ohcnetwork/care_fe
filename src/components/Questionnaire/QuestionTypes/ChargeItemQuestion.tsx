@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
+import UserSelector from "@/components/Common/UserSelector";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -28,11 +29,13 @@ import {
 import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPriceDisplay";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 
+import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
 import {
   ChargeItemDefinitionBase,
   ChargeItemDefinitionRead,
+  ChargeItemDefinitionStatus,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
@@ -40,6 +43,7 @@ import {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
+import { UserReadMinimal } from "@/types/user/user";
 
 interface ChargeItemQuestionProps {
   encounterId: string;
@@ -62,6 +66,7 @@ const CHARGE_ITEM_FIELDS = {
 
 interface ApplyChargeItemDefinitionRequestWithObject extends ApplyChargeItemDefinitionRequest {
   charge_item_definition_object: ChargeItemDefinitionRead;
+  performer_actor_object?: UserReadMinimal;
 }
 
 interface ChargeItemFormProps {
@@ -73,6 +78,7 @@ interface ChargeItemFormProps {
   questionId?: string;
   index?: number;
   defaultOpen?: boolean;
+  facilityId?: string;
 }
 
 function ChargeItemForm({
@@ -83,6 +89,7 @@ function ChargeItemForm({
   errors,
   questionId,
   index,
+  facilityId,
 }: ChargeItemFormProps) {
   const { t } = useTranslation();
 
@@ -116,10 +123,12 @@ function ChargeItemForm({
         <div className="space-y-1">
           <div className="flex items-center gap-1">
             <span>
-              {chargeItem.charge_item_definition_object.price_components?.[0]
-                ?.amount || 0}{" "}
-              {chargeItem.charge_item_definition_object.price_components?.[0]
-                ?.code?.code || "INR"}
+              <MonetaryDisplay
+                amount={
+                  chargeItem.charge_item_definition_object.price_components?.[0]
+                    ?.amount || 0
+                }
+              />
             </span>
             {chargeItem.charge_item_definition_object.price_components?.length >
               0 && (
@@ -142,6 +151,21 @@ function ChargeItemForm({
             )}
           </div>
         </div>
+      </TableCell>
+      <TableCell>
+        <UserSelector
+          selected={chargeItem.performer_actor_object}
+          onChange={(user) => {
+            onUpdate?.({
+              ...chargeItem,
+              performer_actor: user.id,
+              performer_actor_object: user,
+            });
+          }}
+          placeholder={t("select_performer")}
+          facilityId={facilityId}
+          disabled={disabled}
+        />
       </TableCell>
       <TableCell className="text-right">
         <DropdownMenu>
@@ -195,8 +219,11 @@ export function ChargeItemQuestion({
       const updatedChargeItems = [...chargeItems, newChargeItem];
       setChargeItems(updatedChargeItems);
       const updatedChargeItemsWithoutObject = updatedChargeItems.map(
-        ({ charge_item_definition_object: _discard, ...chargeItem }) =>
-          chargeItem,
+        ({
+          charge_item_definition_object: _discard,
+          performer_actor_object: _discardPerformer,
+          ...chargeItem
+        }) => chargeItem,
       );
       updateQuestionnaireResponseCB(
         [{ type: "charge_item", value: updatedChargeItemsWithoutObject }],
@@ -218,8 +245,11 @@ export function ChargeItemQuestion({
     const newChargeItems = chargeItems.filter((_, i: number) => i !== index);
     setChargeItems(newChargeItems);
     const updatedChargeItemsWithoutObject = newChargeItems.map(
-      ({ charge_item_definition_object: _discard, ...chargeItem }) =>
-        chargeItem,
+      ({
+        charge_item_definition_object: _discard,
+        performer_actor_object: _discardPerformer,
+        ...chargeItem
+      }) => chargeItem,
     );
     updateQuestionnaireResponseCB(
       [{ type: "charge_item", value: updatedChargeItemsWithoutObject }],
@@ -238,8 +268,11 @@ export function ChargeItemQuestion({
 
     setChargeItems(newChargeItems);
     const updatedChargeItemsWithoutObject = newChargeItems.map(
-      ({ charge_item_definition_object: _discard, ...chargeItem }) =>
-        chargeItem,
+      ({
+        charge_item_definition_object: _discard,
+        performer_actor_object: _discardPerformer,
+        ...chargeItem
+      }) => chargeItem,
     );
     updateQuestionnaireResponseCB(
       [{ type: "charge_item", value: updatedChargeItemsWithoutObject }],
@@ -256,6 +289,7 @@ export function ChargeItemQuestion({
               <TableHead>{t("item")}</TableHead>
               <TableHead>{t("quantity")}</TableHead>
               <TableHead>{t("price")}</TableHead>
+              <TableHead>{t("performer")}</TableHead>
               <TableHead className="text-right">{t("actions")}</TableHead>
             </TableRow>
           </TableHeader>
@@ -270,6 +304,7 @@ export function ChargeItemQuestion({
                 errors={errors}
                 questionId={questionnaireResponse.question_id}
                 index={index}
+                facilityId={facilityId}
               />
             ))}
           </TableBody>
@@ -296,7 +331,7 @@ export function ChargeItemQuestion({
           listDefinitions={{
             queryFn: chargeItemDefinitionApi.listChargeItemDefinition,
             pathParams: { facilityId },
-            queryParams: { status: "active" },
+            queryParams: { status: ChargeItemDefinitionStatus.active },
           }}
           translationBaseKey="charge_item_definition"
         />

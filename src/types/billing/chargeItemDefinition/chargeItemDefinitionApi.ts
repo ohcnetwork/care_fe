@@ -39,4 +39,16 @@ export default {
     method: HttpMethod.GET,
     TRes: Type<Metrics[]>(),
   },
+  setTags: {
+    path: "/api/v1/facility/{facilityId}/charge_item_definition/{slug}/set_tags/",
+    method: HttpMethod.POST,
+    TRes: Type<ChargeItemDefinitionRead>(),
+    TBody: Type<{ tags: string[] }>(),
+  },
+  removeTags: {
+    path: "/api/v1/facility/{facilityId}/charge_item_definition/{slug}/remove_tags/",
+    method: HttpMethod.POST,
+    TRes: Type<ChargeItemDefinitionRead>(),
+    TBody: Type<{ tags: string[] }>(),
+  },
 } as const;

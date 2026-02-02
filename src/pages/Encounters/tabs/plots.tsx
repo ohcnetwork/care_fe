@@ -17,6 +17,8 @@ type QueryParams = {
   plot: ObservationPlotConfig[number]["id"];
 };
 
+const fetchOptions = { cache: "no-store" as RequestCache };
+
 export const EncounterPlotsTab = () => {
   const { t } = useTranslation();
   const [qParams, setQParams] = useQueryParams<QueryParams>();
@@ -27,7 +29,8 @@ export const EncounterPlotsTab = () => {
 
   const { data, isLoading } = useQuery<ObservationPlotConfig>({
     queryKey: ["plots-config"],
-    queryFn: () => fetch(careConfig.plotsConfigUrl).then((res) => res.json()),
+    queryFn: () =>
+      fetch(careConfig.plotsConfigUrl, fetchOptions).then((res) => res.json()),
   });
 
   if (isLoading || !data) {

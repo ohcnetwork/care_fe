@@ -45,6 +45,7 @@ import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/reso
 import {
   ChargeItemDefinitionBase,
   ChargeItemDefinitionRead,
+  ChargeItemDefinitionStatus,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import {
@@ -439,7 +440,9 @@ export function ProductFormContent({
                             queryFn:
                               chargeItemDefinitionApi.listChargeItemDefinition,
                             pathParams: { facilityId },
-                            queryParams: { status: "active" },
+                            queryParams: {
+                              status: ChargeItemDefinitionStatus.active,
+                            },
                           }}
                           translationBaseKey="charge_item_definition"
                         />

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
-import { Edit3Icon } from "lucide-react";
+import { Edit3Icon, Lock } from "lucide-react";
 import { useQueryParams } from "raviger";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -18,6 +18,11 @@ import query from "@/Utils/request/query";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
 import { getPermissions } from "@/common/Permissions";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { usePermissions } from "@/context/PermissionContext";
 import EditScheduleTemplateSheet from "@/pages/Scheduling/components/EditScheduleTemplateSheet";
 import {
@@ -124,7 +129,21 @@ const ScheduleTemplateItem = ({
             id={template.id}
           />
           <div className="flex flex-col">
-            <span className="text-lg font-semibold">{template.name}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-semibold">{template.name}</span>
+
+              {!template.is_public && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Lock className="size-4 text-gray-400" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {t("schedule_template_is_not_public")}
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+
             <span className="text-sm text-gray-700">
               {t("schedule_for")}
               {": "}

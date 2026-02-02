@@ -28,6 +28,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+import { FormSkeleton } from "@/components/Common/SkeletonLoading";
+
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
@@ -88,7 +90,7 @@ export default function LocationForm({
     name: "",
     description: "",
     status: "active",
-    operational_status: "O",
+    operational_status: "U",
     form: "ro",
     parent: null,
     enableBulkCreation: false,
@@ -258,12 +260,17 @@ export default function LocationForm({
     { value: "H", label: "Housekeeping" },
     { value: "I", label: "Isolated" },
     { value: "K", label: "Contaminated" },
-    { value: "O", label: "Operational" },
+    { value: "O", label: "Occupied" },
     { value: "U", label: "Unoccupied" },
   ];
 
   if (locationId && isLoading) {
-    return <div className="p-4">Loading...</div>;
+    return (
+      <output className="p-4" aria-live="polite">
+        <span className="sr-only">{t("loading")}</span>
+        <FormSkeleton rows={6} />
+      </output>
+    );
   }
 
   const showBedOptions = form.watch("form") === "bd" && !isEditMode;
