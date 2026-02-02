@@ -5383,6 +5383,7 @@
   "sort_by_net_content": "Sort by net content",
   "sort_by_oldest_created": "Oldest Entry First",
   "sort_by_oldest_payment": "Oldest Payment First",
+  "sort_by_token_no": "Sort by Token No.",
   "source": "Source",
   "source_file": "Source Files",
   "spdx_sbom_version": "SPDX SBOM Version",
