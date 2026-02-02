@@ -190,6 +190,7 @@ function ServiceRequestForm({
 }: ServiceRequestFormProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -242,7 +243,10 @@ function ServiceRequestForm({
                 >
                   <Pencil className="h-4 w-4 text-gray-600" />
                 </Button>
-                <DropdownMenu>
+                <DropdownMenu
+                  open={isDropdownOpen}
+                  onOpenChange={setIsDropdownOpen}
+                >
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
@@ -264,6 +268,7 @@ function ServiceRequestForm({
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
+                            setIsDropdownOpen(false);
                             onAddToTemplate(serviceRequest);
                           }}
                           className="cursor-pointer"
@@ -278,6 +283,7 @@ function ServiceRequestForm({
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
+                          setIsDropdownOpen(false);
                           onRemove();
                         }}
                         className="text-red-500 cursor-pointer"
