@@ -111,6 +111,29 @@ export interface ChargeItemBatchResponse {
   results: BatchSuccessResponse<{ charge_item: ChargeItemRead }>[];
 }
 
+const LOCKED_RESOURCES = [
+  ChargeItemServiceResource.appointment,
+  ChargeItemServiceResource.medication_dispense,
+];
+
+export const isChargeItemLockedForEdit = (item: ChargeItemRead) => {
+  if (
+    item.service_resource &&
+    LOCKED_RESOURCES.includes(item.service_resource)
+  ) {
+    return true;
+  }
+
+  if (
+    item.status === ChargeItemStatus.billed ||
+    item.status === ChargeItemStatus.paid
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
 export function extractChargeItemsFromBatchResponse(
   response: ChargeItemBatchResponse,
 ): ChargeItemRead[] {

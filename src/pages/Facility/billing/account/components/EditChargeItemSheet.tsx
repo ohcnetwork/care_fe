@@ -47,9 +47,9 @@ import { Avatar } from "@/components/Common/Avatar";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
   ChargeItemRead,
-  ChargeItemServiceResource,
   ChargeItemStatus,
   ChargeItemUpdate,
+  isChargeItemLockedForEdit,
   MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
@@ -86,11 +86,6 @@ export function EditChargeItemSheet({
   const [isOpen, setIsOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  const LOCKED_RESOURCES = [
-    ChargeItemServiceResource.appointment,
-    ChargeItemServiceResource.medication_dispense,
-  ];
-
   // Register shortcuts for this sheet
   useShortcutSubContext("facility:billing:invoice");
 
@@ -122,12 +117,6 @@ export function EditChargeItemSheet({
       ) || []
     );
   };
-
-  const isLocked =
-    (item.service_resource &&
-      LOCKED_RESOURCES.includes(item.service_resource)) ||
-    item.status === ChargeItemStatus.billed ||
-    item.status === ChargeItemStatus.paid;
 
   const getTotalComponentsByType = (type: MonetaryComponentType) => {
     return (
@@ -177,12 +166,14 @@ export function EditChargeItemSheet({
     updateChargeItem(data);
   }
 
+  const isDisabled = isChargeItemLockedForEdit(item);
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
+      <SheetTrigger asChild disabled={isDisabled}>
         {trigger || (
           <Button variant="ghost" size="icon">
-            <PencilIcon className="h-4 w-4" />
+            <PencilIcon />
           </Button>
         )}
       </SheetTrigger>
@@ -259,7 +250,6 @@ export function EditChargeItemSheet({
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
-                            disabled={isLocked}
                           >
                             <FormControl>
                               <SelectTrigger ref={field.ref}>
@@ -290,7 +280,10 @@ export function EditChargeItemSheet({
                               type="number"
                               min={1}
                               {...field}
-                              disabled={isLocked}
+                              disabled={
+                                item.status === ChargeItemStatus.billed ||
+                                item.status === ChargeItemStatus.paid
+                              }
                             />
                           </FormControl>
                           <FormMessage />
@@ -313,7 +306,10 @@ export function EditChargeItemSheet({
                         onClick={() => {
                           setIsEditDialogOpen(true);
                         }}
-                        disabled={isLocked}
+                        disabled={
+                          item.status === ChargeItemStatus.billed ||
+                          item.status === ChargeItemStatus.paid
+                        }
                       >
                         <CareIcon icon="l-edit" className="size-4" />
                         {t("edit")}
