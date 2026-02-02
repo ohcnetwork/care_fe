@@ -87,10 +87,11 @@ export function AccountSheet({
 
   // Fetch patient encounters
   const { data: encounters, isLoading: isLoadingEncounters } = useQuery({
-    queryKey: ["encounters", patientId],
+    queryKey: ["encounters", patientId, facilityId],
     queryFn: query(encounterApi.list, {
       queryParams: {
         patient: patientId,
+        facility: facilityId,
         ordering: "-created_date",
         limit: 10,
       },

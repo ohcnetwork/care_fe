@@ -1,13 +1,10 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, QrCode, Search, X } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Plus, QrCode, Search, UserPlus, X } from "lucide-react";
 import { navigate } from "raviger";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
-import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,14 +14,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
@@ -45,7 +34,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 
 import PatientIDScanDialog from "@/components/Scan/PatientIDScanDialog";
 import {
@@ -65,36 +53,25 @@ import {
   PatientRead,
 } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
-import {
-  DeliveryOrderRetrieve,
-  DeliveryOrderStatus,
-} from "@/types/inventory/deliveryOrder/deliveryOrder";
-import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import careConfig from "@careConfig";
 
-const medicationReturnSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  note: z.string().optional(),
-});
-
-interface CreateMedicationReturnSheetProps {
+interface CreateDispenseSheetProps {
   facilityId: string;
   locationId: string;
   trigger?: React.ReactNode;
+  patientId?: string;
 }
 
-export function CreateMedicationReturnSheet({
+export function CreateDispenseSheet({
   facilityId,
-  locationId,
   trigger,
-}: CreateMedicationReturnSheetProps) {
+  patientId,
+}: CreateDispenseSheetProps) {
   const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const { facility } = useCurrentFacility();
-  const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<
     PatientListRead | PartialPatientModel | null
@@ -108,15 +85,27 @@ export function CreateMedicationReturnSheet({
   const [verificationOpen, setVerificationOpen] = useState(false);
   const [scanDialogOpen, setScanDialogOpen] = useState(false);
 
-  type FormValues = z.infer<typeof medicationReturnSchema>;
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(medicationReturnSchema),
-    defaultValues: {
-      name: "",
-      note: "",
-    },
+  // Fetch patient data when patientId is provided
+  const { data: preselectedPatient } = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: query(patientApi.get, {
+      pathParams: { id: patientId! },
+    }),
+    enabled: !!patientId,
   });
+
+  // Direct navigation handler when patient is preselected
+  const handleDirectDispense = () => {
+    if (!preselectedPatient) return;
+    navigate(
+      `/facility/${facilityId}/patients/verify?${new URLSearchParams({
+        phone_number: preselectedPatient.phone_number,
+        year_of_birth: preselectedPatient.year_of_birth?.toString() || "",
+        partial_id: preselectedPatient.id.slice(0, 5),
+        flow: "dispense",
+      }).toString()}`,
+    );
+  };
 
   // Combine instance and facility identifier configs
   const allIdentifierConfigs = useMemo(
@@ -160,8 +149,6 @@ export function CreateMedicationReturnSheet({
       (!isPhoneNumberConfig || isValidPhoneNumber(searchTerm)),
   });
 
-  useShortcutSubContext("facility:pharmacy");
-
   // Patient verification query
   const { data: verifiedPatient, refetch: verifyPatient } = useQuery({
     queryKey: ["patient-verify", pendingPatient?.id, yearOfBirth],
@@ -176,54 +163,19 @@ export function CreateMedicationReturnSheet({
     enabled: false,
   });
 
-  // Auto-focus input when search type changes
-  useEffect(() => {
-    if (searchType) {
-      // Small delay to ensure the input is rendered after type change
-      const timer = setTimeout(() => {
-        inputRef.current?.focus();
-      }, 0);
-      return () => clearTimeout(timer);
-    }
-  }, [searchType]);
-
-  const { mutate: createDeliveryOrder, isPending: isCreating } = useMutation({
-    mutationFn: mutate(deliveryOrderApi.createDeliveryOrder, {
-      pathParams: { facilityId },
-    }),
-    onSuccess: (deliveryOrder: DeliveryOrderRetrieve) => {
-      queryClient.invalidateQueries({ queryKey: ["medicationReturns"] });
-      toast.success(t("medication_return_created"));
-      setIsOpen(false);
-      resetState();
-      // Navigate to the new medication return
-      navigate(
-        `/facility/${facilityId}/locations/${locationId}/medication_return/order/${deliveryOrder.id}`,
-      );
-    },
-    onError: () => {
-      toast.error(t("error_creating_medication_return"));
-    },
-  });
-
   const resetState = () => {
     setSelectedPatient(null);
     setPendingPatient(null);
     setSearchTerm("");
     setYearOfBirth("");
-    form.reset();
   };
 
   const handleSelectPatient = useCallback(
     (patient: PatientListRead | PartialPatientModel) => {
       setSelectedPatient(patient);
       setSearchTerm("");
-      form.reset({
-        name: `${t("medication_return")} - ${patient.name}`,
-        note: "",
-      });
     },
-    [form, t],
+    [],
   );
 
   // Handle successful verification
@@ -235,6 +187,19 @@ export function CreateMedicationReturnSheet({
       setPendingPatient(null);
     }
   }, [verifiedPatient, handleSelectPatient]);
+
+  // Auto-focus input when search type changes
+  useEffect(() => {
+    if (searchType) {
+      // Small delay to ensure the input is rendered after type change
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [searchType]);
+
+  useShortcutSubContext("facility:pharmacy");
 
   const handlePatientSelect = (
     patient: PatientListRead | PartialPatientModel,
@@ -261,35 +226,54 @@ export function CreateMedicationReturnSheet({
       id: scannedPatientId,
       name: t("scanned_patient"),
     } as PatientRead);
-    form.reset({
-      name: `${t("medication_return")} - ${t("scanned_patient")}`,
-      note: "",
-    });
     setScanDialogOpen(false);
   };
 
   const handleClearPatient = () => {
     setSelectedPatient(null);
     setSearchTerm("");
-    form.reset({ name: "", note: "" });
   };
 
-  function onSubmit(data: FormValues) {
+  const handleRegisterNewPatient = () => {
+    setIsOpen(false);
+    resetState();
+    navigate(`/facility/${facilityId}/patient/create`, {
+      query:
+        isPhoneNumberConfig && isValidPhoneNumber(searchTerm)
+          ? { phone_number: searchTerm, flow: "dispense" }
+          : { flow: "dispense" },
+    });
+  };
+
+  const handleProceedToDispense = () => {
     if (!selectedPatient) {
       toast.error(t("select_patient_first"));
       return;
     }
-    createDeliveryOrder({
-      name: data.name,
-      note: data.note,
-      destination: locationId,
-      patient: selectedPatient.id,
-      status: DeliveryOrderStatus.draft,
-      extensions: {},
-    });
-  }
+    setIsOpen(false);
+    resetState();
+    navigate(
+      `/facility/${facilityId}/patients/verify?${new URLSearchParams({
+        phone_number: selectedPatient.phone_number,
+        year_of_birth:
+          ("year_of_birth" in selectedPatient &&
+            selectedPatient.year_of_birth?.toString()) ||
+          "",
+        partial_id: selectedPatient.id.slice(0, 5),
+        flow: "dispense",
+      }).toString()}`,
+    );
+  };
 
   const selectedConfig = allIdentifierConfigs.find((c) => c.id === searchType);
+
+  // Check if we have a valid search that returned no results
+  const hasNoResults =
+    searchType &&
+    searchTerm &&
+    (!isPhoneNumberConfig || isValidPhoneNumber(searchTerm)) &&
+    !isPatientFetching &&
+    !patientList?.results.length;
 
   const searchStateMessage = (() => {
     if (!searchType) {
@@ -315,6 +299,22 @@ export function CreateMedicationReturnSheet({
     return null;
   })();
 
+  // When patientId is provided, render a simple button that navigates directly
+  if (patientId && preselectedPatient) {
+    const triggerElement = trigger || (
+      <Button>
+        <Plus className="size-4 mr-1" />
+        {t("new_dispense")}
+      </Button>
+    );
+
+    return (
+      <span onClick={handleDirectDispense} className="cursor-pointer">
+        {triggerElement}
+      </span>
+    );
+  }
+
   return (
     <>
       <Sheet
@@ -328,20 +328,20 @@ export function CreateMedicationReturnSheet({
           {trigger || (
             <Button>
               <Plus className="size-4 mr-1" />
-              {t("create_medication_return")}
-              <ShortcutBadge actionId="medication-return" />
+              {t("new_dispense")}
+              <ShortcutBadge actionId="dispense-button" />
             </Button>
           )}
         </SheetTrigger>
         <SheetContent className="sm:max-w-lg overflow-y-auto">
           <SheetHeader>
-            <SheetTitle>{t("create_medication_return")}</SheetTitle>
+            <SheetTitle>{t("new_dispense")}</SheetTitle>
             <SheetDescription>
               {selectedPatient
-                ? t("create_medication_return_description", {
+                ? t("dispense_for_patient", {
                     patientName: selectedPatient.name,
                   })
-                : t("select_patient_to_create_return")}
+                : t("select_patient_to_dispense")}
             </SheetDescription>
           </SheetHeader>
 
@@ -423,8 +423,8 @@ export function CreateMedicationReturnSheet({
                       <>
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none z-10" />
                         <Input
-                          ref={inputRef}
                           type="text"
+                          ref={inputRef}
                           placeholder={
                             selectedConfig?.config.display || t("search")
                           }
@@ -449,10 +449,22 @@ export function CreateMedicationReturnSheet({
 
                   {/* Search Results */}
                   {searchStateMessage ? (
-                    <Card className="flex items-center justify-center border bg-gray-50 rounded-sm shadow-none">
+                    <Card className="flex flex-col items-center justify-center border bg-gray-50 rounded-sm shadow-none">
                       <div className="text-sm text-gray-950 text-center p-5">
                         {searchStateMessage}
                       </div>
+                      {hasNoResults && (
+                        <div className="pb-4">
+                          <Button
+                            variant="outline_primary"
+                            size="sm"
+                            onClick={handleRegisterNewPatient}
+                          >
+                            <UserPlus className="size-4 mr-1" />
+                            {t("add_new_patient")}
+                          </Button>
+                        </div>
+                      )}
                     </Card>
                   ) : (
                     <>
@@ -488,6 +500,14 @@ export function CreateMedicationReturnSheet({
                           </CommandGroup>
                         </CommandList>
                       </Command>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleRegisterNewPatient}
+                      >
+                        <UserPlus className="size-4 mr-1" />
+                        {t("add_new_patient")}
+                      </Button>
                     </>
                   )}
                 </CardContent>
@@ -515,73 +535,18 @@ export function CreateMedicationReturnSheet({
                   </CardContent>
                 </Card>
 
-                {/* Return Details Form */}
-                <Form {...form}>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-6"
+                <SheetFooter className="gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsOpen(false)}
                   >
-                    <Card className="p-0 bg-gray-50">
-                      <CardContent className="space-y-4 p-4 rounded-md">
-                        <FormField
-                          control={form.control}
-                          name="name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>{t("name")}</FormLabel>
-                              <FormControl>
-                                <Input
-                                  className="h-9"
-                                  placeholder={t("enter_return_name")}
-                                  {...field}
-                                  autoFocus
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="note"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>
-                                {t("note")}
-                                <span className="text-gray-500 text-sm italic">
-                                  {" "}
-                                  ({t("optional")})
-                                </span>
-                              </FormLabel>
-                              <FormControl>
-                                <Textarea
-                                  rows={3}
-                                  placeholder={t("enter_return_note")}
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </CardContent>
-                    </Card>
-
-                    <SheetFooter className="gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        {t("cancel")}
-                      </Button>
-                      <Button type="submit" disabled={isCreating}>
-                        {isCreating ? t("creating") : t("create_return")}
-                      </Button>
-                    </SheetFooter>
-                  </form>
-                </Form>
+                    {t("cancel")}
+                  </Button>
+                  <Button onClick={handleProceedToDispense}>
+                    {t("proceed_to_dispense")}
+                  </Button>
+                </SheetFooter>
               </>
             )}
           </div>

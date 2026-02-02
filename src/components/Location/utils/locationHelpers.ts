@@ -78,7 +78,7 @@ export function createLocationHistoryFromBed(
 /**
  * Creates a location update request for batch API
  */
-export function createLocationUpdateRequest(
+export function createLocationAssociationUpdateRequest(
   location: LocationAssociationRead,
   config: LocationTimeConfig,
   facilityId: string,
@@ -87,7 +87,7 @@ export function createLocationUpdateRequest(
   return {
     url: `/api/v1/facility/${facilityId}/location/${location.location.id}/association/${location.id}/`,
     method: "PUT" as const,
-    reference_id: "updateLocation",
+    reference_id: "updateLocationAssociation",
     body: {
       encounter: encounterId,
       start_datetime: config.start.toISOString(),
@@ -137,6 +137,10 @@ export function createLocationUpdateOperationalStatusRequest(
     method: "PUT" as const,
     reference_id: "updateOperationalStatus",
     body: {
+      ...location,
+      location_type: location.location_type?.code
+        ? location.location_type
+        : undefined,
       operational_status: operationalStatus,
     },
   };
@@ -145,7 +149,7 @@ export function createLocationUpdateOperationalStatusRequest(
 /**
  * Creates a request to complete (mark as completed) a location
  */
-export function createCompleteLocationRequest(
+export function completeCurrentLocationAssociation(
   location: LocationAssociationRead,
   facilityId: string,
   encounterId: string,
@@ -154,7 +158,7 @@ export function createCompleteLocationRequest(
   return {
     url: `/api/v1/facility/${facilityId}/location/${location.location.id}/association/${location.id}/`,
     method: "PUT" as const,
-    reference_id: "completeCurrentLocation",
+    reference_id: "completeCurrentLocationAssociation",
     body: {
       encounter: encounterId,
       end_datetime: endTime.toISOString(),
@@ -163,6 +167,23 @@ export function createCompleteLocationRequest(
     },
   };
 }
+
+/**
+ * Creates a request to delete a location association for batch API
+ */
+export function createDeleteLocationAssociationRequest(
+  locationId: string,
+  associationId: string,
+  facilityId: string,
+) {
+  return {
+    url: `/api/v1/facility/${facilityId}/location/${locationId}/association/${associationId}/`,
+    method: "DELETE" as const,
+    reference_id: "deleteLocationAssociation",
+    body: {},
+  };
+}
+
 export interface AssignmentHandlers {
   sheetState: LocationSheetState;
   setSheetState: React.Dispatch<React.SetStateAction<LocationSheetState>>;
@@ -186,7 +207,7 @@ export interface AssignmentHandlers {
 
 export interface NavigationHandlers {
   onLocationClick: (location: LocationRead) => void;
-  onBedSelect: (bedId: string) => void;
+  onBedSelect: (bed: LocationRead) => void;
   onLinkedBedSelect: (bed: LocationAssociationRead) => void;
   onCheckBedStatus: (bed: LocationRead) => void;
   onSearchChange: (value: string) => void;

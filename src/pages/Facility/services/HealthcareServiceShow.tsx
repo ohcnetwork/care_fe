@@ -10,21 +10,28 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
+import { pharmacyDispenseServiceAtom } from "@/atoms/pharmacy";
 import BackButton from "@/components/Common/BackButton";
 import { InternalType } from "@/types/healthcareService/healthcareService";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
+import { useAtom } from "jotai";
 import { ArrowLeft } from "lucide-react";
 
 function LocationCard({
   location,
   facilityId,
-  service_type,
+  serviceType,
+  serviceId,
 }: {
   location: { id: string; name: string; description?: string };
   facilityId: string;
-  service_type: InternalType | undefined;
+  serviceType: InternalType | undefined;
+  serviceId: string;
 }) {
   const { t } = useTranslation();
+  const [, setPharmacyDispenseService] = useAtom(
+    pharmacyDispenseServiceAtom(facilityId),
+  );
   const getButtonTextAndLink = (
     facilityId: string,
     locationId: string,
@@ -35,6 +42,9 @@ function LocationCard({
         return {
           text: t("view_prescriptions"),
           link: `/facility/${facilityId}/locations/${locationId}/medication_requests`,
+          onClick: () => {
+            setPharmacyDispenseService({ locationId, serviceId });
+          },
         };
       case InternalType.lab:
         return {
@@ -49,14 +59,14 @@ function LocationCard({
     }
   };
 
-  const { text, link } = getButtonTextAndLink(
+  const { text, link, onClick } = getButtonTextAndLink(
     facilityId,
     location.id,
-    service_type,
+    serviceType,
   );
 
   return (
-    <Link href={link} basePath="/" className="block">
+    <Link href={link} basePath="/" className="block" onClick={onClick}>
       <Card className="transition-all duration-200 hover:border-primary/50 hover:shadow-sm rounded-md">
         <CardContent className="flex items-start gap-3 py-3 px-4">
           <div className="shrink-0 relative size-10 rounded-sm flex p-4 items-center justify-center">
@@ -160,7 +170,8 @@ export default function HealthcareServiceShow({
                 key={location.id}
                 location={location}
                 facilityId={facilityId}
-                service_type={service.internal_type}
+                serviceType={service.internal_type}
+                serviceId={serviceId}
               />
             ))
           )}
