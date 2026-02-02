@@ -57,9 +57,9 @@ import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { MedicationTimingSelect } from "@/components/Medicine/MedicationTimingSelect";
 import { AddToTemplateDialog } from "@/components/Questionnaire/AddToTemplateDialog";
 import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
+import ManageResponseTemplatesSheet from "@/components/Questionnaire/ManageResponseTemplatesSheet";
 import MedicationValueSetSelect from "@/components/Questionnaire/MedicationValueSetSelect";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
-import ResponseTemplatesSheet from "@/components/Questionnaire/ResponseTemplatesSheet";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -1020,7 +1020,7 @@ export function MedicationRequestQuestion({
             disableAPI={isPreview}
           />
           {questionnaireSlug && (
-            <ResponseTemplatesSheet
+            <ManageResponseTemplatesSheet
               questionnaireSlug={questionnaireSlug}
               facilityId={facilityId}
               onTemplateSelect={handleApplyTemplate}

@@ -7,8 +7,8 @@ import { toast } from "sonner";
 import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
 import UserSelector from "@/components/Common/UserSelector";
 import { AddToTemplateDialog } from "@/components/Questionnaire/AddToTemplateDialog";
+import ManageResponseTemplatesSheet from "@/components/Questionnaire/ManageResponseTemplatesSheet";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
-import ResponseTemplatesSheet from "@/components/Questionnaire/ResponseTemplatesSheet";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -1020,7 +1020,7 @@ export function ServiceRequestQuestion({
           </div>
         )}
         {questionnaireSlug && (
-          <ResponseTemplatesSheet
+          <ManageResponseTemplatesSheet
             questionnaireSlug={questionnaireSlug}
             facilityId={facilityId}
             onTemplateSelect={handleApplyTemplate}

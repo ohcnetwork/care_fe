@@ -550,7 +550,7 @@ const templateFormSchema = z.object({
 
 type TemplateFormData = z.infer<typeof templateFormSchema>;
 
-interface ResponseTemplatesSheetProps {
+interface ManageResponseTemplatesSheetProps {
   questionnaireSlug: string;
   facilityId?: string;
   trigger?: React.ReactNode;
@@ -570,7 +570,7 @@ interface ResponseTemplatesSheetProps {
 
 type ViewMode = "list" | "create";
 
-export default function ResponseTemplatesSheet({
+export default function ManageResponseTemplatesSheet({
   questionnaireSlug,
   facilityId,
   trigger,
@@ -582,7 +582,7 @@ export default function ResponseTemplatesSheet({
   currentActivityDefinitions = [],
   key_filter = "medication_request",
   facilityOrganizations = [],
-}: ResponseTemplatesSheetProps) {
+}: ManageResponseTemplatesSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const currentUser = useAuthUser();
