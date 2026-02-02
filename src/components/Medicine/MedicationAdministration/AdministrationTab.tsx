@@ -442,7 +442,6 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         status: ACTIVE_MEDICATION_STATUSES.join(","),
         product_type: "medication",
         facility: facilityId,
-        product_type: "medication",
       },
     }),
     enabled: !!patientId && canAccess,
