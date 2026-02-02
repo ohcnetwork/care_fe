@@ -10,7 +10,13 @@ import {
   Shuffle,
 } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -83,6 +89,7 @@ import { formatDoseRange, formatTotalUnits } from "@/components/Medicine/utils";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useFilters from "@/hooks/useFilters";
+import useInventoryLotAutoSelection from "@/hooks/useInventoryLotAutoSelection";
 
 import BackButton from "@/components/Common/BackButton";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
@@ -137,10 +144,8 @@ import medicationRequestApi from "@/types/emr/medicationRequest/medicationReques
 import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { InventoryRead } from "@/types/inventory/product/inventory";
-import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { isGreaterThan, isZero, round, zodDecimal } from "@/Utils/decimal";
-import { isLotAllowedForDispensing } from "@/Utils/inventory";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -656,8 +661,6 @@ export default function AllMedicationBillForm({ patientId }: Props) {
   const { facilityId } = useCurrentFacility();
   const { locationId } = useCurrentLocation();
   const [{ encounterId }] = useQueryParams();
-  const [productKnowledgeInventoriesMap, setProductKnowledgeInventoriesMap] =
-    useState<Record<string, InventoryRead[] | undefined>>({});
   const [selectedProduct, setSelectedProduct] = useState<
     ProductKnowledgeBase | undefined
   >();
@@ -737,34 +740,15 @@ export default function AllMedicationBillForm({ patientId }: Props) {
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["medication_requests", patientId, "dispense"],
-    queryFn: async ({ signal }) => {
-      const medicationResponse = await query(medicationRequestApi.list, {
-        pathParams: { patientId },
-        queryParams: {
-          facility: facilityId,
-          limit: 100,
-          status: "active,on_hold,draft,unknown,ended,completed,cancelled",
-          exclude_dispense_status: "complete,incomplete",
-        },
-      })({ signal });
-
-      const productKnowledgeIds = medicationResponse.results
-        .filter((medication) => medication.requested_product)
-        .reduce(
-          (acc, medication) => ({
-            ...acc,
-            [medication.requested_product!.id]: undefined,
-          }),
-          {},
-        );
-
-      setProductKnowledgeInventoriesMap((prev) => ({
-        ...productKnowledgeIds,
-        ...prev,
-      }));
-
-      return medicationResponse;
-    },
+    queryFn: query(medicationRequestApi.list, {
+      pathParams: { patientId },
+      queryParams: {
+        facility: facilityId,
+        limit: 100,
+        status: "active,on_hold,draft,unknown,ended,completed,cancelled",
+        exclude_dispense_status: "complete,incomplete",
+      },
+    }),
   });
 
   const { data: medicationPrescription } = useQuery({
@@ -777,68 +761,74 @@ export default function AllMedicationBillForm({ patientId }: Props) {
 
   const patient = medicationPrescription?.encounter?.patient;
 
-  useEffect(() => {
-    const fetchMissingInventories = async () => {
-      for (const [productKnowledgeId, inventories] of Object.entries(
-        productKnowledgeInventoriesMap,
-      )) {
-        if (inventories) continue;
-
-        const inventoriesResponse = await query(inventoryApi.list, {
-          pathParams: { facilityId, locationId },
-          queryParams: {
-            limit: 100,
-            product_knowledge: productKnowledgeId,
-            net_content_gt: 0,
-            include_children: true,
-          },
-        })({ signal: new AbortController().signal });
-
-        setProductKnowledgeInventoriesMap((prev) => ({
-          ...prev,
-          [productKnowledgeId]: inventoriesResponse.results || [],
-        }));
-      }
-    };
-
-    fetchMissingInventories();
-  }, [productKnowledgeInventoriesMap, facilityId, locationId]);
-
-  // Auto-select first valid (non-expired) lot by default
-  useEffect(() => {
+  // Use hook for inventory fetching and auto-selection of valid lots
+  // Extract product knowledge IDs from fields (including substitutions)
+  const productKnowledgeIds = useMemo(() => {
+    const ids: string[] = [];
     fields.forEach((field, index) => {
       const productKnowledge = field.productKnowledge as ProductKnowledgeBase;
       const substitution = form.watch(`items.${index}.substitution`);
       const effectiveProductKnowledge =
         substitution?.substitutedProductKnowledge || productKnowledge;
 
-      const inventories =
-        productKnowledgeInventoriesMap[effectiveProductKnowledge?.id];
-      const currentLots = form.getValues(`items.${index}.lots`);
-
+      if (effectiveProductKnowledge?.id) {
+        ids.push(effectiveProductKnowledge.id);
+      }
       if (
-        inventories !== undefined &&
-        inventories?.length &&
-        !currentLots.some((lot) => lot.selectedInventoryId)
+        productKnowledge?.id &&
+        productKnowledge.id !== effectiveProductKnowledge?.id
       ) {
-        const validLot = inventories.find((inv) =>
-          isLotAllowedForDispensing(inv.product.expiration_date),
-        );
+        ids.push(productKnowledge.id);
+      }
+    });
+    return ids;
+  }, [fields, form]);
 
-        if (validLot) {
+  const { productKnowledgeInventoriesMap } = useInventoryLotAutoSelection({
+    facilityId,
+    locationId,
+    productKnowledgeIds,
+    getCurrentLots: useCallback(
+      (pkId: string) => {
+        const index = fields.findIndex((field) => {
+          const pk = field.productKnowledge as ProductKnowledgeBase;
+          const substitution = form.watch(`items.${index}.substitution`);
+          const effectivePk = substitution?.substitutedProductKnowledge || pk;
+          return effectivePk?.id === pkId;
+        });
+        if (index >= 0) {
+          return form.getValues(`items.${index}.lots`);
+        }
+        return undefined;
+      },
+      [fields, form],
+    ),
+    onAutoSelectLot: useCallback(
+      (
+        pkId: string,
+        lot: { selectedInventoryId: string; quantity: string },
+      ) => {
+        const index = fields.findIndex((field) => {
+          const pk = field.productKnowledge as ProductKnowledgeBase;
+          const substitution = form.watch(`items.${index}.substitution`);
+          const effectivePk = substitution?.substitutedProductKnowledge || pk;
+          return effectivePk?.id === pkId;
+        });
+        if (index >= 0) {
           const medication = form.getValues(`items.${index}.medication`);
           form.setValue(`items.${index}.lots`, [
             {
-              selectedInventoryId: validLot.id,
+              selectedInventoryId: lot.selectedInventoryId,
               quantity: medication
                 ? computeMedicationDispenseQuantity(medication)
-                : currentLots[0]?.quantity || "1",
+                : lot.quantity,
             },
           ]);
         }
-      }
-    });
-  }, [productKnowledgeInventoriesMap, fields, form]);
+      },
+      [fields, form],
+    ),
+  });
 
   const medications = useMemo(
     () => response?.results.filter((med) => med.requested_product) || [],
@@ -2135,12 +2125,6 @@ export default function AllMedicationBillForm({ patientId }: Props) {
                             ],
                             prescriptionId: "no-prescription",
                           });
-
-                          // Trigger inventory fetch for the new product
-                          setProductKnowledgeInventoriesMap((prev) => ({
-                            [product.id]: undefined,
-                            ...prev,
-                          }));
                         }}
                         placeholder={t("add_medication")}
                         className="w-full"
@@ -2238,11 +2222,6 @@ export default function AllMedicationBillForm({ patientId }: Props) {
               prescriptionId: "no-prescription", // New medications without prescription
             });
 
-            setProductKnowledgeInventoriesMap((prev) => ({
-              [product.id]: undefined,
-              ...prev,
-            }));
-
             setSelectedProduct(undefined);
           }}
         />
@@ -2273,14 +2252,6 @@ export default function AllMedicationBillForm({ patientId }: Props) {
                   [{ selectedInventoryId: "", quantity: "0" }],
                   { shouldDirty: true, shouldTouch: true },
                 );
-
-                // Ensure inventory for the new substituted product is fetched
-                setProductKnowledgeInventoriesMap((prev) => ({
-                  ...prev,
-                  [substitutionDetails.substitutedProductKnowledge.id]:
-                    prev[substitutionDetails.substitutedProductKnowledge.id] ||
-                    undefined,
-                }));
               } else {
                 // Clearing substitution
                 form.setValue(
