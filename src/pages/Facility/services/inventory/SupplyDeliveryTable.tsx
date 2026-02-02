@@ -148,7 +148,7 @@ export function SupplyDeliveryTable({
       <TableHeader>
         <TableRow>
           {showAllCheckbox && (
-            <TableHead>
+            <TableHead className="w-8">
               <Checkbox
                 checked={allInProgressSelected && selectedDeliveries.length > 0}
                 disabled={inProgressDeliveries.length === 0}

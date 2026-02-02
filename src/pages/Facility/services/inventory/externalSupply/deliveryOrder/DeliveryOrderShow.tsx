@@ -381,7 +381,8 @@ export function DeliveryOrderShow({
   }
 
   const canAddSupplyDeliveries =
-    deliveryOrder.status === DeliveryOrderStatus.draft;
+    deliveryOrder.status === DeliveryOrderStatus.draft ||
+    (!internal && deliveryOrder.status === DeliveryOrderStatus.pending);
 
   return (
     <Page
