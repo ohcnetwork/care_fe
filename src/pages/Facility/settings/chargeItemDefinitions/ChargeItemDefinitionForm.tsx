@@ -149,7 +149,7 @@ export function ChargeItemDefinitionForm({
           },
           { message: t("invalid_url") },
         ),
-      base_price: zodDecimal({ min: 0, message: t("base_price_is_required") }),
+      base_price: zodDecimal({ message: t("base_price_is_required") }),
       mrp: zodDecimal({ min: 0 }).optional().nullable(),
       purchase_price: zodDecimal({ min: 0 }).optional().nullable(),
       price_components: z.array(
@@ -661,8 +661,12 @@ export function ChargeItemDefinitionForm({
                                 field.onChange(e.target.value || "")
                               }
                               placeholder="0.00"
+                              allowNegative
                             />
                           </FormControl>
+                          <p className="text-xs text-muted-foreground">
+                            {t("negative_price_for_discount_hint")}
+                          </p>
                           <FormMessage />
                         </FormItem>
                       )}

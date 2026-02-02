@@ -6,6 +6,8 @@ import {
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { UserReadMinimal } from "@/types/user/user";
+import { add, divide, isZero, multiply, round } from "@/Utils/decimal";
+import Decimal from "decimal.js";
 
 export const MEDICATION_REQUEST_STATUS_COLORS = {
   active: "primary",
@@ -220,8 +222,21 @@ export interface MedicationRequest {
   requester: UserReadMinimal;
 }
 
+export type MedicationRequestTemplateSpec = Omit<
+  MedicationRequest,
+  | "id"
+  | "created_by"
+  | "authored_on"
+  | "requested_product_internal"
+  | "encounter"
+  | "authored_on"
+  | "requester"
+  | "dispense_status"
+>;
+
 export interface MedicationRequestCreate extends MedicationRequest {
   create_prescription?: PrescriptionCreate;
+  dirty?: boolean;
 }
 
 export interface MedicationRequestRequest extends Omit<
@@ -352,6 +367,25 @@ export const MEDICATION_REQUEST_TIMING_OPTIONS: Record<
       },
     },
   },
+  NOON: {
+    display: "NOON (0-1-0)",
+    timing: {
+      repeat: {
+        frequency: 1,
+        period: "1",
+        period_unit: "d",
+        bounds_duration: {
+          value: "1",
+          unit: "d",
+        },
+      },
+      code: {
+        code: "NOON",
+        display: "At noon",
+        system: "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
+      },
+    },
+  },
   PM: {
     display: "PM (0-0-1)",
     timing: {
@@ -367,6 +401,63 @@ export const MEDICATION_REQUEST_TIMING_OPTIONS: Record<
       code: {
         code: "PM",
         display: "Every afternoon",
+        system: "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
+      },
+    },
+  },
+  BID_MORNING_NOON: {
+    display: "BID (1-1-0)",
+    timing: {
+      repeat: {
+        frequency: 2,
+        period: "1",
+        period_unit: "d",
+        bounds_duration: {
+          value: "1",
+          unit: "d",
+        },
+      },
+      code: {
+        code: "BID",
+        display: "Morning and noon",
+        system: "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
+      },
+    },
+  },
+  BID_NOON_NIGHT: {
+    display: "BID (0-1-1)",
+    timing: {
+      repeat: {
+        frequency: 2,
+        period: "1",
+        period_unit: "d",
+        bounds_duration: {
+          value: "1",
+          unit: "d",
+        },
+      },
+      code: {
+        code: "BID",
+        display: "Noon and night",
+        system: "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
+      },
+    },
+  },
+  TID_MORNING_NOON_NIGHT: {
+    display: "TID (1-1-1)",
+    timing: {
+      repeat: {
+        frequency: 3,
+        period: "1",
+        period_unit: "d",
+        bounds_duration: {
+          value: "1",
+          unit: "d",
+        },
+      },
+      code: {
+        code: "TID",
+        display: "Morning, noon and night",
         system: "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
       },
     },
@@ -523,6 +614,25 @@ export const MEDICATION_REQUEST_TIMING_OPTIONS: Record<
       },
     },
   },
+  Q12H: {
+    display: "Q12H (Every 12 hours)",
+    timing: {
+      repeat: {
+        frequency: 1,
+        period: "12",
+        period_unit: "h",
+        bounds_duration: {
+          value: "1",
+          unit: "d",
+        },
+      },
+      code: {
+        code: "Q12H",
+        display: "Every 12 hours",
+        system: "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
+      },
+    },
+  },
   BED: {
     display: "BED (0-0-1)",
     timing: {
@@ -580,6 +690,82 @@ export const MEDICATION_REQUEST_TIMING_OPTIONS: Record<
       },
     },
   },
+  HS: {
+    display: "HS (At bedtime)",
+    timing: {
+      repeat: {
+        frequency: 1,
+        period: "1",
+        period_unit: "d",
+        bounds_duration: {
+          value: "1",
+          unit: "d",
+        },
+      },
+      code: {
+        code: "HS",
+        display: "At bedtime",
+        system: "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
+      },
+    },
+  },
+  AC: {
+    display: "AC (Before meals)",
+    timing: {
+      repeat: {
+        frequency: 3,
+        period: "1",
+        period_unit: "d",
+        bounds_duration: {
+          value: "1",
+          unit: "d",
+        },
+      },
+      code: {
+        code: "AC",
+        display: "Before meals",
+        system: "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
+      },
+    },
+  },
+  PC: {
+    display: "PC (After meals)",
+    timing: {
+      repeat: {
+        frequency: 3,
+        period: "1",
+        period_unit: "d",
+        bounds_duration: {
+          value: "1",
+          unit: "d",
+        },
+      },
+      code: {
+        code: "PC",
+        display: "After meals",
+        system: "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
+      },
+    },
+  },
+  STAT: {
+    display: "STAT (Immediately)",
+    timing: {
+      repeat: {
+        frequency: 1,
+        period: "1",
+        period_unit: "d",
+        bounds_duration: {
+          value: "1",
+          unit: "d",
+        },
+      },
+      code: {
+        code: "STAT",
+        display: "Immediately",
+        system: "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
+      },
+    },
+  },
 } as const;
 
 /**
@@ -605,7 +791,7 @@ export function parseMedicationStringToRequest(
     dosageInstruction.dose_and_rate = {
       type: "ordered",
       dose_quantity: {
-        value: "0",
+        value: "1",
         unit: productKnowledge.base_unit,
       },
     };
@@ -657,4 +843,83 @@ export function displayMedicationName(
       : "") ||
     ""
   );
+}
+
+export function computeMedicationDispenseQuantity(
+  medication: MedicationRequestRead,
+): string {
+  const instruction = medication.dosage_instruction[0];
+  if (!instruction) {
+    return "0";
+  }
+
+  const doseValue = instruction.dose_and_rate?.dose_quantity?.value;
+  if (!doseValue) {
+    return "0";
+  }
+
+  const unitCode = instruction.dose_and_rate?.dose_quantity?.unit?.code;
+  const nonVolumetric = ["{tbl}", "{count}"];
+
+  if (unitCode && !nonVolumetric.includes(unitCode)) {
+    return "";
+  }
+
+  if (instruction.as_needed_boolean) {
+    return round(doseValue);
+  }
+
+  const repeat = instruction.timing?.repeat;
+  if (!repeat?.bounds_duration || !repeat.period_unit) {
+    return doseValue;
+  }
+
+  const convertToHours = (value: string, unit: string) => {
+    switch (unit) {
+      case "h":
+        return new Decimal(value);
+      case "d":
+        return multiply(value, 24);
+      case "wk":
+        return multiply(value, 24 * 7);
+      case "mo":
+        return multiply(value, 24 * 30);
+      case "a":
+        return multiply(value, 24 * 365);
+      default:
+        return 0;
+    }
+  };
+
+  const { frequency = 1, period = "1", period_unit, bounds_duration } = repeat;
+
+  const totalDurationInHours = convertToHours(
+    bounds_duration.value,
+    bounds_duration.unit,
+  );
+  const periodInHours = convertToHours(period, period_unit);
+
+  if (periodInHours === 0) {
+    return doseValue;
+  }
+
+  const doseIntervalInHours = divide(periodInHours, frequency);
+
+  if (isZero(doseIntervalInHours)) {
+    return doseValue;
+  }
+
+  const numberOfDoses = divide(
+    totalDurationInHours,
+    doseIntervalInHours,
+  ).ceil();
+
+  if (instruction.dose_and_rate?.dose_range) {
+    const lowDose = instruction.dose_and_rate.dose_range.low.value || "0";
+    const highDose = instruction.dose_and_rate.dose_range.high.value || "0";
+    const avgDose = divide(add(lowDose, highDose), 2);
+    return round(multiply(avgDose, numberOfDoses));
+  }
+
+  return round(multiply(doseValue, numberOfDoses));
 }

@@ -13,10 +13,7 @@ import PrintTable from "@/components/Common/PrintTable";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { DispenseOrderRead } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
-import {
-  MedicationDispenseRead,
-  MedicationDispenseStatus,
-} from "@/types/emr/medicationDispense/medicationDispense";
+import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
@@ -252,10 +249,9 @@ export const PrintDispenseOrder = ({
       queryParams: {
         order: dispenseOrderId,
         location: locationId,
-        status: MedicationDispenseStatus.completed,
       },
     }),
-    enabled: !!dispenseOrderId,
+    enabled: !!dispenseOrderId && !!locationId,
   });
 
   if (isLoadingOrder || isLoadingDispenses) {

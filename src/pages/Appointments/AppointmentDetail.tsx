@@ -127,6 +127,7 @@ export default function AppointmentDetail(props: Props) {
   const { goBack } = useAppHistory();
   const [params, setQueryParams] = useQueryParams();
   const { showSuccess } = params;
+  const [{ from_queue }] = useQueryParams();
 
   useShortcutSubContext("facility:appointment");
 
@@ -488,6 +489,7 @@ export default function AppointmentDetail(props: Props) {
                         facilityId={facilityId}
                         patientName={appointment.patient.name}
                         appointment={appointment.id}
+                        defaultOpen={from_queue === "true"}
                         defaultStatus={EncounterStatus.IN_PROGRESS}
                         trigger={
                           <QuickAction

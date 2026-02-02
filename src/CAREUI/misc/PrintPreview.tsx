@@ -12,6 +12,7 @@ import Page from "@/components/Common/Page";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAppHistory from "@/hooks/useAppHistory";
+import useAutoPrint, { AutoPrintOptions } from "@/hooks/useAutoPrint";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
@@ -27,6 +28,7 @@ type Props = {
   title: string;
   showBackButton?: boolean;
   watermark?: WatermarkProps;
+  autoPrint?: AutoPrintOptions;
 };
 
 export default function PrintPreview(props: Props) {
@@ -34,6 +36,10 @@ export default function PrintPreview(props: Props) {
   const { goBack } = useAppHistory();
   const { t } = useTranslation();
   useShortcutSubContext();
+  useAutoPrint({
+    ...props.autoPrint,
+    enabled: (props.autoPrint?.enabled ?? false) && !props.disabled,
+  });
   return (
     <div className="flex items-center justify-center">
       <Page

@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowUpRightSquare, EditIcon, Hash, PlusIcon } from "lucide-react";
+import { ArrowUpRightSquare, Hash, PlusIcon } from "lucide-react";
 import { navigate } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -91,7 +91,7 @@ export function AccountList({
   const { facility } = useCurrentFacility();
   const { hasPermission } = usePermissions();
 
-  const { canCreateAccount, canUpdateAccount } = getPermissions(
+  const { canCreateAccount } = getPermissions(
     hasPermission,
     facility?.permissions ?? [],
   );
@@ -174,17 +174,19 @@ export function AccountList({
     >
       <div className={cn("mx-auto", !hideTitleOnPage && "mt-2")}>
         <div className="mb-4">
-          <AccountSheet
-            open={sheetOpen}
-            onOpenChange={(open) => {
-              setSheetOpen(open);
-              if (!open) setEditingAccount(null);
-            }}
-            facilityId={facilityId}
-            patientId={patientId}
-            initialValues={editingAccount ? editingAccount : undefined}
-            isEdit={!!editingAccount}
-          />
+          {patientId && (
+            <AccountSheet
+              open={sheetOpen}
+              onOpenChange={(open) => {
+                setSheetOpen(open);
+                if (!open) setEditingAccount(null);
+              }}
+              facilityId={facilityId}
+              patientId={patientId}
+              initialValues={editingAccount ? editingAccount : undefined}
+              isEdit={!!editingAccount}
+            />
+          )}
           <div className="flex flex-col md:flex-row items-start gap-2">
             <div className="w-full md:w-auto">
               <PatientIdentifierFilter
@@ -240,10 +242,11 @@ export function AccountList({
               <TableRow>
                 <TableHead>{t("account")}</TableHead>
                 <TableHead>{t("balance")}</TableHead>
+                <TableHead>{t("billable")}</TableHead>
                 <TableHead>{t("account_status")}</TableHead>
                 <TableHead>{t("billing_status")}</TableHead>
                 <TableHead>{t("period")}</TableHead>
-                <TableHead>{t("tags_other")}</TableHead>
+                <TableHead>{t("tags_proper")}</TableHead>
                 <TableHead>{t("action")}</TableHead>
               </TableRow>
             </TableHeader>
@@ -274,6 +277,11 @@ export function AccountList({
                     )}
                   >
                     <MonetaryDisplay amount={account.total_balance} />
+                  </TableCell>
+                  <TableCell className="text-base font-medium leading-6 text-gray-950">
+                    <MonetaryDisplay
+                      amount={account.total_billable_charge_items}
+                    />
                   </TableCell>
                   <TableCell>
                     <Badge variant={ACCOUNT_STATUS_COLORS[account.status]}>
@@ -337,20 +345,6 @@ export function AccountList({
                   </TableCell>
                   <TableCell className="whitespace-normal">
                     <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
-                      {canUpdateAccount && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="font-semibold"
-                          onClick={() => {
-                            setEditingAccount(account);
-                            setSheetOpen(true);
-                          }}
-                        >
-                          <EditIcon strokeWidth={1.5} />
-                          <span className="underline">{t("edit")}</span>
-                        </Button>
-                      )}
                       <Button
                         variant="outline"
                         size="sm"

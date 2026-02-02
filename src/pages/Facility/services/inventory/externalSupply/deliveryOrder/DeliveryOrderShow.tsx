@@ -5,6 +5,7 @@ import {
   EllipsisVertical,
   Hash,
   MoreVertical,
+  Printer,
   Truck,
 } from "lucide-react";
 import { Link } from "raviger";
@@ -426,6 +427,13 @@ export function DeliveryOrderShow({
             </div>
           </div>
           <div className="flex items-center justify-end gap-2">
+            <Button variant="outline" asChild>
+              <Link href={`${deliveryOrderId}/print`}>
+                <Printer className="size-4" /> {t("print")}
+                <ShortcutBadge actionId="print-delivery-order" />
+              </Link>
+            </Button>
+
             {(!isRequester || !internal) &&
               deliveryOrder.status === DeliveryOrderStatus.draft && (
                 <Button variant="outline" asChild>
@@ -455,7 +463,11 @@ export function DeliveryOrderShow({
                       DeliveryOrderStatus.completed,
                     )
                   }
-                  disabled={isUpdating || selectedDeliveries.length !== 0}
+                  disabled={
+                    isUpsertingDeliveries ||
+                    isUpdating ||
+                    selectedDeliveries.length !== 0
+                  }
                 >
                   {isUpdating ? t("updating") : t("mark_as_completed")}
                   <ShortcutBadge actionId="mark-as" />
@@ -571,7 +583,7 @@ export function DeliveryOrderShow({
               <div className="flex flex-wrap gap-1">
                 <div>
                   <label className="text-sm font-medium text-gray-700">
-                    {t("tags_other")}
+                    {t("tags_proper")}
                   </label>
                   <div className="flex flex-wrap gap-2">
                     <TagAssignmentSheet
