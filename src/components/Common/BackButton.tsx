@@ -6,12 +6,17 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 type BackButtonProps = {
   to?: string;
+  fallbackUrl?: string;
 } & React.ComponentProps<typeof Button>;
 
-export default function BackButton({ to, ...props }: BackButtonProps) {
+export default function BackButton({
+  to,
+  fallbackUrl,
+  ...props
+}: BackButtonProps) {
   const { history } = useAppHistory();
 
-  to ??= history[1];
+  to ??= history[1] ?? fallbackUrl;
 
   if (!to) {
     return null;

@@ -23,6 +23,7 @@ import {
   EncounterListRead,
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
+import { LocationTypeIcons } from "@/types/location/location";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 
 export interface EncounterInfoCardProps {
@@ -70,15 +71,38 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
           <EncounterActions encounter={encounter} />
         </div>
       </CardHeader>
-      <CardContent className="px-4 py-2 pt-2 bg-white space-y-1">
-        <div className="flex items-center text-gray-600 mb-1">
-          <CareIcon icon="l-clock" className="mr-1 size-3" />
-          <span className="text-xs text-gray-700">
-            {encounter.period.start && formatDateTime(encounter.period.start)}
-            {encounter.period.end &&
-              ` - ${formatDateTime(encounter.period.end)}`}
-          </span>
+      <CardContent className="px-4 py-2 pt-2 bg-white space-y-2">
+        <div className="flex items-center gap-3 text-gray-600">
+          <div className="flex items-center">
+            <CareIcon icon="l-clock" className="mr-1 size-3" />
+            <span className="text-xs text-gray-700">
+              {encounter.period.start &&
+                formatDateTime(encounter.period.start, "hh:mm A, DD/MM/YY")}
+              {encounter.period.end &&
+                ` - ${formatDateTime(encounter.period.end)}`}
+            </span>
+          </div>
+
+          {/* Current Location */}
+          {encounter.current_location && (
+            <>
+              <span className="text-gray-300">|</span>
+              <div className="flex items-center gap-1 min-w-0">
+                {(() => {
+                  const LocationIcon =
+                    LocationTypeIcons[encounter.current_location.form];
+                  return (
+                    <LocationIcon className="size-3 text-gray-500 flex-shrink-0" />
+                  );
+                })()}
+                <span className="text-xs font-medium text-gray-700 truncate">
+                  {encounter.current_location.name}
+                </span>
+              </div>
+            </>
+          )}
         </div>
+
         {/* Encounter Class and Priority Tags */}
         <div className="flex flex-wrap gap-1">
           {encounter.encounter_class && (

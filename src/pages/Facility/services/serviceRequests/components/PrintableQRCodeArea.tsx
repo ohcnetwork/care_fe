@@ -22,7 +22,7 @@ export function PrintableQRCodeArea({
   const { t } = useTranslation();
 
   return (
-    <div id="section-to-print" className="w-full print:py-10">
+    <div id="single-print" className="w-full">
       {/* Header */}
       <div className="flex justify-between items-start pb-2 border-b border-gray-200 print:border-gray-300">
         <div className="space-y-4 flex-1">

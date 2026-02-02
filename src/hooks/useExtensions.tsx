@@ -26,12 +26,12 @@ import { ExtensionEntityType } from "@/types/extensions/extensions";
 // Types
 // ============================================================================
 
-/** Namespaced extension data structure: { owner: { field: value } } */
+/** Namespaced extension data structure: { name: { field: value } } */
 export type NamespacedExtensionData = Record<string, Record<string, unknown>>;
 
-/** Field metadata with owner info for display/iteration */
-export interface ExtensionFieldWithOwner extends ExtensionFieldMetadata {
-  owner: string;
+/** Field metadata with extension name for display/iteration */
+export interface ExtensionFieldWithName extends ExtensionFieldMetadata {
+  extensionName: string;
 }
 
 /** Processed extension info for forms */
@@ -51,34 +51,34 @@ export interface ProcessedExtension {
  * Get a value from namespaced extension data.
  *
  * @example
- * const value = getExtensionValue(delivery.extensions, "core", "custom_field");
+ * const value = getExtensionValue(delivery.extensions, "billing_extension", "custom_field");
  */
 export function getExtensionValue(
   extensions: NamespacedExtensionData | undefined,
-  owner: string,
+  extensionName: string,
   fieldName: string,
 ): unknown {
-  return extensions?.[owner]?.[fieldName];
+  return extensions?.[extensionName]?.[fieldName];
 }
 
 /**
- * Get all field metadata with owner info from extensions.
+ * Get all field metadata with extension name from extensions.
  * Use for table headers or iterating over all extension fields.
  *
  * @example
- * const fields = getExtensionFieldsWithOwner(allExtensions);
- * fields.forEach(f => console.log(`${f.owner}.${f.name}: ${f.label}`));
+ * const fields = getExtensionFieldsWithName(allExtensions);
+ * fields.forEach(f => console.log(`${f.extensionName}.${f.name}: ${f.label}`));
  */
-export function getExtensionFieldsWithOwner(
+export function getExtensionFieldsWithName(
   extensions: ExtensionWithSchema[],
-): ExtensionFieldWithOwner[] {
+): ExtensionFieldWithName[] {
   return extensions
     .filter(({ schema }) => schema !== undefined)
     .flatMap(({ config, schema }) => {
       const { fieldMetadata } = extractSchemaInfo(schema);
       return fieldMetadata.map((field) => ({
         ...field,
-        owner: config.owner,
+        extensionName: config.name,
       }));
     });
 }
@@ -103,14 +103,14 @@ export function processExtensions(
 }
 
 /**
- * Build namespaced defaults: { owner: { field: defaultValue } }
+ * Build namespaced defaults: { name: { field: defaultValue } }
  */
 export function buildNamespacedDefaults(
   processedExtensions: ProcessedExtension[],
 ): NamespacedExtensionData {
   return processedExtensions.reduce((acc, { config, defaults }) => {
     if (Object.keys(defaults).length > 0) {
-      acc[config.owner] = defaults;
+      acc[config.name] = defaults;
     }
     return acc;
   }, {} as NamespacedExtensionData);
@@ -138,15 +138,18 @@ export function getExtensionProps(schema: JSONSchema2020 | undefined) {
 }
 
 /**
- * Creates a namespaced validation schema for owner-keyed extension data.
- * Structure: { owner: { field: value } }
+ * Creates a namespaced validation schema for name-keyed extension data.
+ * Structure: { name: { field: value } }
  * Returns a permissive type to be compatible with API response types.
  */
 function createNamespacedValidationSchema(
   processedExtensions: ProcessedExtension[],
 ): z.ZodType<Record<string, unknown>> {
-  // Build a schema for each owner's fields
-  const ownerSchemas: Record<string, z.ZodType<Record<string, unknown>>> = {};
+  // Build a schema for each extension's fields
+  const extensionSchemas: Record<
+    string,
+    z.ZodType<Record<string, unknown>>
+  > = {};
 
   for (const {
     config,
@@ -154,7 +157,7 @@ function createNamespacedValidationSchema(
     conditionalRules,
   } of processedExtensions) {
     if (fieldMetadata.length > 0) {
-      ownerSchemas[config.owner] = createExtensionValidationSchema(
+      extensionSchemas[config.name] = createExtensionValidationSchema(
         fieldMetadata,
         conditionalRules,
       );
@@ -162,23 +165,23 @@ function createNamespacedValidationSchema(
   }
 
   // If no extensions have fields, return a simple record schema
-  if (Object.keys(ownerSchemas).length === 0) {
+  if (Object.keys(extensionSchemas).length === 0) {
     return z.record(z.unknown());
   }
 
-  // Create a schema that validates each owner's data independently
+  // Create a schema that validates each extension's data independently
   return z.record(z.unknown()).superRefine((data, ctx) => {
     if (!data || typeof data !== "object") return;
 
-    for (const [owner, ownerSchema] of Object.entries(ownerSchemas)) {
-      const ownerData = (data as Record<string, unknown>)[owner];
-      if (ownerData && typeof ownerData === "object") {
-        const result = ownerSchema.safeParse(ownerData);
+    for (const [extName, extSchema] of Object.entries(extensionSchemas)) {
+      const extData = (data as Record<string, unknown>)[extName];
+      if (extData && typeof extData === "object") {
+        const result = extSchema.safeParse(extData);
         if (!result.success) {
           for (const issue of result.error.issues) {
             ctx.addIssue({
               ...issue,
-              path: [owner, ...issue.path],
+              path: [extName, ...issue.path],
             });
           }
         }
@@ -189,7 +192,7 @@ function createNamespacedValidationSchema(
 
 /**
  * Get combined extension props from multiple extensions.
- * Defaults are namespaced by owner.
+ * Defaults are namespaced by extension name.
  * Use BEFORE creating your form to get defaults and validation.
  */
 export function getCombinedExtensionProps(extensions: ExtensionWithSchema[]) {
@@ -329,11 +332,11 @@ interface UseEntityExtensionsOptions<TForm extends FieldValues> {
 }
 
 interface UseEntityExtensionsReturn {
-  /** Rendered extension fields (owner-namespaced) */
+  /** Rendered extension fields (name-namespaced) */
   fields: React.ReactElement | null;
   /** Whether there are any extension fields */
   hasFields: boolean;
-  /** Namespaced defaults: { owner: { field: value } } */
+  /** Namespaced defaults: { name: { field: value } } */
   defaults: NamespacedExtensionData;
   /** Prepare form data for API submission */
   prepareForSubmit: (
@@ -405,17 +408,17 @@ export function useEntityExtensions<TForm extends FieldValues>({
       return;
     }
 
-    // Deep merge by owner
+    // Deep merge by extension name
     const merged: NamespacedExtensionData = {};
-    const allOwners = new Set([
+    const allNames = new Set([
       ...Object.keys(namespacedDefaults),
       ...Object.keys(existingData || {}),
     ]);
 
-    for (const owner of allOwners) {
-      merged[owner] = {
-        ...(namespacedDefaults[owner] || {}),
-        ...(existingData?.[owner] || {}),
+    for (const extName of allNames) {
+      merged[extName] = {
+        ...(namespacedDefaults[extName] || {}),
+        ...(existingData?.[extName] || {}),
       };
     }
 
@@ -433,15 +436,15 @@ export function useEntityExtensions<TForm extends FieldValues>({
     ): NamespacedExtensionData => {
       const result: NamespacedExtensionData = {};
 
-      const allOwners = new Set([
+      const allNames = new Set([
         ...Object.keys(namespacedDefaults),
         ...Object.keys(extensions || {}),
       ]);
 
-      for (const owner of allOwners) {
-        const ownerDefaults = namespacedDefaults[owner] || {};
-        const ownerExtensions = extensions?.[owner] || {};
-        const merged = { ...ownerDefaults, ...ownerExtensions };
+      for (const extName of allNames) {
+        const extDefaults = namespacedDefaults[extName] || {};
+        const extValues = extensions?.[extName] || {};
+        const merged = { ...extDefaults, ...extValues };
 
         // Filter out undefined values
         const filtered = Object.fromEntries(
@@ -449,7 +452,7 @@ export function useEntityExtensions<TForm extends FieldValues>({
         );
 
         if (Object.keys(filtered).length > 0) {
-          result[owner] = filtered;
+          result[extName] = filtered;
         }
       }
 
@@ -458,7 +461,7 @@ export function useEntityExtensions<TForm extends FieldValues>({
     [namespacedDefaults],
   );
 
-  // Render fields for each extension with owner-namespaced basePath
+  // Render fields for each extension with name-namespaced basePath
   // Use stableExtensions which only changes when data actually changes
   const fields = useMemo(() => {
     const extensionsWithFields = stableExtensions.filter(
@@ -472,12 +475,12 @@ export function useEntityExtensions<TForm extends FieldValues>({
         {extensionsWithFields.map(
           ({ config, fieldMetadata, conditionalRules }) => (
             <ExtensionFields
-              key={`${config.owner}-${config.name}`}
+              key={config.name}
               fieldMetadata={fieldMetadata}
               control={form.control}
               setValue={form.setValue}
               conditionalRules={conditionalRules}
-              basePath={`${basePath}.${config.owner}`}
+              basePath={`${basePath}.${config.name}`}
             />
           ),
         )}

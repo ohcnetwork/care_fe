@@ -25,7 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  getExtensionFieldsWithOwner,
+  getExtensionFieldsWithName,
   getExtensionValue,
   NamespacedExtensionData,
 } from "@/hooks/useExtensions";
@@ -42,6 +42,7 @@ import {
   SupplyDeliveryStatus,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
+import { add, round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { EllipsisVertical } from "lucide-react";
@@ -84,9 +85,9 @@ export function SupplyDeliveryTable({
     "read",
   );
 
-  // Get field metadata with owner info for reading namespaced values
+  // Get field metadata with extension name for reading namespaced values
   const extensionFields = useMemo(
-    () => getExtensionFieldsWithOwner(allExtensions),
+    () => getExtensionFieldsWithName(allExtensions),
     [allExtensions],
   );
 
@@ -160,9 +161,10 @@ export function SupplyDeliveryTable({
             </TableHead>
           )}
           <TableHead>{t("item")}</TableHead>
+          <TableHead>{t("batch")}</TableHead>
           <TableHead>{t("requested_qty")}</TableHead>
-          <TableHead>{t("pack_qty")}</TableHead>
-          <TableHead>{t("pack_size")}</TableHead>
+          {!internal && <TableHead>{t("pack_size")}</TableHead>}
+          {!internal && <TableHead>{t("pack_qty")}</TableHead>}
           <TableHead>
             {isRequester ? t("received_qty") : t("dispatched_qty")}
           </TableHead>
@@ -178,7 +180,7 @@ export function SupplyDeliveryTable({
           <TableHead>{t("status")}</TableHead>
           <TableHead>{t("condition")}</TableHead>
           {extensionFields.map((field) => (
-            <TableHead key={`${field.owner}-${field.name}`}>
+            <TableHead key={`${field.extensionName}-${field.name}`}>
               {field.label}
             </TableHead>
           ))}
@@ -211,10 +213,24 @@ export function SupplyDeliveryTable({
                   : delivery.supplied_item?.product_knowledge?.name}
               </div>
             </TableCell>
-            <TableCell>{delivery.supply_request?.quantity || "-"}</TableCell>
-            <TableCell>{delivery.supplied_item_pack_quantity || "-"}</TableCell>
-            <TableCell>{delivery.supplied_item_pack_size || "-"}</TableCell>
-            <TableCell>{delivery.supplied_item_quantity}</TableCell>
+            <TableCell>
+              {delivery.supplied_inventory_item?.product?.batch?.lot_number ||
+                "-"}
+            </TableCell>
+            <TableCell>
+              {delivery.supply_request
+                ? round(delivery.supply_request.quantity)
+                : "-"}
+            </TableCell>
+            {!internal && (
+              <TableCell>{delivery.supplied_item_pack_size || "-"}</TableCell>
+            )}
+            {!internal && (
+              <TableCell>
+                {delivery.supplied_item_pack_quantity || "-"}
+              </TableCell>
+            )}
+            <TableCell>{round(delivery.supplied_item_quantity)}</TableCell>
             <TableCell>
               {delivery.created_date &&
                 formatDate(new Date(delivery.created_date), "dd/MM/yyyy")}
@@ -247,14 +263,17 @@ export function SupplyDeliveryTable({
             })}
             <TableCell>
               <MonetaryDisplay
-                factor={
-                  delivery.supplied_inventory_item?.product.charge_item_definition?.price_components
+                factor={add(
+                  ...(
+                    delivery.supplied_inventory_item?.product
+                      .charge_item_definition?.price_components || []
+                  )
                     .filter(
                       (c) =>
                         c.monetary_component_type === MonetaryComponentType.tax,
                     )
-                    .reduce((sum, c) => sum + (c.factor || 0), 0) || undefined
-                }
+                    .map((c) => c.factor || "0"),
+                )}
               />
             </TableCell>
             <TableCell>
@@ -294,11 +313,11 @@ export function SupplyDeliveryTable({
             {extensionFields.map((field) => {
               const value = getExtensionValue(
                 delivery.extensions as NamespacedExtensionData,
-                field.owner,
+                field.extensionName,
                 field.name,
               );
               return (
-                <TableCell key={`${field.owner}-${field.name}`}>
+                <TableCell key={`${field.extensionName}-${field.name}`}>
                   {value !== undefined && value !== null ? String(value) : "-"}
                 </TableCell>
               );

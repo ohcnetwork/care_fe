@@ -44,7 +44,7 @@ import {
 } from "@/components/ui/table";
 
 import {
-  getExtensionFieldsWithOwner,
+  getExtensionFieldsWithName,
   processExtensions,
 } from "@/hooks/useExtensions";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
@@ -79,18 +79,14 @@ import {
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { SupplyRequestRead } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
+import { round, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
 const supplyDeliveryItemSchema = z.object({
   supplied_inventory_item: z.string().optional(),
-  supplied_item_quantity: z
-    .number()
-    .or(z.nan())
-    .refine((val) => !isNaN(val) && val > 0, {
-      message: "Quantity must be at least 1",
-    }),
+  supplied_item_quantity: zodDecimal({ min: 1 }),
   supplied_item_pack_quantity: z.number().optional(),
   supplied_item_pack_size: z.number().optional(),
   product_knowledge: z
@@ -104,7 +100,7 @@ const supplyDeliveryItemSchema = z.object({
   batch_number: z.string().optional(),
   expiry_date: z.string().optional(),
   charge_item_definition: z.object({ slug: z.string() }).optional(),
-  unit_price: z.number().optional(),
+  unit_price: zodDecimal({ min: 0 }).optional(),
   is_manually_edited: z.boolean().optional(),
   is_tax_inclusive: z.boolean().optional(),
   charge_item_category: z.string().optional(),
@@ -167,9 +163,9 @@ export function AddSupplyDeliveryForm({
     [allExtensions],
   );
 
-  // Get extension field metadata with owner info for table headers
+  // Get extension field metadata with extension name for table headers
   const extensionFields = useMemo(
-    () => getExtensionFieldsWithOwner(allExtensions),
+    () => getExtensionFieldsWithName(allExtensions),
     [allExtensions],
   );
 
@@ -178,7 +174,9 @@ export function AddSupplyDeliveryForm({
     (): SupplyDeliveryItemValues => ({
       product_knowledge: {} as ProductKnowledgeBase,
       supplied_inventory_item: "",
-      supplied_item_quantity: 1,
+      supplied_item_quantity: "1",
+      supplied_item_pack_quantity: origin ? undefined : 1,
+      supplied_item_pack_size: origin ? undefined : 1,
       supplied_item: undefined,
       supply_request: undefined,
       _is_inward_stock: !origin,
@@ -290,6 +288,8 @@ export function AddSupplyDeliveryForm({
     const itemsFromRequests = selectedRequests?.map((request) => ({
       supplied_inventory_item: undefined,
       supplied_item_quantity: request.quantity,
+      supplied_item_pack_quantity: origin ? undefined : 1,
+      supplied_item_pack_size: origin ? undefined : 1,
       product_knowledge: request.item,
       supplied_item: undefined,
       supply_request: request,
@@ -333,10 +333,10 @@ export function AddSupplyDeliveryForm({
     const components: MonetaryComponent[] = [];
 
     // Base price component
-    if (item.unit_price !== undefined) {
+    if (item.unit_price != null) {
       components.push({
         monetary_component_type: MonetaryComponentType.base,
-        amount: item.unit_price.toString(),
+        amount: item.unit_price,
       });
     }
 
@@ -399,8 +399,13 @@ export function AddSupplyDeliveryForm({
               hasErrors = true;
               break;
             }
+            if (!item.charge_item_category) {
+              toast.error(t("category_required_at_row", { row: index + 1 }));
+              hasErrors = true;
+              break;
+            }
           }
-          if (item.unit_price === undefined || item.unit_price < 0) {
+          if (item.unit_price === undefined) {
             toast.error(t("unit_price_required_at_row", { row: index + 1 }));
             hasErrors = true;
             break;
@@ -501,11 +506,13 @@ export function AddSupplyDeliveryForm({
       supplied_item_type: suppliedItemType,
       supplied_item_condition: SupplyDeliveryCondition.normal,
       supplied_item_quantity: item.supplied_item_quantity,
-      supplied_item_pack_quantity: item.supplied_item_pack_quantity,
-      supplied_item_pack_size: item.supplied_item_pack_size,
       ...(origin
         ? { supplied_inventory_item: item.supplied_inventory_item }
-        : { supplied_item: productId }),
+        : {
+            supplied_item: productId,
+            supplied_item_pack_quantity: item.supplied_item_pack_quantity,
+            supplied_item_pack_size: item.supplied_item_pack_size,
+          }),
       supply_request: item.supply_request?.id,
       origin: origin,
       destination: destination,
@@ -644,13 +651,13 @@ export function AddSupplyDeliveryForm({
                                 <TableHead className="min-w-[140px] text-xs font-semibold text-center">
                                   {t("category")}
                                 </TableHead>
-                                <TableHead className="w-[7rem] text-xs font-semibold">
-                                  {t("pack_qty")}
-                                </TableHead>
-                                <TableHead className="w-[5rem] text-xs font-semibold">
+                                <TableHead className="w-20 text-xs font-semibold">
                                   {t("pack_size")}
                                 </TableHead>
-                                <TableHead className="w-[8rem] text-xs font-semibold">
+                                <TableHead className="w-28 text-xs font-semibold">
+                                  {t("pack_qty")}
+                                </TableHead>
+                                <TableHead className="w-32 text-xs font-semibold">
                                   {t("qty")}
                                 </TableHead>
                                 <TableHead className="min-w-[100px] text-xs font-semibold">
@@ -670,7 +677,7 @@ export function AddSupplyDeliveryForm({
                                 </TableHead>
                                 {extensionFields.map((field) => (
                                   <TableHead
-                                    key={`${field.owner}-${field.name}`}
+                                    key={`${field.extensionName}-${field.name}`}
                                     className="min-w-[100px] text-xs font-semibold"
                                   >
                                     {field.label}
@@ -741,7 +748,7 @@ export function AddSupplyDeliveryForm({
                                                     {
                                                       selectedInventoryId:
                                                         field.value,
-                                                      quantity: 1,
+                                                      quantity: "1",
                                                     },
                                                   ]
                                                 : []
@@ -760,6 +767,7 @@ export function AddSupplyDeliveryForm({
                                             enableSearch={true}
                                             multiSelect={false}
                                             className="w-full h-9"
+                                            dontRestrictExpired
                                           />
                                         </FormControl>
                                         <FormMessage />
@@ -778,11 +786,6 @@ export function AddSupplyDeliveryForm({
                                             type="number"
                                             min={1}
                                             {...field}
-                                            onChange={(e) =>
-                                              field.onChange(
-                                                parseInt(e.target.value),
-                                              )
-                                            }
                                           />
                                         </FormControl>
                                         <FormMessage />
@@ -815,6 +818,7 @@ export function AddSupplyDeliveryForm({
                                   setNewlyAddedRowIndex(null)
                                 }
                                 processedExtensions={processedExtensions}
+                                locationId={destination}
                                 onRemove={() => remove(index)}
                               />
                             ),
@@ -957,7 +961,7 @@ export function AddSupplyDeliveryForm({
                       </label>
                     </div>
                     <div className="text-sm font-medium">
-                      {request.quantity} {request.item.base_unit.display}
+                      {round(request.quantity)} {request.item.base_unit.display}
                     </div>
                   </div>
                 ))}

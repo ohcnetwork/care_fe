@@ -13,6 +13,9 @@ const OrganizationRoutes: AppRoutes = {
   "/organization/:id/facilities": ({ id }) => (
     <OrganizationFacilities id={id} />
   ),
+  "/organization/:id/service_accounts": ({ id }) => (
+    <OrganizationUsers id={id} isServiceAccount={true} />
+  ),
   "/organization/:navOrganizationId/children/:id": ({
     navOrganizationId,
     id,
@@ -30,6 +33,16 @@ const OrganizationRoutes: AppRoutes = {
     id,
   }) => (
     <OrganizationFacilities id={id} navOrganizationId={navOrganizationId} />
+  ),
+  "/organization/:navOrganizationId/children/:id/service_accounts": ({
+    navOrganizationId,
+    id,
+  }) => (
+    <OrganizationUsers
+      id={id}
+      isServiceAccount={true}
+      navOrganizationId={navOrganizationId}
+    />
   ),
 };
 

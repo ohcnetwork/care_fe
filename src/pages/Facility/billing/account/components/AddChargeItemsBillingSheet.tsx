@@ -33,12 +33,14 @@ import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPr
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
+import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import {
   ChargeItemDefinitionBase,
   ChargeItemDefinitionRead,
+  ChargeItemDefinitionStatus,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import { UserReadMinimal } from "@/types/user/user";
@@ -206,10 +208,12 @@ export default function AddChargeItemsBillingSheet({
                             </label>
                             <div className="flex items-center gap-1">
                               <span>
-                                {item.charge_item_definition_object
-                                  .price_components?.[0]?.amount || 0}{" "}
-                                {item.charge_item_definition_object
-                                  .price_components?.[0]?.code?.code || "INR"}
+                                <MonetaryDisplay
+                                  amount={
+                                    item.charge_item_definition_object
+                                      .price_components?.[0]?.amount || 0
+                                  }
+                                />
                               </span>
                               {item.charge_item_definition_object
                                 .price_components?.length > 0 && (
@@ -283,10 +287,12 @@ export default function AddChargeItemsBillingSheet({
                           <TableCell>
                             <div className="flex items-center gap-1">
                               <span>
-                                {item.charge_item_definition_object
-                                  .price_components?.[0]?.amount || 0}{" "}
-                                {item.charge_item_definition_object
-                                  .price_components?.[0]?.code?.code || "INR"}
+                                <MonetaryDisplay
+                                  amount={
+                                    item.charge_item_definition_object
+                                      .price_components?.[0]?.amount || 0
+                                  }
+                                />
                               </span>
                               {item.charge_item_definition_object
                                 .price_components?.length > 0 && (
@@ -359,9 +365,10 @@ export default function AddChargeItemsBillingSheet({
                 listDefinitions={{
                   queryFn: chargeItemDefinitionApi.listChargeItemDefinition,
                   pathParams: { facilityId },
-                  queryParams: { status: "active" },
+                  queryParams: { status: ChargeItemDefinitionStatus.active },
                 }}
                 translationBaseKey="charge_item_definition"
+                data-shortcut-id="keydown-action"
               />
             </div>
 
