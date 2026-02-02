@@ -38,7 +38,6 @@ const App = () => {
       <ProductionWarningBanner />
       <QueryClientProvider client={queryClient}>
         <ScrollToTop />
-        <AppUpdateNotifier />
         <Suspense fallback={<Loading />}>
           <PubSubProvider>
             <ShortcutProvider>
@@ -60,6 +59,7 @@ const App = () => {
                   // Refer: https://github.com/shadcn-ui/ui/issues/2234.
                   toastOptions={{}}
                 />
+                <AppUpdateNotifier />
               </PluginEngine>
             </ShortcutProvider>
           </PubSubProvider>
