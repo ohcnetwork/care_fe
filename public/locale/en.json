@@ -5240,6 +5240,7 @@
   "service_account_token": "Service Account Token",
   "service_account_type": "Service Account Type",
   "service_accounts": "Service accounts",
+  "service_appointments": "Service Appointments",
   "service_available_locations": "Locations where this service is available",
   "service_date": "Service Date",
   "service_date_min_date": "Service date must be set to today or a past date",
