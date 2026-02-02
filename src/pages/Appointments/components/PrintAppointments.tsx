@@ -24,7 +24,7 @@ import {
   formatDateTime,
   formatPatientAge,
 } from "@/Utils/utils";
-import { getPartialId, PatientRead } from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import {
   PatientIdentifier,
@@ -92,23 +92,6 @@ export function PrintAppointments({
       pathParams: { id: qParams.patient! },
     }),
     enabled: !!qParams.patient,
-  });
-
-  const { data: _verifiedPatient } = useQuery({
-    queryKey: [
-      "patient-verify",
-      selectedPatient?.id,
-      selectedPatient?.year_of_birth,
-    ],
-    queryFn: query(patientApi.searchRetrieve, {
-      pathParams: { facilityId },
-      body: {
-        phone_number: selectedPatient?.phone_number ?? "",
-        year_of_birth: selectedPatient?.year_of_birth?.toString() ?? "",
-        partial_id: selectedPatient ? getPartialId(selectedPatient) : "",
-      },
-    }),
-    enabled: !!selectedPatient,
   });
 
   useEffect(() => {
