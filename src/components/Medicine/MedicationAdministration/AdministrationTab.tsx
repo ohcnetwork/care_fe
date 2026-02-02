@@ -440,6 +440,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         encounter: encounterId,
         limit: 100,
         status: ACTIVE_MEDICATION_STATUSES.join(","),
+        product_type: "medication",
         facility: facilityId,
         product_type: "medication",
       },

@@ -4185,6 +4185,7 @@
   "prescription_medication": "Prescription Medication",
   "prescription_medications": "Prescription Medications",
   "prescription_not_found": "Prescription not found",
+  "prescription_note_placeholder": "Add any notes for this prescription...",
   "prescription_queue": "Prescription Queue",
   "prescription_status__active": "Active",
   "prescription_status__cancelled": "Cancelled",

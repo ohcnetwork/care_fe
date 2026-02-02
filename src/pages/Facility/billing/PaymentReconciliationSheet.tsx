@@ -318,9 +318,11 @@ export function PaymentReconciliationSheet({
         ? round(new Decimal(invoice.total_gross).abs())
         : "";
       form.reset({
-        reconciliation_type: invoice
-          ? PaymentReconciliationType.payment
-          : PaymentReconciliationType.advance,
+        reconciliation_type: isCreditNote
+          ? undefined
+          : invoice
+            ? PaymentReconciliationType.payment
+            : PaymentReconciliationType.advance,
         status: PaymentReconciliationStatus.active,
         kind: PaymentReconciliationKind.deposit,
         issuer_type: PaymentReconciliationIssuerType.patient,

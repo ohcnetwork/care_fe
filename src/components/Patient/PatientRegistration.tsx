@@ -72,12 +72,18 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
+interface QParams {
+  phone_number?: string;
+  flow?: "dispense";
+  createEncounter?: "true";
+}
+
 export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   useShortcutSubContext();
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
-  const [{ phone_number }] = useQueryParams();
+  const [{ phone_number, flow }] = useQueryParams<QParams>();
 
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
@@ -227,6 +233,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
           phone_number: resp.phone_number,
           year_of_birth: resp.year_of_birth,
           partial_id: resp?.id?.slice(0, 5),
+          ...(flow && { flow, createEncounter: "true" }),
         },
       });
     },
