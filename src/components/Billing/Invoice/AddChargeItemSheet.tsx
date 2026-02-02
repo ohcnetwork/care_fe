@@ -282,9 +282,12 @@ export default function AddChargeItemSheet({
             <ShortcutBadge actionId="cancel-action" />
           </Button>
           <Button
-            onClick={() =>
-              attachItems({ charge_items: Array.from(selectedItems) })
-            }
+            onClick={() => {
+              const filteredSelectedItems = items
+                .filter((item) => selectedItems.has(item.id))
+                .map((item) => item.id);
+              attachItems({ charge_items: filteredSelectedItems });
+            }}
             disabled={
               selectedItems.size === 0 || isPending || isAddChargeItemsOpen
             }
