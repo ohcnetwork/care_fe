@@ -226,6 +226,7 @@ export function AudioRecorder({ encounterId, onClose }: AudioRecorderProps) {
     onSuccess: () => {
       toast.success(t("scribe_bundle_saved"));
       discardRecording();
+      location.reload();
     },
     onError: (error) => {
       toast.error(t("scribe_bundle_save_error"));

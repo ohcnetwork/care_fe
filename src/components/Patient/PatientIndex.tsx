@@ -250,6 +250,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                               </TableHead>
                               <TableHead>{t("phone_number")}</TableHead>
                               <TableHead>{t("gender")}</TableHead>
+                              <TableHead>{t("actions")}</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -271,6 +272,11 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                       (g) => g.id === patient.gender,
                                     )?.text
                                   }
+                                </TableCell>
+                                <TableCell>
+                                  <Button variant={"outline"}>
+                                    {t("book_appointment")}
+                                  </Button>
                                 </TableCell>
                               </TableRow>
                             ))}
