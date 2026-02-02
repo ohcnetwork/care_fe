@@ -9,7 +9,7 @@ import {
   Truck,
 } from "lucide-react";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -21,7 +21,13 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -44,11 +50,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Label } from "@/components/ui/label";
+import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AddSupplyDeliveryForm } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/AddSupplyDeliveryForm";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { SupplyDeliveryTable } from "@/pages/Facility/services/inventory/SupplyDeliveryTable";
+import {
+  calculateTotalPriceWithQuantity,
+  MonetaryComponent,
+} from "@/types/base/monetaryComponent/monetaryComponent";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
   DeliveryOrderRetrieve,
@@ -59,12 +70,47 @@ import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import {
   SupplyDeliveryCondition,
+  SupplyDeliveryRead,
   SupplyDeliveryStatus,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
+import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import Decimal from "decimal.js";
+
+function calculateDeliveryTotals(
+  deliveries: SupplyDeliveryRead[],
+  internal: boolean,
+) {
+  let totalQuantity = new Decimal(0);
+  let totalValue = new Decimal(0);
+
+  for (const delivery of deliveries) {
+    const qty = new Decimal(delivery.supplied_item_quantity || "0");
+    totalQuantity = totalQuantity.plus(qty);
+
+    const priceComponents: MonetaryComponent[] = internal
+      ? delivery.supplied_inventory_item?.product?.charge_item_definition
+          ?.price_components || []
+      : delivery.supplied_item?.charge_item_definition?.price_components || [];
+
+    if (priceComponents.length > 0) {
+      const itemTotal = calculateTotalPriceWithQuantity(
+        priceComponents,
+        qty.toString(),
+      );
+      totalValue = totalValue.plus(itemTotal);
+    }
+  }
+
+  return {
+    totalCount: deliveries.length,
+    totalQuantity: round(totalQuantity),
+    totalValue: round(totalValue),
+  };
+}
 
 interface Props {
   facilityId: string;
@@ -203,6 +249,13 @@ export function DeliveryOrderShow({
       }),
       enabled: !!deliveryOrderId,
     });
+
+  const deliveryTotals = useMemo(() => {
+    if (!supplyDeliveries?.results) {
+      return { totalCount: 0, totalQuantity: "0", totalValue: "0" };
+    }
+    return calculateDeliveryTotals(supplyDeliveries.results, internal);
+  }, [supplyDeliveries?.results, internal]);
 
   const { mutate: upsertSupplyDeliveries, isPending: isUpsertingDeliveries } =
     useMutation({
@@ -779,6 +832,30 @@ export function DeliveryOrderShow({
               </div>
             )}
           </CardContent>
+          {deliveryTotals.totalCount > 0 && (
+            <CardFooter className="flex justify-end border-t bg-gray-50 p-4">
+              <div className="flex flex-col items-end gap-2">
+                <div className="flex items-center gap-3 text-sm">
+                  <span className="text-gray-600">{t("total_items")}:</span>
+                  <span className="font-medium w-20 text-right">
+                    {deliveryTotals.totalCount}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-sm">
+                  <span className="text-gray-600">{t("total_quantity")}:</span>
+                  <span className="font-medium w-20 text-right">
+                    {deliveryTotals.totalQuantity}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-lg font-semibold border-t pt-2 mt-1">
+                  <span className="text-gray-700">{t("total_value")}:</span>
+                  <span className="w-28 text-right">
+                    <MonetaryDisplay amount={deliveryTotals.totalValue} />
+                  </span>
+                </div>
+              </div>
+            </CardFooter>
+          )}
         </Card>
 
         <Drawer
