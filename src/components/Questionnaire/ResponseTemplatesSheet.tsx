@@ -117,6 +117,7 @@ interface MedicationsPreviewProps {
       })
   )[];
   onMedicationSelect?: (medication: MedicationRequestCreate) => void;
+  onMedicationRemove?: (index: number) => void;
   showAddButton?: boolean;
   variant?: "compact" | "form";
 }
@@ -124,6 +125,7 @@ interface MedicationsPreviewProps {
 function MedicationsPreview({
   medications,
   onMedicationSelect,
+  onMedicationRemove,
   showAddButton = false,
   variant = "compact",
 }: MedicationsPreviewProps) {
@@ -163,17 +165,34 @@ function MedicationsPreview({
             const medWithInternal = med as MedicationRequestCreate & {
               requested_product_internal?: { name?: string };
             };
+            const hasInternalName =
+              medWithInternal.requested_product_internal?.name ||
+              med.medication?.display;
+
             return (
               <div
                 key={idx}
-                className="flex items-start gap-2 text-xs text-primary-700 bg-white/60 rounded px-2 py-1.5"
+                className="flex items-center gap-2 text-xs text-primary-700 bg-white/60 rounded px-2 py-1.5"
               >
-                <span className="size-1 rounded-full bg-primary-500 shrink-0 mt-1.5" />
+                <span className="size-1 rounded-full bg-primary-500 shrink-0" />
                 <span className="flex-1 min-w-0">
-                  {medWithInternal.requested_product_internal?.name ||
-                    med.medication?.display ||
-                    t("unknown_medication")}
+                  {hasInternalName ? (
+                    medWithInternal.requested_product_internal?.name ||
+                    med.medication?.display
+                  ) : (
+                    <MedicationName medication={med} />
+                  )}
                 </span>
+                {onMedicationRemove && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-5 shrink-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                    onClick={() => onMedicationRemove(idx)}
+                  >
+                    <X className="size-3" />
+                  </Button>
+                )}
               </div>
             );
           }
@@ -246,6 +265,7 @@ interface ActivityDefinitionsPreviewProps {
   onActivityDefinitionSelect?: (
     activityDefinition: ActivityDefinitionTemplateSpec,
   ) => void;
+  onActivityDefinitionRemove?: (index: number) => void;
   showAddButton?: boolean;
   variant?: "compact" | "form";
 }
@@ -253,6 +273,7 @@ interface ActivityDefinitionsPreviewProps {
 function ActivityDefinitionsPreview({
   activityDefinitions,
   onActivityDefinitionSelect,
+  onActivityDefinitionRemove,
   showAddButton = false,
   variant = "compact",
 }: ActivityDefinitionsPreviewProps) {
@@ -289,34 +310,62 @@ function ActivityDefinitionsPreview({
         </Badge>
       </div>
       <div className="p-1 space-y-0.5">
-        {displayedItems.map((ad, idx) => (
-          <Button
-            key={idx}
-            variant="ghost"
-            onClick={() => {
-              if (showAddButton && onActivityDefinitionSelect) {
-                onActivityDefinitionSelect(ad);
-                toast.success(t("activity_definition_added"));
-              }
-            }}
-            disabled={!showAddButton || !onActivityDefinitionSelect}
-            className={cn(
-              "w-full h-auto justify-between items-start gap-2 rounded px-2 py-1.5 font-normal transition-colors",
-              showAddButton && onActivityDefinitionSelect
-                ? "cursor-pointer hover:bg-purple-100/50 active:bg-purple-50"
-                : "cursor-default bg-white/50",
-            )}
-          >
-            <div className="flex-1 min-w-0 text-left font-medium text-gray-900 text-xs leading-tight">
-              {ad.service_request?.title ||
-                ad.slug ||
-                t("unknown_activity_definition")}
-            </div>
-            {showAddButton && onActivityDefinitionSelect && (
-              <PlusIcon className="size-3.5 shrink-0 text-purple-600 mt-0.5" />
-            )}
-          </Button>
-        ))}
+        {displayedItems.map((ad, idx) => {
+          if (isFormVariant) {
+            return (
+              <div
+                key={idx}
+                className="flex items-center gap-2 text-xs text-purple-700 bg-white/60 rounded px-2 py-1.5"
+              >
+                <span className="size-1 rounded-full bg-purple-500 shrink-0" />
+                <span className="flex-1 min-w-0 font-medium text-gray-900">
+                  {ad.service_request?.title ||
+                    ad.slug ||
+                    t("unknown_activity_definition")}
+                </span>
+                {onActivityDefinitionRemove && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-5 shrink-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                    onClick={() => onActivityDefinitionRemove(idx)}
+                  >
+                    <X className="size-3" />
+                  </Button>
+                )}
+              </div>
+            );
+          }
+
+          return (
+            <Button
+              key={idx}
+              variant="ghost"
+              onClick={() => {
+                if (showAddButton && onActivityDefinitionSelect) {
+                  onActivityDefinitionSelect(ad);
+                  toast.success(t("activity_definition_added"));
+                }
+              }}
+              disabled={!showAddButton || !onActivityDefinitionSelect}
+              className={cn(
+                "w-full h-auto justify-between items-start gap-2 rounded px-2 py-1.5 font-normal transition-colors",
+                showAddButton && onActivityDefinitionSelect
+                  ? "cursor-pointer hover:bg-purple-100/50 active:bg-purple-50"
+                  : "cursor-default bg-white/50",
+              )}
+            >
+              <div className="flex-1 min-w-0 text-left font-medium text-gray-900 text-xs leading-tight">
+                {ad.service_request?.title ||
+                  ad.slug ||
+                  t("unknown_activity_definition")}
+              </div>
+              {showAddButton && onActivityDefinitionSelect && (
+                <PlusIcon className="size-3.5 shrink-0 text-purple-600 mt-0.5" />
+              )}
+            </Button>
+          );
+        })}
         {remainingCount > 0 && (
           <Button
             variant="ghost"
@@ -555,6 +604,11 @@ export default function ResponseTemplatesSheet({
     string[] | null
   >(facilityOrganizations.length > 0 ? facilityOrganizations : null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [editableMedications, setEditableMedications] = useState<
+    MedicationRequestTemplateSpec[]
+  >([]);
+  const [editableActivityDefinitions, setEditableActivityDefinitions] =
+    useState<ActivityDefinitionTemplateSpec[]>([]);
 
   const form = useForm<TemplateFormData>({
     resolver: zodResolver(templateFormSchema),
@@ -664,6 +718,12 @@ export default function ResponseTemplatesSheet({
         (org) => org.id,
       );
       setSelectedOrganizations(orgIds.length > 0 ? orgIds : null);
+      setEditableMedications(
+        templateDetails.template_data?.medication_request ?? [],
+      );
+      setEditableActivityDefinitions(
+        templateDetails.template_data?.activity_definition ?? [],
+      );
     }
   }, [templateDetails, editingTemplate, viewMode]);
 
@@ -675,6 +735,8 @@ export default function ResponseTemplatesSheet({
     setSelectedOrganizations(
       facilityOrganizations.length > 0 ? facilityOrganizations : null,
     );
+    setEditableMedications([]);
+    setEditableActivityDefinitions([]);
   };
 
   const handleEditTemplate = (
@@ -687,34 +749,21 @@ export default function ResponseTemplatesSheet({
 
   const handleSubmit = (data: TemplateFormData) => {
     if (editingTemplate && templateDetails) {
-      // Update existing template
+      // Update existing template with editable lists
       updateTemplate({
         id: editingTemplate.id || "",
         body: {
           name: data.name,
           description: data.description || "",
-          template_data: templateDetails.template_data,
+          template_data: {
+            medication_request: editableMedications,
+            activity_definition: editableActivityDefinitions,
+          },
           users: templateDetails.users.map((u) => u.username),
           facility_organizations: selectedOrganizations ?? [],
         },
       });
     } else {
-      // Create new template
-      const medicationsForTemplate =
-        savingCurrent && currentMedications.length > 0
-          ? currentMedications.map(
-              (med) =>
-                buildMedicationForTemplate(
-                  med,
-                ) as MedicationRequestTemplateSpec,
-            )
-          : [];
-
-      const activityDefinitionsForTemplate =
-        savingCurrent && currentActivityDefinitions.length > 0
-          ? currentActivityDefinitions
-          : [];
-
       const createData: QuestionnaireResponseTemplateCreateSpec = {
         name: data.name,
         description: data.description || "",
@@ -725,8 +774,8 @@ export default function ResponseTemplatesSheet({
           : {}),
         facility: facilityId,
         template_data: {
-          medication_request: medicationsForTemplate,
-          activity_definition: activityDefinitionsForTemplate,
+          medication_request: editableMedications,
+          activity_definition: editableActivityDefinitions,
         },
         users: [currentUser.username],
         facility_organizations: selectedOrganizations ?? [],
@@ -768,6 +817,15 @@ export default function ResponseTemplatesSheet({
             onClick={() => {
               setSavingCurrent(true);
               setViewMode("create");
+              setEditableMedications(
+                currentMedications.map(
+                  (med) =>
+                    buildMedicationForTemplate(
+                      med,
+                    ) as MedicationRequestTemplateSpec,
+                ),
+              );
+              setEditableActivityDefinitions([...currentActivityDefinitions]);
             }}
           >
             <SaveIcon className="size-3.5" />
@@ -858,15 +916,72 @@ export default function ResponseTemplatesSheet({
     <div className="space-y-4">
       {editingTemplate && isLoadingDetails && <CardListSkeleton count={4} />}
 
-      {/* Preview of items being saved */}
+      {/* Preview of items being saved (for saving current medications/activities) */}
       {savingCurrent && (
         <div className="space-y-2">
           <h3 className="text-xs font-medium text-gray-700">{t("preview")}</h3>
-          <MedicationsPreview medications={currentMedications} variant="form" />
-          <ActivityDefinitionsPreview
-            activityDefinitions={currentActivityDefinitions}
-            variant="form"
-          />
+          {editableMedications.length > 0 && (
+            <MedicationsPreview
+              medications={editableMedications}
+              variant="form"
+              onMedicationRemove={(index) => {
+                setEditableMedications((prev) =>
+                  prev.filter((_, i) => i !== index),
+                );
+              }}
+            />
+          )}
+          {editableActivityDefinitions.length > 0 && (
+            <ActivityDefinitionsPreview
+              activityDefinitions={editableActivityDefinitions}
+              variant="form"
+              onActivityDefinitionRemove={(index) => {
+                setEditableActivityDefinitions((prev) =>
+                  prev.filter((_, i) => i !== index),
+                );
+              }}
+            />
+          )}
+          {editableMedications.length === 0 &&
+            editableActivityDefinitions.length === 0 && (
+              <p className="text-xs text-gray-500 italic">
+                {t("no_items_to_save")}
+              </p>
+            )}
+          <Separator className="my-2" />
+        </div>
+      )}
+
+      {editingTemplate && !isLoadingDetails && (
+        <div className="space-y-2">
+          {editableMedications.length > 0 && (
+            <MedicationsPreview
+              medications={editableMedications}
+              variant="form"
+              onMedicationRemove={(index) => {
+                setEditableMedications((prev) =>
+                  prev.filter((_, i) => i !== index),
+                );
+              }}
+            />
+          )}
+          {editableActivityDefinitions.length > 0 && (
+            <ActivityDefinitionsPreview
+              activityDefinitions={editableActivityDefinitions}
+              variant="form"
+              onActivityDefinitionRemove={(index) => {
+                setEditableActivityDefinitions((prev) =>
+                  prev.filter((_, i) => i !== index),
+                );
+              }}
+            />
+          )}
+          {editableMedications.length === 0 &&
+            editableActivityDefinitions.length === 0 && (
+              <p className="text-xs text-gray-500 italic">
+                {t("no_items_in_template")}
+              </p>
+            )}
           <Separator className="my-2" />
         </div>
       )}
