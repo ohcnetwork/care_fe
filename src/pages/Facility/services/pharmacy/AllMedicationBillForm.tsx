@@ -1900,7 +1900,6 @@ export default function AllMedicationBillForm({ patientId }: Props) {
                                                         min={0}
                                                         {...formField}
                                                         className="border-gray-300 border rounded-none w-24"
-                                                        placeholder="0"
                                                       />
                                                     </FormControl>
                                                     <FormMessage />
