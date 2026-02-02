@@ -10,7 +10,7 @@ import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-import { Markdown } from "@/src/components/ui/markdown";
+import { Markdown } from "@/components/ui/markdown";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import query from "@/Utils/request/query";

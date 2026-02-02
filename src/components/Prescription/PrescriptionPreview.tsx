@@ -72,7 +72,7 @@ const PrescriptionContent = ({
                       ? `, ${instruction.additional_instruction[0].display}`
                       : ""),
                 duration: duration ? `${duration.value} ${duration.unit}` : "-",
-                instructions: `${`${remarks ? `${remarks}\n` : ""}`}${notes}`,
+                instructions: [remarks, notes].filter(Boolean).join("\n"),
               };
             })}
           />
