@@ -190,7 +190,7 @@ export function ChargeItemsTable({
       pathParams: { facilityId },
       queryParams: {
         account: accountId,
-        status: qParams.charge_item_status,
+        status: qParams.status,
         service_resource: qParams.service_resource,
         ordering: qParams.ordering,
         title: qParams.title,
