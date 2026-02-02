@@ -969,7 +969,7 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
         {t(appointment.status)}
       </TableCell>
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white rounded-r-lg">
-        {appointment.token && renderTokenNumber(appointment.token)}
+        {appointment.token ? renderTokenNumber(appointment.token) : "--"}
       </TableCell>
     </>
   );

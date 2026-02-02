@@ -200,8 +200,9 @@ export function PrintAppointments({
                       )}
                     </TableCell>
                     <TableCell className="p-2 align-top">
-                      {appointment.token &&
-                        renderTokenNumber(appointment.token)}
+                      {appointment.token
+                        ? renderTokenNumber(appointment.token)
+                        : "--"}
                     </TableCell>
                     <TableCell className="p-2 align-top">
                       <Badge
