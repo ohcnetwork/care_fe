@@ -49,6 +49,7 @@ import {
   longDateRangeOptions,
 } from "@/components/ui/multi-filter/utils/Utils";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { CreateDispenseSheet } from "@/pages/Facility/services/pharmacy/CreateDispenseSheet";
 import { ENCOUNTER_CLASSES_COLORS } from "@/types/emr/encounter/encounter";
 import {
   PrescriptionStatus,
@@ -206,7 +207,16 @@ export default function MedicationRequestList({
   });
 
   return (
-    <Page title={t("prescription_queue")}>
+    <Page
+      title={t("prescription_queue")}
+      options={
+        <CreateDispenseSheet
+          facilityId={facilityId}
+          locationId={locationId}
+          patientId={qParams.patient_external_id}
+        />
+      }
+    >
       {/* Priority tabs with original styling */}
       <div className="mb-4 pt-6">
         <Tabs

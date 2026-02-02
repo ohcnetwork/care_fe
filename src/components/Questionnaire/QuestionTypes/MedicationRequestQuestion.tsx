@@ -12,6 +12,7 @@ import {
   PlusIcon,
   SlidersHorizontal,
 } from "lucide-react";
+import { useQueryParams } from "raviger";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -55,6 +56,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
@@ -93,6 +95,8 @@ import {
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
+import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
+import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
@@ -316,26 +320,38 @@ export function MedicationRequestQuestion({
   const { facilityId } = useCurrentFacilitySilently();
   const currentUser = useAuthUser() as UserReadMinimal;
   const isPreview = patientId === "preview";
+  const [{ prescription: prescriptionId }] = useQueryParams<{
+    prescription?: string;
+  }>();
   const medications =
     (questionnaireResponse.values?.[0]?.value as MedicationRequestCreate[]) ||
     [];
 
   const { data: patientMedications } = useQuery({
-    queryKey: ["medication_requests", patientId, encounterId],
+    queryKey: ["medication_requests", patientId, encounterId, prescriptionId],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,
+        prescription: prescriptionId,
         ordering: "-modified_date",
         limit: 100,
         facility: facilityId,
       },
     }),
-    enabled: !isPreview,
+    enabled: !isPreview && !!prescriptionId,
+  });
+
+  const { data: prescription } = useQuery({
+    queryKey: ["prescription", patientId, prescriptionId],
+    queryFn: query(prescriptionApi.get, {
+      pathParams: { patientId, id: prescriptionId! },
+    }),
+    enabled: !isPreview && !!prescriptionId,
   });
 
   useEffect(() => {
-    if (patientMedications?.results) {
+    if (prescriptionId && patientMedications?.results) {
       updateQuestionnaireResponseCB(
         [
           {
@@ -352,7 +368,7 @@ export function MedicationRequestQuestion({
         questionnaireResponse.question_id,
       );
     }
-  }, [patientMedications]);
+  }, [patientMedications, prescriptionId]);
 
   const [expandedMedicationIndex, setExpandedMedicationIndex] = useState<
     number | null
@@ -363,6 +379,30 @@ export function MedicationRequestQuestion({
   );
   const [showAdvancedFields, setShowAdvancedFields] = useState(false);
   const desktopLayout = useBreakpoints({ lg: true, default: false });
+
+  // Derive prescription note from new medications (those without an ID)
+  const prescriptionNote =
+    medications.find((m) => !m.id)?.create_prescription?.note || "";
+
+  // Update prescription note on all new medications
+  const updatePrescriptionNote = (note: string) => {
+    const updatedMedications = medications.map((medication) =>
+      !medication.id && medication.create_prescription
+        ? {
+            ...medication,
+            create_prescription: {
+              ...medication.create_prescription,
+              note: note || undefined,
+            },
+          }
+        : medication,
+    );
+
+    updateQuestionnaireResponseCB(
+      [{ type: "medication_request", value: updatedMedications }],
+      questionnaireResponse.question_id,
+    );
+  };
 
   const [newMedicationInSheet, setNewMedicationInSheet] =
     useState<MedicationRequestCreate | null>(null);
@@ -552,7 +592,15 @@ export function MedicationRequestQuestion({
   const addNewMedication = (medication: MedicationRequestCreate) => {
     const newMedications: MedicationRequestCreate[] = [
       ...medications,
-      { ...medication, dirty: true }, // Mark new medication as dirty
+      {
+        ...medication,
+        dirty: true, // Mark new medication as dirty
+        create_prescription: {
+          status: PrescriptionStatus.active,
+          alternate_identifier: "", // Will be set by handler
+          note: prescriptionNote || undefined,
+        },
+      },
     ];
 
     updateQuestionnaireResponseCB(
@@ -589,6 +637,11 @@ export function MedicationRequestQuestion({
           requester: currentUser,
           medication: requested_product?.id ? null : request.medication,
           dirty: true, // Mark as dirty since it's being added as new
+          create_prescription: {
+            status: PrescriptionStatus.active,
+            alternate_identifier: "",
+            note: prescriptionNote || undefined,
+          },
         } as MedicationRequestCreate;
       } else {
         const statement = record as MedicationStatementRead;
@@ -598,6 +651,11 @@ export function MedicationRequestQuestion({
           note: statement.note,
           requester: currentUser,
           dirty: true, // Mark as dirty since it's being added as new
+          create_prescription: {
+            status: PrescriptionStatus.active,
+            alternate_identifier: "",
+            note: prescriptionNote || undefined,
+          },
         } as MedicationRequestCreate;
       }
     });
@@ -672,7 +730,14 @@ export function MedicationRequestQuestion({
 
     const newMedications: MedicationRequestCreate[] = [
       ...medications,
-      medicationToAdd,
+      {
+        ...medicationToAdd,
+        create_prescription: {
+          status: PrescriptionStatus.active,
+          alternate_identifier: "",
+          note: prescriptionNote || undefined,
+        },
+      },
     ];
 
     updateQuestionnaireResponseCB(
@@ -702,7 +767,14 @@ export function MedicationRequestQuestion({
 
       const newMedications: MedicationRequestCreate[] = [
         ...medications,
-        ...medicationsWithProductKnowledge,
+        ...medicationsWithProductKnowledge.map((med) => ({
+          ...med,
+          create_prescription: {
+            status: PrescriptionStatus.active,
+            alternate_identifier: "",
+            note: prescriptionNote || undefined,
+          },
+        })),
       ];
 
       updateQuestionnaireResponseCB(
@@ -1035,166 +1107,169 @@ export function MedicationRequestQuestion({
         </DialogContent>
       </Dialog>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <HistoricalRecordSelector<
-          MedicationRequestRead | MedicationStatementRead
-        >
-          title={t("medication_history")}
-          structuredTypes={[
-            {
-              type: t("past_prescriptions"),
-              displayFields: [
-                {
-                  key: "",
-                  label: t("medicine"),
-                  render: (med) => displayMedicationName(med),
-                },
-                {
-                  key: "dosage_instruction",
-                  label: t("dosage"),
-                  render: (instructions) => {
-                    const dosage = formatDosage(instructions[0]) || "";
-                    const frequency =
-                      getFrequencyDisplay(instructions[0]?.timing)?.meaning ||
-                      "-";
-                    return `${dosage}\n${frequency}`;
+      {!prescriptionId && (
+        <div className="flex flex-wrap items-center gap-2">
+          <HistoricalRecordSelector<
+            MedicationRequestRead | MedicationStatementRead
+          >
+            title={t("medication_history")}
+            structuredTypes={[
+              {
+                type: t("past_prescriptions"),
+                displayFields: [
+                  {
+                    key: "",
+                    label: t("medicine"),
+                    render: (med) => displayMedicationName(med),
                   },
-                },
-                {
-                  key: "dosage_instruction",
-                  label: t("duration"),
-                  render: (instructions) => {
-                    const duration =
-                      instructions?.[0]?.timing?.repeat?.bounds_duration;
-                    if (!duration?.value) return "-";
-                    return `${duration.value} ${duration.unit}`;
+                  {
+                    key: "dosage_instruction",
+                    label: t("dosage"),
+                    render: (instructions) => {
+                      const dosage = formatDosage(instructions[0]) || "";
+                      const frequency =
+                        getFrequencyDisplay(instructions[0]?.timing)?.meaning ||
+                        "-";
+                      return `${dosage}\n${frequency}`;
+                    },
                   },
-                },
-                {
-                  key: "requester",
-                  label: t("prescribed_by"),
-                  render: (requester) => (
-                    <div className="flex items-center gap-2">
-                      <Avatar
-                        imageUrl={requester?.profile_picture_url}
-                        name={formatName(requester, true)}
-                        className="size-6 rounded-full"
-                      />
-                      <span className="text-sm truncate">
-                        {formatName(requester)}
-                      </span>
-                    </div>
-                  ),
-                },
-              ],
-              expandableFields: [
-                {
-                  key: "dosage_instruction",
-                  label: t("instructions"),
-                  render: (instructions) =>
-                    instructions?.[0]?.additional_instruction?.[0]?.display,
-                },
-                {
-                  key: "note",
-                  label: t("notes"),
-                  render: (note) => note,
-                },
-              ],
-              queryKey: ["medication_requests", patientId],
-              queryFn: async (
-                limit: number,
-                offset: number,
-                signal: AbortSignal,
-              ) => {
-                const response = await query(medicationRequestApi.list, {
-                  pathParams: { patientId },
-                  queryParams: {
-                    limit,
-                    offset,
-                    status:
-                      "active,on_hold,draft,unknown,ended,completed,cancelled",
+                  {
+                    key: "dosage_instruction",
+                    label: t("duration"),
+                    render: (instructions) => {
+                      const duration =
+                        instructions?.[0]?.timing?.repeat?.bounds_duration;
+                      if (!duration?.value) return "-";
+                      return `${duration.value} ${duration.unit}`;
+                    },
                   },
-                })({ signal });
-                return response;
+                  {
+                    key: "requester",
+                    label: t("prescribed_by"),
+                    render: (requester) => (
+                      <div className="flex items-center gap-2">
+                        <Avatar
+                          imageUrl={requester?.profile_picture_url}
+                          name={formatName(requester, true)}
+                          className="size-6 rounded-full"
+                        />
+                        <span className="text-sm truncate">
+                          {formatName(requester)}
+                        </span>
+                      </div>
+                    ),
+                  },
+                ],
+                expandableFields: [
+                  {
+                    key: "dosage_instruction",
+                    label: t("instructions"),
+                    render: (instructions) =>
+                      instructions?.[0]?.additional_instruction?.[0]?.display,
+                  },
+                  {
+                    key: "note",
+                    label: t("notes"),
+                    render: (note) => note,
+                  },
+                ],
+                queryKey: ["medication_requests", patientId],
+                queryFn: async (
+                  limit: number,
+                  offset: number,
+                  signal: AbortSignal,
+                ) => {
+                  const response = await query(medicationRequestApi.list, {
+                    pathParams: { patientId },
+                    queryParams: {
+                      limit,
+                      offset,
+                      status:
+                        "active,on_hold,draft,unknown,ended,completed,cancelled",
+                    },
+                  })({ signal });
+                  return response;
+                },
               },
-            },
-            {
-              type: t("medication_statements"),
-              displayFields: [
-                {
-                  key: "medication",
-                  label: t("medicine"),
-                  render: (med) => med?.display,
-                },
-                {
-                  key: "dosage_text",
-                  label: t("dosage_instruction"),
-                  render: (dosage) => dosage,
-                },
-                {
-                  key: "status",
-                  label: t("status"),
-                  render: (status: string) => t(`medication_status__${status}`),
-                },
-                {
-                  key: "created_by",
-                  label: t("prescribed_by"),
-                  render: (created_by) => (
-                    <div className="flex items-center gap-2">
-                      <Avatar
-                        imageUrl={created_by?.profile_picture_url}
-                        name={formatName(created_by, true)}
-                        className="size-6 rounded-full"
-                      />
-                      <span className="text-sm truncate">
-                        {formatName(created_by)}
-                      </span>
-                    </div>
-                  ),
-                },
-              ],
-              expandableFields: [
-                {
-                  key: "note",
-                  label: t("notes"),
-                  render: (note) => note,
-                },
-              ],
-              queryKey: ["medication_statements", patientId],
-              queryFn: async (
-                limit: number,
-                offset: number,
-                signal: AbortSignal,
-              ) => {
-                const response = await query(medicationStatementApi.list, {
-                  pathParams: { patientId },
-                  queryParams: {
-                    limit,
-                    offset,
-                    status:
-                      "active,on_hold,completed,stopped,unknown,not_taken,intended",
+              {
+                type: t("medication_statements"),
+                displayFields: [
+                  {
+                    key: "medication",
+                    label: t("medicine"),
+                    render: (med) => med?.display,
                   },
-                })({ signal });
-                return response;
+                  {
+                    key: "dosage_text",
+                    label: t("dosage_instruction"),
+                    render: (dosage) => dosage,
+                  },
+                  {
+                    key: "status",
+                    label: t("status"),
+                    render: (status: string) =>
+                      t(`medication_status__${status}`),
+                  },
+                  {
+                    key: "created_by",
+                    label: t("prescribed_by"),
+                    render: (created_by) => (
+                      <div className="flex items-center gap-2">
+                        <Avatar
+                          imageUrl={created_by?.profile_picture_url}
+                          name={formatName(created_by, true)}
+                          className="size-6 rounded-full"
+                        />
+                        <span className="text-sm truncate">
+                          {formatName(created_by)}
+                        </span>
+                      </div>
+                    ),
+                  },
+                ],
+                expandableFields: [
+                  {
+                    key: "note",
+                    label: t("notes"),
+                    render: (note) => note,
+                  },
+                ],
+                queryKey: ["medication_statements", patientId],
+                queryFn: async (
+                  limit: number,
+                  offset: number,
+                  signal: AbortSignal,
+                ) => {
+                  const response = await query(medicationStatementApi.list, {
+                    pathParams: { patientId },
+                    queryParams: {
+                      limit,
+                      offset,
+                      status:
+                        "active,on_hold,completed,stopped,unknown,not_taken,intended",
+                    },
+                  })({ signal });
+                  return response;
+                },
               },
-            },
-          ]}
-          buttonLabel={t("medication_history")}
-          onAddSelected={handleAddHistoricalMedications}
-          disableAPI={isPreview}
-        />
-        {questionnaireSlug && (
-          <ManageResponseTemplatesSheet
-            questionnaireSlug={questionnaireSlug}
-            facilityId={facilityId}
-            onTemplateSelect={handleApplyTemplate}
-            onMedicationSelect={handleAddSingleMedication}
-            disabled={disabled || isPreview}
-            currentMedications={medications}
-            key_filter="medication_request"
+            ]}
+            buttonLabel={t("medication_history")}
+            onAddSelected={handleAddHistoricalMedications}
+            disableAPI={isPreview}
           />
-        )}
-      </div>
+          {questionnaireSlug && (
+            <ManageResponseTemplatesSheet
+              questionnaireSlug={questionnaireSlug}
+              facilityId={facilityId}
+              onTemplateSelect={handleApplyTemplate}
+              onMedicationSelect={handleAddSingleMedication}
+              disabled={disabled || isPreview}
+              currentMedications={medications}
+              key_filter="medication_request"
+            />
+          )}
+        </div>
+      )}
       {!!patientMedications?.count && patientMedications.count > 100 && (
         <Alert className="bg-yellow-50 border-yellow-200">
           <AlertTriangle className="h-4 w-4 text-yellow-600" />
@@ -1475,35 +1550,59 @@ export function MedicationRequestQuestion({
         </div>
       )}
 
-      {!desktopLayout ? (
-        <EntitySelectionDrawer
-          open={!!newMedicationInSheet}
-          onOpenChange={(isOpen) => {
-            if (!isOpen) {
-              setNewMedicationInSheet(null);
-            }
-          }}
-          system="system-medication"
-          entityType="medication"
-          searchPostFix=" clinical drug"
-          disabled={disabled}
-          onEntitySelected={handleAddMedication}
-          onConfirm={handleConfirmMedicationInSheet}
-          placeholder={addMedicationPlaceholder}
-          onProductEntitySelected={handleAddProductMedication}
-          enableProduct
-        >
-          {newMedicationSheetContent}
-        </EntitySelectionDrawer>
-      ) : (
-        <div className="max-w-4xl">
-          <MedicationValueSetSelect
-            placeholder={addMedicationPlaceholder}
-            onSelect={handleAddMedication}
-            onProductSelect={handleAddProductMedication}
+      {!prescriptionId &&
+        (!desktopLayout ? (
+          <EntitySelectionDrawer
+            open={!!newMedicationInSheet}
+            onOpenChange={(isOpen) => {
+              if (!isOpen) {
+                setNewMedicationInSheet(null);
+              }
+            }}
+            system="system-medication"
+            entityType="medication"
+            searchPostFix=" clinical drug"
             disabled={disabled}
-            title={t("select_medication")}
-          />
+            onEntitySelected={handleAddMedication}
+            onConfirm={handleConfirmMedicationInSheet}
+            placeholder={addMedicationPlaceholder}
+            onProductEntitySelected={handleAddProductMedication}
+            enableProduct
+          >
+            {newMedicationSheetContent}
+          </EntitySelectionDrawer>
+        ) : (
+          <div className="max-w-4xl">
+            <MedicationValueSetSelect
+              placeholder={addMedicationPlaceholder}
+              onSelect={handleAddMedication}
+              onProductSelect={handleAddProductMedication}
+              disabled={disabled}
+              title={t("select_medication")}
+            />
+          </div>
+        ))}
+
+      {/* Prescription Note Field - show when editing, or when creating with at least one medication */}
+      {(prescriptionId || medications.length > 0) && (
+        <div className="max-w-4xl space-y-2">
+          <Label htmlFor="prescription-note">{t("note")}</Label>
+          {prescriptionId ? (
+            <div className="p-3 bg-gray-50 border border-gray-200 rounded-md min-h-[80px] text-sm text-gray-700 whitespace-pre-wrap">
+              {prescription?.note || (
+                <span className="text-gray-400 italic">{t("no_notes")}</span>
+              )}
+            </div>
+          ) : (
+            <Textarea
+              id="prescription-note"
+              placeholder={t("prescription_note_placeholder")}
+              value={prescriptionNote}
+              onChange={(e) => updatePrescriptionNote(e.target.value)}
+              disabled={disabled}
+              className="min-h-[80px]"
+            />
+          )}
         </div>
       )}
     </div>

@@ -49,7 +49,7 @@ const TokenEncounterRedirect = ({
       <Redirect
         to={`/facility/${facilityId}/patients/verify?${new URLSearchParams({
           phone_number: token.patient.phone_number,
-          from_queue: "true",
+          flow: "queue",
           year_of_birth: token.patient.year_of_birth?.toString() || "",
           partial_id: token.patient.id.slice(0, 5),
         }).toString()}`}

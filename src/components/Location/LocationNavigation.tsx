@@ -20,7 +20,7 @@ interface LocationNavigationProps {
   beds: LocationRead[];
   selectedLocation: LocationRead | null;
   locationHistory: LocationRead[];
-  selectedBed: string | null;
+  selectedBed: LocationRead | null;
   selectedLinkedBed: LocationAssociationRead | undefined;
   showAvailableOnly: boolean;
   searchTerm: string;
@@ -28,7 +28,7 @@ interface LocationNavigationProps {
   isLoadingBeds: boolean;
   hasMore: boolean;
   onLocationClick: (location: LocationRead) => void;
-  onBedSelect: (bedId: string) => void;
+  onBedSelect: (bed: LocationRead) => void;
   onLinkedBedSelect: (bed: LocationAssociationRead) => void;
   onCheckBedStatus: (bed: LocationRead) => void;
   onSearchChange: (value: string) => void;
@@ -115,9 +115,7 @@ export function LocationNavigation({
             <p className="text-sm text-green-800 flex items-center justify-between">
               <span className="font-normal">
                 {t("selected_bed")}:{" "}
-                <span className="font-medium">
-                  {beds.find((b) => b.id === selectedBed)?.name}
-                </span>
+                <span className="font-medium">{selectedBed.name}</span>
               </span>
               {selectedBed && (
                 <Button
