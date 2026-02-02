@@ -80,6 +80,7 @@
     "@radix-ui/react-switch": "^1.1.4",
     "@radix-ui/react-tabs": "^1.1.4",
     "@radix-ui/react-tooltip": "^1.2.0",
+    "@radix-ui/react-visually-hidden": "^1.2.4",
     "@sentry/browser": "^9.0.0",
     "@tailwindcss/vite": "^4.0.17",
     "@tanstack/query-async-storage-persister": "^5.83.0",
@@ -136,6 +137,11 @@
     "tailwind-merge": "^3.2.0",
     "use-keyboard-shortcut": "^1.1.6",
     "vaul": "^1.1.2",
+    "workbox-core": "^7.4.0",
+    "workbox-precaching": "^7.4.0",
+    "workbox-routing": "^7.4.0",
+    "workbox-strategies": "^7.4.0",
+    "workbox-window": "^7.4.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
