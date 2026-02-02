@@ -60,10 +60,6 @@ import { Decimal } from "decimal.js";
 
 import { filterStructuredQuestionnaireSlugs } from "@/components/Questionnaire/data/StructuredFormData";
 
-/**
- * Builds a service request object suitable for storing in a template.
- * Converts internal representations to template-friendly format.
- */
 export function buildServiceRequestForTemplate(
   serviceRequest: ServiceRequestApplyActivityDefinitionSpec,
 ): ActivityDefinitionTemplateSpec {
