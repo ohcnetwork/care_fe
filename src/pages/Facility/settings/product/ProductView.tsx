@@ -167,18 +167,20 @@ export default function ProductView({ facilityId, productId }: Props) {
                     {product.product_knowledge.slug}
                   </p>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/settings/product_knowledge/${product.product_knowledge.slug}`,
-                    )
-                  }
-                >
-                  <CareIcon icon="l-eye" className="mr-2 size-4" />
-                  {t("view_details")}
-                </Button>
+                {product.product_knowledge.is_instance_level === false && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/settings/product_knowledge/${product.product_knowledge.slug}`,
+                      )
+                    }
+                  >
+                    <CareIcon icon="l-eye" className="mr-2 size-4" />
+                    {t("view_details")}
+                  </Button>
+                )}
               </div>
             </div>
           </CardContent>

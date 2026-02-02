@@ -72,6 +72,7 @@ import {
 import fileApi from "@/types/files/fileApi";
 
 import { PLUGIN_Component } from "@/PluginEngine";
+import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
 
 interface DiagnosticReportFormProps {
   patientId: string;
@@ -92,7 +93,7 @@ interface DiagnosticReportFormProps {
 interface ComponentValue {
   value: string;
   unit: string;
-  interpretation: string;
+  interpretation?: Interpretation;
 }
 
 // Interface for observation values
@@ -100,7 +101,7 @@ interface ObservationValue {
   id: string;
   value: string;
   unit: string;
-  interpretation: string;
+  interpretation?: Interpretation;
   status: ObservationStatus;
   components: Record<string, ComponentValue>;
 }
@@ -308,7 +309,7 @@ export function DiagnosticReportForm({
                   components[comp.code.code] = {
                     value: comp.value.value || "",
                     unit: comp.value.unit?.code || "",
-                    interpretation: comp.interpretation || "",
+                    interpretation: comp.interpretation,
                   };
                 }
               });
@@ -318,7 +319,7 @@ export function DiagnosticReportForm({
               id: obs.id,
               value: obs.value.value || "",
               unit: obs.value.unit?.code || "",
-              interpretation: obs.interpretation || "",
+              interpretation: obs.interpretation,
               status: obs.status,
               components,
             };
@@ -351,7 +352,6 @@ export function DiagnosticReportForm({
           id: "",
           value: "",
           unit: "",
-          interpretation: "",
           status: ObservationStatus.AMENDED,
           components: {},
         };
@@ -375,7 +375,6 @@ export function DiagnosticReportForm({
           id: "",
           value: "",
           unit: "",
-          interpretation: "",
           status: ObservationStatus.AMENDED,
           components: {},
         };
@@ -405,7 +404,6 @@ export function DiagnosticReportForm({
           id: "",
           value: "",
           unit: "",
-          interpretation: "",
           status: ObservationStatus.AMENDED,
           components: {},
         };
@@ -444,7 +442,6 @@ export function DiagnosticReportForm({
           id: "",
           value: "",
           unit: "",
-          interpretation: "",
           status: ObservationStatus.AMENDED,
           components: {},
         };
@@ -640,7 +637,6 @@ export function DiagnosticReportForm({
                   observationDefinition?.permitted_data_type || "decimal",
                 effective_datetime: new Date().toISOString(),
                 value,
-                interpretation: obsData.interpretation || "",
                 component: components.length > 0 ? components : undefined,
               },
             };
@@ -701,7 +697,6 @@ export function DiagnosticReportForm({
                   id: "",
                   value: "",
                   unit: "",
-                  interpretation: "",
                   status: ObservationStatus.AMENDED,
                   components: {},
                 },
@@ -1071,7 +1066,6 @@ export function DiagnosticReportForm({
                                         id: "",
                                         value: "",
                                         unit: "",
-                                        interpretation: "",
                                         status: ObservationStatus.AMENDED,
                                         components: {},
                                       },

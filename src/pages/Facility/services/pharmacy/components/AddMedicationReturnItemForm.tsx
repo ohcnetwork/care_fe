@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -10,6 +10,14 @@ import { z } from "zod";
 import { DisablingCover } from "@/components/Common/DisablingCover";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -29,18 +37,17 @@ import {
 
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
-import inventoryApi from "@/types/inventory/product/inventoryApi";
+import batchApi from "@/types/base/batch/batchApi";
+import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import {
   SupplyDeliveryCondition,
   SupplyDeliveryStatus,
   SupplyDeliveryType,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
-import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
-import { zodDecimal } from "@/Utils/decimal";
+import { round, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 
 const returnItemSchema = z.object({
   supplied_inventory_item: z.string().min(1, "Please select a stock item"),
@@ -65,6 +72,7 @@ interface Props {
   facilityId: string;
   locationId: string;
   onSuccess: () => void;
+  medicationDispenses?: MedicationDispenseRead[];
 }
 
 export function AddMedicationReturnItemForm({
@@ -72,6 +80,7 @@ export function AddMedicationReturnItemForm({
   facilityId,
   locationId,
   onSuccess,
+  medicationDispenses = [],
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -79,6 +88,8 @@ export function AddMedicationReturnItemForm({
   const [newlyAddedRowIndex, setNewlyAddedRowIndex] = useState<number | null>(
     null,
   );
+  const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
+  const [selectedDispenses, setSelectedDispenses] = useState<string[]>([]);
 
   const createEmptyItem = useCallback(
     (): ReturnItemValues => ({
@@ -97,20 +108,6 @@ export function AddMedicationReturnItemForm({
     },
   });
 
-  // Query inventories for the location (to look up product IDs when user selects stock)
-  const { data: inventoriesData } = useQuery({
-    queryKey: ["inventoryItemsForReturn", facilityId, locationId],
-    queryFn: query(inventoryApi.list, {
-      pathParams: { facilityId, locationId },
-      queryParams: {
-        limit: 100,
-      },
-    }),
-    enabled: Boolean(facilityId && locationId),
-  });
-
-  const inventories = inventoriesData?.results || [];
-
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "items",
@@ -122,8 +119,46 @@ export function AddMedicationReturnItemForm({
     setNewlyAddedRowIndex(newIndex);
   };
 
-  const { mutateAsync: createSupplyDelivery } = useMutation({
-    mutationFn: mutate(supplyDeliveryApi.createSupplyDelivery),
+  const loadFromMedicationDispenses = () => {
+    setIsSelectDialogOpen(true);
+    handleSelectAll(true);
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedDispenses(medicationDispenses.map((dispense) => dispense.id));
+    } else {
+      setSelectedDispenses([]);
+    }
+  };
+
+  const handleSelectDispense = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedDispenses((prev) => [...prev, id]);
+    } else {
+      setSelectedDispenses((prev) =>
+        prev.filter((dispenseId) => dispenseId !== id),
+      );
+    }
+  };
+
+  const handleSelectDispenses = () => {
+    const selectedMedicationDispenses = medicationDispenses.filter((dispense) =>
+      selectedDispenses.includes(dispense.id),
+    );
+    const itemsFromDispenses = selectedMedicationDispenses.map((dispense) => ({
+      supplied_inventory_item: dispense.item.id,
+      supplied_item: dispense.item.product.id,
+      supplied_item_quantity: dispense.quantity,
+      product_knowledge: dispense.item.product.product_knowledge,
+    }));
+    form.setValue("items", itemsFromDispenses);
+    setIsSelectDialogOpen(false);
+    setSelectedDispenses([]);
+  };
+
+  const { mutateAsync: createSupplyDeliveries } = useMutation({
+    mutationFn: mutate(batchApi.batchRequest),
   });
 
   const validateFormWithToasts = useCallback(
@@ -156,11 +191,13 @@ export function AddMedicationReturnItemForm({
 
     setIsProcessing(true);
 
-    const results = await Promise.allSettled(
-      data.items.map(async (item, index) => {
-        // For medication returns (no origin), we use supplied_item (Product ID)
-        // not supplied_inventory_item (InventoryItem ID)
-        const deliveryPayload = {
+    try {
+      // Build batch request for all supply deliveries
+      const requests = data.items.map((item, index) => ({
+        url: `/api/v1/supply_delivery/`,
+        method: "POST",
+        reference_id: `supply_delivery_${index}`,
+        body: {
           status: SupplyDeliveryStatus.in_progress,
           supplied_item_type: SupplyDeliveryType.product,
           supplied_item_condition: SupplyDeliveryCondition.normal,
@@ -169,40 +206,50 @@ export function AddMedicationReturnItemForm({
           destination: locationId,
           order: deliveryOrderId,
           extensions: {},
-        };
+        },
+      }));
 
-        await createSupplyDelivery(deliveryPayload);
-        return index;
-      }),
-    );
+      const response = await createSupplyDeliveries({ requests });
 
-    const successfulIndices = results
-      .map((result) => (result.status === "fulfilled" ? result.value : null))
-      .filter((index): index is number => index !== null);
-
-    const failedCount = results.filter(
-      (result) => result.status === "rejected",
-    ).length;
-
-    // Remove successful rows from form (in reverse order to maintain correct indices)
-    [...successfulIndices].sort((a, b) => b - a).forEach((idx) => remove(idx));
-
-    if (successfulIndices.length > 0) {
-      queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
-    }
-
-    setIsProcessing(false);
-
-    if (failedCount === 0) {
-      toast.success(
-        t("items_created_successfully", { count: successfulIndices.length }),
+      // Check for any failures in the batch response
+      const failedRequests = response.results.filter(
+        (result) => result.status_code >= 400,
       );
-      onSuccess();
-      form.reset();
-    } else if (successfulIndices.length > 0) {
-      toast.success(
-        t("items_created_successfully", { count: successfulIndices.length }),
-      );
+
+      if (failedRequests.length === 0) {
+        // All succeeded
+        toast.success(
+          t("medication_return_completed_successfully", {
+            count: data.items.length,
+          }),
+        );
+        queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
+        onSuccess();
+        form.reset();
+      } else if (failedRequests.length < response.results.length) {
+        // Partial success
+        const successCount = response.results.length - failedRequests.length;
+        toast.success(
+          t("partially_completed_medication_return", { count: successCount }),
+        );
+        queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
+
+        // Remove successful items from form (in reverse order)
+        const successfulIndices = response.results
+          .map((result, index) => (result.status_code < 400 ? index : null))
+          .filter((index): index is number => index !== null);
+
+        [...successfulIndices]
+          .sort((a, b) => b - a)
+          .forEach((idx) => remove(idx));
+      } else {
+        // All failed
+        toast.error(t("error_completing_medication_return_items"));
+      }
+    } catch (_) {
+      toast.error(t("error_completing_medication_return_items"));
+    } finally {
+      setIsProcessing(false);
     }
   }
 
@@ -281,6 +328,7 @@ export function AddMedicationReturnItemForm({
                                   <FormItem>
                                     <FormControl>
                                       <StockLotSelector
+                                        net_content_gt={-1}
                                         selectedLots={
                                           field.value
                                             ? [
@@ -293,19 +341,21 @@ export function AddMedicationReturnItemForm({
                                             : []
                                         }
                                         onLotSelectionChange={(lots) => {
+                                          const lot = lots[0];
                                           const inventoryId =
-                                            lots[0]?.selectedInventoryId || "";
+                                            lot?.selectedInventoryId || "";
                                           field.onChange(inventoryId);
 
-                                          // Find the inventory item and store the product ID
-                                          const selectedInventory =
-                                            inventories.find(
-                                              (inv) => inv.id === inventoryId,
-                                            );
-                                          if (selectedInventory) {
+                                          // Use the inventory from the lot to get the product ID
+                                          if (lot?.inventory) {
                                             form.setValue(
                                               `items.${index}.supplied_item`,
-                                              selectedInventory.product.id,
+                                              lot.inventory.product.id,
+                                            );
+                                          } else {
+                                            form.setValue(
+                                              `items.${index}.supplied_item`,
+                                              "",
                                             );
                                           }
                                         }}
@@ -371,6 +421,17 @@ export function AddMedicationReturnItemForm({
                     <PlusCircle className="mr-2 size-4" />
                     {t("add_another")}
                   </Button>
+                  {medicationDispenses.length > 0 && (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={loadFromMedicationDispenses}
+                    >
+                      {t("load_from_order")} ({medicationDispenses.length}{" "}
+                      {t("items")})
+                      <ShortcutBadge actionId="load-from-order" />
+                    </Button>
+                  )}
                 </div>
 
                 <div className="flex justify-between">
@@ -397,19 +458,111 @@ export function AddMedicationReturnItemForm({
               <p className="text-sm text-gray-500">
                 {t("select_items_from_stock_to_return")}
               </p>
-              <Button
-                type="button"
-                variant="outline_primary"
-                onClick={() => handleAddAnotherItem()}
-              >
-                <PlusCircle className="mr-2 size-4" />
-                {t("add_item")}
-                <ShortcutBadge actionId="add-item" />
-              </Button>
+              <div className="flex flex-row gap-2 items-center mt-2">
+                {medicationDispenses.length > 0 && (
+                  <>
+                    <Button
+                      type="button"
+                      variant="outline_primary"
+                      onClick={loadFromMedicationDispenses}
+                    >
+                      {t("load_from_order")} ({medicationDispenses.length}{" "}
+                      {t("items")})
+                      <ShortcutBadge actionId="load-from-order" />
+                    </Button>
+                    <p>- {t("or")} -</p>
+                  </>
+                )}
+                <Button
+                  type="button"
+                  variant="outline_primary"
+                  onClick={() => handleAddAnotherItem()}
+                >
+                  <PlusCircle className="mr-2 size-4" />
+                  {t("add_item")}
+                  <ShortcutBadge actionId="add-item" />
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
       </Card>
+      {medicationDispenses.length > 0 && (
+        <Dialog open={isSelectDialogOpen} onOpenChange={setIsSelectDialogOpen}>
+          <DialogContent className="sm:max-w-xl overflow-y-auto max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle>{t("select_items_to_add")}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="select-all"
+                  checked={
+                    selectedDispenses.length === medicationDispenses.length
+                  }
+                  onCheckedChange={(checked) =>
+                    handleSelectAll(checked as boolean)
+                  }
+                  data-shortcut-id="select-all"
+                />
+                <label
+                  htmlFor="select-all"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  {t("select_all")}
+                </label>
+              </div>
+              <div className="border rounded-md divide-y">
+                {medicationDispenses.map((dispense) => (
+                  <div
+                    key={dispense.id}
+                    className="flex items-center space-x-4 p-2 hover:bg-gray-50"
+                  >
+                    <Checkbox
+                      id={dispense.id}
+                      checked={selectedDispenses.includes(dispense.id)}
+                      onCheckedChange={(checked) =>
+                        handleSelectDispense(dispense.id, checked as boolean)
+                      }
+                    />
+                    <div className="flex-1">
+                      <label
+                        htmlFor={dispense.id}
+                        className="text-sm font-medium leading-none"
+                      >
+                        {dispense.item.product.product_knowledge.name}
+                      </label>
+                      {dispense.item.product.batch?.lot_number && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          {t("batch")}: {dispense.item.product.batch.lot_number}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-sm font-medium">
+                      {round(dispense.quantity)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsSelectDialogOpen(false)}
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                onClick={handleSelectDispenses}
+                disabled={selectedDispenses.length === 0}
+              >
+                {t("done")}
+                <ShortcutBadge actionId="enter-action" />
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </DisablingCover>
   );
 }

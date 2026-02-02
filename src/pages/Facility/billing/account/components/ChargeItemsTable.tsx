@@ -7,6 +7,7 @@ import {
   PencilIcon,
   PlusIcon,
   PrinterIcon,
+  Zap,
 } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
@@ -43,6 +44,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import SearchInput from "@/components/Common/SearchInput";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
@@ -67,6 +69,7 @@ import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./AddChargeItemsBillingSheet";
 import EditChargeItemSheet from "./EditChargeItemSheet";
+import QuickAddChargeItemsSheet from "./QuickAddChargeItemsSheet";
 
 interface PriceComponentRowProps {
   label: string;
@@ -116,6 +119,7 @@ export function ChargeItemsTable({
     {},
   );
   const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = useState(false);
+  const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
 
   // Register shortcuts for this table
   useShortcutSubContext("facility:billing");
@@ -131,6 +135,7 @@ export function ChargeItemsTable({
       queryParams: {
         account: accountId,
         status: qParams.charge_item_status,
+        title: qParams.title,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
       },
@@ -226,7 +231,7 @@ export function ChargeItemsTable({
           </SelectContent>
         </Select>
 
-        <div className="flex items-center gap-2">
+        <div className="flex sm:flex-row flex-col sm:items-center gap-2 w-full sm:w-auto">
           <Button
             variant="outline"
             onClick={() => navigate(`../${accountId}/charge_items/print`)}
@@ -238,6 +243,14 @@ export function ChargeItemsTable({
           </Button>
           <Button
             variant="outline"
+            onClick={() => setIsQuickAddOpen(true)}
+            className="w-full sm:w-auto bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 hover:border-amber-300 hover:from-amber-100 hover:to-orange-100"
+          >
+            <Zap className="size-4 mr-2 text-amber-500" />
+            {t("quick_add")}
+          </Button>
+          <Button
+            variant="outline"
             onClick={() => setIsAddChargeItemsOpen(true)}
             className="w-full sm:w-auto"
           >
@@ -246,6 +259,22 @@ export function ChargeItemsTable({
             <ShortcutBadge actionId="add-charge-item" />
           </Button>
         </div>
+      </div>
+      <div className="mb-4">
+        <SearchInput
+          id="charge-item-title-search"
+          options={[
+            {
+              key: "title",
+              type: "text",
+              placeholder: t("search_by_item"),
+              value: qParams.title || "",
+              display: t("title"),
+            },
+          ]}
+          className="w-full sm:w-80"
+          onSearch={(key, value) => updateQuery({ [key]: value })}
+        />
       </div>
       {isLoading ? (
         <TableSkeleton count={3} />
@@ -483,6 +512,14 @@ export function ChargeItemsTable({
       <AddChargeItemsBillingSheet
         open={isAddChargeItemsOpen}
         onOpenChange={setIsAddChargeItemsOpen}
+        facilityId={facilityId}
+        patientId={patientId}
+        onChargeItemsAdded={handleChargeItemsAdded}
+      />
+
+      <QuickAddChargeItemsSheet
+        open={isQuickAddOpen}
+        onOpenChange={setIsQuickAddOpen}
         facilityId={facilityId}
         patientId={patientId}
         onChargeItemsAdded={handleChargeItemsAdded}
