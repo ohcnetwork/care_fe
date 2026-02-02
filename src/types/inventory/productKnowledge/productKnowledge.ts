@@ -83,6 +83,7 @@ export interface ProductKnowledgeBase {
   base_unit: Code;
   category: ResourceCategoryRead;
   slug_config: SlugConfig;
+  is_instance_level: boolean;
 }
 
 export interface ProductKnowledgeCreate extends Omit<

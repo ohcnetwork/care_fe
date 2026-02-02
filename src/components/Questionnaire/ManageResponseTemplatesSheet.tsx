@@ -64,83 +64,333 @@ import Loading from "@/components/Common/Loading";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { MedicationRequestCreate } from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  MedicationRequestCreate,
+  MedicationRequestTemplateSpec,
+} from "@/types/emr/medicationRequest/medicationRequest";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 import {
+  ActivityDefinitionTemplateSpec,
   QuestionnaireResponseTemplateCreateSpec,
   QuestionnaireResponseTemplateReadSpec,
-  ServiceRequestTemplateSpec,
 } from "@/types/questionnaire/questionnaireResponseTemplate";
 import { questionnaireResponseTemplateApi } from "@/types/questionnaire/questionnaireResponseTemplateApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
-// Check if a string looks like a product slug (starts with 'f-' prefix)
-function isProductSlug(value: string | undefined): boolean {
-  if (!value) return false;
-  return value.startsWith("f-") && value.includes("-");
-}
-
-// Extract readable name from a product slug
-// Slug format: f-{uuid}-{readable-part} -> extract last part and format
-function extractNameFromSlug(slug: string | undefined): string | null {
-  if (!slug || !isProductSlug(slug)) return null;
-  // Match pattern: f-{uuid}-{name} where uuid is 36 chars
-  const match = slug.match(/^f-[a-f0-9-]{36}-(.+)$/i);
-  if (match) {
-    // Convert slug part to readable: d5-09500-09ml -> D5 09500 09ML
-    return match[1].replace(/-/g, " ").toUpperCase();
-  }
-  return null;
-}
+import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import { t } from "i18next";
+import { buildMedicationForTemplate } from "./QuestionTypes/MedicationRequestQuestion";
 
 // Component to display medication name, fetching from product knowledge if needed
 function MedicationName({
   medication,
-  fallbackName,
 }: {
-  medication: MedicationRequestCreate & {
-    display_name?: string;
-    requested_product_internal?: { name?: string; slug?: string };
-  };
-  fallbackName: string;
+  medication: MedicationRequestTemplateSpec;
 }) {
-  // Get name from internal object first (this is set when applying templates)
-  const internalName = medication.requested_product_internal?.name;
-  const internalSlug = medication.requested_product_internal?.slug;
-
-  // Only fetch if we have a slug (not a UUID) and no other name source
-  const canFetch =
-    !!medication.requested_product &&
-    isProductSlug(medication.requested_product) &&
-    !medication.display_name &&
-    !internalName &&
-    !medication.medication?.display;
-
   const { data: productKnowledge, isLoading } = useQuery({
     queryKey: ["productKnowledge", medication.requested_product],
     queryFn: query(productKnowledgeApi.retrieveProductKnowledge, {
       pathParams: { slug: medication.requested_product! },
     }),
-    enabled: canFetch,
-    staleTime: Infinity, // Cache indefinitely since product names don't change
+    enabled: !!medication.requested_product,
+    meta: {
+      persist: true,
+    },
   });
 
-  // Priority: display_name > internal name > product knowledge > medication.display > extract from slug > fallback
-  const name =
-    medication.display_name ||
-    internalName ||
-    productKnowledge?.name ||
-    medication.medication?.display ||
-    extractNameFromSlug(internalSlug) ||
-    extractNameFromSlug(medication.requested_product) ||
-    fallbackName;
-
-  if (isLoading && canFetch) {
+  if (isLoading) {
     return <span className="text-gray-400 animate-pulse">Loading...</span>;
   }
 
-  return <>{name}</>;
+  return (
+    <>
+      {medication.requested_product
+        ? productKnowledge?.name
+        : medication.medication?.display || t("unknown_medication")}
+    </>
+  );
+}
+
+/**
+ * Reusable component for displaying a list of medications in previews
+ */
+function MedicationsPreview({
+  medications,
+  variant = "compact",
+  onMedicationSelect,
+  t,
+}: {
+  medications: MedicationRequestTemplateSpec[];
+  variant?: "compact" | "form";
+  onMedicationSelect?: (medication: MedicationRequestCreate) => void;
+  t: (key: string, options?: Record<string, unknown>) => string;
+}) {
+  const [showAll, setShowAll] = useState(false);
+
+  if (medications.length === 0) return null;
+
+  const isFormVariant = variant === "form";
+  const displayLimit = 5;
+  const displayedMeds = showAll
+    ? medications
+    : medications.slice(0, displayLimit);
+  const remainingCount = medications.length - displayLimit;
+
+  return (
+    <div
+      className={cn(
+        "space-y-1",
+        isFormVariant &&
+          "rounded-lg border border-primary-200 bg-primary-50/50 p-4 space-y-3",
+      )}
+    >
+      <div
+        className={cn(
+          "flex items-center gap-1.5 text-xs font-medium text-primary-700",
+          isFormVariant && "text-sm text-primary-800 gap-2",
+        )}
+      >
+        <PillIcon className={isFormVariant ? "size-4" : "size-3"} />
+        {isFormVariant ? t("medications_to_include") : t("medications")}
+      </div>
+      <div className={cn("space-y-0.5", isFormVariant ? "space-y-2" : "pl-4")}>
+        {displayedMeds.map((med, idx) => {
+          const medWithExtra = med as typeof med & { display_name?: string };
+
+          if (isFormVariant) {
+            return (
+              <div
+                key={idx}
+                className="flex items-start gap-2 text-sm text-primary-700 bg-white/60 rounded-md px-3 py-2"
+              >
+                <CheckCircle2Icon className="size-3.5 text-primary-500 shrink-0 mt-0.5" />
+                <span className="flex-1 min-w-0">
+                  {(
+                    med as MedicationRequestTemplateSpec & {
+                      requested_product_internal?: { name?: string };
+                    }
+                  ).requested_product_internal?.name ||
+                    med.medication?.display ||
+                    t("unknown_medication")}
+                </span>
+              </div>
+            );
+          }
+
+          // Compact variant (for expanded template view)
+          const dosage = med.dosage_instruction?.[0];
+          const doseQty = dosage?.dose_and_rate?.dose_quantity;
+          const timing = dosage?.timing?.code?.code;
+          const duration = dosage?.timing?.repeat?.bounds_duration;
+
+          const dosageParts = [
+            doseQty?.value
+              ? `${doseQty.value}${doseQty?.unit?.display ? ` ${doseQty.unit.display}` : ""}`
+              : null,
+            timing,
+            duration?.value
+              ? `${duration.value}${duration?.unit ? ` ${duration.unit}` : ""}`
+              : null,
+          ].filter(Boolean);
+
+          return (
+            <div
+              key={idx}
+              className="group/item flex items-start gap-1.5 text-sm py-0.5"
+            >
+              <span className="size-1 rounded-full bg-primary-400 shrink-0 mt-1.5" />
+              <div className="flex-1 min-w-0">
+                <span className="text-gray-800">
+                  <MedicationName medication={medWithExtra} />
+                </span>
+                {dosageParts.length > 0 && (
+                  <span className="text-xs text-gray-400 ml-1">
+                    ({dosageParts.join(" • ")})
+                  </span>
+                )}
+              </div>
+              {onMedicationSelect && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onMedicationSelect(med as MedicationRequestCreate);
+                        toast.success(t("medication_added"));
+                      }}
+                      className="p-0.5 rounded hover:bg-primary-100 text-primary-600 shrink-0 mt-0.5"
+                    >
+                      <PlusCircleIcon className="size-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="left">
+                    {t("add_this_medication")}
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+          );
+        })}
+        {remainingCount > 0 && !showAll && (
+          <Button
+            variant="ghost"
+            onClick={() => setShowAll(true)}
+            className={cn(
+              "text-xs text-primary-500 hover:text-primary-700 hover:underline cursor-pointer",
+              isFormVariant && "pl-6",
+            )}
+          >
+            {isFormVariant
+              ? t("and_more_medications", { count: remainingCount })
+              : `+${remainingCount} ${t("more")}`}
+          </Button>
+        )}
+        {showAll && medications.length > displayLimit && (
+          <Button
+            variant="ghost"
+            onClick={() => setShowAll(false)}
+            className={cn(
+              "text-xs text-primary-500 hover:text-primary-700 hover:underline cursor-pointer",
+              isFormVariant && "pl-6",
+            )}
+          >
+            {t("show_less")}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Reusable component for displaying a list of activity definitions in previews
+ */
+function ActivityDefinitionsPreview({
+  activityDefinitions,
+  variant = "compact",
+  onActivityDefinitionSelect,
+  t,
+}: {
+  activityDefinitions: ActivityDefinitionTemplateSpec[];
+  variant?: "compact" | "form";
+  onActivityDefinitionSelect?: (
+    activityDefinition: ActivityDefinitionTemplateSpec,
+  ) => void;
+  t: (key: string, options?: Record<string, unknown>) => string;
+}) {
+  const [showAll, setShowAll] = useState(false);
+
+  if (activityDefinitions.length === 0) return null;
+
+  const isFormVariant = variant === "form";
+  const displayLimit = 5;
+  const displayedItems = showAll
+    ? activityDefinitions
+    : activityDefinitions.slice(0, displayLimit);
+  const remainingCount = activityDefinitions.length - displayLimit;
+
+  return (
+    <div
+      className={cn(
+        "space-y-1",
+        isFormVariant &&
+          "rounded-lg border border-primary-200 bg-primary-50/50 p-4 space-y-3",
+      )}
+    >
+      <div
+        className={cn(
+          "flex items-center gap-1.5 text-xs font-medium text-primary-700",
+          isFormVariant && "text-sm text-primary-800 gap-2",
+        )}
+      >
+        <ClipboardListIcon className={isFormVariant ? "size-4" : "size-3"} />
+        {isFormVariant
+          ? t("activity_definitions_to_include")
+          : t("activity_definitions")}
+      </div>
+      <div className={cn("space-y-0.5", isFormVariant ? "space-y-2" : "pl-4")}>
+        {displayedItems.map((ad, idx) => {
+          if (isFormVariant) {
+            return (
+              <div
+                key={idx}
+                className="flex items-start gap-2 text-sm text-primary-700 bg-white/60 rounded-md px-3 py-2"
+              >
+                <CheckCircle2Icon className="size-3.5 text-primary-500 shrink-0 mt-0.5" />
+                <span className="flex-1 min-w-0">
+                  {ad.service_request?.title ||
+                    t("unknown_activity_definition")}
+                </span>
+              </div>
+            );
+          }
+
+          // Compact variant
+          return (
+            <div
+              key={idx}
+              className="group/item flex items-start gap-1.5 text-sm py-0.5"
+            >
+              <span className="size-1 rounded-full bg-primary-400 shrink-0 mt-1.5" />
+              <span className="text-gray-800 flex-1 min-w-0">
+                {ad.service_request?.title ||
+                  ad.slug ||
+                  t("unknown_activity_definition")}
+              </span>
+              {onActivityDefinitionSelect && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onActivityDefinitionSelect(ad);
+                        toast.success(t("activity_definition_added"));
+                      }}
+                      className="p-0.5 rounded hover:bg-primary-100 text-primary-600 shrink-0 mt-0.5"
+                    >
+                      <PlusCircleIcon className="size-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="left">
+                    {t("add_this_activity_definition")}
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+          );
+        })}
+        {remainingCount > 0 && !showAll && (
+          <Button
+            variant="ghost"
+            onClick={() => setShowAll(true)}
+            className={cn(
+              "text-xs text-primary-500 hover:text-primary-700 hover:underline cursor-pointer",
+              isFormVariant && "pl-6",
+            )}
+          >
+            {isFormVariant
+              ? t("and_more_activity_definitions", { count: remainingCount })
+              : `+${remainingCount} ${t("more")}`}
+          </Button>
+        )}
+        {showAll && activityDefinitions.length > displayLimit && (
+          <Button
+            variant="ghost"
+            onClick={() => setShowAll(false)}
+            className={cn(
+              "text-xs text-primary-500 hover:text-primary-700 hover:underline cursor-pointer",
+              isFormVariant && "pl-6",
+            )}
+          >
+            {t("show_less")}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
 }
 
 interface ManageResponseTemplatesSheetProps {
@@ -154,13 +404,16 @@ interface ManageResponseTemplatesSheetProps {
   /** Callback when a single medication is selected from a template */
   onMedicationSelect?: (medication: MedicationRequestCreate) => void;
   /** Callback when a single service request is selected from a template */
-  onServiceRequestSelect?: (serviceRequest: ServiceRequestTemplateSpec) => void;
+  onActivityDefinitionSelect?: (
+    activityDefinition: ActivityDefinitionTemplateSpec,
+  ) => void;
   disabled?: boolean;
   /** Current medications to allow saving as template */
   currentMedications?: MedicationRequestCreate[];
   /** Current service requests to allow saving as template */
-  currentServiceRequests?: ServiceRequestTemplateSpec[];
+  currentActivityDefinitions?: ActivityDefinitionTemplateSpec[];
   key_filter: string;
+  facilityOrganizations?: string[];
 }
 
 type ViewState = "list" | "create" | "save-current";
@@ -178,11 +431,12 @@ export default function ManageResponseTemplatesSheet({
   trigger,
   onTemplateSelect,
   onMedicationSelect,
-  onServiceRequestSelect,
+  onActivityDefinitionSelect,
   disabled,
   currentMedications = [],
-  currentServiceRequests = [],
+  currentActivityDefinitions = [],
   key_filter = "medication_request",
+  facilityOrganizations = [],
 }: ManageResponseTemplatesSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -198,6 +452,9 @@ export default function ManageResponseTemplatesSheet({
   const [expandedTemplateId, setExpandedTemplateId] = useState<string | null>(
     null,
   );
+  const [selectedOrganizations, setSelectedOrganizations] = useState<
+    string[] | null
+  >(facilityOrganizations.length > 0 ? facilityOrganizations : null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -218,6 +475,7 @@ export default function ManageResponseTemplatesSheet({
           ? { questionnaire: questionnaireSlug }
           : {}),
         limit: 50,
+        facility: facilityId,
         key_filter: key_filter,
       },
     }),
@@ -261,89 +519,36 @@ export default function ManageResponseTemplatesSheet({
   const onSubmit = (data: FormData) => {
     const isSavingCurrent = viewState === "save-current";
 
-    // Prepare medications for template (use product ID, handle medication field properly)
+    // Prepare medications for template using shared utility
     const medicationsForTemplate =
       isSavingCurrent && currentMedications.length > 0
-        ? currentMedications.map((med) => {
-            const medWithInternal = med as MedicationRequestCreate & {
-              requested_product_internal?: {
-                id?: string;
-                slug?: string;
-                name?: string;
-                code?: { system: string; code: string; display: string };
-              };
-            };
-
-            // Use product ID (UUID) for the template, not the slug
-            // Fall back to med.requested_product which might already be a UUID
-            const productId =
-              medWithInternal.requested_product_internal?.id ||
-              med.requested_product;
-
-            // Get the slug for display name extraction if needed
-            const productSlug =
-              medWithInternal.requested_product_internal?.slug ||
-              (isProductSlug(med.requested_product)
-                ? med.requested_product
-                : undefined);
-
-            // If requested_product is present, don't include medication field
-            // If no requested_product, we need medication with a valid code
-            let medicationCode: typeof med.medication | undefined = undefined;
-            if (!productId) {
-              // No product ID - need medication code
-              medicationCode = med.medication?.code
-                ? med.medication
-                : undefined;
-            }
-
-            // Get display name for the medication - ensure we always have a name
-            const displayName =
-              medWithInternal.requested_product_internal?.name ||
-              med.medication?.display ||
-              extractNameFromSlug(productSlug) ||
-              "Medication";
-
-            // Build template medication with display_name for UI rendering
-            const templateMed = {
-              ...med,
-              requested_product: productId,
-              // Set medication only if we don't have requested_product
-              medication: productId ? undefined : medicationCode,
-              // Store display name for template preview
-              display_name: displayName,
-            };
-
-            // Remove internal objects that shouldn't be stored in templates
-            delete (
-              templateMed as MedicationRequestCreate & {
-                requested_product_internal?: unknown;
-              }
-            ).requested_product_internal;
-            delete (templateMed as MedicationRequestCreate & { id?: unknown })
-              .id;
-
-            return templateMed;
-          })
+        ? currentMedications.map(
+            (med) =>
+              buildMedicationForTemplate(med) as MedicationRequestTemplateSpec,
+          )
         : [];
 
     // Prepare service requests for template
     const serviceRequestsForTemplate =
-      isSavingCurrent && currentServiceRequests.length > 0
-        ? currentServiceRequests
+      isSavingCurrent && currentActivityDefinitions.length > 0
+        ? currentActivityDefinitions
         : [];
 
     const createData: QuestionnaireResponseTemplateCreateSpec = {
       name: data.name,
       description: data.description || "",
-      questionnaire: questionnaireSlug,
+      ...(questionnaireSlug &&
+      questionnaireSlug !== "service_request" &&
+      questionnaireSlug !== "medication_request"
+        ? { questionnaire: questionnaireSlug }
+        : {}),
       facility: facilityId,
       template_data: {
         medication_request: medicationsForTemplate,
-        service_request: serviceRequestsForTemplate,
+        activity_definition: serviceRequestsForTemplate,
       },
       users: [currentUser.username],
-      facility_organizations: [],
+      facility_organizations: selectedOrganizations ?? [],
     };
     createTemplate(createData);
   };
@@ -386,9 +591,9 @@ export default function ManageResponseTemplatesSheet({
 
   const templates = templatesResponse?.results ?? [];
   const hasItemsToSave =
-    currentMedications.length > 0 || currentServiceRequests.length > 0;
+    currentMedications.length > 0 || currentActivityDefinitions.length > 0;
   const totalItemsToSave =
-    currentMedications.length + currentServiceRequests.length;
+    currentMedications.length + currentActivityDefinitions.length;
 
   const renderList = () => (
     <div className="space-y-3">
@@ -447,7 +652,7 @@ export default function ManageResponseTemplatesSheet({
               const medications =
                 template.template_data?.medication_request ?? [];
               const serviceRequests =
-                template.template_data?.service_request ?? [];
+                template.template_data?.activity_definition ?? [];
               const medicationCount = medications.length;
               const serviceRequestCount = serviceRequests.length;
               const isApplied = recentlyApplied === template.id;
@@ -531,7 +736,7 @@ export default function ManageResponseTemplatesSheet({
                     </button>
 
                     {/* Action buttons - inline */}
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center gap-4 shrink-0">
                       {isApplying && (
                         <span className="text-xs text-primary-600 flex items-center gap-1">
                           <Loader2 className="size-3 animate-spin" />
@@ -545,7 +750,7 @@ export default function ManageResponseTemplatesSheet({
                       {onTemplateSelect && !isApplied && !isApplying && (
                         <Button
                           size="sm"
-                          variant="ghost"
+                          variant="outline"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleApplyTemplate(template);
@@ -565,7 +770,6 @@ export default function ManageResponseTemplatesSheet({
                               e.stopPropagation();
                               handleDeleteTemplate(template);
                             }}
-                            className="text-gray-400 hover:text-destructive size-6 opacity-0 group-hover:opacity-100 transition-opacity"
                             disabled={!!applyingTemplateId}
                             aria-label={t("delete_template")}
                           >
@@ -579,142 +783,19 @@ export default function ManageResponseTemplatesSheet({
 
                   {/* Expanded content - shows template items */}
                   {isExpanded && hasContent && (
-                    <div className="px-2 pb-2 ml-6 space-y-1.5 border-t border-gray-100 pt-2 animate-in slide-in-from-top-2 duration-200">
-                      {/* Medications preview */}
-                      {medicationCount > 0 && (
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1.5 text-xs font-medium text-blue-700">
-                            <PillIcon className="size-3" />
-                            {t("medications")}
-                          </div>
-                          <div className="space-y-0.5 pl-4">
-                            {medications.slice(0, 5).map((med, idx) => {
-                              const medWithExtra = med as typeof med & {
-                                display_name?: string;
-                              };
-
-                              // Get dosage info - compact format
-                              const dosage = med.dosage_instruction?.[0];
-                              const doseQty =
-                                dosage?.dose_and_rate?.dose_quantity;
-                              const timing = dosage?.timing?.code?.display;
-                              const duration =
-                                dosage?.timing?.repeat?.bounds_duration;
-
-                              const dosageParts = [
-                                doseQty?.value
-                                  ? `${doseQty.value}${doseQty?.unit?.display ? ` ${doseQty.unit.display}` : ""}`
-                                  : null,
-                                timing,
-                                duration?.value
-                                  ? `${duration.value}${duration?.unit ? ` ${duration.unit}` : ""}`
-                                  : null,
-                              ].filter(Boolean);
-
-                              return (
-                                <div
-                                  key={idx}
-                                  className="group/item flex items-center gap-1 text-sm py-0.5"
-                                >
-                                  <span className="size-1 rounded-full bg-blue-400 shrink-0" />
-                                  <span className="text-gray-800 truncate flex-1">
-                                    <MedicationName
-                                      medication={medWithExtra}
-                                      fallbackName={t("unknown_medication")}
-                                    />
-                                  </span>
-                                  {dosageParts.length > 0 && (
-                                    <span className="text-xs text-gray-400 shrink-0">
-                                      ({dosageParts.join(" • ")})
-                                    </span>
-                                  )}
-                                  {onMedicationSelect && (
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <button
-                                          type="button"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            onMedicationSelect(
-                                              med as MedicationRequestCreate,
-                                            );
-                                            toast.success(
-                                              t("medication_added"),
-                                            );
-                                          }}
-                                          className="opacity-0 group-hover/item:opacity-100 transition-opacity p-0.5 rounded hover:bg-blue-100 text-blue-600"
-                                        >
-                                          <PlusCircleIcon className="size-3.5" />
-                                        </button>
-                                      </TooltipTrigger>
-                                      <TooltipContent side="left">
-                                        {t("add_this_medication")}
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  )}
-                                </div>
-                              );
-                            })}
-                            {medicationCount > 5 && (
-                              <p className="text-xs text-blue-500">
-                                +{medicationCount - 5} {t("more")}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Service requests preview */}
-                      {serviceRequestCount > 0 && (
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1.5 text-xs font-medium text-purple-700">
-                            <ClipboardListIcon className="size-3" />
-                            {t("service_requests")}
-                          </div>
-                          <div className="space-y-0.5 pl-4">
-                            {serviceRequests.slice(0, 5).map((sr, idx) => (
-                              <div
-                                key={idx}
-                                className="group/item flex items-center gap-1 text-sm py-0.5"
-                              >
-                                <span className="size-1 rounded-full bg-purple-400 shrink-0" />
-                                <span className="text-gray-800 truncate flex-1">
-                                  {sr.service_request?.title ||
-                                    sr.slug ||
-                                    t("unknown_service_request")}
-                                </span>
-                                {onServiceRequestSelect && (
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <button
-                                        type="button"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          onServiceRequestSelect(sr);
-                                          toast.success(
-                                            t("service_request_added"),
-                                          );
-                                        }}
-                                        className="opacity-0 group-hover/item:opacity-100 transition-opacity p-0.5 rounded hover:bg-purple-100 text-purple-600"
-                                      >
-                                        <PlusCircleIcon className="size-3.5" />
-                                      </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="left">
-                                      {t("add_this_service_request")}
-                                    </TooltipContent>
-                                  </Tooltip>
-                                )}
-                              </div>
-                            ))}
-                            {serviceRequestCount > 5 && (
-                              <p className="text-xs text-purple-500">
-                                +{serviceRequestCount - 5} {t("more")}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
+                    <div className="px-2 pb-2 ml-6 space-y-1.5 border-t border-gray-100 pt-2">
+                      <MedicationsPreview
+                        medications={medications}
+                        variant="compact"
+                        onMedicationSelect={onMedicationSelect}
+                        t={t}
+                      />
+                      <ActivityDefinitionsPreview
+                        activityDefinitions={serviceRequests}
+                        variant="compact"
+                        onActivityDefinitionSelect={onActivityDefinitionSelect}
+                        t={t}
+                      />
                     </div>
                   )}
                 </div>
@@ -756,70 +837,22 @@ export default function ManageResponseTemplatesSheet({
           </div>
         </div>
 
-        {/* Preview of what will be saved - Medications */}
-        {isSavingCurrent && currentMedications.length > 0 && (
-          <div className="rounded-lg border border-blue-200 bg-blue-50/50 p-4 space-y-3">
-            <div className="flex items-center gap-2 text-sm font-medium text-blue-800">
-              <PillIcon className="size-4" />
-              {t("medications_to_include")}
-            </div>
-            <div className="space-y-2">
-              {currentMedications.slice(0, 5).map((med, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-2 text-sm text-blue-700 bg-white/60 rounded-md px-3 py-2"
-                >
-                  <CheckCircle2Icon className="size-3.5 text-blue-500" />
-                  <span className="truncate">
-                    {(
-                      med as MedicationRequestCreate & {
-                        requested_product_internal?: { name?: string };
-                      }
-                    ).requested_product_internal?.name ||
-                      med.medication?.display ||
-                      t("unknown_medication")}
-                  </span>
-                </div>
-              ))}
-              {currentMedications.length > 5 && (
-                <p className="text-xs text-blue-600 pl-6">
-                  {t("and_more_medications", {
-                    count: currentMedications.length - 5,
-                  })}
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Preview of what will be saved - Service Requests */}
-        {isSavingCurrent && currentServiceRequests.length > 0 && (
-          <div className="rounded-lg border border-purple-200 bg-purple-50/50 p-4 space-y-3">
-            <div className="flex items-center gap-2 text-sm font-medium text-purple-800">
-              <ClipboardListIcon className="size-4" />
-              {t("service_requests_to_include")}
-            </div>
-            <div className="space-y-2">
-              {currentServiceRequests.slice(0, 5).map((sr, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-2 text-sm text-purple-700 bg-white/60 rounded-md px-3 py-2"
-                >
-                  <CheckCircle2Icon className="size-3.5 text-purple-500" />
-                  <span className="truncate">
-                    {sr.service_request?.title || t("unknown_service_request")}
-                  </span>
-                </div>
-              ))}
-              {currentServiceRequests.length > 5 && (
-                <p className="text-xs text-purple-600 pl-6">
-                  {t("and_more_service_requests", {
-                    count: currentServiceRequests.length - 5,
-                  })}
-                </p>
-              )}
-            </div>
-          </div>
+        {/* Preview of what will be saved */}
+        {isSavingCurrent && (
+          <>
+            <MedicationsPreview
+              medications={
+                currentMedications as unknown as MedicationRequestTemplateSpec[]
+              }
+              variant="form"
+              t={t}
+            />
+            <ActivityDefinitionsPreview
+              activityDefinitions={currentActivityDefinitions}
+              variant="form"
+              t={t}
+            />
+          </>
         )}
 
         <Form {...form}>
@@ -866,6 +899,20 @@ export default function ManageResponseTemplatesSheet({
                 </FormItem>
               )}
             />
+
+            {facilityId && (
+              <div className="space-y-2">
+                <FacilityOrganizationSelector
+                  facilityId={facilityId}
+                  value={selectedOrganizations}
+                  onChange={setSelectedOrganizations}
+                  optional
+                />
+                <p className="text-xs text-muted-foreground">
+                  {t("select_departments_to_share_template")}
+                </p>
+              </div>
+            )}
 
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button
@@ -932,7 +979,7 @@ export default function ManageResponseTemplatesSheet({
         }}
       >
         <SheetTrigger asChild>{trigger ?? defaultTrigger}</SheetTrigger>
-        <SheetContent className="sm:max-w-lg flex flex-col">
+        <SheetContent className="sm:max-w-lg flex flex-col overflow-y-auto">
           <SheetHeader className="space-y-1">
             <SheetTitle className="flex items-center gap-2">
               <div className="rounded-lg bg-primary-100 p-1.5">

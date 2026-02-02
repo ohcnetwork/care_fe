@@ -170,6 +170,18 @@ export function EncounterCommandDialog({
             icon: <Plus />,
           },
           {
+            id: "add-service-request",
+            label: t("service_request"),
+            shortcut: getShortcutDisplay("add-service-request"),
+            icon: <Plus />,
+          },
+          {
+            id: "add-medication-request",
+            label: t("add_medication"),
+            shortcut: getShortcutDisplay("add-medication-request"),
+            icon: <Plus />,
+          },
+          {
             id: "update-encounter",
             label: t("update_encounter_details"),
             shortcut: getShortcutDisplay("update-encounter"),
@@ -194,7 +206,11 @@ export function EncounterCommandDialog({
           },
           {
             id: "mark-as-completed",
-            label: t("mark_as_completed"),
+            label:
+              encounter.encounter_class === "imp" &&
+              encounter?.status !== "discharged"
+                ? t("mark_for_discharge")
+                : t("mark_as_completed"),
             shortcut: getShortcutDisplay("mark-as-completed"),
             icon: <CheckCircle2 />,
           },

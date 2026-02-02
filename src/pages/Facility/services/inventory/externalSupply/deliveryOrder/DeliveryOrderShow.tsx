@@ -5,6 +5,7 @@ import {
   EllipsisVertical,
   Hash,
   MoreVertical,
+  Printer,
   Truck,
 } from "lucide-react";
 import { Link } from "raviger";
@@ -426,6 +427,13 @@ export function DeliveryOrderShow({
             </div>
           </div>
           <div className="flex items-center justify-end gap-2">
+            <Button variant="outline" asChild>
+              <Link href={`${deliveryOrderId}/print`}>
+                <Printer className="size-4" /> {t("print")}
+                <ShortcutBadge actionId="print-delivery-order" />
+              </Link>
+            </Button>
+
             {(!isRequester || !internal) &&
               deliveryOrder.status === DeliveryOrderStatus.draft && (
                 <Button variant="outline" asChild>

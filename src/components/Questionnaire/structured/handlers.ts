@@ -76,6 +76,7 @@ export const structuredHandlers: {
               ...medication,
               ...(!medication.id && {
                 create_prescription: {
+                  ...medication.create_prescription,
                   status: PrescriptionStatus.active,
                   alternate_identifier: prescriptionIdentifier,
                 },
