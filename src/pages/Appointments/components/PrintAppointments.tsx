@@ -33,6 +33,7 @@ import {
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
+import { renderTokenNumber } from "@/types/tokens/token/token";
 import { useEffect, useState } from "react";
 
 type PrintAppointmentsProps = {
@@ -98,7 +99,12 @@ export function PrintAppointments({
     return <Loading />;
   }
 
-  const appointments = appointmentsData?.results ?? [];
+  const appointments = [...(appointmentsData?.results ?? [])].sort((a, b) => {
+    if (!a.token && !b.token) return 0;
+    if (!a.token) return 1;
+    if (!b.token) return -1;
+    return a.token.number - b.token.number;
+  });
   const totalCount = appointmentsData?.count ?? 0;
 
   return (
@@ -194,7 +200,8 @@ export function PrintAppointments({
                       )}
                     </TableCell>
                     <TableCell className="p-2 align-top">
-                      {appointment.token?.number ?? "--"}
+                      {appointment.token &&
+                        renderTokenNumber(appointment.token)}
                     </TableCell>
                     <TableCell className="p-2 align-top">
                       <Badge
