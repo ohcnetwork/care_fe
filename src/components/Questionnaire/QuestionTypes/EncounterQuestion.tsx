@@ -46,6 +46,7 @@ import {
   validateFields,
 } from "@/types/questionnaire/validation";
 import careConfig from "@careConfig";
+import { useQueryParams } from "raviger";
 
 interface EncounterQuestionProps {
   question: Question;
@@ -107,6 +108,7 @@ export function EncounterQuestion({
     enabled: !!encounterId,
   });
   const { t } = useTranslation();
+  const [{ toDischarge }] = useQueryParams();
   const { hasError, getError } = useFieldError(
     questionnaireResponse.question_id,
     errors,
@@ -334,6 +336,7 @@ export function EncounterQuestion({
               <h3 className="text-sm font-medium">{t("discharge_patient")}</h3>
             </div>
             <DischargeConfirmationDialog
+              defaultOpen={toDischarge}
               encounter={encounter}
               onConfirm={handleUpdateEncounter}
               disabled={disabled}
