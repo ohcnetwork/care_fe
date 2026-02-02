@@ -1,4 +1,3 @@
-import useAppHistory from "@/hooks/useAppHistory";
 import { sleep } from "@/Utils/utils";
 import { useEffect } from "react";
 
@@ -21,13 +20,12 @@ export default function useAutoPrint({
   delay = 300,
   window: printWindow = window,
 }: AutoPrintOptions) {
-  const { goBack } = useAppHistory();
   useEffect(() => {
     if (enabled) {
       const timer = setTimeout(async () => {
         printWindow.print();
         await sleep(300);
-        goBack();
+        window.history.go(-1);
       }, delay); // Delay to ensure content is rendered
 
       return () => clearTimeout(timer);
