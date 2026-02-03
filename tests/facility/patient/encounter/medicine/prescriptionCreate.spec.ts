@@ -82,11 +82,10 @@ test.describe("Create Patient Prescription", () => {
 
     await test.step("Verify medication in table", async () => {
       await page.getByRole("tab", { name: "Medicines" }).click();
-      // dd/mm/yyyy
+      await page.waitForLoadState("networkidle");
       await page
-        .locator("div")
-        .filter({ hasText: /\d{2}\/\d{2}\/\d{4} \d{2}:\d{2} (AM|PM)/ })
-        .nth(0)
+        .getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2} (AM|PM)$/)
+        .first()
         .click();
       const table = page.getByRole("table");
       await expect(table).toBeVisible({ timeout: 10000 });
