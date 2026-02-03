@@ -22,19 +22,12 @@ export type LocationAssociationRead = {
 export interface LocationAssociation {
   meta: Record<string, any>;
   id: string | null;
-  encounter: string;
+  encounter: EncounterRead;
   start_datetime: string;
   end_datetime: string | null;
   status: LocationAssociationStatus;
   created_by: string | null;
   updated_by: string | null;
-}
-
-export interface LocationAssociationDetail extends Omit<
-  LocationAssociation,
-  "encounter"
-> {
-  encounter: EncounterRead;
 }
 
 export interface LocationAssociationRequest {

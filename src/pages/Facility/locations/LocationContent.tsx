@@ -39,7 +39,7 @@ function OccupiedBedSheet({ location, facilityId }: OccupiedBedSheetProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
-  const { data: associations, isLoading: isLoadingAssociations } = useQuery({
+  const { data: associations, isLoading } = useQuery({
     queryKey: ["location-associations", facilityId, location.id],
     queryFn: query(locationApi.listAssociations, {
       pathParams: {
@@ -51,20 +51,6 @@ function OccupiedBedSheet({ location, facilityId }: OccupiedBedSheetProps) {
   });
 
   const firstAssociation = associations?.results?.[0];
-
-  const { data: association } = useQuery({
-    queryKey: ["location-association", facilityId, location.id],
-    queryFn: query(locationApi.getAssociation, {
-      pathParams: {
-        facility_external_id: facilityId,
-        location_external_id: location.id,
-        external_id: firstAssociation?.id ?? "",
-      },
-    }),
-    enabled: isOpen && !!firstAssociation?.id,
-  });
-
-  const isLoading = isLoadingAssociations;
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -96,9 +82,9 @@ function OccupiedBedSheet({ location, facilityId }: OccupiedBedSheetProps) {
               <Loader2 className="size-8 animate-spin text-gray-400" />
               <p className="text-sm text-gray-500 mt-2">{t("loading")}</p>
             </div>
-          ) : association?.encounter ? (
+          ) : firstAssociation?.encounter ? (
             <EncounterInfoCard
-              encounter={association.encounter}
+              encounter={firstAssociation.encounter}
               facilityId={facilityId}
               disableHover={true}
             />
@@ -106,10 +92,7 @@ function OccupiedBedSheet({ location, facilityId }: OccupiedBedSheetProps) {
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Lock className="size-8 text-gray-400 mb-2" />
               <p className="text-sm font-medium text-gray-700">
-                {t("no_encounter_found")}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                {t("bed_may_be_reserved_or_under_maintenance")}
+                {t("no_encounter_associated")}
               </p>
             </div>
           )}
