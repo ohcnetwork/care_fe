@@ -1,6 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
 import { createContext, useContext, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { CareTeamSheet } from "@/components/CareTeam/CareTeamSheet";
 import { LocationSheet } from "@/components/Location/LocationSheet";
@@ -19,6 +21,7 @@ import {
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
 type EncounterContextType = {
@@ -57,6 +60,7 @@ type EncounterContextType = {
     manageDepartments: () => void;
     dispenseMedicine: () => void;
     dispense: () => void;
+    restartEncounter: () => void;
   };
 };
 
@@ -183,6 +187,30 @@ export function EncounterProvider({
     selectedEncounter?.encounter_class === "imp" &&
     selectedEncounter?.status !== "discharged";
 
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  const { mutate: restartEncounterMutation } = useMutation({
+    mutationFn: mutate(encounterApi.restart, {
+      pathParams: { id: selectedEncounter?.id ?? "" },
+    }),
+    onSuccess: () => {
+      toast.success(t("encounter_restarted_successfully"));
+      queryClient.invalidateQueries({ queryKey: ["encounters"] });
+      queryClient.invalidateQueries({
+        queryKey: ["encounter", selectedEncounter?.id],
+      });
+      if (selectedEncounter) {
+        navigate(
+          `/facility/${selectedEncounter.facility.id}/patient/${selectedEncounter.patient.id}/encounter/${selectedEncounter.id}/updates`,
+        );
+      }
+    },
+    onError: () => {
+      toast.error(t("failed_to_restart_encounter"));
+    },
+  });
+
   return (
     <encounterContext.Provider
       value={{
@@ -235,6 +263,9 @@ export function EncounterProvider({
           },
           dispense: () => {
             setActiveAction(EncounterAction.Dispense);
+          },
+          restartEncounter: () => {
+            restartEncounterMutation({});
           },
         },
       }}
