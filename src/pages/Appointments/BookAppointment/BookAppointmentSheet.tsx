@@ -10,6 +10,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQueryParams } from "raviger";
 
 import { BookAppointmentDetails } from "./BookAppointmentDetails";
 import { BookingsList } from "./BookingsList";
@@ -27,7 +28,8 @@ export default function BookAppointmentSheet({
   trigger,
   onSuccess,
 }: Props) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [qParams] = useQueryParams();
+  const [isOpen, setIsOpen] = useState(qParams.open_schedule === "true");
   const { t } = useTranslation();
 
   return (
