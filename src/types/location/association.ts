@@ -1,3 +1,4 @@
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { LocationRead } from "@/types/location/location";
 
 export const LOCATION_ASSOCIATION_STATUSES = [
@@ -27,6 +28,13 @@ export interface LocationAssociation {
   status: LocationAssociationStatus;
   created_by: string | null;
   updated_by: string | null;
+}
+
+export interface LocationAssociationDetail extends Omit<
+  LocationAssociation,
+  "encounter"
+> {
+  encounter: EncounterRead;
 }
 
 export interface LocationAssociationRequest {
