@@ -1,4 +1,5 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import Loading from "@/components/Common/Loading";
@@ -13,19 +14,21 @@ import query from "@/Utils/request/query";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
-import { t } from "i18next";
+
+interface PrintPrescriptionProps {
+  facilityId: string;
+  patientId: string;
+  prescriptionId?: string;
+  encounterId?: string;
+}
 
 export const PrintPrescription = ({
   facilityId,
   patientId,
   prescriptionId,
   encounterId,
-}: {
-  facilityId: string;
-  patientId: string;
-  prescriptionId?: string;
-  encounterId?: string;
-}) => {
+}: PrintPrescriptionProps) => {
+  const { t } = useTranslation();
   const { data: prescription, isLoading: prescriptionLoading } = useQuery({
     queryKey: ["prescription", patientId, prescriptionId],
     queryFn: query(prescriptionApi.get, {
@@ -43,7 +46,11 @@ export const PrintPrescription = ({
     enabled: !!encounterId,
   });
 
-  const { data: prescriptionList, isLoading: listLoading } = useQuery({
+  const {
+    data: prescriptionList,
+    isLoading: listLoading,
+    isError: listError,
+  } = useQuery({
     queryKey: ["prescription_list", patientId, encounterId],
     queryFn: query(prescriptionApi.list, {
       pathParams: { patientId },
@@ -63,6 +70,8 @@ export const PrintPrescription = ({
   });
 
   const allPrescriptionsLoading = prescriptionQueries.some((q) => q.isLoading);
+  const allPrescriptionsError = prescriptionQueries.some((q) => q.isError);
+
   const prescriptions = prescriptionQueries
     .map((q) => q.data)
     .filter((p): p is PrescriptionRead => !!p);
@@ -73,6 +82,14 @@ export const PrintPrescription = ({
       (encounterLoading || listLoading || allPrescriptionsLoading))
   ) {
     return <Loading />;
+  }
+
+  if (listError || allPrescriptionsError) {
+    return (
+      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed border-red-200 p-4 text-red-500">
+        {t("prescription_load_failed")}
+      </div>
+    );
   }
 
   if (prescriptionId) {

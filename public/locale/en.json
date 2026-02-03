@@ -4194,6 +4194,7 @@
   "prescription_details": "Prescription Details",
   "prescription_details_not_found": "Prescription details not found",
   "prescription_discontinued": "Prescription discontinued",
+  "prescription_load_failed": "Failed to load prescription",
   "prescription_logs": "Prescription Logs",
   "prescription_marked_as_completed": "Prescription marked as completed successfully",
   "prescription_marking_complete_failed": "Failed to mark prescription as completed",
