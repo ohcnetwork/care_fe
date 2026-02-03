@@ -82,8 +82,10 @@ export async function fetchBuildMeta(): Promise<BuildMeta> {
  */
 export async function clearAllCaches(): Promise<void> {
   // Clear browser caches
-  const cacheNames = await caches.keys();
-  await Promise.all(cacheNames.map((name) => caches.delete(name)));
+  if ("caches" in window) {
+    const cacheNames = await caches.keys();
+    await Promise.all(cacheNames.map((name) => caches.delete(name)));
+  }
 
   // Unregister service workers
   if ("serviceWorker" in navigator) {
