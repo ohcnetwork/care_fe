@@ -1,10 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
+import { useAtom } from "jotai";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { scheduleServiceTypeAtom } from "@/atoms/scheduleServiceTypeAtom";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 
@@ -15,10 +17,7 @@ import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
 import { ScheduleResourceFormState } from "@/components/Schedule/ResourceSelector";
-import {
-  Appointment,
-  SchedulableResourceType,
-} from "@/types/scheduling/schedule";
+import { Appointment } from "@/types/scheduling/schedule";
 import { AppointmentDateSelection } from "./AppointmentDateSelection";
 import { AppointmentFormSection } from "./AppointmentFormSection";
 
@@ -32,6 +31,9 @@ export const BookAppointmentDetails = ({
   const { t } = useTranslation();
 
   const { facilityId } = useCurrentFacility();
+  const [cachedServiceType, setCachedServiceType] = useAtom(
+    scheduleServiceTypeAtom,
+  );
 
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
   const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
@@ -39,11 +41,19 @@ export const BookAppointmentDetails = ({
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
-  const [selectedResource, setSelectedResource] =
+  const [selectedResource, setSelectedResourceState] =
     useState<ScheduleResourceFormState>({
       resource: null,
-      resource_type: SchedulableResourceType.Practitioner,
+      resource_type: cachedServiceType,
     });
+
+  const setSelectedResource = (resource: ScheduleResourceFormState) => {
+    setSelectedResourceState(resource);
+    // Cache the service type when it changes
+    if (resource.resource_type !== cachedServiceType) {
+      setCachedServiceType(resource.resource_type);
+    }
+  };
 
   const { mutateAsync: createAppointment, isPending: isCreating } = useMutation(
     {
