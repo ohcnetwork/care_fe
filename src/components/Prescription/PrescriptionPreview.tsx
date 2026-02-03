@@ -66,7 +66,7 @@ const PrescriptionContent = ({
                 status: t(`medication_status_${medication.status}`),
                 dosage: dosage,
                 frequency: instruction?.as_needed_boolean
-                  ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})`
+                  ? `${t("as_needed_prn")}`
                   : (frequency?.meaning ?? "-") +
                     (instruction?.additional_instruction?.[0]?.display
                       ? `, ${instruction.additional_instruction[0].display}`
@@ -133,6 +133,7 @@ export const PrescriptionPreview = ({
   return (
     <PrintPreview
       title={`${t("prescriptions")} - ${patient.name}`}
+      autoPrint={{ enabled: !!prescription.medications?.length }}
       disabled={!prescription.medications?.length}
     >
       <div className="max-w-4xl mx-auto">
