@@ -374,8 +374,6 @@ export function EncounterCommandDialog({
     getShortcutDisplay,
     isLoading,
     isEncounterInactive,
-    encounter.encounter_class,
-    encounter.status,
   ]);
 
   const findRecentActions = useCallback(
