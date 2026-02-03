@@ -5470,7 +5470,6 @@
   "start_new_template_with_item": "Start a new template with this item",
   "start_review": "Start Review",
   "start_time": "Start Time",
-  "start_time_before_authored_error": "Start time cannot be before the medication was prescribed",
   "start_time_future_error": "Start time cannot be in the future",
   "start_time_must_be_before_end_time": "Start time must be before end time",
   "start_time_must_be_in_the_future": "Start time must be a future time",
