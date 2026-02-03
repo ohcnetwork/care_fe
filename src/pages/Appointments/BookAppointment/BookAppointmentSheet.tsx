@@ -31,7 +31,7 @@ export default function BookAppointmentSheet({
   defaultOpen,
 }: Props) {
   const [qParams] = useQueryParams();
-  const [isOpen, setIsOpen] = useState(defaultOpen ?? qParams.open_schedule === "true");
+  const [isOpen, setIsOpen] = useState(defaultOpen || qParams.open_schedule === "true");
   const { t } = useTranslation();
 
   useEffect(() => {
