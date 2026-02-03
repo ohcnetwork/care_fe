@@ -65,7 +65,6 @@ export const BookAppointmentDetails = ({
 
   const handleResourceChange = (resource: ScheduleResourceFormState) => {
     setSelectedResource(resource);
-    // Cache the service type when it changes
     if (resource.resource_type !== cachedServiceType) {
       setCachedServiceType(resource.resource_type);
     }
