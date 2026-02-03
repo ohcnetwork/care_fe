@@ -30,25 +30,15 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-/**
- * Gets the maximum number of digits allowed for a national phone number
- * (excluding country code) based on the country code.
- */
 function getMaxDigits(countryCode: CountryCode): number {
   const example = getExampleNumber(countryCode, examples);
   return example?.nationalNumber?.length ?? 15;
 }
 
-/**
- * Extracts only digit characters from a string
- */
 function extractDigits(str: string): string {
   return str.replace(/\D/g, "");
 }
 
-/**
- * Calculates the maximum total digits allowed for input including country code
- */
 function getMaxTotalDigits(countryCode: CountryCode): number {
   const countryCallingCode = getCountryCallingCode(countryCode);
   const maxNationalDigits = getMaxDigits(countryCode);
