@@ -96,9 +96,7 @@ export default function PluginEngine({
   }, [pluginsQuery]);
 
   useEffect(() => {
-    window.__CARE_PLUGIN_RUNTIME__ = deepFreeze({
-      getMetaSnapshot: (slug: string) => pluginMeta[slug],
-    });
+    window.__CARE_PLUGIN_RUNTIME__ = deepFreeze({ meta: pluginMeta });
   }, [pluginMeta]);
 
   return (
