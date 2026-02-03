@@ -61,7 +61,7 @@ import {
 } from "@/types/emr/prescription/prescription";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { DispensedItemsSheet } from "./MedicationBillForm";
+import { DispensedItemsSheet } from "./components/DispensedItemsSheet";
 
 interface MedicationTableProps {
   medications: MedicationRequestRead[];
@@ -546,13 +546,12 @@ export default function MedicationDispenseList({
       {dispensedMedicationId && (
         <DispensedItemsSheet
           open={!!dispensedMedicationId}
-          onOpenChange={(open) => {
+          onOpenChange={(open: boolean) => {
             if (!open) {
               setDispensedMedicationId(null);
             }
           }}
           medicationRequestId={dispensedMedicationId}
-          facilityId={facilityId}
         />
       )}
       <ConfirmActionDialog
