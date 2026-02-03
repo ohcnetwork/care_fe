@@ -562,7 +562,6 @@ export function EncounterQuestion({
                           startDate.setHours(0, 0, 0, 0);
                           return date < startDate;
                         }}
-                        dateFormat="d/M/yyyy"
                         className="flex-1 border-gray-200 shadow-xs"
                       />
                       <Input
