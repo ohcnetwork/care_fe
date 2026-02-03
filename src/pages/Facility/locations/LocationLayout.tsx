@@ -34,7 +34,6 @@ import PrescriptionsView, {
 } from "@/pages/Facility/services/pharmacy/PrescriptionsView";
 import { PrintDispenseOrder } from "@/pages/Facility/services/pharmacy/PrintDispenseOrder";
 import { PrintMedicationReturn } from "@/pages/Facility/services/pharmacy/PrintMedicationReturn";
-import { PrintPharmacyPrescription } from "@/pages/Facility/services/pharmacy/PrintPharmacyPrescription";
 import ServiceRequestList from "@/pages/Facility/services/serviceRequests/ServiceRequestList";
 import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
@@ -65,13 +64,14 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       prescriptionId={prescriptionId}
     />
   ),
-  "/medication_requests/patient/:patientId/print": ({
-    patientId,
-  }: {
-    patientId: string;
-  }) => (
-    <PrintPharmacyPrescription facilityId={facilityId} patientId={patientId} />
-  ),
+  // Todo: Re-check if this route is needed
+  // "/medication_requests/patient/:patientId/print": ({
+  //   patientId,
+  // }: {
+  //   patientId: string;
+  // }) => (
+  //   <PrintPharmacyPrescription facilityId={facilityId} patientId={patientId} />
+  // ),
   "/medication_requests/patient/:patientId/bill": ({
     patientId,
   }: {
