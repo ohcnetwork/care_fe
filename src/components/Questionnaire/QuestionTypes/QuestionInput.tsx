@@ -521,7 +521,7 @@ export function QuestionInput({
   return (
     <div className="space-y-2">
       {renderInput()}
-      {error && <p className="text-sm font-medium text-red-500">{error}</p>}
+      {error && <p className="text-sm font-medium text-red-500">{t(error)}</p>}
     </div>
   );
 }
