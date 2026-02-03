@@ -598,6 +598,95 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                 </div>
               </>
             )}
+
+            {/* Credit Notes Section */}
+            {invoice.credit_notes?.filter(
+              (p) => p.status === PaymentReconciliationStatus.active,
+            ).length > 0 && (
+              <>
+                <div className="border border-gray-300 rounded-md space-y-2">
+                  <div className="mt-2 px-3 font-medium">
+                    {t("credit_notes_issued_against_this_invoice")}
+                  </div>
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-b border-gray-200">
+                        <TableHead className={tableHeadClass}>#</TableHead>
+                        <TableHead className={cn(tableHeadClass, "text-left")}>
+                          {t("date_and_time")}
+                        </TableHead>
+                        <TableHead className={cn(tableHeadClass, "text-left")}>
+                          {t("payment_method")}
+                        </TableHead>
+                        <TableHead className={cn(tableHeadClass, "text-left")}>
+                          {t("reference")}
+                        </TableHead>
+                        <TableHead className="font-medium text-right">
+                          {t("amount")} ({getCurrencySymbol()})
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {invoice.credit_notes
+                        .filter(
+                          (p) =>
+                            p.status === PaymentReconciliationStatus.active,
+                        )
+                        .map((creditNote, index) => (
+                          <TableRow
+                            key={creditNote.id}
+                            className="border-b border-gray-200"
+                          >
+                            <TableCell
+                              className={cn(tableCellClass, "text-center")}
+                            >
+                              {index + 1}
+                            </TableCell>
+                            <TableCell
+                              className={cn(tableCellClass, "font-medium")}
+                            >
+                              {creditNote.payment_datetime
+                                ? format(
+                                    new Date(creditNote.payment_datetime),
+                                    "d MMM yyyy, hh:mm a",
+                                  )
+                                : "-"}
+                            </TableCell>
+                            <TableCell
+                              className={cn(tableCellClass, "text-left")}
+                            >
+                              {
+                                PAYMENT_RECONCILIATION_METHOD_MAP[
+                                  creditNote.method
+                                ]
+                              }
+                            </TableCell>
+                            <TableCell className={tableCellClass}>
+                              {creditNote.reference_number}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <MonetaryDisplay
+                                amount={creditNote.amount}
+                                hideCurrency
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                <div className="flex flex-col items-end space-y-2 text-gray-950 font-normal text-sm mb-4">
+                  <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
+
+                  {/* Total Credit Notes */}
+                  <div className="flex w-64 justify-between font-semibold">
+                    <span>{t("total_credit_notes")}</span>
+                    <MonetaryDisplay amount={invoice.total_credit_notes} />
+                  </div>
+                  <div className="p-1 border-b-2 border-dashed border-gray-200 w-full" />
+                </div>
+              </>
+            )}
           </div>
 
           {/* Payment Terms */}

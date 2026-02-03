@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { Plus, QrCode, Search, X } from "lucide-react";
+import { Plus, QrCode, Search, UserPlus, X } from "lucide-react";
 import { navigate } from "raviger";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
@@ -44,6 +44,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   getPartialId,
@@ -52,6 +53,7 @@ import {
   PatientRead,
 } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import careConfig from "@careConfig";
 
@@ -59,13 +61,16 @@ interface CreateDispenseSheetProps {
   facilityId: string;
   locationId: string;
   trigger?: React.ReactNode;
+  patientId?: string;
 }
 
 export function CreateDispenseSheet({
   facilityId,
   trigger,
+  patientId,
 }: CreateDispenseSheetProps) {
   const { t } = useTranslation();
+  const inputRef = useRef<HTMLInputElement>(null);
   const { facility } = useCurrentFacility();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<
@@ -79,6 +84,28 @@ export function CreateDispenseSheet({
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [verificationOpen, setVerificationOpen] = useState(false);
   const [scanDialogOpen, setScanDialogOpen] = useState(false);
+
+  // Fetch patient data when patientId is provided
+  const { data: preselectedPatient } = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: query(patientApi.get, {
+      pathParams: { id: patientId! },
+    }),
+    enabled: !!patientId,
+  });
+
+  // Direct navigation handler when patient is preselected
+  const handleDirectDispense = () => {
+    if (!preselectedPatient) return;
+    navigate(
+      `/facility/${facilityId}/patients/verify?${new URLSearchParams({
+        phone_number: preselectedPatient.phone_number,
+        year_of_birth: preselectedPatient.year_of_birth?.toString() || "",
+        partial_id: preselectedPatient.id.slice(0, 5),
+        flow: "dispense",
+      }).toString()}`,
+    );
+  };
 
   // Combine instance and facility identifier configs
   const allIdentifierConfigs = useMemo(
@@ -161,6 +188,19 @@ export function CreateDispenseSheet({
     }
   }, [verifiedPatient, handleSelectPatient]);
 
+  // Auto-focus input when search type changes
+  useEffect(() => {
+    if (searchType) {
+      // Small delay to ensure the input is rendered after type change
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [searchType]);
+
+  useShortcutSubContext("facility:pharmacy");
+
   const handlePatientSelect = (
     patient: PatientListRead | PartialPatientModel,
   ) => {
@@ -194,6 +234,17 @@ export function CreateDispenseSheet({
     setSearchTerm("");
   };
 
+  const handleRegisterNewPatient = () => {
+    setIsOpen(false);
+    resetState();
+    navigate(`/facility/${facilityId}/patient/create`, {
+      query:
+        isPhoneNumberConfig && isValidPhoneNumber(searchTerm)
+          ? { phone_number: searchTerm, flow: "dispense" }
+          : { flow: "dispense" },
+    });
+  };
+
   const handleProceedToDispense = () => {
     if (!selectedPatient) {
       toast.error(t("select_patient_first"));
@@ -215,6 +266,14 @@ export function CreateDispenseSheet({
   };
 
   const selectedConfig = allIdentifierConfigs.find((c) => c.id === searchType);
+
+  // Check if we have a valid search that returned no results
+  const hasNoResults =
+    searchType &&
+    searchTerm &&
+    (!isPhoneNumberConfig || isValidPhoneNumber(searchTerm)) &&
+    !isPatientFetching &&
+    !patientList?.results.length;
 
   const searchStateMessage = (() => {
     if (!searchType) {
@@ -240,6 +299,22 @@ export function CreateDispenseSheet({
     return null;
   })();
 
+  // When patientId is provided, render a simple button that navigates directly
+  if (patientId && preselectedPatient) {
+    const triggerElement = trigger || (
+      <Button>
+        <Plus className="size-4 mr-1" />
+        {t("new_dispense")}
+      </Button>
+    );
+
+    return (
+      <span onClick={handleDirectDispense} className="cursor-pointer">
+        {triggerElement}
+      </span>
+    );
+  }
+
   return (
     <>
       <Sheet
@@ -254,6 +329,7 @@ export function CreateDispenseSheet({
             <Button>
               <Plus className="size-4 mr-1" />
               {t("new_dispense")}
+              <ShortcutBadge actionId="dispense-button" />
             </Button>
           )}
         </SheetTrigger>
@@ -335,6 +411,7 @@ export function CreateDispenseSheet({
                   <div className="relative">
                     {isPhoneNumberConfig ? (
                       <PhoneInput
+                        ref={inputRef}
                         placeholder={
                           selectedConfig?.config.display || t("search")
                         }
@@ -347,6 +424,7 @@ export function CreateDispenseSheet({
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none z-10" />
                         <Input
                           type="text"
+                          ref={inputRef}
                           placeholder={
                             selectedConfig?.config.display || t("search")
                           }
@@ -371,10 +449,22 @@ export function CreateDispenseSheet({
 
                   {/* Search Results */}
                   {searchStateMessage ? (
-                    <Card className="flex items-center justify-center border bg-gray-50 rounded-sm shadow-none">
+                    <Card className="flex flex-col items-center justify-center border bg-gray-50 rounded-sm shadow-none">
                       <div className="text-sm text-gray-950 text-center p-5">
                         {searchStateMessage}
                       </div>
+                      {hasNoResults && (
+                        <div className="pb-4">
+                          <Button
+                            variant="outline_primary"
+                            size="sm"
+                            onClick={handleRegisterNewPatient}
+                          >
+                            <UserPlus className="size-4 mr-1" />
+                            {t("add_new_patient")}
+                          </Button>
+                        </div>
+                      )}
                     </Card>
                   ) : (
                     <>
@@ -410,6 +500,14 @@ export function CreateDispenseSheet({
                           </CommandGroup>
                         </CommandList>
                       </Command>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleRegisterNewPatient}
+                      >
+                        <UserPlus className="size-4 mr-1" />
+                        {t("add_new_patient")}
+                      </Button>
                     </>
                   )}
                 </CardContent>
