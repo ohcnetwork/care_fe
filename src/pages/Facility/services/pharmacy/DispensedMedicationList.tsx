@@ -1292,9 +1292,7 @@ export default function DispensedMedicationList({
                 }
               >
                 <FileTextIcon className="size-4" />
-                {uniquePrescriptionCount > 1
-                  ? t("print_prescriptions")
-                  : t("print_prescription")}
+                {t("print_prescription", { count: uniquePrescriptionCount })}
               </Button>
             )}
             {billableItems && billableItems.length > 0 && (
