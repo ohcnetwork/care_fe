@@ -563,7 +563,7 @@ export function EncounterQuestion({
                           return date < startDate;
                         }}
                         dateFormat="d/M/yyyy"
-                        className="flex-1"
+                        className="flex-1 border-gray-200 shadow-xs"
                       />
                       <Input
                         type="time"
