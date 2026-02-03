@@ -8,13 +8,14 @@ import { CareTeamSheet } from "@/components/CareTeam/CareTeamSheet";
 import { LocationSheet } from "@/components/Location/LocationSheet";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
-import { Permissions, getPermissions } from "@/common/Permissions";
+import { getPermissions, Permissions } from "@/common/Permissions";
 
 import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { usePermissions } from "@/context/PermissionContext";
 import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounterAsCompletedDialog";
 import { useEncounterProgressController } from "@/pages/Encounters/utils/utils";
 import {
+  completedEncounterStatus,
   EncounterRead,
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
@@ -47,6 +48,7 @@ type EncounterContextType = {
 
   canWritePrimaryEncounter: boolean;
   canWriteSelectedEncounter: boolean;
+  canRestartSelectedEncounter: boolean;
   canWriteClinicalData: boolean;
 
   isEndEncounterPending: boolean;
@@ -165,6 +167,13 @@ export function EncounterProvider({
     !!selectedEncounter &&
     !inactiveEncounterStatus.includes(selectedEncounter.status);
 
+  // User can restart the selected encounter if it was accessed via facility scope, is the same as the primary encounter in view, and is completed
+  const canRestartSelectedEncounter =
+    !!facilityId &&
+    selectedEncounterId === primaryEncounterId &&
+    !!selectedEncounter &&
+    completedEncounterStatus.includes(selectedEncounter.status);
+
   // User can access the current encounter if they have canReadEncounter permission
   const canReadPrimaryEncounter = primaryEncounterPermissions.canReadEncounter;
   // User can edit the current encounter if it was accessed via facility scope and is active
@@ -230,6 +239,7 @@ export function EncounterProvider({
         patientPermissions,
         canReadSelectedEncounter,
         canWriteSelectedEncounter,
+        canRestartSelectedEncounter,
         canReadPrimaryEncounter,
         canWritePrimaryEncounter,
         canReadClinicalData,

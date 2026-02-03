@@ -33,10 +33,8 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import query from "@/Utils/request/query";
 import { useCareApps } from "@/hooks/useCareApps";
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
-import {
-  EncounterRead,
-  inactiveEncounterStatus,
-} from "@/types/emr/encounter/encounter";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -67,6 +65,8 @@ export function EncounterCommandDialog({
   onOpenChange,
   trigger,
 }: EncounterCommandDialogProps) {
+  const { canWriteSelectedEncounter, canRestartSelectedEncounter } =
+    useEncounter();
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
 
@@ -144,15 +144,11 @@ export function EncounterCommandDialog({
 
   const recentActions = recentActionsState;
 
-  const isEncounterInactive = inactiveEncounterStatus.includes(
-    encounter.status,
-  );
-
   const baseEncounterActions: ActionGroup[] = useMemo(() => {
     const groups: ActionGroup[] = [];
 
-    // Write actions - only show for active encounters
-    if (!isEncounterInactive) {
+    // Write actions - only show when user has write permission
+    if (canWriteSelectedEncounter) {
       groups.push({
         group: t("encounter_actions"),
         items: [
@@ -218,8 +214,8 @@ export function EncounterCommandDialog({
       },
     ];
 
-    // Add write actions only for active encounters
-    if (!isEncounterInactive) {
+    // Add write actions only when user has write permission
+    if (canWriteSelectedEncounter) {
       actionItems.push(
         {
           id: "consents",
@@ -264,8 +260,8 @@ export function EncounterCommandDialog({
       );
     }
 
-    // Add restart action only for inactive encounters
-    if (isEncounterInactive) {
+    // Add restart action only when user can restart
+    if (canRestartSelectedEncounter) {
       actionItems.push({
         id: "restart-encounter",
         label: t("restart_encounter"),
@@ -346,8 +342,8 @@ export function EncounterCommandDialog({
       ],
     });
 
-    // Questionnaires - only show for active encounters
-    if (!isEncounterInactive) {
+    // Questionnaires - only show when user has write permission
+    if (canWriteSelectedEncounter) {
       groups.push({
         group: t("questionnaire"),
         items: [
@@ -373,7 +369,8 @@ export function EncounterCommandDialog({
     search,
     getShortcutDisplay,
     isLoading,
-    isEncounterInactive,
+    canWriteSelectedEncounter,
+    canRestartSelectedEncounter,
   ]);
 
   const findRecentActions = useCallback(
