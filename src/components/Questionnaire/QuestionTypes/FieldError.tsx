@@ -25,9 +25,11 @@ export function FieldError({
 
   if (!error) return null;
 
+  const errorMessage = error.error || error.msg;
+
   return (
     <div className="text-sm text-red-500 mt-1">
-      {error.error || error.msg || t("field_required")}
+      {errorMessage ? t(errorMessage) : t("field_required")}
     </div>
   );
 }

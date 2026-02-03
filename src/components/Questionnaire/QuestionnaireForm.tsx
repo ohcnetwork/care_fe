@@ -247,7 +247,7 @@ function ValidationErrorDisplay({
                           icon="l-exclamation-circle"
                           className="size-4 mt-0.5 shrink-0"
                         />
-                        <span>{error.error}</span>
+                        <span>{t(error.error ?? "")}</span>
                       </div>
                       <Button
                         variant="ghost"

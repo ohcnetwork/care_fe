@@ -42,10 +42,12 @@ import type {
 import type { Question } from "@/types/questionnaire/question";
 import {
   FieldDefinitions,
+  createValidationError,
   useFieldError,
   validateFields,
 } from "@/types/questionnaire/validation";
 import careConfig from "@careConfig";
+import { format } from "date-fns";
 import { useQueryParams } from "raviger";
 
 interface EncounterQuestionProps {
@@ -70,6 +72,10 @@ const ENCOUNTER_FIELDS: FieldDefinitions = {
     key: "hospitalization.discharge_disposition",
     required: true,
   },
+  PERIOD_END: {
+    key: "period.end",
+    required: true,
+  },
 } as const;
 
 export function validateEncounterQuestion(
@@ -77,6 +83,19 @@ export function validateEncounterQuestion(
   questionId: string,
 ): QuestionValidationError[] {
   const errors: QuestionValidationError[] = [];
+
+  if (
+    value?.period?.end &&
+    new Date(value.period.start!) > new Date(value.period.end)
+  ) {
+    errors.push(
+      createValidationError(
+        questionId,
+        ENCOUNTER_FIELDS.PERIOD_END.key,
+        "end_date_after_start",
+      ),
+    );
+  }
 
   if (
     value?.status === "discharged" &&
@@ -233,6 +252,8 @@ export function EncounterQuestion({
     );
   };
 
+  const getStartDate = () => new Date(encounter.period.start!);
+
   if (isLoading) {
     return <div>{t("loading_encounter")}</div>;
   }
@@ -331,32 +352,25 @@ export function EncounterQuestion({
           <Label>{t("start_datetime")}</Label>
           <div className="flex gap-1 flex-wrap">
             <DatePicker
-              date={new Date(encounter.period.start || new Date())}
+              date={getStartDate()}
               onChange={(newDate) => {
                 if (!newDate) return;
-                const current = new Date(encounter.period.start || new Date());
+                const current = getStartDate();
                 newDate.setHours(current.getHours(), current.getMinutes());
                 handleUpdateEncounter({
                   period: { ...encounter.period, start: newDate.toISOString() },
                 });
               }}
-              disabled={(date) => date > new Date()}
               className="flex-1 border-gray-200 shadow-xs"
             />
             <Input
               type="time"
               className="flex-1 border-t-0 sm:border-t text-sm border-gray-200 h-9"
-              value={new Date(
-                encounter.period.start || new Date(),
-              ).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: false,
-              })}
+              value={format(getStartDate(), "HH:mm")}
               onChange={(e) => {
                 const [hours, minutes] = e.target.value.split(":").map(Number);
                 if (isNaN(hours) || isNaN(minutes)) return;
-                const updated = new Date(encounter.period.start || new Date());
+                const updated = getStartDate();
                 updated.setHours(hours, minutes);
                 handleUpdateEncounter({
                   period: { ...encounter.period, start: updated.toISOString() },
@@ -512,7 +526,14 @@ export function EncounterQuestion({
 
                 {encounter.status === "discharged" && (
                   <div className="space-y-2">
-                    <Label>{t("discharge_date_time")}</Label>
+                    <Label
+                      className={cn(
+                        hasError(ENCOUNTER_FIELDS.PERIOD_END.key) &&
+                          "text-red-500",
+                      )}
+                    >
+                      {t("discharge_date_time")}
+                    </Label>
                     <div className="flex gap-1 flex-wrap">
                       <DatePicker
                         date={
