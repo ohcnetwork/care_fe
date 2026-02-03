@@ -326,6 +326,46 @@ export function EncounterQuestion({
             placeholder={t("ip_op_obs_emr_number")}
           />
         </div>
+
+        <div className="space-y-2">
+          <Label>{t("start_datetime")}</Label>
+          <div className="flex gap-1 flex-wrap">
+            <DatePicker
+              date={new Date(encounter.period.start || new Date())}
+              onChange={(newDate) => {
+                if (!newDate) return;
+                const current = new Date(encounter.period.start || new Date());
+                newDate.setHours(current.getHours(), current.getMinutes());
+                handleUpdateEncounter({
+                  period: { ...encounter.period, start: newDate.toISOString() },
+                });
+              }}
+              disabled={(date) => date > new Date()}
+              className="flex-1 border-gray-200 shadow-xs"
+            />
+            <Input
+              type="time"
+              className="flex-1 border-t-0 sm:border-t text-sm border-gray-200 h-9"
+              value={new Date(
+                encounter.period.start || new Date(),
+              ).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              })}
+              onChange={(e) => {
+                const [hours, minutes] = e.target.value.split(":").map(Number);
+                if (isNaN(hours) || isNaN(minutes)) return;
+                const updated = new Date(encounter.period.start || new Date());
+                updated.setHours(hours, minutes);
+                handleUpdateEncounter({
+                  period: { ...encounter.period, start: updated.toISOString() },
+                });
+              }}
+              disabled={disabled}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Mark for discharge button - Show if not already discharged */}
