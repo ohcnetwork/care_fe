@@ -1279,6 +1279,7 @@
   "condition_age_value_type__days": "Days",
   "condition_age_value_type__months": "Months",
   "condition_age_value_type__years": "Years",
+  "condition_metric__encounter_class": "Encounter Class",
   "condition_metric__encounter_tag": "Encounter Tags",
   "condition_metric__patient_age": "Patient Age",
   "condition_metric__patient_gender": "Patient Gender",
