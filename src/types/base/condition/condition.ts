@@ -169,7 +169,7 @@ export function ConditionOperationSummary({
         typeof condition.value === "object" && "value" in condition.value
           ? condition.value.value
           : condition.value;
-      let valueDisplay = typeof value === "string" ? value : value;
+      let valueDisplay = String(value);
       if (condition.metric === "patient_gender") {
         valueDisplay = t(`GENDER__${value}`);
       } else if (condition.metric === "encounter_class") {
