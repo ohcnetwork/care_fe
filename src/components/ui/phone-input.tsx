@@ -1,5 +1,9 @@
 import careConfig from "@careConfig";
-import { CountryCode, getExampleNumber } from "libphonenumber-js";
+import {
+  CountryCode,
+  getCountryCallingCode,
+  getExampleNumber,
+} from "libphonenumber-js";
 import examples from "libphonenumber-js/mobile/examples";
 import { CheckIcon, ChevronsUpDown } from "lucide-react";
 import * as React from "react";
@@ -27,12 +31,28 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 /**
- * Gets the maximum length for a formatted national phone number
+ * Gets the maximum number of digits allowed for a national phone number
  * (excluding country code) based on the country code.
  */
-function getMaxPhoneLength(countryCode: CountryCode): number {
+function getMaxDigits(countryCode: CountryCode): number {
   const example = getExampleNumber(countryCode, examples);
-  return example?.formatNational().length ?? 15;
+  return example?.nationalNumber?.length ?? 15;
+}
+
+/**
+ * Extracts only digit characters from a string
+ */
+function extractDigits(str: string): string {
+  return str.replace(/\D/g, "");
+}
+
+/**
+ * Calculates the maximum total digits allowed for input including country code
+ */
+function getMaxTotalDigits(countryCode: CountryCode): number {
+  const countryCallingCode = getCountryCallingCode(countryCode);
+  const maxNationalDigits = getMaxDigits(countryCode);
+  return countryCallingCode.length + maxNationalDigits;
 }
 
 type PhoneInputProps = Omit<
@@ -105,7 +125,35 @@ function InputComponent({
   ...props
 }: React.ComponentProps<"input">) {
   const { country } = React.useContext(PhoneInputContext);
-  const maxLength = getMaxPhoneLength(country);
+  const maxNationalDigits = getMaxDigits(country);
+  const maxTotalDigits = getMaxTotalDigits(country);
+
+  const handleBeforeInput = (e: React.FormEvent<HTMLInputElement>) => {
+    const inputEvent = e.nativeEvent as InputEvent;
+    const newData = inputEvent.data || "";
+
+    if (newData.includes("+")) {
+      return;
+    }
+
+    const input = e.currentTarget;
+    const currentValue = input.value || "";
+    const currentDigits = extractDigits(currentValue);
+    const newDigits = extractDigits(newData);
+
+    // Determine max based on whether international format is being used
+    const isInternationalFormat = currentValue.includes("+");
+    const maxAllowed = isInternationalFormat
+      ? maxTotalDigits
+      : maxNationalDigits;
+
+    if (
+      newDigits.length > 0 &&
+      currentDigits.length + newDigits.length > maxAllowed
+    ) {
+      e.preventDefault();
+    }
+  };
 
   return (
     <Input
@@ -113,7 +161,7 @@ function InputComponent({
         "rounded-e-md rounded-s-none focus-visible:ring-0 focus-visible:outline-hidden focus-visible:border-gray-200",
         className,
       )}
-      maxLength={maxLength}
+      onBeforeInput={handleBeforeInput}
       {...props}
     />
   );
