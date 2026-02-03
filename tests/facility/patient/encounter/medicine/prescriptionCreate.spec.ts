@@ -81,8 +81,15 @@ test.describe("Create Patient Prescription", () => {
     });
 
     await test.step("Verify medication in table", async () => {
-      await page.getByRole("tab", { name: "Medicines" }).click();
-      await page.waitForLoadState("networkidle");
+      // Wait for prescriptions API to respond after clicking tab
+      await Promise.all([
+        page.getByRole("tab", { name: "Medicines" }).click(),
+        page.waitForResponse(
+          (resp) =>
+            resp.url().includes("/medication/prescription/") &&
+            resp.status() === 200,
+        ),
+      ]);
       await page
         .getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2} (AM|PM)$/)
         .first()

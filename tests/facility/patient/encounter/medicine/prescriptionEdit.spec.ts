@@ -81,9 +81,15 @@ test.describe("Edit Patient Prescription", () => {
     });
 
     await test.step("Verify medication in table", async () => {
-      await page.getByRole("tab", { name: "Medicines" }).click();
-      await page.waitForLoadState("networkidle");
-      // Target the text span/p directly, then click its parent button/item
+      // Wait for prescriptions API to respond after clicking tab
+      await Promise.all([
+        page.getByRole("tab", { name: "Medicines" }).click(),
+        page.waitForResponse(
+          (resp) =>
+            resp.url().includes("/medication/prescription/") &&
+            resp.status() === 200,
+        ),
+      ]);
       await page
         .getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2} (AM|PM)$/)
         .first()
@@ -95,17 +101,6 @@ test.describe("Edit Patient Prescription", () => {
       await expect(table).toContainText(frequency);
       await expect(table).toContainText(selectedInstruction);
       await expect(page.getByText(`Note${notes}`)).toBeVisible();
-    });
-
-    await test.step("Edit prescription to remove medication", async () => {
-      await page
-        .getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2} (AM|PM)$/)
-        .first()
-        .click();
-      // Wait for medication to be visible instead of networkidle
-      await expect(page.getByText(medicineName).nth(0)).toBeVisible({
-        timeout: 10000,
-      });
     });
 
     await test.step("Remove medication", async () => {
@@ -128,8 +123,15 @@ test.describe("Edit Patient Prescription", () => {
     });
 
     await test.step("Verify medication in stopped medications", async () => {
-      await page.getByRole("tab", { name: "Medicines" }).click();
-      await page.waitForLoadState("networkidle");
+      // Wait for prescriptions API to respond after clicking tab
+      await Promise.all([
+        page.getByRole("tab", { name: "Medicines" }).click(),
+        page.waitForResponse(
+          (resp) =>
+            resp.url().includes("/medication/prescription/") &&
+            resp.status() === 200,
+        ),
+      ]);
       await page
         .getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2} (AM|PM)$/)
         .first()
