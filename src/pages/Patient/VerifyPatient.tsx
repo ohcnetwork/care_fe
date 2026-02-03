@@ -41,23 +41,14 @@ interface QParams {
   year_of_birth: string;
   partial_id: string;
   flow?: "queue" | "dispense";
-  createEncounter?: "true";
-  schedule_open?: "true";
+  action?: "schedule" | "create_encounter";
 }
 
 export default function VerifyPatient() {
   useShortcutSubContext("facility:patient:home");
   const { t } = useTranslation();
-  const [
-    {
-      phone_number,
-      year_of_birth,
-      partial_id,
-      flow,
-      createEncounter,
-      schedule_open,
-    },
-  ] = useQueryParams<QParams>();
+  const [{ phone_number, year_of_birth, partial_id, flow, action }] =
+    useQueryParams<QParams>();
   const queryClient = useQueryClient();
 
   const { goBack } = useAppHistory();
@@ -90,7 +81,7 @@ export default function VerifyPatient() {
     queryFn: query(patientApi.searchRetrieve, {
       body: { phone_number: phone_number ?? "", year_of_birth, partial_id },
     }),
-    enabled: !!(year_of_birth && partial_id),
+    enabled: !!(partial_id && (year_of_birth || phone_number)),
   });
 
   if (isVerifyingPatient || !facility) {
@@ -147,7 +138,7 @@ export default function VerifyPatient() {
                     patientId={patientData.id}
                     facilityId={facilityId}
                     patientName={patientData.name}
-                    defaultOpen={isQueueFlow || createEncounter === "true"}
+                    defaultOpen={isQueueFlow || action === "create_encounter"}
                     trigger={
                       <QuickAction
                         icon={<SquareActivity className="text-orange-500" />}
@@ -170,7 +161,7 @@ export default function VerifyPatient() {
                   <BookAppointmentSheet
                     patientId={patientData.id}
                     facilityId={facilityId}
-                    defaultOpen={schedule_open === "true"}
+                    defaultOpen={action === "schedule"}
                     trigger={
                       <QuickAction
                         icon={<Stethoscope className="text-purple-500" />}

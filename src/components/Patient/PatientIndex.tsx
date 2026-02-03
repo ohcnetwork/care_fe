@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { ChevronDown } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,6 +15,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -54,7 +61,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const [selectedPatient, setSelectedPatient] = useState<
     PartialPatientModel | PatientRead | null
   >(null);
-  const [scheduleOpenOnVerify, setScheduleOpenOnVerify] = useState(false);
+  const [actionOnVerify, setActionOnVerify] = useState<
+    "schedule" | "create_encounter" | undefined
+  >(undefined);
   const shortcuts = useShortcuts();
   const [qParams] = useQueryParams();
   const [verificationOpen, setVerificationOpen] = useState(false);
@@ -105,7 +114,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const navigateToVerify = (
     patient: PartialPatientModel | PatientRead,
     yearOfBirth?: string,
-    options?: { scheduleOpen?: boolean },
+    action?: "schedule" | "create_encounter",
   ) => {
     navigate(`/facility/${facilityId}/patients/verify`, {
       query: {
@@ -117,7 +126,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
           (patient as PatientRead).year_of_birth?.toString() ||
           "",
         partial_id: getPartialId(patient),
-        ...(options?.scheduleOpen ? { schedule_open: "true" } : {}),
+        ...(action ? { action } : {}),
       },
     });
   };
@@ -131,7 +140,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       setSelectedPatient(patient);
       setVerificationOpen(true);
       setYearOfBirth("");
-      setScheduleOpenOnVerify(false);
+      setActionOnVerify(undefined);
     } else {
       navigateToVerify(patient);
     }
@@ -146,9 +155,24 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       setSelectedPatient(patient);
       setVerificationOpen(true);
       setYearOfBirth("");
-      setScheduleOpenOnVerify(true);
+      setActionOnVerify("schedule");
     } else {
-      navigateToVerify(patient, undefined, { scheduleOpen: true });
+      navigateToVerify(patient, undefined, "schedule");
+    }
+  };
+
+  const handleCreateEncounter = (index: number) => {
+    const patient = patientList?.results[index];
+    if (!patient) {
+      return;
+    }
+    if (patientList?.partial) {
+      setSelectedPatient(patient);
+      setVerificationOpen(true);
+      setYearOfBirth("");
+      setActionOnVerify("create_encounter");
+    } else {
+      navigateToVerify(patient, undefined, "create_encounter");
     }
   };
 
@@ -157,9 +181,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       toast.error(t("valid_year_of_birth"));
       return;
     }
-    navigateToVerify(selectedPatient, yearOfBirth, {
-      scheduleOpen: scheduleOpenOnVerify,
-    });
+    navigateToVerify(selectedPatient, yearOfBirth, actionOnVerify);
   };
 
   useEffect(() => {
@@ -293,15 +315,64 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                   }
                                 </TableCell>
                                 <TableCell>
-                                  <Button
-                                    variant="outline"
-                                    onClick={(event) => {
-                                      event.stopPropagation();
-                                      handleScheduleAppointment(index);
-                                    }}
+                                  <div
+                                    className="flex"
+                                    onClick={(e) => e.stopPropagation()}
                                   >
-                                    {t("schedule_appointment")}
-                                  </Button>
+                                    <Button
+                                      variant="outline"
+                                      onClick={(event) => {
+                                        event.stopPropagation();
+                                        handleScheduleAppointment(index);
+                                      }}
+                                      className="flex-1 rounded-r-none border-r-0"
+                                    >
+                                      {t("schedule_appointment")}
+                                    </Button>
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button
+                                          variant="outline"
+                                          size="icon"
+                                          onClick={(event) => {
+                                            event.stopPropagation();
+                                          }}
+                                          className="rounded-l-none"
+                                        >
+                                          <ChevronDown className="size-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end">
+                                        <DropdownMenuItem
+                                          onSelect={(event) => {
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                            handleScheduleAppointment(index);
+                                          }}
+                                        >
+                                          {t("schedule_appointment")}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          onSelect={(event) => {
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                            handleCreateEncounter(index);
+                                          }}
+                                        >
+                                          {t("create_encounter")}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          onSelect={(event) => {
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                            handlePatientSelect(index);
+                                          }}
+                                        >
+                                          {t("patient_home")}
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </div>
                                 </TableCell>
                               </TableRow>
                             ))}
@@ -337,7 +408,12 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                   setYearOfBirth(value);
                 }
               }}
-              onKeyDown={(e) => e.key === "Enter" && handleVerify()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleVerify();
+                }
+              }}
               autoFocus
             />
           </div>
