@@ -52,6 +52,8 @@ import {
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
+import useFilters from "@/hooks/useFilters";
+
 import { add, multiply, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
@@ -100,7 +102,6 @@ export const PrintChargeItems = (props: {
   const [summaryMode, setSummaryMode] = useState(false);
   const [hideHeader, setHideHeader] = useState(false);
   const [preserveHeaderSpace, setPreserveHeaderSpace] = useState(true);
-  const [sortByName, setSortByName] = useState(false);
   const [showCreatedBy, setShowCreatedBy] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
   const [groupByParentCategory, setGroupByParentCategory] = useState(false);
@@ -121,12 +122,13 @@ export const PrintChargeItems = (props: {
         ChargeItemStatus.paid,
       ];
 
+  const { qParams, updateQuery } = useFilters({ disableCache: true });
+
   const hideCategoryLabel = `${t("hide_category_grouping")}`;
   const hidePaymentTypeLabel = `${t("hide_payment_type_grouping")}`;
   const summaryLabel = `${t("summary")}`;
   const hideHeaderLabel = `${t("hide_header")}`;
   const preserveHeaderSpaceLabel = `${t("preserve_header_space")}`;
-  const sortByNameLabel = `${t("sort_by_name")}`;
   const showCreatedByLabel = `${t("show_created_by")}`;
   const showStatusLabel = `${t("show_status")}`;
   const groupByParentCategoryLabel = `${t("group_by_parent_category")}`;
@@ -139,7 +141,7 @@ export const PrintChargeItems = (props: {
   });
 
   const { data: chargeItems, isLoading } = useQuery({
-    queryKey: ["chargeItems", accountId, selectedStatuses],
+    queryKey: ["chargeItems", accountId, selectedStatuses, qParams.ordering],
     queryFn: query.paginated(chargeItemApi.listChargeItem, {
       pathParams: { facilityId },
       queryParams: {
@@ -284,12 +286,14 @@ export const PrintChargeItems = (props: {
 
             <div className="gap-2 flex items-center">
               <Switch
-                id="sort-by-name"
-                checked={sortByName}
-                onCheckedChange={setSortByName}
+                id="sort-by-title"
+                checked={qParams.ordering === "title"}
+                onCheckedChange={(checked) =>
+                  updateQuery({ ordering: checked ? "title" : undefined })
+                }
               />
-              <label htmlFor="sort-by-name" className="cursor-pointer text-sm">
-                {sortByNameLabel}
+              <label htmlFor="sort-by-title" className="cursor-pointer text-sm">
+                {t("sort_by_title")}
               </label>
             </div>
 
@@ -634,13 +638,8 @@ export const PrintChargeItems = (props: {
                                   const rows: React.ReactNode[] = [];
 
                                   sortedCategories.forEach((categoryTitle) => {
-                                    const baseItems: ChargeItemRead[] =
+                                    const items: ChargeItemRead[] =
                                       groups[categoryTitle] ?? [];
-                                    const items = sortByName
-                                      ? baseItems.sort((a, b) =>
-                                          a.title.localeCompare(b.title),
-                                        )
-                                      : baseItems;
 
                                     const categoryTotal = add(
                                       ...items.map((i) => i.total_price || 0),

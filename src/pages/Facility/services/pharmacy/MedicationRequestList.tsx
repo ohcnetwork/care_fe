@@ -6,7 +6,7 @@ import {
   ReceiptTextIcon,
 } from "lucide-react";
 import { navigate } from "raviger";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -50,7 +50,12 @@ import {
 } from "@/components/ui/multi-filter/utils/Utils";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { CreateDispenseSheet } from "@/pages/Facility/services/pharmacy/CreateDispenseSheet";
-import { ENCOUNTER_CLASSES_COLORS } from "@/types/emr/encounter/encounter";
+import {
+  ENCOUNTER_CLASS_ICONS,
+  ENCOUNTER_CLASSES_COLORS,
+  ENCOUNTER_STATUS_COLORS,
+  ENCOUNTER_STATUS_ICONS,
+} from "@/types/emr/encounter/encounter";
 import {
   PrescriptionStatus,
   PrescriptionSummary,
@@ -334,7 +339,7 @@ export default function MedicationRequestList({
 
                   <TableCell className="text-sm">
                     <div className="flex flex-col gap-1">
-                      <div>
+                      <div className="space-x-1">
                         <Badge
                           size="sm"
                           variant={
@@ -343,9 +348,27 @@ export default function MedicationRequestList({
                             ]
                           }
                         >
+                          {React.createElement(
+                            ENCOUNTER_CLASS_ICONS[
+                              item.encounter.encounter_class
+                            ],
+                            { className: "size-3" },
+                          )}
                           {t(
                             `encounter_class__${item.encounter.encounter_class}`,
                           )}
+                        </Badge>
+                        <Badge
+                          size="sm"
+                          variant={
+                            ENCOUNTER_STATUS_COLORS[item.encounter.status]
+                          }
+                        >
+                          {React.createElement(
+                            ENCOUNTER_STATUS_ICONS[item.encounter.status],
+                            { className: "size-3" },
+                          )}
+                          {t(`encounter_status__${item.encounter.status}`)}
                         </Badge>
                       </div>
                       {item.encounter.current_location && (

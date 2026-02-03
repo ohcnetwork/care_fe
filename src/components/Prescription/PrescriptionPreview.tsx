@@ -133,6 +133,7 @@ export const PrescriptionPreview = ({
   return (
     <PrintPreview
       title={`${t("prescriptions")} - ${patient.name}`}
+      autoPrint={{ enabled: !!prescription.medications?.length }}
       disabled={!prescription.medications?.length}
     >
       <div className="max-w-4xl mx-auto">
