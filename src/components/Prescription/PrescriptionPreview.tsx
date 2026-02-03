@@ -14,8 +14,13 @@ import { formatDosage, formatSig } from "@/components/Medicine/utils";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { displayMedicationName } from "@/types/emr/medicationRequest/medicationRequest";
+import { PatientRead } from "@/types/emr/patient/patient";
 import { PrescriptionRead } from "@/types/emr/prescription/prescription";
-import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import { FacilityBareMinimum, FacilityBase } from "@/types/facility/facility";
+import {
+  PatientIdentifier,
+  PatientIdentifierUse,
+} from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { QRCodeSVG } from "qrcode.react";
 
 interface DetailRowProps {
@@ -24,12 +29,92 @@ interface DetailRowProps {
   isStrong?: boolean;
 }
 
-const PrescriptionContent = ({
+export const PrescriptionPrintHeader = ({
+  patient,
+  facility,
+}: {
+  patient: PatientRead;
+  facility?: (FacilityBareMinimum & Partial<FacilityBase>) | null;
+}) => {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <div className="mb-4 flex justify-between items-start border-b border-gray-200 pb-2">
+        <div className="flex items-start gap-4">
+          <div className="text-left">
+            <h1 className="text-2xl font-medium">{facility?.name || ""}</h1>
+            {facility?.address && (
+              <div className="text-sm rounded-md whitespace-pre-wrap text-gray-500">
+                {facility.address}
+                {facility.phone_number && (
+                  <p className="text-sm text-gray-500">
+                    {t("phone")}: {facility.phone_number}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+        <QRCodeSVG value={patient.id} size={50} level="Q" marginSize={0} />
+        <img
+          src={careConfig.mainLogo?.dark}
+          alt="Logo"
+          className="mb-2 h-10 w-auto object-contain sm:mb-0 text-end"
+        />
+      </div>
+
+      <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2 print:grid-cols-2">
+        <div className="space-y-1">
+          <DetailRow label={t("patient")} value={patient.name} isStrong />
+          <DetailRow
+            label={`${t("age")} / ${t("sex")}`}
+            value={
+              patient
+                ? `${formatPatientAge(patient, true)}, ${t(
+                    `GENDER__${patient.gender}`,
+                  )}`
+                : undefined
+            }
+            isStrong
+          />
+          {patient.instance_identifiers
+            ?.filter(
+              ({ config }: PatientIdentifier) =>
+                config.config.use === PatientIdentifierUse.official,
+            )
+            .map((identifier: PatientIdentifier) => (
+              <DetailRow
+                key={identifier.config.id}
+                label={identifier.config.config.display}
+                value={identifier.value}
+                isStrong
+              />
+            ))}
+        </div>
+        <div className="space-y-1">
+          <DetailRow
+            label={t("date")}
+            value={format(new Date(), "dd MMM yyyy, EEEE")}
+            isStrong
+          />
+          <DetailRow
+            label={t("mobile_number")}
+            value={patient && formatPhoneNumberIntl(patient.phone_number)}
+            isStrong
+          />
+        </div>
+      </div>
+    </>
+  );
+};
+
+export const PrescriptionDetails = ({
   prescription,
 }: {
   prescription: PrescriptionRead;
 }) => {
-  const medications = prescription.medications;
+  const medications = prescription.medications || [];
   const { t } = useTranslation();
 
   return (
@@ -101,6 +186,26 @@ const PrescriptionContent = ({
   );
 };
 
+export const PrescriptionPrintContent = ({
+  prescription,
+}: {
+  prescription: PrescriptionRead;
+}) => {
+  const { t } = useTranslation();
+  const { facility } = useCurrentFacility();
+  const patient = prescription.encounter.patient;
+
+  return (
+    <div className="mx-auto max-w-4xl">
+      <div>
+        <PrescriptionPrintHeader patient={patient} facility={facility} />
+        <PrescriptionDetails prescription={prescription} />
+        <PrintFooter leftContent={t("computer_generated_prescription")} />
+      </div>
+    </div>
+  );
+};
+
 const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
   return (
     <div className="flex">
@@ -119,7 +224,6 @@ export const PrescriptionPreview = ({
   prescription: PrescriptionRead;
 }) => {
   const { t } = useTranslation();
-  const { facility } = useCurrentFacility();
   const patient = prescription.encounter.patient;
 
   if (!prescription.medications?.length) {
@@ -136,87 +240,7 @@ export const PrescriptionPreview = ({
       autoPrint={{ enabled: !!prescription.medications?.length }}
       disabled={!prescription.medications?.length}
     >
-      <div className="max-w-4xl mx-auto">
-        <div>
-          {/* Header */}
-          <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
-            <div className="flex items-start gap-4">
-              <div className="text-left">
-                <h1 className="text-2xl font-medium">{facility?.name}</h1>
-                {facility?.address && (
-                  <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
-                    {facility.address}
-                    {facility.phone_number && (
-                      <p className="text-gray-500 text-sm">
-                        {t("phone")}: {facility.phone_number}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-            <QRCodeSVG value={patient.id} size={50} level="Q" marginSize={0} />
-            <img
-              src={careConfig.mainLogo?.dark}
-              alt="Logo"
-              className="h-10 w-auto object-contain mb-2 sm:mb-0 text-end"
-            />
-          </div>
-
-          {/* Patient Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-6 pb-3">
-            <div className="space-y-1">
-              <DetailRow label={t("patient")} value={patient.name} isStrong />
-              <DetailRow
-                label={`${t("age")} / ${t("sex")}`}
-                value={
-                  patient
-                    ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
-                    : undefined
-                }
-                isStrong
-              />
-              {patient.instance_identifiers
-                ?.filter(
-                  ({ config }) =>
-                    config.config.use === PatientIdentifierUse.official,
-                )
-                .map((identifier) => (
-                  <DetailRow
-                    key={identifier.config.id}
-                    label={identifier.config.config.display}
-                    value={identifier.value}
-                    isStrong
-                  />
-                ))}
-            </div>
-            <div className="space-y-1">
-              <DetailRow
-                label={t("date")}
-                value={
-                  prescription.encounter.period?.start
-                    ? format(
-                        new Date(prescription.encounter.period.start),
-                        "dd MMM yyyy, EEEE",
-                      )
-                    : format(new Date(), "dd MMM yyyy, EEEE")
-                }
-                isStrong
-              />
-              <DetailRow
-                label={t("mobile_number")}
-                value={patient && formatPhoneNumberIntl(patient.phone_number)}
-                isStrong
-              />
-            </div>
-          </div>
-
-          <PrescriptionContent prescription={prescription} />
-
-          {/* Footer */}
-          <PrintFooter leftContent={t("computer_generated_prescription")} />
-        </div>
-      </div>
+      <PrescriptionPrintContent prescription={prescription} />
     </PrintPreview>
   );
 };

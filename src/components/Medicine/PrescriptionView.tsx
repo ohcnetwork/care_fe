@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { PencilIcon, PlusIcon } from "lucide-react";
 import { Link } from "raviger";
 import * as React from "react";
@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import { Markdown } from "@/components/ui/markdown";
-import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import { displayMedicationName } from "@/types/emr/medicationRequest/medicationRequest";
+import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
@@ -34,7 +35,7 @@ export default function PrescriptionView({
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = React.useState("");
 
-  const { data: prescription, isLoading } = useQuery({
+  const { data: prescription, isLoading: prescriptionLoading } = useQuery({
     queryKey: ["prescription", patientId, prescriptionId],
     queryFn: query(prescriptionApi.get, {
       pathParams: { patientId, id: prescriptionId! },
@@ -43,22 +44,28 @@ export default function PrescriptionView({
     enabled: !!patientId && !!prescriptionId,
   });
 
-  const { data: medicationRequests, isLoading: medicationRequestsLoading } =
-    useQuery({
-      queryKey: ["medication_requests", patientId, encounterId],
-      queryFn: query.paginated(medicationRequestApi.list, {
-        pathParams: { patientId },
-        queryParams: {
-          encounter: encounterId,
-          facility: facilityId,
-          product_type: "medication",
-        },
-        pageSize: 100,
-      }),
-      enabled: !!patientId && !!encounterId && !!facilityId && !prescriptionId,
-    });
+  const { data: prescriptionList, isLoading: listLoading } = useQuery({
+    queryKey: ["prescription_list", patientId, encounterId],
+    queryFn: query(prescriptionApi.list, {
+      pathParams: { patientId },
+      queryParams: { encounter: encounterId, facility: facilityId },
+    }),
+    enabled: !!patientId && !!encounterId && !!facilityId && !prescriptionId,
+  });
 
-  if (isLoading || medicationRequestsLoading) {
+  const prescriptionQueries = useQueries({
+    queries: (prescriptionList?.results || []).map((pres) => ({
+      queryKey: ["prescription", patientId, pres.id],
+      queryFn: query(prescriptionApi.get, {
+        pathParams: { patientId, id: pres.id! },
+        queryParams: { facility: facilityId },
+      }),
+    })),
+  });
+
+  const allPrescriptionsLoading = prescriptionQueries.some((q) => q.isLoading);
+
+  if (prescriptionLoading || listLoading || allPrescriptionsLoading) {
     return (
       <div className="flex h-full items-center justify-center">
         <Loading />
@@ -66,9 +73,23 @@ export default function PrescriptionView({
     );
   }
 
-  const hasMedications = prescriptionId
-    ? (prescription?.medications?.length ?? 0) > 0
-    : (medicationRequests?.results?.length ?? 0) > 0;
+  const prescriptions = prescriptionId
+    ? prescription
+      ? [prescription]
+      : []
+    : prescriptionQueries
+        .map((q) => q.data)
+        .filter((p): p is PrescriptionRead => !!p);
+
+  const allMedications = prescriptions.flatMap((p) => p.medications || []);
+
+  const hasMedications = allMedications.length > 0;
+
+  const filteredMedications = allMedications.filter((medication) =>
+    displayMedicationName(medication)
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase()),
+  );
 
   return (
     <div className="space-y-4">
@@ -178,23 +199,18 @@ export default function PrescriptionView({
             />
           </div>
         )}
-        <MedicationsTable
-          medications={
-            (prescriptionId && prescription
-              ? prescription.medications
-              : medicationRequests?.results || []
-            ).filter((medication) =>
-              (
-                medication.medication.display ||
-                medication.requested_product?.name ||
-                ""
-              )
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase()),
-            ) || []
-          }
-          showActiveOnly={false}
-        />
+        <div className="flex flex-col gap-2">
+          {hasMedications ? (
+            <MedicationsTable
+              medications={filteredMedications}
+              showActiveOnly={false}
+            />
+          ) : (
+            <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed border-gray-200 p-4 text-gray-500">
+              {t("no_medications_found_for_this_encounter")}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
