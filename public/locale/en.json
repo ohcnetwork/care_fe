@@ -4080,6 +4080,8 @@
   "phone_no": "Phone no.",
   "phone_number": "Phone Number",
   "phone_number_at_current_facility": "Phone Number of Contact person at current Facility",
+  "phone_number_max_digits_constraint": "Maximum {{max}} digits allowed",
+  "phone_number_max_digits_reached": "Maximum {{max}} digits reached",
   "phone_number_min_error": "Phone number must be at least 10 characters long",
   "phone_number_not_found": "Phone number not found",
   "phone_number_validation_error": "Entered phone number is not valid",

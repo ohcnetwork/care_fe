@@ -114,46 +114,72 @@ function InputComponent({
   className,
   ...props
 }: React.ComponentProps<"input">) {
+  const { t } = useTranslation();
   const { country } = React.useContext(PhoneInputContext);
   const maxNationalDigits = getMaxDigits(country);
   const maxTotalDigits = getMaxTotalDigits(country);
+  const [announcement, setAnnouncement] = React.useState("");
 
-  const handleBeforeInput = (e: React.FormEvent<HTMLInputElement>) => {
-    const inputEvent = e.nativeEvent as InputEvent;
-    const newData = inputEvent.data || "";
+  const handleBeforeInput = React.useCallback(
+    (e: React.FormEvent<HTMLInputElement>) => {
+      const inputEvent = e.nativeEvent as InputEvent;
+      const newData = inputEvent.data || "";
 
-    if (newData.includes("+")) {
-      return;
-    }
+      if (newData.includes("+")) {
+        return;
+      }
 
-    const input = e.currentTarget;
-    const currentValue = input.value || "";
-    const currentDigits = extractDigits(currentValue);
-    const newDigits = extractDigits(newData);
+      const input = e.currentTarget;
+      const currentValue = input.value || "";
+      const currentDigits = extractDigits(currentValue);
+      const newDigits = extractDigits(newData);
 
-    // Determine max based on whether international format is being used
-    const isInternationalFormat = currentValue.includes("+");
-    const maxAllowed = isInternationalFormat
-      ? maxTotalDigits
-      : maxNationalDigits;
+      // Calculate digits in the current selection that will be replaced
+      const selectionStart = input.selectionStart ?? currentValue.length;
+      const selectionEnd = input.selectionEnd ?? currentValue.length;
+      const selectedText = currentValue.slice(selectionStart, selectionEnd);
+      const selectedDigits = extractDigits(selectedText);
 
-    if (
-      newDigits.length > 0 &&
-      currentDigits.length + newDigits.length > maxAllowed
-    ) {
-      e.preventDefault();
-    }
-  };
+      // Calculate post-replacement digit count:
+      // current digits - digits being replaced + new digits being added
+      const postReplacementDigits =
+        currentDigits.length - selectedDigits.length + newDigits.length;
+
+      // Determine max based on whether international format is being used
+      const isInternationalFormat = currentValue.includes("+");
+      const maxAllowed = isInternationalFormat
+        ? maxTotalDigits
+        : maxNationalDigits;
+
+      if (newDigits.length > 0 && postReplacementDigits > maxAllowed) {
+        e.preventDefault();
+        setAnnouncement(
+          t("phone_number_max_digits_reached", { max: maxAllowed }),
+        );
+        setTimeout(() => setAnnouncement(""), 1000);
+      }
+    },
+    [maxNationalDigits, maxTotalDigits, t],
+  );
 
   return (
-    <Input
-      className={cn(
-        "rounded-e-md rounded-s-none focus-visible:ring-0 focus-visible:outline-hidden focus-visible:border-gray-200",
-        className,
-      )}
-      onBeforeInput={handleBeforeInput}
-      {...props}
-    />
+    <>
+      <Input
+        className={cn(
+          "rounded-e-md rounded-s-none focus-visible:ring-0 focus-visible:outline-hidden focus-visible:border-gray-200",
+          className,
+        )}
+        onBeforeInput={handleBeforeInput}
+        aria-describedby="phone-input-constraint"
+        {...props}
+      />
+      <span id="phone-input-constraint" className="sr-only">
+        {t("phone_number_max_digits_constraint", { max: maxNationalDigits })}
+      </span>
+      <span aria-live="polite" aria-atomic="true" className="sr-only">
+        {announcement}
+      </span>
+    </>
   );
 }
 InputComponent.displayName = "InputComponent";
