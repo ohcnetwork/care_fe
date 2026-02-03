@@ -109,22 +109,21 @@ export function AppointmentQuestion({
   const [cachedServiceType, setCachedServiceType] = useAtom(
     scheduleServiceTypeAtom,
   );
-  const [selectedResource, setSelectedResourceState] =
+  const [selectedResource, setSelectedResource] =
     useState<ScheduleResourceFormState>(() =>
       getInitialResourceState(cachedServiceType, currentUser),
     );
 
   useEffect(() => {
     if (selectedResource.resource_type !== cachedServiceType) {
-      setSelectedResourceState(
+      setSelectedResource(
         getInitialResourceState(cachedServiceType, currentUser),
       );
     }
   }, [cachedServiceType, currentUser, selectedResource.resource_type]);
 
-  const setSelectedResource = (resource: ScheduleResourceFormState) => {
-    setSelectedResourceState(resource);
-    // Cache the service type when it changes
+  const handleResourceChange = (resource: ScheduleResourceFormState) => {
+    setSelectedResource(resource);
     if (resource.resource_type !== cachedServiceType) {
       setCachedServiceType(resource.resource_type);
     }
@@ -189,7 +188,7 @@ export function AppointmentQuestion({
         reason={value.note || ""}
         setReason={(reason) => handleUpdate({ note: reason })}
         selectedResource={selectedResource}
-        setSelectedResource={setSelectedResource}
+        setSelectedResource={handleResourceChange}
       />
 
       <div>

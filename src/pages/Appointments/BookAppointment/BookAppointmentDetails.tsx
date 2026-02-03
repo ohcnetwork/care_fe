@@ -41,7 +41,7 @@ export const BookAppointmentDetails = ({
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
-  const [selectedResource, setSelectedResourceState] =
+  const [selectedResource, setSelectedResource] =
     useState<ScheduleResourceFormState>({
       resource: null,
       resource_type: cachedServiceType,
@@ -52,7 +52,7 @@ export const BookAppointmentDetails = ({
       selectedResource.resource === null &&
       selectedResource.resource_type !== cachedServiceType
     ) {
-      setSelectedResourceState({
+      setSelectedResource({
         resource: null,
         resource_type: cachedServiceType,
       });
@@ -63,8 +63,8 @@ export const BookAppointmentDetails = ({
     selectedResource.resource_type,
   ]);
 
-  const setSelectedResource = (resource: ScheduleResourceFormState) => {
-    setSelectedResourceState(resource);
+  const handleResourceChange = (resource: ScheduleResourceFormState) => {
+    setSelectedResource(resource);
     // Cache the service type when it changes
     if (resource.resource_type !== cachedServiceType) {
       setCachedServiceType(resource.resource_type);
@@ -117,7 +117,7 @@ export const BookAppointmentDetails = ({
             reason={reason}
             setReason={setReason}
             selectedResource={selectedResource}
-            setSelectedResource={setSelectedResource}
+            setSelectedResource={handleResourceChange}
           />
         </div>
         <div className="hidden sm:flex sm:flex-col lg:flex-row gap-6 bg-white shadow rounded-lg p-4 w-full sm:max-h-full">
