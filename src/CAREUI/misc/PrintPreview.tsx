@@ -36,10 +36,12 @@ export default function PrintPreview(props: Props) {
   const { goBack } = useAppHistory();
   const { t } = useTranslation();
   useShortcutSubContext();
-  useAutoPrint({
+
+  const { isPrinting } = useAutoPrint({
     ...props.autoPrint,
     enabled: (props.autoPrint?.enabled ?? false) && !props.disabled,
   });
+
   return (
     <div className="flex items-center justify-center">
       <Page
@@ -56,7 +58,11 @@ export default function PrintPreview(props: Props) {
                 {t("back")}
               </Button>
             )}
-            <Button variant="primary" disabled={props.disabled} onClick={print}>
+            <Button
+              variant="primary"
+              disabled={props.disabled || isPrinting}
+              onClick={print}
+            >
               <CareIcon icon="l-print" className="text-lg" />
               {t("print")}
               <ShortcutBadge actionId="print-button" className="bg-white" />

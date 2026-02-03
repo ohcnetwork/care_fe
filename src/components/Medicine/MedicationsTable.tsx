@@ -118,7 +118,7 @@ export const MedicationsTable = ({
                   <TableCell className="py-2 px-3 break-words whitespace-normal">
                     {" "}
                     {instruction?.as_needed_boolean
-                      ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display})`
+                      ? `${t("as_needed_prn")}`
                       : frequency?.meaning}
                     {(instruction?.additional_instruction ?? []).length > 0 && (
                       <div className="text-sm text-gray-600 space-y-1">
@@ -134,8 +134,7 @@ export const MedicationsTable = ({
                     {duration ? `${duration.value} ${duration.unit}` : "-"}
                   </TableCell>
                   <TableCell className="py-2 px-3 break-words whitespace-normal">
-                    {remarks || "-"}
-                    {notes ? ` (${t("note")}: ${notes})` : ""}
+                    {[remarks, notes].filter(Boolean).join("\n")}
                   </TableCell>
                 </TableRow>
               );

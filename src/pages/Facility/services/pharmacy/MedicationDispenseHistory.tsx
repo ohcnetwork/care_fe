@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRightSquare } from "lucide-react";
+import { ArrowUpRightSquare, Plus } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/Common/Table";
+import { CreateDispenseSheet } from "@/pages/Facility/services/pharmacy/CreateDispenseSheet";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -91,7 +92,7 @@ export default function MedicationDispenseHistory({
           </TabsList>
         </Tabs>
       </div>
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center justify-between gap-4 mb-6">
         <PatientIdentifierFilter
           onSelect={(patientId, patientName) =>
             updateQuery({
@@ -103,6 +104,17 @@ export default function MedicationDispenseHistory({
           className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
           patientId={qParams.patientId}
           patientName={qParams.patient_name}
+        />
+        <CreateDispenseSheet
+          facilityId={facilityId}
+          locationId={locationId}
+          patientId={qParams.patientId}
+          trigger={
+            <Button>
+              <Plus className="mr-2 size-4" />
+              {t("new_dispense")}
+            </Button>
+          }
         />
       </div>
       <div className="mt-4">

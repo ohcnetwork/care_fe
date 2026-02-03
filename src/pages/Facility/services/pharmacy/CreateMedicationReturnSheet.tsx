@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, QrCode, Search, X } from "lucide-react";
 import { navigate } from "raviger";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
@@ -56,6 +56,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   getPartialId,
@@ -69,6 +70,7 @@ import {
   DeliveryOrderStatus,
 } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import careConfig from "@careConfig";
@@ -90,6 +92,7 @@ export function CreateMedicationReturnSheet({
   trigger,
 }: CreateMedicationReturnSheetProps) {
   const { t } = useTranslation();
+  const inputRef = useRef<HTMLInputElement>(null);
   const { facility } = useCurrentFacility();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
@@ -157,6 +160,8 @@ export function CreateMedicationReturnSheet({
       (!isPhoneNumberConfig || isValidPhoneNumber(searchTerm)),
   });
 
+  useShortcutSubContext("facility:pharmacy");
+
   // Patient verification query
   const { data: verifiedPatient, refetch: verifyPatient } = useQuery({
     queryKey: ["patient-verify", pendingPatient?.id, yearOfBirth],
@@ -170,6 +175,17 @@ export function CreateMedicationReturnSheet({
     }),
     enabled: false,
   });
+
+  // Auto-focus input when search type changes
+  useEffect(() => {
+    if (searchType) {
+      // Small delay to ensure the input is rendered after type change
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [searchType]);
 
   const { mutate: createDeliveryOrder, isPending: isCreating } = useMutation({
     mutationFn: mutate(deliveryOrderApi.createDeliveryOrder, {
@@ -313,6 +329,7 @@ export function CreateMedicationReturnSheet({
             <Button>
               <Plus className="size-4 mr-1" />
               {t("create_medication_return")}
+              <ShortcutBadge actionId="medication-return" />
             </Button>
           )}
         </SheetTrigger>
@@ -394,6 +411,7 @@ export function CreateMedicationReturnSheet({
                   <div className="relative">
                     {isPhoneNumberConfig ? (
                       <PhoneInput
+                        ref={inputRef}
                         placeholder={
                           selectedConfig?.config.display || t("search")
                         }
@@ -405,6 +423,7 @@ export function CreateMedicationReturnSheet({
                       <>
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none z-10" />
                         <Input
+                          ref={inputRef}
                           type="text"
                           placeholder={
                             selectedConfig?.config.display || t("search")

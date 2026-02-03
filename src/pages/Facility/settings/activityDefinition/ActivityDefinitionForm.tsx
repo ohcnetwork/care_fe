@@ -978,7 +978,7 @@ function ActivityDefinitionFormContent({
               <div className="space-y-4">
                 <div>
                   <h2 className="text-base font-medium text-gray-900">
-                    {t("diagnostic_report")}
+                    {t("diagnostic_report", { count: 1 })}
                   </h2>
                   <p className="mt-0.5 text-sm text-gray-500">
                     {t("specify_diagnostic_report_codes")}

@@ -7,6 +7,7 @@ import {
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationRead } from "@/types/location/location";
+import { UserReadMinimal } from "@/types/user/user";
 import {
   Beaker,
   Building,
@@ -14,6 +15,7 @@ import {
   CircleDashed,
   MapPin,
   Tag,
+  Users,
 } from "lucide-react";
 
 import { t } from "i18next";
@@ -21,6 +23,7 @@ import {
   ActivityDefinitionFilterValue,
   SelectedActivityDefinitionBadge,
 } from "./activityDefinitionFilter";
+import { SelectedCareTeamBadge } from "./careTeamFilter";
 import { SelectedDateBadge, getDateOperations } from "./dateFilter";
 import { SelectedDepartmentBadge } from "./departmentFilter";
 import { GenericSelectedBadge } from "./genericFilter";
@@ -42,6 +45,11 @@ import {
   AccountBillingStatus,
   AccountStatus,
 } from "@/types/billing/account/Account";
+import {
+  CHARGE_ITEM_STATUS_COLORS,
+  ChargeItemServiceResource,
+  ChargeItemStatus,
+} from "@/types/billing/chargeItem/chargeItem";
 import {
   INVOICE_STATUS_COLORS,
   InvoiceStatus,
@@ -499,6 +507,76 @@ export const paymentMethodFilter = (
     },
   );
 
+export const chargeItemStatusFilter = (
+  key: string = "status",
+  mode: FilterMode = "single",
+  customOperations?: Operation[],
+) =>
+  createFilterConfig(
+    key,
+    t("status"),
+    "command",
+    Object.values(ChargeItemStatus).map((value) => ({
+      value: value,
+      label: t(value),
+      color: getVariantColorClasses(CHARGE_ITEM_STATUS_COLORS[value]),
+    })),
+    {
+      renderSelected: (selected: FilterValues) => {
+        const selectedStatus = selected as string[];
+        if (typeof selectedStatus[0] === "string") {
+          const option = selectedStatus[0];
+          const variant = CHARGE_ITEM_STATUS_COLORS[option as ChargeItemStatus];
+          return (
+            <GenericSelectedBadge
+              selectedValue={option}
+              selectedLength={selectedStatus.length}
+              variant={variant}
+            />
+          );
+        }
+        return <></>;
+      },
+      getOperations: () => customOperations || [{ label: "is" }],
+      mode,
+      icon: <CircleDashed className="size-4" />,
+      showColorIndicators: true,
+    },
+  );
+
+export const chargeItemServiceResourceFilter = (
+  key: string = "service_resource",
+  mode: FilterMode = "multi",
+  customOperations?: Operation[],
+) =>
+  createFilterConfig(
+    key,
+    t("service_resource"),
+    "command",
+    Object.values(ChargeItemServiceResource).map((value) => ({
+      value: value,
+      label: t(value),
+    })),
+    {
+      renderSelected: (selected: FilterValues) => {
+        const selectedValues = selected as string[];
+        if (typeof selectedValues[0] === "string") {
+          const option = selectedValues[0];
+          return (
+            <GenericSelectedBadge
+              selectedValue={option}
+              selectedLength={selectedValues.length}
+            />
+          );
+        }
+        return <></>;
+      },
+      getOperations: () => customOperations || [{ label: "includes" }],
+      mode,
+      icon: <CircleDashed className="size-4" />,
+    },
+  );
+
 export const activityDefinitionFilter = (
   key: string = "activity_definition",
   mode: FilterMode = "single",
@@ -522,3 +600,17 @@ export const activityDefinitionFilter = (
       icon: <Beaker className="size-4" />,
     },
   );
+
+export const careTeamFilter = (
+  key: string = "care_team",
+  mode: FilterMode = "single",
+  label?: string,
+) =>
+  createFilterConfig(key, label ? t(label) : t("care_team"), "care_team", [], {
+    renderSelected: (selected: FilterValues) => {
+      return <SelectedCareTeamBadge selected={selected as UserReadMinimal[]} />;
+    },
+    getOperations: () => [{ label: "is" }],
+    mode,
+    icon: <Users className="size-4" />,
+  });
