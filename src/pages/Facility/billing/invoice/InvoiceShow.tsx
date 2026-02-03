@@ -518,10 +518,23 @@ export function InvoiceShow({
                 <div className="h-6 w-px bg-gray-300" />
                 <div className="text-center">
                   <div className="text-xs text-gray-500">
-                    {t("total_payments_received")}
+                    {invoice.is_refund
+                      ? t("total_credit_notes")
+                      : t("total_payments_received")}
                   </div>
-                  <div className="text-base font-semibold text-green-600">
-                    <MonetaryDisplay amount={invoice.total_payments} />
+                  <div
+                    className={cn(
+                      "text-base font-semibold",
+                      invoice.is_refund ? "text-red-600" : "text-green-600",
+                    )}
+                  >
+                    <MonetaryDisplay
+                      amount={
+                        invoice.is_refund
+                          ? -invoice.total_credit_notes
+                          : invoice.total_payments
+                      }
+                    />
                   </div>
                 </div>
                 <div className="h-6 w-px bg-gray-300" />
@@ -532,8 +545,11 @@ export function InvoiceShow({
                   <div className="text-base font-semibold text-gray-900">
                     <MonetaryDisplay
                       amount={subtract(
-                        invoice.total_gross,
-                        invoice.total_payments,
+                        subtract(invoice.total_gross, invoice.total_payments),
+                        multiply(
+                          invoice.total_credit_notes,
+                          invoice.is_refund ? -1 : 1,
+                        ),
                       )}
                     />
                   </div>
@@ -544,7 +560,13 @@ export function InvoiceShow({
 
           {invoice.status === InvoiceStatus.balanced &&
             parseFloat(
-              subtract(invoice.total_gross, invoice.total_payments).toString(),
+              subtract(
+                subtract(invoice.total_gross, invoice.total_payments),
+                multiply(
+                  invoice.total_credit_notes,
+                  invoice.is_refund ? -1 : 1,
+                ),
+              ).toString(),
             ) > 0 && (
               <div className="bg-blue-50 border border-blue-200 rounded-md p-2 mb-3 flex gap-2 items-center">
                 <CareIcon
@@ -555,8 +577,11 @@ export function InvoiceShow({
                   <span className="font-semibold">
                     <MonetaryDisplay
                       amount={subtract(
-                        invoice.total_gross,
-                        invoice.total_payments,
+                        subtract(invoice.total_gross, invoice.total_payments),
+                        multiply(
+                          invoice.total_credit_notes,
+                          invoice.is_refund ? -1 : 1,
+                        ),
                       )}
                     />
                   </span>{" "}
@@ -1266,6 +1291,135 @@ export function InvoiceShow({
                   </div>
                 </>
               )}
+
+              {invoice.credit_notes?.filter(
+                (p) => p.status === PaymentReconciliationStatus.active,
+              ).length > 0 && (
+                <>
+                  <div className="border border-gray-300 rounded-md space-y-2">
+                    <div className="mt-2 px-3 font-medium">
+                      {t("credit_notes_issued_against_this_invoice")}
+                    </div>
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-b border-gray-200">
+                          <TableHead className={tableHeadClass}>#</TableHead>
+                          <TableHead
+                            className={cn(tableHeadClass, "text-left")}
+                          >
+                            {t("date_and_time")}
+                          </TableHead>
+                          <TableHead
+                            className={cn(tableHeadClass, "text-left")}
+                          >
+                            {t("payment_method")}
+                          </TableHead>
+                          <TableHead
+                            className={cn(tableHeadClass, "text-left")}
+                          >
+                            {t("reference")}
+                          </TableHead>
+                          <TableHead className="font-semibold text-right">
+                            {t("amount")} ({getCurrencySymbol()})
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {invoice.credit_notes
+                          .filter(
+                            (p) =>
+                              p.status === PaymentReconciliationStatus.active,
+                          )
+                          .map((creditNote, index) => (
+                            <TableRow
+                              key={creditNote.id}
+                              className="border-b border-gray-200 hover:bg-muted/50"
+                            >
+                              <TableCell
+                                className={cn(tableCellClass, "text-center")}
+                              >
+                                {index + 1}
+                              </TableCell>
+                              <TableCell
+                                className={cn(tableCellClass, "font-medium")}
+                              >
+                                <span className="flex justify-between items-center flex-wrap gap-2">
+                                  {creditNote.payment_datetime
+                                    ? format(
+                                        new Date(creditNote.payment_datetime),
+                                        "d MMM yyyy, hh:mm a",
+                                      )
+                                    : "-"}
+
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="text-gray-800 font-semibold text-xs p-2"
+                                      onClick={() => {
+                                        navigate(
+                                          `/facility/${facilityId}/billing/payments/${creditNote.id}`,
+                                        );
+                                      }}
+                                    >
+                                      <>
+                                        <EyeIcon className="size-3" />
+                                        {t("view")}
+                                      </>
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="text-gray-800 font-semibold text-xs p-2"
+                                      onClick={() => {
+                                        navigate(
+                                          `/facility/${facilityId}/billing/payments/${creditNote.id}/print`,
+                                        );
+                                      }}
+                                    >
+                                      <>
+                                        <PrinterIcon className="size-3" />
+                                        {t("print")}
+                                      </>
+                                    </Button>
+                                  </div>
+                                </span>
+                              </TableCell>
+                              <TableCell
+                                className={cn(tableCellClass, "text-left")}
+                              >
+                                {
+                                  PAYMENT_RECONCILIATION_METHOD_MAP[
+                                    creditNote.method
+                                  ]
+                                }
+                              </TableCell>
+                              <TableCell className={tableCellClass}>
+                                {creditNote.reference_number}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <MonetaryDisplay
+                                  amount={creditNote.amount}
+                                  hideCurrency
+                                />
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <div className="flex flex-col items-end space-y-2 text-gray-950 font-mormal text-sm mb-4">
+                    <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
+
+                    {/* Total Credit Notes */}
+                    <div className="flex w-64 justify-between font-bold">
+                      <span>{t("total_credit_notes")}</span>
+                      <MonetaryDisplay amount={invoice.total_credit_notes} />
+                    </div>
+                    <div className="p-1 border-b-2 border-dashed border-gray-200 w-full" />
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
           <div>
@@ -1355,6 +1509,18 @@ export function InvoiceShow({
                             <MonetaryDisplay amount={invoice.total_payments} />
                           </span>
                         </div>
+                        {parseFloat(invoice.total_credit_notes || "0") > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">
+                              {t("total_credit_notes")}
+                            </span>
+                            <span className="font-medium text-red-600">
+                              <MonetaryDisplay
+                                amount={-invoice.total_credit_notes}
+                              />
+                            </span>
+                          </div>
+                        )}
                         <div className="border-t border-gray-200 pt-2 flex justify-between text-sm">
                           <span className="text-gray-600">
                             {t("outstanding_balance")}
@@ -1362,8 +1528,14 @@ export function InvoiceShow({
                           <span className="font-semibold text-gray-900">
                             <MonetaryDisplay
                               amount={subtract(
-                                invoice.total_gross,
-                                invoice.total_payments,
+                                subtract(
+                                  invoice.total_gross,
+                                  invoice.total_payments,
+                                ),
+                                multiply(
+                                  invoice.total_credit_notes || "0",
+                                  invoice.is_refund ? -1 : 1,
+                                ),
                               )}
                             />
                           </span>
@@ -1371,8 +1543,11 @@ export function InvoiceShow({
                       </div>
                       {parseFloat(
                         subtract(
-                          invoice.total_gross,
-                          invoice.total_payments,
+                          subtract(invoice.total_gross, invoice.total_payments),
+                          multiply(
+                            invoice.total_credit_notes || "0",
+                            invoice.is_refund ? -1 : 1,
+                          ),
                         ).toString(),
                       ) > 0 && (
                         <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 flex gap-2 items-start">

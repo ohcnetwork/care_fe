@@ -118,7 +118,7 @@ export default function HealthcareServiceShow({
 
   return (
     <div className="container px-4 mx-auto max-w-4xl space-y-6">
-      <BackButton>
+      <BackButton to={`/facility/${facilityId}/services`}>
         <ArrowLeft />
         <span>{t("back_to_services")}</span>
       </BackButton>

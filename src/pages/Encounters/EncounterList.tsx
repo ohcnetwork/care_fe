@@ -10,6 +10,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import {
+  careTeamFilter,
   dateFilter,
   departmentFilter,
   encounterPriorityFilter,
@@ -42,6 +43,7 @@ import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
+import { UserReadMinimal } from "@/types/user/user";
 import query from "@/Utils/request/query";
 import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
 import careConfig from "@careConfig";
@@ -60,6 +62,7 @@ const buildQueryParams = (
   created_date_after?: string,
   created_date_before?: string,
   organization?: string,
+  care_team_user?: string,
 ) => {
   const params: Record<string, string | undefined> = {};
   if (facilityId) {
@@ -88,6 +91,9 @@ const buildQueryParams = (
   }
   if (organization) {
     params.organization = organization;
+  }
+  if (care_team_user) {
+    params.care_team_user = care_team_user;
   }
   return params;
 };
@@ -137,6 +143,7 @@ export function EncounterList({
     created_date_after,
     created_date_before,
     organization,
+    care_team_user,
   } = qParams;
 
   const getDefaultDateRange = () => {
@@ -160,7 +167,12 @@ export function EncounterList({
 
     // Restore filters from session storage if no URL filters
     const hasUrlFilters =
-      status || priority || organization || qParams.tags || patient_filter;
+      status ||
+      priority ||
+      organization ||
+      care_team_user ||
+      qParams.tags ||
+      patient_filter;
 
     if (!hasUrlFilters) {
       try {
@@ -171,6 +183,9 @@ export function EncounterList({
           if (filters.priority) restoredParams.priority = filters.priority;
           if (filters.selectedOrg)
             restoredParams.organization = filters.selectedOrg.id;
+          if (filters.selectedCareTeamMember)
+            restoredParams.care_team_user =
+              filters.selectedCareTeamMember.username;
           if (filters.selectedTags?.length > 0)
             restoredParams.tags = filters.selectedTags
               .map((t: TagConfig) => t.id)
@@ -219,6 +234,7 @@ export function EncounterList({
           created_date_after,
           created_date_before,
           organization,
+          care_team_user,
         ),
         encounter_class: encounterClass,
         external_identifier,
@@ -271,10 +287,27 @@ export function EncounterList({
     enabled: !!organization && !!facilityId,
   });
 
+  // Fetch user data if care_team_user (username) is in URL params
+  const { data: selectedCareTeamUser } = useQuery({
+    queryKey: ["user", care_team_user],
+    queryFn: query(
+      {
+        path: "/api/v1/users/{username}/",
+        method: "GET",
+        TRes: {} as UserReadMinimal,
+      },
+      {
+        pathParams: { username: care_team_user },
+      },
+    ),
+    enabled: !!care_team_user,
+  });
+
   const filters = [
     encounterStatusFilter("status", "multi"),
     encounterPriorityFilter("priority"),
     departmentFilter("organization"),
+    careTeamFilter("care_team"),
     tagFilter("tags", TagResource.ENCOUNTER, "multi", t("tags", { count: 2 })),
     dateFilter("created_date", t("date"), longDateRangeOptions, true),
   ];
@@ -302,6 +335,10 @@ export function EncounterList({
           case "organization":
             updates.selectedOrg =
               (value as FacilityOrganizationRead) || undefined;
+            break;
+          case "care_team":
+            updates.selectedCareTeamMember =
+              (value as UserReadMinimal) || undefined;
             break;
           case "created_date":
             if (
@@ -343,6 +380,11 @@ export function EncounterList({
           filterQuery.organization =
             (value as FacilityOrganizationRead)?.id || undefined;
           break;
+        case "care_team":
+          filterQuery.care_team_user =
+            (value as UserReadMinimal)?.username || undefined;
+          filterQuery.care_team = undefined;
+          break;
         case "created_date":
           {
             const dateRange = value as FilterDateRange;
@@ -374,6 +416,7 @@ export function EncounterList({
     status: status ? status.split(",") : undefined,
     tags: selectedTags,
     organization: selectedOrg ? [selectedOrg] : undefined,
+    care_team: selectedCareTeamUser ? [selectedCareTeamUser] : undefined,
     created_date:
       created_date_after || created_date_before
         ? {
