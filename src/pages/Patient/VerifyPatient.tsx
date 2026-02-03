@@ -42,13 +42,22 @@ interface QParams {
   partial_id: string;
   flow?: "queue" | "dispense";
   createEncounter?: "true";
+  schedule_open?: "true";
 }
 
 export default function VerifyPatient() {
   useShortcutSubContext("facility:patient:home");
   const { t } = useTranslation();
-  const [{ phone_number, year_of_birth, partial_id, flow, createEncounter }] =
-    useQueryParams<QParams>();
+  const [
+    {
+      phone_number,
+      year_of_birth,
+      partial_id,
+      flow,
+      createEncounter,
+      schedule_open,
+    },
+  ] = useQueryParams<QParams>();
   const queryClient = useQueryClient();
 
   const { goBack } = useAppHistory();
@@ -161,6 +170,7 @@ export default function VerifyPatient() {
                   <BookAppointmentSheet
                     patientId={patientData.id}
                     facilityId={facilityId}
+                    defaultOpen={schedule_open === "true"}
                     trigger={
                       <QuickAction
                         icon={<Stethoscope className="text-purple-500" />}

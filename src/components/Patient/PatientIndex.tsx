@@ -54,6 +54,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const [selectedPatient, setSelectedPatient] = useState<
     PartialPatientModel | PatientRead | null
   >(null);
+  const [scheduleOpenOnVerify, setScheduleOpenOnVerify] = useState(false);
   const shortcuts = useShortcuts();
   const [qParams] = useQueryParams();
   const [verificationOpen, setVerificationOpen] = useState(false);
@@ -79,11 +80,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     facility?.permissions ?? [],
   );
 
-  useEffect(() => {
-    shortcuts.setIgnoreInputFields(true);
-    return () => shortcuts.setIgnoreInputFields(false);
-  }, [shortcuts]);
-
   // Track identifier search state
   const [identifierSearch, setIdentifierSearch] = useState<{
     config?: string;
@@ -106,26 +102,64 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     enabled: !!(identifierSearch.config && identifierSearch.value),
   });
 
+  const navigateToVerify = (
+    patient: PartialPatientModel | PatientRead,
+    yearOfBirth?: string,
+    options?: { scheduleOpen?: boolean },
+  ) => {
+    navigate(`/facility/${facilityId}/patients/verify`, {
+      query: {
+        config: identifierSearch.config,
+        value: identifierSearch.value,
+        phone_number: patient.phone_number,
+        year_of_birth:
+          yearOfBirth ||
+          (patient as PatientRead).year_of_birth?.toString() ||
+          "",
+        partial_id: getPartialId(patient),
+        ...(options?.scheduleOpen ? { schedule_open: "true" } : {}),
+      },
+    });
+  };
+
   const handlePatientSelect = (index: number) => {
     const patient = patientList?.results[index];
     if (!patient) {
       return;
     }
-    if (patientList && patientList.partial) {
+    if (patientList?.partial) {
       setSelectedPatient(patient);
       setVerificationOpen(true);
       setYearOfBirth("");
-    } else if ("year_of_birth" in patient) {
-      navigate(`/facility/${facilityId}/patients/verify`, {
-        query: {
-          config: identifierSearch.config,
-          value: identifierSearch.value,
-          phone_number: patient.phone_number,
-          year_of_birth: patient.year_of_birth?.toString() || "",
-          partial_id: patient.id.slice(0, 5),
-        },
-      });
+      setScheduleOpenOnVerify(false);
+    } else {
+      navigateToVerify(patient);
     }
+  };
+
+  const handleScheduleAppointment = (index: number) => {
+    const patient = patientList?.results[index];
+    if (!patient) {
+      return;
+    }
+    if (patientList?.partial) {
+      setSelectedPatient(patient);
+      setVerificationOpen(true);
+      setYearOfBirth("");
+      setScheduleOpenOnVerify(true);
+    } else {
+      navigateToVerify(patient, undefined, { scheduleOpen: true });
+    }
+  };
+
+  const handleVerify = () => {
+    if (!selectedPatient || yearOfBirth.length !== 4) {
+      toast.error(t("valid_year_of_birth"));
+      return;
+    }
+    navigateToVerify(selectedPatient, yearOfBirth, {
+      scheduleOpen: scheduleOpenOnVerify,
+    });
   };
 
   useEffect(() => {
@@ -147,23 +181,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       });
     }
   }, [qParams.phone_number, facility, allIdentifierConfigs]);
-
-  const handleVerify = () => {
-    if (!selectedPatient || !yearOfBirth || yearOfBirth.length !== 4) {
-      toast.error(t("valid_year_of_birth"));
-      return;
-    }
-
-    navigate(`/facility/${facilityId}/patients/verify`, {
-      query: {
-        config: identifierSearch.config,
-        value: identifierSearch.value,
-        phone_number: selectedPatient.phone_number,
-        year_of_birth: yearOfBirth,
-        partial_id: getPartialId(selectedPatient),
-      },
-    });
-  };
 
   return (
     <div>
@@ -250,6 +267,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                               </TableHead>
                               <TableHead>{t("phone_number")}</TableHead>
                               <TableHead>{t("gender")}</TableHead>
+                              <TableHead className="w-[220px]">
+                                {t("actions")}
+                              </TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -271,6 +291,17 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                       (g) => g.id === patient.gender,
                                     )?.text
                                   }
+                                </TableCell>
+                                <TableCell>
+                                  <Button
+                                    variant="outline"
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      handleScheduleAppointment(index);
+                                    }}
+                                  >
+                                    {t("schedule_appointment")}
+                                  </Button>
                                 </TableCell>
                               </TableRow>
                             ))}
@@ -297,6 +328,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
           <div className="py-4">
             <Input
               type="text"
+              inputMode="numeric"
               placeholder={`${t("year_of_birth")} (YYYY)`}
               value={yearOfBirth}
               onChange={(e) => {
@@ -305,11 +337,8 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                   setYearOfBirth(value);
                 }
               }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleVerify();
-                }
-              }}
+              onKeyDown={(e) => e.key === "Enter" && handleVerify()}
+              autoFocus
             />
           </div>
           <DialogFooter>
@@ -319,9 +348,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
             >
               {t("cancel")}
             </Button>
-            <Button className="mb-2" onClick={handleVerify}>
-              {t("verify")}
-            </Button>
+            <Button onClick={handleVerify}>{t("verify")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
