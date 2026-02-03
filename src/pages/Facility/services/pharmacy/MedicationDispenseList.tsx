@@ -89,6 +89,7 @@ function MedicationTable({
             <TableHead className="text-gray-700">
               {t("dispense_status")}
             </TableHead>
+            <TableHead className="text-gray-700">{t("instructions")}</TableHead>
             <TableHead className="text-gray-700">{t("status")}</TableHead>
             {medications.some(
               (medication) =>
@@ -118,23 +119,25 @@ function MedicationTable({
                     : "bg-gray-200",
                 )}
               >
-                <TableCell className="font-semibold text-gray-950 flex items-center gap-2">
-                  {displayMedicationName(medication)}
-                  {medication?.dispense_status ===
-                    MedicationRequestDispenseStatus.partial && (
-                    <Button
-                      variant="secondary"
-                      type="button"
-                      size="xs"
-                      className="flex gap-1"
-                      onClick={() => {
-                        setDispensedMedicationId?.(medication.id);
-                      }}
-                    >
-                      <CareIcon icon="l-eye" className="size-4" />
-                      {t("view_dispensed")}
-                    </Button>
-                  )}
+                <TableCell className="font-semibold text-gray-950 h-full items-center">
+                  <span className="flex flex-col gap-2">
+                    {displayMedicationName(medication)}
+                    {medication?.dispense_status ===
+                      MedicationRequestDispenseStatus.partial && (
+                      <Button
+                        variant="secondary"
+                        type="button"
+                        size="xs"
+                        className="flex gap-1"
+                        onClick={() => {
+                          setDispensedMedicationId?.(medication.id);
+                        }}
+                      >
+                        <CareIcon icon="l-eye" className="size-4" />
+                        {t("view_dispensed")}
+                      </Button>
+                    )}
+                  </span>
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
                   {dosage
@@ -158,6 +161,9 @@ function MedicationTable({
                 </TableCell>
                 <TableCell>
                   <Badge>{t(medication.dispense_status || "incomplete")}</Badge>
+                </TableCell>
+                <TableCell className="whitespace-pre-wrap text-gray-950 font-medium">
+                  {medication.note || "-"}
                 </TableCell>
                 <TableCell>
                   <Badge
