@@ -8,6 +8,7 @@ import { GenericSelectedBadge } from "@/components/ui/multi-filter/genericFilter
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationRead } from "@/types/location/location";
+import { UserReadMinimal } from "@/types/user/user";
 
 // Generic color palette for cycling through options
 export const COLOR_PALETTE = [
@@ -41,7 +42,8 @@ export type FilterValues =
   | FilterDateRange
   | FacilityOrganizationRead[]
   | LocationRead[]
-  | ActivityDefinitionFilterValue[];
+  | ActivityDefinitionFilterValue[]
+  | UserReadMinimal[];
 
 export type FilterMode = "single" | "multi";
 
@@ -59,6 +61,10 @@ export type LocationFilterMeta = {
   facilityId?: string;
 };
 export type ActivityDefinitionFilterMeta = {
+  facilityId?: string;
+};
+
+export type CareTeamFilterMeta = {
   facilityId?: string;
 };
 
@@ -109,13 +115,19 @@ export interface ActivityDefinitionFilterConfig extends BaseFilterConfig {
   meta: ActivityDefinitionFilterMeta;
 }
 
+export interface CareTeamFilterConfig extends BaseFilterConfig {
+  type: "care_team";
+  meta: CareTeamFilterMeta;
+}
+
 export type FilterConfig =
   | CommandFilterConfig
   | TagFilterConfig
   | DateFilterConfig
   | DepartmentFilterConfig
   | LocationFilterConfig
-  | ActivityDefinitionFilterConfig;
+  | ActivityDefinitionFilterConfig
+  | CareTeamFilterConfig;
 
 export interface OperationConfig {
   selectedOperation: Operation | null;
@@ -171,7 +183,8 @@ export function createFilterConfig(
     | "date"
     | "department"
     | "location"
-    | "activity_definition",
+    | "activity_definition"
+    | "care_team",
   options: FilterOption[],
   meta?: {
     resource?: TagResource;
@@ -248,6 +261,12 @@ export function createFilterConfig(
         type: "activity_definition",
         meta: { facilityId },
       } as ActivityDefinitionFilterConfig;
+    case "care_team":
+      return {
+        ...baseConfig,
+        type: "care_team",
+        meta: { facilityId },
+      } as CareTeamFilterConfig;
     case "command":
       return {
         ...baseConfig,

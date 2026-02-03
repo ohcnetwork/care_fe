@@ -227,6 +227,7 @@ export interface EncounterListRead extends EncounterBase {
   modified_date: string;
   tags: TagConfig[];
   current_location: LocationMinSpec | null;
+  care_team: CareTeamResponse[];
 }
 
 export interface EncounterRead
