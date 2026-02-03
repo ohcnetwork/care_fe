@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { navigate } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -46,6 +46,22 @@ export const BookAppointmentDetails = ({
       resource: null,
       resource_type: cachedServiceType,
     });
+
+  useEffect(() => {
+    if (
+      selectedResource.resource === null &&
+      selectedResource.resource_type !== cachedServiceType
+    ) {
+      setSelectedResourceState({
+        resource: null,
+        resource_type: cachedServiceType,
+      });
+    }
+  }, [
+    cachedServiceType,
+    selectedResource.resource,
+    selectedResource.resource_type,
+  ]);
 
   const setSelectedResource = (resource: ScheduleResourceFormState) => {
     setSelectedResourceState(resource);

@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { useAtom } from "jotai";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import { scheduleServiceTypeAtom } from "@/atoms/scheduleServiceTypeAtom";
@@ -113,6 +113,14 @@ export function AppointmentQuestion({
     useState<ScheduleResourceFormState>(() =>
       getInitialResourceState(cachedServiceType, currentUser),
     );
+
+  useEffect(() => {
+    if (selectedResource.resource_type !== cachedServiceType) {
+      setSelectedResourceState(
+        getInitialResourceState(cachedServiceType, currentUser),
+      );
+    }
+  }, [cachedServiceType, currentUser, selectedResource.resource_type]);
 
   const setSelectedResource = (resource: ScheduleResourceFormState) => {
     setSelectedResourceState(resource);

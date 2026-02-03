@@ -7,7 +7,7 @@ import { SchedulableResourceType } from "@/types/scheduling/schedule";
  * Uses localStorage to persist across sessions and logouts
  * Only clears on cache/localStorage clear
  */
-export const SCHEDULE_SERVICE_TYPE_KEY = "care:schedule_service_type";
+export const SCHEDULE_SERVICE_TYPE_KEY = "care_schedule_service_type";
 
 export const scheduleServiceTypeAtom = atomWithStorage<SchedulableResourceType>(
   SCHEDULE_SERVICE_TYPE_KEY,
