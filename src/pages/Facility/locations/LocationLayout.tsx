@@ -33,6 +33,7 @@ import PrescriptionsView, {
   PharmacyMedicationTab,
 } from "@/pages/Facility/services/pharmacy/PrescriptionsView";
 import { PrintDispenseOrder } from "@/pages/Facility/services/pharmacy/PrintDispenseOrder";
+import { PrintDispenseOrderPrescription } from "@/pages/Facility/services/pharmacy/PrintDispenseOrderPrescription";
 import { PrintMedicationReturn } from "@/pages/Facility/services/pharmacy/PrintMedicationReturn";
 import ServiceRequestList from "@/pages/Facility/services/serviceRequests/ServiceRequestList";
 import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
@@ -102,6 +103,17 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     dispenseOrderId: string;
   }) => (
     <PrintDispenseOrder
+      facilityId={facilityId}
+      dispenseOrderId={dispenseOrderId}
+      locationId={locationId}
+    />
+  ),
+  "/medication_dispense/order/:dispenseOrderId/print_prescription": ({
+    dispenseOrderId,
+  }: {
+    dispenseOrderId: string;
+  }) => (
+    <PrintDispenseOrderPrescription
       facilityId={facilityId}
       dispenseOrderId={dispenseOrderId}
       locationId={locationId}

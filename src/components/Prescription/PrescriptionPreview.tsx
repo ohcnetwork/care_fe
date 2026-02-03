@@ -18,13 +18,13 @@ import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { QRCodeSVG } from "qrcode.react";
 
-interface DetailRowProps {
+export interface DetailRowProps {
   label: string;
   value?: string | null;
   isStrong?: boolean;
 }
 
-const PrescriptionContent = ({
+export const PrescriptionContent = ({
   prescription,
 }: {
   prescription: PrescriptionRead;
@@ -101,7 +101,11 @@ const PrescriptionContent = ({
   );
 };
 
-const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
+export const DetailRow = ({
+  label,
+  value,
+  isStrong = false,
+}: DetailRowProps) => {
   return (
     <div className="flex">
       <span className="text-gray-600 w-32">{label}</span>

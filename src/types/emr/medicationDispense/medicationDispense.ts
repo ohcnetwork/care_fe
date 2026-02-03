@@ -1,7 +1,11 @@
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import { DispenseOrderRead } from "@/types/emr/dispenseOrder/dispenseOrder";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { MedicationRequestDosageInstruction } from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  MedicationRequestDosageInstruction,
+  MedicationRequestRead,
+} from "@/types/emr/medicationRequest/medicationRequest";
+import { PrescritionList } from "@/types/emr/prescription/prescription";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import { LocationRead } from "@/types/location/location";
 
@@ -200,6 +204,14 @@ export interface MedicationDispenseUpsert extends Omit<
   id?: string;
 }
 
+export interface MedicationDispenseAuthorizingRequest extends Omit<
+  MedicationRequestRead,
+  "encounter" | "prescription"
+> {
+  prescription: PrescritionList;
+  encounter: string;
+}
+
 export interface MedicationDispenseRead extends MedicationDispenseBase {
   item: InventoryRead;
   charge_item: ChargeItemRead;
@@ -207,6 +219,7 @@ export interface MedicationDispenseRead extends MedicationDispenseBase {
   location: LocationRead;
   quantity: string;
   order: DispenseOrderRead;
+  authorizing_request?: MedicationDispenseAuthorizingRequest;
 }
 
 export interface MedicationDispenseSummary {

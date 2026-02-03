@@ -95,12 +95,13 @@ import {
   BanknoteIcon,
   CheckCircleIcon,
   ClockIcon,
+  FileTextIcon,
   PillIcon,
   PrinterIcon,
   ReceiptIcon,
   SendIcon,
 } from "lucide-react";
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -1249,6 +1250,18 @@ export default function DispensedMedicationList({
     return counts;
   }, [medications]);
 
+  // Count unique prescriptions for print button text
+  const uniquePrescriptionCount = useMemo(() => {
+    const prescriptionIds = new Set<string>();
+    medications.forEach((med) => {
+      const prescriptionId = med.authorizing_request?.prescription?.id;
+      if (prescriptionId) {
+        prescriptionIds.add(prescriptionId);
+      }
+    });
+    return prescriptionIds.size;
+  }, [medications]);
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
       {/* Left Panel - Medications */}
@@ -1268,6 +1281,22 @@ export default function DispensedMedicationList({
                 {t("prescriptions")}
               </Link>
             </Button>
+            {uniquePrescriptionCount > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  navigate(
+                    `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrder.id}/print_prescription`,
+                  )
+                }
+              >
+                <FileTextIcon className="size-4" />
+                {uniquePrescriptionCount > 1
+                  ? t("print_prescriptions")
+                  : t("print_prescription")}
+              </Button>
+            )}
             {billableItems && billableItems.length > 0 && (
               <Button
                 variant="outline"
