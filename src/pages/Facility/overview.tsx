@@ -7,6 +7,7 @@ import {
   RotateCcw,
   Users,
   Wrench,
+  X,
 } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -48,7 +49,8 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   const { t } = useTranslation();
   const user = useAuthUser();
   const { hasPermission } = usePermissions();
-  const { customLinks, resetPreferences } = useUserPreferences();
+  const { customLinks, resetPreferences, removeCustomLink } =
+    useUserPreferences();
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
@@ -192,27 +194,35 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
             </div>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {pinnedLinks.map((link) => (
-                <Link
+                <div
                   key={link.link}
-                  href={link.link}
-                  className="block h-full transition-all duration-200 hover:ring-2 ring-primary-400 rounded-xl ring-offset-2"
+                  className="relative group block h-full transition-all duration-200 hover:ring-2 ring-primary-400 rounded-xl ring-offset-2"
                 >
-                  <Card className="h-full border-0 shadow rounded-xl p-4">
-                    <CardContent className="p-0 flex flex-row items-center justify-between h-full gap-4">
-                      <div>
-                        {link.description && (
-                          <CardDescription className="text-gray-500 text-xs mb-1">
-                            {link.description}
-                          </CardDescription>
-                        )}
-                        <CardTitle className="text-lg font-semibold text-gray-900">
-                          {link.title}
-                        </CardTitle>
-                      </div>
-                      <ArrowUpRight className="size-5 text-gray-400" />
-                    </CardContent>
-                  </Card>
-                </Link>
+                  <button
+                    onClick={() => removeCustomLink(link.link)}
+                    className="absolute -top-2 -right-2 z-10 p-1 rounded-full bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                    aria-label={t("remove")}
+                  >
+                    <X className="size-4" />
+                  </button>
+                  <Link href={link.link} className="block h-full">
+                    <Card className="h-full border border-gray-200 shadow-sm rounded-xl p-5">
+                      <CardContent className="p-0 flex flex-row items-center justify-between h-full gap-4">
+                        <div className="space-y-1">
+                          {link.description && (
+                            <CardDescription className="text-gray-500 text-sm">
+                              {link.description}
+                            </CardDescription>
+                          )}
+                          <CardTitle className="text-xl font-semibold text-gray-900">
+                            {link.title}
+                          </CardTitle>
+                        </div>
+                        <ArrowUpRight className="size-5 text-gray-400 shrink-0" />
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </div>
               ))}
             </div>
           </div>
