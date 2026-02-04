@@ -6,6 +6,7 @@ import * as Sentry from "@sentry/browser";
 import App from "@/App";
 import { AuthContextType, AuthUserContext } from "@/hooks/useAuthUser";
 import { initI18n } from "@/i18n";
+import { PlugConfigMeta } from "@/types/plugConfig";
 import careConfig from "@careConfig";
 import React, { Context } from "react";
 import { createRoot } from "react-dom/client";
@@ -16,6 +17,7 @@ declare global {
   interface Window {
     CARE_API_URL: string;
     __CORE_ENV__: typeof careConfig;
+    __CARE_PLUGIN_RUNTIME__: { meta: PlugConfigMeta };
     AuthUserContext: Context<AuthContextType | null>;
   }
 }
