@@ -5,7 +5,7 @@ import {
   MedicationRequestDosageInstruction,
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
-import { PrescritionList } from "@/types/emr/prescription/prescription";
+import { PrescriptionList } from "@/types/emr/prescription/prescription";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import { LocationRead } from "@/types/location/location";
 
@@ -208,7 +208,7 @@ export interface MedicationDispenseAuthorizingRequest extends Omit<
   MedicationRequestRead,
   "encounter" | "prescription"
 > {
-  prescription: PrescritionList;
+  prescription: PrescriptionList;
   encounter: string;
 }
 
