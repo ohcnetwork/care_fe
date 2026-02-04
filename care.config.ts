@@ -275,6 +275,14 @@ const careConfig = {
   },
 
   /**
+   * Open schedule window automatically after patient registration if set to "true"
+   */
+  openScheduleAfterPatientRegistration: booleanFromString(
+    env.REACT_OPEN_SCHEDULE_AFTER_PATIENT_REGISTRATION,
+    false,
+  ),
+
+  /**
    * Decimal calculation configuration
    */
   decimal: {
