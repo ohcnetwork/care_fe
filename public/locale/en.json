@@ -1286,6 +1286,8 @@
   "condition_operation__equality": "Equals to",
   "condition_operation__has_tag": "Has tag",
   "condition_operation__in_range": "In range",
+  "conditional": "Conditional",
+  "conditional_discounts_not_applied": "Conditional discounts not applied to total",
   "conditions": "Conditions",
   "configuration": "Configuration",
   "configure": "Configure",
