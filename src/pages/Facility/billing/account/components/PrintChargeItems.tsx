@@ -170,6 +170,18 @@ export const PrintChargeItems = (props: {
   const payments =
     (paymentsResponse?.results as PaymentReconciliationRead[]) || [];
 
+  const activePayments = payments.filter(
+    (payment) => payment.status === PaymentReconciliationStatus.active,
+  );
+
+  const nonReturnedPayments = activePayments.filter(
+    (payment) => !payment.target_invoice?.is_refund,
+  );
+
+  const returnedPayments = activePayments.filter(
+    (payment) => payment.target_invoice?.is_refund,
+  );
+
   if (!chargeItems?.results && !isLoading) {
     return (
       <div className="flex h-[200px] items-center justify-center  border-2 border-dashed p-4 text-gray-500 border-gray-200">
@@ -1147,7 +1159,7 @@ export const PrintChargeItems = (props: {
                           </>
                         )}
 
-                      {payments.length > 0 && !selectedCategory && (
+                      {nonReturnedPayments.length > 0 && !selectedCategory && (
                         <div className="mt-4">
                           <hr className="border-gray-300 py-2" />
                           <h2 className="text-sm font-semibold mb-1">
@@ -1191,31 +1203,27 @@ export const PrintChargeItems = (props: {
                               </TableHeader>
                               <TableBody className="[&_tr]:border-0 [&_td]:p-0.5">
                                 {(() => {
-                                  const validPayments = payments.filter(
-                                    (payment) =>
-                                      payment.status ===
-                                      PaymentReconciliationStatus.active,
-                                  );
-
-                                  const paymentGroups = validPayments.reduce(
-                                    (
-                                      acc: Record<
+                                  const paymentGroups =
+                                    nonReturnedPayments.reduce(
+                                      (
+                                        acc: Record<
+                                          string,
+                                          PaymentReconciliationRead[]
+                                        >,
+                                        payment: PaymentReconciliationRead,
+                                      ) => {
+                                        const type =
+                                          payment.reconciliation_type;
+                                        const list = acc[type] ?? [];
+                                        list.push(payment);
+                                        acc[type] = list;
+                                        return acc;
+                                      },
+                                      {} as Record<
                                         string,
                                         PaymentReconciliationRead[]
                                       >,
-                                      payment: PaymentReconciliationRead,
-                                    ) => {
-                                      const type = payment.reconciliation_type;
-                                      const list = acc[type] ?? [];
-                                      list.push(payment);
-                                      acc[type] = list;
-                                      return acc;
-                                    },
-                                    {} as Record<
-                                      string,
-                                      PaymentReconciliationRead[]
-                                    >,
-                                  );
+                                    );
 
                                   const sortedTypes =
                                     Object.keys(paymentGroups).sort();
@@ -1346,7 +1354,228 @@ export const PrintChargeItems = (props: {
                                       <TableCell className="text-right">
                                         <MonetaryDisplay
                                           amount={add(
-                                            ...validPayments.map((p) =>
+                                            ...nonReturnedPayments.map((p) =>
+                                              multiply(
+                                                p.amount || 0,
+                                                p.is_credit_note ? -1 : 1,
+                                              ),
+                                            ),
+                                          )}
+                                        />
+                                      </TableCell>
+                                    </TableRow>,
+                                  );
+
+                                  return rows;
+                                })()}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </div>
+                      )}
+
+                      {returnedPayments.length > 0 && !selectedCategory && (
+                        <div className="mt-4">
+                          <hr className="border-gray-300 py-2" />
+                          <h2 className="text-sm font-semibold mb-1">
+                            {t("returned_payments")}
+                          </h2>
+                          <div className="overflow-hidden">
+                            <Table className="w-full [&_th]:text-xs [&_td]:text-xs [&_tr]:text-xs">
+                              <TableHeader className="[&_tr]:border-y [&_th]:p-0.5 [&_th]:h-auto">
+                                <TableRow className="bg-transparent hover:bg-transparent">
+                                  {summaryMode ? (
+                                    <>
+                                      <TableHead
+                                        className="font-bold"
+                                        colSpan={2}
+                                      >
+                                        {t("type")}
+                                      </TableHead>
+                                      <TableHead className="font-bold text-right w-32">
+                                        {t("amount")}
+                                      </TableHead>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <TableHead className="font-bold w-10">
+                                        {t("date")}
+                                      </TableHead>
+                                      {hidePaymentTypeGrouping && (
+                                        <TableHead className="font-bold w-10">
+                                          {t("type")}
+                                        </TableHead>
+                                      )}
+                                      <TableHead className="font-bold w-32">
+                                        {t("method")}
+                                      </TableHead>
+                                      <TableHead className="font-bold text-right w-32">
+                                        {t("amount")}
+                                      </TableHead>
+                                    </>
+                                  )}
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody className="[&_tr]:border-0 [&_td]:p-0.5">
+                                {(() => {
+                                  const returnedPayments = payments.filter(
+                                    (payment) =>
+                                      payment.status ===
+                                        PaymentReconciliationStatus.active &&
+                                      payment.target_invoice?.is_refund ===
+                                        true,
+                                  );
+
+                                  const paymentGroups = returnedPayments.reduce(
+                                    (
+                                      acc: Record<
+                                        string,
+                                        PaymentReconciliationRead[]
+                                      >,
+                                      payment: PaymentReconciliationRead,
+                                    ) => {
+                                      const type = payment.reconciliation_type;
+                                      const list = acc[type] ?? [];
+                                      list.push(payment);
+                                      acc[type] = list;
+                                      return acc;
+                                    },
+                                    {} as Record<
+                                      string,
+                                      PaymentReconciliationRead[]
+                                    >,
+                                  );
+
+                                  const sortedTypes =
+                                    Object.keys(paymentGroups).sort();
+
+                                  const rows: React.ReactNode[] = [];
+
+                                  sortedTypes.forEach((paymentType) => {
+                                    const paymentsOfType: PaymentReconciliationRead[] =
+                                      paymentGroups[paymentType] ?? [];
+                                    const typeTotal = add(
+                                      ...paymentsOfType.map((p) =>
+                                        multiply(
+                                          p.amount || 0,
+                                          p.is_credit_note ? -1 : 1,
+                                        ),
+                                      ),
+                                    );
+
+                                    if (summaryMode) {
+                                      // In summary mode, show only payment type with total
+                                      rows.push(
+                                        <TableRow
+                                          key={`returned-payment-type-${paymentType}`}
+                                          className="bg-transparent hover:bg-transparent"
+                                        >
+                                          <TableCell
+                                            colSpan={2}
+                                            className="font-semibold capitalize"
+                                          >
+                                            {t(paymentType)}
+                                          </TableCell>
+                                          <TableCell className="text-right font-semibold">
+                                            <MonetaryDisplay
+                                              amount={typeTotal}
+                                            />
+                                          </TableCell>
+                                        </TableRow>,
+                                      );
+                                    } else {
+                                      // Normal mode - show header, items, and subtotal
+                                      // Add payment type header (only if not hiding grouping)
+                                      if (!hidePaymentTypeGrouping) {
+                                        rows.push(
+                                          <TableRow
+                                            key={`returned-payment-type-${paymentType}`}
+                                            className="font-semibold hover:bg-transparent"
+                                          >
+                                            <TableCell
+                                              colSpan={2}
+                                              className="capitalize"
+                                            >
+                                              {t(paymentType)}
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                              <MonetaryDisplay
+                                                amount={typeTotal}
+                                              />
+                                            </TableCell>
+                                          </TableRow>,
+                                        );
+                                      }
+
+                                      paymentsOfType.forEach(
+                                        (
+                                          payment: PaymentReconciliationRead,
+                                        ) => {
+                                          rows.push(
+                                            <TableRow
+                                              key={payment.id}
+                                              className="bg-transparent hover:bg-transparent"
+                                            >
+                                              <TableCell>
+                                                {payment.payment_datetime
+                                                  ? formatDateTime(
+                                                      payment.payment_datetime,
+                                                      "DD-MM-YY",
+                                                    )
+                                                  : "-"}
+                                              </TableCell>
+                                              {hidePaymentTypeGrouping && (
+                                                <TableCell className="text-left capitalize">
+                                                  {t(
+                                                    payment.reconciliation_type,
+                                                  )}
+                                                </TableCell>
+                                              )}
+                                              <TableCell>
+                                                {
+                                                  PAYMENT_RECONCILIATION_METHOD_MAP[
+                                                    payment.method
+                                                  ]
+                                                }
+                                              </TableCell>
+                                              <TableCell className="text-right">
+                                                <MonetaryDisplay
+                                                  amount={multiply(
+                                                    payment.amount,
+                                                    payment.is_credit_note
+                                                      ? -1
+                                                      : 1,
+                                                  )}
+                                                />
+                                              </TableCell>
+                                            </TableRow>,
+                                          );
+                                        },
+                                      );
+                                    }
+                                  });
+
+                                  // Add grand total
+                                  rows.push(
+                                    <TableRow
+                                      key="returned-grand-total"
+                                      className="bg-muted/30 font-semibold"
+                                    >
+                                      <TableCell
+                                        colSpan={
+                                          hidePaymentTypeGrouping &&
+                                          !summaryMode
+                                            ? 3
+                                            : 2
+                                        }
+                                        className="text-right pr-2"
+                                      >
+                                        {t("net_total")}
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        <MonetaryDisplay
+                                          amount={add(
+                                            ...returnedPayments.map((p) =>
                                               multiply(
                                                 p.amount || 0,
                                                 p.is_credit_note ? -1 : 1,

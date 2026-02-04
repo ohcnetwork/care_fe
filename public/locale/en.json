@@ -4735,6 +4735,7 @@
   "return_to_patient_dashboard": "Return to Patient Dashboard",
   "returned": "Returned",
   "returned_items": "Returned items",
+  "returned_payments": "Returned payments",
   "review_and_finalise_request": "Review and finalise this request order",
   "review_and_finalise_request_description": "Add more items if needed, or approve to mark this delivery as requested.",
   "review_before": "Review Before",
