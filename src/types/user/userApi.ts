@@ -7,10 +7,7 @@ import {
   UserReadMinimal,
   UserUpdate,
 } from "@/types/user/user";
-import {
-  UserPreference,
-  UserPreferenceRequest,
-} from "@/types/user/userPreferences";
+import { UserPreferenceRequest } from "@/types/user/userPreferences";
 
 export default {
   list: {
@@ -77,6 +74,6 @@ export default {
     path: "/api/v1/users/set_preferences/",
     method: HttpMethod.POST,
     TRes: Type<CurrentUserRead>(),
-    TBody: Type<UserPreferenceRequest<keyof UserPreference>>(),
+    TBody: Type<UserPreferenceRequest>(),
   },
 } as const;

@@ -5,21 +5,37 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import mutate from "@/Utils/request/mutate";
 import userApi from "@/types/user/userApi";
-import { QuickLinkCustom, UserPreference } from "@/types/user/userPreferences";
+import {
+  QuickLinkCustom,
+  UserPreference,
+  UserPreferenceKey,
+} from "@/types/user/userPreferences";
+
+enum ActionType {
+  ADD_CUSTOM_LINK = "ADD_CUSTOM_LINK",
+  REMOVE_CUSTOM_LINK = "REMOVE_CUSTOM_LINK",
+  UPDATE_CUSTOM_LINK = "UPDATE_CUSTOM_LINK",
+  BLACKLIST_SHORTCUT = "BLACKLIST_SHORTCUT",
+  UNBLACKLIST_SHORTCUT = "UNBLACKLIST_SHORTCUT",
+  SET_BLACKLIST = "SET_BLACKLIST",
+  SET_PREFERENCE = "SET_PREFERENCE",
+  RESET_CUSTOM_LINKS = "RESET_CUSTOM_LINKS",
+}
 
 // Action types for preferences reducer
 type PreferencesAction =
-  // Custom links actions
-  | { type: "ADD_CUSTOM_LINK"; payload: QuickLinkCustom }
-  | { type: "REMOVE_CUSTOM_LINK"; payload: string }
-  | { type: "UPDATE_CUSTOM_LINK"; payload: QuickLinkCustom }
-  // Blacklist actions (for hiding default shortcuts)
-  | { type: "BLACKLIST_SHORTCUT"; payload: string }
-  | { type: "UNBLACKLIST_SHORTCUT"; payload: string }
-  | { type: "SET_BLACKLIST"; payload: string[] }
-  // Generic setter for future preference types
-  | { type: "SET_PREFERENCE"; key: keyof UserPreference; payload: unknown }
-  | { type: "RESET_CUSTOM_LINKS"; payload: UserPreference };
+  | { type: ActionType.ADD_CUSTOM_LINK; payload: QuickLinkCustom }
+  | { type: ActionType.REMOVE_CUSTOM_LINK; payload: string }
+  | { type: ActionType.UPDATE_CUSTOM_LINK; payload: QuickLinkCustom }
+  | { type: ActionType.BLACKLIST_SHORTCUT; payload: string }
+  | { type: ActionType.UNBLACKLIST_SHORTCUT; payload: string }
+  | { type: ActionType.SET_BLACKLIST; payload: string[] }
+  | {
+      type: ActionType.SET_PREFERENCE;
+      key: UserPreferenceKey;
+      payload: unknown;
+    }
+  | { type: ActionType.RESET_CUSTOM_LINKS; payload: UserPreference };
 
 export const MAX_QUICK_LINKS = 10;
 
@@ -28,7 +44,7 @@ function preferencesReducer(
   action: PreferencesAction,
 ): UserPreference {
   switch (action.type) {
-    case "ADD_CUSTOM_LINK":
+    case ActionType.ADD_CUSTOM_LINK:
       return {
         ...state,
         facility_quick_links: {
@@ -40,7 +56,7 @@ function preferencesReducer(
         },
       };
 
-    case "REMOVE_CUSTOM_LINK":
+    case ActionType.REMOVE_CUSTOM_LINK:
       return {
         ...state,
         facility_quick_links: {
@@ -51,7 +67,7 @@ function preferencesReducer(
         },
       };
 
-    case "UPDATE_CUSTOM_LINK":
+    case ActionType.UPDATE_CUSTOM_LINK:
       return {
         ...state,
         facility_quick_links: {
@@ -62,7 +78,7 @@ function preferencesReducer(
         },
       };
 
-    case "BLACKLIST_SHORTCUT":
+    case ActionType.BLACKLIST_SHORTCUT:
       return {
         ...state,
         facility_quick_links: {
@@ -74,7 +90,7 @@ function preferencesReducer(
         },
       };
 
-    case "UNBLACKLIST_SHORTCUT":
+    case ActionType.UNBLACKLIST_SHORTCUT:
       return {
         ...state,
         facility_quick_links: {
@@ -85,7 +101,7 @@ function preferencesReducer(
         },
       };
 
-    case "SET_BLACKLIST":
+    case ActionType.SET_BLACKLIST:
       return {
         ...state,
         facility_quick_links: {
@@ -94,13 +110,13 @@ function preferencesReducer(
         },
       };
 
-    case "SET_PREFERENCE":
+    case ActionType.SET_PREFERENCE:
       return {
         ...state,
         [action.key]: action.payload,
       } as UserPreference;
 
-    case "RESET_CUSTOM_LINKS":
+    case ActionType.RESET_CUSTOM_LINKS:
       return action.payload;
 
     default:
@@ -135,27 +151,19 @@ export function useUserPreferences() {
 
   // Sync reducer state when server state changes (after query invalidation)
   useEffect(() => {
-    dispatch({ type: "RESET_CUSTOM_LINKS", payload: user?.preferences ?? {} });
+    dispatch({
+      type: ActionType.RESET_CUSTOM_LINKS,
+      payload: user?.preferences ?? {},
+    });
   }, [user?.preferences]);
 
-  // Map action types to the preference key they affect
   const getAffectedPreferenceKey = (
     action: PreferencesAction,
-  ): keyof UserPreference | null => {
-    switch (action.type) {
-      case "ADD_CUSTOM_LINK":
-      case "REMOVE_CUSTOM_LINK":
-      case "UPDATE_CUSTOM_LINK":
-      case "BLACKLIST_SHORTCUT":
-      case "UNBLACKLIST_SHORTCUT":
-      case "SET_BLACKLIST":
-      case "RESET_CUSTOM_LINKS":
-        return "facility_quick_links";
-      case "SET_PREFERENCE":
-        return action.key;
-      default:
-        return null;
+  ): UserPreferenceKey => {
+    if (action.type === ActionType.SET_PREFERENCE) {
+      return action.key;
     }
+    return "facility_quick_links";
   };
 
   // Wrapped dispatch that also syncs to backend
@@ -165,13 +173,11 @@ export function useUserPreferences() {
       const newState = preferencesReducer(preferences, action);
       const key = getAffectedPreferenceKey(action);
 
-      if (key) {
-        syncPreferences({
-          version: "0.0.1",
-          preference: key,
-          value: newState[key] ?? {},
-        });
-      }
+      syncPreferences({
+        version: "0.0.1",
+        preference: key,
+        value: newState[key] ?? {},
+      });
     },
     [preferences, syncPreferences],
   );
@@ -184,7 +190,7 @@ export function useUserPreferences() {
       if (currentCount >= MAX_QUICK_LINKS) {
         return false;
       }
-      updatePreferences({ type: "ADD_CUSTOM_LINK", payload: link });
+      updatePreferences({ type: ActionType.ADD_CUSTOM_LINK, payload: link });
       return true;
     },
     [preferences.facility_quick_links?.custom_links?.length, updatePreferences],
@@ -192,14 +198,17 @@ export function useUserPreferences() {
 
   const removeCustomLink = useCallback(
     (linkHref: string) => {
-      updatePreferences({ type: "REMOVE_CUSTOM_LINK", payload: linkHref });
+      updatePreferences({
+        type: ActionType.REMOVE_CUSTOM_LINK,
+        payload: linkHref,
+      });
     },
     [updatePreferences],
   );
 
   const updateCustomLink = useCallback(
     (link: QuickLinkCustom) => {
-      updatePreferences({ type: "UPDATE_CUSTOM_LINK", payload: link });
+      updatePreferences({ type: ActionType.UPDATE_CUSTOM_LINK, payload: link });
     },
     [updatePreferences],
   );
@@ -207,27 +216,36 @@ export function useUserPreferences() {
   // Blacklist methods (for hiding default shortcuts)
   const blacklistShortcut = useCallback(
     (shortcutId: string) => {
-      updatePreferences({ type: "BLACKLIST_SHORTCUT", payload: shortcutId });
+      updatePreferences({
+        type: ActionType.BLACKLIST_SHORTCUT,
+        payload: shortcutId,
+      });
     },
     [updatePreferences],
   );
 
   const unblacklistShortcut = useCallback(
     (shortcutId: string) => {
-      updatePreferences({ type: "UNBLACKLIST_SHORTCUT", payload: shortcutId });
+      updatePreferences({
+        type: ActionType.UNBLACKLIST_SHORTCUT,
+        payload: shortcutId,
+      });
     },
     [updatePreferences],
   );
 
   const setBlacklist = useCallback(
     (shortcutIds: string[]) => {
-      updatePreferences({ type: "SET_BLACKLIST", payload: shortcutIds });
+      updatePreferences({
+        type: ActionType.SET_BLACKLIST,
+        payload: shortcutIds,
+      });
     },
     [updatePreferences],
   );
 
   const resetPreferences = useCallback(() => {
-    updatePreferences({ type: "RESET_CUSTOM_LINKS", payload: {} });
+    updatePreferences({ type: ActionType.RESET_CUSTOM_LINKS, payload: {} });
   }, [updatePreferences]);
 
   const canAddMoreLinks = useMemo(() => {

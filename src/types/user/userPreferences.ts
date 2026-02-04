@@ -17,10 +17,8 @@ export interface UserPreference {
 
 export type UserPreferenceKey = keyof UserPreference;
 
-export interface UserPreferenceRequest<
-  K extends UserPreferenceKey = UserPreferenceKey,
-> {
-  preference: K;
-  version: string;
-  value: UserPreference[K];
+export interface UserPreferenceRequest {
+  preference: UserPreferenceKey;
+  version?: string;
+  value: UserPreference[UserPreferenceKey];
 }
