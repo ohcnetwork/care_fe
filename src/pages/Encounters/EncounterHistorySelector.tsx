@@ -94,26 +94,24 @@ function EncounterCard({
       )}
       <CardContent className="flex flex-col px-4 py-3 gap-2">
         <div className="flex justify-between items-center">
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 min-w-0">
             <span className="text-base font-semibold">
               {t(`encounter_class__${encounter.encounter_class}`)}
             </span>
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-gray-700 block truncate">
               {isSameFacility && careTeam.length > 0 ? (
                 <span className="flex items-center gap-1">
-                  <span className="truncate max-w-40">
+                  <span className="truncate">
                     {formatName(careTeam[0].member)}
                   </span>
                   {additionalMembersCount > 0 && (
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 shrink-0">
                       +{additionalMembersCount}
                     </span>
                   )}
                 </span>
               ) : (
-                <span className="truncate max-w-40">
-                  {encounter.facility.name}
-                </span>
+                encounter.facility.name
               )}
             </span>
             {encounter.tags.length > 0 && (
