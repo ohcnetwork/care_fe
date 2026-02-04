@@ -61,10 +61,8 @@ test.describe("Purchase Delivery", () => {
       .first()
       .click();
 
-    await page.getByRole("button", { name: "Save ⇧ + ENTER" }).click();
-    await expect(
-      page.getByRole("button", { name: "Mark as Approved" }),
-    ).toBeEnabled({ timeout: 15000 });
+    await page.getByRole("button", { name: "Save" }).click();
+
     await page.getByRole("button", { name: "Mark as Approved" }).click();
 
     await expect(
