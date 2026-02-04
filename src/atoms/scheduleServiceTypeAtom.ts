@@ -13,3 +13,10 @@ export const scheduleServiceTypeAtom = atomWithStorage<SchedulableResourceType>(
   SCHEDULE_SERVICE_TYPE_KEY,
   SchedulableResourceType.Practitioner,
 );
+
+/**
+ * Clear the schedule service type cache from localStorage
+ */
+export const clearScheduleServiceTypeCache = () => {
+  localStorage.removeItem(SCHEDULE_SERVICE_TYPE_KEY);
+};

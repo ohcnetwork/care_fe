@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 
 import UpdatableApp, { checkForUpdate } from "@/components/Common/UpdatableApp";
 
+import { clearScheduleServiceTypeCache } from "@/atoms/scheduleServiceTypeAtom";
 import { clearQueryPersistenceCache } from "@/Utils/request/queryClient";
 import { useQueryClient } from "@tanstack/react-query";
 import { RotateCwIcon } from "lucide-react";
@@ -29,6 +30,7 @@ function ClearCacheButton() {
       }
       queryClient.clear();
       clearQueryPersistenceCache();
+      clearScheduleServiceTypeCache();
       window.location.reload();
     } catch (error) {
       console.error("Cache clear failed:", error);
