@@ -89,14 +89,16 @@ export function useAppVersion(): UseAppVersionReturn {
     await queryClient.invalidateQueries({ queryKey: ["build-meta"] });
     const result = await refetch();
     const fetchedVersion = result.data?.version;
-    const storedInfo = getStoredVersionInfo();
-
-    if (fetchedVersion && storedInfo && fetchedVersion !== storedInfo.version) {
+    if (
+      fetchedVersion &&
+      versionInfo &&
+      fetchedVersion !== versionInfo.version
+    ) {
       setPendingUpdate(fetchedVersion);
       return true;
     }
     return false;
-  }, [queryClient, refetch]);
+  }, [queryClient, refetch, versionInfo]);
 
   const updateApp = useCallback(async () => {
     if (pendingUpdate) {

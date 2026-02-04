@@ -61,7 +61,12 @@ export default function UserSoftwareUpdate() {
         </div>
         <div className="flex gap-2">
           {isChecking ? (
-            <Button variant="primary" disabled aria-busy="true">
+            <Button
+              variant="primary"
+              disabled
+              aria-busy="true"
+              aria-label={t("checking_for_update")}
+            >
               <CareIcon icon="l-sync" className="text-2xl animate-spin" />
               {t("checking_for_update")}
             </Button>
