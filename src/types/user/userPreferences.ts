@@ -12,7 +12,7 @@ export interface QuickLinksPreferences {
 }
 
 export interface UserPreference {
-  quick_links?: QuickLinksPreferences;
+  facility_quick_links?: QuickLinksPreferences;
 }
 
 export type UserPreferenceKey = keyof UserPreference;
@@ -21,5 +21,6 @@ export interface UserPreferenceRequest<
   K extends UserPreferenceKey = UserPreferenceKey,
 > {
   preference: K;
+  version: string;
   value: UserPreference[K];
 }

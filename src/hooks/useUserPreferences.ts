@@ -31,10 +31,10 @@ function preferencesReducer(
     case "ADD_CUSTOM_LINK":
       return {
         ...state,
-        quick_links: {
-          ...state.quick_links,
+        facility_quick_links: {
+          ...state.facility_quick_links,
           custom_links: [
-            ...(state.quick_links?.custom_links ?? []),
+            ...(state.facility_quick_links?.custom_links ?? []),
             action.payload,
           ],
         },
@@ -43,9 +43,9 @@ function preferencesReducer(
     case "REMOVE_CUSTOM_LINK":
       return {
         ...state,
-        quick_links: {
-          ...state.quick_links,
-          custom_links: state.quick_links?.custom_links?.filter(
+        facility_quick_links: {
+          ...state.facility_quick_links,
+          custom_links: state.facility_quick_links?.custom_links?.filter(
             (link) => link.link !== action.payload,
           ),
         },
@@ -54,9 +54,9 @@ function preferencesReducer(
     case "UPDATE_CUSTOM_LINK":
       return {
         ...state,
-        quick_links: {
-          ...state.quick_links,
-          custom_links: state.quick_links?.custom_links?.map((link) =>
+        facility_quick_links: {
+          ...state.facility_quick_links,
+          custom_links: state.facility_quick_links?.custom_links?.map((link) =>
             link.link === action.payload.link ? action.payload : link,
           ),
         },
@@ -65,18 +65,21 @@ function preferencesReducer(
     case "BLACKLIST_SHORTCUT":
       return {
         ...state,
-        quick_links: {
-          ...state.quick_links,
-          blacklist: [...(state.quick_links?.blacklist ?? []), action.payload],
+        facility_quick_links: {
+          ...state.facility_quick_links,
+          blacklist: [
+            ...(state.facility_quick_links?.blacklist ?? []),
+            action.payload,
+          ],
         },
       };
 
     case "UNBLACKLIST_SHORTCUT":
       return {
         ...state,
-        quick_links: {
-          ...state.quick_links,
-          blacklist: state.quick_links?.blacklist?.filter(
+        facility_quick_links: {
+          ...state.facility_quick_links,
+          blacklist: state.facility_quick_links?.blacklist?.filter(
             (id) => id !== action.payload,
           ),
         },
@@ -85,8 +88,8 @@ function preferencesReducer(
     case "SET_BLACKLIST":
       return {
         ...state,
-        quick_links: {
-          ...state.quick_links,
+        facility_quick_links: {
+          ...state.facility_quick_links,
           blacklist: action.payload,
         },
       };
@@ -115,9 +118,10 @@ export function useUserPreferences() {
     user.preferences ?? {},
   );
 
-  const customLinksCount = preferences.quick_links?.custom_links?.length ?? 0;
-  const blacklist = preferences.quick_links?.blacklist ?? [];
-  const customLinks = preferences.quick_links?.custom_links ?? [];
+  const customLinksCount =
+    preferences.facility_quick_links?.custom_links?.length ?? 0;
+  const blacklist = preferences.facility_quick_links?.blacklist ?? [];
+  const customLinks = preferences.facility_quick_links?.custom_links ?? [];
 
   // Mutation to sync with backend
   const { mutate: syncPreferences, isPending } = useMutation({
@@ -146,7 +150,7 @@ export function useUserPreferences() {
       case "UNBLACKLIST_SHORTCUT":
       case "SET_BLACKLIST":
       case "RESET_CUSTOM_LINKS":
-        return "quick_links";
+        return "facility_quick_links";
       case "SET_PREFERENCE":
         return action.key;
       default:
@@ -162,7 +166,11 @@ export function useUserPreferences() {
       const key = getAffectedPreferenceKey(action);
 
       if (key) {
-        syncPreferences({ preference: key, value: newState[key] ?? {} });
+        syncPreferences({
+          version: "0.0.1",
+          preference: key,
+          value: newState[key] ?? {},
+        });
       }
     },
     [preferences, syncPreferences],
@@ -171,14 +179,15 @@ export function useUserPreferences() {
   // Custom links methods
   const addCustomLink = useCallback(
     (link: QuickLinkCustom) => {
-      const currentCount = preferences.quick_links?.custom_links?.length ?? 0;
+      const currentCount =
+        preferences.facility_quick_links?.custom_links?.length ?? 0;
       if (currentCount >= MAX_QUICK_LINKS) {
         return false;
       }
       updatePreferences({ type: "ADD_CUSTOM_LINK", payload: link });
       return true;
     },
-    [preferences.quick_links?.custom_links?.length, updatePreferences],
+    [preferences.facility_quick_links?.custom_links?.length, updatePreferences],
   );
 
   const removeCustomLink = useCallback(
@@ -219,30 +228,34 @@ export function useUserPreferences() {
 
   const resetPreferences = useCallback(() => {
     updatePreferences({ type: "RESET_CUSTOM_LINKS", payload: {} });
-  }, []);
+  }, [updatePreferences]);
 
   const canAddMoreLinks = useMemo(() => {
-    const currentCount = preferences.quick_links?.custom_links?.length ?? 0;
+    const currentCount =
+      preferences.facility_quick_links?.custom_links?.length ?? 0;
     return currentCount < MAX_QUICK_LINKS;
-  }, [preferences.quick_links?.custom_links?.length]);
+  }, [preferences.facility_quick_links?.custom_links?.length]);
 
   const isBlacklisted = useCallback(
     (shortcutId: string) => {
-      return preferences.quick_links?.blacklist?.includes(shortcutId) ?? false;
+      return (
+        preferences.facility_quick_links?.blacklist?.includes(shortcutId) ??
+        false
+      );
     },
-    [preferences.quick_links?.blacklist],
+    [preferences.facility_quick_links?.blacklist],
   );
 
   // Helper to check if a link is a custom link
   const isCustomLink = useCallback(
     (linkHref: string) => {
       return (
-        preferences.quick_links?.custom_links?.some(
+        preferences.facility_quick_links?.custom_links?.some(
           (link) => link.link === linkHref,
         ) ?? false
       );
     },
-    [preferences.quick_links?.custom_links],
+    [preferences.facility_quick_links?.custom_links],
   );
 
   return {
