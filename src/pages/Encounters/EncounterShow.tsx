@@ -188,7 +188,9 @@ export const EncounterShow = (props: Props) => {
       entriesOf(pluginTabs).map(([key, Component]) => [
         key,
         {
-          label: t(`ENCOUNTER_TAB__${key}`),
+          label: t(`ENCOUNTER_TAB__${key}`, {
+            defaultValue: key.toUpperCase(),
+          }),
           component: (
             <Component encounter={selectedEncounter!} patient={patient!} />
           ),
