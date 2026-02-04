@@ -7,6 +7,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
+import { useAppVersion } from "@/hooks/useAppVersion";
 import { clearAllCaches } from "@/lib/appVersion";
 
 function ClearCacheButton() {

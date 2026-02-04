@@ -1,3 +1,4 @@
+import { clearScheduleServiceTypeCache } from "@/atoms/scheduleServiceTypeAtom";
 import { clearQueryPersistenceCache } from "@/Utils/request/queryClient";
 
 import queryClient from "@/Utils/request/queryClient";
@@ -96,6 +97,7 @@ export async function clearAllCaches(): Promise<void> {
   // Clear React Query cache
   queryClient.clear();
   clearQueryPersistenceCache();
+  clearScheduleServiceTypeCache();
 }
 
 /**
