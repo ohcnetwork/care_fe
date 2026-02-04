@@ -74,7 +74,7 @@ test.describe("Purchase Delivery", () => {
     ).toBeDisabled();
 
     await page
-      .getByRole("row", { name: "Item Requested Qty" })
+      .getByRole("row", { name: "Requested Qty" })
       .getByRole("checkbox")
       .click();
 
@@ -87,7 +87,7 @@ test.describe("Purchase Delivery", () => {
     ).toBeDisabled();
 
     await page
-      .getByRole("row", { name: "Item Requested Qty" })
+      .getByRole("row", { name: "Requested Qty" })
       .getByRole("checkbox")
       .click();
 
