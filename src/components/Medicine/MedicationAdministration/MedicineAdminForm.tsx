@@ -55,7 +55,6 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
 
   const validateDateTime = (date: Date, isStartTime: boolean): string => {
     const now = startOfMinute(new Date());
-    const authoredOn = startOfMinute(new Date(medication.authored_on));
     const startTime = startOfMinute(
       new Date(administrationRequest.occurrence_period_start),
     );
@@ -65,10 +64,6 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
       return t(
         isStartTime ? "start_time_future_error" : "end_time_future_error",
       );
-    }
-
-    if (isStartTime) {
-      return date < authoredOn ? t("start_time_before_authored_error") : "";
     }
 
     return date < startTime ? t("end_time_before_start_error") : "";

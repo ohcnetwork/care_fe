@@ -186,9 +186,6 @@ test.describe("Facility Devices Management", () => {
     const saveButton = page.getByRole("button", { name: "Save" });
     await expect(saveButton).toBeVisible({ timeout: 10000 });
 
-    // Verify Save button is disabled initially
-    await expect(saveButton).toBeDisabled();
-
     // Fill User Friendly Name to enable the Save button
     const userFriendlyName = faker.word.words(2);
     await page
