@@ -5,7 +5,12 @@ import { useTranslation } from "react-i18next";
 import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardTitle,
+} from "@/components/ui/card";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -15,7 +20,7 @@ import BackButton from "@/components/Common/BackButton";
 import { InternalType } from "@/types/healthcareService/healthcareService";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 import { useAtom } from "jotai";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Calendar, CalendarDays, Logs } from "lucide-react";
 
 function LocationCard({
   location,
@@ -122,6 +127,53 @@ export default function HealthcareServiceShow({
         <ArrowLeft />
         <span>{t("back_to_services")}</span>
       </BackButton>
+
+      <div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {[
+            {
+              title: t("schedule"),
+              description: t("schedule_information"),
+              icon: Calendar,
+              href: `/schedule`,
+            },
+            {
+              title: t("appointments"),
+              description: t("view_appointments"),
+              icon: CalendarDays,
+              href: `/appointments`,
+            },
+            {
+              title: t("queues"),
+              description: t("manage_token_queues_for_facility"),
+              icon: Logs,
+              href: `/queues`,
+            },
+          ].map((shortcut) => (
+            <Link
+              key={shortcut.href}
+              href={shortcut.href}
+              className="block h-full transition-all duration-200 hover:ring-2 ring-primary-400 rounded-lg ring-offset-2"
+            >
+              <Card className="h-full border-0 shadow rounded-lg p-3">
+                <CardContent className="p-0 flex flex-row items-center h-full gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <shortcut.icon className="size-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">
+                      {shortcut.title}
+                    </CardTitle>
+                    <CardDescription className="text-gray-500 text-xs">
+                      {shortcut.description}
+                    </CardDescription>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </div>
 
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
