@@ -234,6 +234,9 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
           year_of_birth: resp.year_of_birth,
           partial_id: resp?.id?.slice(0, 5),
           ...(flow && { flow, createEncounter: "true" }),
+          ...(careConfig.openScheduleAfterPatientRegistration && {
+            open_schedule: "true",
+          }),
         },
       });
     },

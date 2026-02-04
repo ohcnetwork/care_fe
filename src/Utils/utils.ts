@@ -430,3 +430,12 @@ export function formatTruncatedList<T>(
 
   return `${displayedItems.map(getDisplayValue).join(", ")} ... +${remainingCount} ${t("more") || moreText}`;
 }
+
+export function deepFreeze<T>(obj: T): T {
+  if (!obj || typeof obj !== "object") return obj;
+
+  Object.freeze(obj);
+  Object.values(obj).forEach(deepFreeze);
+
+  return obj;
+}
