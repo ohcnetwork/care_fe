@@ -29,6 +29,8 @@ interface QuestionGroupProps {
   facilityId?: string;
   patientId: string;
   isSubQuestion?: boolean;
+  questionnaireId?: string;
+  questionnaireSlug?: string;
 }
 
 export function isQuestionEnabled(
@@ -111,6 +113,8 @@ export const QuestionGroup = memo(function QuestionGroup({
   facilityId,
   patientId,
   isSubQuestion = false,
+  questionnaireId,
+  questionnaireSlug,
 }: QuestionGroupProps) {
   const isEnabled = isQuestionEnabled(question, questionnaireResponses);
 
@@ -149,6 +153,8 @@ export const QuestionGroup = memo(function QuestionGroup({
         facilityId={facilityId}
         patientId={patientId}
         isSubQuestion={isSubQuestion}
+        questionnaireId={questionnaireId}
+        questionnaireSlug={questionnaireSlug}
       />
     );
   }
@@ -196,6 +202,8 @@ export const QuestionGroup = memo(function QuestionGroup({
             activeGroupId={activeGroupId}
             patientId={patientId}
             isSubQuestion={true}
+            questionnaireId={questionnaireId}
+            questionnaireSlug={questionnaireSlug}
           />
         ))}
       </div>

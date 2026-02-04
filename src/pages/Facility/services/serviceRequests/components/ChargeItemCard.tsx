@@ -22,6 +22,7 @@ import {
   ChargeItemRead,
 } from "@/types/billing/chargeItem/chargeItem";
 import { InvoiceStatus } from "@/types/billing/invoice/invoice";
+import { isGreaterThan, round } from "@/Utils/decimal";
 import { navigate } from "raviger";
 interface ChargeItemCardProps {
   chargeItem: ChargeItemRead;
@@ -44,9 +45,9 @@ export function ChargeItemCard({ chargeItem, sourceUrl }: ChargeItemCardProps) {
               {chargeItem.title}
             </span>
             <div className="flex items-center gap-2">
-              {Number(chargeItem.quantity) > 1 && (
+              {isGreaterThan(chargeItem.quantity, 1) && (
                 <span className="text-sm text-gray-950 whitespace-nowrap">
-                  {t("x")} {chargeItem.quantity}
+                  {t("x")} {round(chargeItem.quantity)}
                 </span>
               )}
             </div>

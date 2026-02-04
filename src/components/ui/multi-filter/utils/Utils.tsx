@@ -1,8 +1,14 @@
 import React from "react";
 
-import { GenericSelectedBadge } from "@/components/ui/multi-filter/genericFilter";
-import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { addDays, subDays, subMonths, subWeeks, subYears } from "date-fns";
+
+import { ActivityDefinitionFilterValue } from "@/components/ui/multi-filter/activityDefinitionFilter";
+import { GenericSelectedBadge } from "@/components/ui/multi-filter/genericFilter";
+
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
+import { LocationRead } from "@/types/location/location";
+import { UserReadMinimal } from "@/types/user/user";
 
 // Generic color palette for cycling through options
 export const COLOR_PALETTE = [
@@ -30,7 +36,14 @@ export interface FilterOption {
   icon?: string;
 }
 
-export type FilterValues = string[] | TagConfig[] | FilterDateRange;
+export type FilterValues =
+  | string[]
+  | TagConfig[]
+  | FilterDateRange
+  | FacilityOrganizationRead[]
+  | LocationRead[]
+  | ActivityDefinitionFilterValue[]
+  | UserReadMinimal[];
 
 export type FilterMode = "single" | "multi";
 
@@ -39,6 +52,20 @@ export type DateFilterMeta = {
 };
 export type TagFilterMeta = {
   resource: TagResource;
+};
+export type DepartmentFilterMeta = {
+  facilityId?: string;
+};
+
+export type LocationFilterMeta = {
+  facilityId?: string;
+};
+export type ActivityDefinitionFilterMeta = {
+  facilityId?: string;
+};
+
+export type CareTeamFilterMeta = {
+  facilityId?: string;
 };
 
 export interface BaseFilterConfig {
@@ -74,10 +101,33 @@ export interface DateFilterConfig extends BaseFilterConfig {
   meta: DateFilterMeta;
 }
 
+export interface DepartmentFilterConfig extends BaseFilterConfig {
+  type: "department";
+  meta: DepartmentFilterMeta;
+}
+
+export interface LocationFilterConfig extends BaseFilterConfig {
+  type: "location";
+  meta: LocationFilterMeta;
+}
+export interface ActivityDefinitionFilterConfig extends BaseFilterConfig {
+  type: "activity_definition";
+  meta: ActivityDefinitionFilterMeta;
+}
+
+export interface CareTeamFilterConfig extends BaseFilterConfig {
+  type: "care_team";
+  meta: CareTeamFilterMeta;
+}
+
 export type FilterConfig =
   | CommandFilterConfig
   | TagFilterConfig
-  | DateFilterConfig;
+  | DateFilterConfig
+  | DepartmentFilterConfig
+  | LocationFilterConfig
+  | ActivityDefinitionFilterConfig
+  | CareTeamFilterConfig;
 
 export interface OperationConfig {
   selectedOperation: Operation | null;
@@ -127,7 +177,14 @@ function defaultGetOperations(_selected: FilterValues) {
 export function createFilterConfig(
   key: string,
   label: string,
-  type: "command" | "tag" | "date",
+  type:
+    | "command"
+    | "tag"
+    | "date"
+    | "department"
+    | "location"
+    | "activity_definition"
+    | "care_team",
   options: FilterOption[],
   meta?: {
     resource?: TagResource;
@@ -143,6 +200,7 @@ export function createFilterConfig(
     operationKey?: string;
     disableClear?: boolean;
     showColorIndicators?: boolean;
+    facilityId?: string;
   },
 ): FilterConfig {
   const {
@@ -155,6 +213,7 @@ export function createFilterConfig(
     operationKey,
     disableClear,
     showColorIndicators,
+    facilityId,
   } = meta || {};
   const baseConfig: BaseFilterConfig = {
     key,
@@ -184,6 +243,30 @@ export function createFilterConfig(
         type: "tag",
         meta: { resource },
       } as TagFilterConfig;
+    case "department":
+      return {
+        ...baseConfig,
+        type: "department",
+        meta: {},
+      } as DepartmentFilterConfig;
+    case "location":
+      return {
+        ...baseConfig,
+        type: "location",
+        meta: {},
+      } as LocationFilterConfig;
+    case "activity_definition":
+      return {
+        ...baseConfig,
+        type: "activity_definition",
+        meta: { facilityId },
+      } as ActivityDefinitionFilterConfig;
+    case "care_team":
+      return {
+        ...baseConfig,
+        type: "care_team",
+        meta: { facilityId },
+      } as CareTeamFilterConfig;
     case "command":
       return {
         ...baseConfig,
@@ -299,3 +382,17 @@ export const shortDateRangeOptions: DateRangeOption[] = [
     }),
   },
 ];
+
+export const getVariantColorClasses = (variant: string) => {
+  const variantMap: Record<string, string> = {
+    primary: "border-primary-300 bg-primary-100 text-primary-900",
+    secondary: "border-gray-300 bg-gray-100 text-gray-900",
+    destructive: "border-red-300 bg-red-100 text-red-900",
+    blue: "border-blue-300 bg-blue-100 text-blue-900",
+    green: "border-green-300 bg-green-100 text-green-900",
+    yellow: "border-yellow-300 bg-yellow-100/80 text-yellow-900",
+    orange: "border-orange-300 bg-orange-100 text-orange-900",
+    purple: "border-purple-300 bg-purple-100 text-purple-900",
+  };
+  return variantMap[variant] || variantMap.secondary;
+};

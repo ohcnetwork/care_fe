@@ -6,6 +6,7 @@ import {
 } from "@/types/emr/encounter/encounter";
 
 import { NonEmptyArray } from "@/Utils/types";
+import Decimal from "decimal.js";
 import { CountryCode } from "libphonenumber-js/types.cjs";
 
 const env = import.meta.env;
@@ -246,6 +247,14 @@ const careConfig = {
   ),
 
   /**
+   * Show token generation button in patient home if set to "true"
+   */
+  enableTokenGenerationInPatientHome: booleanFromString(
+    env.REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME,
+    false,
+  ),
+
+  /**
    * Default state for tax inclusive pricing in inventory
    * When true, base price is calculated from MRP by removing tax
    */
@@ -254,6 +263,61 @@ const careConfig = {
       env.REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE,
       false,
     ),
+    /**
+     * Number of months offset for expiry restriction.
+     * 0 = current month, 1 = next month, etc.
+     * Products expiring before the end of (current month + offset) will be restricted.
+     * Set to null (default) to disable expiry restriction entirely.
+     */
+    expiryMonthOffset: env.REACT_INVENTORY_EXPIRY_MONTH_OFFSET
+      ? parseInt(env.REACT_INVENTORY_EXPIRY_MONTH_OFFSET, 10)
+      : null,
+  },
+
+  /**
+   * Open schedule window automatically after patient registration if set to "true"
+   */
+  openScheduleAfterPatientRegistration: booleanFromString(
+    env.REACT_OPEN_SCHEDULE_AFTER_PATIENT_REGISTRATION,
+    false,
+  ),
+
+  /**
+   * Decimal calculation configuration
+   */
+  decimal: {
+    /**
+     * Maximum precision for decimal calculations (max_digits in backend)
+     */
+    precision: env.REACT_DECIMAL_PRECISION
+      ? parseInt(env.REACT_DECIMAL_PRECISION, 10)
+      : 20,
+
+    /**
+     * Accounting display precision
+     * Matches backend `ACCOUNTING_PRECISION` config
+     */
+    accountingPrecision: env.REACT_ACCOUNTING_PRECISION
+      ? parseInt(env.REACT_ACCOUNTING_PRECISION, 10)
+      : 2,
+
+    /**
+     * Rounding method for decimal calculations
+     * Matches backend `DECIMAL_ROUNDING_METHOD` config
+     */
+    rounding: (() => {
+      const method = (env.REACT_DECIMAL_ROUNDING_METHOD || "ROUND_HALF_UP") as
+        | "ROUND_UP"
+        | "ROUND_DOWN"
+        | "ROUND_CEIL"
+        | "ROUND_FLOOR"
+        | "ROUND_HALF_UP"
+        | "ROUND_HALF_DOWN"
+        | "ROUND_HALF_EVEN"
+        | "ROUND_HALF_CEIL"
+        | "ROUND_HALF_FLOOR";
+      return Decimal[method] as Decimal.Rounding;
+    })(),
   },
 } as const;
 

@@ -174,7 +174,7 @@ export function ChargeItemList({
   const chargeItems = chargeItemsResponse?.results || [];
 
   useEffect(() => {
-    if (!qParams.search && qParams.page === "1") {
+    if (!qParams.search && !qParams.page) {
       setAllowCategoryCreate(!chargeItemsResponse?.count);
     }
   }, [

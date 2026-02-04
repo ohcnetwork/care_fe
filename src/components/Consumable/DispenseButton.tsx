@@ -16,6 +16,7 @@ import {
 import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import { LocationRead } from "@/types/location/location";
+import { getLocationPath } from "@/types/location/utils";
 import query from "@/Utils/request/query";
 
 import DispenseDrawer from "./DispenseDrawer";
@@ -56,16 +57,6 @@ export const DispenseButton = ({
     setLocation(selectedLocation);
     setOpen(false);
     setShowDrawer(true);
-  };
-
-  const getLocationPath = (location: LocationRead): string => {
-    const path = [location.name];
-    let current = location.parent;
-    while (current && current.id) {
-      path.unshift(current.name);
-      current = current.parent;
-    }
-    return path.length > 1 ? path.join(" → ") : path[0] || "";
   };
 
   const resetInvoiceState = () => {
@@ -109,9 +100,9 @@ export const DispenseButton = ({
 
             queryClient.invalidateQueries({
               queryKey: [
-                "medication_dispense",
+                "dispenseOrders",
                 selectedEncounter.patient.id,
-                selectedEncounter.id,
+                facilityId,
               ],
             });
 
@@ -145,7 +136,6 @@ export const DispenseButton = ({
             `/encounter/${selectedEncounter.id}/updates`,
             facilityId,
           )}
-          patientId={selectedEncounter.patient.id}
         />
       )}
     </>

@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { t } from "i18next";
 import { PlusCircle, XCircle } from "lucide-react";
 import { navigate } from "raviger";
 import React from "react";
@@ -34,7 +33,6 @@ import { Textarea } from "@/components/ui/textarea";
 import ComboboxQuantityInput from "@/components/Common/ComboboxQuantityInput";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import { generateSlug } from "@/Utils/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { Code, CodeSchema } from "@/types/base/code/code";
 import {
@@ -46,6 +44,8 @@ import {
   SpecimenDefinitionRead,
   SpecimenDefinitionStatus,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
+import { zodDecimal } from "@/Utils/decimal";
+import { generateSlug } from "@/Utils/utils";
 
 const typeTestedSchema = z.object({
   is_derived: z.boolean(),
@@ -55,7 +55,7 @@ const typeTestedSchema = z.object({
       description: z.string().optional(),
       capacity: z
         .object({
-          value: z.number(),
+          value: zodDecimal(),
           unit: CodeSchema,
         })
         .nullable()
@@ -64,7 +64,7 @@ const typeTestedSchema = z.object({
         .object({
           quantity: z
             .object({
-              value: z.number(),
+              value: zodDecimal(),
               unit: CodeSchema,
             })
             .optional()
@@ -80,15 +80,13 @@ const typeTestedSchema = z.object({
   requirement: z.string().optional(),
   retention_time: z
     .object({
-      value: z.number().int({ message: t("valid_integer_required") }),
+      value: zodDecimal(),
       unit: CodeSchema,
     })
     .nullable()
     .optional(),
   single_use: z.boolean().nullable(),
 });
-
-type FormValues = z.infer<any>;
 
 interface SpecimenDefinitionFormProps {
   initialData?: SpecimenDefinitionRead;
@@ -206,7 +204,7 @@ export function SpecimenDefinitionForm({
     return cleanedContainer;
   };
 
-  const handleSubmit = (data: FormValues) => {
+  const handleSubmit = (data: z.infer<typeof formSchema>) => {
     onSubmit({
       ...data,
       patient_preparation:
