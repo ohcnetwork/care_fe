@@ -21,7 +21,7 @@ type PreferencesAction =
   | { type: "SET_PREFERENCE"; key: keyof UserPreference; payload: unknown }
   | { type: "RESET_CUSTOM_LINKS"; payload: UserPreference };
 
-export const MAX_QUICK_LINKS = 4;
+export const MAX_QUICK_LINKS = 10;
 
 function preferencesReducer(
   state: UserPreference,
