@@ -147,6 +147,7 @@ export const PrintChargeItems = (props: {
       queryParams: {
         account: accountId,
         status: selectedStatuses.join(","),
+        ordering: qParams.ordering,
       },
       pageSize: 100,
     }),
