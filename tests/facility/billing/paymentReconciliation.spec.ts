@@ -4,6 +4,13 @@ import { getAccountId } from "tests/support/accountId";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
+const paymentMethods = [
+  "Cash",
+  "Credit Card",
+  "Debit Card",
+  "Check",
+  "Direct Deposit",
+];
 
 test.describe("Payment Reconciliation", () => {
   test.beforeEach(async ({ page }) => {
@@ -15,16 +22,9 @@ test.describe("Payment Reconciliation", () => {
 
   test("should record payment with all fields filled", async ({ page }) => {
     // Open Record Payment
-    await page.getByRole("button", { name: /record payment/i }).click();
+    await page.getByRole("button", { name: /advance/i }).click();
 
     // Select payment method randomly
-    const paymentMethods = [
-      "Cash",
-      "Credit Card",
-      "Debit Card",
-      "Check",
-      "Direct Deposit",
-    ];
     const selectedMethod = faker.helpers.arrayElement(paymentMethods);
 
     await page
@@ -103,9 +103,7 @@ test.describe("Payment Reconciliation", () => {
   test("should open record payment dialog using keyboard shortcut R", async ({
     page,
   }) => {
-    await expect(
-      page.getByRole("button", { name: /record payment/i }),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: /advance/i })).toBeVisible();
     // Press 'R' to open Record Payment
     await page.keyboard.press("r");
 
@@ -118,7 +116,7 @@ test.describe("Payment Reconciliation", () => {
     page,
   }) => {
     // Open Record Payment
-    await page.getByRole("button", { name: /record payment/i }).click();
+    await page.getByRole("button", { name: /advance/i }).click();
 
     // Click Record Payment without filling anything
     await page.getByRole("button", { name: /record payment/i }).click();
@@ -127,7 +125,7 @@ test.describe("Payment Reconciliation", () => {
     const paymentAmountSection = page
       .locator("div")
       .filter({ hasText: /^Amount Paid/ })
-      .filter({ hasText: /Please enter a valid amount$/ });
+      .filter({ hasText: /Must be a valid number$/ });
 
     await expect(paymentAmountSection).toBeVisible();
   });
@@ -136,7 +134,9 @@ test.describe("Payment Reconciliation", () => {
     page,
   }) => {
     // Open Record Payment
-    await page.getByRole("button", { name: /record payment/i }).click();
+    await page.getByRole("button", { name: /advance/i }).click();
+
+    await page.locator("label").filter({ hasText: "Cash" }).click();
 
     // Select the first location
     await page
@@ -173,13 +173,23 @@ test.describe("Payment Reconciliation", () => {
     ).toBeVisible();
 
     // Record Payment again without refreshing the page
-    await page.getByRole("button", { name: /record payment/i }).click();
+    await page.getByRole("button", { name: /advance/i }).click();
+
+    await page.locator("label").filter({ hasText: "Cash" }).click();
 
     // Enter Amount Paid
     const newPaymentAmount = faker.number.int({ min: 1, max: 100 }).toString();
     await page
       .getByRole("textbox", { name: "Amount Paid" })
       .fill(newPaymentAmount);
+
+    // Enter Amount Received
+    const newTenderAmount = faker.number
+      .int({ min: parseInt(newPaymentAmount), max: 10000 })
+      .toString();
+    await page
+      .getByRole("textbox", { name: "Amount Received" })
+      .fill(newTenderAmount);
 
     // Save payment
     await page.getByRole("button", { name: /record payment/i }).click();
