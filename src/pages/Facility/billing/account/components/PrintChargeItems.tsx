@@ -175,11 +175,11 @@ export const PrintChargeItems = (props: {
   );
 
   const nonReturnedPayments = activePayments.filter(
-    (payment) => !payment.target_invoice?.is_refund,
+    (payment) => !payment.is_credit_note,
   );
 
   const returnedPayments = activePayments.filter(
-    (payment) => payment.target_invoice?.is_refund,
+    (payment) => payment.is_credit_note,
   );
 
   if (!chargeItems?.results && !isLoading) {
@@ -1422,8 +1422,7 @@ export const PrintChargeItems = (props: {
                                     (payment) =>
                                       payment.status ===
                                         PaymentReconciliationStatus.active &&
-                                      payment.target_invoice?.is_refund ===
-                                        true,
+                                      payment.is_credit_note === true,
                                   );
 
                                   const paymentGroups = returnedPayments.reduce(
