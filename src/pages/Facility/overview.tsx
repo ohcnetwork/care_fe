@@ -49,7 +49,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   const { t } = useTranslation();
   const user = useAuthUser();
   const { hasPermission } = usePermissions();
-  const { customLinks, resetPreferences, removeCustomLink } =
+  const { customLinks, resetCustomLinks, removeCustomLink } =
     useUserPreferences();
 
   const { data: facilityData } = useQuery({
@@ -185,7 +185,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={resetPreferences}>
+                  <DropdownMenuItem onClick={resetCustomLinks}>
                     <RotateCcw className="size-4" />
                     {t("reset_pinned_links")}
                   </DropdownMenuItem>

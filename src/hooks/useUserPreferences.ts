@@ -7,8 +7,7 @@ import mutate from "@/Utils/request/mutate";
 import userApi from "@/types/user/userApi";
 import {
   QuickLinkCustom,
-  UserPreference,
-  UserPreferenceKey,
+  QuickLinksPreferences,
 } from "@/types/user/userPreferences";
 
 enum ActionType {
@@ -19,7 +18,8 @@ enum ActionType {
   UNBLACKLIST_SHORTCUT = "UNBLACKLIST_SHORTCUT",
   SET_BLACKLIST = "SET_BLACKLIST",
   SET_PREFERENCE = "SET_PREFERENCE",
-  RESET_CUSTOM_LINKS = "RESET_CUSTOM_LINKS",
+  SET_CUSTOM_LINKS = "SET_CUSTOM_LINKS",
+  RESET_PREFERENCES = "RESET_PREFERENCES",
 }
 
 // Action types for preferences reducer
@@ -32,93 +32,108 @@ type PreferencesAction =
   | { type: ActionType.SET_BLACKLIST; payload: string[] }
   | {
       type: ActionType.SET_PREFERENCE;
-      key: UserPreferenceKey;
+      key: string;
       payload: unknown;
     }
-  | { type: ActionType.RESET_CUSTOM_LINKS; payload: UserPreference };
-
+  | { type: ActionType.SET_CUSTOM_LINKS; payload: QuickLinksPreferences }
+  | { type: ActionType.RESET_PREFERENCES; payload: Record<string, unknown> };
 export const MAX_QUICK_LINKS = 10;
 
 function preferencesReducer(
-  state: UserPreference,
+  state: Record<string, unknown>,
   action: PreferencesAction,
-): UserPreference {
+): Record<string, unknown> {
   switch (action.type) {
-    case ActionType.ADD_CUSTOM_LINK:
+    case ActionType.ADD_CUSTOM_LINK: {
+      const facilityQuickLinks =
+        state.facility_quick_links as QuickLinksPreferences;
       return {
         ...state,
         facility_quick_links: {
-          ...state.facility_quick_links,
+          ...facilityQuickLinks,
           custom_links: [
-            ...(state.facility_quick_links?.custom_links ?? []),
+            ...(facilityQuickLinks.custom_links ?? []),
             action.payload,
           ],
         },
       };
-
-    case ActionType.REMOVE_CUSTOM_LINK:
+    }
+    case ActionType.REMOVE_CUSTOM_LINK: {
+      const facilityQuickLinks =
+        state.facility_quick_links as QuickLinksPreferences;
       return {
         ...state,
         facility_quick_links: {
-          ...state.facility_quick_links,
-          custom_links: state.facility_quick_links?.custom_links?.filter(
+          ...facilityQuickLinks,
+          custom_links: facilityQuickLinks.custom_links?.filter(
             (link) => link.link !== action.payload,
           ),
         },
       };
-
-    case ActionType.UPDATE_CUSTOM_LINK:
+    }
+    case ActionType.UPDATE_CUSTOM_LINK: {
+      const facilityQuickLinks =
+        state.facility_quick_links as QuickLinksPreferences;
       return {
         ...state,
         facility_quick_links: {
-          ...state.facility_quick_links,
-          custom_links: state.facility_quick_links?.custom_links?.map((link) =>
+          ...facilityQuickLinks,
+          custom_links: facilityQuickLinks.custom_links?.map((link) =>
             link.link === action.payload.link ? action.payload : link,
           ),
         },
       };
-
-    case ActionType.BLACKLIST_SHORTCUT:
+    }
+    case ActionType.BLACKLIST_SHORTCUT: {
+      const facilityQuickLinks =
+        state.facility_quick_links as QuickLinksPreferences;
       return {
         ...state,
         facility_quick_links: {
-          ...state.facility_quick_links,
-          blacklist: [
-            ...(state.facility_quick_links?.blacklist ?? []),
-            action.payload,
-          ],
+          ...facilityQuickLinks,
+          blacklist: [...(facilityQuickLinks.blacklist ?? []), action.payload],
         },
       };
-
-    case ActionType.UNBLACKLIST_SHORTCUT:
+    }
+    case ActionType.UNBLACKLIST_SHORTCUT: {
+      const facilityQuickLinks =
+        state.facility_quick_links as QuickLinksPreferences;
       return {
         ...state,
         facility_quick_links: {
-          ...state.facility_quick_links,
-          blacklist: state.facility_quick_links?.blacklist?.filter(
+          ...facilityQuickLinks,
+          blacklist: facilityQuickLinks.blacklist?.filter(
             (id) => id !== action.payload,
           ),
         },
       };
-
-    case ActionType.SET_BLACKLIST:
+    }
+    case ActionType.SET_BLACKLIST: {
+      const facilityQuickLinks =
+        state.facility_quick_links as QuickLinksPreferences;
       return {
         ...state,
         facility_quick_links: {
-          ...state.facility_quick_links,
+          ...facilityQuickLinks,
           blacklist: action.payload,
         },
       };
-
-    case ActionType.SET_PREFERENCE:
+    }
+    case ActionType.SET_PREFERENCE: {
       return {
         ...state,
         [action.key]: action.payload,
-      } as UserPreference;
-
-    case ActionType.RESET_CUSTOM_LINKS:
+      };
+    }
+    case ActionType.SET_CUSTOM_LINKS: {
+      return {
+        ...state,
+        facility_quick_links: action.payload,
+      };
+    }
+    case ActionType.RESET_PREFERENCES: {
       return action.payload;
-
+    }
     default:
       return state;
   }
@@ -133,11 +148,13 @@ export function useUserPreferences() {
     preferencesReducer,
     user.preferences ?? {},
   );
-
-  const customLinksCount =
-    preferences.facility_quick_links?.custom_links?.length ?? 0;
-  const blacklist = preferences.facility_quick_links?.blacklist ?? [];
-  const customLinks = preferences.facility_quick_links?.custom_links ?? [];
+  const facilityQuickLinks =
+    "facility_quick_links" in preferences
+      ? (preferences.facility_quick_links as QuickLinksPreferences)
+      : {};
+  const customLinksCount = facilityQuickLinks.custom_links?.length ?? 0;
+  const blacklist = facilityQuickLinks.blacklist ?? [];
+  const customLinks = facilityQuickLinks.custom_links ?? [];
 
   // Mutation to sync with backend
   const { mutate: syncPreferences, isPending } = useMutation({
@@ -152,14 +169,12 @@ export function useUserPreferences() {
   // Sync reducer state when server state changes (after query invalidation)
   useEffect(() => {
     dispatch({
-      type: ActionType.RESET_CUSTOM_LINKS,
+      type: ActionType.RESET_PREFERENCES,
       payload: user?.preferences ?? {},
     });
   }, [user?.preferences]);
 
-  const getAffectedPreferenceKey = (
-    action: PreferencesAction,
-  ): UserPreferenceKey => {
+  const getAffectedPreferenceKey = (action: PreferencesAction): string => {
     if (action.type === ActionType.SET_PREFERENCE) {
       return action.key;
     }
@@ -176,7 +191,7 @@ export function useUserPreferences() {
       syncPreferences({
         version: "0.0.1",
         preference: key,
-        value: newState[key] ?? {},
+        value: newState[key] as Record<string, unknown>,
       });
     },
     [preferences, syncPreferences],
@@ -185,15 +200,14 @@ export function useUserPreferences() {
   // Custom links methods
   const addCustomLink = useCallback(
     (link: QuickLinkCustom) => {
-      const currentCount =
-        preferences.facility_quick_links?.custom_links?.length ?? 0;
+      const currentCount = facilityQuickLinks.custom_links?.length ?? 0;
       if (currentCount >= MAX_QUICK_LINKS) {
         return false;
       }
       updatePreferences({ type: ActionType.ADD_CUSTOM_LINK, payload: link });
       return true;
     },
-    [preferences.facility_quick_links?.custom_links?.length, updatePreferences],
+    [facilityQuickLinks.custom_links?.length, updatePreferences],
   );
 
   const removeCustomLink = useCallback(
@@ -244,36 +258,37 @@ export function useUserPreferences() {
     [updatePreferences],
   );
 
-  const resetPreferences = useCallback(() => {
-    updatePreferences({ type: ActionType.RESET_CUSTOM_LINKS, payload: {} });
-  }, [updatePreferences]);
+  const resetCustomLinks = useCallback(() => {
+    const newQuickLinks = { ...facilityQuickLinks };
+    newQuickLinks.custom_links = [];
+    updatePreferences({
+      type: ActionType.SET_CUSTOM_LINKS,
+      payload: newQuickLinks,
+    });
+  }, [updatePreferences, facilityQuickLinks]);
 
   const canAddMoreLinks = useMemo(() => {
-    const currentCount =
-      preferences.facility_quick_links?.custom_links?.length ?? 0;
+    const currentCount = facilityQuickLinks.custom_links?.length ?? 0;
     return currentCount < MAX_QUICK_LINKS;
-  }, [preferences.facility_quick_links?.custom_links?.length]);
+  }, [facilityQuickLinks.custom_links?.length]);
 
   const isBlacklisted = useCallback(
     (shortcutId: string) => {
-      return (
-        preferences.facility_quick_links?.blacklist?.includes(shortcutId) ??
-        false
-      );
+      return facilityQuickLinks.blacklist?.includes(shortcutId) ?? false;
     },
-    [preferences.facility_quick_links?.blacklist],
+    [facilityQuickLinks.blacklist],
   );
 
   // Helper to check if a link is a custom link
   const isCustomLink = useCallback(
     (linkHref: string) => {
       return (
-        preferences.facility_quick_links?.custom_links?.some(
+        facilityQuickLinks.custom_links?.some(
           (link) => link.link === linkHref,
         ) ?? false
       );
     },
-    [preferences.facility_quick_links?.custom_links],
+    [facilityQuickLinks.custom_links],
   );
 
   return {
@@ -296,7 +311,7 @@ export function useUserPreferences() {
     setBlacklist,
     isBlacklisted,
     blacklist,
-    resetPreferences,
+    resetCustomLinks,
   };
 }
 
