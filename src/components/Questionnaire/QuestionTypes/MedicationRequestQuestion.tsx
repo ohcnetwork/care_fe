@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import {
   AlertTriangle,
+  ChevronDown,
   ChevronsDownUp,
   ChevronsUpDown,
   MoreVerticalIcon,
@@ -192,6 +193,60 @@ async function fetchProductAndBuildMedication(
   };
 }
 
+interface ApplyRequesterToAllProps {
+  facilityId?: string;
+  disabled?: boolean;
+  selected?: UserReadMinimal;
+  onApply: (user: UserReadMinimal | undefined) => void;
+  onClear: () => void;
+  className?: string;
+}
+
+function ApplyRequesterToAll({
+  facilityId,
+  disabled,
+  selected,
+  onApply,
+  onClear,
+  className,
+}: ApplyRequesterToAllProps) {
+  const { t } = useTranslation();
+
+  return (
+    <div
+      className={cn(
+        "flex max-w-4xl items-center gap-2 border border-gray-400 rounded-md bg-white",
+        className,
+      )}
+    >
+      <span className="text-xs font-medium text-gray-800 whitespace-nowrap pl-3">
+        {t("requester")}:
+      </span>
+      <UserSelector
+        selected={selected}
+        onChange={onApply}
+        facilityId={facilityId}
+        trigger={
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-between"
+            disabled={disabled}
+          >
+            <span className="truncate">
+              {selected ? formatName(selected) : t("apply_to_all")}
+            </span>
+            <ChevronDown className="size-3 shrink-0" />
+          </Button>
+        }
+        contentAlign="center"
+        contentClassName="w-80"
+        onClear={onClear}
+      />
+    </div>
+  );
+}
+
 interface MedicationRequestQuestionProps {
   patientId: string;
   questionnaireResponse: QuestionnaireResponse;
@@ -374,6 +429,17 @@ export function MedicationRequestQuestion({
   // Derive prescription note from new medications (those without an ID)
   const prescriptionNote =
     medications.find((m) => !m.id)?.create_prescription?.note || "";
+
+  // Get common requester if all medications have the same requester
+  const commonRequester = (() => {
+    if (medications.length === 0) return undefined;
+    const firstRequester = medications[0]?.requester;
+    if (!firstRequester) return undefined;
+    const allSame = medications.every(
+      (m) => m.requester?.username === firstRequester.username,
+    );
+    return allSame ? firstRequester : undefined;
+  })();
 
   // Update prescription note on all new medications
   const updatePrescriptionNote = (note: string) => {
@@ -717,6 +783,32 @@ export function MedicationRequestQuestion({
     const newMedications = medications.map((medication, i) =>
       i === index ? { ...medication, ...updates, dirty: true } : medication,
     );
+
+    updateQuestionnaireResponseCB(
+      [{ type: "medication_request", value: newMedications }],
+      questionnaireResponse.question_id,
+    );
+  };
+
+  const handleApplyRequesterToAll = (user: UserReadMinimal | undefined) => {
+    const newMedications = medications.map((medication) => ({
+      ...medication,
+      requester: user || currentUser,
+      dirty: true,
+    }));
+
+    updateQuestionnaireResponseCB(
+      [{ type: "medication_request", value: newMedications }],
+      questionnaireResponse.question_id,
+    );
+  };
+
+  const handleClearAllRequesters = () => {
+    const newMedications = medications.map((medication) => ({
+      ...medication,
+      requester: currentUser,
+      dirty: true,
+    }));
 
     updateQuestionnaireResponseCB(
       [{ type: "medication_request", value: newMedications }],
@@ -1324,27 +1416,39 @@ export function MedicationRequestQuestion({
 
       {!prescriptionId &&
         (!desktopLayout ? (
-          <EntitySelectionDrawer
-            open={!!newMedicationInSheet}
-            onOpenChange={(isOpen) => {
-              if (!isOpen) {
-                setNewMedicationInSheet(null);
-              }
-            }}
-            system="system-medication"
-            entityType="medication"
-            searchPostFix=" clinical drug"
-            disabled={disabled}
-            onEntitySelected={handleAddMedication}
-            onConfirm={handleConfirmMedicationInSheet}
-            placeholder={addMedicationPlaceholder}
-            onProductEntitySelected={handleAddProductMedication}
-            enableProduct
-          >
-            {newMedicationSheetContent}
-          </EntitySelectionDrawer>
+          <>
+            <EntitySelectionDrawer
+              open={!!newMedicationInSheet}
+              onOpenChange={(isOpen) => {
+                if (!isOpen) {
+                  setNewMedicationInSheet(null);
+                }
+              }}
+              system="system-medication"
+              entityType="medication"
+              searchPostFix=" clinical drug"
+              disabled={disabled}
+              onEntitySelected={handleAddMedication}
+              onConfirm={handleConfirmMedicationInSheet}
+              placeholder={addMedicationPlaceholder}
+              onProductEntitySelected={handleAddProductMedication}
+              enableProduct
+            >
+              {newMedicationSheetContent}
+            </EntitySelectionDrawer>
+
+            {medications.length > 1 && (
+              <ApplyRequesterToAll
+                facilityId={facilityId}
+                disabled={disabled}
+                selected={commonRequester}
+                onApply={handleApplyRequesterToAll}
+                onClear={handleClearAllRequesters}
+              />
+            )}
+          </>
         ) : (
-          <div className="max-w-4xl">
+          <div className="max-w-4xl flex gap-1">
             <MedicationValueSetSelect
               placeholder={addMedicationPlaceholder}
               onSelect={handleAddMedication}
@@ -1352,6 +1456,16 @@ export function MedicationRequestQuestion({
               disabled={disabled}
               title={t("select_medication")}
             />
+
+            {medications.length > 1 && (
+              <ApplyRequesterToAll
+                facilityId={facilityId}
+                disabled={disabled}
+                selected={commonRequester}
+                onApply={handleApplyRequesterToAll}
+                onClear={handleClearAllRequesters}
+              />
+            )}
           </div>
         ))}
 
