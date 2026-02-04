@@ -4214,7 +4214,6 @@
   "prescriptions__route": "Route",
   "prescriptions__start_date": "Prescribed On",
   "prescriptions_count": "{{count}} Prescriptions",
-  "prescriptions_count_one": "{{count}} Prescription",
   "present_health": "Present Health",
   "preserve_header_space": "Preserve Header Space",
   "preset_deleted": "Preset deleted",
