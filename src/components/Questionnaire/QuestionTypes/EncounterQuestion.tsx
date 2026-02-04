@@ -43,7 +43,6 @@ import {
   FieldDefinitions,
   createValidationError,
   useFieldError,
-  validateFields,
 } from "@/types/questionnaire/validation";
 import careConfig from "@careConfig";
 import { format } from "date-fns";
@@ -102,7 +101,13 @@ export function validateEncounterQuestion(
     ["imp", "obsenc", "emer"].includes(value.encounter_class) &&
     !value?.hospitalization?.discharge_disposition
   ) {
-    errors.push(...validateFields(value, questionId, ENCOUNTER_FIELDS));
+    errors.push(
+      createValidationError(
+        questionId,
+        ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key,
+        "field_required",
+      ),
+    );
   }
 
   return errors;
@@ -128,10 +133,7 @@ export function EncounterQuestion({
   });
   const { t } = useTranslation();
   const [{ toDischarge }] = useQueryParams();
-  const { hasError, getError } = useFieldError(
-    questionnaireResponse.question_id,
-    errors,
-  );
+  const { hasError } = useFieldError(questionnaireResponse.question_id, errors);
 
   const [encounter, setEncounter] = useState<EncounterEdit>({
     status: EncounterStatus.UNKNOWN,
@@ -529,14 +531,6 @@ export function EncounterQuestion({
                       ))}
                     </SelectContent>
                   </Select>
-                  {hasError(ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key) && (
-                    <p className="text-red-500 text-sm">
-                      {
-                        getError(ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key)
-                          ?.msg
-                      }
-                    </p>
-                  )}
                 </div>
 
                 {encounter.status === EncounterStatus.DISCHARGED && (
