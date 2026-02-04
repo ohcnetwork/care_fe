@@ -304,13 +304,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                 <TableCell className="font-medium">
                                   {patient.name}
                                   {!patientList?.partial && (
-                                    <div>
-                                      <p className="text-xs text-gray-500 text-wrap line-clamp-2">
-                                        {"address" in patient
-                                          ? patient.address
-                                          : ""}
-                                      </p>
-                                    </div>
+                                    <p className="text-xs text-gray-500 text-wrap line-clamp-2">
+                                      {"address" in patient && patient.address}
+                                    </p>
                                   )}
                                 </TableCell>
                                 <TableCell>
