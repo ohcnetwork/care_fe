@@ -56,7 +56,7 @@ export function createValidationError(
   return {
     question_id: questionId,
     field_key: fieldKey,
-    error,
+    error: t(error),
     type: "validation_error",
     msg: error,
   };

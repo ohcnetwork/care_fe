@@ -41,10 +41,11 @@ import type {
 import type { Question } from "@/types/questionnaire/question";
 import {
   FieldDefinitions,
+  createValidationError,
   useFieldError,
-  validateFields,
 } from "@/types/questionnaire/validation";
 import careConfig from "@careConfig";
+import { format } from "date-fns";
 import { useQueryParams } from "raviger";
 
 interface EncounterQuestionProps {
@@ -69,6 +70,10 @@ const ENCOUNTER_FIELDS: FieldDefinitions = {
     key: "hospitalization.discharge_disposition",
     required: true,
   },
+  PERIOD_END: {
+    key: "period.end",
+    required: true,
+  },
 } as const;
 
 export function validateEncounterQuestion(
@@ -78,11 +83,31 @@ export function validateEncounterQuestion(
   const errors: QuestionValidationError[] = [];
 
   if (
+    value?.period?.end &&
+    value?.period?.start &&
+    new Date(value.period.start!) > new Date(value.period.end)
+  ) {
+    errors.push(
+      createValidationError(
+        questionId,
+        ENCOUNTER_FIELDS.PERIOD_END.key,
+        "end_date_after_start",
+      ),
+    );
+  }
+
+  if (
     value?.status === EncounterStatus.DISCHARGED &&
     ["imp", "obsenc", "emer"].includes(value.encounter_class) &&
     !value?.hospitalization?.discharge_disposition
   ) {
-    errors.push(...validateFields(value, questionId, ENCOUNTER_FIELDS));
+    errors.push(
+      createValidationError(
+        questionId,
+        ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key,
+        "field_required",
+      ),
+    );
   }
 
   return errors;
@@ -108,10 +133,7 @@ export function EncounterQuestion({
   });
   const { t } = useTranslation();
   const [{ toDischarge }] = useQueryParams();
-  const { hasError, getError } = useFieldError(
-    questionnaireResponse.question_id,
-    errors,
-  );
+  const { hasError } = useFieldError(questionnaireResponse.question_id, errors);
 
   const [encounter, setEncounter] = useState<EncounterEdit>({
     status: EncounterStatus.UNKNOWN,
@@ -236,6 +258,8 @@ export function EncounterQuestion({
     );
   };
 
+  const getStartDate = () => new Date(encounter.period.start!);
+
   if (isLoading) {
     return <div>{t("loading_encounter")}</div>;
   }
@@ -335,6 +359,39 @@ export function EncounterQuestion({
             disabled={disabled}
             placeholder={t("ip_op_obs_emr_number")}
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label>{t("start_datetime")}</Label>
+          <div className="flex gap-1 flex-wrap">
+            <DatePicker
+              date={getStartDate()}
+              onChange={(newDate) => {
+                if (!newDate) return;
+                const current = getStartDate();
+                newDate.setHours(current.getHours(), current.getMinutes());
+                handleUpdateEncounter({
+                  period: { ...encounter.period, start: newDate.toISOString() },
+                });
+              }}
+              className="flex-1 border-gray-200 shadow-xs"
+            />
+            <Input
+              type="time"
+              className="flex-1 border-t-0 sm:border-t text-sm border-gray-200 h-9"
+              value={format(getStartDate(), "HH:mm")}
+              onChange={(e) => {
+                const [hours, minutes] = e.target.value.split(":").map(Number);
+                if (isNaN(hours) || isNaN(minutes)) return;
+                const updated = getStartDate();
+                updated.setHours(hours, minutes);
+                handleUpdateEncounter({
+                  period: { ...encounter.period, start: updated.toISOString() },
+                });
+              }}
+              disabled={disabled}
+            />
+          </div>
         </div>
       </div>
 
@@ -436,7 +493,12 @@ export function EncounterQuestion({
               encounter.hospitalization?.discharge_disposition) && (
               <>
                 <div className="space-y-2">
-                  <Label>
+                  <Label
+                    className={cn(
+                      hasError(ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key) &&
+                        "text-red-500",
+                    )}
+                  >
                     {t("discharge_disposition")}
                     <span className="text-red-500">*</span>
                   </Label>
@@ -474,19 +536,18 @@ export function EncounterQuestion({
                       ))}
                     </SelectContent>
                   </Select>
-                  {hasError(ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key) && (
-                    <p className="text-red-500 text-sm">
-                      {
-                        getError(ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key)
-                          ?.msg
-                      }
-                    </p>
-                  )}
                 </div>
 
                 {encounter.status === EncounterStatus.DISCHARGED && (
                   <div className="space-y-2">
-                    <Label>{t("discharge_date_time")}</Label>
+                    <Label
+                      className={cn(
+                        hasError(ENCOUNTER_FIELDS.PERIOD_END.key) &&
+                          "text-red-500",
+                      )}
+                    >
+                      {t("discharge_date_time")}
+                    </Label>
                     <div className="flex gap-1 flex-wrap">
                       <DatePicker
                         date={
@@ -515,8 +576,7 @@ export function EncounterQuestion({
                           startDate.setHours(0, 0, 0, 0);
                           return date < startDate;
                         }}
-                        dateFormat="d/M/yyyy"
-                        className="flex-1"
+                        className="flex-1 border-gray-200 shadow-xs"
                       />
                       <Input
                         type="time"
