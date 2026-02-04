@@ -689,6 +689,7 @@
   "apply_updates_selected": "Apply the following updates to {{count}} selected items.",
   "applying": "Applying...",
   "appointment": "Appointment",
+  "view_appointment": "View Appointment",
   "appointment_booking_success": "Your appointment has been successfully booked!",
   "appointment_cancelled": "Appointment has been cancelled!",
   "appointment_closed_successfully": "Appointment closed successfully",
