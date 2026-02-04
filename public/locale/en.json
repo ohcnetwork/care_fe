@@ -4840,6 +4840,7 @@
   "schedule_weekdays_min_error": "Select at least one weekday",
   "scheduled": "Scheduled",
   "scheduled_for": "Schedule for:",
+  "scheduling": "Scheduling",
   "scribe__reviewing_field": "Reviewing field {{currentField}} / {{totalFields}}",
   "scribe_error": "Could not autofill fields",
   "scroll_to_question": "Scroll to question",

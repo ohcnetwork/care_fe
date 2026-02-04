@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { ChevronDown } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,6 +15,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -54,6 +61,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const [selectedPatient, setSelectedPatient] = useState<
     PartialPatientModel | PatientRead | null
   >(null);
+  const [actionOnVerify, setActionOnVerify] = useState<
+    "schedule" | "create_encounter" | undefined
+  >(undefined);
   const shortcuts = useShortcuts();
   const [qParams] = useQueryParams();
   const [verificationOpen, setVerificationOpen] = useState(false);
@@ -79,11 +89,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     facility?.permissions ?? [],
   );
 
-  useEffect(() => {
-    shortcuts.setIgnoreInputFields(true);
-    return () => shortcuts.setIgnoreInputFields(false);
-  }, [shortcuts]);
-
   // Track identifier search state
   const [identifierSearch, setIdentifierSearch] = useState<{
     config?: string;
@@ -106,26 +111,77 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     enabled: !!(identifierSearch.config && identifierSearch.value),
   });
 
+  const navigateToVerify = (
+    patient: PartialPatientModel | PatientRead,
+    yearOfBirth?: string,
+    action?: "schedule" | "create_encounter",
+  ) => {
+    navigate(`/facility/${facilityId}/patients/verify`, {
+      query: {
+        config: identifierSearch.config,
+        value: identifierSearch.value,
+        phone_number: patient.phone_number,
+        year_of_birth:
+          yearOfBirth ||
+          (patient as PatientRead).year_of_birth?.toString() ||
+          "",
+        partial_id: getPartialId(patient),
+        ...(action ? { action } : {}),
+      },
+    });
+  };
+
   const handlePatientSelect = (index: number) => {
     const patient = patientList?.results[index];
     if (!patient) {
       return;
     }
-    if (patientList && patientList.partial) {
+    if (patientList?.partial) {
       setSelectedPatient(patient);
       setVerificationOpen(true);
       setYearOfBirth("");
-    } else if ("year_of_birth" in patient) {
-      navigate(`/facility/${facilityId}/patients/verify`, {
-        query: {
-          config: identifierSearch.config,
-          value: identifierSearch.value,
-          phone_number: patient.phone_number,
-          year_of_birth: patient.year_of_birth?.toString() || "",
-          partial_id: patient.id.slice(0, 5),
-        },
-      });
+      setActionOnVerify(undefined);
+    } else {
+      navigateToVerify(patient);
     }
+  };
+
+  const handleScheduleAppointment = (index: number) => {
+    const patient = patientList?.results[index];
+    if (!patient) {
+      return;
+    }
+    if (patientList?.partial) {
+      setSelectedPatient(patient);
+      setVerificationOpen(true);
+      setYearOfBirth("");
+      setActionOnVerify("schedule");
+    } else {
+      navigateToVerify(patient, undefined, "schedule");
+    }
+  };
+
+  const handleCreateEncounter = (index: number) => {
+    const patient = patientList?.results[index];
+    if (!patient) {
+      return;
+    }
+    if (patientList?.partial) {
+      setSelectedPatient(patient);
+      setVerificationOpen(true);
+      setYearOfBirth("");
+      setActionOnVerify("create_encounter");
+    } else {
+      navigateToVerify(patient, undefined, "create_encounter");
+    }
+  };
+
+  const handleVerify = () => {
+    if (!selectedPatient || yearOfBirth.length !== 4) {
+      toast.error(t("valid_year_of_birth"));
+      return;
+    }
+    navigateToVerify(selectedPatient, yearOfBirth, actionOnVerify);
   };
 
   useEffect(() => {
@@ -147,23 +203,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       });
     }
   }, [qParams.phone_number, facility, allIdentifierConfigs]);
-
-  const handleVerify = () => {
-    if (!selectedPatient || !yearOfBirth || yearOfBirth.length !== 4) {
-      toast.error(t("valid_year_of_birth"));
-      return;
-    }
-
-    navigate(`/facility/${facilityId}/patients/verify`, {
-      query: {
-        config: identifierSearch.config,
-        value: identifierSearch.value,
-        phone_number: selectedPatient.phone_number,
-        year_of_birth: yearOfBirth,
-        partial_id: getPartialId(selectedPatient),
-      },
-    });
-  };
 
   return (
     <div>
@@ -250,6 +289,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                               </TableHead>
                               <TableHead>{t("phone_number")}</TableHead>
                               <TableHead>{t("gender")}</TableHead>
+                              <TableHead className="w-[220px]">
+                                {t("actions")}
+                              </TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -271,6 +313,66 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                       (g) => g.id === patient.gender,
                                     )?.text
                                   }
+                                </TableCell>
+                                <TableCell>
+                                  <div
+                                    className="flex"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <Button
+                                      variant="outline"
+                                      onClick={(event) => {
+                                        event.stopPropagation();
+                                        handleScheduleAppointment(index);
+                                      }}
+                                      className="flex-1 rounded-r-none border-r-0"
+                                    >
+                                      {t("schedule_appointment")}
+                                    </Button>
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button
+                                          variant="outline"
+                                          size="icon"
+                                          onClick={(event) => {
+                                            event.stopPropagation();
+                                          }}
+                                          className="rounded-l-none"
+                                        >
+                                          <ChevronDown className="size-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end">
+                                        <DropdownMenuItem
+                                          onSelect={(event) => {
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                            handleScheduleAppointment(index);
+                                          }}
+                                        >
+                                          {t("schedule_appointment")}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          onSelect={(event) => {
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                            handleCreateEncounter(index);
+                                          }}
+                                        >
+                                          {t("create_encounter")}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          onSelect={(event) => {
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                            handlePatientSelect(index);
+                                          }}
+                                        >
+                                          {t("patient_home")}
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </div>
                                 </TableCell>
                               </TableRow>
                             ))}
@@ -297,6 +399,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
           <div className="py-4">
             <Input
               type="text"
+              inputMode="numeric"
               placeholder={`${t("year_of_birth")} (YYYY)`}
               value={yearOfBirth}
               onChange={(e) => {
@@ -307,9 +410,11 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
+                  e.preventDefault();
                   handleVerify();
                 }
               }}
+              autoFocus
             />
           </div>
           <DialogFooter>
@@ -319,9 +424,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
             >
               {t("cancel")}
             </Button>
-            <Button className="mb-2" onClick={handleVerify}>
-              {t("verify")}
-            </Button>
+            <Button onClick={handleVerify}>{t("verify")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
