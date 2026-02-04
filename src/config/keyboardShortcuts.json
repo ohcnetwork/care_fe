@@ -22,7 +22,8 @@
   ],
 
   "facility": [
-    { "key": "t", "action": "generate-token", "description": "Generate Token", "when": "always" }
+    { "key": "t", "action": "generate-token", "description": "Generate Token", "when": "always" },
+    { "key": "shift+b", "action": "pin-page", "description": "Pin/Unpin Page", "when": "always" }
   ],
 
   "facility:general": [
