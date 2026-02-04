@@ -78,7 +78,7 @@ const DetailRow = ({
       <span
         className={`ml-1 whitespace-pre-wrap ${isStrong ? "font-semibold" : ""}`}
       >
-        {value || "-"}
+        {value}
       </span>
     </div>
   );
@@ -438,14 +438,14 @@ export const PrintChargeItems = (props: {
                             className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2 print:mb-0 print:order-2"
                           />
                           <div className="text-center sm:text-left sm:order-1 print:text-left">
-                            <h1 className="text-3xl font-semibold">
+                            <h1 className="text-2xl font-semibold">
                               {facility?.name}
                             </h1>
                             {facility?.address && (
-                              <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
+                              <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-xs">
                                 {facility.address}
                                 {facility.phone_number && (
-                                  <p className="text-gray-500 text-sm">
+                                  <p className="text-gray-500 text-xs">
                                     {facility.phone_number}
                                   </p>
                                 )}
@@ -779,8 +779,10 @@ export const PrintChargeItems = (props: {
                                                       </div>
                                                     </TableCell>
                                                     <TableCell className="w-10 text-left">
-                                                      {chargeItem.paid_invoice
-                                                        ?.number || "-"}
+                                                      {
+                                                        chargeItem.paid_invoice
+                                                          ?.number
+                                                      }
                                                     </TableCell>
                                                     <TableCell>
                                                       <div className="flex flex-col">
@@ -914,7 +916,7 @@ export const PrintChargeItems = (props: {
                               return (
                                 <div className="text-sm mt-4">
                                   <h2 className="text-sm font-semibold mb-1">
-                                    {t("returned_items")}
+                                    {t("returned")}
                                   </h2>
                                   <div className="overflow-hidden">
                                     <Table className="w-full [&_th]:text-xs [&_td]:text-xs">
@@ -1067,9 +1069,11 @@ export const PrintChargeItems = (props: {
                                                           </div>
                                                         </TableCell>
                                                         <TableCell className="w-10 text-left">
-                                                          {chargeItem
-                                                            .paid_invoice
-                                                            ?.number || "-"}
+                                                          {
+                                                            chargeItem
+                                                              .paid_invoice
+                                                              ?.number
+                                                          }
                                                         </TableCell>
                                                         <TableCell>
                                                           <div className="flex flex-col">
@@ -1299,16 +1303,14 @@ export const PrintChargeItems = (props: {
                                               className="bg-transparent hover:bg-transparent"
                                             >
                                               <TableCell>
-                                                {payment.payment_datetime
-                                                  ? formatDateTime(
-                                                      payment.payment_datetime,
-                                                      "DD-MM-YY",
-                                                    )
-                                                  : "-"}
+                                                {payment.payment_datetime &&
+                                                  formatDateTime(
+                                                    payment.payment_datetime,
+                                                    "DD-MM-YY",
+                                                  )}
                                               </TableCell>
                                               <TableCell>
-                                                {payment.target_invoice
-                                                  ?.number || "-"}
+                                                {payment.target_invoice?.number}
                                               </TableCell>
                                               {hidePaymentTypeGrouping && (
                                                 <TableCell className="text-left capitalize">
@@ -1523,16 +1525,14 @@ export const PrintChargeItems = (props: {
                                               className="bg-transparent hover:bg-transparent"
                                             >
                                               <TableCell>
-                                                {payment.payment_datetime
-                                                  ? formatDateTime(
-                                                      payment.payment_datetime,
-                                                      "DD-MM-YY",
-                                                    )
-                                                  : "-"}
+                                                {payment.payment_datetime &&
+                                                  formatDateTime(
+                                                    payment.payment_datetime,
+                                                    "DD-MM-YY",
+                                                  )}
                                               </TableCell>
                                               <TableCell>
-                                                {payment.target_invoice
-                                                  ?.number || "-"}
+                                                {payment.target_invoice?.number}
                                               </TableCell>
                                               {hidePaymentTypeGrouping && (
                                                 <TableCell className="text-left capitalize">
