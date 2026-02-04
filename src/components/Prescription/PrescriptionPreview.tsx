@@ -77,7 +77,7 @@ const PrescriptionContent = ({
             })}
             className="text-xs font-semibold whitespace-break-spaces text-gray-950"
             cellConfig={{
-              medicine: { className: "text-left font-semibold" },
+              medicine: { className: "text-left" },
             }}
           />
         </div>

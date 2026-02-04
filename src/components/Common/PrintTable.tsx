@@ -14,7 +14,6 @@ import {
 type HeaderRow = {
   key: string;
   width?: number;
-  className?: string;
 };
 
 type TableRowType = Record<string, string | undefined>;
@@ -53,18 +52,13 @@ export default function PrintTable({
     value: string | undefined,
     rowIndex: number,
   ) => {
-    // Priority 1: Custom renderCell function
     if (renderCell) {
       return renderCell(key, value, rowIndex);
     }
 
-    // Priority 2: Cell-specific render function from cellConfig
     if (cellConfig?.[key]?.render) {
       return cellConfig[key].render(value);
     }
-
-    // Priority 3: Default value or "-"
-    return value || "-";
   };
 
   return (
