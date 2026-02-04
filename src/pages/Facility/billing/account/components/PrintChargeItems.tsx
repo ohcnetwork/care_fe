@@ -1186,6 +1186,9 @@ export const PrintChargeItems = (props: {
                                       <TableHead className="font-bold w-10">
                                         {t("date")}
                                       </TableHead>
+                                      <TableHead className="font-bold w-20">
+                                        {t("invoice")}
+                                      </TableHead>
                                       {hidePaymentTypeGrouping && (
                                         <TableHead className="font-bold w-10">
                                           {t("type")}
@@ -1303,6 +1306,10 @@ export const PrintChargeItems = (props: {
                                                     )
                                                   : "-"}
                                               </TableCell>
+                                              <TableCell>
+                                                {payment.target_invoice
+                                                  ?.number || "-"}
+                                              </TableCell>
                                               {hidePaymentTypeGrouping && (
                                                 <TableCell className="text-left capitalize">
                                                   {t(
@@ -1400,6 +1407,9 @@ export const PrintChargeItems = (props: {
                                     <>
                                       <TableHead className="font-bold w-10">
                                         {t("date")}
+                                      </TableHead>
+                                      <TableHead className="font-bold w-20">
+                                        {t("invoice")}
                                       </TableHead>
                                       {hidePaymentTypeGrouping && (
                                         <TableHead className="font-bold w-10">
@@ -1522,6 +1532,10 @@ export const PrintChargeItems = (props: {
                                                       "DD-MM-YY",
                                                     )
                                                   : "-"}
+                                              </TableCell>
+                                              <TableCell>
+                                                {payment.target_invoice
+                                                  ?.number || "-"}
                                               </TableCell>
                                               {hidePaymentTypeGrouping && (
                                                 <TableCell className="text-left capitalize">
