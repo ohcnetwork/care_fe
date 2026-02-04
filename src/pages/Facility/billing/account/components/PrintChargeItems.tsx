@@ -182,6 +182,15 @@ export const PrintChargeItems = (props: {
     (item) => item.paid_invoice?.locked,
   );
 
+  const hasUnissuedChargeItems = chargeItems?.results?.some((item) => {
+    const invoice = item.paid_invoice;
+    if (!invoice) return true;
+    return !(
+      invoice.status === InvoiceStatus.issued ||
+      invoice.status === InvoiceStatus.balanced
+    );
+  });
+
   if (hasLockedInvoice && !canManageLockedInvoice) {
     return (
       <div className="flex flex-col items-center justify-center h-[200px] gap-4">
@@ -397,205 +406,247 @@ export const PrintChargeItems = (props: {
         className="print:pt-0"
       >
         <DisablingCover disabled={isLoading || isLoadingPayments}>
-          <div className="md:p-2 max-w-4xl mx-auto bg-white">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr>
-                  <th className="p-0 font-normal text-left">
-                    {hideHeader && preserveHeaderSpace ? (
-                      <div className="mb-4 pb-2 border-b border-gray-200 h-20" />
-                    ) : !hideHeader ? (
-                      <div className="flex flex-col sm:flex-row print:flex-row print:items-start justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
-                        <img
-                          src={careConfig.mainLogo?.dark}
-                          alt="Care Logo"
-                          className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2 print:mb-0 print:order-2"
-                        />
-                        <div className="text-center sm:text-left sm:order-1 print:text-left">
-                          <h1 className="text-3xl font-semibold">
-                            {facility?.name}
-                          </h1>
-                          {facility?.address && (
-                            <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
-                              {facility.address}
-                              {facility.phone_number && (
-                                <p className="text-gray-500 text-sm">
-                                  {facility.phone_number}
-                                </p>
-                              )}
-                            </div>
-                          )}
+          {summaryMode && hasUnissuedChargeItems ? (
+            <p className="mt-2 text-xs text-red-600">
+              {t("unissued_charge_items_summary_warning")}
+            </p>
+          ) : (
+            <div className="md:p-2 max-w-4xl mx-auto bg-white">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr>
+                    <th className="p-0 font-normal text-left">
+                      {hideHeader && preserveHeaderSpace ? (
+                        <div className="mb-4 pb-2 border-b border-gray-200 h-20" />
+                      ) : !hideHeader ? (
+                        <div className="flex flex-col sm:flex-row print:flex-row print:items-start justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
+                          <img
+                            src={careConfig.mainLogo?.dark}
+                            alt="Care Logo"
+                            className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2 print:mb-0 print:order-2"
+                          />
+                          <div className="text-center sm:text-left sm:order-1 print:text-left">
+                            <h1 className="text-3xl font-semibold">
+                              {facility?.name}
+                            </h1>
+                            {facility?.address && (
+                              <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
+                                {facility.address}
+                                {facility.phone_number && (
+                                  <p className="text-gray-500 text-sm">
+                                    {facility.phone_number}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ) : null}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="p-0 align-top">
-                    <div className="grid md:grid-cols-2 print:grid-cols-2 gap-x-8 gap-y-4 mb-4 text-xs">
-                      <div className="space-y-1">
-                        <DetailRow
-                          label={t("name")}
-                          value={account?.patient?.name}
-                          width="w-16"
-                        />
-                        <DetailRow
-                          label={`${t("age")} / ${t("sex")}`}
-                          value={
-                            account?.patient
-                              ? `${formatPatientAge(account.patient, true)}, ${t(`GENDER__${account.patient.gender}`)}`
-                              : undefined
-                          }
-                          width="w-16"
-                        />
-                        <DetailRow
-                          label={`${t("address")}`}
-                          value={account?.patient?.address}
-                          width="w-16"
-                        />
-                        {account?.primary_encounter?.current_location && (
+                      ) : null}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="p-0 align-top">
+                      <div className="grid md:grid-cols-2 print:grid-cols-2 gap-x-8 gap-y-4 mb-4 text-xs">
+                        <div className="space-y-1">
                           <DetailRow
-                            label={`${t("location")}`}
+                            label={t("name")}
+                            value={account?.patient?.name}
+                            width="w-16"
+                          />
+                          <DetailRow
+                            label={`${t("age")} / ${t("sex")}`}
                             value={
-                              account?.primary_encounter?.current_location?.name
+                              account?.patient
+                                ? `${formatPatientAge(account.patient, true)}, ${t(`GENDER__${account.patient.gender}`)}`
+                                : undefined
                             }
                             width="w-16"
                           />
-                        )}
-                      </div>
-                      <div className="space-y-1">
-                        <DetailRow
-                          label={`${t("date")}`}
-                          value={formatDateTime(new Date(), "DD-MM-YYYY")}
-                          width="w-24"
-                        />
-                        {account?.patient?.instance_identifiers
-                          ?.filter(
-                            ({ config }) =>
-                              config.config.use ===
-                              PatientIdentifierUse.official,
-                          )
-                          .map((identifier) => (
+                          <DetailRow
+                            label={`${t("address")}`}
+                            value={account?.patient?.address}
+                            width="w-16"
+                          />
+                          {account?.primary_encounter?.current_location && (
                             <DetailRow
-                              key={identifier.config.id}
-                              label={identifier.config.config.display}
-                              value={identifier.value}
-                              width="w-24"
-                            />
-                          ))}
-                        <DetailRow
-                          label={t("mobile_number")}
-                          value={
-                            account?.patient &&
-                            formatPhoneNumberIntl(account.patient.phone_number)
-                          }
-                          width="w-24"
-                        />
-                        {account?.primary_encounter && (
-                          <>
-                            <DetailRow
-                              label={t("start_date")}
+                              label={`${t("location")}`}
                               value={
-                                account?.primary_encounter &&
-                                account?.primary_encounter.period.start &&
-                                new Date(
-                                  account?.primary_encounter.period.start,
-                                ).toLocaleDateString("en-IN")
+                                account?.primary_encounter?.current_location
+                                  ?.name
                               }
-                              width="w-24"
+                              width="w-16"
                             />
-                            <DetailRow
-                              label={t("end_date")}
-                              value={
-                                account?.primary_encounter &&
-                                account?.primary_encounter.period.end &&
-                                new Date(
-                                  account?.primary_encounter.period.end,
-                                ).toLocaleDateString("en-IN")
-                              }
-                              width="w-24"
-                            />
-                            {account?.primary_encounter?.care_team?.[0] && (
+                          )}
+                        </div>
+                        <div className="space-y-1">
+                          <DetailRow
+                            label={`${t("date")}`}
+                            value={formatDateTime(new Date(), "DD-MM-YYYY")}
+                            width="w-24"
+                          />
+                          {account?.patient?.instance_identifiers
+                            ?.filter(
+                              ({ config }) =>
+                                config.config.use ===
+                                PatientIdentifierUse.official,
+                            )
+                            .map((identifier) => (
                               <DetailRow
-                                label={t("doctor")}
-                                value={formatName(
-                                  account.primary_encounter.care_team[0].member,
-                                )}
+                                key={identifier.config.id}
+                                label={identifier.config.config.display}
+                                value={identifier.value}
                                 width="w-24"
                               />
-                            )}
-                          </>
-                        )}
+                            ))}
+                          <DetailRow
+                            label={t("mobile_number")}
+                            value={
+                              account?.patient &&
+                              formatPhoneNumberIntl(
+                                account.patient.phone_number,
+                              )
+                            }
+                            width="w-24"
+                          />
+                          {account?.primary_encounter && (
+                            <>
+                              <DetailRow
+                                label={t("start_date")}
+                                value={
+                                  account?.primary_encounter &&
+                                  account?.primary_encounter.period.start &&
+                                  new Date(
+                                    account?.primary_encounter.period.start,
+                                  ).toLocaleDateString("en-IN")
+                                }
+                                width="w-24"
+                              />
+                              <DetailRow
+                                label={t("end_date")}
+                                value={
+                                  account?.primary_encounter &&
+                                  account?.primary_encounter.period.end &&
+                                  new Date(
+                                    account?.primary_encounter.period.end,
+                                  ).toLocaleDateString("en-IN")
+                                }
+                                width="w-24"
+                              />
+                              {account?.primary_encounter?.care_team?.[0] && (
+                                <DetailRow
+                                  label={t("doctor")}
+                                  value={formatName(
+                                    account.primary_encounter.care_team[0]
+                                      .member,
+                                  )}
+                                  width="w-24"
+                                />
+                              )}
+                            </>
+                          )}
+                        </div>
                       </div>
-                    </div>
 
-                    {chargeItems?.results &&
-                      chargeItems?.results?.length > 0 && (
-                        <>
-                          <div className="text-sm">
-                            <div className="overflow-hidden">
-                              <Table className="w-full [&_th]:text-xs [&_td]:text-xs">
-                                <TableHeader className="[&_tr]:border-y [&_th]:p-0.5 [&_th]:h-auto">
-                                  <TableRow className="bg-transparent hover:bg-transparent">
-                                    {summaryMode ? (
-                                      <>
-                                        <TableHead
-                                          className="font-bold"
-                                          colSpan={5}
-                                        >
-                                          {t("category")}
-                                        </TableHead>
-                                        <TableHead className="font-bold text-right w-32">
-                                          {t("amount")}
-                                        </TableHead>
-                                      </>
-                                    ) : (
-                                      <>
-                                        <TableHead className="font-bold w-10">
-                                          {t("date")}
-                                        </TableHead>
-                                        <TableHead className="font-bold w-10">
-                                          {t("invoice")}
-                                        </TableHead>
-                                        <TableHead className="font-bold w-24">
-                                          {t("title")}
-                                        </TableHead>
-                                        {showStatus && (
-                                          <TableHead className="font-bold text-center w-8">
-                                            {t("status")}
+                      {chargeItems?.results &&
+                        chargeItems?.results?.length > 0 && (
+                          <>
+                            <div className="text-sm">
+                              <div className="overflow-hidden">
+                                <Table className="w-full [&_th]:text-xs [&_td]:text-xs">
+                                  <TableHeader className="[&_tr]:border-y [&_th]:p-0.5 [&_th]:h-auto">
+                                    <TableRow className="bg-transparent hover:bg-transparent">
+                                      {summaryMode ? (
+                                        <>
+                                          <TableHead
+                                            className="font-bold"
+                                            colSpan={5}
+                                          >
+                                            {t("category")}
                                           </TableHead>
-                                        )}
-                                        {showCreatedBy && (
-                                          <TableHead className="font-bold w-16">
-                                            {t("created_by")}
+                                          <TableHead className="font-bold text-right w-32">
+                                            {t("amount")}
                                           </TableHead>
-                                        )}
-                                        <TableHead className="font-bold w-10">
-                                          {t("rate")}
-                                        </TableHead>
-                                        <TableHead className="font-bold text-right w-10">
-                                          {t("qty")}
-                                        </TableHead>
-                                        <TableHead className="font-bold text-right w-10">
-                                          {t("amount")}
-                                        </TableHead>
-                                      </>
-                                    )}
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody className="[&_tr]:border-0 [&_td]:p-0.5">
-                                  {(() => {
-                                    const validItemsBeforeFilter =
-                                      chargeItems.results;
+                                        </>
+                                      ) : (
+                                        <>
+                                          <TableHead className="font-bold w-10">
+                                            {t("date")}
+                                          </TableHead>
+                                          <TableHead className="font-bold w-10">
+                                            {t("invoice")}
+                                          </TableHead>
+                                          <TableHead className="font-bold w-24">
+                                            {t("title")}
+                                          </TableHead>
+                                          {showStatus && (
+                                            <TableHead className="font-bold text-center w-8">
+                                              {t("status")}
+                                            </TableHead>
+                                          )}
+                                          {showCreatedBy && (
+                                            <TableHead className="font-bold w-16">
+                                              {t("created_by")}
+                                            </TableHead>
+                                          )}
+                                          <TableHead className="font-bold w-10">
+                                            {t("rate")}
+                                          </TableHead>
+                                          <TableHead className="font-bold text-right w-10">
+                                            {t("qty")}
+                                          </TableHead>
+                                          <TableHead className="font-bold text-right w-10">
+                                            {t("amount")}
+                                          </TableHead>
+                                        </>
+                                      )}
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody className="[&_tr]:border-0 [&_td]:p-0.5">
+                                    {(() => {
+                                      const validItemsBeforeFilter =
+                                        chargeItems.results;
 
-                                    const useParentCategory =
-                                      groupByParentCategory || summaryMode;
+                                      const useParentCategory =
+                                        groupByParentCategory || summaryMode;
 
-                                    const validItems = selectedCategory
-                                      ? validItemsBeforeFilter.filter(
-                                          (item) => {
+                                      const validItems = selectedCategory
+                                        ? validItemsBeforeFilter.filter(
+                                            (item) => {
+                                              const category =
+                                                item.charge_item_definition
+                                                  ?.category;
+                                              const categoryTitle =
+                                                useParentCategory
+                                                  ? category?.parent?.title ||
+                                                    category?.title ||
+                                                    t("uncategorized")
+                                                  : category?.title ||
+                                                    t("uncategorized");
+                                              return (
+                                                categoryTitle ===
+                                                selectedCategory
+                                              );
+                                            },
+                                          )
+                                        : validItemsBeforeFilter;
+
+                                      const nonReturnedValidItems =
+                                        validItems.filter(
+                                          (item) =>
+                                            !item.paid_invoice?.is_refund,
+                                        );
+
+                                      const groups =
+                                        nonReturnedValidItems.reduce(
+                                          (
+                                            acc: Record<
+                                              string,
+                                              ChargeItemRead[]
+                                            >,
+                                            item: ChargeItemRead,
+                                          ) => {
                                             const category =
                                               item.charge_item_definition
                                                 ?.category;
@@ -606,226 +657,230 @@ export const PrintChargeItems = (props: {
                                                   t("uncategorized")
                                                 : category?.title ||
                                                   t("uncategorized");
-                                            return (
-                                              categoryTitle === selectedCategory
-                                            );
+                                            const list =
+                                              acc[categoryTitle] ?? [];
+                                            list.push(item);
+                                            acc[categoryTitle] = list;
+                                            return acc;
                                           },
-                                        )
-                                      : validItemsBeforeFilter;
-
-                                    const nonReturnedValidItems =
-                                      validItems.filter(
-                                        (item) => !item.paid_invoice?.is_refund,
-                                      );
-
-                                    const groups = nonReturnedValidItems.reduce(
-                                      (
-                                        acc: Record<string, ChargeItemRead[]>,
-                                        item: ChargeItemRead,
-                                      ) => {
-                                        const category =
-                                          item.charge_item_definition?.category;
-                                        const categoryTitle = useParentCategory
-                                          ? category?.parent?.title ||
-                                            category?.title ||
-                                            t("uncategorized")
-                                          : category?.title ||
-                                            t("uncategorized");
-                                        const list = acc[categoryTitle] ?? [];
-                                        list.push(item);
-                                        acc[categoryTitle] = list;
-                                        return acc;
-                                      },
-                                      {} as Record<string, ChargeItemRead[]>,
-                                    );
-
-                                    const sortedCategories =
-                                      Object.keys(groups).sort();
-
-                                    const rows: React.ReactNode[] = [];
-
-                                    sortedCategories.forEach(
-                                      (categoryTitle) => {
-                                        const items: ChargeItemRead[] =
-                                          groups[categoryTitle] ?? [];
-
-                                        const sectionTotal = add(
-                                          ...items.map(
-                                            (i) => i.total_price || 0,
-                                          ),
+                                          {} as Record<
+                                            string,
+                                            ChargeItemRead[]
+                                          >,
                                         );
 
-                                        if (summaryMode) {
-                                          rows.push(
-                                            <TableRow
-                                              key={`category-${categoryTitle}`}
-                                              className="bg-transparent hover:bg-transparent"
-                                            >
-                                              <TableCell
-                                                colSpan={5}
-                                                className="font-semibold capitalize"
-                                              >
-                                                {categoryTitle}
-                                              </TableCell>
-                                              <TableCell className="text-right font-semibold">
-                                                <MonetaryDisplay
-                                                  amount={sectionTotal}
-                                                />
-                                              </TableCell>
-                                            </TableRow>,
+                                      const sortedCategories =
+                                        Object.keys(groups).sort();
+
+                                      const rows: React.ReactNode[] = [];
+
+                                      sortedCategories.forEach(
+                                        (categoryTitle) => {
+                                          const items: ChargeItemRead[] =
+                                            groups[categoryTitle] ?? [];
+
+                                          const sectionTotal = add(
+                                            ...items.map(
+                                              (i) => i.total_price || 0,
+                                            ),
                                           );
-                                        } else {
-                                          if (!hideCategories) {
+
+                                          if (summaryMode) {
                                             rows.push(
                                               <TableRow
                                                 key={`category-${categoryTitle}`}
-                                                className="font-bold hover:bg-transparent"
+                                                className="bg-transparent hover:bg-transparent"
                                               >
                                                 <TableCell
-                                                  colSpan={
-                                                    5 +
-                                                    (showStatus ? 1 : 0) +
-                                                    (showCreatedBy ? 1 : 0)
-                                                  }
-                                                  className="capitalize"
+                                                  colSpan={5}
+                                                  className="font-semibold capitalize"
                                                 >
                                                   {categoryTitle}
                                                 </TableCell>
-                                                <TableCell className="text-right">
+                                                <TableCell className="text-right font-semibold">
                                                   <MonetaryDisplay
                                                     amount={sectionTotal}
                                                   />
                                                 </TableCell>
                                               </TableRow>,
                                             );
-                                          }
-
-                                          items.forEach(
-                                            (chargeItem: ChargeItemRead) => {
-                                              const unitPrice =
-                                                chargeItem.unit_price_components.find(
-                                                  (c) =>
-                                                    c.monetary_component_type ===
-                                                    MonetaryComponentType.base,
-                                                )?.amount;
-                                              const hasIssuedOrBalancedInvoice =
-                                                chargeItem.paid_invoice &&
-                                                (chargeItem.paid_invoice
-                                                  .status ===
-                                                  InvoiceStatus.issued ||
-                                                  chargeItem.paid_invoice
-                                                    .status ===
-                                                    InvoiceStatus.balanced);
+                                          } else {
+                                            if (!hideCategories) {
                                               rows.push(
                                                 <TableRow
-                                                  key={chargeItem.id}
-                                                  className={
-                                                    hasIssuedOrBalancedInvoice
-                                                      ? "bg-transparent hover:bg-transparent"
-                                                      : "bg-red-50 hover:bg-red-50 text-red-700 print:bg-red-50"
-                                                  }
+                                                  key={`category-${categoryTitle}`}
+                                                  className="font-bold hover:bg-transparent"
                                                 >
-                                                  <TableCell className="w-10 text-left">
-                                                    <div className="flex items-center gap-1">
-                                                      {!hasIssuedOrBalancedInvoice && (
-                                                        <AlertTriangle className="h-3 w-3 text-red-600 shrink-0" />
-                                                      )}
-                                                      {formatDateTime(
-                                                        chargeItem.created_date,
-                                                        "DD/MM/YY",
-                                                      )}
-                                                    </div>
+                                                  <TableCell
+                                                    colSpan={
+                                                      5 +
+                                                      (showStatus ? 1 : 0) +
+                                                      (showCreatedBy ? 1 : 0)
+                                                    }
+                                                    className="capitalize"
+                                                  >
+                                                    {categoryTitle}
                                                   </TableCell>
-                                                  <TableCell className="w-10 text-left">
-                                                    {chargeItem.paid_invoice
-                                                      ?.number || "-"}
-                                                  </TableCell>
-                                                  <TableCell>
-                                                    <div className="flex flex-col">
-                                                      <span className="font-medium">
-                                                        {chargeItem.title}
-                                                      </span>
-                                                    </div>
-                                                  </TableCell>
-                                                  {showStatus && (
-                                                    <TableCell className="text-center w-8">
-                                                      <span className="text-xs">
-                                                        {t(chargeItem.status)}
-                                                      </span>
-                                                    </TableCell>
-                                                  )}
-                                                  {showCreatedBy && (
-                                                    <TableCell className="w-16">
-                                                      {
-                                                        chargeItem.created_by
-                                                          ?.first_name
-                                                      }
-                                                    </TableCell>
-                                                  )}
-                                                  <TableCell className="text-right w-10">
+                                                  <TableCell className="text-right">
                                                     <MonetaryDisplay
-                                                      amount={unitPrice}
-                                                    />
-                                                  </TableCell>
-                                                  <TableCell className="text-right w-10">
-                                                    {round(chargeItem.quantity)}
-                                                  </TableCell>
-                                                  <TableCell className="text-right w-10">
-                                                    <MonetaryDisplay
-                                                      amount={
-                                                        chargeItem.total_price
-                                                      }
+                                                      amount={sectionTotal}
                                                     />
                                                   </TableCell>
                                                 </TableRow>,
                                               );
-                                            },
-                                          );
-                                        }
-                                      },
-                                    );
+                                            }
 
-                                    rows.push(
-                                      <TableRow
-                                        key="grand-total"
-                                        className="bg-muted/30 font-semibold"
-                                      >
-                                        <TableCell
-                                          colSpan={
-                                            5 +
-                                            (showStatus ? 1 : 0) +
-                                            (showCreatedBy ? 1 : 0)
+                                            items.forEach(
+                                              (chargeItem: ChargeItemRead) => {
+                                                const unitPrice =
+                                                  chargeItem.unit_price_components.find(
+                                                    (c) =>
+                                                      c.monetary_component_type ===
+                                                      MonetaryComponentType.base,
+                                                  )?.amount;
+                                                const hasIssuedOrBalancedInvoice =
+                                                  chargeItem.paid_invoice &&
+                                                  (chargeItem.paid_invoice
+                                                    .status ===
+                                                    InvoiceStatus.issued ||
+                                                    chargeItem.paid_invoice
+                                                      .status ===
+                                                      InvoiceStatus.balanced);
+                                                rows.push(
+                                                  <TableRow
+                                                    key={chargeItem.id}
+                                                    className={
+                                                      hasIssuedOrBalancedInvoice
+                                                        ? "bg-transparent hover:bg-transparent"
+                                                        : "bg-red-50 hover:bg-red-50 text-red-700 print:bg-red-50"
+                                                    }
+                                                  >
+                                                    <TableCell className="w-10 text-left">
+                                                      <div className="flex items-center gap-1">
+                                                        {!hasIssuedOrBalancedInvoice && (
+                                                          <AlertTriangle className="h-3 w-3 text-red-600 shrink-0" />
+                                                        )}
+                                                        {formatDateTime(
+                                                          chargeItem.created_date,
+                                                          "DD/MM/YY",
+                                                        )}
+                                                      </div>
+                                                    </TableCell>
+                                                    <TableCell className="w-10 text-left">
+                                                      {chargeItem.paid_invoice
+                                                        ?.number || "-"}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                      <div className="flex flex-col">
+                                                        <span className="font-medium">
+                                                          {chargeItem.title}
+                                                        </span>
+                                                      </div>
+                                                    </TableCell>
+                                                    {showStatus && (
+                                                      <TableCell className="text-center w-8">
+                                                        <span className="text-xs">
+                                                          {t(chargeItem.status)}
+                                                        </span>
+                                                      </TableCell>
+                                                    )}
+                                                    {showCreatedBy && (
+                                                      <TableCell className="w-16">
+                                                        {
+                                                          chargeItem.created_by
+                                                            ?.first_name
+                                                        }
+                                                      </TableCell>
+                                                    )}
+                                                    <TableCell className="text-right w-10">
+                                                      <MonetaryDisplay
+                                                        amount={unitPrice}
+                                                      />
+                                                    </TableCell>
+                                                    <TableCell className="text-right w-10">
+                                                      {round(
+                                                        chargeItem.quantity,
+                                                      )}
+                                                    </TableCell>
+                                                    <TableCell className="text-right w-10">
+                                                      <MonetaryDisplay
+                                                        amount={
+                                                          chargeItem.total_price
+                                                        }
+                                                      />
+                                                    </TableCell>
+                                                  </TableRow>,
+                                                );
+                                              },
+                                            );
                                           }
-                                          className="text-right pr-2"
+                                        },
+                                      );
+
+                                      rows.push(
+                                        <TableRow
+                                          key="grand-total"
+                                          className="bg-muted/30 font-semibold"
                                         >
-                                          {t("net_total")}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                          <MonetaryDisplay
-                                            amount={add(
-                                              ...nonReturnedValidItems.map(
-                                                (i) => i.total_price || 0,
-                                              ),
-                                            )}
-                                          />
-                                        </TableCell>
-                                      </TableRow>,
-                                    );
+                                          <TableCell
+                                            colSpan={
+                                              5 +
+                                              (showStatus ? 1 : 0) +
+                                              (showCreatedBy ? 1 : 0)
+                                            }
+                                            className="text-right pr-2"
+                                          >
+                                            {t("net_total")}
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            <MonetaryDisplay
+                                              amount={add(
+                                                ...nonReturnedValidItems.map(
+                                                  (i) => i.total_price || 0,
+                                                ),
+                                              )}
+                                            />
+                                          </TableCell>
+                                        </TableRow>,
+                                      );
 
-                                    return rows;
-                                  })()}
-                                </TableBody>
-                              </Table>
+                                      return rows;
+                                    })()}
+                                  </TableBody>
+                                </Table>
+                              </div>
                             </div>
-                          </div>
 
-                          {(() => {
-                            const validItemsBeforeFilter = chargeItems.results;
-                            const useParentCategory =
-                              groupByParentCategory || summaryMode;
+                            {(() => {
+                              const validItemsBeforeFilter =
+                                chargeItems.results;
+                              const useParentCategory =
+                                groupByParentCategory || summaryMode;
 
-                            const validItems = selectedCategory
-                              ? validItemsBeforeFilter.filter((item) => {
+                              const validItems = selectedCategory
+                                ? validItemsBeforeFilter.filter((item) => {
+                                    const category =
+                                      item.charge_item_definition?.category;
+                                    const categoryTitle = useParentCategory
+                                      ? category?.parent?.title ||
+                                        category?.title ||
+                                        t("uncategorized")
+                                      : category?.title || t("uncategorized");
+                                    return categoryTitle === selectedCategory;
+                                  })
+                                : validItemsBeforeFilter;
+
+                              const returnedValidItems = validItems.filter(
+                                (item) => item.paid_invoice?.is_refund,
+                              );
+
+                              if (returnedValidItems.length === 0) return null;
+
+                              const groups = returnedValidItems.reduce(
+                                (
+                                  acc: Record<string, ChargeItemRead[]>,
+                                  item: ChargeItemRead,
+                                ) => {
                                   const category =
                                     item.charge_item_definition?.category;
                                   const categoryTitle = useParentCategory
@@ -833,550 +888,543 @@ export const PrintChargeItems = (props: {
                                       category?.title ||
                                       t("uncategorized")
                                     : category?.title || t("uncategorized");
-                                  return categoryTitle === selectedCategory;
-                                })
-                              : validItemsBeforeFilter;
+                                  const list = acc[categoryTitle] ?? [];
+                                  list.push(item);
+                                  acc[categoryTitle] = list;
+                                  return acc;
+                                },
+                                {} as Record<string, ChargeItemRead[]>,
+                              );
 
-                            const returnedValidItems = validItems.filter(
-                              (item) => item.paid_invoice?.is_refund,
-                            );
+                              const sortedCategories =
+                                Object.keys(groups).sort();
 
-                            if (returnedValidItems.length === 0) return null;
-
-                            const groups = returnedValidItems.reduce(
-                              (
-                                acc: Record<string, ChargeItemRead[]>,
-                                item: ChargeItemRead,
-                              ) => {
-                                const category =
-                                  item.charge_item_definition?.category;
-                                const categoryTitle = useParentCategory
-                                  ? category?.parent?.title ||
-                                    category?.title ||
-                                    t("uncategorized")
-                                  : category?.title || t("uncategorized");
-                                const list = acc[categoryTitle] ?? [];
-                                list.push(item);
-                                acc[categoryTitle] = list;
-                                return acc;
-                              },
-                              {} as Record<string, ChargeItemRead[]>,
-                            );
-
-                            const sortedCategories = Object.keys(groups).sort();
-
-                            return (
-                              <div className="text-sm mt-4">
-                                <div className="overflow-hidden">
-                                  <Table className="w-full [&_th]:text-xs [&_td]:text-xs">
-                                    <TableHeader className="[&_tr]:border-y [&_th]:p-0.5 [&_th]:h-auto">
-                                      <TableRow className="bg-transparent hover:bg-transparent">
-                                        {summaryMode ? (
-                                          <>
-                                            <TableHead
-                                              className="font-bold"
-                                              colSpan={5}
-                                            >
-                                              {t("category")}
-                                            </TableHead>
-                                            <TableHead className="font-bold text-right w-32">
-                                              {t("amount")}
-                                            </TableHead>
-                                          </>
-                                        ) : (
-                                          <>
-                                            <TableHead className="font-bold w-10">
-                                              {t("date")}
-                                            </TableHead>
-                                            <TableHead className="font-bold w-10">
-                                              {t("invoice")}
-                                            </TableHead>
-                                            <TableHead className="font-bold w-24">
-                                              {t("title")}
-                                            </TableHead>
-                                            {showStatus && (
-                                              <TableHead className="font-bold text-center w-8">
-                                                {t("status")}
+                              return (
+                                <div className="text-sm mt-4">
+                                  <h2 className="text-sm font-semibold mb-1">
+                                    {t("returned_items")}
+                                  </h2>
+                                  <div className="overflow-hidden">
+                                    <Table className="w-full [&_th]:text-xs [&_td]:text-xs">
+                                      <TableHeader className="[&_tr]:border-y [&_th]:p-0.5 [&_th]:h-auto">
+                                        <TableRow className="bg-transparent hover:bg-transparent">
+                                          {summaryMode ? (
+                                            <>
+                                              <TableHead
+                                                className="font-bold"
+                                                colSpan={5}
+                                              >
+                                                {t("category")}
                                               </TableHead>
-                                            )}
-                                            {showCreatedBy && (
-                                              <TableHead className="font-bold w-16">
-                                                {t("created_by")}
+                                              <TableHead className="font-bold text-right w-32">
+                                                {t("amount")}
                                               </TableHead>
-                                            )}
-                                            <TableHead className="font-bold w-10">
-                                              {t("rate")}
-                                            </TableHead>
-                                            <TableHead className="font-bold text-right w-10">
-                                              {t("qty")}
-                                            </TableHead>
-                                            <TableHead className="font-bold text-right w-10">
-                                              {t("amount")}
-                                            </TableHead>
-                                          </>
-                                        )}
-                                      </TableRow>
-                                    </TableHeader>
-                                    <TableBody className="[&_tr]:border-0 [&_td]:p-0.5">
-                                      {(() => {
-                                        const rows: React.ReactNode[] = [];
+                                            </>
+                                          ) : (
+                                            <>
+                                              <TableHead className="font-bold w-10">
+                                                {t("date")}
+                                              </TableHead>
+                                              <TableHead className="font-bold w-10">
+                                                {t("invoice")}
+                                              </TableHead>
+                                              <TableHead className="font-bold w-24">
+                                                {t("title")}
+                                              </TableHead>
+                                              {showStatus && (
+                                                <TableHead className="font-bold text-center w-8">
+                                                  {t("status")}
+                                                </TableHead>
+                                              )}
+                                              {showCreatedBy && (
+                                                <TableHead className="font-bold w-16">
+                                                  {t("created_by")}
+                                                </TableHead>
+                                              )}
+                                              <TableHead className="font-bold w-10">
+                                                {t("rate")}
+                                              </TableHead>
+                                              <TableHead className="font-bold text-right w-10">
+                                                {t("qty")}
+                                              </TableHead>
+                                              <TableHead className="font-bold text-right w-10">
+                                                {t("amount")}
+                                              </TableHead>
+                                            </>
+                                          )}
+                                        </TableRow>
+                                      </TableHeader>
+                                      <TableBody className="[&_tr]:border-0 [&_td]:p-0.5">
+                                        {(() => {
+                                          const rows: React.ReactNode[] = [];
 
-                                        sortedCategories.forEach(
-                                          (categoryTitle) => {
-                                            const items: ChargeItemRead[] =
-                                              groups[categoryTitle] ?? [];
+                                          sortedCategories.forEach(
+                                            (categoryTitle) => {
+                                              const items: ChargeItemRead[] =
+                                                groups[categoryTitle] ?? [];
 
-                                            const sectionTotal = add(
-                                              ...items.map(
-                                                (i) => i.total_price || 0,
-                                              ),
-                                            );
-
-                                            const sectionTitle = `${categoryTitle} - ${t(
-                                              "returned",
-                                            )}`;
-
-                                            if (summaryMode) {
-                                              rows.push(
-                                                <TableRow
-                                                  key={`returned-category-${categoryTitle}`}
-                                                  className="bg-transparent hover:bg-transparent"
-                                                >
-                                                  <TableCell
-                                                    colSpan={5}
-                                                    className="font-semibold capitalize"
-                                                  >
-                                                    {sectionTitle}
-                                                  </TableCell>
-                                                  <TableCell className="text-right font-semibold">
-                                                    <MonetaryDisplay
-                                                      amount={sectionTotal}
-                                                    />
-                                                  </TableCell>
-                                                </TableRow>,
+                                              const sectionTotal = add(
+                                                ...items.map(
+                                                  (i) => i.total_price || 0,
+                                                ),
                                               );
-                                            } else {
-                                              if (!hideCategories) {
+
+                                              if (summaryMode) {
                                                 rows.push(
                                                   <TableRow
                                                     key={`returned-category-${categoryTitle}`}
-                                                    className="font-bold hover:bg-transparent"
+                                                    className="bg-transparent hover:bg-transparent"
                                                   >
                                                     <TableCell
-                                                      colSpan={
-                                                        5 +
-                                                        (showStatus ? 1 : 0) +
-                                                        (showCreatedBy ? 1 : 0)
-                                                      }
-                                                      className="capitalize"
+                                                      colSpan={5}
+                                                      className="font-semibold capitalize"
                                                     >
-                                                      {sectionTitle}
+                                                      {categoryTitle}
                                                     </TableCell>
-                                                    <TableCell className="text-right">
+                                                    <TableCell className="text-right font-semibold">
                                                       <MonetaryDisplay
                                                         amount={sectionTotal}
                                                       />
                                                     </TableCell>
                                                   </TableRow>,
                                                 );
-                                              }
-
-                                              items.forEach(
-                                                (
-                                                  chargeItem: ChargeItemRead,
-                                                ) => {
-                                                  const unitPrice =
-                                                    chargeItem.unit_price_components.find(
-                                                      (c) =>
-                                                        c.monetary_component_type ===
-                                                        MonetaryComponentType.base,
-                                                    )?.amount;
-                                                  const hasIssuedOrBalancedInvoice =
-                                                    chargeItem.paid_invoice &&
-                                                    (chargeItem.paid_invoice
-                                                      .status ===
-                                                      InvoiceStatus.issued ||
-                                                      chargeItem.paid_invoice
-                                                        .status ===
-                                                        InvoiceStatus.balanced);
+                                              } else {
+                                                if (!hideCategories) {
                                                   rows.push(
                                                     <TableRow
-                                                      key={chargeItem.id}
-                                                      className={
-                                                        hasIssuedOrBalancedInvoice
-                                                          ? "bg-transparent hover:bg-transparent"
-                                                          : "bg-red-50 hover:bg-red-50 text-red-700 print:bg-red-50"
-                                                      }
+                                                      key={`returned-category-${categoryTitle}`}
+                                                      className="font-bold hover:bg-transparent"
                                                     >
-                                                      <TableCell className="w-10 text-left">
-                                                        <div className="flex items-center gap-1">
-                                                          {!hasIssuedOrBalancedInvoice && (
-                                                            <AlertTriangle className="h-3 w-3 text-red-600 shrink-0" />
-                                                          )}
-                                                          {formatDateTime(
-                                                            chargeItem.created_date,
-                                                            "DD/MM/YY",
-                                                          )}
-                                                        </div>
+                                                      <TableCell
+                                                        colSpan={
+                                                          5 +
+                                                          (showStatus ? 1 : 0) +
+                                                          (showCreatedBy
+                                                            ? 1
+                                                            : 0)
+                                                        }
+                                                        className="capitalize"
+                                                      >
+                                                        {categoryTitle}
                                                       </TableCell>
-                                                      <TableCell className="w-10 text-left">
-                                                        {chargeItem.paid_invoice
-                                                          ?.number || "-"}
-                                                      </TableCell>
-                                                      <TableCell>
-                                                        <div className="flex flex-col">
-                                                          <span className="font-medium">
-                                                            {chargeItem.title}
-                                                          </span>
-                                                        </div>
-                                                      </TableCell>
-                                                      {showStatus && (
-                                                        <TableCell className="text-center w-8">
-                                                          <span className="text-xs">
-                                                            {t(
-                                                              chargeItem.status,
-                                                            )}
-                                                          </span>
-                                                        </TableCell>
-                                                      )}
-                                                      {showCreatedBy && (
-                                                        <TableCell className="w-16">
-                                                          {
-                                                            chargeItem
-                                                              .created_by
-                                                              ?.first_name
-                                                          }
-                                                        </TableCell>
-                                                      )}
-                                                      <TableCell className="text-right w-10">
+                                                      <TableCell className="text-right">
                                                         <MonetaryDisplay
-                                                          amount={unitPrice}
-                                                        />
-                                                      </TableCell>
-                                                      <TableCell className="text-right w-10">
-                                                        {round(
-                                                          chargeItem.quantity,
-                                                        )}
-                                                      </TableCell>
-                                                      <TableCell className="text-right w-10">
-                                                        <MonetaryDisplay
-                                                          amount={
-                                                            chargeItem.total_price
-                                                          }
+                                                          amount={sectionTotal}
                                                         />
                                                       </TableCell>
                                                     </TableRow>,
                                                   );
-                                                },
-                                              );
-                                            }
-                                          },
-                                        );
+                                                }
 
-                                        rows.push(
-                                          <TableRow
-                                            key="returned-grand-total"
-                                            className="bg-muted/30 font-semibold"
-                                          >
-                                            <TableCell
-                                              colSpan={
-                                                5 +
-                                                (showStatus ? 1 : 0) +
-                                                (showCreatedBy ? 1 : 0)
+                                                items.forEach(
+                                                  (
+                                                    chargeItem: ChargeItemRead,
+                                                  ) => {
+                                                    const unitPrice =
+                                                      chargeItem.unit_price_components.find(
+                                                        (c) =>
+                                                          c.monetary_component_type ===
+                                                          MonetaryComponentType.base,
+                                                      )?.amount;
+                                                    const hasIssuedOrBalancedInvoice =
+                                                      chargeItem.paid_invoice &&
+                                                      (chargeItem.paid_invoice
+                                                        .status ===
+                                                        InvoiceStatus.issued ||
+                                                        chargeItem.paid_invoice
+                                                          .status ===
+                                                          InvoiceStatus.balanced);
+                                                    rows.push(
+                                                      <TableRow
+                                                        key={chargeItem.id}
+                                                        className={
+                                                          hasIssuedOrBalancedInvoice
+                                                            ? "bg-transparent hover:bg-transparent"
+                                                            : "bg-red-50 hover:bg-red-50 text-red-700 print:bg-red-50"
+                                                        }
+                                                      >
+                                                        <TableCell className="w-10 text-left">
+                                                          <div className="flex items-center gap-1">
+                                                            {!hasIssuedOrBalancedInvoice && (
+                                                              <AlertTriangle className="h-3 w-3 text-red-600 shrink-0" />
+                                                            )}
+                                                            {formatDateTime(
+                                                              chargeItem.created_date,
+                                                              "DD/MM/YY",
+                                                            )}
+                                                          </div>
+                                                        </TableCell>
+                                                        <TableCell className="w-10 text-left">
+                                                          {chargeItem
+                                                            .paid_invoice
+                                                            ?.number || "-"}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                          <div className="flex flex-col">
+                                                            <span className="font-medium">
+                                                              {chargeItem.title}
+                                                            </span>
+                                                          </div>
+                                                        </TableCell>
+                                                        {showStatus && (
+                                                          <TableCell className="text-center w-8">
+                                                            <span className="text-xs">
+                                                              {t(
+                                                                chargeItem.status,
+                                                              )}
+                                                            </span>
+                                                          </TableCell>
+                                                        )}
+                                                        {showCreatedBy && (
+                                                          <TableCell className="w-16">
+                                                            {
+                                                              chargeItem
+                                                                .created_by
+                                                                ?.first_name
+                                                            }
+                                                          </TableCell>
+                                                        )}
+                                                        <TableCell className="text-right w-10">
+                                                          <MonetaryDisplay
+                                                            amount={unitPrice}
+                                                          />
+                                                        </TableCell>
+                                                        <TableCell className="text-right w-10">
+                                                          {round(
+                                                            chargeItem.quantity,
+                                                          )}
+                                                        </TableCell>
+                                                        <TableCell className="text-right w-10">
+                                                          <MonetaryDisplay
+                                                            amount={
+                                                              chargeItem.total_price
+                                                            }
+                                                          />
+                                                        </TableCell>
+                                                      </TableRow>,
+                                                    );
+                                                  },
+                                                );
                                               }
-                                              className="text-right pr-2"
+                                            },
+                                          );
+
+                                          rows.push(
+                                            <TableRow
+                                              key="returned-grand-total"
+                                              className="bg-muted/30 font-semibold"
                                             >
-                                              {t("net_total")}
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                              <MonetaryDisplay
-                                                amount={add(
-                                                  ...returnedValidItems.map(
-                                                    (i) => i.total_price || 0,
-                                                  ),
-                                                )}
-                                              />
-                                            </TableCell>
-                                          </TableRow>,
-                                        );
+                                              <TableCell
+                                                colSpan={
+                                                  5 +
+                                                  (showStatus ? 1 : 0) +
+                                                  (showCreatedBy ? 1 : 0)
+                                                }
+                                                className="text-right pr-2"
+                                              >
+                                                {t("net_total")}
+                                              </TableCell>
+                                              <TableCell className="text-right">
+                                                <MonetaryDisplay
+                                                  amount={add(
+                                                    ...returnedValidItems.map(
+                                                      (i) => i.total_price || 0,
+                                                    ),
+                                                  )}
+                                                />
+                                              </TableCell>
+                                            </TableRow>,
+                                          );
 
-                                        return rows;
-                                      })()}
-                                    </TableBody>
-                                  </Table>
+                                          return rows;
+                                        })()}
+                                      </TableBody>
+                                    </Table>
+                                  </div>
                                 </div>
-                              </div>
-                            );
-                          })()}
-                        </>
-                      )}
+                              );
+                            })()}
+                          </>
+                        )}
 
-                    {payments.length > 0 && !selectedCategory && (
-                      <div className="mt-4">
-                        <hr className="border-gray-300 py-2" />
-                        <h2 className="text-sm font-semibold mb-1">
-                          {t("payment_details")}
-                        </h2>
-                        <div className="overflow-hidden">
-                          <Table className="w-full [&_th]:text-xs [&_td]:text-xs [&_tr]:text-xs">
-                            <TableHeader className="[&_tr]:border-y [&_th]:p-0.5 [&_th]:h-auto">
-                              <TableRow className="bg-transparent hover:bg-transparent">
-                                {summaryMode ? (
-                                  <>
-                                    <TableHead
-                                      className="font-bold"
-                                      colSpan={2}
-                                    >
-                                      {t("type")}
-                                    </TableHead>
-                                    <TableHead className="font-bold text-right w-32">
-                                      {t("amount")}
-                                    </TableHead>
-                                  </>
-                                ) : (
-                                  <>
-                                    <TableHead className="font-bold w-10">
-                                      {t("date")}
-                                    </TableHead>
-                                    {hidePaymentTypeGrouping && (
-                                      <TableHead className="font-bold w-10">
+                      {payments.length > 0 && !selectedCategory && (
+                        <div className="mt-4">
+                          <hr className="border-gray-300 py-2" />
+                          <h2 className="text-sm font-semibold mb-1">
+                            {t("payment_details")}
+                          </h2>
+                          <div className="overflow-hidden">
+                            <Table className="w-full [&_th]:text-xs [&_td]:text-xs [&_tr]:text-xs">
+                              <TableHeader className="[&_tr]:border-y [&_th]:p-0.5 [&_th]:h-auto">
+                                <TableRow className="bg-transparent hover:bg-transparent">
+                                  {summaryMode ? (
+                                    <>
+                                      <TableHead
+                                        className="font-bold"
+                                        colSpan={2}
+                                      >
                                         {t("type")}
                                       </TableHead>
-                                    )}
-                                    <TableHead className="font-bold w-32">
-                                      {t("method")}
-                                    </TableHead>
-                                    <TableHead className="font-bold text-right w-32">
-                                      {t("amount")}
-                                    </TableHead>
-                                  </>
-                                )}
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody className="[&_tr]:border-0 [&_td]:p-0.5">
-                              {(() => {
-                                const validPayments = payments.filter(
-                                  (payment) =>
-                                    payment.status ===
-                                    PaymentReconciliationStatus.active,
-                                );
+                                      <TableHead className="font-bold text-right w-32">
+                                        {t("amount")}
+                                      </TableHead>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <TableHead className="font-bold w-10">
+                                        {t("date")}
+                                      </TableHead>
+                                      {hidePaymentTypeGrouping && (
+                                        <TableHead className="font-bold w-10">
+                                          {t("type")}
+                                        </TableHead>
+                                      )}
+                                      <TableHead className="font-bold w-32">
+                                        {t("method")}
+                                      </TableHead>
+                                      <TableHead className="font-bold text-right w-32">
+                                        {t("amount")}
+                                      </TableHead>
+                                    </>
+                                  )}
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody className="[&_tr]:border-0 [&_td]:p-0.5">
+                                {(() => {
+                                  const validPayments = payments.filter(
+                                    (payment) =>
+                                      payment.status ===
+                                      PaymentReconciliationStatus.active,
+                                  );
 
-                                const paymentGroups = validPayments.reduce(
-                                  (
-                                    acc: Record<
+                                  const paymentGroups = validPayments.reduce(
+                                    (
+                                      acc: Record<
+                                        string,
+                                        PaymentReconciliationRead[]
+                                      >,
+                                      payment: PaymentReconciliationRead,
+                                    ) => {
+                                      const type = payment.reconciliation_type;
+                                      const list = acc[type] ?? [];
+                                      list.push(payment);
+                                      acc[type] = list;
+                                      return acc;
+                                    },
+                                    {} as Record<
                                       string,
                                       PaymentReconciliationRead[]
                                     >,
-                                    payment: PaymentReconciliationRead,
-                                  ) => {
-                                    const type = payment.reconciliation_type;
-                                    const list = acc[type] ?? [];
-                                    list.push(payment);
-                                    acc[type] = list;
-                                    return acc;
-                                  },
-                                  {} as Record<
-                                    string,
-                                    PaymentReconciliationRead[]
-                                  >,
-                                );
-
-                                const sortedTypes =
-                                  Object.keys(paymentGroups).sort();
-
-                                const rows: React.ReactNode[] = [];
-
-                                sortedTypes.forEach((paymentType) => {
-                                  const paymentsOfType: PaymentReconciliationRead[] =
-                                    paymentGroups[paymentType] ?? [];
-                                  const typeTotal = add(
-                                    ...paymentsOfType.map((p) =>
-                                      multiply(
-                                        p.amount || 0,
-                                        p.is_credit_note ? -1 : 1,
-                                      ),
-                                    ),
                                   );
 
-                                  if (summaryMode) {
-                                    // In summary mode, show only payment type with total
-                                    rows.push(
-                                      <TableRow
-                                        key={`payment-type-${paymentType}`}
-                                        className="bg-transparent hover:bg-transparent"
-                                      >
-                                        <TableCell
-                                          colSpan={2}
-                                          className="font-semibold capitalize"
-                                        >
-                                          {t(paymentType)}
-                                        </TableCell>
-                                        <TableCell className="text-right font-semibold">
-                                          <MonetaryDisplay amount={typeTotal} />
-                                        </TableCell>
-                                      </TableRow>,
+                                  const sortedTypes =
+                                    Object.keys(paymentGroups).sort();
+
+                                  const rows: React.ReactNode[] = [];
+
+                                  sortedTypes.forEach((paymentType) => {
+                                    const paymentsOfType: PaymentReconciliationRead[] =
+                                      paymentGroups[paymentType] ?? [];
+                                    const typeTotal = add(
+                                      ...paymentsOfType.map((p) =>
+                                        multiply(
+                                          p.amount || 0,
+                                          p.is_credit_note ? -1 : 1,
+                                        ),
+                                      ),
                                     );
-                                  } else {
-                                    // Normal mode - show header, items, and subtotal
-                                    // Add payment type header (only if not hiding grouping)
-                                    if (!hidePaymentTypeGrouping) {
+
+                                    if (summaryMode) {
+                                      // In summary mode, show only payment type with total
                                       rows.push(
                                         <TableRow
                                           key={`payment-type-${paymentType}`}
-                                          className="font-semibold hover:bg-transparent"
+                                          className="bg-transparent hover:bg-transparent"
                                         >
                                           <TableCell
                                             colSpan={2}
-                                            className="capitalize"
+                                            className="font-semibold capitalize"
                                           >
                                             {t(paymentType)}
                                           </TableCell>
-                                          <TableCell className="text-right">
+                                          <TableCell className="text-right font-semibold">
                                             <MonetaryDisplay
                                               amount={typeTotal}
                                             />
                                           </TableCell>
                                         </TableRow>,
                                       );
-                                    }
-
-                                    paymentsOfType.forEach(
-                                      (payment: PaymentReconciliationRead) => {
+                                    } else {
+                                      // Normal mode - show header, items, and subtotal
+                                      // Add payment type header (only if not hiding grouping)
+                                      if (!hidePaymentTypeGrouping) {
                                         rows.push(
                                           <TableRow
-                                            key={payment.id}
-                                            className="bg-transparent hover:bg-transparent"
+                                            key={`payment-type-${paymentType}`}
+                                            className="font-semibold hover:bg-transparent"
                                           >
-                                            <TableCell>
-                                              {payment.payment_datetime
-                                                ? formatDateTime(
-                                                    payment.payment_datetime,
-                                                    "DD-MM-YY",
-                                                  )
-                                                : "-"}
-                                            </TableCell>
-                                            {hidePaymentTypeGrouping && (
-                                              <TableCell className="text-left capitalize">
-                                                {t(payment.reconciliation_type)}
-                                              </TableCell>
-                                            )}
-                                            <TableCell>
-                                              {
-                                                PAYMENT_RECONCILIATION_METHOD_MAP[
-                                                  payment.method
-                                                ]
-                                              }
+                                            <TableCell
+                                              colSpan={2}
+                                              className="capitalize"
+                                            >
+                                              {t(paymentType)}
                                             </TableCell>
                                             <TableCell className="text-right">
                                               <MonetaryDisplay
-                                                amount={multiply(
-                                                  payment.amount,
-                                                  payment.is_credit_note
-                                                    ? -1
-                                                    : 1,
-                                                )}
+                                                amount={typeTotal}
                                               />
                                             </TableCell>
                                           </TableRow>,
                                         );
-                                      },
-                                    );
-                                  }
-                                });
-
-                                // Add grand total
-                                rows.push(
-                                  <TableRow
-                                    key="grand-total"
-                                    className="bg-muted/30 font-semibold"
-                                  >
-                                    <TableCell
-                                      colSpan={
-                                        hidePaymentTypeGrouping && !summaryMode
-                                          ? 3
-                                          : 2
                                       }
-                                      className="text-right pr-2"
-                                    >
-                                      {t("total_paid")}
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                      <MonetaryDisplay
-                                        amount={add(
-                                          ...validPayments.map((p) =>
-                                            multiply(
-                                              p.amount || 0,
-                                              p.is_credit_note ? -1 : 1,
-                                            ),
-                                          ),
-                                        )}
-                                      />
-                                    </TableCell>
-                                  </TableRow>,
-                                );
 
-                                return rows;
-                              })()}
+                                      paymentsOfType.forEach(
+                                        (
+                                          payment: PaymentReconciliationRead,
+                                        ) => {
+                                          rows.push(
+                                            <TableRow
+                                              key={payment.id}
+                                              className="bg-transparent hover:bg-transparent"
+                                            >
+                                              <TableCell>
+                                                {payment.payment_datetime
+                                                  ? formatDateTime(
+                                                      payment.payment_datetime,
+                                                      "DD-MM-YY",
+                                                    )
+                                                  : "-"}
+                                              </TableCell>
+                                              {hidePaymentTypeGrouping && (
+                                                <TableCell className="text-left capitalize">
+                                                  {t(
+                                                    payment.reconciliation_type,
+                                                  )}
+                                                </TableCell>
+                                              )}
+                                              <TableCell>
+                                                {
+                                                  PAYMENT_RECONCILIATION_METHOD_MAP[
+                                                    payment.method
+                                                  ]
+                                                }
+                                              </TableCell>
+                                              <TableCell className="text-right">
+                                                <MonetaryDisplay
+                                                  amount={multiply(
+                                                    payment.amount,
+                                                    payment.is_credit_note
+                                                      ? -1
+                                                      : 1,
+                                                  )}
+                                                />
+                                              </TableCell>
+                                            </TableRow>,
+                                          );
+                                        },
+                                      );
+                                    }
+                                  });
+
+                                  // Add grand total
+                                  rows.push(
+                                    <TableRow
+                                      key="grand-total"
+                                      className="bg-muted/30 font-semibold"
+                                    >
+                                      <TableCell
+                                        colSpan={
+                                          hidePaymentTypeGrouping &&
+                                          !summaryMode
+                                            ? 3
+                                            : 2
+                                        }
+                                        className="text-right pr-2"
+                                      >
+                                        {t("total_paid")}
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        <MonetaryDisplay
+                                          amount={add(
+                                            ...validPayments.map((p) =>
+                                              multiply(
+                                                p.amount || 0,
+                                                p.is_credit_note ? -1 : 1,
+                                              ),
+                                            ),
+                                          )}
+                                        />
+                                      </TableCell>
+                                    </TableRow>,
+                                  );
+
+                                  return rows;
+                                })()}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Account Summary Section */}
+                      {account && (
+                        <div className="overflow-hidden mt-4">
+                          <Table className="w-full border [&_th]:text-xs [&_td]:text-xs">
+                            <TableHeader className="[&_tr]:border [&_th]:p-0.5 [&_th]:h-auto">
+                              <TableRow className="bg-transparent hover:bg-transparent">
+                                <TableHead className="text-center font-bold">
+                                  {t("billed_gross")}
+                                </TableHead>
+                                <TableHead className="text-center font-bold">
+                                  {t("total_paid")}
+                                </TableHead>
+                                <TableHead className="text-center font-bold">
+                                  {t("amount_due")}
+                                </TableHead>
+                                <TableHead className="text-center font-bold">
+                                  {t("total_billable")}
+                                </TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody className="[&_tr]:border [&_td]:p-0.5">
+                              <TableRow className="bg-transparent hover:bg-transparent">
+                                <TableCell className="text-center">
+                                  <MonetaryDisplay
+                                    amount={account.total_gross}
+                                  />
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  <MonetaryDisplay
+                                    amount={account.total_paid}
+                                  />
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  <MonetaryDisplay
+                                    amount={account.total_balance}
+                                  />
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  <MonetaryDisplay
+                                    amount={account.total_billable_charge_items}
+                                  />
+                                </TableCell>
+                              </TableRow>
                             </TableBody>
                           </Table>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* Account Summary Section */}
-                    {account && (
-                      <div className="overflow-hidden mt-4">
-                        <Table className="w-full border [&_th]:text-xs [&_td]:text-xs">
-                          <TableHeader className="[&_tr]:border [&_th]:p-0.5 [&_th]:h-auto">
-                            <TableRow className="bg-transparent hover:bg-transparent">
-                              <TableHead className="text-center font-bold">
-                                {t("billed_gross")}
-                              </TableHead>
-                              <TableHead className="text-center font-bold">
-                                {t("total_paid")}
-                              </TableHead>
-                              <TableHead className="text-center font-bold">
-                                {t("amount_due")}
-                              </TableHead>
-                              <TableHead className="text-center font-bold">
-                                {t("total_billable")}
-                              </TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody className="[&_tr]:border [&_td]:p-0.5">
-                            <TableRow className="bg-transparent hover:bg-transparent">
-                              <TableCell className="text-center">
-                                <MonetaryDisplay amount={account.total_gross} />
-                              </TableCell>
-                              <TableCell className="text-center">
-                                <MonetaryDisplay amount={account.total_paid} />
-                              </TableCell>
-                              <TableCell className="text-center">
-                                <MonetaryDisplay
-                                  amount={account.total_balance}
-                                />
-                              </TableCell>
-                              <TableCell className="text-center">
-                                <MonetaryDisplay
-                                  amount={account.total_billable_charge_items}
-                                />
-                              </TableCell>
-                            </TableRow>
-                          </TableBody>
-                        </Table>
-                      </div>
-                    )}
-
-                    {/* Footer Section */}
-                    <PrintFooter
-                      showPreparedBy
-                      className="mt-4 border-t border-gray-200"
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                      {/* Footer Section */}
+                      <PrintFooter
+                        showPreparedBy
+                        className="mt-4 border-t border-gray-200"
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
         </DisablingCover>
       </PrintPreview>
     </div>
