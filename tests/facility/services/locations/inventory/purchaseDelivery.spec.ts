@@ -61,12 +61,14 @@ test.describe("Purchase Delivery", () => {
       .first()
       .click();
 
-    await page.getByRole("button", { name: "Save" }).click();
-    await page.waitForResponse(
-      (resp) =>
-        resp.url().includes("/api/v1/supply_delivery/") &&
-        resp.status() === 200,
-    );
+    await Promise.all([
+      page.waitForResponse(
+        (resp) =>
+          resp.url().includes("/api/v1/supply_delivery/") &&
+          resp.status() === 200,
+      ),
+      page.getByRole("button", { name: "Save" }).click(),
+    ]);
     await page.getByRole("button", { name: "Mark as Approved" }).click();
 
     await expect(

@@ -158,7 +158,7 @@ test.describe("Charge Item Definition Creation", () => {
     await page.getByRole("link", { name: "View" }).click();
     await expect(page.getByRole("heading", { name: title })).toBeVisible();
     await expect(page.getByText(description)).toBeVisible();
-    await expect(page.getByText(purpose)).toBeVisible();
+    await expect(page.getByText(purpose).last()).toBeVisible();
     await expect(page.getByText(url)).toBeVisible();
     await expect(page.getByText(mrp)).toBeVisible();
     await expect(page.getByText(purchasePrice)).toBeVisible();
