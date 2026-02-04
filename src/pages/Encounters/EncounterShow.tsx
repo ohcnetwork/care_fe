@@ -78,7 +78,7 @@ export const EncounterShow = (props: Props) => {
     canReadSelectedEncounter,
   } = useEncounter();
 
-  useSidebarAutoCollapse({ restore: false });
+  useSidebarAutoCollapse();
   const [actionsOpen, setActionsOpen] = useState(false);
   const getShortcutDisplay = useEncounterShortcutDisplays();
 
