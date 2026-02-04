@@ -22,7 +22,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
-import { useSidebarAutoCollapse } from "@/hooks/useSidebarAutoCollapse";
 import { cn } from "@/lib/utils";
 import EncounterHistorySelector from "@/pages/Encounters/EncounterHistorySelector";
 import { EncounterConsentsTab } from "@/pages/Encounters/tabs/consents";
@@ -78,7 +77,6 @@ export const EncounterShow = (props: Props) => {
     canReadSelectedEncounter,
   } = useEncounter();
 
-  useSidebarAutoCollapse({ restore: false });
   const [actionsOpen, setActionsOpen] = useState(false);
   const getShortcutDisplay = useEncounterShortcutDisplays();
 
