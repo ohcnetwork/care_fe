@@ -67,7 +67,7 @@ test.describe("Purchase Delivery", () => {
           resp.url().includes("/api/v1/supply_delivery/") &&
           resp.status() === 200,
       ),
-      page.getByRole("button", { name: "Save" }).click(),
+      page.getByRole("button", { name: "Save ⇧ + ENTER" }).click(),
     ]);
     await page.getByRole("button", { name: "Mark as Approved" }).click();
 
