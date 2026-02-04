@@ -2,14 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 import { FilterState } from "@/hooks/useFilters";
 
@@ -104,55 +98,71 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
 
   const clearSelections = () => {
     setSelectedFacilityType(undefined);
-    setOrgTypes((prevTypes) => {
-      return [prevTypes[0], prevTypes[1]];
-    });
+    setOrgTypes((prevTypes) => [prevTypes[0], prevTypes[1]]);
     setSelectedLevels([]);
     onChange({ organization: undefined, facility_type: undefined });
   };
+
   const levelCount = selectedLevels.length
     ? Math.min(selectedLevels.length + 1, DEFAULT_ORG_LEVELS)
     : 1;
+
   return (
-    <div className="flex flex-col flex-wrap lg:flex-nowrap sm:flex-row gap-3">
-      <div className="flex flex-col gap-2 lg:gap-0 sm:flex-row lg:rounded-md lg:border-1 lg:border-secondary-400 overflow-clip sm:w-fit w-[calc(100vw-2rem)]">
+    <div className="flex flex-col flex-wrap lg:flex-nowrap sm:flex-row items-center gap-3">
+      {/* 🔹 FIXED CONTAINER: divide-x creates vertical lines, [&_button] removes internal borders */}
+      <div className="flex flex-col sm:flex-row items-stretch rounded-md border border-secondary-400 overflow-hidden divide-y sm:divide-y-0 sm:divide-x divide-secondary-400 w-full sm:w-fit [&_button]:border-none [&_button]:rounded-none [&_button]:shadow-none">
+        {/* Organization Levels */}
         {[...Array(levelCount)].map((_, index) => (
-          <OrganizationLevel
-            key={`organization-level-${index}`}
-            index={index}
-            skip={skipLevels?.includes(index) || false}
-            selectedLevels={selectedLevels}
-            orgTypes={orgTypes}
-            setOrgTypes={setOrgTypes}
-            onChange={onChange}
-          />
+          <div key={`org-level-${index}`} className="w-full sm:w-64">
+            <OrganizationLevel
+              index={index}
+              skip={skipLevels?.includes(index) || false}
+              selectedLevels={selectedLevels}
+              orgTypes={orgTypes}
+              setOrgTypes={setOrgTypes}
+              onChange={(val) => {
+                const parentId =
+                  index > 0 ? selectedLevels[index - 1]?.id : undefined;
+                if (val.organization === parentId) {
+                  setSelectedLevels((prev) => prev.slice(0, index));
+                }
+                onChange(val);
+              }}
+            />
+          </div>
         ))}
+
+        {/* Facility Type */}
+        {selected && (
+          <div className="w-full sm:w-64">
+            <Autocomplete
+              options={FACILITY_TYPES.map((type) => ({
+                label: type.text,
+                value: String(type.id),
+              }))}
+              value={
+                selectedFacilityType ? String(selectedFacilityType.id) : ""
+              }
+              // Autocomplete likely accepts className, but we use h-full to fill the single line
+              className="h-full border-none rounded-none shadow-none"
+              onChange={(val) => {
+                if (!val) {
+                  setSelectedFacilityType(undefined);
+                  onChange({ facility_type: undefined });
+                } else {
+                  const type = FACILITY_TYPES.find((t) => String(t.id) === val);
+                  setSelectedFacilityType(type);
+                  onChange({ facility_type: val });
+                }
+              }}
+              showClearButton={!!selectedFacilityType}
+              placeholder={t("select_facility_type")}
+            />
+          </div>
+        )}
       </div>
-      {selected && (
-        <Select
-          value={selectedFacilityType?.text || ""}
-          onValueChange={(value) => {
-            const facilityType = FACILITY_TYPES.find(
-              (type) => type.text === value,
-            );
-            setSelectedFacilityType(facilityType);
-            onChange({
-              facility_type: facilityType?.id,
-            });
-          }}
-        >
-          <SelectTrigger className="sm:max-w-56 h-[38px]">
-            <SelectValue placeholder={t("select_facility_type")} />
-          </SelectTrigger>
-          <SelectContent>
-            {FACILITY_TYPES.map((type) => (
-              <SelectItem key={type.id} value={type.text}>
-                {type.text}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      )}
+
+      {/* Global Clear Button */}
       <Button
         onClick={clearSelections}
         variant="ghost"

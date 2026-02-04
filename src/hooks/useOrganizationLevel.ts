@@ -2,17 +2,17 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 
 import { FilterState } from "@/hooks/useFilters";
-
-import query from "@/Utils/request/query";
 import { Organization } from "@/types/organization/organization";
+
 import organizationApi from "@/types/organization/organizationApi";
+import query from "@/Utils/request/query";
 
 interface UseOrganizationLevelProps {
   index: number;
   skip: boolean;
   selectedLevels: Organization[];
   setOrgTypes: React.Dispatch<React.SetStateAction<string[]>>;
-  onChange: (Filter: FilterState, index?: number) => void;
+  onChange: (filter: FilterState, index?: number) => void;
 }
 
 export function useOrganizationLevel({
@@ -49,16 +49,14 @@ export function useOrganizationLevel({
   useEffect(() => {
     if (selectedLevels[index]) {
       const currentOrg = selectedLevels[index];
-      if (currentOrg?.metadata?.govt_org_children_type) {
+      const childrenType = currentOrg?.metadata?.govt_org_children_type;
+      if (typeof childrenType === "string" && childrenType) {
         setOrgTypes((prevTypes) => {
           const newTypes = [...prevTypes];
-          // Update next level type
-          if (currentOrg.metadata?.govt_org_children_type) {
-            if (index === newTypes.length) {
-              newTypes.push(currentOrg.metadata.govt_org_children_type);
-            } else {
-              newTypes[index + 1] = currentOrg.metadata.govt_org_children_type;
-            }
+          if (index === newTypes.length) {
+            newTypes.push(childrenType);
+          } else {
+            newTypes[index + 1] = childrenType;
           }
           return newTypes;
         });
@@ -75,12 +73,32 @@ export function useOrganizationLevel({
     );
   }, [availableOrgs?.results]);
 
+  /**
+   * ✅ FIXED HANDLER
+   * - Handles normal selection
+   * - Handles clear (X button)
+   * - Cascades child clears
+   */
   const handleChange = (value: string) => {
-    const selectedOrg = availableOrgs?.results.find((org) => org.id === value);
-    if (selectedOrg) {
-      onChange({ organization: selectedOrg.id }, index);
+    // 🔹 CLEAR CLICKED
+    if (!value) {
+      onChange(
+        {
+          organization: selectedLevels[index - 1]?.id,
+        },
+        index,
+      );
       setLevelSearch("");
+      return;
     }
+
+    // 🔹 NORMAL SELECTION
+    const selectedOrg = availableOrgs?.results.find((org) => org.id === value);
+
+    if (!selectedOrg) return;
+
+    onChange({ organization: selectedOrg.id }, index);
+    setLevelSearch("");
   };
 
   const handleSearch = (value: string) => setLevelSearch(value);
@@ -93,3 +111,4 @@ export function useOrganizationLevel({
     availableOrgs,
   };
 }
+export default useOrganizationLevel;
