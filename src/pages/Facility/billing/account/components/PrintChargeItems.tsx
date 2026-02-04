@@ -1275,7 +1275,7 @@ export const PrintChargeItems = (props: {
                                             className="font-semibold hover:bg-transparent"
                                           >
                                             <TableCell
-                                              colSpan={2}
+                                              colSpan={3}
                                               className="capitalize"
                                             >
                                               {t(paymentType)}
@@ -1349,10 +1349,7 @@ export const PrintChargeItems = (props: {
                                     >
                                       <TableCell
                                         colSpan={
-                                          hidePaymentTypeGrouping &&
-                                          !summaryMode
-                                            ? 3
-                                            : 2
+                                          hidePaymentTypeGrouping ? 4 : 3
                                         }
                                         className="text-right pr-2"
                                       >
@@ -1502,7 +1499,7 @@ export const PrintChargeItems = (props: {
                                             className="font-semibold hover:bg-transparent"
                                           >
                                             <TableCell
-                                              colSpan={2}
+                                              colSpan={3}
                                               className="capitalize"
                                             >
                                               {t(paymentType)}
@@ -1576,10 +1573,7 @@ export const PrintChargeItems = (props: {
                                     >
                                       <TableCell
                                         colSpan={
-                                          hidePaymentTypeGrouping &&
-                                          !summaryMode
-                                            ? 3
-                                            : 2
+                                          hidePaymentTypeGrouping ? 4 : 3
                                         }
                                         className="text-right pr-2"
                                       >
