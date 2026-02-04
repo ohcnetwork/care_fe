@@ -85,19 +85,7 @@ export function validateEncounterQuestion(
 
   if (
     value?.period?.end &&
-    new Date(value.period.start!) > new Date(value.period.end)
-  ) {
-    errors.push(
-      createValidationError(
-        questionId,
-        ENCOUNTER_FIELDS.PERIOD_END.key,
-        "end_date_after_start",
-      ),
-    );
-  }
-
-  if (
-    value?.period?.end &&
+    value?.period?.start &&
     new Date(value.period.start!) > new Date(value.period.end)
   ) {
     errors.push(
