@@ -638,40 +638,52 @@ export const PrintChargeItems = (props: {
                                   const rows: React.ReactNode[] = [];
 
                                   sortedCategories.forEach((categoryTitle) => {
-                                    const items: ChargeItemRead[] =
+                                    const allItems: ChargeItemRead[] =
                                       groups[categoryTitle] ?? [];
 
-                                    const categoryTotal = add(
-                                      ...items.map((i) => i.total_price || 0),
+                                    const nonReturnedItems = allItems.filter(
+                                      (item) => !item.paid_invoice?.is_refund,
+                                    );
+                                    const returnedItems = allItems.filter(
+                                      (item) => item.paid_invoice?.is_refund,
                                     );
 
-                                    if (summaryMode) {
-                                      // In summary mode, show only category with total
-                                      rows.push(
-                                        <TableRow
-                                          key={`category-${categoryTitle}`}
-                                          className="bg-transparent hover:bg-transparent"
-                                        >
-                                          <TableCell
-                                            colSpan={5}
-                                            className="font-semibold capitalize"
-                                          >
-                                            {categoryTitle}
-                                          </TableCell>
-                                          <TableCell className="text-right font-semibold">
-                                            <MonetaryDisplay
-                                              amount={categoryTotal}
-                                            />
-                                          </TableCell>
-                                        </TableRow>,
+                                    const pushCategorySection = (
+                                      sectionTitle: string,
+                                      items: ChargeItemRead[],
+                                    ) => {
+                                      if (items.length === 0) return;
+
+                                      const sectionTotal = add(
+                                        ...items.map((i) => i.total_price || 0),
                                       );
-                                    } else {
-                                      // Normal mode - show header, items, and subtotal
-                                      // Add category header (only if not hiding categories)
+
+                                      if (summaryMode) {
+                                        rows.push(
+                                          <TableRow
+                                            key={`category-${sectionTitle}`}
+                                            className="bg-transparent hover:bg-transparent"
+                                          >
+                                            <TableCell
+                                              colSpan={5}
+                                              className="font-semibold capitalize"
+                                            >
+                                              {sectionTitle}
+                                            </TableCell>
+                                            <TableCell className="text-right font-semibold">
+                                              <MonetaryDisplay
+                                                amount={sectionTotal}
+                                              />
+                                            </TableCell>
+                                          </TableRow>,
+                                        );
+                                        return;
+                                      }
+
                                       if (!hideCategories) {
                                         rows.push(
                                           <TableRow
-                                            key={`category-${categoryTitle}`}
+                                            key={`category-${sectionTitle}`}
                                             className="font-bold hover:bg-transparent"
                                           >
                                             <TableCell
@@ -682,11 +694,11 @@ export const PrintChargeItems = (props: {
                                               }
                                               className="capitalize"
                                             >
-                                              {categoryTitle}
+                                              {sectionTitle}
                                             </TableCell>
                                             <TableCell className="text-right">
                                               <MonetaryDisplay
-                                                amount={categoryTotal}
+                                                amount={sectionTotal}
                                               />
                                             </TableCell>
                                           </TableRow>,
@@ -719,7 +731,7 @@ export const PrintChargeItems = (props: {
                                               <TableCell className="w-10 text-left">
                                                 <div className="flex items-center gap-1">
                                                   {!hasIssuedOrBalancedInvoice && (
-                                                    <AlertTriangle className="h-3 w-3 text-red-600 flex-shrink-0" />
+                                                    <AlertTriangle className="h-3 w-3 text-red-600 shrink-0" />
                                                   )}
                                                   {formatDateTime(
                                                     chargeItem.created_date,
@@ -772,7 +784,16 @@ export const PrintChargeItems = (props: {
                                           );
                                         },
                                       );
-                                    }
+                                    };
+
+                                    pushCategorySection(
+                                      categoryTitle,
+                                      nonReturnedItems,
+                                    );
+                                    pushCategorySection(
+                                      `${categoryTitle} - ${t("returned")}`,
+                                      returnedItems,
+                                    );
                                   });
 
                                   // Add grand total
