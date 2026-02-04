@@ -61,7 +61,7 @@ test.describe("Purchase Delivery", () => {
       .first()
       .click();
 
-    await page.getByRole("button", { name: "Save" }).click();
+    await page.keyboard.press("Shift+Enter");
 
     await page.getByRole("button", { name: "Mark as Approved" }).click();
 
