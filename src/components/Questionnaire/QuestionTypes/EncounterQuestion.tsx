@@ -493,7 +493,12 @@ export function EncounterQuestion({
               encounter.hospitalization?.discharge_disposition) && (
               <>
                 <div className="space-y-2">
-                  <Label>
+                  <Label
+                    className={cn(
+                      hasError(ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key) &&
+                        "text-red-500",
+                    )}
+                  >
                     {t("discharge_disposition")}
                     <span className="text-red-500">*</span>
                   </Label>
