@@ -135,6 +135,7 @@ test.describe("Charge Item Definition Creation", () => {
     await page.getByRole("checkbox").first().click();
     await page.getByRole("button", { name: "Done" }).click();
     await page.getByRole("button", { name: "Add Condition" }).click();
+    await page.waitForLoadState("networkidle");
     await page
       .getByRole("combobox")
       .filter({ hasText: /^Metric|Encounter Tags$/ })
