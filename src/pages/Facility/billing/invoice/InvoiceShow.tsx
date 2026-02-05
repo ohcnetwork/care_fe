@@ -30,6 +30,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import {
   INVOICE_STATUS_COLORS,
@@ -672,17 +678,31 @@ export function InvoiceShow({
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem asChild className="text-primary-900">
-                      <Button
-                        variant="ghost"
-                        onClick={() =>
-                          handleStatusChange(InvoiceStatus.cancelled)
-                        }
-                        disabled={isCancelPending || hasActivePayments}
-                        className="w-full flex flex-row justify-stretch items-center"
-                      >
-                        <CareIcon icon="l-times-circle" className="mr-1" />
-                        <span>{t("mark_as_cancelled")}</span>
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              onClick={() =>
+                                handleStatusChange(InvoiceStatus.cancelled)
+                              }
+                              disabled={isCancelPending || hasActivePayments}
+                              className="w-full flex flex-row justify-stretch items-center"
+                            >
+                              <CareIcon
+                                icon="l-times-circle"
+                                className="mr-1"
+                              />
+                              <span>{t("mark_as_cancelled")}</span>
+                            </Button>
+                          </TooltipTrigger>
+                          {hasActivePayments && (
+                            <TooltipContent>
+                              {t("cannot_cancel_invoice_with_payments")}
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      </TooltipProvider>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild className="text-primary-900">
                       <Button
