@@ -274,10 +274,9 @@ export function InvoiceShow({
         status === InvoiceStatus.cancelled ||
         status === InvoiceStatus.entered_in_error
       ) {
-        const hasActivePayments =
-          (invoice?.payments?.filter(
-            (p) => p.status === PaymentReconciliationStatus.active,
-          ).length ?? 0) > 0;
+        const hasActivePayments = !!invoice?.payments?.some(
+          (p) => p.status === PaymentReconciliationStatus.active,
+        );
 
         if (hasActivePayments) {
           setSelectedStatus(status);
