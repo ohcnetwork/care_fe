@@ -1,6 +1,5 @@
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -114,14 +113,13 @@ export function ManageQueueFinishedTab({
                   )}
                 </TableCell>
                 <TableCell>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link
-                      href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
-                    >
-                      {t("encounter")}
-                      <ExternalLink />
-                    </Link>
-                  </Button>
+                  <Link
+                    href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
+                    className="hover:underline transition-colors flex items-center gap-1"
+                  >
+                    {t("encounter")}
+                    <ExternalLink className="size-3" />
+                  </Link>
                 </TableCell>
                 <TableCell>
                   {token.sub_queue?.name || (
