@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { format, subHours } from "date-fns";
 import { CopyPlus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -112,40 +113,30 @@ const getTimeRangeLabel = (range: TimeRange): string => {
   return allOptions.find((o) => o.value === range)?.label || range;
 };
 
+const TIME_RANGE_HOURS: Record<Exclude<TimeRange, "ALL">, number> = {
+  "1H": 1,
+  "6H": 6,
+  "12H": 12,
+  "24H": 24,
+  "48H": 48,
+  "72H": 72,
+};
+
 const getTimeRangeStartDate = (range: TimeRange): Date | null => {
-  const now = new Date();
-  switch (range) {
-    case "1H":
-      return new Date(now.getTime() - 1 * 60 * 60 * 1000);
-    case "6H":
-      return new Date(now.getTime() - 6 * 60 * 60 * 1000);
-    case "12H":
-      return new Date(now.getTime() - 12 * 60 * 60 * 1000);
-    case "24H":
-      return new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    case "48H":
-      return new Date(now.getTime() - 48 * 60 * 60 * 1000);
-    case "72H":
-      return new Date(now.getTime() - 72 * 60 * 60 * 1000);
-    case "ALL":
-      return null;
-  }
+  if (range === "ALL") return null;
+  return subHours(new Date(), TIME_RANGE_HOURS[range]);
 };
 
 const formatXAxisTick = (value: number, timeRange: TimeRange): string => {
   const date = new Date(value);
-  const hours = date.getHours().toString().padStart(2, "0");
-  const minutes = date.getMinutes().toString().padStart(2, "0");
-  const day = date.getDate().toString().padStart(2, "0");
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
 
   if (["1H", "6H", "12H"].includes(timeRange)) {
-    return `${hours}:${minutes}`;
+    return format(date, "HH:mm");
   }
   if (["24H", "48H", "72H"].includes(timeRange)) {
-    return `${hours}:${minutes}\n${day}/${month}`;
+    return `${format(date, "HH:mm")}\n${format(date, "dd/MM")}`;
   }
-  return `${day}/${month}`;
+  return format(date, "dd/MM");
 };
 
 const roundToNearestMinute = (dateString: string): string => {
@@ -158,13 +149,8 @@ const formatChartDate = (
   dateString: string,
 ): { display: string; time: number } => {
   const date = new Date(dateString);
-  const hours = date.getHours().toString().padStart(2, "0");
-  const minutes = date.getMinutes().toString().padStart(2, "0");
-  const day = date.getDate().toString().padStart(2, "0");
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const year = date.getFullYear();
   return {
-    display: `${hours}:${minutes} ${day}/${month}/${year}`,
+    display: format(date, "HH:mm dd/MM/yyyy"),
     time: date.getTime(),
   };
 };
@@ -429,6 +415,7 @@ export const ObservationVisualizer = ({
                       key={option.value}
                       onClick={() => setTimeRange(groupIndex, option.value)}
                       className={cn(
+                        "cursor-pointer",
                         getTimeRange(groupIndex) === option.value &&
                           "bg-gray-100 font-medium",
                       )}
@@ -439,7 +426,7 @@ export const ObservationVisualizer = ({
                   {codeGroups.length > 1 && (
                     <DropdownMenuItem
                       onClick={() => applyToAll(getTimeRange(groupIndex))}
-                      className="border-t text-primary-600"
+                      className="border-t text-primary-600 cursor-pointer"
                     >
                       <CopyPlus className="size-4" />
                       {t("apply_to_all_charts")}
