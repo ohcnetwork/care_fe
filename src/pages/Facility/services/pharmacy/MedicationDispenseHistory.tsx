@@ -1,12 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { startOfDay } from "date-fns";
 import { ArrowUpRightSquare } from "lucide-react";
-import { navigate } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 
 import Page from "@/components/Common/Page";
@@ -27,6 +25,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import query from "@/Utils/request/query";
 import { dateQueryString, formatDateTime } from "@/Utils/utils";
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
+import { Button } from "@/components/ui/button";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import {
   createdByFilter,
@@ -45,6 +44,7 @@ import {
 } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import { UserReadMinimal } from "@/types/user/user";
+import { Link } from "raviger";
 
 export default function MedicationDispenseHistory({
   facilityId,
@@ -263,17 +263,14 @@ export default function MedicationDispenseHistory({
                   </TableCell>
 
                   <TableCell>
-                    <Button
-                      variant="outline"
-                      className="font-semibold"
-                      onClick={() => {
-                        navigate(
-                          `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${item.id}`,
-                        );
-                      }}
-                    >
-                      <ArrowUpRightSquare strokeWidth={1.5} />
-                      {t("view_order")}
+                    <Button variant="outline" asChild>
+                      <Link href={`/medication_dispense/order/${item.id}`}>
+                        <ArrowUpRightSquare
+                          strokeWidth={1.5}
+                          className="size-4"
+                        />
+                        {t("view_order")}
+                      </Link>
                     </Button>
                   </TableCell>
                 </TableRow>
