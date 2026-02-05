@@ -5,7 +5,7 @@ import {
   MoreVertical,
   ReceiptTextIcon,
 } from "lucide-react";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -300,28 +300,13 @@ export default function MedicationRequestList({
 
         {qParams.patient_external_id && (
           <div className="ml-auto items-end">
-            <Button
-              variant="outline_primary"
-              className="font-semibold"
-              onClick={() => {
-                const params = new URLSearchParams();
-                if (qParams.created_date_after) {
-                  params.set("created_date_after", qParams.created_date_after);
-                }
-                if (qParams.created_date_before) {
-                  params.set(
-                    "created_date_before",
-                    qParams.created_date_before,
-                  );
-                }
-                const queryString = params.toString();
-                navigate(
-                  `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${qParams.patient_external_id}/bill${queryString ? `?${queryString}` : ""}`,
-                );
-              }}
-            >
-              <ReceiptTextIcon strokeWidth={1.5} />
-              {t("bill_all_pending_prescriptions")}
+            <Button variant="outline_primary" asChild>
+              <Link
+                href={`/medication_requests/patient/${qParams.patient_external_id}/bill`}
+              >
+                <ReceiptTextIcon strokeWidth={1.5} />
+                {t("bill_all_pending_prescriptions")}
+              </Link>
             </Button>
           </div>
         )}
