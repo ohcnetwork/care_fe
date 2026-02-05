@@ -322,9 +322,16 @@ export function InvoiceShow({
     invoice?.status !== InvoiceStatus.cancelled;
 
   const hasActivePayments =
-    invoice?.payments?.filter(
+    invoice?.payments?.some(
       (p) => p.status === PaymentReconciliationStatus.active,
-    ).length > 0;
+    ) ?? false;
+
+  const hasActiveCreditNotes =
+    invoice?.credit_notes?.some(
+      (p) => p.status === PaymentReconciliationStatus.active,
+    ) ?? false;
+
+  const canCancelInvoice = !hasActivePayments && !hasActiveCreditNotes;
 
   const [{ sourceUrl }] = useQueryParams();
 
@@ -686,7 +693,7 @@ export function InvoiceShow({
                               onClick={() =>
                                 handleStatusChange(InvoiceStatus.cancelled)
                               }
-                              disabled={isCancelPending || hasActivePayments}
+                              disabled={isCancelPending || !canCancelInvoice}
                               className="w-full flex flex-row justify-stretch items-center"
                             >
                               <CareIcon
@@ -696,9 +703,21 @@ export function InvoiceShow({
                               <span>{t("mark_as_cancelled")}</span>
                             </Button>
                           </TooltipTrigger>
-                          {hasActivePayments && (
+                          {(isCancelPending ||
+                            hasActivePayments ||
+                            hasActiveCreditNotes) && (
                             <TooltipContent>
-                              {t("cannot_cancel_invoice_with_payments")}
+                              {isCancelPending
+                                ? t("cancellation_in_progress")
+                                : hasActivePayments && hasActiveCreditNotes
+                                  ? t(
+                                      "cannot_cancel_invoice_with_payments_and_credit_notes",
+                                    )
+                                  : hasActivePayments
+                                    ? t("cannot_cancel_invoice_with_payments")
+                                    : t(
+                                        "cannot_cancel_invoice_with_credit_notes",
+                                      )}
                             </TooltipContent>
                           )}
                         </Tooltip>
