@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { startOfDay } from "date-fns";
-import { ArrowUpRightSquare, Plus } from "lucide-react";
+import { ArrowUpRightSquare } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -170,12 +170,6 @@ export default function MedicationDispenseHistory({
           facilityId={facilityId}
           locationId={locationId}
           patientId={qParams.patientId}
-          trigger={
-            <Button>
-              <Plus className="mr-2 size-4" />
-              {t("new_dispense")}
-            </Button>
-          }
         />
       }
     >
