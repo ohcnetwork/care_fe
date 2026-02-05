@@ -315,6 +315,11 @@ export function InvoiceShow({
     invoice?.status !== InvoiceStatus.entered_in_error &&
     invoice?.status !== InvoiceStatus.cancelled;
 
+  const hasActivePayments =
+    invoice?.payments?.filter(
+      (p) => p.status === PaymentReconciliationStatus.active,
+    ).length > 0;
+
   const [{ sourceUrl }] = useQueryParams();
 
   const alertButtonText = (() => {
@@ -672,7 +677,7 @@ export function InvoiceShow({
                         onClick={() =>
                           handleStatusChange(InvoiceStatus.cancelled)
                         }
-                        disabled={isCancelPending}
+                        disabled={isCancelPending || hasActivePayments}
                         className="w-full flex flex-row justify-stretch items-center"
                       >
                         <CareIcon icon="l-times-circle" className="mr-1" />
