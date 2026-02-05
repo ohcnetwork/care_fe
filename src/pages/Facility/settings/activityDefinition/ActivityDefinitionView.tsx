@@ -34,7 +34,8 @@ import {
   Status,
 } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ExternalLinkIcon } from "lucide-react";
+import { Link } from "raviger";
 
 type DuoToneIconName = keyof typeof duoToneIcons;
 
@@ -274,7 +275,16 @@ export default function ActivityDefinitionView({
                     className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50"
                   >
                     <div className="space-y-2">
-                      <p className="font-medium">{specimen.title}</p>
+                      <div className="flex items-center gap-1">
+                        <p className="font-medium">{specimen.title}</p>
+                        <Link
+                          basePath="/"
+                          href={`/facility/${facilityId}/settings/specimen_definitions/${specimen.slug}`}
+                          className="flex items-center gap-1"
+                        >
+                          <ExternalLinkIcon className="size-3" />
+                        </Link>
+                      </div>
                       <p className="text-sm text-gray-600">
                         {specimen.description}
                       </p>
@@ -303,7 +313,16 @@ export default function ActivityDefinitionView({
                       className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50"
                     >
                       <div className="space-y-2">
-                        <p className="font-medium">{observation.title}</p>
+                        <div className="flex items-center gap-1">
+                          <p className="font-medium">{observation.title}</p>
+                          <Link
+                            basePath="/"
+                            href={`/facility/${facilityId}/settings/observation_definitions/${observation.slug}`}
+                            className="flex items-center gap-1"
+                          >
+                            <ExternalLinkIcon className="size-3" />
+                          </Link>
+                        </div>
                         <p className="text-sm text-gray-600">
                           {observation.description}
                         </p>
@@ -338,7 +357,16 @@ export default function ActivityDefinitionView({
                   >
                     <div className="space-y-2">
                       <div className="flex items-center justify-between gap-4">
-                        <p className="font-medium">{chargeItem.title}</p>
+                        <div className="flex items-center gap-1">
+                          <p className="font-medium">{chargeItem.title}</p>
+                          <Link
+                            basePath="/"
+                            href={`/facility/${facilityId}/settings/charge_item_definitions/${chargeItem.slug}`}
+                            className="flex items-center gap-1"
+                          >
+                            <ExternalLinkIcon className="size-3" />
+                          </Link>
+                        </div>
                         <ChargeItemDefinitionPopover
                           chargeItemDefinition={chargeItem}
                         />
