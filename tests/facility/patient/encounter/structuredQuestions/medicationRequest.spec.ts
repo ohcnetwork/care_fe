@@ -138,9 +138,9 @@ test.describe("Medication Request Questionnaire", () => {
 
     await page
       .getByRole("combobox")
-      .filter({ hasText: /Add (another )?Medication/i })
+      .filter({ hasText: /Add Medication/i })
       .click();
-    await page.getByRole("tab", { name: "Medication List" }).click();
+    await page.getByRole("tab", { name: "Medication" }).click();
     await page.getByPlaceholder(/Search Medications/i).fill(medicationName);
     await page
       .getByRole("option", { name: medicationName, exact: true })
@@ -176,6 +176,8 @@ test.describe("Medication Request Questionnaire", () => {
 
     // Select random additional instruction - target only enabled button
     const instruction = faker.helpers.arrayElement(instructionOptions);
+
+    await page.getByTitle("Show Advanced Fields").first().click();
     await page
       .locator("button:not([disabled])")
       .filter({ hasText: "No instructions selected" })
@@ -239,7 +241,7 @@ test.describe("Medication Request Questionnaire", () => {
     const medicationRow = page
       .locator('[data-slot="table-body"] tr')
       .filter({ hasText: medicationName })
-      .filter({ hasText: `${dosageQuantity} ${dosageUnit}` })
+      .filter({ hasText: `${dosageQuantity.toFixed(2)} ${dosageUnit}` })
       .filter({ hasText: frequency })
       .filter({ hasText: `${duration} ${durationUnit}` });
 
@@ -253,9 +255,9 @@ test.describe("Medication Request Questionnaire", () => {
 
     await page
       .getByRole("combobox")
-      .filter({ hasText: /Add (another )?Medication/i })
+      .filter({ hasText: /Add Medication/i })
       .click();
-    await page.getByRole("tab", { name: "Medication List" }).click();
+    await page.getByRole("tab", { name: "Medication" }).click();
     await page.getByPlaceholder(/Search Medications/i).fill(medicationName);
     await page
       .getByRole("option", { name: medicationName, exact: true })
@@ -305,7 +307,7 @@ test.describe("Medication Request Questionnaire", () => {
     const medicationRow = page
       .locator('[data-slot="table-body"] tr')
       .filter({ hasText: medicationName })
-      .filter({ hasText: `${dosageQuantity} ${dosageUnit}` })
+      .filter({ hasText: `${dosageQuantity.toFixed(2)} ${dosageUnit}` })
       .filter({ hasText: frequency })
       .filter({ hasText: `${duration} ${durationUnit}` });
 
@@ -319,9 +321,9 @@ test.describe("Medication Request Questionnaire", () => {
 
     await page
       .getByRole("combobox")
-      .filter({ hasText: /Add (another )?Medication/i })
+      .filter({ hasText: /Add Medication/i })
       .click();
-    await page.getByRole("tab", { name: "Medication List" }).click();
+    await page.getByRole("tab", { name: "Medication" }).click();
     await page.getByPlaceholder(/Search Medications/i).fill(medicationName);
     await page
       .getByRole("option", { name: medicationName, exact: true })

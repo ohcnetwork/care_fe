@@ -40,12 +40,16 @@ import {
   MedicationDispenseStatus,
 } from "@/types/emr/medicationDispense/medicationDispense";
 import {
+  ACTIVE_MEDICATION_STATUSES,
   computeMedicationDispenseQuantity,
   MedicationRequestDispenseStatus,
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
-import { PrescriptionRead } from "@/types/emr/prescription/prescription";
+import {
+  PrescriptionRead,
+  PrescriptionStatus,
+} from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
@@ -215,7 +219,7 @@ export function useMedicationBill({
           queryParams: {
             facility: facilityId,
             limit: 100,
-            status: "active,on_hold,draft,unknown,ended,completed,cancelled",
+            status: ACTIVE_MEDICATION_STATUSES.join(","),
             exclude_dispense_status: "complete,incomplete",
           },
         })({ signal });
@@ -411,6 +415,9 @@ export function useMedicationBill({
         newPrescriptionCompletionMap[pId] = true;
       }
     });
+    if (prescriptionId) {
+      newPrescriptionCompletionMap[prescriptionId] = true;
+    }
     setPrescriptionCompletionMap(newPrescriptionCompletionMap);
 
     // Add medications to form
@@ -728,6 +735,10 @@ export function useMedicationBill({
         ),
     );
 
+    if (prescriptionId && prescriptionCompletionMap[prescriptionId]) {
+      prescriptionIds.add(prescriptionId);
+    }
+
     if (prescriptionIds.size > 0) {
       requests.push({
         url: `/api/v1/patient/${patientId}/medication/prescription/upsert/`,
@@ -736,7 +747,7 @@ export function useMedicationBill({
         body: {
           datapoints: Array.from(prescriptionIds).map((pId) => ({
             id: pId,
-            status: "completed",
+            status: PrescriptionStatus.completed,
           })),
         },
       });
