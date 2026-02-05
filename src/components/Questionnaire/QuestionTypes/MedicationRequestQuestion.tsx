@@ -3,9 +3,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import {
   AlertTriangle,
-  ChevronDown,
   ChevronsDownUp,
   ChevronsUpDown,
+  CopyPlus,
   MoreVerticalIcon,
   SlidersHorizontal,
 } from "lucide-react";
@@ -193,60 +193,6 @@ async function fetchProductAndBuildMedication(
   };
 }
 
-interface ApplyRequesterToAllProps {
-  facilityId?: string;
-  disabled?: boolean;
-  selected?: UserReadMinimal;
-  onApply: (user: UserReadMinimal | undefined) => void;
-  onClear: () => void;
-  className?: string;
-}
-
-function ApplyRequesterToAll({
-  facilityId,
-  disabled,
-  selected,
-  onApply,
-  onClear,
-  className,
-}: ApplyRequesterToAllProps) {
-  const { t } = useTranslation();
-
-  return (
-    <div
-      className={cn(
-        "flex max-w-4xl items-center gap-2 border border-gray-400 rounded-md bg-white",
-        className,
-      )}
-    >
-      <span className="text-xs font-medium text-gray-800 whitespace-nowrap pl-3">
-        {t("requester")}:
-      </span>
-      <UserSelector
-        selected={selected}
-        onChange={onApply}
-        facilityId={facilityId}
-        trigger={
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full justify-between"
-            disabled={disabled}
-          >
-            <span className="truncate">
-              {selected ? formatName(selected) : t("apply_to_all")}
-            </span>
-            <ChevronDown className="size-3 shrink-0" />
-          </Button>
-        }
-        contentAlign="center"
-        contentClassName="w-80"
-        onClear={onClear}
-      />
-    </div>
-  );
-}
-
 interface MedicationRequestQuestionProps {
   patientId: string;
   questionnaireResponse: QuestionnaireResponse;
@@ -429,17 +375,6 @@ export function MedicationRequestQuestion({
   // Derive prescription note from new medications (those without an ID)
   const prescriptionNote =
     medications.find((m) => !m.id)?.create_prescription?.note || "";
-
-  // Get common requester if all medications have the same requester
-  const commonRequester = (() => {
-    if (medications.length === 0) return undefined;
-    const firstRequester = medications[0]?.requester;
-    if (!firstRequester) return undefined;
-    const allSame = medications.every(
-      (m) => m.requester?.username === firstRequester.username,
-    );
-    return allSame ? firstRequester : undefined;
-  })();
 
   // Update prescription note on all new medications
   const updatePrescriptionNote = (note: string) => {
@@ -801,19 +736,7 @@ export function MedicationRequestQuestion({
       [{ type: "medication_request", value: newMedications }],
       questionnaireResponse.question_id,
     );
-  };
-
-  const handleClearAllRequesters = () => {
-    const newMedications = medications.map((medication) => ({
-      ...medication,
-      requester: currentUser,
-      dirty: true,
-    }));
-
-    updateQuestionnaireResponseCB(
-      [{ type: "medication_request", value: newMedications }],
-      questionnaireResponse.question_id,
-    );
+    toast.success(t("requester_applied_to_all"));
   };
 
   // Handler for adding a single medication from a template
@@ -1374,11 +1297,15 @@ export function MedicationRequestQuestion({
                                       ? handleAddToTemplate
                                       : undefined
                                   }
+                                  onCopyRequesterToAll={
+                                    handleApplyRequesterToAll
+                                  }
                                   index={index}
                                   questionId={questionnaireResponse.question_id}
                                   errors={errors}
                                   facilityId={facilityId}
                                   showAdvancedFields={true}
+                                  showCopyRequester={medications.length > 1}
                                 />
                               </CardContent>
                             </CollapsibleContent>
@@ -1395,6 +1322,7 @@ export function MedicationRequestQuestion({
                           onAddToTemplate={
                             questionnaireSlug ? handleAddToTemplate : undefined
                           }
+                          onCopyRequesterToAll={handleApplyRequesterToAll}
                           index={index}
                           questionId={questionnaireResponse.question_id}
                           errors={errors}
@@ -1403,6 +1331,7 @@ export function MedicationRequestQuestion({
                           onToggleAdvanced={() =>
                             setShowAdvancedFields(!showAdvancedFields)
                           }
+                          showCopyRequester={medications.length > 1}
                         />
                       )}
                     </React.Fragment>
@@ -1436,16 +1365,6 @@ export function MedicationRequestQuestion({
             >
               {newMedicationSheetContent}
             </EntitySelectionDrawer>
-
-            {medications.length > 1 && (
-              <ApplyRequesterToAll
-                facilityId={facilityId}
-                disabled={disabled}
-                selected={commonRequester}
-                onApply={handleApplyRequesterToAll}
-                onClear={handleClearAllRequesters}
-              />
-            )}
           </>
         ) : (
           <div className="max-w-4xl flex gap-1">
@@ -1456,16 +1375,6 @@ export function MedicationRequestQuestion({
               disabled={disabled}
               title={t("select_medication")}
             />
-
-            {medications.length > 1 && (
-              <ApplyRequesterToAll
-                facilityId={facilityId}
-                disabled={disabled}
-                selected={commonRequester}
-                onApply={handleApplyRequesterToAll}
-                onClear={handleClearAllRequesters}
-              />
-            )}
           </div>
         ))}
 
@@ -1501,12 +1410,14 @@ interface MedicationRequestGridRowProps {
   onUpdate?: (medication: Partial<MedicationRequestCreate>) => void;
   onRemove?: () => void;
   onAddToTemplate?: (medication: MedicationRequestCreate) => void;
+  onCopyRequesterToAll?: (requester: UserReadMinimal) => void;
   index: number;
   questionId: string;
   errors?: QuestionValidationError[];
   facilityId?: string;
   showAdvancedFields?: boolean;
   onToggleAdvanced?: () => void;
+  showCopyRequester?: boolean;
 }
 
 const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
@@ -1515,12 +1426,14 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   onUpdate,
   onRemove,
   onAddToTemplate,
+  onCopyRequesterToAll,
   index,
   questionId,
   errors,
   facilityId,
   showAdvancedFields = false,
   onToggleAdvanced,
+  showCopyRequester = false,
 }) => {
   const { t } = useTranslation();
   const [showDosageDialog, setShowDosageDialog] = useState(false);
@@ -2052,7 +1965,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             />
           </div>
           {/* Requester */}
-          <div className="lg:px-1 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+          <div className="lg:px-1 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden flex gap-1">
             <UserSelector
               selected={medication.requester}
               onChange={(user) => {
@@ -2062,6 +1975,17 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               facilityId={facilityId}
               disabled={disabled || isReadOnly}
             />
+            {showCopyRequester && medication.requester && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onCopyRequesterToAll?.(medication.requester!)}
+                disabled={disabled || isReadOnly}
+                title={t("copy_requester_to_all")}
+              >
+                <CopyPlus className="size-4" />
+              </Button>
+            )}
           </div>
         </>
       )}
@@ -2224,15 +2148,30 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               {/* Requester */}
               <div className="p-1">
                 <Label className="mb-1.5 block text-sm">{t("requester")}</Label>
-                <UserSelector
-                  selected={medication.requester}
-                  onChange={(user) => {
-                    onUpdate?.({ requester: user });
-                  }}
-                  placeholder={t("select_requester")}
-                  facilityId={facilityId}
-                  disabled={disabled || isReadOnly}
-                />
+                <div className="flex gap-1">
+                  <UserSelector
+                    selected={medication.requester}
+                    onChange={(user) => {
+                      onUpdate?.({ requester: user });
+                    }}
+                    placeholder={t("select_requester")}
+                    facilityId={facilityId}
+                    disabled={disabled || isReadOnly}
+                  />
+                  {showCopyRequester && medication.requester && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        onCopyRequesterToAll?.(medication.requester!)
+                      }
+                      disabled={disabled || isReadOnly}
+                      title={t("copy_requester_to_all")}
+                    >
+                      <CopyPlus className="size-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
             </CollapsibleContent>
           </Collapsible>
