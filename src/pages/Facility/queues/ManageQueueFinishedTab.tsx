@@ -1,5 +1,6 @@
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,6 +74,7 @@ export function ManageQueueFinishedTab({
             <TableRow>
               <TableHead>{t("token_number")}</TableHead>
               <TableHead>{t("patient_name")}</TableHead>
+              <TableHead>{t("encounter")}</TableHead>
               <TableHead>{t("service_points")}</TableHead>
               <TableHead>{t("status")}</TableHead>
               <TableHead className="w-[100px]">{t("actions")}</TableHead>
@@ -110,6 +112,16 @@ export function ManageQueueFinishedTab({
                   ) : (
                     <span className="text-gray-500">-</span>
                   )}
+                </TableCell>
+                <TableCell>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link
+                      href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
+                    >
+                      {t("encounter")}
+                      <ExternalLink />
+                    </Link>
+                  </Button>
                 </TableCell>
                 <TableCell>
                   {token.sub_queue?.name || (
