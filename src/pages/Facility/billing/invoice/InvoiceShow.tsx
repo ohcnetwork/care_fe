@@ -30,12 +30,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import {
   INVOICE_STATUS_COLORS,
@@ -117,6 +111,8 @@ export function InvoiceShow({
   const [selectedStatus, setSelectedStatus] = useState<InvoiceStatus | null>(
     null,
   );
+  const [activePaymentsDialogOpen, setActivePaymentsDialogOpen] =
+    useState(false);
   const [isAddChargeItemSheetOpen, setIsAddChargeItemSheetOpen] =
     useState(false);
   const queryClient = useQueryClient();
@@ -273,6 +269,25 @@ export function InvoiceShow({
       status === InvoiceStatus.entered_in_error ||
       status === InvoiceStatus.balanced
     ) {
+      // Check for active payments or credit notes when trying to cancel or mark as entered in error
+      if (
+        status === InvoiceStatus.cancelled ||
+        status === InvoiceStatus.entered_in_error
+      ) {
+        const hasActivePayments = !!invoice?.payments?.some(
+          (p) => p.status === PaymentReconciliationStatus.active,
+        );
+        const hasActiveCreditNotes = !!invoice?.credit_notes?.some(
+          (p) => p.status === PaymentReconciliationStatus.active,
+        );
+
+        if (hasActivePayments || hasActiveCreditNotes) {
+          setSelectedStatus(status);
+          setActivePaymentsDialogOpen(true);
+          return;
+        }
+      }
+
       setSelectedStatus(status);
       setReasonDialogOpen(true);
     } else {
@@ -320,18 +335,6 @@ export function InvoiceShow({
   const canEdit =
     invoice?.status !== InvoiceStatus.entered_in_error &&
     invoice?.status !== InvoiceStatus.cancelled;
-
-  const hasActivePayments =
-    invoice?.payments?.some(
-      (p) => p.status === PaymentReconciliationStatus.active,
-    ) ?? false;
-
-  const hasActiveCreditNotes =
-    invoice?.credit_notes?.some(
-      (p) => p.status === PaymentReconciliationStatus.active,
-    ) ?? false;
-
-  const canCancelInvoice = !hasActivePayments && !hasActiveCreditNotes;
 
   const [{ sourceUrl }] = useQueryParams();
 
@@ -685,43 +688,17 @@ export function InvoiceShow({
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem asChild className="text-primary-900">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              onClick={() =>
-                                handleStatusChange(InvoiceStatus.cancelled)
-                              }
-                              disabled={isCancelPending || !canCancelInvoice}
-                              className="w-full flex flex-row justify-stretch items-center"
-                            >
-                              <CareIcon
-                                icon="l-times-circle"
-                                className="mr-1"
-                              />
-                              <span>{t("mark_as_cancelled")}</span>
-                            </Button>
-                          </TooltipTrigger>
-                          {(isCancelPending ||
-                            hasActivePayments ||
-                            hasActiveCreditNotes) && (
-                            <TooltipContent>
-                              {isCancelPending
-                                ? t("cancellation_in_progress")
-                                : hasActivePayments && hasActiveCreditNotes
-                                  ? t(
-                                      "cannot_cancel_invoice_with_payments_and_credit_notes",
-                                    )
-                                  : hasActivePayments
-                                    ? t("cannot_cancel_invoice_with_payments")
-                                    : t(
-                                        "cannot_cancel_invoice_with_credit_notes",
-                                      )}
-                            </TooltipContent>
-                          )}
-                        </Tooltip>
-                      </TooltipProvider>
+                      <Button
+                        variant="ghost"
+                        onClick={() =>
+                          handleStatusChange(InvoiceStatus.cancelled)
+                        }
+                        disabled={isCancelPending}
+                        className="w-full flex flex-row justify-stretch items-center"
+                      >
+                        <CareIcon icon="l-times-circle" className="mr-1" />
+                        <span>{t("mark_as_cancelled")}</span>
+                      </Button>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild className="text-primary-900">
                       <Button
@@ -1633,6 +1610,35 @@ export function InvoiceShow({
                 {t("confirm")}
                 <ShortcutBadge actionId="submit-action" />
               </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog
+          open={activePaymentsDialogOpen}
+          onOpenChange={(open) => {
+            setActivePaymentsDialogOpen(open);
+            if (!open) {
+              setTimeout(() => setSelectedStatus(null), 150);
+            }
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {selectedStatus === InvoiceStatus.entered_in_error
+                  ? t("cannot_mark_as_entered_in_error")
+                  : t("cannot_cancel_invoice")}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("invoice_has_active_payments_or_credit_notes")}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>
+                {t("close")}
+                <ShortcutBadge actionId="cancel-action" />
+              </AlertDialogCancel>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
