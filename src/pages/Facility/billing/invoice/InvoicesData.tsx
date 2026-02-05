@@ -10,7 +10,10 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
-import { invoiceStatusFilter } from "@/components/ui/multi-filter/filterConfigs";
+import {
+  createdByFilter,
+  invoiceStatusFilter,
+} from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 
@@ -34,6 +37,7 @@ import {
   InvoiceRead,
 } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
+import { UserReadMinimal } from "@/types/user/user";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 
@@ -52,9 +56,23 @@ export default function InvoicesData({
     disableCache: true,
   });
 
-  const filters = [invoiceStatusFilter("status")];
+  const filters = [
+    invoiceStatusFilter("status"),
+    createdByFilter("created_by"),
+  ];
 
-  const onFilterUpdate = (query: Record<string, unknown>) => {
+  const onFilterUpdate = (filterQuery: Record<string, unknown>) => {
+    let query = { ...filterQuery };
+    for (const [key, value] of Object.entries(filterQuery)) {
+      if (key === "created_by") {
+        const userValue = value as UserReadMinimal | UserReadMinimal[];
+        const user = Array.isArray(userValue) ? userValue[0] : userValue;
+        query = {
+          ...query,
+          created_by: user?.id || undefined,
+        };
+      }
+    }
     updateQuery(query);
   };
 
@@ -67,6 +85,7 @@ export default function InvoicesData({
   } = useMultiFilterState(filters, onFilterUpdate, {
     ...qParams,
     status: qParams.status ? [qParams.status] : undefined,
+    created_by: [],
   });
 
   const { data: response, isLoading } = useQuery({
@@ -80,6 +99,7 @@ export default function InvoicesData({
         number: qParams.search,
         status: qParams.status,
         patient: qParams.patient,
+        created_by: qParams.created_by,
       },
     }),
   });
