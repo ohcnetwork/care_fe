@@ -3,7 +3,7 @@ import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityO
 
 import {
   LocationAssociation,
-  LocationAssociationDetail,
+  LocationAssociationRead,
   LocationAssociationRequest,
   LocationAssociationUpdate,
 } from "./association";
@@ -71,7 +71,7 @@ export default {
   getAssociation: {
     path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/association/{external_id}/",
     method: HttpMethod.GET,
-    TRes: Type<LocationAssociationDetail>(),
+    TRes: Type<LocationAssociationRead>(),
   },
   updateAssociation: {
     path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/association/{external_id}/",

@@ -128,6 +128,7 @@ export function useEncounterShortcuts() {
       "manage-care-team": () => actions.manageCareTeam(),
       "manage-departments": () => actions.manageDepartments(),
       dispense: () => actions.dispense(),
+      "restart-encounter": () => actions.restartEncounter(),
       "open-command-dialog": () => {
         document.dispatchEvent(
           new CustomEvent("open-encounter-command-dialog"),
