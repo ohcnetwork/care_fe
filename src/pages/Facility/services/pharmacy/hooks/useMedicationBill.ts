@@ -1,5 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -52,10 +57,8 @@ import {
 } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { InventoryRead } from "@/types/inventory/product/inventory";
-import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { isGreaterThan, isZero, round, roundWhole } from "@/Utils/decimal";
-import { isLotAllowedForDispensing } from "@/Utils/inventory";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
@@ -70,8 +73,12 @@ export interface GroupedPrescription {
 
 export interface UseMedicationBillOptions {
   patientId: string;
-  /** If provided, fetch only medications from this prescription */
-  prescriptionId?: string;
+  /** If provided, fetch only medications from these prescriptions */
+  prescriptionIds?: string[];
+  /** Filter prescriptions created after this date (ISO string) */
+  createdDateAfter?: string;
+  /** Filter prescriptions created before this date (ISO string) */
+  createdDateBefore?: string;
   /** Callback when dispense succeeds */
   onDispenseSuccess?: (dispenseOrderId: string | null) => void;
 }
@@ -94,7 +101,7 @@ export interface UseMedicationBillResult {
   setProductKnowledgeInventoriesMap: React.Dispatch<
     React.SetStateAction<Record<string, InventoryRead[] | undefined>>
   >;
-  prescription: PrescriptionRead | undefined;
+  prescriptions: PrescriptionRead[];
   patient: PrescriptionRead["encounter"]["patient"] | undefined;
   grandTotal: string;
 
@@ -134,7 +141,9 @@ export interface UseMedicationBillResult {
 
 export function useMedicationBill({
   patientId,
-  prescriptionId,
+  prescriptionIds,
+  createdDateAfter,
+  createdDateBefore,
   onDispenseSuccess,
 }: UseMedicationBillOptions): UseMedicationBillResult {
   const { t } = useTranslation();
@@ -181,85 +190,79 @@ export function useMedicationBill({
     }),
   });
 
-  // Single prescription query (when prescriptionId is provided)
-  const { data: prescription, isLoading: isPrescriptionLoading } = useQuery({
-    queryKey: ["prescription", patientId, prescriptionId],
-    queryFn: async ({ signal }) => {
-      const prescriptionResponse = await query(prescriptionApi.get, {
-        pathParams: { patientId, id: prescriptionId! },
-      })({ signal });
-
-      const productKnowledgeIds = prescriptionResponse.medications
-        .filter((medication) => medication.requested_product)
-        .reduce<Record<string, undefined>>(
-          (acc, medication) => ({
-            ...acc,
-            [medication.requested_product!.id]: undefined,
-          }),
-          {},
-        );
-
-      setProductKnowledgeInventoriesMap((prev) => ({
-        ...productKnowledgeIds,
-        ...prev,
-      }));
-
-      return prescriptionResponse;
-    },
-    enabled: !!prescriptionId,
-  });
-
-  // All medications query (when no prescriptionId)
-  const { data: allMedicationsResponse, isLoading: isAllMedicationsLoading } =
-    useQuery({
-      queryKey: ["medication_requests", patientId, "dispense"],
-      queryFn: async ({ signal }) => {
-        const medicationResponse = await query(medicationRequestApi.list, {
-          pathParams: { patientId },
-          queryParams: {
-            facility: facilityId,
-            limit: 100,
-            status: ACTIVE_MEDICATION_STATUSES.join(","),
-            exclude_dispense_status: "complete,incomplete",
-          },
-        })({ signal });
-
-        const productKnowledgeIds = medicationResponse.results
-          .filter((medication) => medication.requested_product)
-          .reduce(
-            (acc, medication) => ({
-              ...acc,
-              [medication.requested_product!.id]: undefined,
-            }),
-            {},
-          );
-
-        setProductKnowledgeInventoriesMap((prev) => ({
-          ...productKnowledgeIds,
-          ...prev,
-        }));
-
-        return medicationResponse;
-      },
-      enabled: !prescriptionId,
-    });
-
-  // Prescription for patient header (when no prescriptionId)
-  const { data: medicationPrescription } = useQuery({
-    queryKey: ["medication_prescription", patientId, encounterId],
-    queryFn: query(prescriptionApi.get, {
-      pathParams: {
-        patientId,
-        id: allMedicationsResponse?.results[0]?.prescription?.id,
+  // Fetch active prescriptions within the date range
+  const {
+    data: prescriptionListResponse,
+    isLoading: isPrescriptionListLoading,
+  } = useQuery({
+    queryKey: ["prescriptions", patientId, createdDateAfter, createdDateBefore],
+    queryFn: query(prescriptionApi.list, {
+      pathParams: { patientId },
+      queryParams: {
+        limit: 100,
+        status: PrescriptionStatus.active,
+        ...(createdDateAfter && { created_date_after: createdDateAfter }),
+        ...(createdDateBefore && { created_date_before: createdDateBefore }),
       },
     }),
-    enabled:
-      !prescriptionId && !!allMedicationsResponse?.results[0]?.prescription?.id,
+    enabled: prescriptionIds === undefined,
   });
 
-  const isLoading = prescriptionId
-    ? isPrescriptionLoading
-    : isAllMedicationsLoading;
+  // Get prescription IDs to fetch (either single prescriptionId or all from list)
+  const prescriptionIdsToFetch = useMemo(() => {
+    return (
+      prescriptionIds ||
+      prescriptionListResponse?.results?.map((p) => p.id) ||
+      []
+    );
+  }, [prescriptionIds, prescriptionListResponse?.results]);
+
+  // Fetch full prescription details for each prescription ID using useQueries
+  const { isLoading: isPrescriptionsLoading, data: prescriptions } = useQueries(
+    {
+      queries: prescriptionIdsToFetch.map((id) => ({
+        queryKey: ["prescription", patientId, id],
+        queryFn: query(prescriptionApi.get, { pathParams: { patientId, id } }),
+      })),
+      combine: (result) => {
+        return {
+          isLoading: result.some((q) => q.isFetching),
+          data: result.map((q) => q.data).filter(Boolean) as PrescriptionRead[],
+        };
+      },
+    },
+  );
+
+  // // Extract product knowledge IDs from prescriptions and update the map
+  // useEffect(() => {
+  //   if (prescriptions.length === 0) return;
+
+  //   const productKnowledgeIds = prescriptions
+  //     .flatMap((p) => p.medications)
+  //     // TODO: confirm if entered in error medicines are being included here.
+  //     .filter((medication) => medication.requested_product)
+  //     .reduce<Record<string, undefined>>(
+  //       (acc, medication) => ({
+  //         ...acc,
+  //         [medication.requested_product!.id]: undefined,
+  //       }),
+  //       {},
+  //     );
+
+  //   // Only update if there are new product knowledge IDs not already in the map
+  //   const newIds = Object.keys(productKnowledgeIds).filter(
+  //     (id) => !(id in productKnowledgeInventoriesMap),
+  //   );
+
+  //   if (newIds.length > 0) {
+  //     setProductKnowledgeInventoriesMap((prev) => ({
+  //       ...newIds.reduce((acc, id) => ({ ...acc, [id]: undefined }), {}),
+  //       ...prev,
+  //     }));
+  //   }
+  // }, [prescriptions]);
+
+  const isLoading = isPrescriptionListLoading || isPrescriptionsLoading;
 
   // Medication updates
   const { mutate: updateMedicationRequest } = useMutation({
@@ -277,96 +280,108 @@ export function useMedicationBill({
   });
 
   // Fetch inventories
-  useEffect(() => {
-    const fetchMissingInventories = async () => {
-      for (const [productKnowledgeId, inventories] of Object.entries(
-        productKnowledgeInventoriesMap,
-      )) {
-        if (inventories) continue;
+  // useEffect(() => {
+  //   const fetchMissingInventories = async () => {
+  //     for (const [productKnowledgeId, inventories] of Object.entries(
+  //       productKnowledgeInventoriesMap,
+  //     )) {
+  //       if (inventories) continue;
 
-        const inventoriesResponse = await query(inventoryApi.list, {
-          pathParams: { facilityId, locationId },
-          queryParams: {
-            limit: 100,
-            product_knowledge: productKnowledgeId,
-            net_content_gt: 0,
-            include_children: true,
-          },
-        })({ signal: new AbortController().signal });
+  //       const inventoriesResponse = await query(inventoryApi.list, {
+  //         pathParams: { facilityId, locationId },
+  //         queryParams: {
+  //           limit: 100,
+  //           product_knowledge: productKnowledgeId,
+  //           net_content_gt: 0,
+  //           include_children: true,
+  //         },
+  //       })({ signal: new AbortController().signal });
 
-        setProductKnowledgeInventoriesMap((prev) => ({
-          ...prev,
-          [productKnowledgeId]: inventoriesResponse.results || [],
-        }));
-      }
-    };
+  //       setProductKnowledgeInventoriesMap((prev) => ({
+  //         ...prev,
+  //         [productKnowledgeId]: inventoriesResponse.results || [],
+  //       }));
+  //     }
+  //   };
 
-    fetchMissingInventories();
-  }, [productKnowledgeInventoriesMap, facilityId, locationId]);
+  //   fetchMissingInventories();
+  // }, [productKnowledgeInventoriesMap, facilityId, locationId]);
 
   // Auto-select first valid lot
-  useEffect(() => {
-    fields.forEach((field, index) => {
-      const productKnowledge = field.productKnowledge as ProductKnowledgeBase;
-      const substitution = form.watch(`items.${index}.substitution`);
-      const effectiveProductKnowledge =
-        substitution?.substitutedProductKnowledge || productKnowledge;
+  // useEffect(() => {
+  //   fields.forEach((field, index) => {
+  //     const productKnowledge = field.productKnowledge as ProductKnowledgeBase;
+  //     const substitution = form.watch(`items.${index}.substitution`);
+  //     const effectiveProductKnowledge =
+  //       substitution?.substitutedProductKnowledge || productKnowledge;
 
-      const inventories =
-        productKnowledgeInventoriesMap[effectiveProductKnowledge?.id];
-      const currentLots = form.getValues(`items.${index}.lots`);
+  //     const inventories =
+  //       productKnowledgeInventoriesMap[effectiveProductKnowledge?.id];
+  //     const currentLots = form.getValues(`items.${index}.lots`);
 
-      if (
-        inventories !== undefined &&
-        inventories?.length &&
-        !currentLots.some((lot) => lot.selectedInventoryId)
-      ) {
-        const validLot = inventories.find((inv) =>
-          isLotAllowedForDispensing(inv.product.expiration_date),
-        );
+  //     if (
+  //       inventories !== undefined &&
+  //       inventories?.length &&
+  //       !currentLots.some((lot) => lot.selectedInventoryId)
+  //     ) {
+  //       const validLot = inventories.find((inv) =>
+  //         isLotAllowedForDispensing(inv.product.expiration_date),
+  //       );
 
-        if (validLot) {
-          const medication = form.getValues(`items.${index}.medication`);
-          form.setValue(`items.${index}.lots`, [
-            {
-              selectedInventoryId: validLot.id,
-              quantity: medication
-                ? computeMedicationDispenseQuantity(medication)
-                : currentLots[0]?.quantity || "1",
-            },
-          ]);
-        }
-      }
-    });
-  }, [productKnowledgeInventoriesMap, fields, form]);
+  //       if (validLot) {
+  //         const medication = form.getValues(`items.${index}.medication`);
+  //         form.setValue(`items.${index}.lots`, [
+  //           {
+  //             selectedInventoryId: validLot.id,
+  //             quantity: medication
+  //               ? computeMedicationDispenseQuantity(medication)
+  //               : currentLots[0]?.quantity || "1",
+  //           },
+  //         ]);
+  //       }
+  //     }
+  //   });
+  // }, [productKnowledgeInventoriesMap, fields, form]);
 
-  // Compute medications list
+  // Compute medications list from all prescriptions
   const medications = useMemo(() => {
-    if (prescriptionId) {
-      return prescription?.medications || [];
-    }
-    return allMedicationsResponse?.results || [];
-  }, [prescriptionId, prescription?.medications, allMedicationsResponse]);
+    return prescriptions.flatMap((p) =>
+      p.medications.filter(
+        (m) =>
+          // TODO: filter cancelled medications?
+          (ACTIVE_MEDICATION_STATUSES as readonly string[]).includes(
+            m.status,
+          ) &&
+          m.dispense_status !== "complete" &&
+          m.dispense_status !== "incomplete",
+      ),
+    );
+  }, [prescriptions]);
 
   // Group medications by prescription
   const groupedMedications = useMemo((): GroupedPrescription => {
-    return medications.reduce((acc, medication) => {
-      const pId = medication.prescription?.id || "no-prescription";
-      if (!acc[pId]) {
-        acc[pId] = {
-          requests: [],
-          prescription: medication.prescription!,
+    return prescriptions.reduce((acc, prescription) => {
+      const filteredMedications = prescription.medications.filter(
+        (m) =>
+          // TODO: filter cancelled medications?
+          (ACTIVE_MEDICATION_STATUSES as readonly string[]).includes(
+            m.status,
+          ) &&
+          m.dispense_status !== "complete" &&
+          m.dispense_status !== "incomplete",
+      );
+      if (filteredMedications.length > 0) {
+        acc[prescription.id] = {
+          requests: filteredMedications,
+          prescription,
         };
       }
-      acc[pId].requests.push(medication);
       return acc;
     }, {} as GroupedPrescription);
-  }, [medications]);
+  }, [prescriptions]);
 
-  // Patient for header
-  const patient = prescriptionId
-    ? prescription?.encounter?.patient
-    : medicationPrescription?.encounter?.patient;
+  // Patient for header (from first prescription)
+  const patient = prescriptions[0]?.encounter?.patient;
 
   // Calculate grand total
   const formValues = form.watch();
@@ -415,14 +430,10 @@ export function useMedicationBill({
         newPrescriptionCompletionMap[pId] = true;
       }
     });
-    if (prescriptionId) {
-      newPrescriptionCompletionMap[prescriptionId] = true;
-    }
     setPrescriptionCompletionMap(newPrescriptionCompletionMap);
 
     // Add medications to form
     medications.forEach((medication) => {
-      const pId = medication.prescription?.id || prescriptionId || "";
       append({
         reference_id: crypto.randomUUID(),
         productKnowledge: medication.requested_product,
@@ -437,10 +448,10 @@ export function useMedicationBill({
             quantity: computeMedicationDispenseQuantity(medication),
           },
         ],
-        prescriptionId: pId,
+        prescriptionId: medication.prescription?.id,
       });
     });
-  }, [medications.length, append, form, groupedMedications, prescriptionId]);
+  }, [medications.length, append, form, groupedMedications]);
 
   // Invoice creation mutation
   const { mutate: createInvoice, isPending: isCreatingInvoice } = useMutation({
@@ -464,16 +475,15 @@ export function useMedicationBill({
     onSuccess: (response: unknown) => {
       toast.success(t("medications_billed_and_prescriptions_completed"));
 
-      // Invalidate appropriate queries
-      if (prescriptionId) {
+      // Invalidate prescription queries
+      queryClient.invalidateQueries({
+        queryKey: ["prescriptions", patientId],
+      });
+      prescriptionIdsToFetch.forEach((id) => {
         queryClient.invalidateQueries({
-          queryKey: ["prescription", patientId, prescriptionId],
+          queryKey: ["prescription", patientId, id],
         });
-      } else {
-        queryClient.invalidateQueries({
-          queryKey: ["medication_requests", patientId, "dispense"],
-        });
-      }
+      });
 
       let newDispenseOrderId: string | null = null;
 
@@ -658,9 +668,7 @@ export function useMedicationBill({
       reference_id: string;
       body: unknown;
     }[] = [];
-    const defaultEncounterId = prescriptionId
-      ? prescription?.encounter?.id
-      : (allMedicationsResponse?.results[0]?.encounter ?? encounterId);
+    const defaultEncounterId = prescriptions[0]?.encounter?.id ?? encounterId;
 
     selectedItems.forEach((item) => {
       const medication = item.medication as MedicationRequestRead | undefined;
@@ -735,18 +743,14 @@ export function useMedicationBill({
         ),
     );
 
-    if (prescriptionId && prescriptionCompletionMap[prescriptionId]) {
-      prescriptionIds.add(prescriptionId);
-    }
-
     if (prescriptionIds.size > 0) {
       requests.push({
         url: `/api/v1/patient/${patientId}/medication/prescription/upsert/`,
         method: "POST",
         reference_id: "prescription_completion_upsert",
         body: {
-          datapoints: Array.from(prescriptionIds).map((pId) => ({
-            id: pId,
+          datapoints: Array.from(prescriptionIds).map((id) => ({
+            id,
             status: PrescriptionStatus.completed,
           })),
         },
@@ -787,7 +791,7 @@ export function useMedicationBill({
     groupedMedications,
     productKnowledgeInventoriesMap,
     setProductKnowledgeInventoriesMap,
-    prescription,
+    prescriptions,
     patient,
     grandTotal,
     isLoading,

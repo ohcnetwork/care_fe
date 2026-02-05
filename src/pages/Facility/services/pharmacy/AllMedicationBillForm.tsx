@@ -1,5 +1,5 @@
 import { ArrowLeft } from "lucide-react";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -34,6 +34,7 @@ interface Props {
 export default function AllMedicationBillForm({ patientId }: Props) {
   useShortcutSubContext("facility:general");
   const { t } = useTranslation();
+  const [{ created_date_after, created_date_before }] = useQueryParams();
 
   // UI state for sheets and dialogs
   const [selectedProduct, setSelectedProduct] = useState<
@@ -91,6 +92,8 @@ export default function AllMedicationBillForm({ patientId }: Props) {
   } = useMedicationBill({
     patientId,
     // No prescriptionId = fetch all medications
+    createdDateAfter: created_date_after,
+    createdDateBefore: created_date_before,
     onDispenseSuccess: (dispenseOrderId) => {
       if (dispenseOrderId) {
         navigate(

@@ -79,7 +79,7 @@ export default function MedicationBillForm({
     groupedMedications,
     productKnowledgeInventoriesMap,
     setProductKnowledgeInventoriesMap,
-    prescription,
+    prescriptions,
     grandTotal,
     isLoading,
     isPending,
@@ -94,7 +94,7 @@ export default function MedicationBillForm({
     locationId,
   } = useMedicationBill({
     patientId,
-    prescriptionId,
+    prescriptionIds: [prescriptionId],
     onDispenseSuccess: (dispenseOrderId) => {
       if (dispenseOrderId) {
         navigate(
@@ -103,6 +103,8 @@ export default function MedicationBillForm({
       }
     },
   });
+
+  const prescription = prescriptions[0];
 
   return (
     <Page title={t("bill_medications")} hideTitleOnPage={true} isInsidePage>
