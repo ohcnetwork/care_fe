@@ -15,7 +15,7 @@ import organizationApi from "@/types/organization/organizationApi";
 
 interface OrganizationFilterProps {
   selected: string | undefined;
-  onChange: (Filter: FilterState) => void;
+  onChange: (filter: FilterState) => void;
   skipLevels?: number[];
   required?: boolean;
   className?: string;
@@ -29,9 +29,8 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
 
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
   const [orgTypes, setOrgTypes] = useState<string[]>([]);
-  const [selectedFacilityType, setSelectedFacilityType] = useState<
-    FacilityType | undefined
-  >(undefined);
+  const [selectedFacilityType, setSelectedFacilityType] =
+    useState<FacilityType>();
 
   const { data: orgDetail, isLoading: isOrgDetailLoading } = useQuery({
     queryKey: ["organization-detail", selected],
@@ -50,47 +49,46 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
   });
 
   useEffect(() => {
-    if (!isOrgDetailLoading && selected) {
-      const validOrg = orgDetail;
-      if (validOrg) {
-        if (validOrg.level_cache === 1) {
-          setSelectedLevels([validOrg]);
-          if (
-            validOrg.metadata?.govt_org_type &&
-            validOrg.metadata?.govt_org_children_type
-          ) {
-            setOrgTypes([
-              validOrg.metadata.govt_org_type,
-              validOrg.metadata.govt_org_children_type,
-            ]);
-          }
-        } else {
-          const newOrgs: Organization[] = [];
-          let currentOrg = validOrg;
-          while (currentOrg.parent && currentOrg.level_cache >= 1) {
-            newOrgs.unshift(currentOrg);
-            currentOrg = currentOrg.parent as Organization;
-          }
-          setSelectedLevels(newOrgs);
-        }
-      } else {
-        setSelectedLevels([]);
+    if (isOrgDetailLoading || !selected || !orgDetail) return;
+
+    if (orgDetail.level_cache === 1) {
+      setSelectedLevels([orgDetail]);
+
+      if (
+        orgDetail.metadata?.govt_org_type &&
+        orgDetail.metadata?.govt_org_children_type
+      ) {
+        setOrgTypes([
+          orgDetail.metadata.govt_org_type,
+          orgDetail.metadata.govt_org_children_type,
+        ]);
       }
+      return;
     }
+
+    const newOrgs: Organization[] = [];
+    let current: Organization | undefined = orgDetail;
+
+    while (current && current.level_cache >= 1) {
+      newOrgs.unshift(current);
+      current =
+        typeof current.parent === "object"
+          ? (current.parent as Organization | undefined)
+          : undefined;
+    }
+
+    setSelectedLevels(newOrgs.slice(0, DEFAULT_ORG_LEVELS));
   }, [isOrgDetailLoading, selected, orgDetail]);
 
   useEffect(() => {
-    if (rootOrgs) {
-      const validOrg = rootOrgs.results[0];
-      if (
-        validOrg?.metadata?.govt_org_type &&
-        validOrg?.metadata?.govt_org_children_type
-      ) {
-        setOrgTypes([
-          validOrg.metadata.govt_org_type,
-          validOrg.metadata.govt_org_children_type,
-        ]);
-      }
+    if (!rootOrgs?.results?.length) return;
+
+    const root = rootOrgs.results[0];
+    if (root.metadata?.govt_org_type && root.metadata?.govt_org_children_type) {
+      setOrgTypes([
+        root.metadata.govt_org_type,
+        root.metadata.govt_org_children_type,
+      ]);
     }
   }, [rootOrgs]);
 
