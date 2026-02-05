@@ -402,29 +402,21 @@ export function MedicationBillRow({
             <StockLotSelector
               selectedLots={form.watch(`items.${index}.lots`)}
               onLotSelectionChange={(lots) => {
-                const existingLotIds = (
-                  form.getValues(
-                    `items.${index}.lots`,
-                  ) as MedicationBillLotItem[]
-                ).map((lot: MedicationBillLotItem) => lot.selectedInventoryId);
-                const newLots = lots.map((lot) => {
-                  if (!existingLotIds.includes(lot.selectedInventoryId)) {
-                    const medication = form.getValues(
-                      `items.${index}.medication`,
-                    );
-                    return {
-                      ...lot,
-                      quantity: medication
-                        ? computeMedicationDispenseQuantity(medication)
-                        : lot.quantity,
-                    };
-                  }
-                  return lot;
-                });
-                form.setValue(`items.${index}.lots`, newLots);
+                form.setValue(`items.${index}.lots`, lots);
               }}
               availableInventories={
                 productKnowledgeInventoriesMap[displayProductKnowledge!.id]
+              }
+              requiredQuantity={
+                field.medication
+                  ? Math.floor(
+                      parseFloat(
+                        computeMedicationDispenseQuantity(
+                          field.medication as MedicationRequestRead,
+                        ),
+                      ),
+                    )
+                  : undefined
               }
               multiSelect
               showexpiry={true}

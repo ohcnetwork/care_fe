@@ -6,12 +6,13 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
+import { useInventoryItemAutoSelect } from "@/pages/Facility/services/pharmacy/hooks/useInventoryItemAutoSelect";
 import {
   MedicationBillField,
   medicationBillFormSchema,
@@ -114,6 +115,10 @@ export interface UseMedicationBillResult {
     React.SetStateAction<Record<string, boolean>>
   >;
   alternateIdentifier: string;
+  /** Set of product knowledge IDs with insufficient stock */
+  insufficientProductKnowledgeIds: Set<string>;
+  /** Whether inventory data is still loading */
+  isInventoryLoading: boolean;
 
   // Actions
   handleDispense: () => void;
@@ -161,6 +166,7 @@ export function useMedicationBill({
     `${patientId}-${new Date().toISOString().replace(/[:.]/g, "-")}`,
   );
   const dispenseOrderIdRef = useRef<string | null>(null);
+  const hasAppliedAutoSelections = useRef(false);
 
   // Form setup
   const form = useForm<MedicationBillFormValues>({
@@ -233,35 +239,6 @@ export function useMedicationBill({
     },
   );
 
-  // // Extract product knowledge IDs from prescriptions and update the map
-  // useEffect(() => {
-  //   if (prescriptions.length === 0) return;
-
-  //   const productKnowledgeIds = prescriptions
-  //     .flatMap((p) => p.medications)
-  //     // TODO: confirm if entered in error medicines are being included here.
-  //     .filter((medication) => medication.requested_product)
-  //     .reduce<Record<string, undefined>>(
-  //       (acc, medication) => ({
-  //         ...acc,
-  //         [medication.requested_product!.id]: undefined,
-  //       }),
-  //       {},
-  //     );
-
-  //   // Only update if there are new product knowledge IDs not already in the map
-  //   const newIds = Object.keys(productKnowledgeIds).filter(
-  //     (id) => !(id in productKnowledgeInventoriesMap),
-  //   );
-
-  //   if (newIds.length > 0) {
-  //     setProductKnowledgeInventoriesMap((prev) => ({
-  //       ...newIds.reduce((acc, id) => ({ ...acc, [id]: undefined }), {}),
-  //       ...prev,
-  //     }));
-  //   }
-  // }, [prescriptions]);
-
   const isLoading = isPrescriptionListLoading || isPrescriptionsLoading;
 
   // Medication updates
@@ -278,70 +255,6 @@ export function useMedicationBill({
       toast.error(t("something_went_wrong"));
     },
   });
-
-  // Fetch inventories
-  // useEffect(() => {
-  //   const fetchMissingInventories = async () => {
-  //     for (const [productKnowledgeId, inventories] of Object.entries(
-  //       productKnowledgeInventoriesMap,
-  //     )) {
-  //       if (inventories) continue;
-
-  //       const inventoriesResponse = await query(inventoryApi.list, {
-  //         pathParams: { facilityId, locationId },
-  //         queryParams: {
-  //           limit: 100,
-  //           product_knowledge: productKnowledgeId,
-  //           net_content_gt: 0,
-  //           include_children: true,
-  //         },
-  //       })({ signal: new AbortController().signal });
-
-  //       setProductKnowledgeInventoriesMap((prev) => ({
-  //         ...prev,
-  //         [productKnowledgeId]: inventoriesResponse.results || [],
-  //       }));
-  //     }
-  //   };
-
-  //   fetchMissingInventories();
-  // }, [productKnowledgeInventoriesMap, facilityId, locationId]);
-
-  // Auto-select first valid lot
-  // useEffect(() => {
-  //   fields.forEach((field, index) => {
-  //     const productKnowledge = field.productKnowledge as ProductKnowledgeBase;
-  //     const substitution = form.watch(`items.${index}.substitution`);
-  //     const effectiveProductKnowledge =
-  //       substitution?.substitutedProductKnowledge || productKnowledge;
-
-  //     const inventories =
-  //       productKnowledgeInventoriesMap[effectiveProductKnowledge?.id];
-  //     const currentLots = form.getValues(`items.${index}.lots`);
-
-  //     if (
-  //       inventories !== undefined &&
-  //       inventories?.length &&
-  //       !currentLots.some((lot) => lot.selectedInventoryId)
-  //     ) {
-  //       const validLot = inventories.find((inv) =>
-  //         isLotAllowedForDispensing(inv.product.expiration_date),
-  //       );
-
-  //       if (validLot) {
-  //         const medication = form.getValues(`items.${index}.medication`);
-  //         form.setValue(`items.${index}.lots`, [
-  //           {
-  //             selectedInventoryId: validLot.id,
-  //             quantity: medication
-  //               ? computeMedicationDispenseQuantity(medication)
-  //               : currentLots[0]?.quantity || "1",
-  //           },
-  //         ]);
-  //       }
-  //     }
-  //   });
-  // }, [productKnowledgeInventoriesMap, fields, form]);
 
   // Compute medications list from all prescriptions
   const medications = useMemo(() => {
@@ -383,6 +296,79 @@ export function useMedicationBill({
   // Patient for header (from first prescription)
   const patient = prescriptions[0]?.encounter?.patient;
 
+  // Watch form items for substitution changes
+  const watchedItems = form.watch("items");
+
+  // Create a stable key from substitution IDs to trigger recomputation
+  const substitutionIdsKey = useMemo(() => {
+    return (
+      watchedItems
+        ?.map((item) => item.substitution?.substitutedProductKnowledge?.id)
+        .filter(Boolean)
+        .join(",") || ""
+    );
+  }, [watchedItems]);
+
+  // Compute requirements for inventory auto-selection (product knowledge ID -> required quantity)
+  // Includes both original and substituted product knowledge IDs
+  const inventoryRequirements = useMemo(() => {
+    const requirements: Record<string, number> = {};
+
+    // Add original product knowledge IDs from medications
+    medications.forEach((medication) => {
+      const productKnowledgeId = medication.requested_product?.id;
+      if (productKnowledgeId) {
+        const quantity = parseFloat(
+          computeMedicationDispenseQuantity(medication),
+        );
+        requirements[productKnowledgeId] = Math.floor(quantity);
+      }
+    });
+
+    // Add substituted product knowledge IDs from form state
+    watchedItems?.forEach((item) => {
+      const substitutedProductKnowledgeId =
+        item.substitution?.substitutedProductKnowledge?.id;
+      if (
+        substitutedProductKnowledgeId &&
+        !requirements[substitutedProductKnowledgeId]
+      ) {
+        // Use the medication's quantity for the substituted product
+        const medication = item.medication as MedicationRequestRead | undefined;
+        const quantity = medication
+          ? parseFloat(computeMedicationDispenseQuantity(medication))
+          : 1;
+        requirements[substitutedProductKnowledgeId] = Math.floor(quantity);
+      }
+    });
+
+    return requirements;
+  }, [medications, watchedItems, substitutionIdsKey]);
+
+  // Callback for updating inventory map from auto-select hook
+  const handleInventoriesFetched = useCallback(
+    (map: Record<string, InventoryRead[]>) => {
+      setProductKnowledgeInventoriesMap((prev) => ({
+        ...prev,
+        ...map,
+      }));
+    },
+    [],
+  );
+
+  // Auto-select inventory items using FEFO algorithm
+  const {
+    isLoading: isInventoryLoading,
+    selections: autoSelections,
+    insufficientProductKnowledgeIds,
+  } = useInventoryItemAutoSelect({
+    facilityId,
+    locationId,
+    requirements: inventoryRequirements,
+    includeChildren: true,
+    onInventoriesFetched: handleInventoriesFetched,
+  });
+
   // Calculate grand total
   const formValues = form.watch();
   const grandTotal = useMemo(() => {
@@ -422,6 +408,7 @@ export function useMedicationBill({
   // Initialize form items when data loads
   useEffect(() => {
     form.reset({ items: [] });
+    hasAppliedAutoSelections.current = false;
 
     // Initialize prescription completion map
     const newPrescriptionCompletionMap: Record<string, boolean> = {};
@@ -432,7 +419,7 @@ export function useMedicationBill({
     });
     setPrescriptionCompletionMap(newPrescriptionCompletionMap);
 
-    // Add medications to form
+    // Add medications to form with empty lots (will be filled by auto-select effect)
     medications.forEach((medication) => {
       append({
         reference_id: crypto.randomUUID(),
@@ -452,6 +439,43 @@ export function useMedicationBill({
       });
     });
   }, [medications.length, append, form, groupedMedications]);
+
+  // Apply auto-selections to form once (on initial load only)
+  useEffect(() => {
+    if (
+      hasAppliedAutoSelections.current ||
+      isInventoryLoading ||
+      Object.keys(autoSelections).length === 0 ||
+      fields.length === 0
+    ) {
+      return;
+    }
+
+    fields.forEach((field, index) => {
+      const productKnowledgeId = (
+        field.productKnowledge as ProductKnowledgeBase
+      )?.id;
+      if (!productKnowledgeId) return;
+
+      const selections = autoSelections[productKnowledgeId];
+      if (!selections?.length) return;
+
+      // Only apply if no inventory is currently selected
+      const currentLots = form.getValues(`items.${index}.lots`);
+      if (currentLots.some((lot) => lot.selectedInventoryId)) return;
+
+      // Apply auto-selections as lots
+      form.setValue(
+        `items.${index}.lots`,
+        selections.map((sel) => ({
+          selectedInventoryId: sel.inventoryId,
+          quantity: sel.quantity,
+        })),
+      );
+    });
+
+    hasAppliedAutoSelections.current = true;
+  }, [isInventoryLoading, autoSelections, fields, form]);
 
   // Invoice creation mutation
   const { mutate: createInvoice, isPending: isCreatingInvoice } = useMutation({
@@ -800,6 +824,8 @@ export function useMedicationBill({
     prescriptionCompletionMap,
     setPrescriptionCompletionMap,
     alternateIdentifier,
+    insufficientProductKnowledgeIds,
+    isInventoryLoading,
     handleDispense,
     handleRemoveMedication,
     calculatePrices,

@@ -49,6 +49,12 @@ interface StockLotSelectorProps {
   disabled?: boolean;
   showUnitPrice?: boolean;
   net_content_gt?: number;
+  /**
+   * The total remaining quantity required. When a new lot is selected,
+   * the quantity will be min(available qty in batch, requiredQuantity).
+   * Defaults to 1 if not provided.
+   */
+  requiredQuantity?: number;
 }
 
 export default function StockLotSelector({
@@ -67,6 +73,7 @@ export default function StockLotSelector({
   disabled = false,
   showUnitPrice = true,
   net_content_gt = 0,
+  requiredQuantity,
 }: StockLotSelectorProps) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -117,20 +124,41 @@ export default function StockLotSelector({
         selectedLots.filter((lot) => lot.selectedInventoryId !== inventoryId),
       );
     } else {
+      // Calculate already allocated quantity from existing selected lots
+      const alreadyAllocated = selectedLots.reduce(
+        (sum, lot) => sum + (parseFloat(lot.quantity) || 0),
+        0,
+      );
+
+      // Calculate remaining quantity needed
+      const remainingNeeded =
+        requiredQuantity !== undefined
+          ? Math.max(0, requiredQuantity - alreadyAllocated)
+          : 1;
+
+      // Calculate quantity to allocate: min(available in batch, remaining needed)
+      const availableInBatch = Math.floor(parseFloat(inventory.net_content));
+      const quantityToAllocate = Math.min(availableInBatch, remainingNeeded);
+
       if (multiSelect) {
         onLotSelectionChange([
           ...selectedLots,
           {
             selectedInventoryId: inventoryId,
-            quantity: "1",
+            quantity: String(Math.max(1, quantityToAllocate)),
             inventory,
           },
         ]);
       } else {
+        // For single select, use the full required quantity (capped by available)
+        const singleSelectQuantity =
+          requiredQuantity !== undefined
+            ? Math.min(availableInBatch, requiredQuantity)
+            : 1;
         onLotSelectionChange([
           {
             selectedInventoryId: inventoryId,
-            quantity: "1",
+            quantity: String(Math.max(1, singleSelectQuantity)),
             inventory,
           },
         ]);
