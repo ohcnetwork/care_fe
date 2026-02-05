@@ -439,7 +439,7 @@ export const ObservationVisualizer = ({
                   {codeGroups.length > 1 && (
                     <DropdownMenuItem
                       onClick={() => applyToAll(getTimeRange(groupIndex))}
-                      className="border-t text-primary"
+                      className="border-t text-primary-600"
                     >
                       <CopyPlus className="size-4" />
                       {t("apply_to_all_charts")}
