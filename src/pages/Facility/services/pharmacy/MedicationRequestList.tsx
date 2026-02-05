@@ -5,7 +5,7 @@ import {
   MoreVertical,
   ReceiptTextIcon,
 } from "lucide-react";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -297,6 +297,19 @@ export default function MedicationRequestList({
           className="flex flex-wrap md:flex-row items-start"
           facilityId={facilityId}
         />
+
+        {qParams.patient_external_id && (
+          <div className="ml-auto items-end">
+            <Button variant="outline_primary" asChild>
+              <Link
+                href={`/medication_requests/patient/${qParams.patient_external_id}/bill`}
+              >
+                <ReceiptTextIcon strokeWidth={1.5} />
+                {t("bill_all_pending_prescriptions")}
+              </Link>
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Table section */}
@@ -326,8 +339,16 @@ export default function MedicationRequestList({
             </TableHeader>
             <TableBody>
               {prescriptionQueue?.results?.map((item: PrescriptionSummary) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-semibold">
+                <TableRow key={item.id} className="group">
+                  <TableCell
+                    className="font-semibold group-hover:underline cursor-pointer"
+                    onClick={() =>
+                      updateQuery({
+                        patient_external_id: item.encounter.patient.id,
+                        patient_name: item.encounter.patient.name,
+                      })
+                    }
+                  >
                     {item.encounter.patient.name}
                     <div className="text-xs text-gray-500">
                       {t("by")}: {formatName(item.prescribed_by)}
@@ -418,18 +439,6 @@ export default function MedicationRequestList({
                   <TableCell>
                     <div className="flex gap-2 self-center">
                       <Button
-                        variant="outline_primary"
-                        className="font-semibold"
-                        onClick={() => {
-                          navigate(
-                            `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}/bill`,
-                          );
-                        }}
-                      >
-                        <ReceiptTextIcon strokeWidth={1.5} />
-                        {t("bill_all")}
-                      </Button>
-                      <Button
                         variant="outline"
                         className="font-semibold"
                         onClick={() => {
@@ -439,7 +448,7 @@ export default function MedicationRequestList({
                         }}
                       >
                         <ReceiptTextIcon strokeWidth={1.5} />
-                        {t("bill_this")}
+                        {t("bill")}
                       </Button>
                       <Button
                         variant="outline"

@@ -22,7 +22,8 @@
   ],
 
   "facility": [
-    { "key": "t", "action": "generate-token", "description": "Generate Token", "when": "always" }
+    { "key": "t", "action": "generate-token", "description": "Generate Token", "when": "always" },
+    { "key": "shift+b", "action": "pin-page", "description": "Pin/Unpin Page", "when": "always" }
   ],
 
   "facility:general": [
@@ -39,7 +40,7 @@
     { "key": "shift+enter", "action": "submit-action", "description": "Submit Current Action", "when": "always" },
     { "key": "cmd+k", "action": "search-input-shortcut", "description": "Search Input", "when": "always" }
   ],
-  
+
   "facility:patient:home": [
     { "key": "p", "action": "print-token", "description": "Print Token", "when": "always" },
     { "key": "e", "action": "create-encounter", "description": "Create Encounter", "when": "always" },
@@ -146,8 +147,8 @@
     { "key": "g c", "action": "consents", "description": "Go to Consents", "when": "always" },
     { "key": "g s", "action": "service-requests", "description": "Go to Service Requests", "when": "always" },
     { "key": "g r", "action": "diagnostic-reports", "description": "Go to Diagnostic Reports", "when": "always" },
-    { "key": "cmd+e", "action": "open-command-dialog", "description": "Open Command Dialog", "when": "canEdit" },
-    { "key": "ctrl+e", "action": "open-command-dialog", "description": "Open Command Dialog", "when": "canEdit" },
+    { "key": "cmd+e", "action": "open-command-dialog", "description": "Open Command Dialog", "when": "always" },
+    { "key": "ctrl+e", "action": "open-command-dialog", "description": "Open Command Dialog", "when": "always" },
     { "key": "q 1", "action": "questionnaire-1", "description": "Questionnaire 1", "when": "canEdit && questionnairesEnabled" },
     { "key": "q 2", "action": "questionnaire-2", "description": "Questionnaire 2", "when": "canEdit && questionnairesEnabled" },
     { "key": "q 3", "action": "questionnaire-3", "description": "Questionnaire 3", "when": "canEdit && questionnairesEnabled" },

@@ -39,6 +39,7 @@ interface ImportMetaEnv {
   readonly REACT_OPEN_SCHEDULE_AFTER_PATIENT_REGISTRATION?: string;
   readonly REACT_AUTO_REFRESH_INTERVAL?: string;
   readonly REACT_AUTO_REFRESH_BY_DEFAULT?: string;
+  readonly REACT_APP_UPDATE_CHECK_INTERVAL?: string;
   readonly REACT_DECIMAL_PRECISION?: string;
   readonly REACT_ACCOUNTING_PRECISION?: string;
   readonly REACT_DECIMAL_ROUNDING_METHOD?: string;
