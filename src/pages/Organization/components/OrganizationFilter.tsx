@@ -96,7 +96,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
 
   const clearSelections = () => {
     setSelectedFacilityType(undefined);
-    setOrgTypes((prev) => [prev[0], prev[1]]);
+    setOrgTypes((prev) => prev.slice(0, 2));
     setSelectedLevels([]);
     onChange({ organization: undefined, facility_type: undefined });
   };
