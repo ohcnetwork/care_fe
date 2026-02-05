@@ -1,4 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { CopyPlus } from "lucide-react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   CartesianGrid,
@@ -13,7 +15,15 @@ import {
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { Card } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Popover,
   PopoverContent,
@@ -32,11 +42,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import { cn } from "@/lib/utils";
+import { Code } from "@/types/base/code/code";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import { Code } from "@/types/base/code/code";
 
 import observationApi from "@/types/emr/observation/observationApi";
+
 import { ObservationHistoryTable } from "./ObservationHistoryTable";
 interface CodeGroup {
   codes: Code[];
@@ -80,6 +92,68 @@ const DEFAULT_COLORS = [
   "#0891b2", // cyan-600
 ] as const;
 
+type TimeRange = "1H" | "6H" | "12H" | "24H" | "48H" | "72H" | "ALL";
+
+const PRIMARY_TIME_OPTIONS: { value: TimeRange; label: string }[] = [
+  { value: "1H", label: "1H" },
+  { value: "24H", label: "24H" },
+];
+
+const MORE_TIME_OPTIONS: { value: TimeRange; label: string }[] = [
+  { value: "6H", label: "6 Hours" },
+  { value: "12H", label: "12 Hours" },
+  { value: "48H", label: "48 Hours" },
+  { value: "72H", label: "72 Hours" },
+  { value: "ALL", label: "All Data" },
+];
+
+const getTimeRangeLabel = (range: TimeRange): string => {
+  const allOptions = [...PRIMARY_TIME_OPTIONS, ...MORE_TIME_OPTIONS];
+  return allOptions.find((o) => o.value === range)?.label || range;
+};
+
+const getTimeRangeStartDate = (range: TimeRange): Date | null => {
+  const now = new Date();
+  switch (range) {
+    case "1H":
+      return new Date(now.getTime() - 1 * 60 * 60 * 1000);
+    case "6H":
+      return new Date(now.getTime() - 6 * 60 * 60 * 1000);
+    case "12H":
+      return new Date(now.getTime() - 12 * 60 * 60 * 1000);
+    case "24H":
+      return new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    case "48H":
+      return new Date(now.getTime() - 48 * 60 * 60 * 1000);
+    case "72H":
+      return new Date(now.getTime() - 72 * 60 * 60 * 1000);
+    case "ALL":
+      return null;
+  }
+};
+
+const formatXAxisTick = (value: number, timeRange: TimeRange): string => {
+  const date = new Date(value);
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+
+  if (["1H", "6H", "12H"].includes(timeRange)) {
+    return `${hours}:${minutes}`;
+  }
+  if (["24H", "48H", "72H"].includes(timeRange)) {
+    return `${hours}:${minutes}\n${day}/${month}`;
+  }
+  return `${day}/${month}`;
+};
+
+const roundToNearestMinute = (dateString: string): string => {
+  const date = new Date(dateString);
+  date.setSeconds(0, 0);
+  return date.toISOString();
+};
+
 const formatChartDate = (
   dateString: string,
 ): { display: string; time: number } => {
@@ -103,6 +177,20 @@ export const ObservationVisualizer = ({
   gridCols = 2,
 }: ObservationVisualizerProps) => {
   const { t } = useTranslation();
+  const [timeRanges, setTimeRanges] = useState<Record<number, TimeRange>>({});
+  const getTimeRange = (index: number): TimeRange => timeRanges[index] || "24H";
+
+  const setTimeRange = (index: number, range: TimeRange) => {
+    setTimeRanges((prev) => ({ ...prev, [index]: range }));
+  };
+
+  const applyToAll = (range: TimeRange) => {
+    const newRanges: Record<number, TimeRange> = {};
+    codeGroups.forEach((_, index) => {
+      newRanges[index] = range;
+    });
+    setTimeRanges(newRanges);
+  };
 
   // Flatten all codes for a single API request
   const allCodes = codeGroups.flatMap((group) => group.codes);
@@ -125,6 +213,101 @@ export const ObservationVisualizer = ({
       },
     }),
   });
+
+  // Process data for each code group
+  const processedDataByGroup = useMemo(() => {
+    if (!data?.results?.length) return [];
+
+    return codeGroups.map((group, groupIndex) => {
+      const groupTimeRange = timeRanges[groupIndex] || "24H";
+      const startDate = getTimeRangeStartDate(groupTimeRange);
+      const processedData: { [key: string]: ChartData } = {};
+
+      // First, collect all timestamps from all codes in the group
+      const allTimestamps = new Set<string>();
+      group.codes.forEach((code) => {
+        const resultGroup = data.results.find(
+          (rg) => rg.code.code === code.code,
+        );
+        if (!resultGroup) return;
+
+        resultGroup.results.forEach((observation) => {
+          if (observation.effective_datetime) {
+            // Filter by time range
+            const observationDate = new Date(observation.effective_datetime);
+            if (!startDate || observationDate >= startDate) {
+              // Round to nearest minute to group related observations
+              allTimestamps.add(
+                roundToNearestMinute(observation.effective_datetime),
+              );
+            }
+          }
+        });
+      });
+
+      // Create entries for all timestamps
+      Array.from(allTimestamps).forEach((timestamp) => {
+        const { display, time } = formatChartDate(timestamp);
+        processedData[timestamp] = {
+          timestamp: display,
+          time,
+        };
+      });
+
+      // Then fill in the values for each code
+      group.codes.forEach((code) => {
+        const resultGroup = data.results.find(
+          (rg) => rg.code.code === code.code,
+        );
+        if (!resultGroup || !code.display) return;
+
+        resultGroup.results.forEach((observation) => {
+          const originalTimestamp = observation.effective_datetime;
+          if (!originalTimestamp || typeof originalTimestamp !== "string")
+            return;
+
+          // Filter by time range
+          const observationDate = new Date(originalTimestamp);
+          if (startDate && observationDate < startDate) return;
+
+          // Use rounded timestamp to match the key in processedData
+          const roundedTimestamp = roundToNearestMinute(originalTimestamp);
+          const value = Number(observation.value.value);
+          if (
+            !isNaN(value) &&
+            roundedTimestamp in processedData &&
+            code.display
+          ) {
+            const details: ObservationDetails = {
+              value,
+              enteredBy: formatName(observation.data_entered_by),
+              enteredAt: formatChartDate(observation.effective_datetime)
+                .display,
+              note: observation.note || undefined,
+              status: observation.status,
+            };
+            (processedData[roundedTimestamp] as ChartData)[code.display] =
+              value;
+            (processedData[roundedTimestamp] as ChartData)[
+              `${code.display}_details`
+            ] = details;
+          }
+        });
+      });
+
+      // Sort data by timestamp
+      const sortedData = Object.values(processedData).sort(
+        (a, b) => a.time - b.time,
+      );
+
+      return {
+        ...group,
+        data: sortedData,
+        timeRange: groupTimeRange,
+      };
+    });
+  }, [data, codeGroups, timeRanges]);
+
   if (isLoading) {
     return (
       <div
@@ -163,68 +346,6 @@ export const ObservationVisualizer = ({
     );
   }
 
-  // Process data for each code group
-  const processedDataByGroup = codeGroups.map((group) => {
-    const processedData: { [key: string]: ChartData } = {};
-
-    // First, collect all timestamps from all codes in the group
-    const allTimestamps = new Set<string>();
-    group.codes.forEach((code) => {
-      const resultGroup = data.results.find((rg) => rg.code.code === code.code);
-      if (!resultGroup) return;
-
-      resultGroup.results.forEach((observation) => {
-        if (observation.effective_datetime) {
-          allTimestamps.add(observation.effective_datetime);
-        }
-      });
-    });
-
-    // Create entries for all timestamps
-    Array.from(allTimestamps).forEach((timestamp) => {
-      const { display, time } = formatChartDate(timestamp);
-      processedData[timestamp] = {
-        timestamp: display,
-        time,
-      };
-    });
-
-    // Then fill in the values for each code
-    group.codes.forEach((code) => {
-      const resultGroup = data.results.find((rg) => rg.code.code === code.code);
-      if (!resultGroup || !code.display) return;
-
-      resultGroup.results.forEach((observation) => {
-        const timestamp = observation.effective_datetime;
-        if (!timestamp || typeof timestamp !== "string") return;
-
-        const value = Number(observation.value.value);
-        if (!isNaN(value) && timestamp in processedData && code.display) {
-          const details: ObservationDetails = {
-            value,
-            enteredBy: formatName(observation.data_entered_by),
-            enteredAt: formatChartDate(observation.effective_datetime).display,
-            note: observation.note || undefined,
-            status: observation.status,
-          };
-          (processedData[timestamp] as ChartData)[code.display] = value;
-          (processedData[timestamp] as ChartData)[`${code.display}_details`] =
-            details;
-        }
-      });
-    });
-
-    // Sort data by timestamp
-    const sortedData = Object.values(processedData).sort(
-      (a, b) => a.time - b.time,
-    );
-
-    return {
-      ...group,
-      data: sortedData,
-    };
-  });
-
   return (
     <div
       className="grid gap-4"
@@ -236,21 +357,21 @@ export const ObservationVisualizer = ({
             <div className="flex items-center gap-1">
               <h3 className="text-sm font-medium">{group.title}</h3>
               <Popover>
-                <PopoverTrigger className="!px-0">
+                <PopoverTrigger className="px-0!">
                   <CareIcon
                     icon="l-info-circle"
                     className="size-4 text-gray-500 hover:text-gray-700 cursor-pointer"
                   />
                 </PopoverTrigger>
                 <PopoverContent
-                  className="max-w-fit w-[calc(100vw-2rem)] sm:max-w-fit sm:w-auto break-words"
+                  className="max-w-fit w-[calc(100vw-2rem)] sm:max-w-fit sm:w-auto wrap-break-word"
                   side="bottom"
                   align="start"
                   sideOffset={4}
                   collisionPadding={16}
                 >
                   <div className="space-y-2">
-                    <div className="font-medium">Observations:</div>
+                    <div className="font-medium">{t("observations")}:</div>
                     {group.codes.map((code) => (
                       <div key={code.code} className="text-xs">
                         {code.display} ({code.code})
@@ -260,6 +381,73 @@ export const ObservationVisualizer = ({
                 </PopoverContent>
               </Popover>
             </div>
+
+            <ButtonGroup>
+              {PRIMARY_TIME_OPTIONS.map((option) => (
+                <Button
+                  key={option.value}
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    "h-7 px-2 text-xs",
+                    getTimeRange(groupIndex) === option.value &&
+                      "bg-gray-100 border-gray-400 font-medium dark:bg-gray-800",
+                  )}
+                  onClick={() => setTimeRange(groupIndex, option.value)}
+                >
+                  {option.label}
+                </Button>
+              ))}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={cn(
+                      "h-7 px-2",
+                      !PRIMARY_TIME_OPTIONS.find(
+                        (o) => o.value === getTimeRange(groupIndex),
+                      ) &&
+                        "bg-gray-100 border-gray-400 font-medium dark:bg-gray-800",
+                    )}
+                  >
+                    {!PRIMARY_TIME_OPTIONS.find(
+                      (o) => o.value === getTimeRange(groupIndex),
+                    ) ? (
+                      <span className="text-xs">
+                        {getTimeRangeLabel(getTimeRange(groupIndex))}
+                        <CareIcon icon="l-angle-down" className="size-4" />
+                      </span>
+                    ) : (
+                      <CareIcon icon="l-angle-down" className="size-4" />
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {MORE_TIME_OPTIONS.map((option) => (
+                    <DropdownMenuItem
+                      key={option.value}
+                      onClick={() => setTimeRange(groupIndex, option.value)}
+                      className={cn(
+                        getTimeRange(groupIndex) === option.value &&
+                          "bg-gray-100 font-medium",
+                      )}
+                    >
+                      {option.label}
+                    </DropdownMenuItem>
+                  ))}
+                  {codeGroups.length > 1 && (
+                    <DropdownMenuItem
+                      onClick={() => applyToAll(getTimeRange(groupIndex))}
+                      className="border-t text-primary"
+                    >
+                      <CopyPlus className="size-4" />
+                      {t("apply_to_all_charts")}
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </ButtonGroup>
           </div>
           <Tabs defaultValue="graph" className="w-full">
             <TabsList className="flex w-full">
@@ -287,14 +475,13 @@ export const ObservationVisualizer = ({
                       type="number"
                       domain={["dataMin", "dataMax"]}
                       scale="time"
-                      tickFormatter={(value) => {
-                        const date = new Date(value);
-                        return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
-                      }}
+                      tickFormatter={(value) =>
+                        formatXAxisTick(value, group.timeRange)
+                      }
                       angle={-45}
                       textAnchor="end"
                       height={60}
-                      tick={{ fontSize: 12 }}
+                      tick={{ fontSize: 11 }}
                     />
                     <YAxis
                       domain={group.yAxisDomain || ["auto", "auto"]}
