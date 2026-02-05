@@ -111,6 +111,8 @@ export function InvoiceShow({
   const [selectedStatus, setSelectedStatus] = useState<InvoiceStatus | null>(
     null,
   );
+  const [activePaymentsDialogOpen, setActivePaymentsDialogOpen] =
+    useState(false);
   const [isAddChargeItemSheetOpen, setIsAddChargeItemSheetOpen] =
     useState(false);
   const queryClient = useQueryClient();
@@ -267,6 +269,23 @@ export function InvoiceShow({
       status === InvoiceStatus.entered_in_error ||
       status === InvoiceStatus.balanced
     ) {
+      // Check for active payments when trying to cancel or mark as entered in error
+      if (
+        status === InvoiceStatus.cancelled ||
+        status === InvoiceStatus.entered_in_error
+      ) {
+        const hasActivePayments =
+          (invoice?.payments?.filter(
+            (p) => p.status === PaymentReconciliationStatus.active,
+          ).length ?? 0) > 0;
+
+        if (hasActivePayments) {
+          setSelectedStatus(status);
+          setActivePaymentsDialogOpen(true);
+          return;
+        }
+      }
+
       setSelectedStatus(status);
       setReasonDialogOpen(true);
     } else {
@@ -1589,6 +1608,35 @@ export function InvoiceShow({
                 {t("confirm")}
                 <ShortcutBadge actionId="submit-action" />
               </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog
+          open={activePaymentsDialogOpen}
+          onOpenChange={(open) => {
+            setActivePaymentsDialogOpen(open);
+            if (!open) {
+              setTimeout(() => setSelectedStatus(null), 150);
+            }
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {selectedStatus === InvoiceStatus.entered_in_error
+                  ? t("cannot_mark_as_entered_in_error")
+                  : t("cannot_cancel_invoice")}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("invoice_has_active_payments_description")}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>
+                {t("close")}
+                <ShortcutBadge actionId="cancel-action" />
+              </AlertDialogCancel>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
