@@ -614,3 +614,17 @@ export const careTeamFilter = (
     mode,
     icon: <Users className="size-4" />,
   });
+
+export const createdByFilter = (
+  key: string = "created_by",
+  mode: FilterMode = "single",
+  label?: string,
+) =>
+  createFilterConfig(key, label ? t(label) : t("created_by"), "care_team", [], {
+    renderSelected: (selected: FilterValues) => {
+      return <SelectedCareTeamBadge selected={selected as UserReadMinimal[]} />;
+    },
+    getOperations: () => [{ label: "is" }],
+    mode,
+    icon: <Users className="size-4" />,
+  });
