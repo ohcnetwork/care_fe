@@ -225,7 +225,7 @@ export function PaymentReconciliationShow({
                   </div>
                   <div className="font-medium">
                     {payment.payment_datetime
-                      ? format(new Date(payment.payment_datetime), "PPP")
+                      ? format(new Date(payment.payment_datetime), "PPP p")
                       : "-"}
                   </div>
                 </div>
@@ -409,8 +409,8 @@ export function PaymentReconciliationShow({
                   <p className="font-medium">{t("payment_recorded")}</p>
                   <p className="text-sm text-gray-500">
                     {payment.payment_datetime
-                      ? format(new Date(payment.payment_datetime), "PPP")
-                      : format(new Date(), "PPP")}
+                      ? format(new Date(payment.payment_datetime), "PPP p")
+                      : format(new Date(), "PPP p")}
                   </p>
                 </div>
                 {payment.status === "cancelled" && (
@@ -418,7 +418,7 @@ export function PaymentReconciliationShow({
                     <div className="absolute left-0 top-2 size-2 rounded-full bg-destructive" />
                     <p className="font-medium">{t("payment_cancelled")}</p>
                     <p className="text-sm text-gray-500">
-                      {format(new Date(), "PPP")}
+                      {format(new Date(), "PPP p")}
                     </p>
                   </div>
                 )}
