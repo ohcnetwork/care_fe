@@ -132,6 +132,14 @@ const careConfig = {
     parseInt(env.REACT_AUTO_REFRESH_INTERVAL || "10", 10) * 1000,
 
   /**
+   * App update check interval in milliseconds (env var in seconds, default: 86400 seconds = 24 hours)
+   * Clamped to minimum 60 seconds to prevent accidental hot polling
+   */
+  appUpdateCheckInterval:
+    Math.max(parseInt(env.REACT_APP_UPDATE_CHECK_INTERVAL || "86400", 10), 60) *
+    1000,
+
+  /**
    * Flag to make location field mandatory for payment reconciliation
    */
   paymentLocationRequired: booleanFromString(

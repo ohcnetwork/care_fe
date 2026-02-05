@@ -72,13 +72,12 @@ export const EncounterShow = (props: Props) => {
     patientId,
     patient,
     isPatientLoading,
-    canWriteSelectedEncounter,
     canWritePrimaryEncounter,
     canReadClinicalData,
     canReadSelectedEncounter,
   } = useEncounter();
 
-  useSidebarAutoCollapse({ restore: false });
+  useSidebarAutoCollapse();
   const [actionsOpen, setActionsOpen] = useState(false);
   const getShortcutDisplay = useEncounterShortcutDisplays();
 
@@ -242,25 +241,23 @@ export const EncounterShow = (props: Props) => {
                 )}
               />
 
-              {canWriteSelectedEncounter && (
-                <EncounterCommandDialog
-                  encounter={selectedEncounter}
-                  open={actionsOpen}
-                  onOpenChange={setActionsOpen}
-                  trigger={
-                    <Button
-                      variant="primary_gradient"
-                      onClick={() => setActionsOpen(true)}
-                      className="text-base font-semibold rounded-md w-full"
-                    >
-                      {t("encounter_actions")}
-                      <CommandShortcut className="text-white hidden md:inline">
-                        {getShortcutDisplay("open-command-dialog")}
-                      </CommandShortcut>
-                    </Button>
-                  }
-                />
-              )}
+              <EncounterCommandDialog
+                encounter={selectedEncounter}
+                open={actionsOpen}
+                onOpenChange={setActionsOpen}
+                trigger={
+                  <Button
+                    variant="primary_gradient"
+                    onClick={() => setActionsOpen(true)}
+                    className="text-base font-semibold rounded-md w-full"
+                  >
+                    {t("encounter_actions")}
+                    <CommandShortcut className="text-white hidden md:inline">
+                      {getShortcutDisplay("open-command-dialog")}
+                    </CommandShortcut>
+                  </Button>
+                }
+              />
             </div>
           )}
         </Card>
