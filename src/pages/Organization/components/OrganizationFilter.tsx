@@ -56,21 +56,20 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
         if (validOrg.level_cache === 1) {
           setSelectedLevels([validOrg]);
           if (
-            validOrg &&
             validOrg.metadata?.govt_org_type &&
             validOrg.metadata?.govt_org_children_type
           ) {
             setOrgTypes([
-              validOrg.metadata?.govt_org_type,
-              validOrg.metadata?.govt_org_children_type,
+              validOrg.metadata.govt_org_type,
+              validOrg.metadata.govt_org_children_type,
             ]);
           }
         } else {
-          const newOrgs = [];
+          const newOrgs: Organization[] = [];
           let currentOrg = validOrg;
           while (currentOrg.parent && currentOrg.level_cache >= 1) {
             newOrgs.unshift(currentOrg);
-            currentOrg = currentOrg.parent as unknown as Organization;
+            currentOrg = currentOrg.parent as Organization;
           }
           setSelectedLevels(newOrgs);
         }
@@ -84,9 +83,8 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
     if (rootOrgs) {
       const validOrg = rootOrgs.results[0];
       if (
-        validOrg &&
-        validOrg.metadata?.govt_org_type &&
-        validOrg.metadata?.govt_org_children_type
+        validOrg?.metadata?.govt_org_type &&
+        validOrg?.metadata?.govt_org_children_type
       ) {
         setOrgTypes([
           validOrg.metadata.govt_org_type,
@@ -98,7 +96,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
 
   const clearSelections = () => {
     setSelectedFacilityType(undefined);
-    setOrgTypes((prevTypes) => [prevTypes[0], prevTypes[1]]);
+    setOrgTypes((prev) => [prev[0], prev[1]]);
     setSelectedLevels([]);
     onChange({ organization: undefined, facility_type: undefined });
   };
@@ -109,9 +107,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
 
   return (
     <div className="flex flex-col flex-wrap lg:flex-nowrap sm:flex-row items-center gap-3">
-      {/* 🔹 FIXED CONTAINER: divide-x creates vertical lines, [&_button] removes internal borders */}
       <div className="flex flex-col sm:flex-row items-stretch rounded-md border border-secondary-400 overflow-hidden divide-y sm:divide-y-0 sm:divide-x divide-secondary-400 w-full sm:w-fit [&_button]:border-none [&_button]:rounded-none [&_button]:shadow-none">
-        {/* Organization Levels */}
         {[...Array(levelCount)].map((_, index) => (
           <div key={`org-level-${index}`} className="w-full sm:w-64">
             <OrganizationLevel
@@ -123,16 +119,18 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
               onChange={(val) => {
                 const parentId =
                   index > 0 ? selectedLevels[index - 1]?.id : undefined;
+
                 if (val.organization === parentId) {
                   setSelectedLevels((prev) => prev.slice(0, index));
+                  setOrgTypes((prev) => prev.slice(0, index + 1));
                 }
+
                 onChange(val);
               }}
             />
           </div>
         ))}
 
-        {/* Facility Type */}
         {selected && (
           <div className="w-full sm:w-64">
             <Autocomplete
@@ -143,7 +141,6 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
               value={
                 selectedFacilityType ? String(selectedFacilityType.id) : ""
               }
-              // Autocomplete likely accepts className, but we use h-full to fill the single line
               className="h-full border-none rounded-none shadow-none"
               onChange={(val) => {
                 if (!val) {
@@ -162,7 +159,6 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
         )}
       </div>
 
-      {/* Global Clear Button */}
       <Button
         onClick={clearSelections}
         variant="ghost"
