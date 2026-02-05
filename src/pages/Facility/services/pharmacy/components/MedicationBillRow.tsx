@@ -369,7 +369,7 @@ export function MedicationBillRow({
               </div>
             )}
             {field.medication?.note && (
-              <span className="mt-4 text-xs text-gray-600 wrap-break-word whitespace-pre-wrap">
+              <span className="mt-4 text-xs text-gray-600 break-words whitespace-pre-wrap">
                 {field.medication.note}
               </span>
             )}
