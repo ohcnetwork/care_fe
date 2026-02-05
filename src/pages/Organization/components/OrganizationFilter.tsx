@@ -15,7 +15,9 @@ import organizationApi from "@/types/organization/organizationApi";
 
 interface OrganizationFilterProps {
   selected: string | undefined;
-  onChange: (filter: FilterState) => void;
+  // 🔹 Added this to receive the current filter from the URL
+  facility_type?: string;
+  onChange: (Filter: FilterState) => void;
   skipLevels?: number[];
   required?: boolean;
   className?: string;
@@ -25,12 +27,22 @@ const DEFAULT_ORG_LEVELS = 2;
 
 export default function OrganizationFilter(props: OrganizationFilterProps) {
   const { t } = useTranslation();
-  const { onChange, selected, skipLevels } = props;
+  const { onChange, selected, skipLevels, facility_type } = props;
 
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
   const [orgTypes, setOrgTypes] = useState<string[]>([]);
-  const [selectedFacilityType, setSelectedFacilityType] =
-    useState<FacilityType>();
+  const [selectedFacilityType, setSelectedFacilityType] = useState<
+    FacilityType | undefined
+  >(undefined);
+
+  useEffect(() => {
+    if (facility_type) {
+      const type = FACILITY_TYPES.find((t) => String(t.id) === facility_type);
+      setSelectedFacilityType(type);
+    } else {
+      setSelectedFacilityType(undefined);
+    }
+  }, [facility_type]);
 
   const { data: orgDetail, isLoading: isOrgDetailLoading } = useQuery({
     queryKey: ["organization-detail", selected],
@@ -49,52 +61,55 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
   });
 
   useEffect(() => {
-    if (isOrgDetailLoading || !selected || !orgDetail) return;
-
-    if (orgDetail.level_cache === 1) {
-      setSelectedLevels([orgDetail]);
-
-      if (
-        orgDetail.metadata?.govt_org_type &&
-        orgDetail.metadata?.govt_org_children_type
-      ) {
-        setOrgTypes([
-          orgDetail.metadata.govt_org_type,
-          orgDetail.metadata.govt_org_children_type,
-        ]);
+    if (!isOrgDetailLoading && selected) {
+      const validOrg = orgDetail;
+      if (validOrg) {
+        if (validOrg.level_cache === 1) {
+          setSelectedLevels([validOrg]);
+          if (
+            validOrg &&
+            validOrg.metadata?.govt_org_type &&
+            validOrg.metadata?.govt_org_children_type
+          ) {
+            setOrgTypes([
+              validOrg.metadata?.govt_org_type,
+              validOrg.metadata?.govt_org_children_type,
+            ]);
+          }
+        } else {
+          const newOrgs = [];
+          let currentOrg = validOrg;
+          while (currentOrg.parent && currentOrg.level_cache >= 1) {
+            newOrgs.unshift(currentOrg);
+            currentOrg = currentOrg.parent as unknown as Organization;
+          }
+          setSelectedLevels(newOrgs);
+        }
+      } else {
+        setSelectedLevels([]);
       }
-      return;
     }
-
-    const newOrgs: Organization[] = [];
-    let current: Organization | undefined = orgDetail;
-
-    while (current && current.level_cache >= 1) {
-      newOrgs.unshift(current);
-      current =
-        typeof current.parent === "object"
-          ? (current.parent as Organization | undefined)
-          : undefined;
-    }
-
-    setSelectedLevels(newOrgs.slice(0, DEFAULT_ORG_LEVELS));
   }, [isOrgDetailLoading, selected, orgDetail]);
 
   useEffect(() => {
-    if (!rootOrgs?.results?.length) return;
-
-    const root = rootOrgs.results[0];
-    if (root.metadata?.govt_org_type && root.metadata?.govt_org_children_type) {
-      setOrgTypes([
-        root.metadata.govt_org_type,
-        root.metadata.govt_org_children_type,
-      ]);
+    if (rootOrgs) {
+      const validOrg = rootOrgs.results[0];
+      if (
+        validOrg &&
+        validOrg.metadata?.govt_org_type &&
+        validOrg.metadata?.govt_org_children_type
+      ) {
+        setOrgTypes([
+          validOrg.metadata.govt_org_type,
+          validOrg.metadata.govt_org_children_type,
+        ]);
+      }
     }
   }, [rootOrgs]);
 
   const clearSelections = () => {
     setSelectedFacilityType(undefined);
-    setOrgTypes((prev) => prev.slice(0, 2));
+    setOrgTypes((prevTypes) => [prevTypes[0], prevTypes[1]]);
     setSelectedLevels([]);
     onChange({ organization: undefined, facility_type: undefined });
   };
@@ -104,58 +119,50 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
     : 1;
 
   return (
-    <div className="flex flex-col flex-wrap lg:flex-nowrap sm:flex-row items-center gap-3">
-      <div className="flex flex-col sm:flex-row items-stretch rounded-md border border-secondary-400 overflow-hidden divide-y sm:divide-y-0 sm:divide-x divide-secondary-400 w-full sm:w-fit [&_button]:border-none [&_button]:rounded-none [&_button]:shadow-none">
-        {[...Array(levelCount)].map((_, index) => (
-          <div key={`org-level-${index}`} className="w-full sm:w-64">
-            <OrganizationLevel
-              index={index}
-              skip={skipLevels?.includes(index) || false}
-              selectedLevels={selectedLevels}
-              orgTypes={orgTypes}
-              setOrgTypes={setOrgTypes}
-              onChange={(val) => {
-                const parentId =
-                  index > 0 ? selectedLevels[index - 1]?.id : undefined;
-
-                if (val.organization === parentId) {
-                  setSelectedLevels((prev) => prev.slice(0, index));
-                  setOrgTypes((prev) => prev.slice(0, index + 1));
-                }
-
-                onChange(val);
-              }}
-            />
-          </div>
-        ))}
-
-        {selected && (
-          <div className="w-full sm:w-64">
-            <Autocomplete
-              options={FACILITY_TYPES.map((type) => ({
-                label: type.text,
-                value: String(type.id),
-              }))}
-              value={
-                selectedFacilityType ? String(selectedFacilityType.id) : ""
+    <div className="flex flex-col flex-wrap lg:flex-nowrap sm:flex-row gap-3">
+      {[...Array(levelCount)].map((_, index) => (
+        <div key={`org-level-${index}`} className="w-full sm:w-64">
+          <OrganizationLevel
+            index={index}
+            skip={skipLevels?.includes(index) || false}
+            selectedLevels={selectedLevels}
+            orgTypes={orgTypes}
+            setOrgTypes={setOrgTypes}
+            onChange={(val) => {
+              const parentId =
+                index > 0 ? selectedLevels[index - 1]?.id : undefined;
+              if (val.organization === parentId) {
+                setSelectedLevels((prev) => prev.slice(0, index));
               }
-              className="h-full border-none rounded-none shadow-none"
-              onChange={(val) => {
-                if (!val) {
-                  setSelectedFacilityType(undefined);
-                  onChange({ facility_type: undefined });
-                } else {
-                  const type = FACILITY_TYPES.find((t) => String(t.id) === val);
-                  setSelectedFacilityType(type);
-                  onChange({ facility_type: val });
-                }
-              }}
-              showClearButton={!!selectedFacilityType}
-              placeholder={t("select_facility_type")}
-            />
-          </div>
-        )}
-      </div>
+              onChange(val);
+            }}
+          />
+        </div>
+      ))}
+
+      {selected && (
+        <div className="w-full sm:w-64">
+          <Autocomplete
+            options={FACILITY_TYPES.map((type) => ({
+              label: type.text,
+              value: String(type.id),
+            }))}
+            value={selectedFacilityType ? String(selectedFacilityType.id) : ""}
+            onChange={(val) => {
+              if (!val) {
+                setSelectedFacilityType(undefined);
+                onChange({ facility_type: undefined });
+              } else {
+                const type = FACILITY_TYPES.find((t) => String(t.id) === val);
+                setSelectedFacilityType(type);
+                onChange({ facility_type: val });
+              }
+            }}
+            showClearButton={!!selectedFacilityType}
+            placeholder={t("select_facility_type")}
+          />
+        </div>
+      )}
 
       <Button
         onClick={clearSelections}
