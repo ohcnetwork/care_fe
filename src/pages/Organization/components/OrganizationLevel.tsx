@@ -13,6 +13,15 @@ interface OrganizationLevelProps {
   onChange: (filter: FilterState, index?: number) => void;
 }
 
+/**
+ * Static mapping so i18n cleanup scripts can detect keys
+ */
+const ORG_TYPE_I18N_KEYS: Record<string, string> = {
+  state: "SYSTEM__govt_org_type__state",
+  district: "SYSTEM__govt_org_type__district",
+  local_body: "SYSTEM__govt_org_type__local_body",
+};
+
 export function OrganizationLevel({
   index,
   skip,
@@ -34,21 +43,21 @@ export function OrganizationLevel({
   if (skip) return null;
 
   const orgType = orgTypes[index];
+  const orgTypeKey = orgType
+    ? ORG_TYPE_I18N_KEYS[orgType.toLowerCase()]
+    : undefined;
 
   return (
     <Autocomplete
       key={`dropdown-${index}`}
-      // 🔹 CLEANED UP: Removed joined borders/rounding for standalone look
       popoverClassName="min-w-56 lg:max-w-72"
       value={selectedLevels[index]?.id || ""}
       options={options}
       onChange={handleChange}
       onSearch={handleSearch}
       placeholder={
-        orgType
-          ? `${t("select")} ${t(
-              `SYSTEM__govt_org_type__${orgType.toLowerCase()}`,
-            )}`
+        orgType && orgTypeKey
+          ? `${t("select")} ${t(orgTypeKey)}`
           : t("select_location")
       }
       disabled={index > selectedLevels.length}
