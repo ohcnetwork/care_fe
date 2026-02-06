@@ -20,10 +20,12 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Signal, SquarePen } from "lucide-react";
 import { Link } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 export const SummaryPanelEncounterDetails = () => {
   const { t } = useTranslation();
+  const [showAllCareTeam, setShowAllCareTeam] = useState(false);
   const {
     selectedEncounter: encounter,
     selectedEncounterId: encounterId,
@@ -242,8 +244,11 @@ export const SummaryPanelEncounterDetails = () => {
               <span className="text-sm font-medium text-gray-700">
                 {t("care_team")}:
               </span>
-              <div className="flex flex-wrap gap-2">
-                {encounter.care_team.map((member) => (
+              <div className="flex flex-wrap items-center gap-2">
+                {(showAllCareTeam
+                  ? encounter.care_team
+                  : encounter.care_team.slice(0, 2)
+                ).map((member) => (
                   <div
                     key={member.member.id}
                     className="flex flex-col px-2 py-1 rounded-lg border border-gray-200 bg-gray-100"
@@ -256,6 +261,19 @@ export const SummaryPanelEncounterDetails = () => {
                     </span>
                   </div>
                 ))}
+                {encounter.care_team.length > 2 && (
+                  <Button
+                    type="button"
+                    onClick={() => setShowAllCareTeam(!showAllCareTeam)}
+                    variant="link"
+                    size="xs"
+                    className="underline"
+                  >
+                    {showAllCareTeam
+                      ? t("show_less")
+                      : `+${encounter.care_team.length - 2} ${t("more")}`}
+                  </Button>
+                )}
               </div>
             </div>
           )}
