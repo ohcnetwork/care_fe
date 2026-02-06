@@ -214,15 +214,13 @@ const IndividualMedicationRow: React.FC<{
         )}
       >
         {isActive && canWrite && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+          <div
+            className="flex flex-col p-1 rounded-md cursor-pointer items-center text-red-600 border-red-300 hover:bg-red-100 hover:text-red-700"
             onClick={() => onDiscontinue(medication)}
           >
-            <CircleStop className="size-3.5 mr-1" />
+            <CircleStop className="size-4" />
             <span className="text-xs">{t("stop")}</span>
-          </Button>
+          </div>
         )}
       </div>
     </React.Fragment>
@@ -472,14 +470,12 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
           {group.hasActiveRequests && canWrite && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="size-8 text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700"
+                <div
+                  className="p-2 rounded-md cursor-pointer text-red-600 border-red-300 hover:bg-red-100 hover:text-red-700"
                   onClick={() => onDiscontinueGroup(group)}
                 >
                   <CircleStop className="size-4" />
-                </Button>
+                </div>
               </TooltipTrigger>
               <TooltipContent>{t("discontinue")}</TooltipContent>
             </Tooltip>
