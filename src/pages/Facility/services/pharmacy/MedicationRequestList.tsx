@@ -5,7 +5,7 @@ import {
   MoreVertical,
   ReceiptTextIcon,
 } from "lucide-react";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -211,6 +211,25 @@ export default function MedicationRequestList({
     },
   });
 
+  const billAllPrescriptionsLink = useMemo(() => {
+    if (!qParams.patient_external_id) return null;
+
+    const params = new URLSearchParams();
+    if (qParams.created_date_after) {
+      params.set("created_date_after", qParams.created_date_after);
+    }
+    if (qParams.created_date_before) {
+      params.set("created_date_before", qParams.created_date_before);
+    }
+    const queryString = params.toString();
+
+    return `/medication_requests/patient/${qParams.patient_external_id}/bill${queryString ? `?${queryString}` : ""}`;
+  }, [
+    qParams.patient_external_id,
+    qParams.created_date_after,
+    qParams.created_date_before,
+  ]);
+
   return (
     <Page
       title={t("prescription_queue")}
@@ -298,30 +317,13 @@ export default function MedicationRequestList({
           facilityId={facilityId}
         />
 
-        {qParams.patient_external_id && (
+        {billAllPrescriptionsLink && (
           <div className="ml-auto items-end">
-            <Button
-              variant="outline_primary"
-              className="font-semibold"
-              onClick={() => {
-                const params = new URLSearchParams();
-                if (qParams.created_date_after) {
-                  params.set("created_date_after", qParams.created_date_after);
-                }
-                if (qParams.created_date_before) {
-                  params.set(
-                    "created_date_before",
-                    qParams.created_date_before,
-                  );
-                }
-                const queryString = params.toString();
-                navigate(
-                  `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${qParams.patient_external_id}/bill${queryString ? `?${queryString}` : ""}`,
-                );
-              }}
-            >
-              <ReceiptTextIcon strokeWidth={1.5} />
-              {t("bill_all_pending_prescriptions")}
+            <Button variant="outline_primary" asChild>
+              <Link href={billAllPrescriptionsLink}>
+                <ReceiptTextIcon strokeWidth={1.5} />
+                {t("bill_all_pending_prescriptions")}
+              </Link>
             </Button>
           </div>
         )}
