@@ -125,6 +125,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   const { facilityId } = useCurrentFacilitySilently();
 
   const currentDate = new Date();
+  const currentDay = format(currentDate, "yyyy-MM-dd");
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
   const [showStopped, setShowStopped] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -549,7 +550,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                     key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
                     slot={slot}
                     isCurrentSlot={isTimeInSlot(currentDate, slot)}
-                    isEndSlot={slot.date.getTime() === currentDate.getTime()}
+                    isEndSlot={format(slot.date, "yyyy-MM-dd") === currentDay}
                   />
                 ))}
                 <div className="flex justify-start items-center px-1 bg-gray-50">
