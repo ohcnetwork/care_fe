@@ -60,9 +60,7 @@ export const AppointmentEncounterHeader = ({
   return (
     <div className="flex gap-3 border border-gray-300 rounded-lg py-1.5 px-2 bg-white sm:w-fit w-full items-center justify-center shadow-sm">
       <TokenActions
-        patientId={appointment.patient.id}
         facilityId={encounter.facility.id}
-        status={encounter.status}
         appointment={appointment}
         resourceType={appointment.resource_type}
         resourceId={appointment.resource.id}
@@ -199,16 +197,12 @@ const AppointmentEncounterHeaderActions = ({
 };
 
 const TokenActions = ({
-  patientId,
   facilityId,
-  status,
   appointment,
   resourceType,
   resourceId,
 }: {
-  patientId: string;
   facilityId: string;
-  status: EncounterStatus;
   appointment?: AppointmentRead;
   resourceType: SchedulableResourceType;
   resourceId: string;
@@ -219,17 +213,18 @@ const TokenActions = ({
   }
 
   const { token } = appointment;
-  const isHealthcareService =
-    resourceType === SchedulableResourceType.HealthcareService;
-  const isEncounterActive = !inactiveEncounterStatus.includes(status);
 
   return (
     <div className="flex gap-2">
-      {appointment.id && !isHealthcareService && (
+      {appointment.id && (
         <div className="flex items-center justify-center border-r border-gray-300">
           <Button variant="ghost" className="rounded-r-none pl-2 " asChild>
             <Link
-              href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointment.id}`}
+              href={
+                resourceType === SchedulableResourceType.Practitioner
+                  ? `/facility/${facilityId}/appointments`
+                  : `/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/appointments`
+              }
             >
               <div className="flex sm:flex-row flex-col items-center justify-center sm:gap-1">
                 {token ? (
@@ -249,26 +244,6 @@ const TokenActions = ({
                   </div>
                 )}
               </div>
-            </Link>
-          </Button>
-        </div>
-      )}
-      {isHealthcareService && (
-        <div
-          className={cn(
-            "flex items-center justify-center",
-            token && "border-l border-gray-300 pl-2",
-            isEncounterActive && "border-r border-gray-300 pr-2",
-          )}
-        >
-          <Button variant="link" className="underline">
-            <Link
-              basePath="/"
-              className="flex items-center gap-1"
-              href={`/facility/${facilityId}/services/${resourceId}/appointments`}
-            >
-              {t("service_appointments")}
-              <ExternalLinkIcon className="size-4 text-black" />
             </Link>
           </Button>
         </div>

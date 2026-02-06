@@ -38,11 +38,9 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import {
   ENCOUNTER_STATUS_COLORS,
   EncounterRead,
-  inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { LocationTypeIcons } from "@/types/location/location";
-import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import { entriesOf } from "@/Utils/utils";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -96,17 +94,6 @@ export const EncounterShow = (props: Props) => {
   useEncounterShortcuts();
 
   const canAccess = canReadClinicalData || canReadSelectedEncounter;
-  const hasToken = primaryEncounter?.appointment?.token;
-  const isHealthcareService =
-    primaryEncounter?.appointment?.resource_type ===
-    SchedulableResourceType.HealthcareService;
-  const isEncounterActive =
-    primaryEncounter?.appointment?.id &&
-    !inactiveEncounterStatus.includes(primaryEncounter?.status ?? "");
-
-  // Header is shown either when token is present or encounter is active and has an appointment
-  const canViewAppointmentEncounterHeader =
-    hasToken || isEncounterActive || isHealthcareService;
 
   useEffect(() => {
     if (!isPrimaryEncounterLoading && !isPatientLoading && !canAccess) {
@@ -212,13 +199,11 @@ export const EncounterShow = (props: Props) => {
       hideTitleOnPage
       style={
         {
-          "--encounter-header-offset": canViewAppointmentEncounterHeader
-            ? "3rem"
-            : "0rem",
+          "--encounter-header-offset": "3rem",
         } as React.CSSProperties
       }
     >
-      {primaryEncounter.appointment && canViewAppointmentEncounterHeader && (
+      {primaryEncounter.appointment && (
         <div className="flex items-center justify-center -mt-2 mb-2">
           <AppointmentEncounterHeader
             canWritePrimaryEncounter={canWritePrimaryEncounter}
