@@ -225,7 +225,7 @@ const TokenActions = ({
 
   return (
     <div className="flex gap-2">
-      {appointment.id && (
+      {appointment.id && !isHealthcareService && (
         <div className="flex items-center justify-center border-r border-gray-300">
           <Button variant="ghost" className="rounded-r-none pl-2 " asChild>
             <Link
