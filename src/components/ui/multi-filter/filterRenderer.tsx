@@ -3,7 +3,7 @@ import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityO
 import { LocationRead } from "@/types/location/location";
 import { UserReadMinimal } from "@/types/user/user";
 
-import RenderFacilityUserFilter from "@/components/ui/multi-filter/facilityUserFiilter";
+import RenderFacilityUserFilter from "@/components/ui/multi-filter/facilityUserFilter";
 import RenderActivityDefinitionFilter, {
   ActivityDefinitionFilterValue,
 } from "./activityDefinitionFilter";
