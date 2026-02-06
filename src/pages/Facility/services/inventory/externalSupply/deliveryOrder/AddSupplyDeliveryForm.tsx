@@ -453,6 +453,7 @@ export function AddSupplyDeliveryForm({
           category,
           title: `${item.product_knowledge.name}${item.batch_number ? ` - ${item.batch_number}` : ""}`,
           status: ChargeItemDefinitionStatus.active,
+          can_edit_charge_item: false,
           price_components:
             priceComponents.length > 0
               ? priceComponents
