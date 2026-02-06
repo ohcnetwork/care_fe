@@ -208,6 +208,7 @@ const TokenActions = ({
   resourceId: string;
 }) => {
   const { t } = useTranslation();
+
   if (!appointment?.id && !appointment?.token) {
     return null;
   }
@@ -257,7 +258,6 @@ const TokenActions = ({
               href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/queues/${token.queue.id}`}
             >
               {t("queue")}
-
               <ExternalLinkIcon className="size-4 text-black" />
             </Link>
           </Button>
