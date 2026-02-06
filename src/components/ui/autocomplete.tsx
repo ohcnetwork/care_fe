@@ -19,27 +19,31 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
-interface AutoCompleteOption {
+interface AutoCompleteOptionBase<T> {
   label: string;
-  value: string;
+  value: T;
 }
+export type AutoCompleteOption<T = string> = AutoCompleteOptionBase<T> &
+  (T extends string ? { key?: string } : { key: string });
 
-interface AutocompleteProps {
-  options: AutoCompleteOption[];
+export interface AutocompleteProps<T = string> {
+  options: AutoCompleteOption<T>[];
   isLoading?: boolean;
-  value: string;
-  onChange: (value: string) => void;
+  value: T | null;
+  onChange: (value: T) => void;
   onSearch?: (value: string) => void;
   placeholder?: string;
   inputPlaceholder?: string;
@@ -52,73 +56,239 @@ interface AutocompleteProps {
   freeInput?: boolean;
   closeOnSelect?: boolean;
   showClearButton?: boolean;
-
+  /** Custom renderer for options. Used by both dropdown and radio unless overridden. */
+  renderOption?: (
+    option: AutoCompleteOption<T>,
+    isSelected: boolean,
+  ) => React.ReactNode;
+  /** Optional override for radio variant. If not provided, uses renderOption. */
+  renderRadioOption?: (
+    option: AutoCompleteOption<T>,
+    isSelected: boolean,
+  ) => React.ReactNode;
+  /** Custom renderer for the selected value in the dropdown trigger button */
+  renderSelected?: (option: AutoCompleteOption<T>) => React.ReactNode;
+  /** Function to compare values for equality. Defaults to === for primitives */
+  valueCompare?: (a: T | null, b: T | null) => boolean;
   ref?: React.RefCallback<HTMLButtonElement | null>;
-
   "aria-invalid"?: boolean;
   shortcutId?: string;
 }
 
-export default function Autocomplete({
+// Default value comparison function
+function defaultValueCompare<T>(a: T | null, b: T | null): boolean {
+  return a === b;
+}
+
+// Default option renderer
+function defaultRenderDropdownOption<T>(
+  option: AutoCompleteOption<T>,
+  isSelected: boolean,
+): React.ReactNode {
+  return (
+    <>
+      <CheckIcon
+        className={cn("mr-2 size-4", isSelected ? "opacity-100" : "opacity-0")}
+      />
+      {option.label}
+    </>
+  );
+}
+
+// Default selected renderer
+function defaultRenderDropdownSelected<T>(
+  option: AutoCompleteOption<T>,
+): React.ReactNode {
+  return <span className="truncate">{option.label}</span>;
+}
+
+// Helper to get option key
+function getOptionKey<T>(option: AutoCompleteOption<T>): string {
+  if (option.key) return option.key;
+  if (typeof option.value === "string")
+    return `${option.label}-${option.value}`;
+  return option.label;
+}
+
+interface AutocompleteRadioProps<T> {
+  options: AutoCompleteOption<T>[];
+  value: T | null;
+  onChange: (value: T) => void;
+  renderOption?: (
+    option: AutoCompleteOption<T>,
+    isSelected: boolean,
+  ) => React.ReactNode;
+  disabled?: boolean;
+  showClearButton?: boolean;
+  valueCompare: (a: T | null, b: T | null) => boolean;
+  className?: string;
+}
+
+function AutocompleteRadio<T>({
   options,
-  isLoading = false,
+  value,
+  onChange,
+  disabled,
+  showClearButton,
+  valueCompare,
+  renderOption,
+  className,
+}: AutocompleteRadioProps<T>) {
+  const { t } = useTranslation();
+
+  const selectedOption = options.find((opt) => valueCompare(opt.value, value));
+  const optionKey = selectedOption ? getOptionKey(selectedOption) : null;
+  const selectedKey = selectedOption?.key ?? optionKey;
+
+  const handleValueChange = (key: string) => {
+    const selected = options.find((opt) => getOptionKey(opt) === key);
+    if (selected) {
+      onChange(selected.value);
+    }
+  };
+
+  return (
+    <div className={cn("space-y-2", className)}>
+      <RadioGroup
+        value={selectedKey ?? ""}
+        onValueChange={handleValueChange}
+        disabled={disabled}
+        className="flex flex-row flex-wrap gap-1"
+      >
+        {options.map((option) => {
+          const itemKey = getOptionKey(option);
+          const isSelected = valueCompare(option.value, value);
+          return (
+            <Label
+              key={itemKey}
+              htmlFor={itemKey}
+              className={cn(
+                "border rounded-md p-2 w-full cursor-pointer sm:w-auto hover:border-primary-500 group text-left",
+                isSelected
+                  ? "bg-primary-100 border-primary-500"
+                  : "bg-white border-gray-300",
+              )}
+            >
+              <RadioGroupItem
+                value={itemKey}
+                id={itemKey}
+                className="h-4 w-4 text-primary focus:ring-primary group-hover:border-primary-500"
+              />
+              {renderOption?.(option, isSelected) ?? (
+                <span className="text-sm font-normal">{option.label}</span>
+              )}
+            </Label>
+          );
+        })}
+      </RadioGroup>
+      {value !== null && showClearButton && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => onChange(null as T)}
+          disabled={disabled}
+          className="h-7 px-2 text-xs text-gray-500"
+        >
+          <Cross2Icon className="mr-1 size-3" />
+          {t("clear")}
+        </Button>
+      )}
+    </div>
+  );
+}
+
+interface AutocompleteDropdownProps<T> {
+  options: AutoCompleteOption<T>[];
+  isLoading: boolean;
+  value: T | null;
+  onChange: (value: T) => void;
+  onSearch?: (value: string) => void;
+  placeholder: string;
+  inputPlaceholder: string;
+  noOptionsMessage: string;
+  disabled?: boolean;
+  align: "start" | "center" | "end";
+  className?: string;
+  popoverClassName?: string;
+  popoverContentClassName?: string;
+  freeInput: boolean;
+  closeOnSelect: boolean;
+  showClearButton: boolean;
+  renderOption: (
+    option: AutoCompleteOption<T>,
+    isSelected: boolean,
+  ) => React.ReactNode;
+  renderSelected: (option: AutoCompleteOption<T>) => React.ReactNode;
+  valueCompare: (a: T | null, b: T | null) => boolean;
+  buttonRef?: React.RefCallback<HTMLButtonElement | null>;
+  shortcutId?: string;
+  "aria-invalid"?: boolean;
+}
+
+function AutocompleteDropdown<T>({
+  options,
+  isLoading,
   value,
   onChange,
   onSearch,
-  placeholder = "Select...",
-  inputPlaceholder = "Search option...",
-  noOptionsMessage = "No options found",
+  placeholder,
+  inputPlaceholder,
+  noOptionsMessage,
   disabled,
-  align = "center",
+  align,
   className,
   popoverClassName,
   popoverContentClassName,
-  freeInput = false,
-  closeOnSelect = true,
-  showClearButton = true,
-  ref,
+  freeInput,
+  closeOnSelect,
+  showClearButton,
+  renderOption,
+  renderSelected,
+  valueCompare,
+  buttonRef,
   shortcutId,
   ...props
-}: AutocompleteProps) {
+}: AutocompleteDropdownProps<T>) {
   const [open, setOpen] = React.useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
+  const { t } = useTranslation();
 
   // Maintain an internal state for the input text when freeInput is enabled.
-  // TODO : Find a better way to handle this, maybe as a seperate component
-  const [inputValue, setInputValue] = React.useState(value);
+  const [inputValue, setInputValue] = React.useState(
+    typeof value === "string" ? value : "",
+  );
 
-  // Find a matching option from the options list (for non freeInput or when value matches an option)
-  const selectedOption = options.find((option) => option.value === value);
+  // Find a matching option from the options list
+  const selectedOption = options.find((option) =>
+    valueCompare(option.value, value),
+  );
 
-  // Sync the inputValue with value prop changes.
+  // Sync the inputValue with value prop changes (only for string/freeInput mode)
   React.useEffect(() => {
-    const selected = options.find((option) => option.value === value);
-    if (value) {
-      setInputValue(selected ? selected.label : value);
-    } else {
-      setInputValue("");
+    if (typeof value === "string") {
+      const selected = options.find((option) =>
+        valueCompare(option.value, value),
+      );
+      if (value) {
+        setInputValue(selected ? selected.label : value);
+      } else {
+        setInputValue("");
+      }
     }
-  }, [value, options]);
-
-  // Determine what text to display on the button.
-  const displayText = freeInput
-    ? inputValue || placeholder
-    : selectedOption
-      ? selectedOption.label
-      : placeholder;
+  }, [value, options, valueCompare]);
 
   // Handle changes in the CommandInput.
   const handleInputChange = (newValue: string) => {
-    if (freeInput) {
+    if (freeInput && typeof value === "string") {
       setInputValue(newValue);
-      // If the new text exactly matches an option (case-insensitive), select that option.
       const matchingOption = options.find(
         (option) => option.label.toLowerCase() === newValue.toLowerCase(),
       );
       if (matchingOption) {
         onChange(matchingOption.value);
       } else {
-        onChange(newValue);
+        onChange(newValue as T);
       }
     } else {
       if (onSearch) {
@@ -130,18 +300,14 @@ export default function Autocomplete({
   const handleClear = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    onChange("");
-
+    onChange(null as T);
     if (freeInput) {
       setInputValue("");
     }
-
     onSearch?.("");
-
     setOpen(false);
   };
-  const { t } = useTranslation();
+
   const commandContent = (
     <>
       <CommandInput
@@ -158,40 +324,52 @@ export default function Autocomplete({
           <CommandEmpty>{noOptionsMessage}</CommandEmpty>
         )}
         <CommandGroup>
-          {options.map((option) => (
-            <CommandItem
-              key={option.value}
-              value={`${option.label} - ${option.value}`}
-              onSelect={(v) => {
-                const currentValue =
-                  options.find((o) => `${o.label} - ${o.value}` === v)?.value ||
-                  "";
-                onChange(currentValue);
-                // If freeInput is enabled, update the input text with the selected option's label.
-                if (freeInput) {
-                  const selected = options.find(
-                    (o) => o.value === currentValue,
-                  );
-                  setInputValue(selected ? selected.label : currentValue);
-                }
-                if (closeOnSelect) {
-                  setOpen(false);
-                }
-              }}
-            >
-              <CheckIcon
-                className={cn(
-                  "mr-2 size-4",
-                  value === option.value ? "opacity-100" : "opacity-0",
-                )}
-              />
-              {option.label}
-            </CommandItem>
-          ))}
+          {options.map((option) => {
+            const itemKey = getOptionKey(option);
+            const isSelected = valueCompare(option.value, value);
+            return (
+              <CommandItem
+                key={itemKey}
+                value={itemKey}
+                onSelect={() => {
+                  onChange(option.value);
+                  // If freeInput is enabled, update the input text with the selected option's label.
+                  if (freeInput) {
+                    setInputValue(option.label);
+                  }
+                  if (closeOnSelect) {
+                    setOpen(false);
+                  }
+                }}
+              >
+                {renderOption(option, isSelected)}
+              </CommandItem>
+            );
+          })}
         </CommandGroup>
       </CommandList>
     </>
   );
+
+  const renderTriggerContent = () => {
+    if (selectedOption) {
+      return renderSelected(selectedOption);
+    }
+    if (freeInput && inputValue) {
+      return <span className="truncate">{inputValue}</span>;
+    }
+    return <span className="text-gray-500">{placeholder}</span>;
+  };
+
+  const getTriggerTitle = (): string | undefined => {
+    if (selectedOption) {
+      return selectedOption.label;
+    }
+    if (freeInput && inputValue) {
+      return inputValue;
+    }
+    return undefined;
+  };
 
   if (isMobile) {
     return (
@@ -200,32 +378,20 @@ export default function Autocomplete({
           <DrawerTrigger asChild>
             <Button
               aria-invalid={props["aria-invalid"]}
-              title={
-                value
-                  ? freeInput
-                    ? inputValue || value
-                    : selectedOption?.label
-                  : undefined
-              }
+              title={getTriggerTitle()}
               variant="outline"
-              ref={ref}
+              ref={buttonRef}
               role="combobox"
               aria-expanded={open}
               className={cn(
                 "w-full justify-between",
                 className,
-                selectedOption && "rounded-r-none",
+                selectedOption && showClearButton && "rounded-r-none",
               )}
               disabled={disabled}
               type="button"
             >
-              <span className="overflow-hidden">
-                {value
-                  ? freeInput
-                    ? inputValue || value
-                    : selectedOption?.label
-                  : placeholder}
-              </span>
+              <span className="overflow-hidden">{renderTriggerContent()}</span>
             </Button>
           </DrawerTrigger>
           <DrawerContent
@@ -235,9 +401,8 @@ export default function Autocomplete({
             <DrawerTitle className="sr-only">
               {t("autocomplete_options")}
             </DrawerTitle>
-
             <div className="mt-6 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
-              <Command>{commandContent}</Command>
+              <Command shouldFilter={!onSearch}>{commandContent}</Command>
             </div>
           </DrawerContent>
         </Drawer>
@@ -265,7 +430,7 @@ export default function Autocomplete({
       <Popover open={open} onOpenChange={setOpen} modal={true}>
         <PopoverTrigger asChild className={popoverClassName}>
           <Button
-            title={selectedOption ? selectedOption.label : undefined}
+            title={getTriggerTitle()}
             variant="outline"
             role="combobox"
             aria-invalid={props["aria-invalid"]}
@@ -273,21 +438,14 @@ export default function Autocomplete({
             className={cn(
               "w-full justify-between",
               className,
-              selectedOption && "rounded-r-none",
+              selectedOption && showClearButton && "rounded-r-none",
             )}
             disabled={disabled}
             onClick={() => setOpen(!open)}
-            ref={ref}
+            ref={buttonRef}
             data-shortcut-id={shortcutId}
           >
-            <span
-              className={cn(
-                inputValue && "truncate",
-                !selectedOption && "text-gray-500",
-              )}
-            >
-              {displayText}
-            </span>
+            {renderTriggerContent()}
           </Button>
         </PopoverTrigger>
         <PopoverContent
@@ -297,7 +455,7 @@ export default function Autocomplete({
           )}
           align={align}
         >
-          <Command>{commandContent}</Command>
+          <Command shouldFilter={!onSearch}>{commandContent}</Command>
         </PopoverContent>
       </Popover>
       {selectedOption && showClearButton ? (
@@ -327,5 +485,91 @@ export default function Autocomplete({
         </>
       )}
     </div>
+  );
+}
+
+const DEFAULT_INLINE_OPTIONS_LIMIT = 5;
+
+export default function Autocomplete<T = string>({
+  options,
+  isLoading = false,
+  value,
+  onChange,
+  onSearch,
+  placeholder = "Select...",
+  inputPlaceholder = "Search option...",
+  noOptionsMessage = "No options found",
+  disabled,
+  align = "center",
+  className,
+  popoverClassName,
+  popoverContentClassName,
+  freeInput = false,
+  closeOnSelect = true,
+  showClearButton = true,
+  renderOption,
+  renderRadioOption,
+  renderSelected,
+  valueCompare = defaultValueCompare<T>,
+  ref,
+  shortcutId,
+  ...props
+}: AutocompleteProps<T>) {
+  // Capture initial options count to determine variant (radio vs dropdown)
+  // This prevents switching variants when search results change
+  const initialOptionsCountRef = React.useRef<number | null>(null);
+  if (initialOptionsCountRef.current === null && options.length > 0) {
+    initialOptionsCountRef.current = options.length;
+  }
+
+  // Use radio buttons if:
+  // - Initial options count is within limit
+  // - freeInput is disabled (radio doesn't support free text)
+  const useRadioButtons =
+    !freeInput &&
+    initialOptionsCountRef.current !== null &&
+    initialOptionsCountRef.current > 0 &&
+    initialOptionsCountRef.current <= DEFAULT_INLINE_OPTIONS_LIMIT;
+
+  if (useRadioButtons) {
+    return (
+      <AutocompleteRadio<T>
+        options={options}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        showClearButton={showClearButton}
+        valueCompare={valueCompare}
+        renderOption={renderRadioOption ?? renderOption}
+        className={className}
+      />
+    );
+  }
+
+  return (
+    <AutocompleteDropdown<T>
+      options={options}
+      isLoading={isLoading}
+      value={value}
+      onChange={onChange}
+      onSearch={onSearch}
+      placeholder={placeholder}
+      inputPlaceholder={inputPlaceholder}
+      noOptionsMessage={noOptionsMessage}
+      disabled={disabled}
+      align={align}
+      className={className}
+      popoverClassName={popoverClassName}
+      popoverContentClassName={popoverContentClassName}
+      freeInput={freeInput}
+      closeOnSelect={closeOnSelect}
+      showClearButton={showClearButton}
+      renderOption={renderOption ?? defaultRenderDropdownOption}
+      renderSelected={renderSelected ?? defaultRenderDropdownSelected}
+      valueCompare={valueCompare}
+      buttonRef={ref}
+      shortcutId={shortcutId}
+      aria-invalid={props["aria-invalid"]}
+    />
   );
 }
