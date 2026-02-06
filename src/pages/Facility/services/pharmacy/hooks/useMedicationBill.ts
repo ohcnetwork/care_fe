@@ -137,6 +137,8 @@ export interface UseMedicationBillResult {
       onError?: (error: HTTPError) => void;
     },
   ) => void;
+  /** Add a substituted product knowledge ID to trigger inventory fetching and auto-selection */
+  addSubstitutedProductKnowledgeId: (id: string, itemIndex: number) => void;
 
   // Context
   facilityId: string;
@@ -162,6 +164,14 @@ export function useMedicationBill({
   const [prescriptionCompletionMap, setPrescriptionCompletionMap] = useState<
     Record<string, boolean>
   >({});
+  // Track substituted product knowledge IDs to trigger inventory fetching
+  const [substitutedProductKnowledgeIds, setSubstitutedProductKnowledgeIds] =
+    useState<string[]>([]);
+  // Track item indices that need auto-selection applied after substitution
+  const [
+    pendingSubstitutionAutoSelections,
+    setPendingSubstitutionAutoSelections,
+  ] = useState<Set<number>>(new Set());
   const [alternateIdentifier] = useState<string>(
     `${patientId}-${new Date().toISOString().replace(/[:.]/g, "-")}`,
   );
@@ -256,20 +266,28 @@ export function useMedicationBill({
     },
   });
 
-  // Compute medications list from all prescriptions
-  const medications = useMemo(() => {
+  // Compute medications list from all prescriptions with their prescription IDs
+  const medicationsWithPrescriptionId = useMemo(() => {
     return prescriptions.flatMap((p) =>
-      p.medications.filter(
-        (m) =>
-          // TODO: filter cancelled medications?
-          (ACTIVE_MEDICATION_STATUSES as readonly string[]).includes(
-            m.status,
-          ) &&
-          m.dispense_status !== "complete" &&
-          m.dispense_status !== "incomplete",
-      ),
+      p.medications
+        .filter(
+          (m) =>
+            // TODO: filter cancelled medications?
+            (ACTIVE_MEDICATION_STATUSES as readonly string[]).includes(
+              m.status,
+            ) &&
+            m.dispense_status !== "complete" &&
+            m.dispense_status !== "incomplete",
+        )
+        .map((m) => ({ medication: m, prescriptionId: p.id })),
     );
   }, [prescriptions]);
+
+  // Extract just medications for backward compatibility
+  const medications = useMemo(
+    () => medicationsWithPrescriptionId.map((m) => m.medication),
+    [medicationsWithPrescriptionId],
+  );
 
   // Group medications by prescription
   const groupedMedications = useMemo((): GroupedPrescription => {
@@ -296,19 +314,6 @@ export function useMedicationBill({
   // Patient for header (from first prescription)
   const patient = prescriptions[0]?.encounter?.patient;
 
-  // Watch form items for substitution changes
-  const watchedItems = form.watch("items");
-
-  // Create a stable key from substitution IDs to trigger recomputation
-  const substitutionIdsKey = useMemo(() => {
-    return (
-      watchedItems
-        ?.map((item) => item.substitution?.substitutedProductKnowledge?.id)
-        .filter(Boolean)
-        .join(",") || ""
-    );
-  }, [watchedItems]);
-
   // Compute requirements for inventory auto-selection (product knowledge ID -> required quantity)
   // Includes both original and substituted product knowledge IDs
   const inventoryRequirements = useMemo(() => {
@@ -325,25 +330,30 @@ export function useMedicationBill({
       }
     });
 
-    // Add substituted product knowledge IDs from form state
-    watchedItems?.forEach((item) => {
-      const substitutedProductKnowledgeId =
-        item.substitution?.substitutedProductKnowledge?.id;
-      if (
-        substitutedProductKnowledgeId &&
-        !requirements[substitutedProductKnowledgeId]
-      ) {
-        // Use the medication's quantity for the substituted product
-        const medication = item.medication as MedicationRequestRead | undefined;
-        const quantity = medication
-          ? parseFloat(computeMedicationDispenseQuantity(medication))
-          : 1;
-        requirements[substitutedProductKnowledgeId] = Math.floor(quantity);
+    // Add substituted product knowledge IDs from state
+    substitutedProductKnowledgeIds.forEach((id) => {
+      if (!requirements[id]) {
+        // Default quantity for substituted products
+        requirements[id] = 1;
       }
     });
 
     return requirements;
-  }, [medications, watchedItems, substitutionIdsKey]);
+  }, [medications, substitutedProductKnowledgeIds]);
+
+  // Add a substituted product knowledge ID to trigger inventory fetching and auto-selection
+  const addSubstitutedProductKnowledgeId = useCallback(
+    (id: string, itemIndex: number) => {
+      setSubstitutedProductKnowledgeIds((prev) =>
+        prev.includes(id) ? prev : [...prev, id],
+      );
+      // Mark this item as needing auto-selection when inventory is loaded
+      setPendingSubstitutionAutoSelections(
+        (prev) => new Set([...prev, itemIndex]),
+      );
+    },
+    [],
+  );
 
   // Callback for updating inventory map from auto-select hook
   const handleInventoriesFetched = useCallback(
@@ -420,7 +430,7 @@ export function useMedicationBill({
     setPrescriptionCompletionMap(newPrescriptionCompletionMap);
 
     // Add medications to form with empty lots (will be filled by auto-select effect)
-    medications.forEach((medication) => {
+    medicationsWithPrescriptionId.forEach(({ medication, prescriptionId }) => {
       append({
         reference_id: crypto.randomUUID(),
         productKnowledge: medication.requested_product,
@@ -435,10 +445,10 @@ export function useMedicationBill({
             quantity: computeMedicationDispenseQuantity(medication),
           },
         ],
-        prescriptionId: medication.prescription?.id,
+        prescriptionId,
       });
     });
-  }, [medications.length, append, form, groupedMedications]);
+  }, [medicationsWithPrescriptionId.length, append, form, groupedMedications]);
 
   // Apply auto-selections to form once (on initial load only)
   useEffect(() => {
@@ -476,6 +486,57 @@ export function useMedicationBill({
 
     hasAppliedAutoSelections.current = true;
   }, [isInventoryLoading, autoSelections, fields, form]);
+
+  // Apply auto-selections for substituted items when inventory becomes available
+  useEffect(() => {
+    if (isInventoryLoading || pendingSubstitutionAutoSelections.size === 0) {
+      return;
+    }
+
+    const appliedIndices: number[] = [];
+
+    pendingSubstitutionAutoSelections.forEach((index) => {
+      const field = fields[index];
+      if (!field) return;
+
+      // Get the effective product knowledge ID (substituted if available)
+      const substitution = form.getValues(`items.${index}.substitution`);
+      const effectiveProductKnowledgeId =
+        substitution?.substitutedProductKnowledge?.id ||
+        (field.productKnowledge as ProductKnowledgeBase)?.id;
+
+      if (!effectiveProductKnowledgeId) return;
+
+      const selections = autoSelections[effectiveProductKnowledgeId];
+      if (!selections?.length) return;
+
+      // Apply auto-selections as lots
+      form.setValue(
+        `items.${index}.lots`,
+        selections.map((sel) => ({
+          selectedInventoryId: sel.inventoryId,
+          quantity: sel.quantity,
+        })),
+      );
+
+      appliedIndices.push(index);
+    });
+
+    // Remove applied indices from pending set
+    if (appliedIndices.length > 0) {
+      setPendingSubstitutionAutoSelections((prev) => {
+        const next = new Set(prev);
+        appliedIndices.forEach((i) => next.delete(i));
+        return next;
+      });
+    }
+  }, [
+    isInventoryLoading,
+    autoSelections,
+    pendingSubstitutionAutoSelections,
+    fields,
+    form,
+  ]);
 
   // Invoice creation mutation
   const { mutate: createInvoice, isPending: isCreatingInvoice } = useMutation({
@@ -830,6 +891,7 @@ export function useMedicationBill({
     handleRemoveMedication,
     calculatePrices,
     updateMedicationRequest,
+    addSubstitutedProductKnowledgeId,
     facilityId,
     locationId,
     encounterId: encounterId as string | undefined,

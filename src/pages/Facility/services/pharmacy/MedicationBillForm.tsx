@@ -90,6 +90,7 @@ export default function MedicationBillForm({
     handleRemoveMedication,
     calculatePrices,
     updateMedicationRequest,
+    addSubstitutedProductKnowledgeId,
     facilityId,
     locationId,
   } = useMedicationBill({
@@ -386,12 +387,11 @@ export default function MedicationBillForm({
                 [{ selectedInventoryId: "", quantity: "0" }],
                 { shouldDirty: true, shouldTouch: true },
               );
-              setProductKnowledgeInventoriesMap((prev) => ({
-                ...prev,
-                [substitutionDetails.substitutedProductKnowledge.id]:
-                  prev[substitutionDetails.substitutedProductKnowledge.id] ||
-                  undefined,
-              }));
+              // Trigger inventory fetching and auto-selection for the substituted product
+              addSubstitutedProductKnowledgeId(
+                substitutionDetails.substitutedProductKnowledge.id,
+                substitutingItemIndex,
+              );
             } else {
               form.setValue(
                 `items.${substitutingItemIndex}.substitution`,
