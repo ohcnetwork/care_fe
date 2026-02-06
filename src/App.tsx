@@ -58,6 +58,7 @@ const App = () => {
                   // For `richColors` to work, pass at-least an empty object.
                   // Refer: https://github.com/shadcn-ui/ui/issues/2234.
                   toastOptions={{}}
+                  closeButton
                 />
                 <AppUpdateNotifier />
               </PluginEngine>

@@ -31,6 +31,7 @@ import { PatientNav } from "@/components/ui/sidebar/patient-nav";
 import { useRouteParams } from "@/hooks/useRouteParams";
 import { ServiceSwitcher } from "./facility/service/service-switcher";
 
+import PinPageDialog from "@/components/Common/PinPageDialog";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { CurrentUserRead } from "@/types/user/user";
 
@@ -170,6 +171,10 @@ export function AppSidebar({
         )}
         {patientSidebar && <PatientNav />}
         {adminSidebar && <AdminNav />}
+        {(facilitySidebar ||
+          facilityLocationSidebar ||
+          facilityServiceSidebar ||
+          adminSidebar) && <PinPageDialog />}
       </SidebarContent>
 
       <SidebarFooter>
