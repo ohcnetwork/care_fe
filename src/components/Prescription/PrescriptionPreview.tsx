@@ -35,7 +35,7 @@ const PrescriptionContent = ({
   return (
     <div>
       {/* Prescription Symbol */}
-      <div className="text-2xl font-semibold mb-3 flex items-end gap-4">
+      <div className="text-xl font-semibold mb-3 flex items-end gap-4">
         <p>{t("℞")}</p>
         <p className="text-sm text-gray-600 font-semibold ">
           {formatDateTime(prescription.created_date, "DD/MM/YYYY hh:mm A")}
@@ -75,6 +75,10 @@ const PrescriptionContent = ({
                 instructions: [remarks, notes].filter(Boolean).join("\n"),
               };
             })}
+            className="text-xs font-semibold whitespace-break-spaces text-gray-950"
+            cellConfig={{
+              medicine: { className: "text-left" },
+            }}
           />
         </div>
       )}
@@ -91,7 +95,7 @@ const PrescriptionContent = ({
       {/* Doctor's Signature */}
       <div className="w-full items-end mt-6 flex flex-row justify-end gap-1">
         <div className="text-right">
-          <p className="text-sm text-gray-400">{t("prescribed_by")}</p>
+          <p className="text-xs text-gray-400">{t("prescribed_by")}</p>
           <p className="text-sm text-gray-600 font-semibold">
             {formatName(prescription.prescribed_by)}
           </p>
@@ -142,12 +146,12 @@ export const PrescriptionPreview = ({
           <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
             <div className="flex items-start gap-4">
               <div className="text-left">
-                <h1 className="text-2xl font-medium">{facility?.name}</h1>
+                <h1 className="text-xl font-medium">{facility?.name}</h1>
                 {facility?.address && (
-                  <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
+                  <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-xs">
                     {facility.address}
                     {facility.phone_number && (
-                      <p className="text-gray-500 text-sm">
+                      <p className="text-gray-500 text-xs">
                         {t("phone")}: {facility.phone_number}
                       </p>
                     )}
@@ -214,7 +218,10 @@ export const PrescriptionPreview = ({
           <PrescriptionContent prescription={prescription} />
 
           {/* Footer */}
-          <PrintFooter leftContent={t("computer_generated_prescription")} />
+          <PrintFooter
+            leftContent={t("computer_generated_prescription")}
+            className="text-xs"
+          />
         </div>
       </div>
     </PrintPreview>

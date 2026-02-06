@@ -255,6 +255,7 @@ function ActivityDefinitionFormContent({
               existingData.specimen_requirements?.map((s) => ({
                 value: s.slug,
                 label: s.title,
+                link: `/facility/${facilityId}/settings/specimen_definitions/${s.slug}`,
                 details: [
                   {
                     label: t("type"),
@@ -282,6 +283,7 @@ function ActivityDefinitionFormContent({
               existingData.observation_result_requirements?.map((obs) => ({
                 value: obs.slug,
                 label: obs.title,
+                link: `/facility/${facilityId}/settings/observation_definitions/${obs.slug}`,
                 details: [
                   {
                     label: t("category"),
@@ -756,6 +758,7 @@ function ActivityDefinitionFormContent({
                           specimenDefinitions?.results.map((spec) => ({
                             label: spec.title,
                             value: spec.slug,
+                            link: `/facility/${facilityId}/settings/specimen_definitions/${spec.slug}`,
                             details: [
                               {
                                 label: t("type"),
@@ -822,6 +825,7 @@ function ActivityDefinitionFormContent({
                           observationDefinitions?.results.map((obs) => ({
                             label: obs.title,
                             value: obs.slug,
+                            link: `/facility/${facilityId}/settings/observation_definitions/${obs.slug}`,
                             details: [
                               {
                                 label: t("category"),
