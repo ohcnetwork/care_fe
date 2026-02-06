@@ -39,7 +39,7 @@ import {
   getVariantColorClasses,
 } from "./utils/Utils";
 
-import { SelectedFacilityUserBadge } from "@/components/ui/multi-filter/facilityUserFiilter";
+import { SelectedFacilityUserBadge } from "@/components/ui/multi-filter/facilityUserFilter";
 import {
   ACCOUNT_BILLING_STATUS_COLORS,
   ACCOUNT_STATUS_COLORS,
