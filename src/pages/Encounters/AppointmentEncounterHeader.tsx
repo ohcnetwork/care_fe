@@ -226,7 +226,7 @@ const TokenActions = ({
             <Link
               href={
                 resourceType === SchedulableResourceType.Practitioner
-                  ? `/facility/${facilityId}/${patientId}/appointments/${appointment.id}`
+                  ? `/facility/${facilityId}/patient/${patientId}/appointments/${appointment.id}`
                   : `/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/appointments`
               }
             >
