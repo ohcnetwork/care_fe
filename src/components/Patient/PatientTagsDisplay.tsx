@@ -24,15 +24,12 @@ export const PatientTagsDisplay = ({
 }: PatientTagsDisplayProps) => {
   const { t } = useTranslation();
 
-  const allTags: TagConfig[] = [];
-
-  if ("instance_tags" in patient) {
-    allTags.push(...patient.instance_tags);
-  }
-
-  if ("facility_tags" in patient && patient.facility_tags) {
-    allTags.push(...patient.facility_tags);
-  }
+  const allTags: TagConfig[] = [
+    ...("instance_tags" in patient ? patient.instance_tags : []),
+    ...("facility_tags" in patient && patient.facility_tags
+      ? patient.facility_tags
+      : []),
+  ];
 
   if (allTags.length === 0) {
     return null;
