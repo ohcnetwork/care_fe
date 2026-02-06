@@ -264,7 +264,13 @@ export function AccountShow({
     },
     payments: {
       label: t("payments"),
-      component: <PaymentsData facilityId={facilityId} accountId={accountId} />,
+      component: (
+        <PaymentsData
+          facilityId={facilityId}
+          accountId={accountId}
+          hideAccountColumn
+        />
+      ),
       shortcutId: "switch-to-payments-tab",
     },
     reports: {
