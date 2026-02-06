@@ -60,6 +60,7 @@ export const AppointmentEncounterHeader = ({
   return (
     <div className="flex gap-3 border border-gray-300 rounded-lg py-1.5 px-2 bg-white sm:w-fit w-full items-center justify-center shadow-sm">
       <TokenActions
+        patientId={appointment.patient.id}
         facilityId={encounter.facility.id}
         appointment={appointment}
         resourceType={appointment.resource_type}
@@ -197,11 +198,13 @@ const AppointmentEncounterHeaderActions = ({
 };
 
 const TokenActions = ({
+  patientId,
   facilityId,
   appointment,
   resourceType,
   resourceId,
 }: {
+  patientId: string;
   facilityId: string;
   appointment?: AppointmentRead;
   resourceType: SchedulableResourceType;
@@ -223,7 +226,7 @@ const TokenActions = ({
             <Link
               href={
                 resourceType === SchedulableResourceType.Practitioner
-                  ? `/facility/${facilityId}/appointments`
+                  ? `/facility/${facilityId}/${patientId}/appointments/${appointment.id}`
                   : `/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/appointments`
               }
             >
