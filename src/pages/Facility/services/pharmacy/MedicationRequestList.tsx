@@ -5,8 +5,8 @@ import {
   MoreVertical,
   ReceiptTextIcon,
 } from "lucide-react";
-import { navigate } from "raviger";
-import { useMemo } from "react";
+import { Link, navigate } from "raviger";
+import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -50,7 +50,12 @@ import {
 } from "@/components/ui/multi-filter/utils/Utils";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { CreateDispenseSheet } from "@/pages/Facility/services/pharmacy/CreateDispenseSheet";
-import { ENCOUNTER_CLASSES_COLORS } from "@/types/emr/encounter/encounter";
+import {
+  ENCOUNTER_CLASS_ICONS,
+  ENCOUNTER_CLASSES_COLORS,
+  ENCOUNTER_STATUS_COLORS,
+  ENCOUNTER_STATUS_ICONS,
+} from "@/types/emr/encounter/encounter";
 import {
   PrescriptionStatus,
   PrescriptionSummary,
@@ -292,6 +297,19 @@ export default function MedicationRequestList({
           className="flex flex-wrap md:flex-row items-start"
           facilityId={facilityId}
         />
+
+        {qParams.patient_external_id && (
+          <div className="ml-auto items-end">
+            <Button variant="outline_primary" asChild>
+              <Link
+                href={`/medication_requests/patient/${qParams.patient_external_id}/bill`}
+              >
+                <ReceiptTextIcon strokeWidth={1.5} />
+                {t("bill_all_pending_prescriptions")}
+              </Link>
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Table section */}
@@ -321,8 +339,16 @@ export default function MedicationRequestList({
             </TableHeader>
             <TableBody>
               {prescriptionQueue?.results?.map((item: PrescriptionSummary) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-semibold">
+                <TableRow key={item.id} className="group">
+                  <TableCell
+                    className="font-semibold group-hover:underline cursor-pointer"
+                    onClick={() =>
+                      updateQuery({
+                        patient_external_id: item.encounter.patient.id,
+                        patient_name: item.encounter.patient.name,
+                      })
+                    }
+                  >
                     {item.encounter.patient.name}
                     <div className="text-xs text-gray-500">
                       {t("by")}: {formatName(item.prescribed_by)}
@@ -334,7 +360,7 @@ export default function MedicationRequestList({
 
                   <TableCell className="text-sm">
                     <div className="flex flex-col gap-1">
-                      <div>
+                      <div className="space-x-1">
                         <Badge
                           size="sm"
                           variant={
@@ -343,9 +369,27 @@ export default function MedicationRequestList({
                             ]
                           }
                         >
+                          {React.createElement(
+                            ENCOUNTER_CLASS_ICONS[
+                              item.encounter.encounter_class
+                            ],
+                            { className: "size-3" },
+                          )}
                           {t(
                             `encounter_class__${item.encounter.encounter_class}`,
                           )}
+                        </Badge>
+                        <Badge
+                          size="sm"
+                          variant={
+                            ENCOUNTER_STATUS_COLORS[item.encounter.status]
+                          }
+                        >
+                          {React.createElement(
+                            ENCOUNTER_STATUS_ICONS[item.encounter.status],
+                            { className: "size-3" },
+                          )}
+                          {t(`encounter_status__${item.encounter.status}`)}
                         </Badge>
                       </div>
                       {item.encounter.current_location && (
@@ -395,18 +439,6 @@ export default function MedicationRequestList({
                   <TableCell>
                     <div className="flex gap-2 self-center">
                       <Button
-                        variant="outline_primary"
-                        className="font-semibold"
-                        onClick={() => {
-                          navigate(
-                            `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}/bill`,
-                          );
-                        }}
-                      >
-                        <ReceiptTextIcon strokeWidth={1.5} />
-                        {t("bill_all")}
-                      </Button>
-                      <Button
                         variant="outline"
                         className="font-semibold"
                         onClick={() => {
@@ -416,7 +448,7 @@ export default function MedicationRequestList({
                         }}
                       >
                         <ReceiptTextIcon strokeWidth={1.5} />
-                        {t("bill_this")}
+                        {t("bill")}
                       </Button>
                       <Button
                         variant="outline"

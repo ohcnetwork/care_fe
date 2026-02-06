@@ -110,6 +110,8 @@ export interface PaymentReconciliationRead extends PaymentReconciliationBase {
   location: LocationRead | null;
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
+  created_date: string;
+  modified_date: string;
   extensions?: Record<string, Record<string, unknown>>;
 }
 

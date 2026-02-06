@@ -14,11 +14,16 @@ import {
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import {
+  AppointmentFinalStatuses,
   AppointmentStatus,
   AppointmentUpdateRequest,
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
-import { TokenStatus, TokenUpdate } from "@/types/tokens/token/token";
+import {
+  TokenActiveStatuses,
+  TokenStatus,
+  TokenUpdate,
+} from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
 
@@ -107,7 +112,11 @@ export function useEncounterProgressController() {
       });
     }
 
-    if (appointment && appointment.id) {
+    // Close appointment if it exists and is not already in a final status
+    if (
+      appointment?.id &&
+      !AppointmentFinalStatuses.includes(appointment.status)
+    ) {
       requests.push({
         url: scheduleApi.appointments.update.path
           .replace("{facilityId}", encounter.facility.id)
@@ -120,7 +129,12 @@ export function useEncounterProgressController() {
         },
       });
     }
-    if (appointment?.token) {
+
+    // Close token if it exists and is still active
+    if (
+      appointment?.token &&
+      TokenActiveStatuses.includes(appointment.token.status)
+    ) {
       requests.push({
         url: tokenApi.update.path
           .replace("{facility_id}", encounter.facility.id)

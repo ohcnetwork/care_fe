@@ -8,21 +8,15 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
-import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
-import { formatDosage } from "@/components/Medicine/utils";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -37,59 +31,21 @@ import {
   ACTIVE_MEDICATION_STATUSES,
   INACTIVE_MEDICATION_STATUSES,
   MedicationRequestRead,
-  displayMedicationName,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
+import { DiscontinueConfirmDialog } from "./DiscontinueConfirmDialog";
+import { GroupedMedicationRow } from "./GroupedMedicationRow";
 import { MedicineAdminDialog } from "./MedicineAdminDialog";
 import { MedicineAdminSheet } from "./MedicineAdminSheet";
 import {
-  STATUS_COLORS,
+  GroupedMedication,
   TIME_SLOTS,
   createMedicationAdministrationRequest,
+  getLatestActiveRequest,
+  groupMedicationsByProduct,
+  isTimeInSlot,
 } from "./utils";
-
-// Utility Functions
-function isTimeInSlot(
-  date: Date,
-  slot: { date: Date; start: string; end: string },
-): boolean {
-  const slotStartDate = new Date(slot.date);
-  const [startHour] = slot.start.split(":").map(Number);
-  const [endHour] = slot.end.split(":").map(Number);
-
-  slotStartDate.setHours(startHour, 0, 0, 0);
-  const slotEndDate = new Date(slotStartDate);
-  slotEndDate.setHours(endHour, 0, 0, 0);
-
-  return date >= slotStartDate && date < slotEndDate;
-}
-
-function getAdministrationsForTimeSlot(
-  administrations: MedicationAdministrationRead[],
-  medicationId: string,
-  slotDate: Date,
-  start: string,
-  end: string,
-): MedicationAdministrationRead[] {
-  return administrations.filter((admin) => {
-    const adminDate = new Date(admin.occurrence_period_start);
-    const slotStartDate = new Date(slotDate);
-    const slotEndDate = new Date(slotDate);
-
-    const [startHour] = start.split(":").map(Number);
-    const [endHour] = end.split(":").map(Number);
-
-    slotStartDate.setHours(startHour, 0, 0, 0);
-    slotEndDate.setHours(endHour, 0, 0, 0);
-
-    return (
-      admin.request === medicationId &&
-      adminDate >= slotStartDate &&
-      adminDate < slotEndDate
-    );
-  });
-}
 
 // Types and Interfaces
 interface AdministrationTabProps {
@@ -105,62 +61,6 @@ interface TimeSlotHeaderProps {
   isCurrentSlot: boolean;
   isEndSlot: boolean;
 }
-
-interface MedicationStatusBadgeProps {
-  status: string;
-}
-
-interface MedicationBadgesProps {
-  medication: MedicationRequestRead;
-}
-
-interface MedicationRowProps {
-  medication: MedicationRequestRead;
-  visibleSlots: ((typeof TIME_SLOTS)[number] & { date: Date })[];
-  currentDate: Date;
-  administrations?: MedicationAdministrationRead[];
-  onAdminister: (medication: MedicationRequestRead) => void;
-  onEditAdministration: (
-    medication: MedicationRequestRead,
-    admin: MedicationAdministrationRead,
-  ) => void;
-  onDiscontinue: (medication: MedicationRequestRead) => void;
-  canWrite: boolean;
-}
-
-// Utility Components
-const MedicationStatusBadge: React.FC<MedicationStatusBadgeProps> = ({
-  status,
-}) => {
-  const { t } = useTranslation();
-
-  return (
-    <Badge
-      variant={status === "active" ? "green" : "secondary"}
-      className="text-xs"
-    >
-      {t(status)}
-    </Badge>
-  );
-};
-
-const MedicationBadges: React.FC<MedicationBadgesProps> = ({ medication }) => {
-  const { t } = useTranslation();
-
-  return (
-    <div className="flex flex-wrap gap-2 mt-1">
-      <Badge variant="blue" className="text-xs">
-        {medication.dosage_instruction[0]?.route?.display || t("oral")}
-      </Badge>
-      {medication.dosage_instruction[0]?.as_needed_boolean && (
-        <Badge variant="pink" className="text-xs">
-          {t("as_needed_prn")}
-        </Badge>
-      )}
-      <MedicationStatusBadge status={medication.status} />
-    </div>
-  );
-};
 
 const TimeSlotHeader: React.FC<TimeSlotHeaderProps> = ({
   slot,
@@ -209,182 +109,6 @@ const TimeSlotHeader: React.FC<TimeSlotHeaderProps> = ({
         </div>
       )}
     </div>
-  );
-};
-
-const MedicationRow: React.FC<MedicationRowProps> = ({
-  medication,
-  visibleSlots,
-  currentDate,
-  administrations,
-  onAdminister,
-  onEditAdministration,
-  onDiscontinue,
-  canWrite,
-}) => {
-  const { t } = useTranslation();
-  const isInactive = INACTIVE_MEDICATION_STATUSES.includes(
-    medication.status as (typeof INACTIVE_MEDICATION_STATUSES)[number],
-  );
-
-  return (
-    <React.Fragment>
-      <div
-        className={cn(
-          "p-4 border-t border-gray-200",
-          isInactive && "bg-gray-200 opacity-40",
-        )}
-      >
-        <div
-          className={cn(
-            "font-semibold truncate",
-            isInactive && medication.status === "ended" && "line-through",
-          )}
-        >
-          {displayMedicationName(medication)}
-        </div>
-        <MedicationBadges medication={medication} />
-        <div className="text-xs mt-1 font-medium truncate">
-          {formatDosage(medication.dosage_instruction[0])},{" "}
-          {
-            getFrequencyDisplay(medication.dosage_instruction[0]?.timing)
-              ?.meaning
-          }
-        </div>
-        <div className="text-xs text-gray-500 mt-1 truncate">
-          {t("added_on")}:{" "}
-          {format(
-            new Date(medication.authored_on || medication.created_date),
-            "MMM dd, yyyy, hh:mm a",
-          )}
-        </div>
-      </div>
-
-      {visibleSlots.map((slot) => {
-        const administrationRecords = getAdministrationsForTimeSlot(
-          administrations || [],
-          medication.id,
-          slot.date,
-          slot.start,
-          slot.end,
-        );
-        const isCurrentSlot = isTimeInSlot(currentDate, slot);
-
-        return (
-          <div
-            key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
-            className={cn(
-              "p-4 border-t relative text-sm",
-              isInactive && "bg-gray-200 opacity-40",
-            )}
-          >
-            {administrationRecords?.map((admin) => {
-              const colorClass =
-                STATUS_COLORS[admin.status as keyof typeof STATUS_COLORS] ||
-                STATUS_COLORS.default;
-
-              return (
-                <div
-                  key={admin.id}
-                  className={`flex font-medium flex-col rounded-md p-2 mb-2 cursor-pointer border border-gray-200 ${colorClass}`}
-                  onClick={() => onEditAdministration(medication, admin)}
-                >
-                  <div className="flex justify-between">
-                    <div>
-                      <CareIcon
-                        icon="l-check-circle"
-                        className="size-4 self-center"
-                      />
-                    </div>
-                    <div>
-                      {admin.note && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className={`size-4 hover:${colorClass} p-0`}
-                        >
-                          <CareIcon icon="l-notes" className="size-3" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    <span>
-                      {new Date(
-                        admin.occurrence_period_start,
-                      ).toLocaleTimeString("en-US", {
-                        hour: "numeric",
-                        minute: "2-digit",
-                        hour12: true,
-                      })}
-                    </span>
-                    {admin.occurrence_period_end && (
-                      <>
-                        <span>{"-"}</span>
-                        <span>
-                          {new Date(
-                            admin.occurrence_period_end,
-                          ).toLocaleTimeString("en-US", {
-                            hour: "numeric",
-                            minute: "2-digit",
-                            hour12: true,
-                          })}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-            {isCurrentSlot && medication.status === "active" && canWrite && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full h-8 text-primary-800 border-primary-600 hover:bg-primary-100 font-semibold"
-                onClick={() => onAdminister(medication)}
-              >
-                {t("administer")}
-              </Button>
-            )}
-          </div>
-        );
-      })}
-
-      <div
-        className={cn(
-          "p-4 border-t border-gray-200 flex justify-center",
-          isInactive && "bg-gray-200 opacity-40",
-        )}
-      >
-        {ACTIVE_MEDICATION_STATUSES.includes(
-          medication.status as (typeof ACTIVE_MEDICATION_STATUSES)[number],
-        ) &&
-          canWrite && (
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="size-6">
-                  <CareIcon icon="l-ellipsis-h" className="size-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-40 p-0">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start px-3 py-2 text-sm text-red-600 hover:text-red-600 hover:bg-red-50"
-                  onClick={() => {
-                    onDiscontinue(medication);
-                    // Close the popover after clicking
-                    const button = document.activeElement as HTMLElement;
-                    button?.blur();
-                  }}
-                >
-                  <CareIcon icon="l-ban" className="mr-2 size-4" />
-                  {t("discontinue")}
-                </Button>
-              </PopoverContent>
-            </Popover>
-          )}
-      </div>
-    </React.Fragment>
   );
 };
 
@@ -438,7 +162,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,
-        limit: 100,
+        limit: 1000,
         status: ACTIVE_MEDICATION_STATUSES.join(","),
         product_type: "medication",
         facility: facilityId,
@@ -453,7 +177,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,
-        limit: 100,
+        limit: 1000,
         status: INACTIVE_MEDICATION_STATUSES.join(","),
         facility: facilityId,
         product_type: "medication",
@@ -463,36 +187,15 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   });
 
   const { data: administrations } = useQuery({
-    queryKey: [
-      "medication_administrations",
-      patientId,
-      visibleSlots,
-      encounterId,
-    ],
+    queryKey: ["medication_administrations", patientId, encounterId],
     queryFn: query(medicationAdministrationApi.list, {
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,
-        limit: 100,
-        ...(visibleSlots.length > 0 && {
-          occurrence_period_start_after: (() => {
-            const firstSlot = visibleSlots[0];
-            const [startHour] = firstSlot.start.split(":").map(Number);
-            const date = new Date(firstSlot.date);
-            date.setHours(startHour, 0, 0, 0);
-            return date.toISOString();
-          })(),
-          occurrence_period_start_before: (() => {
-            const lastSlot = visibleSlots[visibleSlots.length - 1];
-            const [endHour] = lastSlot.end.split(":").map(Number);
-            const date = new Date(lastSlot.date);
-            date.setHours(endHour, 0, 0, 0);
-            return date.toISOString();
-          })(),
-        }),
+        limit: 1000, // Increased to fetch more historical administrations
       },
     }),
-    enabled: !!patientId && !!visibleSlots?.length && canAccess,
+    enabled: !!patientId && canAccess,
   });
 
   // Get last administered date and last administered by for each medication
@@ -554,6 +257,17 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [administrationRequest, setAdministrationRequest] =
     useState<MedicationAdministrationRequest | null>(null);
+
+  // State for grouped display
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [discontinueDialogOpen, setDiscontinueDialogOpen] = useState(false);
+  const [itemToDiscontinue, setItemToDiscontinue] = useState<{
+    type: "single" | "group";
+    medication?: MedicationRequestRead;
+    group?: GroupedMedication;
+  } | null>(null);
+  const [selectedGroupForAdmin, setSelectedGroupForAdmin] =
+    useState<GroupedMedication | null>(null);
 
   // Calculate last modified date
   const lastModifiedDate = useMemo(() => {
@@ -624,6 +338,19 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     [encounterId],
   );
 
+  const handleMedicationChangeInDialog = useCallback(
+    (medication: MedicationRequestRead) => {
+      if (!encounterId) {
+        return;
+      }
+      setAdministrationRequest(
+        createMedicationAdministrationRequest(medication, encounterId),
+      );
+      setSelectedMedication(medication);
+    },
+    [encounterId],
+  );
+
   const handleEditAdministration = useCallback(
     (
       medication: MedicationRequestRead,
@@ -649,38 +376,108 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     [],
   );
 
-  const handleDiscontinue = useCallback(
+  // Group medications by product - include all medications (active + stopped)
+  // so that administrations from stopped requests are shown when the group has active requests
+  const groupedMedications = useMemo(() => {
+    const allMedications = [
+      ...(activeMedications?.results || []),
+      ...(stoppedMedications?.results || []),
+    ];
+
+    // Apply search filter if present
+    const filtered = searchQuery.trim()
+      ? allMedications.filter((med: MedicationRequestRead) => {
+          const query = searchQuery.toLowerCase().trim();
+          const medicationName = med.medication?.display?.toLowerCase() || "";
+          const productName = med.requested_product?.name?.toLowerCase() || "";
+          return medicationName.includes(query) || productName.includes(query);
+        })
+      : allMedications;
+
+    return groupMedicationsByProduct(filtered, administrations?.results);
+  }, [
+    activeMedications?.results,
+    stoppedMedications?.results,
+    searchQuery,
+    administrations?.results,
+  ]);
+
+  // Handlers for grouped display
+  const handleToggleExpand = useCallback((productId: string) => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(productId)) {
+        next.delete(productId);
+      } else {
+        next.add(productId);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleDiscontinueClick = useCallback(
     (medication: MedicationRequestRead) => {
+      setItemToDiscontinue({ type: "single", medication });
+      setDiscontinueDialogOpen(true);
+    },
+    [],
+  );
+
+  const handleDiscontinueGroupClick = useCallback(
+    (group: GroupedMedication) => {
+      setItemToDiscontinue({ type: "group", group });
+      setDiscontinueDialogOpen(true);
+    },
+    [],
+  );
+
+  const handleConfirmDiscontinue = useCallback(() => {
+    if (!itemToDiscontinue) return;
+
+    if (itemToDiscontinue.type === "group" && itemToDiscontinue.group) {
+      // Discontinue all active medications in the group
+      const activeRequests = itemToDiscontinue.group.requests.filter((r) =>
+        ACTIVE_MEDICATION_STATUSES.includes(
+          r.status as (typeof ACTIVE_MEDICATION_STATUSES)[number],
+        ),
+      );
+
+      discontinueMedication({
+        datapoints: activeRequests.map((medication) => ({
+          ...medication,
+          status: "ended" as const,
+          encounter: encounterId,
+        })),
+      });
+    } else if (
+      itemToDiscontinue.type === "single" &&
+      itemToDiscontinue.medication
+    ) {
       discontinueMedication({
         datapoints: [
           {
-            ...medication,
-            status: "ended",
+            ...itemToDiscontinue.medication,
+            status: "ended" as const,
             encounter: encounterId,
           },
         ],
       });
+    }
+
+    setDiscontinueDialogOpen(false);
+    setItemToDiscontinue(null);
+  }, [discontinueMedication, encounterId, itemToDiscontinue]);
+
+  const handleAdministerGroup = useCallback(
+    (group: GroupedMedication) => {
+      const latestRequest = getLatestActiveRequest(group);
+      if (latestRequest) {
+        setSelectedGroupForAdmin(group);
+        handleAdminister(latestRequest);
+      }
     },
-    [discontinueMedication, encounterId],
+    [handleAdminister],
   );
-
-  const medications = showStopped
-    ? [
-        ...(activeMedications?.results || []),
-        ...(stoppedMedications?.results || []),
-      ]
-    : activeMedications?.results || [];
-
-  const filteredMedications = !searchQuery.trim()
-    ? medications
-    : [
-        ...(activeMedications?.results || []),
-        ...(stoppedMedications?.results || []),
-      ].filter((med: MedicationRequestRead) =>
-        med.medication?.display
-          ?.toLowerCase()
-          .includes(searchQuery.toLowerCase().trim()),
-      );
 
   let content;
   if (!activeMedications || !stoppedMedications) {
@@ -699,12 +496,17 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         description={t("no_medications_to_administer")}
       />
     );
-  } else if (searchQuery && !filteredMedications.length) {
+  } else if (
+    searchQuery &&
+    !groupedMedications.some((g) => showStopped || g.hasActiveRequests)
+  ) {
     content = <EmptyState searching searchQuery={searchQuery} />;
   } else {
     content = (
       <>
-        {!filteredMedications.length && (
+        {!groupedMedications.some(
+          (g) => showStopped || g.hasActiveRequests,
+        ) && (
           <CardContent className="p-2">
             <p className="text-gray-500 w-full flex justify-center mb-3">
               {t("no_active_medication_recorded")}
@@ -764,60 +566,75 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
               </div>
 
               {/* Main content with borders */}
-              <div className="col-span-full grid grid-cols-subgrid divide-x divide-gray-200 border-l border-r border-gray-200">
+              <div className="col-span-full grid grid-cols-subgrid border-l border-r border-gray-200">
                 {/* Headers */}
-                <div className="p-4 font-medium text-sm border-t border-gray-200 bg-gray-100 text-secondary-700">
+                <div className="p-4 font-medium text-sm border-t border-r border-gray-200 bg-gray-100 text-secondary-700">
                   {t("medicine")}:
                 </div>
-                {visibleSlots.map((slot, i) => (
-                  <div
-                    key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
-                    className="p-4 font-semibold text-xs text-center border-t border-gray-200 relative bg-gray-100 text-secondary-700"
-                  >
-                    {i === endSlotIndex &&
-                      slot.date.getTime() === currentDate.getTime() && (
-                        <div className="absolute top-0 left-1/2 -translate-y-1/2 -translate-x-1/2">
-                          <div className="size-2 rounded-full bg-blue-500" />
-                        </div>
+                {visibleSlots.map((slot, i) => {
+                  // Check if this slot is the last of a day (next slot is a different day)
+                  const nextSlot = visibleSlots[i + 1];
+                  const isLastSlotOfDay =
+                    nextSlot &&
+                    format(slot.date, "yyyy-MM-dd") !==
+                      format(nextSlot.date, "yyyy-MM-dd");
+
+                  return (
+                    <div
+                      key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
+                      className={cn(
+                        "p-4 font-semibold text-xs text-center border-t border-r border-gray-200 relative bg-gray-100 text-secondary-700",
+                        isLastSlotOfDay && "border-r-4 border-r-gray-200",
                       )}
-                    {slot.label}
-                  </div>
-                ))}
+                    >
+                      {i === endSlotIndex &&
+                        slot.date.getTime() === currentDate.getTime() && (
+                          <div className="absolute top-0 left-1/2 -translate-y-1/2 -translate-x-1/2">
+                            <div className="size-2 rounded-full bg-blue-500" />
+                          </div>
+                        )}
+                      {slot.label}
+                    </div>
+                  );
+                })}
                 <div className="border-t border-gray-200 bg-gray-100" />
 
-                {/* Medication rows */}
-                {filteredMedications?.map((medication) => (
-                  <MedicationRow
-                    key={medication.id}
-                    medication={medication}
-                    visibleSlots={visibleSlots}
-                    currentDate={currentDate}
-                    administrations={administrations?.results}
-                    onAdminister={handleAdminister}
-                    onEditAdministration={handleEditAdministration}
-                    onDiscontinue={handleDiscontinue}
-                    canWrite={canWrite}
-                  />
-                ))}
+                {/* Grouped Medication rows */}
+                {groupedMedications
+                  .filter((group) => showStopped || group.hasActiveRequests)
+                  .map((group) => (
+                    <GroupedMedicationRow
+                      key={group.productId}
+                      group={group}
+                      visibleSlots={visibleSlots}
+                      currentDate={currentDate}
+                      administrations={administrations?.results}
+                      expandedGroups={expandedGroups}
+                      onToggleExpand={handleToggleExpand}
+                      onAdminister={handleAdminister}
+                      onAdministerGroup={handleAdministerGroup}
+                      onEditAdministration={handleEditAdministration}
+                      onDiscontinue={handleDiscontinueClick}
+                      onDiscontinueGroup={handleDiscontinueGroupClick}
+                      canWrite={canWrite}
+                    />
+                  ))}
               </div>
             </div>
 
-            {stoppedMedications?.results?.length > 0 && !searchQuery.trim() && (
-              <div
-                className="p-4 border-t border-gray-200 flex items-center gap-2 cursor-pointer hover:bg-gray-50"
-                onClick={() => setShowStopped(!showStopped)}
-              >
-                <CareIcon
-                  icon={showStopped ? "l-eye-slash" : "l-eye"}
-                  className="size-4"
-                />
-                <span className="text-sm underline">
-                  {showStopped ? t("hide") : t("show")}{" "}
-                  {`${stoppedMedications?.results?.length} ${t("stopped")}`}{" "}
-                  {t("prescriptions")}
-                </span>
-              </div>
-            )}
+            {stoppedMedications?.results?.length > 0 &&
+              activeMedications?.results?.length > 0 &&
+              !searchQuery.trim() && (
+                <div className="p-3 border-t border-gray-200 bg-gray-50 text-center">
+                  <span className="text-xs text-gray-500">
+                    {showStopped
+                      ? t("showing_all_medications")
+                      : t("n_discontinued_medications_hidden", {
+                          count: stoppedMedications.results.length,
+                        })}
+                  </span>
+                </div>
+              )}
           </Card>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
@@ -826,58 +643,86 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   }
 
   return (
-    <div className="flex flex-col gap-2 mx-2">
+    <div className="flex flex-col gap-4 mx-2">
       {!showTimeLine && (
-        <div className="flex justify-start items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-2 flex-1">
-            <div className="flex items-center gap-2 flex-1">
-              <CareIcon icon="l-search" className="text-lg text-gray-500" />
+        <div className="flex flex-col gap-3">
+          {/* Search and Actions Row */}
+          <div className="flex justify-between items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-md bg-white border rounded-lg px-3 py-1.5">
+              <CareIcon icon="l-search" className="text-lg text-gray-400" />
               <Input
                 placeholder={t("search_medications")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 bg-transparent text-sm outline-hidden placeholder:text-gray-500"
+                className="flex-1 border-0 bg-transparent text-sm outline-none focus-visible:ring-0 placeholder:text-gray-400 h-8 px-0"
               />
               {searchQuery && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-6 px-2 text-gray-500 hover:text-foreground"
+                  className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
                   onClick={() => setSearchQuery("")}
                 >
-                  <CareIcon icon="l-times" className="text-lg" />
+                  <CareIcon icon="l-times" className="text-base" />
                 </Button>
               )}
             </div>
+            <div className="flex items-center gap-2">
+              {canWrite && (
+                <Button
+                  variant="outline"
+                  className="text-emerald-600 border-emerald-600 hover:bg-emerald-50"
+                  onClick={() => setIsSheetOpen(true)}
+                  disabled={!activeMedications?.results?.length}
+                >
+                  <CareIcon icon="l-syringe" className="mr-2 size-4" />
+                  {t("administer_medicine")}
+                </Button>
+              )}
+              {facilityIdExists && (
+                <Link
+                  href={`../${encounterId}/medicines/administrations/print`}
+                >
+                  <Button
+                    variant="outline"
+                    disabled={
+                      !activeMedications?.results?.length &&
+                      !stoppedMedications?.results?.length
+                    }
+                    size="sm"
+                    className="h-9"
+                  >
+                    <CareIcon icon="l-file-medical-alt" className="mr-2" />
+                    {t("view_drug_chart")}
+                  </Button>
+                </Link>
+              )}
+            </div>
           </div>
-          {canWrite && (
-            <Button
-              variant="outline"
-              className="text-emerald-600 border-emerald-600 hover:bg-emerald-50 w-full sm:w-auto"
-              onClick={() => setIsSheetOpen(true)}
-              disabled={!activeMedications?.results.length}
-            >
-              <CareIcon icon="l-plus" className="mr-2 size-4" />
-              {t("administer_medicine")}
-            </Button>
-          )}
-          {facilityIdExists && (
-            <Button
-              variant="outline"
-              disabled={!activeMedications?.results?.length}
-              size="sm"
-              className="text-gray-950 hover:text-gray-700 h-9"
-            >
-              <Link href={`../${encounterId}/medicines/administrations/print`}>
-                <CareIcon icon="l-print" className="mr-2" />
-                {t("print")}
-              </Link>
-            </Button>
-          )}
+
+          {/* Filter Controls Row */}
+          <div className="flex items-center gap-4 flex-wrap text-sm">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="show-stopped"
+                checked={showStopped}
+                onCheckedChange={(checked) => setShowStopped(checked === true)}
+              />
+              <Label
+                htmlFor="show-stopped"
+                className="text-sm cursor-pointer text-gray-600"
+              >
+                {t("show_discontinued")}
+                {stoppedMedications?.results?.length
+                  ? ` (${stoppedMedications.results.length})`
+                  : ""}
+              </Label>
+            </div>
+          </div>
         </div>
       )}
 
-      <div className="mt-4">{content}</div>
+      <div>{content}</div>
 
       {selectedMedication && administrationRequest && (
         <MedicineAdminDialog
@@ -887,6 +732,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             if (!open) {
               setAdministrationRequest(null);
               setSelectedMedication(null);
+              setSelectedGroupForAdmin(null);
               queryClient.invalidateQueries({
                 queryKey: ["medication_administrations"],
               });
@@ -901,6 +747,10 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
           }
           administrationRequest={administrationRequest}
           patientId={patientId}
+          otherGroupRequests={
+            selectedGroupForAdmin ? selectedGroupForAdmin.requests : undefined
+          }
+          onMedicationChange={handleMedicationChangeInDialog}
         />
       )}
 
@@ -910,6 +760,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
           onOpenChange={(open) => {
             setIsSheetOpen(open);
             if (!open) {
+              setSelectedGroupForAdmin(null);
               queryClient.invalidateQueries({
                 queryKey: ["medication_administrations"],
               });
@@ -919,8 +770,17 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
           lastAdministeredDates={lastAdministeredDetails?.dates}
           patientId={patientId}
           encounterId={encounterId}
+          selectedGroup={selectedGroupForAdmin || undefined}
         />
       )}
+
+      <DiscontinueConfirmDialog
+        open={discontinueDialogOpen}
+        onOpenChange={setDiscontinueDialogOpen}
+        medication={itemToDiscontinue?.medication}
+        group={itemToDiscontinue?.group}
+        onConfirm={handleConfirmDiscontinue}
+      />
     </div>
   );
 };

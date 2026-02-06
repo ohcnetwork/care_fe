@@ -238,6 +238,7 @@ function ActivityDefinitionFilterDropdown({
           placeholder={t("search_activity_definition")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => e.stopPropagation()}
           className="h-8 text-sm"
         />
       </div>

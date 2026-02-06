@@ -414,7 +414,6 @@ export function SmartExternalDeliveryRow({
           onChange={(e) => {
             const value = parseInt(e.target.value) || undefined;
             setField("supplied_item_pack_quantity", value);
-            markAsEdited();
           }}
           disabled={!productKnowledge}
           className="w-[7rem]"
