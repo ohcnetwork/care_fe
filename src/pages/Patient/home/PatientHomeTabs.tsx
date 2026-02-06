@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import PatientTokensList from "@/components/Tokens/PatientTokensList";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { cn } from "@/lib/utils";
 import { BookingsList } from "@/pages/Appointments/BookAppointment/BookingsList";
 import { EncounterListRead } from "@/types/emr/encounter/encounter";
 import { FacilityRead } from "@/types/facility/facility";
@@ -16,6 +17,8 @@ interface PatientHomeTabsProps {
   canWriteAppointment: boolean;
   canListTokens: boolean;
   actions?: (encounter: EncounterListRead) => React.ReactNode;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
 }
 
 export default function PatientHomeTabs({
@@ -26,9 +29,10 @@ export default function PatientHomeTabs({
   canWriteAppointment,
   canListTokens,
   actions,
+  activeTab,
+  onTabChange,
 }: PatientHomeTabsProps) {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState("encounters");
   const isTab = useBreakpoints({ default: true, lg: false });
 
   const tabs = [
@@ -47,10 +51,10 @@ export default function PatientHomeTabs({
         (tab) => tab.id !== "tokens" && (tab.alwaysVisible || tab.visible),
       );
       if (fallbackTab) {
-        setActiveTab(fallbackTab.id);
+        onTabChange(fallbackTab.id);
       }
     }
-  }, [isTab, activeTab, tabs]);
+  }, [isTab, activeTab, tabs, onTabChange]);
 
   return (
     <div className="w-full">
@@ -60,12 +64,13 @@ export default function PatientHomeTabs({
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+              onClick={() => onTabChange(tab.id)}
+              className={cn(
+                "py-2 px-1 border-b-2 font-medium text-sm transition-colors",
                 activeTab === tab.id
                   ? "border-primary-600 text-primary-600"
-                  : "border-transparent text-gray-700 hover:text-gray-500 hover:border-gray-300"
-              }`}
+                  : "border-transparent text-gray-700 hover:text-gray-500 hover:border-gray-300",
+              )}
             >
               {tab.label}
             </button>

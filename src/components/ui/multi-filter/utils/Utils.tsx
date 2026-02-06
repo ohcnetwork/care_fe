@@ -64,7 +64,7 @@ export type ActivityDefinitionFilterMeta = {
   facilityId?: string;
 };
 
-export type CareTeamFilterMeta = {
+export type FacilityUserFilterMeta = {
   facilityId?: string;
 };
 
@@ -117,7 +117,12 @@ export interface ActivityDefinitionFilterConfig extends BaseFilterConfig {
 
 export interface CareTeamFilterConfig extends BaseFilterConfig {
   type: "care_team";
-  meta: CareTeamFilterMeta;
+  meta: FacilityUserFilterMeta;
+}
+
+export interface FacilityUserFilterConfig extends BaseFilterConfig {
+  type: "facility_user";
+  meta: FacilityUserFilterMeta;
 }
 
 export type FilterConfig =
@@ -127,7 +132,8 @@ export type FilterConfig =
   | DepartmentFilterConfig
   | LocationFilterConfig
   | ActivityDefinitionFilterConfig
-  | CareTeamFilterConfig;
+  | CareTeamFilterConfig
+  | FacilityUserFilterConfig;
 
 export interface OperationConfig {
   selectedOperation: Operation | null;
@@ -184,7 +190,8 @@ export function createFilterConfig(
     | "department"
     | "location"
     | "activity_definition"
-    | "care_team",
+    | "care_team"
+    | "facility_user",
   options: FilterOption[],
   meta?: {
     resource?: TagResource;
@@ -261,6 +268,12 @@ export function createFilterConfig(
         type: "activity_definition",
         meta: { facilityId },
       } as ActivityDefinitionFilterConfig;
+    case "facility_user":
+      return {
+        ...baseConfig,
+        type: "facility_user",
+        meta: { facilityId },
+      } as FacilityUserFilterConfig;
     case "care_team":
       return {
         ...baseConfig,

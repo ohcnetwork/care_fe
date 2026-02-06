@@ -1,7 +1,6 @@
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import { Avatar } from "@/components/Common/Avatar";
 import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,10 +20,12 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Signal, SquarePen } from "lucide-react";
 import { Link } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 export const SummaryPanelEncounterDetails = () => {
   const { t } = useTranslation();
+  const [showAllCareTeam, setShowAllCareTeam] = useState(false);
   const {
     selectedEncounter: encounter,
     selectedEncounterId: encounterId,
@@ -239,34 +240,40 @@ export const SummaryPanelEncounterDetails = () => {
           </div>
 
           {encounter.care_team.length > 0 && (
-            <div className="flex flex-row gap-2">
-              <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium text-gray-700">
-                  {t("care_team")}:
-                </span>
-                <div className="flex items-center gap-2">
-                  <div className="flex -space-x-2">
-                    {encounter.care_team.length > 0 ? (
-                      encounter.care_team
-                        .slice(0, 3)
-                        .map((member) => (
-                          <Avatar
-                            key={member.member.id}
-                            name={formatName(member.member, true)}
-                            imageUrl={member.member.profile_picture_url}
-                            className="size-10 rounded-full border border-white shadow-sm"
-                          />
-                        ))
-                    ) : (
-                      <span>--</span>
-                    )}
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-medium text-gray-700">
+                {t("care_team")}:
+              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                {(showAllCareTeam
+                  ? encounter.care_team
+                  : encounter.care_team.slice(0, 2)
+                ).map((member) => (
+                  <div
+                    key={member.member.id}
+                    className="flex flex-col px-2 py-1 rounded-lg border border-gray-200 bg-gray-100"
+                  >
+                    <span className="text-sm md:text-base font-medium text-gray-950">
+                      {formatName(member.member)}
+                    </span>
+                    <span className="text-xs md:text-sm text-gray-600">
+                      {member.role.display}
+                    </span>
                   </div>
-                  {encounter.care_team.length > 3 && (
-                    <div className="flex items-center justify-center text-sm font-medium text-gray-700 rounded-full bg-gray-100 size-10 border border-white shadow-sm -ml-4">
-                      <span>+{encounter.care_team.length - 3}</span>
-                    </div>
-                  )}
-                </div>
+                ))}
+                {encounter.care_team.length > 2 && (
+                  <Button
+                    type="button"
+                    onClick={() => setShowAllCareTeam(!showAllCareTeam)}
+                    variant="link"
+                    size="xs"
+                    className="underline"
+                  >
+                    {showAllCareTeam
+                      ? t("show_less")
+                      : `+${encounter.care_team.length - 2} ${t("more")}`}
+                  </Button>
+                )}
               </div>
             </div>
           )}
