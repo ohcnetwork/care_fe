@@ -99,19 +99,9 @@ export function getAdministrationsForTimeSlot<
 ): T[] {
   return administrations.filter((admin) => {
     const adminDate = new Date(admin.occurrence_period_start);
-    const slotStartDate = new Date(slotDate);
-    const slotEndDate = new Date(slotDate);
-
-    const [startHour] = start.split(":").map(Number);
-    const [endHour] = end.split(":").map(Number);
-
-    slotStartDate.setHours(startHour, 0, 0, 0);
-    slotEndDate.setHours(endHour, 0, 0, 0);
-
     return (
       admin.request === medicationId &&
-      adminDate >= slotStartDate &&
-      adminDate < slotEndDate
+      isTimeInSlot(adminDate, { date: slotDate, start, end })
     );
   });
 }
@@ -259,15 +249,6 @@ export function getGroupAdministrationsForTimeSlot(
     if (!requestIds.has(admin.request)) return false;
 
     const adminDate = new Date(admin.occurrence_period_start);
-    const slotStartDate = new Date(slotDate);
-    const slotEndDate = new Date(slotDate);
-
-    const [startHour] = start.split(":").map(Number);
-    const [endHour] = end.split(":").map(Number);
-
-    slotStartDate.setHours(startHour, 0, 0, 0);
-    slotEndDate.setHours(endHour, 0, 0, 0);
-
-    return adminDate >= slotStartDate && adminDate < slotEndDate;
+    return isTimeInSlot(adminDate, { date: slotDate, start, end });
   });
 }
