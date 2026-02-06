@@ -13,6 +13,7 @@ import {
 
 import query from "@/Utils/request/query";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 
@@ -34,6 +35,7 @@ export const PrintAllPrescriptions = ({
     selectedEncounter: encounter,
     isSelectedEncounterLoading: encounterLoading,
   } = useEncounter();
+  const { facility } = useCurrentFacility();
   const encounterId = encounter?.id;
 
   const {
@@ -98,13 +100,7 @@ export const PrintAllPrescriptions = ({
       <div className="mx-auto max-w-4xl">
         <PrescriptionPrintHeader
           patient={encounter.patient}
-          facility={
-            encounter.facility as {
-              name?: string;
-              address?: string;
-              phone_number?: string;
-            } | null
-          }
+          facility={facility}
         />
         <PrescriptionPatientDetails patient={encounter.patient} />
         <div className="flex flex-col mt-8">

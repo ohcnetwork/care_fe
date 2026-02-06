@@ -15,6 +15,7 @@ import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { displayMedicationName } from "@/types/emr/medicationRequest/medicationRequest";
 import { PrescriptionRead } from "@/types/emr/prescription/prescription";
+import { FacilityRead } from "@/types/facility/facility";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { QRCodeSVG } from "qrcode.react";
 
@@ -123,11 +124,7 @@ export const PrescriptionContent = ({
 
 interface PrescriptionPrintHeaderProps {
   patient: { id: string };
-  facility?: {
-    name?: string;
-    address?: string;
-    phone_number?: string;
-  } | null;
+  facility?: FacilityRead | null;
 }
 
 export const PrescriptionPrintHeader = ({
