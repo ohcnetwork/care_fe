@@ -2392,6 +2392,7 @@
   "facility_organizations": "Facility Organizations",
   "facility_preference": "Facility preference",
   "facility_required_for_care_team_filter": "Facility is required to filter by care team",
+  "facility_required_for_facility_user_filter": "Facility is required to filter by facility user",
   "facility_required_for_department_filter": "Facility is required to filter by department",
   "facility_required_for_location_filter": "Facility is required to filter by location",
   "facility_type": "Facility Type",
