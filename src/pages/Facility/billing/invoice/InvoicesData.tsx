@@ -63,15 +63,18 @@ export default function InvoicesData({
 
   const onFilterUpdate = (filterQuery: Record<string, unknown>) => {
     let query = { ...filterQuery };
-    for (const [key, value] of Object.entries(filterQuery)) {
-      if (key === "created_by") {
-        const userValue = value as UserReadMinimal | UserReadMinimal[];
-        const user = Array.isArray(userValue) ? userValue[0] : userValue;
-        query = {
-          ...query,
-          created_by: user?.id || undefined,
-        };
-      }
+    const createdByValue = filterQuery.created_by as
+      | UserReadMinimal
+      | UserReadMinimal[]
+      | undefined;
+    if (createdByValue !== undefined) {
+      const user = Array.isArray(createdByValue)
+        ? createdByValue[0]
+        : createdByValue;
+      query = {
+        ...query,
+        created_by: user?.id || undefined,
+      };
     }
     updateQuery(query);
   };

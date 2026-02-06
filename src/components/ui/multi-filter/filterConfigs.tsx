@@ -634,6 +634,5 @@ export const createdByFilter = (
       },
       getOperations: () => [{ label: "is" }],
       mode,
-      icon: <Users className="size-4" />,
     },
   );
