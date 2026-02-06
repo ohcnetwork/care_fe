@@ -1077,6 +1077,7 @@
   "character_count_validation": "Must be atleast {{min}} characters and atmost {{max}} characters",
   "charge_item": "Charge Item",
   "charge_item_category_required_for_item": "Charge item category is required for {{item}}",
+  "can_edit_charge_item": "Can Edit Charge Item",
   "charge_item_definition": "Charge Item Definition",
   "charge_item_definition_created_successfully": "Charge item definition created successfully",
   "charge_item_definition_description": "Billing information for this product",
