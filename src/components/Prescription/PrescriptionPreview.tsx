@@ -18,13 +18,29 @@ import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { QRCodeSVG } from "qrcode.react";
 
-interface DetailRowProps {
+export interface DetailRowProps {
   label: string;
   value?: string | null;
   isStrong?: boolean;
 }
 
-const PrescriptionContent = ({
+export const DetailRow = ({
+  label,
+  value,
+  isStrong = false,
+}: DetailRowProps) => {
+  return (
+    <div className="flex">
+      <span className="text-gray-600 w-32">{label}</span>
+      <span className="text-gray-600">: </span>
+      <span className={`ml-1 ${isStrong ? "font-semibold" : ""}`}>
+        {value || "-"}
+      </span>
+    </div>
+  );
+};
+
+export const PrescriptionContent = ({
   prescription,
 }: {
   prescription: PrescriptionRead;
@@ -105,14 +121,115 @@ const PrescriptionContent = ({
   );
 };
 
-const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
+interface PrescriptionPrintHeaderProps {
+  patient: { id: string };
+  facility?: {
+    name?: string;
+    address?: string;
+    phone_number?: string;
+  } | null;
+}
+
+export const PrescriptionPrintHeader = ({
+  patient,
+  facility,
+}: PrescriptionPrintHeaderProps) => {
+  const { t } = useTranslation();
+
   return (
-    <div className="flex">
-      <span className="text-gray-600 w-32">{label}</span>
-      <span className="text-gray-600">: </span>
-      <span className={`ml-1 ${isStrong ? "font-semibold" : ""}`}>
-        {value || "-"}
-      </span>
+    <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
+      <div className="flex items-start gap-4">
+        <div className="text-left">
+          <h1 className="text-xl font-medium">{facility?.name || ""}</h1>
+          {facility?.address && (
+            <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-xs">
+              {facility.address}
+              {facility.phone_number && (
+                <p className="text-gray-500 text-xs">
+                  {t("phone")}: {facility.phone_number}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+      <QRCodeSVG value={patient.id} size={50} level="Q" marginSize={0} />
+      <img
+        src={careConfig.mainLogo?.dark}
+        alt="Logo"
+        className="h-10 w-auto object-contain mb-2 sm:mb-0 text-end"
+      />
+    </div>
+  );
+};
+
+interface PrescriptionPatientDetailsProps {
+  patient: {
+    name: string;
+    gender: string;
+    phone_number?: string;
+    instance_identifiers?: Array<{
+      config: {
+        id: string;
+        config: {
+          display: string;
+          use: PatientIdentifierUse;
+        };
+      };
+      value: string;
+    }>;
+  };
+  date?: string;
+}
+
+export const PrescriptionPatientDetails = ({
+  patient,
+  date,
+}: PrescriptionPatientDetailsProps) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-6 pb-3">
+      <div className="space-y-1">
+        <DetailRow label={t("patient")} value={patient.name} isStrong />
+        <DetailRow
+          label={`${t("age")} / ${t("sex")}`}
+          value={
+            patient
+              ? `${formatPatientAge(patient as Parameters<typeof formatPatientAge>[0], true)}, ${t(`GENDER__${patient.gender}`)}`
+              : undefined
+          }
+          isStrong
+        />
+        {patient.instance_identifiers
+          ?.filter(
+            ({ config }) => config.config.use === PatientIdentifierUse.official,
+          )
+          .map((identifier) => (
+            <DetailRow
+              key={identifier.config.id}
+              label={identifier.config.config.display}
+              value={identifier.value}
+              isStrong
+            />
+          ))}
+      </div>
+      <div className="space-y-1">
+        <DetailRow
+          label={t("date")}
+          value={date || format(new Date(), "dd MMM yyyy, EEEE")}
+          isStrong
+        />
+        <DetailRow
+          label={t("mobile_number")}
+          value={
+            patient?.phone_number
+              ? formatPhoneNumberIntl(patient.phone_number) || undefined
+              : undefined
+          }
+          isStrong
+        />
+      </div>
     </div>
   );
 };
@@ -142,78 +259,18 @@ export const PrescriptionPreview = ({
     >
       <div className="max-w-4xl mx-auto">
         <div>
-          {/* Header */}
-          <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
-            <div className="flex items-start gap-4">
-              <div className="text-left">
-                <h1 className="text-xl font-medium">{facility?.name}</h1>
-                {facility?.address && (
-                  <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-xs">
-                    {facility.address}
-                    {facility.phone_number && (
-                      <p className="text-gray-500 text-xs">
-                        {t("phone")}: {facility.phone_number}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-            <QRCodeSVG value={patient.id} size={50} level="Q" marginSize={0} />
-            <img
-              src={careConfig.mainLogo?.dark}
-              alt="Logo"
-              className="h-10 w-auto object-contain mb-2 sm:mb-0 text-end"
-            />
-          </div>
-
-          {/* Patient Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-6 pb-3">
-            <div className="space-y-1">
-              <DetailRow label={t("patient")} value={patient.name} isStrong />
-              <DetailRow
-                label={`${t("age")} / ${t("sex")}`}
-                value={
-                  patient
-                    ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
-                    : undefined
-                }
-                isStrong
-              />
-              {patient.instance_identifiers
-                ?.filter(
-                  ({ config }) =>
-                    config.config.use === PatientIdentifierUse.official,
-                )
-                .map((identifier) => (
-                  <DetailRow
-                    key={identifier.config.id}
-                    label={identifier.config.config.display}
-                    value={identifier.value}
-                    isStrong
-                  />
-                ))}
-            </div>
-            <div className="space-y-1">
-              <DetailRow
-                label={t("date")}
-                value={
-                  prescription.encounter.period?.start
-                    ? format(
-                        new Date(prescription.encounter.period.start),
-                        "dd MMM yyyy, EEEE",
-                      )
-                    : format(new Date(), "dd MMM yyyy, EEEE")
-                }
-                isStrong
-              />
-              <DetailRow
-                label={t("mobile_number")}
-                value={patient && formatPhoneNumberIntl(patient.phone_number)}
-                isStrong
-              />
-            </div>
-          </div>
+          <PrescriptionPrintHeader patient={patient} facility={facility} />
+          <PrescriptionPatientDetails
+            patient={patient}
+            date={
+              prescription.encounter.period?.start
+                ? format(
+                    new Date(prescription.encounter.period.start),
+                    "dd MMM yyyy, EEEE",
+                  )
+                : undefined
+            }
+          />
 
           <PrescriptionContent prescription={prescription} />
 
