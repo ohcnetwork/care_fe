@@ -31,7 +31,10 @@ import {
 
 import query from "@/Utils/request/query";
 import useBreakpoints from "@/hooks/useBreakpoints";
-import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
+import {
+  HealthcareServiceReadSpec,
+  InternalType,
+} from "@/types/healthcareService/healthcareService";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 
 type DuoToneIconName = keyof typeof duoToneIcons;
@@ -64,6 +67,7 @@ export const HealthcareServiceSelector = ({
       pathParams: { facilityId },
       queryParams: {
         limit: 50,
+        internal_type: InternalType.scheduling,
         ...(searchValue && { name: searchValue }),
       },
     }),
