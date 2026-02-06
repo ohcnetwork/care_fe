@@ -1,7 +1,10 @@
 import { LocationSearch } from "@/components/Location/LocationSearch";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { HealthcareServiceSelector } from "@/pages/Facility/services/HealthcareServiceSelector";
-import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
+import {
+  HealthcareServiceReadSpec,
+  InternalType,
+} from "@/types/healthcareService/healthcareService";
 import { LocationRead } from "@/types/location/location";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import { UserReadMinimal } from "@/types/user/user";
@@ -75,6 +78,7 @@ export const ScheduleResourceSelector = ({
               resource_type: selectedResource.resource_type,
             });
           }}
+          internalType={InternalType.scheduling}
         />
       );
 

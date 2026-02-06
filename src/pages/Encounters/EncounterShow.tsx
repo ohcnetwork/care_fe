@@ -10,7 +10,6 @@ import {
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
 
-import { getPermissions } from "@/common/Permissions";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandDialog";
@@ -20,7 +19,6 @@ import { Card } from "@/components/ui/card";
 import { CommandShortcut } from "@/components/ui/command";
 import { NavTabs } from "@/components/ui/nav-tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { usePermissions } from "@/context/PermissionContext";
 import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
@@ -43,6 +41,7 @@ import {
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
+import { LocationTypeIcons } from "@/types/location/location";
 import { entriesOf } from "@/Utils/utils";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -70,18 +69,19 @@ export const EncounterShow = (props: Props) => {
     primaryEncounterId,
     selectedEncounterId,
     isPrimaryEncounterLoading,
+    patientId,
     patient,
     isPatientLoading,
-    canWriteSelectedEncounter,
     canWritePrimaryEncounter,
+    canReadClinicalData,
+    canReadSelectedEncounter,
   } = useEncounter();
 
-  useSidebarAutoCollapse({ restore: false });
+  useSidebarAutoCollapse();
   const [actionsOpen, setActionsOpen] = useState(false);
   const getShortcutDisplay = useEncounterShortcutDisplays();
 
   const { t } = useTranslation();
-  const { hasPermission } = usePermissions();
   const pluginTabs = useCareAppEncounterTabs();
   const { goBack } = useAppHistory();
   const showMoreAfterIndex = useBreakpoints({
@@ -92,18 +92,9 @@ export const EncounterShow = (props: Props) => {
     "2xl": 12,
   });
 
-  const { canReadEncounter, canReadEncounterClinicalData } = getPermissions(
-    hasPermission,
-    primaryEncounter?.permissions ?? [],
-  );
-
   useEncounterShortcuts();
-  // const { canViewClinicalData } = getPermissions(
-  //   hasPermission,
-  //   patient?.permissions ?? [],
-  // );
 
-  const canAccess = canReadEncounterClinicalData || canReadEncounter;
+  const canAccess = canReadClinicalData || canReadSelectedEncounter;
   const hasToken = primaryEncounter?.appointment?.token;
   const isEncounterActive =
     primaryEncounter?.appointment?.id &&
@@ -139,38 +130,48 @@ export const EncounterShow = (props: Props) => {
     },
     plots: {
       label: t(`ENCOUNTER_TAB__plots`),
-      visible: canReadEncounterClinicalData,
+      visible: canReadClinicalData,
       component: <EncounterPlotsTab />,
     },
     observations: {
       label: t(`ENCOUNTER_TAB__observations`),
-      visible: canReadEncounterClinicalData,
+      visible: canReadClinicalData,
       component: <EncounterObservationsTab />,
     },
     medicines: {
       label: t(`ENCOUNTER_TAB__medicines`),
-      visible: canReadEncounterClinicalData,
+      visible: canReadClinicalData,
       component: <EncounterMedicinesTab />,
     },
     responses: {
       label: t(`ENCOUNTER_TAB__qnr_responses`),
-      visible: canReadEncounterClinicalData,
+      visible: canReadClinicalData,
       component: (
         <EncounterResponsesTab
-          patientId={patient?.id}
-          encounterId={selectedEncounter?.id}
+          patientId={patientId}
+          encounterId={selectedEncounterId}
           canAccess={canAccess}
         />
       ),
     },
+    service_requests: {
+      label: t(`ENCOUNTER_TAB__service_requests`),
+      visible: canReadClinicalData,
+      component: <EncounterServiceRequestTab />,
+    },
+    diagnostic_reports: {
+      label: t(`ENCOUNTER_TAB__diagnostic_reports`),
+      visible: canReadClinicalData,
+      component: <EncounterDiagnosticReportsTab />,
+    },
     files: {
       label: t(`ENCOUNTER_TAB__files`),
-      visible: canReadEncounterClinicalData,
+      visible: canReadClinicalData,
       component: <EncounterFilesTab />,
     },
     notes: {
       label: t(`ENCOUNTER_TAB__notes`),
-      visible: canReadEncounterClinicalData,
+      visible: canReadClinicalData,
       component: <EncounterNotesTab />,
     },
     devices: {
@@ -180,16 +181,6 @@ export const EncounterShow = (props: Props) => {
     consents: {
       label: t(`ENCOUNTER_TAB__consents`),
       component: <EncounterConsentsTab />,
-    },
-    service_requests: {
-      label: t(`ENCOUNTER_TAB__service_requests`),
-      visible: canReadEncounterClinicalData,
-      component: <EncounterServiceRequestTab />,
-    },
-    diagnostic_reports: {
-      label: t(`ENCOUNTER_TAB__diagnostic_reports`),
-      visible: canReadEncounterClinicalData,
-      component: <EncounterDiagnosticReportsTab />,
     },
 
     ...Object.fromEntries(
@@ -250,25 +241,23 @@ export const EncounterShow = (props: Props) => {
                 )}
               />
 
-              {canWriteSelectedEncounter && (
-                <EncounterCommandDialog
-                  encounter={selectedEncounter}
-                  open={actionsOpen}
-                  onOpenChange={setActionsOpen}
-                  trigger={
-                    <Button
-                      variant="primary_gradient"
-                      onClick={() => setActionsOpen(true)}
-                      className="text-base font-semibold rounded-md w-full"
-                    >
-                      {t("encounter_actions")}
-                      <CommandShortcut className="text-white hidden md:inline">
-                        {getShortcutDisplay("open-command-dialog")}
-                      </CommandShortcut>
-                    </Button>
-                  }
-                />
-              )}
+              <EncounterCommandDialog
+                encounter={selectedEncounter}
+                open={actionsOpen}
+                onOpenChange={setActionsOpen}
+                trigger={
+                  <Button
+                    variant="primary_gradient"
+                    onClick={() => setActionsOpen(true)}
+                    className="text-base font-semibold rounded-md w-full"
+                  >
+                    {t("encounter_actions")}
+                    <CommandShortcut className="text-white hidden md:inline">
+                      {getShortcutDisplay("open-command-dialog")}
+                    </CommandShortcut>
+                  </Button>
+                }
+              />
             </div>
           )}
         </Card>
@@ -289,9 +278,28 @@ export const EncounterShow = (props: Props) => {
                     )}
                   </h4>
                   <div className="text-sm text-gray-700 space-x-2">
-                    <span className="">{selectedEncounter?.facility.name}</span>
+                    {primaryEncounterId !== selectedEncounterId && (
+                      <>
+                        <span>{selectedEncounter?.facility.name}</span>
+                        <span>|</span>
+                      </>
+                    )}
 
-                    <span>|</span>
+                    {selectedEncounter.current_location && (
+                      <>
+                        <span className="inline-flex items-center gap-1">
+                          {(() => {
+                            const LocationIcon =
+                              LocationTypeIcons[
+                                selectedEncounter.current_location.form
+                              ];
+                            return <LocationIcon className="size-3" />;
+                          })()}
+                          {selectedEncounter.current_location.name}
+                        </span>
+                        <span>|</span>
+                      </>
+                    )}
 
                     <span className="whitespace-nowrap">
                       {selectedEncounter.period.start && (

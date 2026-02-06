@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { QrCode, Search, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
@@ -54,6 +54,8 @@ import patientApi from "@/types/emr/patient/patientApi";
 import query from "@/Utils/request/query";
 import careConfig from "@careConfig";
 
+const IDENTIFIER_CONFIG_STORAGE_KEY = "patient_identifier_filter_search_type";
+
 interface Props {
   onSelect: (patientId: string | undefined, patientName?: string) => void;
   placeholder?: string;
@@ -62,6 +64,7 @@ interface Props {
   patientName?: string;
   align?: "start" | "center" | "end";
   hideScanButton?: boolean;
+  open?: boolean;
 }
 
 interface IdentifierConfig {
@@ -98,6 +101,18 @@ function PatientSearchSelector({
   isPatientFetching,
 }: PatientSearchSelectorProps) {
   const { t } = useTranslation();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus input when search type changes
+  useEffect(() => {
+    if (searchType) {
+      // Small delay to ensure the input is rendered after type change
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [searchType]);
 
   const searchStateMessage = (() => {
     if (!searchType) {
@@ -176,6 +191,7 @@ function PatientSearchSelector({
         <div className="relative px-2">
           {isPhoneNumberConfig ? (
             <PhoneInput
+              ref={inputRef}
               placeholder={selectedConfig?.config.display || t("search")}
               value={searchTerm}
               onChange={(value) => setSearchTerm(value || "")}
@@ -186,6 +202,7 @@ function PatientSearchSelector({
             <>
               <Search className="absolute left-5 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none z-10" />
               <Input
+                ref={inputRef}
                 type="text"
                 placeholder={selectedConfig?.config.display || t("search")}
                 value={searchTerm}
@@ -261,10 +278,11 @@ export default function PatientIdentifierFilter({
   patientName,
   align = "start",
   hideScanButton = false,
+  open: externalOpen = false,
 }: Props) {
   const { t } = useTranslation();
   const { facility, facilityId } = useCurrentFacility();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(externalOpen);
   const [selectedPatient, setSelectedPatient] = useState<
     PatientListRead | PartialPatientModel | null
   >(null);
@@ -277,6 +295,10 @@ export default function PatientIdentifierFilter({
   const [verificationOpen, setVerificationOpen] = useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
   const [scanDialogOpen, setScanDialogOpen] = useState(false);
+
+  useEffect(() => {
+    setOpen(externalOpen);
+  }, [externalOpen]);
 
   // Enable external scanner detection when not in a dialog
   useBarcodeScanner({
@@ -324,15 +346,33 @@ export default function PatientIdentifierFilter({
     ],
   );
 
-  // Set default search type to first identifier config (prioritize phone number)
+  // Set default search type from localStorage, fallback to first identifier config (prioritize phone number)
   useEffect(() => {
     if (allIdentifierConfigs.length && !searchType) {
-      const phoneConfig = allIdentifierConfigs.find(
-        (c) => c.config.system === careConfig.phoneNumberConfigSystem,
+      const cachedSearchType = localStorage.getItem(
+        IDENTIFIER_CONFIG_STORAGE_KEY,
       );
-      setSearchType(phoneConfig?.id || allIdentifierConfigs[0].id);
+      const cachedConfigExists = allIdentifierConfigs.some(
+        (c) => c.id === cachedSearchType,
+      );
+
+      if (cachedSearchType && cachedConfigExists) {
+        setSearchType(cachedSearchType);
+      } else {
+        const phoneConfig = allIdentifierConfigs.find(
+          (c) => c.config.system === careConfig.phoneNumberConfigSystem,
+        );
+        setSearchType(phoneConfig?.id || allIdentifierConfigs[0].id);
+      }
     }
   }, [allIdentifierConfigs, searchType]);
+
+  // Cache the selected identifier config in localStorage
+  useEffect(() => {
+    if (searchType) {
+      localStorage.setItem(IDENTIFIER_CONFIG_STORAGE_KEY, searchType);
+    }
+  }, [searchType]);
 
   // Check if current search type is phone number
   const isPhoneNumberConfig =

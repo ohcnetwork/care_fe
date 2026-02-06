@@ -2,6 +2,10 @@ import { cn } from "@/lib/utils";
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
+import {
+  BedAvailableSelected,
+  BedAvailableUnselected,
+} from "@/CAREUI/icons/CustomIcons";
 import { LocationAssociationRead } from "@/types/location/association";
 
 interface LinkedBedListingProps {
@@ -49,15 +53,11 @@ export function LinkedBedListing({
             </div>
             <div className="flex flex-col items-center">
               <div className="relative">
-                <img
-                  src={
-                    isSelected
-                      ? "/images/bed-available-selected.svg"
-                      : "/images/bed-available.svg"
-                  }
-                  alt="Bed"
-                  className="size-10 mt-4"
-                />
+                {isSelected ? (
+                  <BedAvailableSelected className="size-10 mt-4" />
+                ) : (
+                  <BedAvailableUnselected className="size-10 mt-4" />
+                )}
               </div>
               <p className="text-xs text-center font-medium mt-2">
                 {linkedBed.location.name}

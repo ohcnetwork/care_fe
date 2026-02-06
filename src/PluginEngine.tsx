@@ -1,22 +1,26 @@
-import ErrorBoundary from "@/components/Common/ErrorBoundary";
-import Loading from "@/components/Common/Loading";
-import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
+import { CareAppsContext, useCareApps } from "@/hooks/useCareApps";
+import {
+  PluginManifest,
+  PluginManifestWithMeta,
+  SupportedPluginComponents,
+} from "@/pluginTypes";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import {
   __federation_method_getRemote as getFederationRemote,
   __federation_method_setRemote as setFederationRemote,
   __federation_method_unwrapDefault as unwrapModule,
 } from "__federation__";
-import { Loader2Icon } from "lucide-react";
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect, useMemo } from "react";
 
-import { CareAppsContext, useCareApps } from "@/hooks/useCareApps";
-import query from "@/Utils/request/query";
-
-import { PluginManifest, SupportedPluginComponents } from "@/pluginTypes";
-import { PlugConfig } from "@/types/plugConfig";
+import ErrorBoundary from "@/components/Common/ErrorBoundary";
+import Loading from "@/components/Common/Loading";
+import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
+import { PlugConfig, PlugConfigMeta } from "@/types/plugConfig";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
+import query from "@/Utils/request/query";
+import { deepFreeze } from "@/Utils/utils";
 import { t } from "i18next";
+import { Loader2Icon } from "lucide-react";
 import { z } from "zod";
 
 const getPluginManifest = async (config: PlugConfig) => {
@@ -31,15 +35,19 @@ const getPluginManifest = async (config: PlugConfig) => {
   }
 
   setFederationRemote(config.slug, {
-    url: () => Promise.resolve(config.meta.url),
+    url: () => Promise.resolve(config.meta.url as string),
     format: "esm",
     from: "vite",
     externalType: "promise",
   });
 
   try {
-    const manifest = await getFederationRemote(config.slug, "./manifest");
-    return unwrapModule(manifest) as PluginManifest;
+    const module = await getFederationRemote(config.slug, "./manifest");
+    const manifest = unwrapModule(module) as PluginManifest;
+    return {
+      ...manifest,
+      meta: config.meta,
+    } as PluginManifestWithMeta;
   } catch (e) {
     console.error(`There was an error enabling the app ${config.slug}`, e);
     return null;
@@ -75,6 +83,22 @@ export default function PluginEngine({
       }),
   });
 
+  const pluginMeta = useMemo(() => {
+    return pluginsQuery.reduce(
+      (acc, plugin) => {
+        if (!plugin.isLoading && plugin.meta) {
+          acc[plugin.slug] = deepFreeze({ ...plugin.meta });
+        }
+        return acc;
+      },
+      {} as Record<string, PlugConfigMeta>,
+    );
+  }, [pluginsQuery]);
+
+  useEffect(() => {
+    window.__CARE_PLUGIN_RUNTIME__ = deepFreeze({ meta: pluginMeta });
+  }, [pluginMeta]);
+
   return (
     <Suspense fallback={<Loading />}>
       <ErrorBoundary
@@ -94,12 +118,16 @@ export default function PluginEngine({
 }
 
 type PluginProps<K extends keyof SupportedPluginComponents> =
-  React.ComponentProps<SupportedPluginComponents[K]>;
+  React.ComponentProps<SupportedPluginComponents[K]> & {
+    __meta?: PluginManifestWithMeta["meta"];
+  };
 
-export function PLUGIN_Component<K extends keyof SupportedPluginComponents>({
-  __name,
-  ...props
-}: { __name: K } & PluginProps<K>) {
+type PluginComponentProps = {
+  [K in keyof SupportedPluginComponents]: { __name: K } & PluginProps<K>;
+}[keyof SupportedPluginComponents];
+
+export function PLUGIN_Component(props: PluginComponentProps) {
+  const { __name, ...restProps } = props;
   const careApps = useCareApps();
 
   return (
@@ -109,13 +137,17 @@ export function PLUGIN_Component<K extends keyof SupportedPluginComponents>({
           return null;
         }
 
-        const Component = plugin.components?.[
-          __name
-        ] as React.ComponentType<unknown>;
-
+        const Component = plugin.components?.[__name] as React.ComponentType<
+          PluginProps<typeof __name>
+        >;
         if (!Component) {
           return null;
         }
+
+        const propsWithMeta = {
+          ...restProps,
+          __meta: plugin.meta,
+        } as PluginProps<typeof __name>;
 
         return (
           <PluginErrorBoundary key={plugin.plugin} pluginName={plugin.plugin}>
@@ -131,7 +163,7 @@ export function PLUGIN_Component<K extends keyof SupportedPluginComponents>({
                 </div>
               }
             >
-              <Component {...props} />
+              <Component {...propsWithMeta} />
             </React.Suspense>
           </PluginErrorBoundary>
         );

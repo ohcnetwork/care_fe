@@ -1,18 +1,59 @@
+import { useMutation } from "@tanstack/react-query";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
+import mutate from "@/Utils/request/mutate";
+import reportApi from "@/types/emr/report/reportApi";
 import { TemplateBaseRead } from "@/types/emr/template/template";
+
+import { toast } from "sonner";
+
+interface TemplateCardProps {
+  template: TemplateBaseRead;
+  facilityId: string;
+  canWriteTemplate?: boolean;
+  canGenerate?: boolean;
+  associatingId?: string;
+  onSuccess?: () => void;
+}
 
 export default function TemplateCard({
   template,
-  buttons,
-}: {
-  template: TemplateBaseRead;
-  buttons: React.ReactNode;
-}) {
+  facilityId,
+  canWriteTemplate,
+  canGenerate,
+  associatingId,
+  onSuccess,
+}: TemplateCardProps) {
   const { t } = useTranslation();
+
+  const { mutate: generateReport, isPending } = useMutation({
+    mutationFn: mutate(reportApi.createReport),
+    onSuccess: () => {
+      toast.success(t("report_generation_started"));
+      onSuccess?.();
+    },
+    onError: (error) => {
+      toast.error(error.message || t("report_generation_failed"));
+    },
+  });
+
+  const handleGenerateReport = () => {
+    generateReport({
+      template_id: template.id,
+      associating_id: associatingId ?? "",
+      output_format: template.default_format,
+      options: JSON.stringify({}),
+      force: false,
+    });
+  };
+
   return (
     <Card
       key={template.id}
@@ -39,11 +80,29 @@ export default function TemplateCard({
             {t(template.template_type)}
           </span>
         </div>
-        {buttons && (
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            {buttons}
-          </div>
-        )}
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          {canWriteTemplate && (
+            <Button variant="outline" size="sm" className="w-full" asChild>
+              <Link
+                href={`/facility/${facilityId}/template/builder/${template.slug}`}
+              >
+                <CareIcon icon="l-pen" className="mr-1" />
+                <span>{t("edit")}</span>
+              </Link>
+            </Button>
+          )}
+          {canGenerate && associatingId && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={handleGenerateReport}
+              disabled={isPending || template.status !== "active"}
+            >
+              {isPending ? t("generating") : t("generate_report")}
+            </Button>
+          )}
+        </div>
       </div>
     </Card>
   );
