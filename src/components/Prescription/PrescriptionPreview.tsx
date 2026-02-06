@@ -12,6 +12,7 @@ import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage, formatSig } from "@/components/Medicine/utils";
 
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { displayMedicationName } from "@/types/emr/medicationRequest/medicationRequest";
 import { PrescriptionRead } from "@/types/emr/prescription/prescription";
@@ -34,7 +35,7 @@ export const DetailRow = ({
     <div className="flex">
       <span className="text-gray-600 w-32">{label}</span>
       <span className="text-gray-600">: </span>
-      <span className={`ml-1 ${isStrong ? "font-semibold" : ""}`}>
+      <span className={cn("ml-1", isStrong && "font-semibold")}>
         {value || "-"}
       </span>
     </div>
