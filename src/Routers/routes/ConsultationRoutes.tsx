@@ -10,6 +10,7 @@ import TreatmentSummary from "@/components/Patient/TreatmentSummary";
 
 import { AppRoutes } from "@/Routers/AppRouter";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
+import { PrintAllPrescriptions } from "@/pages/Encounters/PrintAllPrescriptions";
 import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 
@@ -24,6 +25,14 @@ const consultationRoutes: AppRoutes = {
         facilityId={facilityId}
         patientId={patientId}
         prescriptionId={prescriptionId}
+      />
+    ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/prescriptions/print":
+    ({ facilityId, patientId, encounterId }) => (
+      <PrintAllPrescriptions
+        facilityId={facilityId}
+        patientId={patientId}
+        encounterId={encounterId}
       />
     ),
   ...[
