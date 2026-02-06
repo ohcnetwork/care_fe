@@ -59,6 +59,9 @@ export default function PrintTable({
     if (cellConfig?.[key]?.render) {
       return cellConfig[key].render(value);
     }
+
+    // Fallback to default value display
+    return value || "-";
   };
 
   return (

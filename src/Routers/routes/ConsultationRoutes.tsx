@@ -10,7 +10,10 @@ import TreatmentSummary from "@/components/Patient/TreatmentSummary";
 
 import { AppRoutes } from "@/Routers/AppRouter";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
-import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
+import {
+  PrintAllPrescriptions,
+  PrintPrescription,
+} from "@/pages/Encounters/PrintPrescription";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 
 const ExcalidrawEditor = lazy(
@@ -28,11 +31,13 @@ const consultationRoutes: AppRoutes = {
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/prescriptions/print":
     ({ facilityId, patientId, encounterId }) => (
-      <PrintPrescription
-        facilityId={facilityId}
-        patientId={patientId}
+      <EncounterProvider
         encounterId={encounterId}
-      />
+        patientId={patientId}
+        facilityId={facilityId}
+      >
+        <PrintAllPrescriptions facilityId={facilityId} patientId={patientId} />
+      </EncounterProvider>
     ),
   ...[
     "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:questionnaireId/responses/print",
