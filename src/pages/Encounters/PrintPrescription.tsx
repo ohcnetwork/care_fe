@@ -10,7 +10,7 @@ import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 interface PrintPrescriptionProps {
   facilityId: string;
@@ -29,6 +29,8 @@ export const PrintPrescription = ({
   dispenseOrderId,
   locationId,
 }: PrintPrescriptionProps) => {
+  const { t } = useTranslation();
+
   const { data: dispenseOrder, isLoading: isLoadingDispenseOrder } = useQuery({
     queryKey: ["dispenseOrder", facilityId, dispenseOrderId],
     queryFn: query(dispenseOrderApi.get, {
