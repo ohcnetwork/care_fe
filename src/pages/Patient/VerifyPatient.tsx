@@ -12,6 +12,7 @@ import {
   Ticket,
   Wallet,
 } from "lucide-react";
+import { useState } from "react";
 
 import { pharmacyDispenseServiceAtom } from "@/atoms/pharmacy";
 import { getPermissions } from "@/common/Permissions";
@@ -25,6 +26,7 @@ import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
+import { UpcomingAppointmentCard } from "@/pages/Appointments/components/UpcomingAppointmentCard";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -60,6 +62,8 @@ export default function VerifyPatient() {
 
   const isQueueFlow = flow === "queue";
   const isDispenseFlow = flow === "dispense" && pharmacyDispenseService != null;
+
+  const [activeTab, setActiveTab] = useState("encounters");
 
   const { hasPermission } = usePermissions();
   const isTab = useBreakpoints({ default: true, lg: false });
@@ -132,6 +136,12 @@ export default function VerifyPatient() {
                 </PatientInfoCard>
               </div>
 
+              <UpcomingAppointmentCard
+                patientId={patientData.id}
+                facilityId={facilityId}
+                onViewAllAppointments={() => setActiveTab("appointments")}
+              />
+
               <div className="grid gap-4 grid-cols-2  lg:grid-cols-3">
                 {canCreateEncounter && (
                   <CreateEncounterForm
@@ -169,6 +179,15 @@ export default function VerifyPatient() {
                         actionId="schedule-appointment"
                       />
                     }
+                    onSuccess={() => {
+                      queryClient.invalidateQueries({
+                        queryKey: [
+                          "upcoming-appointment",
+                          patientData.id,
+                          facilityId,
+                        ],
+                      });
+                    }}
                   />
                 )}
 
@@ -202,6 +221,8 @@ export default function VerifyPatient() {
                 canListEncounters={canListEncounters}
                 canWriteAppointment={canWriteAppointment}
                 canListTokens={canListTokens}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
                 actions={(encounter) => (
                   <div className="flex gap-2 items-center">
                     {flow === "dispense" && pharmacyDispenseService && (

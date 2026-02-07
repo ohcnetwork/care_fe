@@ -39,6 +39,7 @@ import {
   getVariantColorClasses,
 } from "./utils/Utils";
 
+import { SelectedFacilityUserBadge } from "@/components/ui/multi-filter/facilityUserFilter";
 import {
   ACCOUNT_BILLING_STATUS_COLORS,
   ACCOUNT_STATUS_COLORS,
@@ -614,3 +615,24 @@ export const careTeamFilter = (
     mode,
     icon: <Users className="size-4" />,
   });
+
+export const createdByFilter = (
+  key: string = "created_by",
+  mode: FilterMode = "single",
+  label?: string,
+) =>
+  createFilterConfig(
+    key,
+    label ? t(label) : t("created_by"),
+    "facility_user",
+    [],
+    {
+      renderSelected: (selected: FilterValues) => {
+        return (
+          <SelectedFacilityUserBadge selected={selected as UserReadMinimal[]} />
+        );
+      },
+      getOperations: () => [{ label: "is" }],
+      mode,
+    },
+  );

@@ -266,7 +266,8 @@ export function ChargeItemDefinitionDetail({
 
           {(chargeItemDefinition.description ||
             chargeItemDefinition.purpose ||
-            chargeItemDefinition.derived_from_uri) && (
+            chargeItemDefinition.derived_from_uri ||
+            chargeItemDefinition.can_edit_charge_item !== undefined) && (
             <Card className="mb-4">
               <CardHeader>
                 <CardTitle>{t("details")}</CardTitle>
@@ -299,6 +300,18 @@ export function ChargeItemDefinitionDetail({
                     </h3>
                     <p className="font-mono text-sm">
                       {chargeItemDefinition.derived_from_uri}
+                    </p>
+                  </div>
+                )}
+                {chargeItemDefinition.can_edit_charge_item !== undefined && (
+                  <div className="mb-4">
+                    <h3 className="text-sm font-medium text-gray-500">
+                      {t("can_edit_charge_item")}
+                    </h3>
+                    <p>
+                      {chargeItemDefinition.can_edit_charge_item
+                        ? t("yes")
+                        : t("no")}
                     </p>
                   </div>
                 )}

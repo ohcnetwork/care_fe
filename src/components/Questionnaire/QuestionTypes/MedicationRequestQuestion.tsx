@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   ChevronsDownUp,
   ChevronsUpDown,
+  CopyPlus,
   MoreVerticalIcon,
   SlidersHorizontal,
 } from "lucide-react";
@@ -724,6 +725,20 @@ export function MedicationRequestQuestion({
     );
   };
 
+  const handleApplyRequesterToAll = (user: UserReadMinimal | undefined) => {
+    const newMedications = medications.map((medication) => ({
+      ...medication,
+      requester: user || currentUser,
+      dirty: true,
+    }));
+
+    updateQuestionnaireResponseCB(
+      [{ type: "medication_request", value: newMedications }],
+      questionnaireResponse.question_id,
+    );
+    toast.success(t("requester_applied_to_all"));
+  };
+
   // Handler for adding a single medication from a template
   const handleAddSingleMedication = async (med: MedicationRequestCreate) => {
     const medicationToAdd = await fetchProductAndBuildMedication(
@@ -1282,11 +1297,15 @@ export function MedicationRequestQuestion({
                                       ? handleAddToTemplate
                                       : undefined
                                   }
+                                  onCopyRequesterToAll={
+                                    handleApplyRequesterToAll
+                                  }
                                   index={index}
                                   questionId={questionnaireResponse.question_id}
                                   errors={errors}
                                   facilityId={facilityId}
                                   showAdvancedFields={true}
+                                  showCopyRequester={medications.length > 1}
                                 />
                               </CardContent>
                             </CollapsibleContent>
@@ -1303,6 +1322,7 @@ export function MedicationRequestQuestion({
                           onAddToTemplate={
                             questionnaireSlug ? handleAddToTemplate : undefined
                           }
+                          onCopyRequesterToAll={handleApplyRequesterToAll}
                           index={index}
                           questionId={questionnaireResponse.question_id}
                           errors={errors}
@@ -1311,6 +1331,7 @@ export function MedicationRequestQuestion({
                           onToggleAdvanced={() =>
                             setShowAdvancedFields(!showAdvancedFields)
                           }
+                          showCopyRequester={medications.length > 1}
                         />
                       )}
                     </React.Fragment>
@@ -1324,27 +1345,29 @@ export function MedicationRequestQuestion({
 
       {!prescriptionId &&
         (!desktopLayout ? (
-          <EntitySelectionDrawer
-            open={!!newMedicationInSheet}
-            onOpenChange={(isOpen) => {
-              if (!isOpen) {
-                setNewMedicationInSheet(null);
-              }
-            }}
-            system="system-medication"
-            entityType="medication"
-            searchPostFix=" clinical drug"
-            disabled={disabled}
-            onEntitySelected={handleAddMedication}
-            onConfirm={handleConfirmMedicationInSheet}
-            placeholder={addMedicationPlaceholder}
-            onProductEntitySelected={handleAddProductMedication}
-            enableProduct
-          >
-            {newMedicationSheetContent}
-          </EntitySelectionDrawer>
+          <>
+            <EntitySelectionDrawer
+              open={!!newMedicationInSheet}
+              onOpenChange={(isOpen) => {
+                if (!isOpen) {
+                  setNewMedicationInSheet(null);
+                }
+              }}
+              system="system-medication"
+              entityType="medication"
+              searchPostFix=" clinical drug"
+              disabled={disabled}
+              onEntitySelected={handleAddMedication}
+              onConfirm={handleConfirmMedicationInSheet}
+              placeholder={addMedicationPlaceholder}
+              onProductEntitySelected={handleAddProductMedication}
+              enableProduct
+            >
+              {newMedicationSheetContent}
+            </EntitySelectionDrawer>
+          </>
         ) : (
-          <div className="max-w-4xl">
+          <div className="max-w-4xl flex gap-1">
             <MedicationValueSetSelect
               placeholder={addMedicationPlaceholder}
               onSelect={handleAddMedication}
@@ -1387,12 +1410,14 @@ interface MedicationRequestGridRowProps {
   onUpdate?: (medication: Partial<MedicationRequestCreate>) => void;
   onRemove?: () => void;
   onAddToTemplate?: (medication: MedicationRequestCreate) => void;
+  onCopyRequesterToAll?: (requester: UserReadMinimal) => void;
   index: number;
   questionId: string;
   errors?: QuestionValidationError[];
   facilityId?: string;
   showAdvancedFields?: boolean;
   onToggleAdvanced?: () => void;
+  showCopyRequester?: boolean;
 }
 
 const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
@@ -1401,12 +1426,14 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   onUpdate,
   onRemove,
   onAddToTemplate,
+  onCopyRequesterToAll,
   index,
   questionId,
   errors,
   facilityId,
   showAdvancedFields = false,
   onToggleAdvanced,
+  showCopyRequester = false,
 }) => {
   const { t } = useTranslation();
   const [showDosageDialog, setShowDosageDialog] = useState(false);
@@ -1938,7 +1965,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             />
           </div>
           {/* Requester */}
-          <div className="lg:px-1 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+          <div className="lg:px-1 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden flex gap-1">
             <UserSelector
               selected={medication.requester}
               onChange={(user) => {
@@ -1948,6 +1975,17 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               facilityId={facilityId}
               disabled={disabled || isReadOnly}
             />
+            {showCopyRequester && medication.requester && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onCopyRequesterToAll?.(medication.requester!)}
+                disabled={disabled || isReadOnly}
+                title={t("copy_requester_to_all")}
+              >
+                <CopyPlus className="size-4" />
+              </Button>
+            )}
           </div>
         </>
       )}
@@ -2110,15 +2148,30 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               {/* Requester */}
               <div className="p-1">
                 <Label className="mb-1.5 block text-sm">{t("requester")}</Label>
-                <UserSelector
-                  selected={medication.requester}
-                  onChange={(user) => {
-                    onUpdate?.({ requester: user });
-                  }}
-                  placeholder={t("select_requester")}
-                  facilityId={facilityId}
-                  disabled={disabled || isReadOnly}
-                />
+                <div className="flex gap-1">
+                  <UserSelector
+                    selected={medication.requester}
+                    onChange={(user) => {
+                      onUpdate?.({ requester: user });
+                    }}
+                    placeholder={t("select_requester")}
+                    facilityId={facilityId}
+                    disabled={disabled || isReadOnly}
+                  />
+                  {showCopyRequester && medication.requester && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        onCopyRequesterToAll?.(medication.requester!)
+                      }
+                      disabled={disabled || isReadOnly}
+                      title={t("copy_requester_to_all")}
+                    >
+                      <CopyPlus className="size-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
             </CollapsibleContent>
           </Collapsible>
