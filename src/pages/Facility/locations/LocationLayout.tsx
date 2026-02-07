@@ -16,6 +16,7 @@ import { ExternalPurchasesList } from "@/pages/Facility/services/inventory/exter
 import RequestOrderForm from "@/pages/Facility/services/inventory/externalSupply/requestOrder/RequestOrderForm";
 import { RequestOrderShow } from "@/pages/Facility/services/inventory/externalSupply/requestOrder/RequestOrderShow";
 
+import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
 import DeliveryOrderForm from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderForm";
 import { DeliveryOrderList } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderList";
 import { DeliveryOrderShow } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderShow";
@@ -33,7 +34,6 @@ import PrescriptionsView, {
   PharmacyMedicationTab,
 } from "@/pages/Facility/services/pharmacy/PrescriptionsView";
 import { PrintDispenseOrder } from "@/pages/Facility/services/pharmacy/PrintDispenseOrder";
-import { PrintDispenseOrderPrescription } from "@/pages/Facility/services/pharmacy/PrintDispenseOrderPrescription";
 import { PrintMedicationReturn } from "@/pages/Facility/services/pharmacy/PrintMedicationReturn";
 import ServiceRequestList from "@/pages/Facility/services/serviceRequests/ServiceRequestList";
 import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
@@ -108,12 +108,12 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       locationId={locationId}
     />
   ),
-  "/medication_dispense/order/:dispenseOrderId/print_prescription": ({
+  "/medication_dispense/order/:dispenseOrderId/print_prescriptions": ({
     dispenseOrderId,
   }: {
     dispenseOrderId: string;
   }) => (
-    <PrintDispenseOrderPrescription
+    <PrintPrescription
       facilityId={facilityId}
       dispenseOrderId={dispenseOrderId}
       locationId={locationId}
