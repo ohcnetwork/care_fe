@@ -1616,29 +1616,34 @@ export function InvoiceShow({
 
         <AlertDialog
           open={activePaymentsDialogOpen}
-          onOpenChange={(open) => {
-            setActivePaymentsDialogOpen(open);
-            if (!open) {
-              setTimeout(() => setSelectedStatus(null), 150);
-            }
-          }}
+          onOpenChange={setActivePaymentsDialogOpen}
         >
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>
                 {selectedStatus === InvoiceStatus.entered_in_error
-                  ? t("cannot_mark_as_entered_in_error")
-                  : t("cannot_cancel_invoice")}
+                  ? t("mark_as_entered_in_error_warning")
+                  : t("cancel_invoice_warning")}
               </AlertDialogTitle>
               <AlertDialogDescription>
-                {t("invoice_has_active_payments_or_credit_notes")}
+                {t("invoice_has_active_payments_or_credit_notes_warning")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>
-                {t("close")}
+              <AlertDialogCancel onClick={() => setSelectedStatus(null)}>
+                {t("cancel")}
                 <ShortcutBadge actionId="cancel-action" />
               </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  setActivePaymentsDialogOpen(false);
+                  setReasonDialogOpen(true);
+                }}
+                className={cn(buttonVariants({ variant: "destructive" }))}
+              >
+                {t("proceed")}
+                <ShortcutBadge actionId="submit-action" />
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
