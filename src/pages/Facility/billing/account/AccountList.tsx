@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowUpRightSquare, EditIcon, Hash, PlusIcon } from "lucide-react";
+import { ArrowUpRightSquare, Hash, PlusIcon } from "lucide-react";
 import { navigate } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -16,6 +16,7 @@ import {
   accountBillingStatusFilter,
   accountStatusFilter,
   dateFilter,
+  tagFilter,
 } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
@@ -49,6 +50,8 @@ import {
   type AccountRead,
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import query from "@/Utils/request/query";
 import { dateTimeQueryString } from "@/Utils/utils";
 
@@ -91,10 +94,16 @@ export function AccountList({
   const { facility } = useCurrentFacility();
   const { hasPermission } = usePermissions();
 
-  const { canCreateAccount, canUpdateAccount } = getPermissions(
+  const { canCreateAccount } = getPermissions(
     hasPermission,
     facility?.permissions ?? [],
   );
+
+  const tagIds = qParams.tags?.split(",") || [];
+  const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
+  const selectedTags = tagQueries
+    .map((query) => query.data)
+    .filter(Boolean) as TagConfig[];
 
   const { created_date_after, created_date_before } = qParams;
 
@@ -102,11 +111,15 @@ export function AccountList({
     accountStatusFilter("status"),
     dateFilter("created_date", t("period"), longDateRangeOptions, false),
     accountBillingStatusFilter("billing_status"),
+    tagFilter("tags", TagResource.ACCOUNT, "multi", "tags"),
   ];
 
   const onFilterUpdate = (query: Record<string, unknown>) => {
     for (const [key, value] of Object.entries(query)) {
       switch (key) {
+        case "tags":
+          query.tags = (value as TagConfig[])?.map((tag) => tag.id).join(",");
+          break;
         case "created_date":
           {
             const dateRange = value as FilterDateRange;
@@ -146,6 +159,7 @@ export function AccountList({
     billing_status: qParams.billing_status
       ? [qParams.billing_status]
       : undefined,
+    tags: selectedTags,
   });
 
   const { data: response, isLoading } = useQuery({
@@ -160,6 +174,8 @@ export function AccountList({
         billing_status: qParams.billing_status,
         created_date_after: qParams.created_date_after,
         created_date_before: qParams.created_date_before,
+        tags: qParams.tags,
+        tags_behavior: qParams.tags_behavior,
       },
     }),
   });
@@ -174,17 +190,19 @@ export function AccountList({
     >
       <div className={cn("mx-auto", !hideTitleOnPage && "mt-2")}>
         <div className="mb-4">
-          <AccountSheet
-            open={sheetOpen}
-            onOpenChange={(open) => {
-              setSheetOpen(open);
-              if (!open) setEditingAccount(null);
-            }}
-            facilityId={facilityId}
-            patientId={patientId}
-            initialValues={editingAccount ? editingAccount : undefined}
-            isEdit={!!editingAccount}
-          />
+          {patientId && (
+            <AccountSheet
+              open={sheetOpen}
+              onOpenChange={(open) => {
+                setSheetOpen(open);
+                if (!open) setEditingAccount(null);
+              }}
+              facilityId={facilityId}
+              patientId={patientId}
+              initialValues={editingAccount ? editingAccount : undefined}
+              isEdit={!!editingAccount}
+            />
+          )}
           <div className="flex flex-col md:flex-row items-start gap-2">
             <div className="w-full md:w-auto">
               <PatientIdentifierFilter
@@ -343,20 +361,6 @@ export function AccountList({
                   </TableCell>
                   <TableCell className="whitespace-normal">
                     <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
-                      {canUpdateAccount && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="font-semibold"
-                          onClick={() => {
-                            setEditingAccount(account);
-                            setSheetOpen(true);
-                          }}
-                        >
-                          <EditIcon strokeWidth={1.5} />
-                          <span className="underline">{t("edit")}</span>
-                        </Button>
-                      )}
                       <Button
                         variant="outline"
                         size="sm"

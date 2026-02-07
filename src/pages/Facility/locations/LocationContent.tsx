@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Bed } from "lucide-react";
-import React from "react";
+import { ArrowRight, Bed, Eye, Loader2, Lock } from "lucide-react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -12,8 +12,15 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 import PaginationComponent from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
@@ -23,6 +30,78 @@ import query from "@/Utils/request/query";
 import { LocationRead, LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
+interface OccupiedBedSheetProps {
+  location: LocationRead;
+  facilityId: string;
+}
+
+function OccupiedBedSheet({ location, facilityId }: OccupiedBedSheetProps) {
+  const { t } = useTranslation();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const { data: associations, isLoading } = useQuery({
+    queryKey: ["location-associations", facilityId, location.id],
+    queryFn: query(locationApi.listAssociations, {
+      pathParams: {
+        facility_external_id: facilityId,
+        location_external_id: location.id,
+      },
+    }),
+    enabled: isOpen,
+  });
+
+  const firstAssociation = associations?.results?.[0];
+
+  return (
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <div className="flex flex-col items-center justify-center py-8 h-auto">
+        <div className="rounded-full bg-yellow-100 p-3 mb-3">
+          <Lock className="size-6 text-yellow-700" />
+        </div>
+        <p className="text-sm font-medium text-gray-700">{t("occupied")}</p>
+        <p className="text-xs text-gray-500 mt-1">
+          {t("this_bed_is_currently_occupied")}
+        </p>
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-3"
+          onClick={() => setIsOpen(true)}
+        >
+          <Eye className="size-4 mr-1" />
+          {t("view_encounter")}
+        </Button>
+      </div>
+      <SheetContent className="sm:max-w-lg overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>{t("bed_encounter_details")}</SheetTitle>
+        </SheetHeader>
+        <div className="mt-4">
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <Loader2 className="size-8 animate-spin text-gray-400" />
+              <p className="text-sm text-gray-500 mt-2">{t("loading")}</p>
+            </div>
+          ) : firstAssociation?.encounter ? (
+            <EncounterInfoCard
+              encounter={firstAssociation.encounter}
+              facilityId={facilityId}
+              disableHover={true}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Lock className="size-8 text-gray-400 mb-2" />
+              <p className="text-sm font-medium text-gray-700">
+                {t("no_encounter_associated")}
+              </p>
+            </div>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
 interface BedCardProps {
   location: LocationRead;
   facilityId: string;
@@ -30,7 +109,8 @@ interface BedCardProps {
 
 function BedCard({ location, facilityId }: BedCardProps) {
   const { t } = useTranslation();
-  const isOccupied = !!location.current_encounter;
+  const isOccupied =
+    !!location.current_encounter || location.operational_status !== "U";
 
   return (
     <div
@@ -71,18 +151,20 @@ function BedCard({ location, facilityId }: BedCardProps) {
       </div>
 
       <div className="h-full">
-        {!location.current_encounter ? (
-          <div className="flex flex-col items-center justify-center py-4 h-auto">
-            <p className="text-sm text-gray-600 mb-3">
-              {t("ready_for_admission")}
-            </p>
-          </div>
-        ) : (
+        {location.current_encounter ? (
           <EncounterInfoCard
             encounter={location.current_encounter}
             facilityId={facilityId}
             hideBorder={true}
           />
+        ) : location.operational_status !== "U" ? (
+          <OccupiedBedSheet location={location} facilityId={facilityId} />
+        ) : (
+          <div className="flex flex-col items-center justify-center py-4 h-auto">
+            <p className="text-sm text-gray-600 mb-3">
+              {t("ready_for_admission")}
+            </p>
+          </div>
         )}
       </div>
     </div>

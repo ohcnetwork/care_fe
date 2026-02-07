@@ -760,7 +760,6 @@ export default function DispenseDrawer({
                                                         min={0}
                                                         {...formField}
                                                         className="border-gray-300 border rounded-md w-24"
-                                                        placeholder="0"
                                                         autoFocus
                                                       />
                                                     </FormControl>

@@ -41,6 +41,9 @@ export const ENCOUNTER_ADMIT_SOURCE = [
   "other",
 ] as const;
 
+/**
+ * Do not use this constant directly. Use `careConfig.encounterClasses` instead.
+ */
 export const ENCOUNTER_CLASS = [
   "imp",
   "amb",
@@ -224,6 +227,7 @@ export interface EncounterListRead extends EncounterBase {
   modified_date: string;
   tags: TagConfig[];
   current_location: LocationMinSpec | null;
+  care_team: CareTeamResponse[];
 }
 
 export interface EncounterRead

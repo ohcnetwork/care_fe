@@ -86,6 +86,10 @@ export function useEncounterShortcuts() {
     }
 
     return {
+      "add-service-request": () =>
+        navigate(buildEncounterUrl("/questionnaire/service_request")),
+      "add-medication-request": () =>
+        navigate(buildEncounterUrl("/questionnaire/medication_request")),
       "add-allergy": () =>
         navigate(buildEncounterUrl("/questionnaire/allergy_intolerance")),
       "add-symptoms": () =>
@@ -124,6 +128,7 @@ export function useEncounterShortcuts() {
       "manage-care-team": () => actions.manageCareTeam(),
       "manage-departments": () => actions.manageDepartments(),
       dispense: () => actions.dispense(),
+      "restart-encounter": () => actions.restartEncounter(),
       "open-command-dialog": () => {
         document.dispatchEvent(
           new CustomEvent("open-encounter-command-dialog"),

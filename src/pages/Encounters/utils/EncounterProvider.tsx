@@ -1,24 +1,28 @@
-import { useQuery } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { navigate, useQueryParams } from "raviger";
 import { createContext, useContext, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { CareTeamSheet } from "@/components/CareTeam/CareTeamSheet";
 import { LocationSheet } from "@/components/Location/LocationSheet";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
-import { Permissions, getPermissions } from "@/common/Permissions";
+import { getPermissions, Permissions } from "@/common/Permissions";
 
 import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { usePermissions } from "@/context/PermissionContext";
 import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounterAsCompletedDialog";
-import { useEndEncounter } from "@/pages/Encounters/utils/utils";
+import { useEncounterProgressController } from "@/pages/Encounters/utils/utils";
 import {
+  completedEncounterStatus,
   EncounterRead,
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
 type EncounterContextType = {
@@ -44,6 +48,7 @@ type EncounterContextType = {
 
   canWritePrimaryEncounter: boolean;
   canWriteSelectedEncounter: boolean;
+  canRestartSelectedEncounter: boolean;
   canWriteClinicalData: boolean;
 
   isEndEncounterPending: boolean;
@@ -57,6 +62,7 @@ type EncounterContextType = {
     manageDepartments: () => void;
     dispenseMedicine: () => void;
     dispense: () => void;
+    restartEncounter: () => void;
   };
 };
 
@@ -161,6 +167,13 @@ export function EncounterProvider({
     !!selectedEncounter &&
     !inactiveEncounterStatus.includes(selectedEncounter.status);
 
+  // User can restart the selected encounter if it was accessed via facility scope, is the same as the primary encounter in view, and is completed
+  const canRestartSelectedEncounter =
+    !!facilityId &&
+    selectedEncounterId === primaryEncounterId &&
+    !!selectedEncounter &&
+    completedEncounterStatus.includes(selectedEncounter.status);
+
   // User can access the current encounter if they have canReadEncounter permission
   const canReadPrimaryEncounter = primaryEncounterPermissions.canReadEncounter;
   // User can edit the current encounter if it was accessed via facility scope and is active
@@ -177,7 +190,35 @@ export function EncounterProvider({
     null,
   );
 
-  const { endEncounter, isPending: isEndEncounterPending } = useEndEncounter();
+  const { endEncounter, isPending: isEndEncounterPending } =
+    useEncounterProgressController();
+  const toDischarge =
+    selectedEncounter?.encounter_class === "imp" &&
+    selectedEncounter?.status !== "discharged";
+
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  const { mutate: restartEncounterMutation } = useMutation({
+    mutationFn: mutate(encounterApi.restart, {
+      pathParams: { id: selectedEncounter?.id ?? "" },
+    }),
+    onSuccess: () => {
+      toast.success(t("encounter_restarted_successfully"));
+      queryClient.invalidateQueries({ queryKey: ["encounters"] });
+      queryClient.invalidateQueries({
+        queryKey: ["encounter", selectedEncounter?.id],
+      });
+      if (selectedEncounter) {
+        navigate(
+          `/facility/${selectedEncounter.facility.id}/patient/${selectedEncounter.patient.id}/encounter/${selectedEncounter.id}/updates`,
+        );
+      }
+    },
+    onError: () => {
+      toast.error(t("failed_to_restart_encounter"));
+    },
+  });
 
   return (
     <encounterContext.Provider
@@ -198,6 +239,7 @@ export function EncounterProvider({
         patientPermissions,
         canReadSelectedEncounter,
         canWriteSelectedEncounter,
+        canRestartSelectedEncounter,
         canReadPrimaryEncounter,
         canWritePrimaryEncounter,
         canReadClinicalData,
@@ -205,6 +247,12 @@ export function EncounterProvider({
         isEndEncounterPending,
         actions: {
           markAsCompleted: () => {
+            if (toDischarge) {
+              navigate(
+                `/facility/${selectedEncounter?.facility.id}/patient/${selectedEncounter?.patient.id}/encounter/${selectedEncounter?.id}/questionnaire/encounter?toDischarge=true`,
+              );
+              return;
+            }
             setActiveAction(EncounterAction.MarkAsCompleted);
           },
           endEncounter,
@@ -225,6 +273,9 @@ export function EncounterProvider({
           },
           dispense: () => {
             setActiveAction(EncounterAction.Dispense);
+          },
+          restartEncounter: () => {
+            restartEncounterMutation({});
           },
         },
       }}

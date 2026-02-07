@@ -27,6 +27,7 @@ export interface ChargeItemDefinitionBase {
   category: ResourceCategoryRead;
   slug_config: SlugConfig;
   tags: TagConfig[];
+  can_edit_charge_item: boolean;
 }
 
 export interface ChargeItemDefinitionRead extends ChargeItemDefinitionBase {

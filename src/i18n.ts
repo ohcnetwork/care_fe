@@ -42,6 +42,8 @@ const namespaceToUrl = (namespace: string) => {
   return undefined;
 };
 
+const fetchOptions = { cache: "no-store" as RequestCache };
+
 export async function initI18n() {
   // Fetch plugin configurations from API
   try {
@@ -74,8 +76,6 @@ export async function initI18n() {
         if (namespace === DEFAULT_NAMESPACE && careConfig.i18nUrl) {
           const remoteUrl = `${careConfig.i18nUrl}/${language}.json`;
           const localUrl = `/locale/${language}.json`;
-          const fetchOptions =
-            language === "en" ? { cache: "no-store" as RequestCache } : {};
           Promise.all([
             fetch(remoteUrl, fetchOptions)
               .then((response) => {
@@ -127,8 +127,6 @@ export async function initI18n() {
           return;
         }
 
-        const fetchOptions =
-          language === "en" ? { cache: "no-store" as RequestCache } : {};
         fetch(`${baseUrl}/locale/${language}.json`, fetchOptions)
           .then((response) => {
             if (!response.ok) {

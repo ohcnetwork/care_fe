@@ -152,6 +152,7 @@ const PatientRoutes: AppRoutes = {
   }) => (
     <ClinicalHistoryPage
       patientId={patientId}
+      facilityId={facilityId}
       tab={tab}
       fallBackUrl={`/facility/${facilityId}/patient/${patientId}`}
     />

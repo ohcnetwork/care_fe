@@ -81,7 +81,7 @@ import patientApi from "@/types/emr/patient/patientApi";
 import facilityApi from "@/types/facility/facilityApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import dayjs from "@/Utils/dayjs";
-import { add, round } from "@/Utils/decimal";
+import { add, multiply, round, subtract } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -111,6 +111,8 @@ export function InvoiceShow({
   const [selectedStatus, setSelectedStatus] = useState<InvoiceStatus | null>(
     null,
   );
+  const [activePaymentsDialogOpen, setActivePaymentsDialogOpen] =
+    useState(false);
   const [isAddChargeItemSheetOpen, setIsAddChargeItemSheetOpen] =
     useState(false);
   const queryClient = useQueryClient();
@@ -267,6 +269,25 @@ export function InvoiceShow({
       status === InvoiceStatus.entered_in_error ||
       status === InvoiceStatus.balanced
     ) {
+      // Check for active payments or credit notes when trying to cancel or mark as entered in error
+      if (
+        status === InvoiceStatus.cancelled ||
+        status === InvoiceStatus.entered_in_error
+      ) {
+        const hasActivePayments = !!invoice?.payments?.some(
+          (p) => p.status === PaymentReconciliationStatus.active,
+        );
+        const hasActiveCreditNotes = !!invoice?.credit_notes?.some(
+          (p) => p.status === PaymentReconciliationStatus.active,
+        );
+
+        if (hasActivePayments || hasActiveCreditNotes) {
+          setSelectedStatus(status);
+          setActivePaymentsDialogOpen(true);
+          return;
+        }
+      }
+
       setSelectedStatus(status);
       setReasonDialogOpen(true);
     } else {
@@ -495,7 +516,101 @@ export function InvoiceShow({
           </div>
         </div>
 
-        <div className="md:col-span-2 overflow-x-auto max-w-4xl mx-auto">
+        <div className="md:col-span-2 overflow-x-auto max-w-5xl mx-auto">
+          <div className="bg-gray-50 border border-gray-200 rounded-md p-3 mb-3">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-600">
+                  {t("invoice_summary")}
+                </span>
+                <Badge variant={INVOICE_STATUS_COLORS[invoice.status]}>
+                  {t(invoice.status)}
+                </Badge>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="text-center">
+                  <div className="text-xs text-gray-500">
+                    {t("total_amount")}
+                  </div>
+                  <div className="text-base font-semibold text-gray-900">
+                    <MonetaryDisplay amount={invoice.total_gross} />
+                  </div>
+                </div>
+                <div className="h-6 w-px bg-gray-300" />
+                <div className="text-center">
+                  <div className="text-xs text-gray-500">
+                    {invoice.is_refund
+                      ? t("total_credit_notes")
+                      : t("total_payments_received")}
+                  </div>
+                  <div
+                    className={cn(
+                      "text-base font-semibold",
+                      invoice.is_refund ? "text-red-600" : "text-green-600",
+                    )}
+                  >
+                    <MonetaryDisplay
+                      amount={
+                        invoice.is_refund
+                          ? -invoice.total_credit_notes
+                          : invoice.total_payments
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="h-6 w-px bg-gray-300" />
+                <div className="text-center">
+                  <div className="text-xs text-gray-500">
+                    {t("balance_due")}
+                  </div>
+                  <div className="text-base font-semibold text-gray-900">
+                    <MonetaryDisplay
+                      amount={subtract(
+                        subtract(invoice.total_gross, invoice.total_payments),
+                        multiply(
+                          invoice.total_credit_notes,
+                          invoice.is_refund ? -1 : 1,
+                        ),
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {invoice.status === InvoiceStatus.balanced &&
+            parseFloat(
+              subtract(
+                subtract(invoice.total_gross, invoice.total_payments),
+                multiply(
+                  invoice.total_credit_notes,
+                  invoice.is_refund ? -1 : 1,
+                ),
+              ).toString(),
+            ) > 0 && (
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-2 mb-3 flex gap-2 items-center">
+                <CareIcon
+                  icon="l-info-circle"
+                  className="text-blue-600 size-4 shrink-0"
+                />
+                <p className="text-xs text-blue-800">
+                  <span className="font-semibold">
+                    <MonetaryDisplay
+                      amount={subtract(
+                        subtract(invoice.total_gross, invoice.total_payments),
+                        multiply(
+                          invoice.total_credit_notes,
+                          invoice.is_refund ? -1 : 1,
+                        ),
+                      )}
+                    />
+                  </span>{" "}
+                  {t("unpaid_moved_to_account")}
+                </p>
+              </div>
+            )}
+
           <div className="flex sm:flex-row flex-col sm:items-center gap-4 justify-between items-start mb-4">
             <div className="flex flex-row items-center gap-2">
               <span className="font-semibold text-gray-950 text-base">
@@ -761,7 +876,10 @@ export function InvoiceShow({
                               {index + 1}
                             </TableCell>
                             <TableCell
-                              className={cn(tableCellClass, "font-medium")}
+                              className={cn(
+                                tableCellClass,
+                                "font-medium whitespace-pre-wrap",
+                              )}
                             >
                               <InvoiceChargeItemTitle
                                 item={item}
@@ -1163,7 +1281,10 @@ export function InvoiceShow({
                                 </TableCell>
                                 <TableCell className="text-right">
                                   <MonetaryDisplay
-                                    amount={payment.amount}
+                                    amount={multiply(
+                                      payment.amount,
+                                      payment.is_credit_note ? -1 : 1,
+                                    )}
                                     hideCurrency
                                   />
                                 </TableCell>
@@ -1186,6 +1307,135 @@ export function InvoiceShow({
                           : t("total_received")}
                       </span>
                       <MonetaryDisplay amount={invoice.total_payments} />
+                    </div>
+                    <div className="p-1 border-b-2 border-dashed border-gray-200 w-full" />
+                  </div>
+                </>
+              )}
+
+              {invoice.credit_notes?.filter(
+                (p) => p.status === PaymentReconciliationStatus.active,
+              ).length > 0 && (
+                <>
+                  <div className="border border-gray-300 rounded-md space-y-2">
+                    <div className="mt-2 px-3 font-medium">
+                      {t("credit_notes_issued_against_this_invoice")}
+                    </div>
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-b border-gray-200">
+                          <TableHead className={tableHeadClass}>#</TableHead>
+                          <TableHead
+                            className={cn(tableHeadClass, "text-left")}
+                          >
+                            {t("date_and_time")}
+                          </TableHead>
+                          <TableHead
+                            className={cn(tableHeadClass, "text-left")}
+                          >
+                            {t("payment_method")}
+                          </TableHead>
+                          <TableHead
+                            className={cn(tableHeadClass, "text-left")}
+                          >
+                            {t("reference")}
+                          </TableHead>
+                          <TableHead className="font-semibold text-right">
+                            {t("amount")} ({getCurrencySymbol()})
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {invoice.credit_notes
+                          .filter(
+                            (p) =>
+                              p.status === PaymentReconciliationStatus.active,
+                          )
+                          .map((creditNote, index) => (
+                            <TableRow
+                              key={creditNote.id}
+                              className="border-b border-gray-200 hover:bg-muted/50"
+                            >
+                              <TableCell
+                                className={cn(tableCellClass, "text-center")}
+                              >
+                                {index + 1}
+                              </TableCell>
+                              <TableCell
+                                className={cn(tableCellClass, "font-medium")}
+                              >
+                                <span className="flex justify-between items-center flex-wrap gap-2">
+                                  {creditNote.payment_datetime
+                                    ? format(
+                                        new Date(creditNote.payment_datetime),
+                                        "d MMM yyyy, hh:mm a",
+                                      )
+                                    : "-"}
+
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="text-gray-800 font-semibold text-xs p-2"
+                                      onClick={() => {
+                                        navigate(
+                                          `/facility/${facilityId}/billing/payments/${creditNote.id}`,
+                                        );
+                                      }}
+                                    >
+                                      <>
+                                        <EyeIcon className="size-3" />
+                                        {t("view")}
+                                      </>
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="text-gray-800 font-semibold text-xs p-2"
+                                      onClick={() => {
+                                        navigate(
+                                          `/facility/${facilityId}/billing/payments/${creditNote.id}/print`,
+                                        );
+                                      }}
+                                    >
+                                      <>
+                                        <PrinterIcon className="size-3" />
+                                        {t("print")}
+                                      </>
+                                    </Button>
+                                  </div>
+                                </span>
+                              </TableCell>
+                              <TableCell
+                                className={cn(tableCellClass, "text-left")}
+                              >
+                                {
+                                  PAYMENT_RECONCILIATION_METHOD_MAP[
+                                    creditNote.method
+                                  ]
+                                }
+                              </TableCell>
+                              <TableCell className={tableCellClass}>
+                                {creditNote.reference_number}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <MonetaryDisplay
+                                  amount={creditNote.amount}
+                                  hideCurrency
+                                />
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <div className="flex flex-col items-end space-y-2 text-gray-950 font-mormal text-sm mb-4">
+                    <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
+
+                    {/* Total Credit Notes */}
+                    <div className="flex w-64 justify-between font-bold">
+                      <span>{t("total_credit_notes")}</span>
+                      <MonetaryDisplay amount={invoice.total_credit_notes} />
                     </div>
                     <div className="p-1 border-b-2 border-dashed border-gray-200 w-full" />
                   </div>
@@ -1258,12 +1508,86 @@ export function InvoiceShow({
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>{t("confirm")}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {selectedStatus === InvoiceStatus.balanced
-                  ? t("are_you_sure_want_to_mark_as_balanced")
-                  : selectedStatus === InvoiceStatus.entered_in_error
-                    ? t("are_you_sure_want_to_mark_as_error")
-                    : t("are_you_sure_want_to_cancel_invoice")}
+              <AlertDialogDescription asChild>
+                <div className="space-y-4">
+                  {selectedStatus === InvoiceStatus.balanced ? (
+                    <>
+                      <p>{t("are_you_sure_want_to_mark_as_balanced")}</p>
+                      <div className="bg-gray-50 border border-gray-200 rounded-md p-3 space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">
+                            {t("invoice_total")}
+                          </span>
+                          <span className="font-medium text-gray-900">
+                            <MonetaryDisplay amount={invoice.total_gross} />
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">
+                            {t("total_payments_received")}
+                          </span>
+                          <span className="font-medium text-green-600">
+                            <MonetaryDisplay amount={invoice.total_payments} />
+                          </span>
+                        </div>
+                        {parseFloat(invoice.total_credit_notes || "0") > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">
+                              {t("total_credit_notes")}
+                            </span>
+                            <span className="font-medium text-red-600">
+                              <MonetaryDisplay
+                                amount={-invoice.total_credit_notes}
+                              />
+                            </span>
+                          </div>
+                        )}
+                        <div className="border-t border-gray-200 pt-2 flex justify-between text-sm">
+                          <span className="text-gray-600">
+                            {t("outstanding_balance")}
+                          </span>
+                          <span className="font-semibold text-gray-900">
+                            <MonetaryDisplay
+                              amount={subtract(
+                                subtract(
+                                  invoice.total_gross,
+                                  invoice.total_payments,
+                                ),
+                                multiply(
+                                  invoice.total_credit_notes || "0",
+                                  invoice.is_refund ? -1 : 1,
+                                ),
+                              )}
+                            />
+                          </span>
+                        </div>
+                      </div>
+                      {parseFloat(
+                        subtract(
+                          subtract(invoice.total_gross, invoice.total_payments),
+                          multiply(
+                            invoice.total_credit_notes || "0",
+                            invoice.is_refund ? -1 : 1,
+                          ),
+                        ).toString(),
+                      ) > 0 && (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 flex gap-2 items-start">
+                          <CareIcon
+                            icon="l-exclamation-triangle"
+                            className="text-yellow-600 size-5 mt-0.5 shrink-0"
+                          />
+                          <p className="text-sm text-yellow-800">
+                            {t("mark_as_balanced_warning")}
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  ) : selectedStatus === InvoiceStatus.entered_in_error ? (
+                    <p>{t("are_you_sure_want_to_mark_as_error")}</p>
+                  ) : (
+                    <p>{t("are_you_sure_want_to_cancel_invoice")}</p>
+                  )}
+                </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -1286,6 +1610,35 @@ export function InvoiceShow({
                 {t("confirm")}
                 <ShortcutBadge actionId="submit-action" />
               </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog
+          open={activePaymentsDialogOpen}
+          onOpenChange={(open) => {
+            setActivePaymentsDialogOpen(open);
+            if (!open) {
+              setTimeout(() => setSelectedStatus(null), 150);
+            }
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {selectedStatus === InvoiceStatus.entered_in_error
+                  ? t("cannot_mark_as_entered_in_error")
+                  : t("cannot_cancel_invoice")}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("invoice_has_active_payments_or_credit_notes")}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>
+                {t("close")}
+                <ShortcutBadge actionId="cancel-action" />
+              </AlertDialogCancel>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

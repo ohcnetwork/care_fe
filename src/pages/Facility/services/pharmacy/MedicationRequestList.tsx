@@ -2,12 +2,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowUpRightSquare,
   CheckCircle,
-  MapPin,
   MoreVertical,
   ReceiptTextIcon,
 } from "lucide-react";
-import { navigate } from "raviger";
-import { useMemo } from "react";
+import { Link, navigate } from "raviger";
+import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -39,12 +38,23 @@ import useFilters from "@/hooks/useFilters";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
-import { tagFilter } from "@/components/ui/multi-filter/filterConfigs";
+import {
+  dateFilter,
+  tagFilter,
+} from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import {
-  ENCOUNTER_CLASS,
+  FilterDateRange,
+  longDateRangeOptions,
+} from "@/components/ui/multi-filter/utils/Utils";
+import useBreakpoints from "@/hooks/useBreakpoints";
+import { CreateDispenseSheet } from "@/pages/Facility/services/pharmacy/CreateDispenseSheet";
+import {
+  ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_CLASSES_COLORS,
+  ENCOUNTER_STATUS_COLORS,
+  ENCOUNTER_STATUS_ICONS,
 } from "@/types/emr/encounter/encounter";
 import {
   PrescriptionStatus,
@@ -57,10 +67,17 @@ import {
   TagResource,
 } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
+import { getLocationPath } from "@/types/location/utils";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { formatDateTime, formatName } from "@/Utils/utils";
+import {
+  dateQueryString,
+  dateTimeQueryString,
+  formatDateTime,
+  formatName,
+} from "@/Utils/utils";
+import careConfig from "@careConfig";
 
 export default function MedicationRequestList({
   facilityId,
@@ -73,7 +90,12 @@ export default function MedicationRequestList({
   const queryClient = useQueryClient();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
-    disableCache: true,
+    cacheBlacklist: ["patient_external_id", "patient_name"],
+  });
+  const encounterClassFilterVisibleTabs = useBreakpoints({
+    default: 2,
+    md: 3,
+    xl: 4,
   });
   const tagIds = qParams.tags?.split(",") || [];
   const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
@@ -83,17 +105,36 @@ export default function MedicationRequestList({
 
   // Create filter configurations
   const filters = useMemo(
-    () => [tagFilter("tags", TagResource.PRESCRIPTION, "multi", "tags")],
-    [],
+    () => [
+      tagFilter("tags", TagResource.PRESCRIPTION, "multi", "tags"),
+      dateFilter("created_date", t("date"), longDateRangeOptions),
+    ],
+    [t],
   );
 
   // Handle filter updates
-  const onFilterUpdate = (query: Record<string, unknown>) => {
+  const onFilterUpdate = (filterQuery: Record<string, unknown>) => {
     // Update the query parameters based on filter changes
-    for (const [key, value] of Object.entries(query)) {
+    let query = { ...filterQuery };
+    for (const [key, value] of Object.entries(filterQuery)) {
       switch (key) {
         case "tags":
-          query.tags = (value as TagConfig[])?.map((tag) => tag.id);
+          query.tags = (value as TagConfig[])?.map((tag) => tag.id).join(",");
+          break;
+        case "created_date":
+          {
+            const dateRange = value as FilterDateRange;
+            query = {
+              ...query,
+              created_date: undefined,
+              created_date_after: dateRange?.from
+                ? dateQueryString(dateRange?.from as Date)
+                : undefined,
+              created_date_before: dateRange?.to
+                ? dateQueryString(dateRange?.to as Date)
+                : undefined,
+            };
+          }
           break;
       }
     }
@@ -110,6 +151,17 @@ export default function MedicationRequestList({
   } = useMultiFilterState(filters, onFilterUpdate, {
     ...qParams,
     tags: selectedTags,
+    created_date:
+      qParams.created_date_after || qParams.created_date_before
+        ? {
+            from: qParams.created_date_after
+              ? new Date(qParams.created_date_after)
+              : undefined,
+            to: qParams.created_date_before
+              ? new Date(qParams.created_date_before)
+              : undefined,
+          }
+        : undefined,
   });
 
   const { data: prescriptionQueue, isLoading } = useQuery<
@@ -125,6 +177,12 @@ export default function MedicationRequestList({
         encounter_class: qParams.encounter_class,
         tags: qParams.tags,
         tags_behavior: qParams.tags_behavior,
+        created_date_after: qParams.created_date_after
+          ? dateTimeQueryString(new Date(qParams.created_date_after))
+          : undefined,
+        created_date_before: qParams.created_date_before
+          ? dateTimeQueryString(new Date(qParams.created_date_before), true)
+          : undefined,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
       },
@@ -154,7 +212,16 @@ export default function MedicationRequestList({
   });
 
   return (
-    <Page title={t("prescription_queue")}>
+    <Page
+      title={t("prescription_queue")}
+      options={
+        <CreateDispenseSheet
+          facilityId={facilityId}
+          locationId={locationId}
+          patientId={qParams.patient_external_id}
+        />
+      }
+    >
       {/* Priority tabs with original styling */}
       <div className="mb-4 pt-6">
         <Tabs
@@ -206,12 +273,14 @@ export default function MedicationRequestList({
                 : "",
             })
           }
-          options={[...ENCOUNTER_CLASS].map((ec) => `encounter_class__${ec}`)}
+          options={[...careConfig.encounterClasses].map(
+            (ec) => `encounter_class__${ec}`,
+          )}
           showAllOption={true}
           allOptionLabel="all"
           variant="background"
           showMoreDropdown={true}
-          maxVisibleTabs={3}
+          maxVisibleTabs={encounterClassFilterVisibleTabs}
           defaultVisibleOptions={[
             "encounter_class__imp",
             "encounter_class__amb",
@@ -225,9 +294,22 @@ export default function MedicationRequestList({
           onClearAll={handleClearAll}
           onClearFilter={handleClearFilter}
           placeholder={t("filters")}
-          className="flex flex-wrap items-center"
+          className="flex flex-wrap md:flex-row items-start"
           facilityId={facilityId}
         />
+
+        {qParams.patient_external_id && (
+          <div className="ml-auto items-end">
+            <Button variant="outline_primary" asChild>
+              <Link
+                href={`/medication_requests/patient/${qParams.patient_external_id}/bill`}
+              >
+                <ReceiptTextIcon strokeWidth={1.5} />
+                {t("bill_all_pending_prescriptions")}
+              </Link>
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Table section */}
@@ -257,8 +339,16 @@ export default function MedicationRequestList({
             </TableHeader>
             <TableBody>
               {prescriptionQueue?.results?.map((item: PrescriptionSummary) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-semibold">
+                <TableRow key={item.id} className="group">
+                  <TableCell
+                    className="font-semibold group-hover:underline cursor-pointer"
+                    onClick={() =>
+                      updateQuery({
+                        patient_external_id: item.encounter.patient.id,
+                        patient_name: item.encounter.patient.name,
+                      })
+                    }
+                  >
                     {item.encounter.patient.name}
                     <div className="text-xs text-gray-500">
                       {t("by")}: {formatName(item.prescribed_by)}
@@ -270,7 +360,7 @@ export default function MedicationRequestList({
 
                   <TableCell className="text-sm">
                     <div className="flex flex-col gap-1">
-                      <div>
+                      <div className="space-x-1">
                         <Badge
                           size="sm"
                           variant={
@@ -279,15 +369,34 @@ export default function MedicationRequestList({
                             ]
                           }
                         >
+                          {React.createElement(
+                            ENCOUNTER_CLASS_ICONS[
+                              item.encounter.encounter_class
+                            ],
+                            { className: "size-3" },
+                          )}
                           {t(
                             `encounter_class__${item.encounter.encounter_class}`,
                           )}
                         </Badge>
+                        <Badge
+                          size="sm"
+                          variant={
+                            ENCOUNTER_STATUS_COLORS[item.encounter.status]
+                          }
+                        >
+                          {React.createElement(
+                            ENCOUNTER_STATUS_ICONS[item.encounter.status],
+                            { className: "size-3" },
+                          )}
+                          {t(`encounter_status__${item.encounter.status}`)}
+                        </Badge>
                       </div>
                       {item.encounter.current_location && (
                         <div className="flex items-center gap-1 text-sm text-gray-700">
-                          <MapPin className="size-3.5 text-gray-500" />
-                          <span>{item.encounter.current_location.name}</span>
+                          <span>
+                            {getLocationPath(item.encounter.current_location)}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -330,18 +439,6 @@ export default function MedicationRequestList({
                   <TableCell>
                     <div className="flex gap-2 self-center">
                       <Button
-                        variant="outline_primary"
-                        className="font-semibold"
-                        onClick={() => {
-                          navigate(
-                            `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}/bill`,
-                          );
-                        }}
-                      >
-                        <ReceiptTextIcon strokeWidth={1.5} />
-                        {t("bill_all")}
-                      </Button>
-                      <Button
                         variant="outline"
                         className="font-semibold"
                         onClick={() => {
@@ -351,7 +448,7 @@ export default function MedicationRequestList({
                         }}
                       >
                         <ReceiptTextIcon strokeWidth={1.5} />
-                        {t("bill_this")}
+                        {t("bill")}
                       </Button>
                       <Button
                         variant="outline"
