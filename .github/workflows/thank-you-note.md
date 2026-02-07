@@ -15,7 +15,6 @@ safe-outputs:
   add-comment:
     max: 1
     target: "*"
-needs-checkout: false
 ---
 
 # Thank You Note Generator
