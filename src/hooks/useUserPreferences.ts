@@ -43,10 +43,13 @@ function preferencesReducer(
   state: Record<string, unknown>,
   action: PreferencesAction,
 ): Record<string, unknown> {
+  const facilityQuickLinks: QuickLinksPreferences =
+    state.facility_quick_links ?? {
+      custom_links: [],
+      blacklist: [],
+    };
   switch (action.type) {
     case ActionType.ADD_CUSTOM_LINK: {
-      const facilityQuickLinks =
-        state.facility_quick_links as QuickLinksPreferences;
       return {
         ...state,
         facility_quick_links: {
@@ -59,8 +62,6 @@ function preferencesReducer(
       };
     }
     case ActionType.REMOVE_CUSTOM_LINK: {
-      const facilityQuickLinks =
-        state.facility_quick_links as QuickLinksPreferences;
       return {
         ...state,
         facility_quick_links: {
@@ -72,8 +73,6 @@ function preferencesReducer(
       };
     }
     case ActionType.UPDATE_CUSTOM_LINK: {
-      const facilityQuickLinks =
-        state.facility_quick_links as QuickLinksPreferences;
       return {
         ...state,
         facility_quick_links: {
@@ -85,8 +84,6 @@ function preferencesReducer(
       };
     }
     case ActionType.BLACKLIST_SHORTCUT: {
-      const facilityQuickLinks =
-        state.facility_quick_links as QuickLinksPreferences;
       return {
         ...state,
         facility_quick_links: {
@@ -96,8 +93,6 @@ function preferencesReducer(
       };
     }
     case ActionType.UNBLACKLIST_SHORTCUT: {
-      const facilityQuickLinks =
-        state.facility_quick_links as QuickLinksPreferences;
       return {
         ...state,
         facility_quick_links: {
@@ -109,8 +104,6 @@ function preferencesReducer(
       };
     }
     case ActionType.SET_BLACKLIST: {
-      const facilityQuickLinks =
-        state.facility_quick_links as QuickLinksPreferences;
       return {
         ...state,
         facility_quick_links: {
@@ -148,10 +141,11 @@ export function useUserPreferences() {
     preferencesReducer,
     user.preferences ?? {},
   );
-  const facilityQuickLinks =
-    "facility_quick_links" in preferences
-      ? (preferences.facility_quick_links as QuickLinksPreferences)
-      : {};
+  const facilityQuickLinks: QuickLinksPreferences =
+    preferences.facility_quick_links ?? {
+      custom_links: [],
+      blacklist: [],
+    };
   const customLinksCount = facilityQuickLinks.custom_links?.length ?? 0;
   const blacklist = facilityQuickLinks.blacklist ?? [];
   const customLinks = facilityQuickLinks.custom_links ?? [];
