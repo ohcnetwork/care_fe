@@ -71,6 +71,7 @@ export interface AutocompleteProps<T = string> {
   /** Function to compare values for equality. Defaults to === for primitives */
   valueCompare?: (a: T | null, b: T | null) => boolean;
   ref?: React.RefCallback<HTMLButtonElement | null>;
+  enableRadio?: boolean;
   "aria-invalid"?: boolean;
   shortcutId?: string;
 }
@@ -512,6 +513,7 @@ export default function Autocomplete<T = string>({
   renderSelected,
   valueCompare = defaultValueCompare<T>,
   ref,
+  enableRadio = false,
   shortcutId,
   ...props
 }: AutocompleteProps<T>) {
@@ -527,6 +529,7 @@ export default function Autocomplete<T = string>({
   // - freeInput is disabled (radio doesn't support free text)
   const useRadioButtons =
     !freeInput &&
+    enableRadio &&
     initialOptionsCountRef.current !== null &&
     initialOptionsCountRef.current > 0 &&
     initialOptionsCountRef.current <= DEFAULT_INLINE_OPTIONS_LIMIT;
