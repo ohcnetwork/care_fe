@@ -131,7 +131,7 @@ export function MedicationBillRow({
           )}
         />
       </TableCell>
-      <TableCell className={tableCellClass}>
+      <TableCell className={cn(tableCellClass, "max-w-xs")}>
         <div
           className={cn(
             "flex items-center justify-between gap-2",
@@ -367,6 +367,11 @@ export function MedicationBillRow({
                   return t("click_to_add_dosage_instructions");
                 })()}
               </div>
+            )}
+            {field.medication?.note && (
+              <span className="mt-4 text-xs text-gray-600 break-words whitespace-pre-wrap">
+                {field.medication.note}
+              </span>
             )}
           </div>
           {field.medication && (

@@ -136,9 +136,10 @@ test.describe("Charge Item Definition Creation", () => {
     await page.getByRole("button", { name: "Done" }).click();
     await page.getByRole("button", { name: "Add Condition" }).click();
     await page.waitForLoadState("networkidle");
+    // To do: make this metric agnostic/otherwise might have to adjust everytime we add a new metric
     await page
       .getByRole("combobox")
-      .filter({ hasText: /^Metric|Encounter Tags$/ })
+      .filter({ hasText: /^Metric|Encounter/ })
       .click();
     await page.getByRole("option", { name: "Patient Age" }).click();
     await page.getByRole("combobox").filter({ hasText: "In range" }).click();

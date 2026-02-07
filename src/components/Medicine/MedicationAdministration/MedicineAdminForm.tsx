@@ -2,7 +2,13 @@ import { formatDistanceToNow, startOfMinute, subDays } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import RadioInput from "@/components/ui/RadioInput";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
@@ -31,8 +38,11 @@ interface MedicineAdminFormProps {
   lastAdministeredBy?: string;
   administrationRequest: MedicationAdministrationRequest;
   onChange: (request: MedicationAdministrationRequest) => void;
+  onMedicationChange?: (medication: MedicationRequestRead) => void;
   formId: string;
   isValid?: (valid: boolean) => void;
+  compact?: boolean;
+  otherGroupRequests?: MedicationRequestRead[];
 }
 
 export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
@@ -41,8 +51,11 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   lastAdministeredBy,
   administrationRequest,
   onChange,
+  onMedicationChange,
   formId,
   isValid,
+  compact = false,
+  otherGroupRequests,
 }) => {
   const { t } = useTranslation();
 
@@ -52,6 +65,9 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   );
   const [startTimeError, setStartTimeError] = useState("");
   const [endTimeError, setEndTimeError] = useState("");
+  const [showAdvanced, setShowAdvanced] = useState(
+    !!administrationRequest.id || isPastTime,
+  );
 
   const validateDateTime = (date: Date, isStartTime: boolean): string => {
     const now = startOfMinute(new Date());
@@ -177,6 +193,211 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
     });
   };
 
+  const handleAdministerNow = () => {
+    const now = new Date().toISOString();
+    onChange({
+      ...administrationRequest,
+      status: "completed",
+      occurrence_period_start: now,
+      occurrence_period_end: now,
+    });
+    setIsPastTime(false);
+    setShowAdvanced(false);
+  };
+
+  // Compact mode for sheet - simplified form
+  if (compact) {
+    return (
+      <div className="space-y-4">
+        {/* Quick Actions */}
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant={!showAdvanced ? "default" : "outline"}
+            size="sm"
+            className={cn(
+              "flex-1",
+              !showAdvanced && "bg-green-600 hover:bg-green-700",
+            )}
+            onClick={handleAdministerNow}
+          >
+            <CareIcon icon="l-check-circle" className="size-4 mr-1.5" />
+            {t("administer_now")}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="text-gray-600"
+          >
+            <CareIcon
+              icon={showAdvanced ? "l-angle-up" : "l-angle-down"}
+              className="size-4 mr-1"
+            />
+            {showAdvanced ? t("less_options") : t("more_options")}
+          </Button>
+        </div>
+
+        {/* Status Badge */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-500">{t("status")}:</span>
+          <Badge
+            variant={
+              administrationRequest.status === "completed"
+                ? "green"
+                : administrationRequest.status === "in_progress"
+                  ? "blue"
+                  : "secondary"
+            }
+          >
+            {t(administrationRequest.status)}
+          </Badge>
+        </div>
+
+        {/* Advanced Options */}
+        {showAdvanced && (
+          <div className="space-y-4 pt-2 border-t border-gray-200">
+            {/* Status Select */}
+            <div className="space-y-2">
+              <Label className="text-sm">{t("status")}</Label>
+              <Select
+                value={administrationRequest.status}
+                onValueChange={(value: MedicationAdministrationStatus) => {
+                  const newRequest = {
+                    ...administrationRequest,
+                    status: value,
+                  };
+
+                  if (value === "in_progress" || value === "not_done") {
+                    delete newRequest.occurrence_period_end;
+                  } else if (
+                    value === "completed" &&
+                    !administrationRequest.occurrence_period_end
+                  ) {
+                    newRequest.occurrence_period_end =
+                      administrationRequest.occurrence_period_start;
+                  }
+
+                  onChange(newRequest);
+                }}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder={t("select_status")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {MEDICATION_ADMINISTRATION_STATUS.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {t(status)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Time Selection */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label className="text-sm">{t("start_time")}</Label>
+                <div className="flex gap-2">
+                  <DatePicker
+                    date={
+                      administrationRequest.occurrence_period_start
+                        ? new Date(
+                            administrationRequest.occurrence_period_start,
+                          )
+                        : undefined
+                    }
+                    onChange={(date) => {
+                      if (!date) return;
+                      handleDateChange(date.toISOString(), true);
+                    }}
+                    disabled={(date) => {
+                      const now = new Date();
+                      const encounterStart = subDays(
+                        new Date(medication.authored_on),
+                        1,
+                      );
+                      return date < encounterStart || date > now;
+                    }}
+                    className="flex-1"
+                  />
+                  <Input
+                    type="time"
+                    className="w-24 text-sm"
+                    value={formatTime(
+                      administrationRequest.occurrence_period_start,
+                    )}
+                    onChange={(e) => handleTimeChange(e, true)}
+                  />
+                </div>
+                {startTimeError && (
+                  <p className="text-xs text-red-500">{startTimeError}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm">{t("end_time")}</Label>
+                <div className="flex gap-2">
+                  <DatePicker
+                    date={
+                      administrationRequest.occurrence_period_end
+                        ? new Date(administrationRequest.occurrence_period_end)
+                        : undefined
+                    }
+                    onChange={(date) => {
+                      if (!date) return;
+                      handleDateChange(date.toISOString(), false);
+                    }}
+                    disabled={(date) => {
+                      const now = new Date();
+                      const encounterStart = subDays(
+                        new Date(medication.authored_on),
+                        1,
+                      );
+                      return date < encounterStart || date > now;
+                    }}
+                    className="flex-1"
+                    disablePicker={
+                      administrationRequest.status === "in_progress"
+                    }
+                  />
+                  <Input
+                    type="time"
+                    className="w-24 text-sm"
+                    value={formatTime(
+                      administrationRequest.occurrence_period_end,
+                    )}
+                    onChange={(e) => handleTimeChange(e, false)}
+                    disabled={administrationRequest.status === "in_progress"}
+                  />
+                </div>
+                {endTimeError && (
+                  <p className="text-xs text-red-500">{endTimeError}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div className="space-y-2">
+              <Label className="text-sm">{t("notes")}</Label>
+              <Textarea
+                name={`${formId}notes`}
+                value={administrationRequest.note || ""}
+                onChange={(e) =>
+                  onChange({ ...administrationRequest, note: e.target.value })
+                }
+                placeholder={t("add_notes_optional")}
+                rows={2}
+                className="resize-none text-sm"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Full form mode for dialog
   return (
     <div className="space-y-6">
       <div className="space-y-1">
@@ -199,7 +420,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-3 bg-gray-50 rounded-lg">
         <div>
           <Label className="text-xs text-gray-500">{t("dosage")}</Label>
           <p className="font-medium">
@@ -229,6 +450,72 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
           </p>
         </div>
       </div>
+
+      {/* All prescriptions in the group */}
+      {otherGroupRequests && otherGroupRequests.length > 0 && (
+        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+            <CareIcon icon="l-clipboard-notes" className="size-4" />
+            <span>{t("all_prescriptions_in_group")}</span>
+          </div>
+          <div className="space-y-1.5">
+            {otherGroupRequests.map((req) => {
+              const dosage = req.dosage_instruction[0];
+              const isCurrentMedication = req.id === medication.id;
+              const canSelect = !isCurrentMedication && onMedicationChange;
+              return (
+                <button
+                  type="button"
+                  key={req.id}
+                  onClick={() => canSelect && onMedicationChange(req)}
+                  disabled={isCurrentMedication}
+                  className={cn(
+                    "flex items-center justify-between w-full px-3 py-2 rounded-md text-sm border text-left transition-colors",
+                    isCurrentMedication
+                      ? "bg-primary-50 border-primary-200 cursor-default"
+                      : "bg-white border-gray-100 hover:bg-gray-50 hover:border-gray-200 cursor-pointer",
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    {isCurrentMedication && (
+                      <CareIcon
+                        icon="l-check-circle"
+                        className="size-4 text-primary-600"
+                      />
+                    )}
+                    <span
+                      className={
+                        isCurrentMedication
+                          ? "text-primary-700 font-medium"
+                          : "text-gray-700"
+                      }
+                    >
+                      {formatDosage(dosage)}
+                    </span>
+                    {getFrequencyDisplay(dosage?.timing)?.meaning && (
+                      <span
+                        className={
+                          isCurrentMedication
+                            ? "text-primary-500"
+                            : "text-gray-400"
+                        }
+                      >
+                        · {getFrequencyDisplay(dosage?.timing)?.meaning}
+                      </span>
+                    )}
+                  </div>
+                  <Badge
+                    variant={req.status === "active" ? "green" : "secondary"}
+                    className="text-xs"
+                  >
+                    {t(req.status)}
+                  </Badge>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label>{t("status")}</Label>
@@ -265,12 +552,14 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
 
       <div className="space-y-2">
         <Label>{t("administration_notes")}</Label>
-        <Input
+        <Textarea
           name={`${formId}notes`}
           value={administrationRequest.note || ""}
           onChange={(e) =>
             onChange({ ...administrationRequest, note: e.target.value })
           }
+          placeholder={t("add_notes_optional")}
+          rows={2}
         />
       </div>
 
