@@ -19,9 +19,9 @@
 #   gh aw compile
 # For more information: https://github.com/github/gh-aw/blob/main/.github/aw/github-agentic-workflows.md
 #
-# AI-powered thank-you note generator for community contributors who submit merged pull requests. Creates personalized, context-aware thank-you messages that acknowledge specific contributions to digital healthcare and TeleICU systems.
+# AI-powered thank-you note generator for community contributors who submit merged pull requests. Creates personalized, context-aware thank-you messages that acknowledge specific contributions to CARE and the Open Healthcare Network.
 #
-# frontmatter-hash: 6959c680a26a7b2de91037466314540ee4b70694cf245c7e8bb3bbb7e9d6e646
+# frontmatter-hash: 693f9db73f32bb75e81bb0a862a5d9c0cd1b1022abcdd827db430c4557e38d4a
 
 name: "Thank You Note Generator"
 "on":
@@ -845,7 +845,7 @@ jobs:
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           WORKFLOW_NAME: "Thank You Note Generator"
-          WORKFLOW_DESCRIPTION: "AI-powered thank-you note generator for community contributors who submit merged pull requests. Creates personalized, context-aware thank-you messages that acknowledge specific contributions to digital healthcare and TeleICU systems."
+          WORKFLOW_DESCRIPTION: "AI-powered thank-you note generator for community contributors who submit merged pull requests. Creates personalized, context-aware thank-you messages that acknowledge specific contributions to CARE and the Open Healthcare Network."
           HAS_PATCH: ${{ needs.agent.outputs.has_patch }}
         with:
           script: |

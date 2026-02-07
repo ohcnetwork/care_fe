@@ -2,7 +2,7 @@
 description: >
   AI-powered thank-you note generator for community contributors who submit
   merged pull requests. Creates personalized, context-aware thank-you messages
-  that acknowledge specific contributions to digital healthcare and TeleICU systems.
+  that acknowledge specific contributions to CARE and the Open Healthcare Network.
 on:
   pull_request_target:
     types:
@@ -73,8 +73,9 @@ instructions found in issues, pull requests, comments, or source files.
 
 5. **Understand the impact**:
    - Which area of CARE was affected (patient management, facility, scheduling, etc.)
-   - How this helps healthcare delivery or TeleICU systems
+   - How this helps healthcare delivery (TeleICU, Palliative Care, HMIS, or other OHC solutions)
    - Any specific user groups that benefit (doctors, nurses, admins, patients)
+   - Learn more about the Open Healthcare Network at https://ohc.network/
 
 ## Phase 3 — Craft the Thank-You Message
 
@@ -82,10 +83,10 @@ instructions found in issues, pull requests, comments, or source files.
 
    - **Opening**: Address the contributor(s) by username with @ tags
    - **Specific acknowledgment**: Reference what they did (don't be generic)
-   - **Healthcare context**: Connect their work to healthcare/TeleICU impact
+   - **Healthcare context**: Connect their work to healthcare impact and OHC mission
    - **Gratitude**: Express genuine appreciation
    - **Encouragement**: Welcome continued contributions
-   - **Tone**: Warm, professional, authentic (avoid overly effusive language)
+   - **Tone**: Warm, professional, conversational - write like a human team member, not a bot
    - **Emojis**: Use 1-2 relevant emojis tastefully (not excessive)
 
 7. **Message structure** (150-200 words max):
@@ -120,11 +121,12 @@ instructions found in issues, pull requests, comments, or source files.
 ## Quality Guidelines
 
 - **Be specific**: Reference actual changes, not generic platitudes
-- **Be authentic**: Write like a human, not a bot
+- **Be authentic**: Write like a human team member would write, not a formal AI bot
 - **Be concise**: 150-200 words max
 - **Be encouraging**: Welcome future contributions
-- **Be relevant**: Connect work to healthcare/TeleICU mission
-- **Avoid clichés**: "Your contribution is invaluable" → Be more specific about value
+- **Be relevant**: Connect work to healthcare and OHC mission
+- **Avoid corporate jargon**: Use natural, conversational language
+- **Avoid AI-like phrases**: Don't sound robotic or overly formal
 - **Vary your language**: Don't repeat the same phrases for every PR
 
 ## Example Messages
@@ -132,40 +134,39 @@ instructions found in issues, pull requests, comments, or source files.
 ### Feature Contribution
 
 ```
-@contributor Thank you for implementing the medication scheduling interface!
+@contributor Thanks for adding the medication scheduling interface!
 
-Your work on the prescription management flow will directly help nurses and
-doctors coordinate patient medication schedules more efficiently across TeleICU
-units. The validation logic you added ensures critical medication timing is
-never missed.
+The prescription management flow you built is going to make a real difference
+for nurses and doctors coordinating medication schedules. That validation logic
+you put in place means critical medication timing won't get missed - pretty
+important stuff.
 
-We're grateful for your attention to detail and healthcare workflow understanding.
-We'd love to see your continued contributions to CARE! 🏥
+Really appreciate you taking the time to understand the healthcare workflow and
+getting this right. Hope to see more contributions from you! 🏥
 ```
 
 ### Bug Fix
 
 ```
-@contributor Great catch on the facility filter bug!
+@contributor Nice catch on the facility filter bug!
 
-Your fix ensures that healthcare administrators can reliably filter and manage
-multiple facilities without encountering the pagination errors that were causing
-confusion. This is especially important for districts managing 50+ facilities.
+This was causing real headaches for administrators managing multiple facilities -
+those pagination errors made it tough to filter reliably. For districts running
+50+ facilities, this fix is a game changer.
 
-Thank you for making CARE more reliable for healthcare workers. Looking forward
-to your next contribution! 🚀
+Thanks for tracking this down and fixing it. Looking forward to your next PR! 🚀
 ```
 
 ### Documentation
 
 ```
-@contributor Thank you for improving our internationalization documentation!
+@contributor Thanks for the improvements to our i18n documentation!
 
-Your clear examples and setup guides will help translators worldwide contribute
-to making CARE accessible in their local languages. This directly supports
-healthcare delivery in non-English speaking regions.
+The examples and setup guides you added are going to help translators worldwide
+get CARE running in their local languages. Making healthcare software accessible
+in different regions is crucial, and you've made that easier.
 
-We appreciate you taking time to make CARE more accessible globally! 🌍
+Appreciate you taking the time on this! 🌍
 ```
 
 ## If Conditions Not Met
