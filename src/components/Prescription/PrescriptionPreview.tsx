@@ -42,7 +42,7 @@ export const PrescriptionContent = ({
       {/* Prescription Symbol */}
       <div className="text-xl font-semibold mb-3 flex items-end gap-4">
         <p>{t("℞")}</p>
-        <p className="text-sm text-gray-600 font-semibold ">
+        <p className="text-base text-gray-600 font-semibold ">
           {formatDateTime(prescription.created_date, "DD/MM/YYYY hh:mm A")}
         </p>
       </div>
@@ -80,7 +80,7 @@ export const PrescriptionContent = ({
                 instructions: [remarks, notes].filter(Boolean).join("\n"),
               };
             })}
-            className="text-xs font-semibold whitespace-break-spaces text-gray-950"
+            className="text-sm font-medium whitespace-break-spaces text-gray-950"
             cellConfig={{
               medicine: { className: "text-left" },
             }}
@@ -88,20 +88,20 @@ export const PrescriptionContent = ({
         </div>
       )}
       {prescription?.note && (
-        <div className="mt-6 mb-6 text-sm text-gray-600">
+        <div className="mt-6 mb-6 text-base text-gray-600">
           <p className="font-semibold mb-1">{t("note")}</p>
           <Markdown
             content={prescription.note}
             prose={false}
-            className="text-sm"
+            className="text-base"
           />
         </div>
       )}
       {/* Doctor's Signature */}
       <div className="w-full items-end mt-6 flex flex-row justify-end gap-1">
         <div className="text-right">
-          <p className="text-xs text-gray-400">{t("prescribed_by")}</p>
-          <p className="text-sm text-gray-600 font-semibold">
+          <p className="text-sm text-gray-400">{t("prescribed_by")}</p>
+          <p className="text-base text-gray-600 font-semibold">
             {formatName(prescription.prescribed_by)}
           </p>
         </div>
@@ -116,7 +116,7 @@ export const DetailRow = ({
   isStrong = false,
 }: DetailRowProps) => {
   return (
-    <div className="flex">
+    <div className="flex text-sm">
       <span className="text-gray-600 w-32">{label}</span>
       <span className="text-gray-600">: </span>
       <span className={`ml-1 ${isStrong ? "font-semibold" : ""}`}>
@@ -226,17 +226,17 @@ export const PrescriptionPreview = ({
       autoPrint={{ enabled: hasMedications }}
       disabled={!hasMedications}
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
           <div className="flex items-start gap-4">
             <div className="text-left">
-              <h1 className="text-xl font-medium">{facility?.name}</h1>
+              <h1 className="text-2xl font-medium">{facility?.name}</h1>
               {facility?.address && (
-                <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-xs">
+                <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
                   {facility.address}
                   {facility.phone_number && (
-                    <p className="text-gray-500 text-xs">
+                    <p className="text-gray-500 text-sm">
                       {t("phone")}: {facility.phone_number}
                     </p>
                   )}
@@ -311,7 +311,7 @@ export const PrescriptionPreview = ({
         {/* Footer */}
         <PrintFooter
           leftContent={t("computer_generated_prescription")}
-          className="text-xs"
+          className="text-sm"
         />
       </div>
     </PrintPreview>
