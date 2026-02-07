@@ -43,11 +43,7 @@ function preferencesReducer(
   state: Record<string, unknown>,
   action: PreferencesAction,
 ): Record<string, unknown> {
-  const facilityQuickLinks: QuickLinksPreferences =
-    state.facility_quick_links ?? {
-      custom_links: [],
-      blacklist: [],
-    };
+  const facilityQuickLinks = getFacilityQuickLinks(state);
   switch (action.type) {
     case ActionType.ADD_CUSTOM_LINK: {
       return {
@@ -132,6 +128,17 @@ function preferencesReducer(
   }
 }
 
+function getFacilityQuickLinks(
+  state: Record<string, unknown>,
+): QuickLinksPreferences {
+  return (
+    state.facility_quick_links ?? {
+      custom_links: [],
+      blacklist: [],
+    }
+  );
+}
+
 export function useUserPreferences() {
   const user = useAuthUser();
   const queryClient = useQueryClient();
@@ -141,11 +148,7 @@ export function useUserPreferences() {
     preferencesReducer,
     user.preferences ?? {},
   );
-  const facilityQuickLinks: QuickLinksPreferences =
-    preferences.facility_quick_links ?? {
-      custom_links: [],
-      blacklist: [],
-    };
+  const facilityQuickLinks = getFacilityQuickLinks(preferences);
   const customLinksCount = facilityQuickLinks.custom_links?.length ?? 0;
   const blacklist = facilityQuickLinks.blacklist ?? [];
   const customLinks = facilityQuickLinks.custom_links ?? [];
