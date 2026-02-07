@@ -1,5 +1,4 @@
 import { useAtom } from "jotai";
-import { AlertTriangleIcon } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -23,9 +22,11 @@ export default function ProductionWarningBanner() {
   }
 
   return (
-    <div className="sticky top-0 z-50 flex items-center justify-between gap-2 bg-red-600 px-4 py-2 text-white shadow-lg">
-      <div className="flex items-center gap-2">
-        <AlertTriangleIcon className="h-5 w-5 shrink-0 animate-pulse" />
+    <div className="group fixed right-0 bottom-0 top-0 z-50 flex flex-col justify-start pointer-events-none">
+      {/* Ghost hover detector - stays fixed, detects hover */}
+      <div className="absolute top-0 right-0 h-10 w-full pointer-events-auto" />
+      {/* Actual banner content - moves based on group hover */}
+      <div className="pointer-events-auto flex items-center gap-2 bg-red-600 px-4 py-2 text-white font-mono group-hover:mt-auto animate-caret-blink">
         <span className="text-sm font-semibold">
           {t("production_warning_banner")}
         </span>
