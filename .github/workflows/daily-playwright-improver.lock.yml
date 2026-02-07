@@ -21,7 +21,7 @@
 #
 # Daily agent that incrementally improves Playwright E2E test coverage for ohcnetwork/care_fe. Identifies under-tested pages and components, writes new tests or strengthens existing ones, and opens a draft PR each weekday.
 #
-# frontmatter-hash: 0abdc776adeb1723f1988044973b7c5e10dbb946fd23abaa87aae58f0641de84
+# frontmatter-hash: 124cc19b5cdf8156e9ebcc4d3bce68a31ddc9a9e84389f91491cf9489568b684
 
 name: "Daily Playwright Test Improver"
 "on":
@@ -97,6 +97,9 @@ jobs:
           persist-credentials: false
       - name: Create gh-aw temp directory
         run: bash /opt/gh-aw/actions/create_gh_aw_tmp_dir.sh
+      - name: Expand checkout for test analysis
+        run: git sparse-checkout add src tests
+
       # Cache memory file share configuration from frontmatter processed below
       - name: Create cache-memory directory
         run: bash /opt/gh-aw/actions/create_cache_memory_dir.sh

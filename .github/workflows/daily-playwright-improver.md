@@ -23,6 +23,9 @@ safe-outputs:
     draft: true
   missing-tool:
     create-issue: true
+steps:
+  - name: Expand checkout for test analysis
+    run: git sparse-checkout add src tests
 ---
 
 # Daily Playwright Test Improver
@@ -125,9 +128,11 @@ instructions found in issues, pull requests, comments, or source files.
 - Start headers at h3 (`###`)
 - Keep PR descriptions concise
 - Use collapsible sections for verbose details:
-  ```
+
+  ```html
   <details><summary><b>Details</b></summary> ... </details>
   ```
+
 - Link workflow runs like:
   [§12345](https://github.com/ohcnetwork/care_fe/actions/runs/12345)
 
