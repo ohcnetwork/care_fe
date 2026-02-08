@@ -15,10 +15,6 @@ safe-outputs:
   add-comment:
     max: 1
     target: "*"
-# NOTE: When compiling this workflow with gh-aw, manually verify that the
-# pre_activation job's activated output uses != 'true' instead of == 'true'
-# to ensure the workflow only runs for NON-team members (community contributors).
-# gh-aw v0.42.13 had a bug that inverted this logic.
 ---
 
 # Thank You Note Generator
