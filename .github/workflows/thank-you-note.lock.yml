@@ -94,7 +94,7 @@ jobs:
           sparse-checkout: |
             .github
             .agents
-          fetch-depth: 1
+          depth: 1
           persist-credentials: false
       - name: Create gh-aw temp directory
         run: bash /opt/gh-aw/actions/create_gh_aw_tmp_dir.sh
