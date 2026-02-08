@@ -564,8 +564,8 @@
     background:
       linear-gradient(
         to bottom right,
-        rgba(4, 78, 55, 0.466),
-        rgba(2, 54, 40, 0.521)
+        rgba(255, 0, 0, 0.466),
+        rgba(255, 0, 0, 0.521)
       ),
       url("/images/wave_scene_square.png");
     background-size: cover;

@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { Link } from "raviger";
+// import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 export const AuthHero = () => {
@@ -37,7 +37,7 @@ export const AuthHero = () => {
               <img
                 src={customLogoAlt?.light ?? "/images/ohc_logo_light.svg"}
                 className="h-8"
-                alt="Open Healthcare Network logo"
+                alt="Clinic logo"
               />
             </a>
           )}
@@ -57,7 +57,7 @@ export const AuthHero = () => {
             </div>
           ) : (
             <div className="max-w-xl py-6 pl-1 text-base font-semibold text-secondary-400 md:text-lg lg:text-xl">
-              {t("goal")}
+              {/* {t("goal")} */}
             </div>
           )}
         </div>
@@ -65,7 +65,7 @@ export const AuthHero = () => {
       <div className="mb-6 flex items-center">
         <div className="max-w-lg text-xs md:text-sm">
           <div className="mb-2 ml-1 flex items-center gap-4">
-            <a
+            {/* <a
               href="https://www.digitalpublicgoods.net/r/care"
               rel="noopener noreferrer"
               target="_blank"
@@ -75,42 +75,42 @@ export const AuthHero = () => {
                 className="h-12"
                 alt="Logo of Digital Public Goods Alliance"
               />
-            </a>
-            <div className="ml-2 h-8 w-px rounded-full bg-white/50" />
-            <a href={urls.ohcn} rel="noopener noreferrer" target="_blank">
+            </a> */}
+            {/* <div className="ml-2 h-8 w-px rounded-full bg-white/50" /> */}
+            {/* <a href={urls.ohcn} rel="noopener noreferrer" target="_blank">
               <img
                 src="/images/ohc_logo_light.svg"
                 className="inline-block h-10"
                 alt="Open Healthcare Network logo"
               />
-            </a>
+            </a> */}
           </div>
-          <a
+          {/* <a
             href={urls.ohcn}
             target="_blank"
             rel="noopener noreferrer"
             className="text-secondary-500"
           >
             {t("footer_body")}
-          </a>
+          </a> */}
           <div className="mx-auto mt-2">
-            <a
+            {/* <a
               href={urls.github}
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary-400 hover:text-primary-500"
             >
               {t("contribute_github")}
-            </a>
-            <span className="mx-2 text-primary-400">|</span>
-            <Link
+            </a> */}
+            {/* <span className="mx-2 text-primary-400">|</span> */}
+            {/* <Link
               href="/licenses"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary-400 hover:text-primary-500"
             >
               {t("third_party_software_licenses")}
-            </Link>
+            </Link> */}
           </div>
         </div>
       </div>

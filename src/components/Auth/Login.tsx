@@ -32,7 +32,6 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import CircularProgress from "@/components/Common/CircularProgress";
-import LanguageSelectorLogin from "@/components/Common/LanguageSelectorLogin";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
@@ -796,7 +795,7 @@ const Login = (props: LoginProps) => {
               </CardContent>
             </Card>
 
-            <LanguageSelectorLogin />
+            {/* <LanguageSelectorLogin /> */}
           </div>
         </div>
       </div>
