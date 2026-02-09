@@ -7,6 +7,7 @@ import {
   PencilIcon,
   PlusIcon,
   PrinterIcon,
+  Zap,
 } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
@@ -27,12 +28,13 @@ import {
 import { EmptyState } from "@/components/ui/empty-state";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  chargeItemServiceResourceFilter,
+  chargeItemStatusFilter,
+  dateFilter,
+} from "@/components/ui/multi-filter/filterConfigs";
+import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
+import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
+import { FilterDateRange } from "@/components/ui/multi-filter/utils/Utils";
 import {
   Table,
   TableBody,
@@ -41,8 +43,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import SearchInput from "@/components/Common/SearchInput";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
@@ -55,17 +57,20 @@ import {
   CHARGE_ITEM_STATUS_COLORS,
   ChargeItemRead,
   ChargeItemServiceResource,
-  ChargeItemStatus,
   MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./AddChargeItemsBillingSheet";
 import EditChargeItemSheet from "./EditChargeItemSheet";
+import QuickAddChargeItemsSheet from "./QuickAddChargeItemsSheet";
 
 interface PriceComponentRowProps {
   label: string;
@@ -115,6 +120,7 @@ export function ChargeItemsTable({
     {},
   );
   const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = useState(false);
+  const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
 
   // Register shortcuts for this table
   useShortcutSubContext("facility:billing");
@@ -123,15 +129,74 @@ export function ChargeItemsTable({
     disableCache: true,
   });
 
+  // MultiFilter configuration
+  const filters = [
+    chargeItemStatusFilter("status"),
+    chargeItemServiceResourceFilter("service_resource"),
+    dateFilter("created_date", t("created_date")),
+  ];
+
+  const onFilterUpdate = (query: Record<string, unknown>) => {
+    for (const [key, value] of Object.entries(query)) {
+      switch (key) {
+        case "service_resource":
+          query.service_resource = (value as string[])?.join(",");
+          break;
+      }
+    }
+    updateQuery(query);
+  };
+
+  const {
+    selectedFilters,
+    handleFilterChange,
+    handleOperationChange,
+    handleClearAll,
+    handleClearFilter,
+  } = useMultiFilterState(filters, onFilterUpdate, {
+    ...qParams,
+    status: qParams.status ? [qParams.status] : undefined,
+    service_resource: qParams.service_resource
+      ? qParams.service_resource.split(",")
+      : undefined,
+    created_date:
+      qParams.created_date_after || qParams.created_date_before
+        ? {
+            from: qParams.created_date_after
+              ? new Date(qParams.created_date_after as string)
+              : undefined,
+            to: qParams.created_date_before
+              ? new Date(qParams.created_date_before as string)
+              : undefined,
+          }
+        : undefined,
+  });
+
+  // Convert date filter values to API query params
+  const getDateQueryParams = () => {
+    const dateRange = selectedFilters.created_date?.selected as
+      | FilterDateRange
+      | undefined;
+    if (!dateRange) return {};
+    return {
+      created_date_after: dateRange.from?.toISOString(),
+      created_date_before: dateRange.to?.toISOString(),
+    };
+  };
+
   const { data: chargeItems, isLoading } = useQuery({
     queryKey: ["chargeItems", accountId, qParams],
     queryFn: query(chargeItemApi.listChargeItem, {
       pathParams: { facilityId },
       queryParams: {
         account: accountId,
-        status: qParams.charge_item_status,
+        status: qParams.status,
+        service_resource: qParams.service_resource,
+        ordering: qParams.ordering,
+        title: qParams.title,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        ...getDateQueryParams(),
       },
     }),
   }) as {
@@ -184,48 +249,26 @@ export function ChargeItemsTable({
   return (
     <div>
       <div className="mb-4 flex flex-col sm:flex-row justify-between items-center gap-2">
-        {/* Desktop Tabs */}
-        <Tabs
-          value={qParams.charge_item_status ?? "all"}
-          onValueChange={(value) =>
-            updateQuery({
-              charge_item_status: value === "all" ? undefined : value,
-            })
-          }
-          className="max-sm:hidden w-2/3 md:w-full overflow-x-auto"
-        >
-          <TabsList className="overflow-x-auto">
-            <TabsTrigger value="all">{t("all")}</TabsTrigger>
-            {Object.values(ChargeItemStatus).map((status) => (
-              <TabsTrigger key={status} value={status}>
-                {t(status)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-        {/* Mobile Select */}
-        <Select
-          value={qParams.charge_item_status ?? "all"}
-          onValueChange={(value) =>
-            updateQuery({
-              charge_item_status: value === "all" ? undefined : value,
-            })
-          }
-        >
-          <SelectTrigger className="sm:hidden w-full">
-            <SelectValue placeholder={t("filter_by_status")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("all")}</SelectItem>
-            {Object.values(ChargeItemStatus).map((status) => (
-              <SelectItem key={status} value={status}>
-                {t(status)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <div className="flex items-center gap-2">
+        <MultiFilter
+          selectedFilters={selectedFilters}
+          onFilterChange={handleFilterChange}
+          onOperationChange={handleOperationChange}
+          onClearAll={handleClearAll}
+          onClearFilter={handleClearFilter}
+          className="flex flex-row-reverse flex-wrap sm:items-center"
+          facilityId={facilityId}
+        />
+        <div className="flex sm:flex-row flex-col sm:items-center gap-2 w-full sm:w-auto">
+          <div className="gap-2 flex items-center whitespace-nowrap">
+            <Label htmlFor="sort-by-title">{t("sort_by_title")}</Label>
+            <Switch
+              id="sort-by-title"
+              checked={qParams.ordering === "title"}
+              onCheckedChange={(checked) =>
+                updateQuery({ ordering: checked ? "title" : undefined })
+              }
+            />
+          </div>
           <Button
             variant="outline"
             onClick={() => navigate(`../${accountId}/charge_items/print`)}
@@ -237,6 +280,14 @@ export function ChargeItemsTable({
           </Button>
           <Button
             variant="outline"
+            onClick={() => setIsQuickAddOpen(true)}
+            className="w-full sm:w-auto bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 hover:border-amber-300 hover:from-amber-100 hover:to-orange-100"
+          >
+            <Zap className="size-4 mr-2 text-amber-500" />
+            {t("quick_add")}
+          </Button>
+          <Button
+            variant="outline"
             onClick={() => setIsAddChargeItemsOpen(true)}
             className="w-full sm:w-auto"
           >
@@ -245,6 +296,22 @@ export function ChargeItemsTable({
             <ShortcutBadge actionId="add-charge-item" />
           </Button>
         </div>
+      </div>
+      <div className="mb-4">
+        <SearchInput
+          id="charge-item-title-search"
+          options={[
+            {
+              key: "title",
+              type: "text",
+              placeholder: t("search_by_item"),
+              value: qParams.title || "",
+              display: t("title"),
+            },
+          ]}
+          className="w-full sm:w-80"
+          onSearch={(key, value) => updateQuery({ [key]: value })}
+        />
       </div>
       {isLoading ? (
         <TableSkeleton count={3} />
@@ -258,7 +325,7 @@ export function ChargeItemsTable({
           <Table className="rounded-lg border shadow-sm w-full bg-white">
             <TableHeader className="bg-gray-100">
               <TableRow className="border-b">
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-[40px]"></TableHead>
+                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10"></TableHead>
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
                   {t("item")}
                 </TableHead>
@@ -291,8 +358,6 @@ export function ChargeItemsTable({
             <TableBody className="bg-white">
               {chargeItems.results.flatMap((item) => {
                 const isExpanded = expandedItems[item.id] || false;
-                const baseComponent = getBaseComponent(item);
-                const baseAmount = String(baseComponent?.amount || "0");
                 const linkedResource = getLinkedResource(item);
 
                 const mrpAmount = item.unit_price_components.find(
@@ -344,10 +409,12 @@ export function ChargeItemsTable({
                       <MonetaryDisplay amount={mrpAmount} />
                     </TableCell>
                     <TableCell className="border-x p-3 text-gray-950">
-                      <MonetaryDisplay amount={baseAmount} />
+                      <MonetaryDisplay
+                        amount={getBaseComponent(item)?.amount || "0"}
+                      />
                     </TableCell>
                     <TableCell className="border-x p-3 text-gray-950">
-                      {item.quantity}
+                      {round(item.quantity)}
                     </TableCell>
                     <TableCell className="border-x p-3 text-gray-950 font-medium">
                       <MonetaryDisplay amount={item.total_price} />
@@ -366,6 +433,7 @@ export function ChargeItemsTable({
                             className="flex items-center gap-0.5 underline text-gray-600"
                             title={t("view_invoice")}
                           >
+                            {item.paid_invoice.number}
                             <ExternalLinkIcon className="size-3.5" />
                           </Link>
                         )}
@@ -459,7 +527,14 @@ export function ChargeItemsTable({
                     <TableCell className="p-3">
                       <MonetaryDisplay amount={item.total_price} />
                     </TableCell>
-                    <TableCell></TableCell>
+                    <TableCell className="text-gray-700 text-xs">
+                      <p>
+                        {t("created_by_user", {
+                          name: formatName(item.created_by),
+                        })}
+                      </p>
+                      <p>{formatDateTime(item.created_date)}</p>
+                    </TableCell>
                   </TableRow>
                 );
 
@@ -482,6 +557,14 @@ export function ChargeItemsTable({
       <AddChargeItemsBillingSheet
         open={isAddChargeItemsOpen}
         onOpenChange={setIsAddChargeItemsOpen}
+        facilityId={facilityId}
+        patientId={patientId}
+        onChargeItemsAdded={handleChargeItemsAdded}
+      />
+
+      <QuickAddChargeItemsSheet
+        open={isQuickAddOpen}
+        onOpenChange={setIsQuickAddOpen}
         facilityId={facilityId}
         patientId={patientId}
         onChargeItemsAdded={handleChargeItemsAdded}

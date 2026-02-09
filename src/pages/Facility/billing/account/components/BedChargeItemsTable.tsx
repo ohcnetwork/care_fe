@@ -47,6 +47,7 @@ import {
   MonetaryComponent,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
+import { ResourceCategorySubType } from "@/types/base/resourceCategory/resourceCategory";
 import {
   CHARGE_ITEM_STATUS_COLORS,
   ChargeItemRead,
@@ -55,6 +56,7 @@ import {
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
+import { round } from "@/Utils/decimal";
 import queryClient from "@/Utils/request/queryClient";
 import { formatName } from "@/Utils/utils";
 import AddMultipleChargeItemsSheet from "@/pages/Facility/services/serviceRequests/components/AddMultipleChargeItemsSheet";
@@ -230,12 +232,17 @@ export function BedChargeItemsTable({
   const locationHistory = encounter?.location_history || [];
 
   const { data: chargeItems, isLoading } = useQuery({
-    queryKey: ["chargeItems", accountId],
+    queryKey: [
+      "chargeItems",
+      accountId,
+      qParams,
+      ChargeItemServiceResource.bed_association,
+    ],
     queryFn: query(chargeItemApi.listChargeItem, {
       pathParams: { facilityId },
       queryParams: {
         account: accountId,
-        status: qParams.charge_item_status,
+        status: qParams.status,
         service_resource: ChargeItemServiceResource.bed_association,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
@@ -292,6 +299,9 @@ export function BedChargeItemsTable({
         encounterId={encounterId}
         serviceResourceId={addChargeItemState.locationId}
         serviceResourceType={ChargeItemServiceResource.bed_association}
+        resourceSubType={
+          ResourceCategorySubType.charge_item_definition_location_bed_charges
+        }
         onChargeItemsAdded={() => {
           setAddChargeItemState({
             serviceRequestId: "",
@@ -306,12 +316,12 @@ export function BedChargeItemsTable({
       <div className="mb-4">
         {/* Desktop Tabs */}
         <Tabs
-          value={qParams.charge_item_status ?? "all"}
-          onValueChange={(value) =>
+          value={qParams.status ?? "all"}
+          onValueChange={(value) => {
             updateQuery({
-              charge_item_status: value === "all" ? undefined : value,
-            })
-          }
+              status: value === "all" ? undefined : value,
+            });
+          }}
           className="max-sm:hidden"
         >
           <TabsList>
@@ -325,10 +335,10 @@ export function BedChargeItemsTable({
         </Tabs>
         {/* Mobile Select */}
         <Select
-          value={qParams.charge_item_status ?? "all"}
+          value={qParams.status ?? "all"}
           onValueChange={(value) =>
             updateQuery({
-              charge_item_status: value === "all" ? undefined : value,
+              status: value === "all" ? undefined : value,
             })
           }
         >
@@ -358,7 +368,7 @@ export function BedChargeItemsTable({
           <Table className="rounded-lg border shadow-sm w-full bg-white">
             <TableHeader className="bg-gray-100">
               <TableRow className="border-b">
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-[40px]"></TableHead>
+                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10"></TableHead>
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
                   {t("item")}
                 </TableHead>
@@ -415,10 +425,6 @@ export function BedChargeItemsTable({
                         ]
                       : items.flatMap((item) => {
                           const isExpanded = expandedItems[item.id] || false;
-                          const baseComponent = getBaseComponent(item);
-                          const baseAmount = String(
-                            baseComponent?.amount || "0",
-                          );
 
                           const mainRow = (
                             <TableRow
@@ -461,10 +467,12 @@ export function BedChargeItemsTable({
                                   )}
                               </TableCell>
                               <TableCell className="border-x p-3 text-gray-950">
-                                <MonetaryDisplay amount={baseAmount} />
+                                <MonetaryDisplay
+                                  amount={getBaseComponent(item)?.amount || "0"}
+                                />
                               </TableCell>
                               <TableCell className="border-x p-3 text-gray-950">
-                                {item.quantity}
+                                {round(item.quantity)}
                               </TableCell>
                               <TableCell className="border-x p-3 text-gray-950 font-medium">
                                 <MonetaryDisplay amount={item.total_price} />

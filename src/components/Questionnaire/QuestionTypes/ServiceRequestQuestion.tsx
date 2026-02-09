@@ -1,9 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
-import { ChevronDown, Info, Trash2 } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ChevronDown, MoreVerticalIcon, Pencil } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
+import UserSelector from "@/components/Common/UserSelector";
+import { AddToTemplateDialog } from "@/components/Questionnaire/AddToTemplateDialog";
+import ManageResponseTemplatesSheet from "@/components/Questionnaire/ManageResponseTemplatesSheet";
+import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
+import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,28 +17,30 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { TooltipComponent } from "@/components/ui/tooltip";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 
-import UserSelector from "@/components/Common/UserSelector";
-import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
-import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
-
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { add } from "@/Utils/decimal";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
+import { getBasePrice } from "@/types/base/monetaryComponent/monetaryComponent";
+import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import {
   ServiceRequestApplyActivityDefinitionSpec as BaseServiceRequestApplyActivityDefinitionSpec,
   Intent,
@@ -42,7 +50,37 @@ import {
 } from "@/types/emr/serviceRequest/serviceRequest";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import {
+  ActivityDefinitionTemplateSpec,
+  QuestionnaireResponseTemplateReadSpec,
+} from "@/types/questionnaire/questionnaireResponseTemplate";
+import { questionnaireResponseTemplateApi } from "@/types/questionnaire/questionnaireResponseTemplateApi";
 import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
+import { Decimal } from "decimal.js";
+
+import { filterStructuredQuestionnaireSlugs } from "@/components/Questionnaire/data/StructuredFormData";
+
+export function buildServiceRequestForTemplate(
+  serviceRequest: ServiceRequestApplyActivityDefinitionSpec,
+): ActivityDefinitionTemplateSpec {
+  return {
+    slug: serviceRequest.activity_definition,
+    service_request: {
+      title: serviceRequest.service_request.title,
+      status: serviceRequest.service_request.status,
+      intent: serviceRequest.service_request.intent,
+      priority: serviceRequest.service_request.priority,
+      category: serviceRequest.service_request.category,
+      code: serviceRequest.service_request.code,
+      do_not_perform: serviceRequest.service_request.do_not_perform,
+      body_site: serviceRequest.service_request.body_site,
+      note: serviceRequest.service_request.note,
+      patient_instruction: serviceRequest.service_request.patient_instruction,
+      occurance: serviceRequest.service_request.occurance,
+      locations: serviceRequest.service_request.locations,
+    },
+  };
+}
 
 // Extend the base type to use UserReadMinimal for requester
 interface ServiceRequestApplyActivityDefinitionSpec extends Omit<
@@ -68,6 +106,7 @@ interface ServiceRequestQuestionProps {
   ) => void;
   disabled?: boolean;
   errors?: QuestionValidationError[];
+  questionnaireSlug?: string;
 }
 
 const SERVICE_REQUEST_FIELDS = {
@@ -121,251 +160,141 @@ interface ServiceRequestFormProps {
   onUpdate?: (updates: Partial<ServiceRequestReadSpec>) => void;
   onRemove?: () => void;
   onAdd?: () => void;
+  onCancel?: () => void;
+  onAddToTemplate?: (
+    serviceRequest: ServiceRequestApplyActivityDefinitionSpec,
+  ) => void;
   disabled?: boolean;
   errors?: QuestionValidationError[];
   questionId?: string;
   index?: number;
-  isPreview?: boolean;
   activityDefinition?: ActivityDefinitionReadSpec;
   facilityId?: string;
+  requester?: UserReadMinimal;
+  onRequesterChange?: (user: UserReadMinimal | undefined) => void;
 }
 
 function ServiceRequestForm({
   serviceRequest,
   onUpdate,
   onRemove,
-  onAdd,
+  onAddToTemplate,
   disabled,
   errors,
   questionId,
   index,
-  isPreview = false,
   activityDefinition,
   facilityId = "",
+  requester,
+  onRequesterChange,
 }: ServiceRequestFormProps) {
   const { t } = useTranslation();
-
-  const renderInfoSection = () => (
-    <div className="flex flex-wrap gap-x-5 gap-y-2 w-full">
-      <div className="flex items-center gap-2">
-        <span className="font-medium text-sm text-gray-700">
-          {t("status")}:
-        </span>
-        <Badge
-          variant="outline"
-          className="bg-blue-50 text-blue-700 border-blue-200"
-        >
-          {t(serviceRequest.service_request.status)}
-        </Badge>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="font-medium text-sm text-gray-700">
-          {t("intent")}:
-        </span>
-        <Badge
-          variant="outline"
-          className="bg-purple-50 text-purple-700 border-purple-200"
-        >
-          {t(serviceRequest.service_request.intent)}
-        </Badge>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="font-medium text-sm text-gray-700">
-          {t("category")}:
-        </span>
-        <Badge
-          variant="outline"
-          className="bg-green-50 text-green-700 border-green-200 whitespace-nowrap"
-        >
-          {t(serviceRequest.service_request.category)}
-        </Badge>
-      </div>
-
-      {serviceRequest.service_request.do_not_perform && (
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-sm text-gray-700">
-            {t("do_not_perform")}:
-          </span>
-          <Badge
-            variant="outline"
-            className="bg-red-50 text-red-700 border-red-200"
-          >
-            {t("yes")}
-          </Badge>
-        </div>
-      )}
-      {activityDefinition?.healthcare_service && (
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-sm text-gray-700">
-            {t("healthcare_service")}:
-          </span>
-          <Badge
-            variant="outline"
-            className="bg-indigo-50 text-indigo-700 border-indigo-200 whitespace-nowrap"
-          >
-            {activityDefinition.healthcare_service.name}
-          </Badge>
-        </div>
-      )}
-      {activityDefinition?.locations &&
-        activityDefinition.locations.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap w-full">
-            <span className="font-medium text-sm text-gray-700">
-              {t("locations")}:
-            </span>
-            {activityDefinition.locations.map((location) => (
-              <Badge
-                key={location.id}
-                variant="outline"
-                className="bg-gray-50 text-gray-700 border-gray-200"
-              >
-                {location.name}
-              </Badge>
-            ))}
-          </div>
-        )}
-    </div>
-  );
-
-  if (isPreview) {
-    return (
-      <div className="rounded-lg border border-primary-500 p-4 space-y-4 bg-white shadow-sm">
-        <div className="flex flex-col gap-2 items-start w-full">
-          <div className="flex gap-2 items-center">
-            <p className="text-sm font-semibold text-gray-900">
-              {serviceRequest.service_request.title}
-            </p>
-            <TooltipComponent
-              content={`${serviceRequest.service_request.code.code} | ${serviceRequest.service_request.code.display} \n${serviceRequest.service_request.code.system}`}
-            >
-              <Info className="size-4 text-gray-600 cursor-help" />
-            </TooltipComponent>
-          </div>
-          {renderInfoSection()}
-          <div className="flex w-full justify-end items-center mt-2 gap-2">
-            {onRemove && (
-              <Button variant="ghost" size="icon" onClick={onRemove}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        </div>
-        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
-          <div className="space-y-2">
-            <Label>
-              {t("priority")} <span className="text-red-500">*</span>
-            </Label>
-            <Select
-              value={serviceRequest.service_request.priority}
-              onValueChange={(value: Priority) =>
-                onUpdate?.({ priority: value })
-              }
-              disabled={disabled}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={t("select_priority")} />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.values(Priority).map((priority) => (
-                  <SelectItem key={priority} value={priority}>
-                    {t(priority)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {questionId && index !== undefined && (
-              <FieldError
-                fieldKey={SERVICE_REQUEST_FIELDS.PRIORITY.key}
-                questionId={questionId}
-                errors={errors}
-                index={index}
-              />
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("body_site")}</Label>
-            <ValueSetSelect
-              system="system-body-site"
-              value={serviceRequest.service_request.body_site}
-              onSelect={(code) => onUpdate?.({ body_site: code })}
-              placeholder={t("select_body_site")}
-              disabled={disabled}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("patient_instruction")}</Label>
-            <Textarea
-              value={serviceRequest.service_request.patient_instruction || ""}
-              onChange={(e) =>
-                onUpdate?.({ patient_instruction: e.target.value })
-              }
-              disabled={disabled}
-              placeholder={t("enter_patient_instructions")}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("requester")}</Label>
-            <UserSelector
-              selected={serviceRequest.service_request.requester}
-              onChange={(user) => onUpdate?.({ requester: user })}
-              placeholder={t("select_requester")}
-              facilityId={facilityId}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("note")}</Label>
-            <Textarea
-              value={serviceRequest.service_request.note || ""}
-              onChange={(e) => onUpdate?.({ note: e.target.value })}
-              disabled={disabled}
-              placeholder={t("add_notes")}
-            />
-          </div>
-        </div>
-        {isPreview && (
-          <div className="flex justify-end">
-            <Button onClick={onAdd}>{t("add")}</Button>
-          </div>
-        )}
-      </div>
-    );
-  }
+  const [isOpen, setIsOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
-    <Collapsible defaultOpen={false}>
-      <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
-        <CollapsibleTrigger className="flex flex-col gap-2 w-full items-start text-left p-4 hover:bg-gray-50 cursor-pointer">
-          <div className="flex gap-2 items-center">
-            <p className="text-sm font-semibold text-gray-900">
-              {serviceRequest.service_request.title}
-            </p>
-            <TooltipComponent
-              content={`${serviceRequest.service_request.code.code} | ${serviceRequest.service_request.code.display} \n${serviceRequest.service_request.code.system}`}
-            >
-              <Info className="size-4 text-gray-600 cursor-help" />
-            </TooltipComponent>
-          </div>
-          {renderInfoSection()}
-          <div className="flex w-full justify-end items-center mt-2 gap-2">
-            {onRemove && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onRemove();
-                }}
-                disabled={disabled}
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <div className="rounded-lg border border-gray-200 bg-white shadow-sm relative">
+        <div className="absolute left-0 top-4 w-1 h-4 bg-purple-500 rounded-r-full" />
+        <CollapsibleTrigger className="flex flex-col gap-3 w-full items-start text-left p-2 pl-6 hover:bg-gray-50 cursor-pointer">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between w-full">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-900">
+                {serviceRequest.service_request.title}
+              </p>
+              <Badge
+                variant="outline"
+                className="bg-purple-50 text-purple-700 border-purple-200"
               >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
-            <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+                {t(serviceRequest.service_request.category)}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between sm:justify-end gap-3">
+              {serviceRequest.service_request.requester && (
+                <Badge
+                  variant="outline"
+                  className="bg-green-50 text-green-700 border-green-200 whitespace-nowrap"
+                >
+                  {formatName(serviceRequest.service_request.requester)}
+                </Badge>
+              )}
+              <div className="flex items-center gap-1">
+                {activityDefinition && (
+                  <span className="text-sm font-medium text-gray-700">
+                    <MonetaryDisplay
+                      amount={activityDefinition.charge_item_definitions.reduce(
+                        (acc: Decimal, curr: ChargeItemDefinitionBase) =>
+                          add(acc, getBasePrice(curr.price_components)),
+                        new Decimal(0),
+                      )}
+                    />
+                  </span>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsOpen(true);
+                  }}
+                  disabled={disabled}
+                >
+                  <Pencil className="h-4 w-4 text-gray-600" />
+                </Button>
+                <DropdownMenu
+                  open={isDropdownOpen}
+                  onOpenChange={setIsDropdownOpen}
+                >
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      disabled={disabled}
+                    >
+                      <MoreVerticalIcon className="h-4 w-4 text-gray-600" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {onAddToTemplate && (
+                      <>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setIsDropdownOpen(false);
+                            onAddToTemplate(serviceRequest);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          {t("add_to_template")}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
+                    {onRemove && (
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setIsDropdownOpen(false);
+                          onRemove();
+                        }}
+                        className="text-red-500 cursor-pointer"
+                      >
+                        {t("remove")}
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
           </div>
         </CollapsibleTrigger>
         <CollapsibleContent>
@@ -375,24 +304,30 @@ function ServiceRequestForm({
                 <Label>
                   {t("priority")} <span className="text-red-500">*</span>
                 </Label>
-                <Select
+                <RadioGroup
                   value={serviceRequest.service_request.priority}
                   onValueChange={(value: Priority) =>
                     onUpdate?.({ priority: value })
                   }
                   disabled={disabled}
+                  className="flex flex-wrap gap-4"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("select_priority")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.values(Priority).map((priority) => (
-                      <SelectItem key={priority} value={priority}>
+                  {Object.values(Priority).map((priority) => (
+                    <div key={priority} className="flex items-center space-x-2">
+                      <RadioGroupItem
+                        value={priority}
+                        id={`priority-${priority}-${index || "preview"}`}
+                        className="h-4 w-4"
+                      />
+                      <Label
+                        htmlFor={`priority-${priority}-${index || "preview"}`}
+                        className="text-sm font-normal cursor-pointer"
+                      >
                         {t(priority)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
                 {questionId && index !== undefined && (
                   <FieldError
                     fieldKey={SERVICE_REQUEST_FIELDS.PRIORITY.key}
@@ -431,8 +366,13 @@ function ServiceRequestForm({
               <div className="space-y-2">
                 <Label>{t("requester")}</Label>
                 <UserSelector
-                  selected={serviceRequest.service_request.requester}
-                  onChange={(user) => onUpdate?.({ requester: user })}
+                  selected={
+                    requester || serviceRequest.service_request.requester
+                  }
+                  onChange={(user) => {
+                    onRequesterChange?.(user);
+                    onUpdate?.({ requester: user });
+                  }}
                   placeholder={t("select_requester")}
                   facilityId={facilityId}
                 />
@@ -462,14 +402,13 @@ export function ServiceRequestQuestion({
   facilityId,
   encounterId,
   errors,
+  questionnaireSlug,
 }: ServiceRequestQuestionProps) {
   const { t } = useTranslation();
   const currentUser = useAuthUser() as CurrentUserRead;
   const [selectedActivityDefinition, setSelectedActivityDefinition] = useState<
     string | null
   >(null);
-  const [previewServiceRequest, setPreviewServiceRequest] =
-    useState<ServiceRequestApplyActivityDefinitionSpec | null>(null);
   const [serviceRequests, setServiceRequests] = useState<
     ServiceRequestApplyActivityDefinitionSpec[]
   >(
@@ -479,6 +418,194 @@ export function ServiceRequestQuestion({
   const [activityDefinitionsMap, setActivityDefinitionsMap] = useState<
     Record<string, ActivityDefinitionReadSpec>
   >({});
+
+  const [serviceRequestToAddToTemplate, setServiceRequestToAddToTemplate] =
+    useState<ServiceRequestApplyActivityDefinitionSpec | null>(null);
+  const [templateSearchQuery, setTemplateSearchQuery] = useState("");
+  const [isCreatingNewTemplate, setIsCreatingNewTemplate] = useState(false);
+  const [newTemplateName, setNewTemplateName] = useState("");
+  const [selectedOrganizations, setSelectedOrganizations] = useState<
+    string[] | null
+  >(null);
+
+  const queryClient = useQueryClient();
+
+  const { data: templatesData, isLoading: isLoadingTemplates } = useQuery({
+    queryKey: [
+      "questionnaire_response_templates",
+      questionnaireSlug,
+      templateSearchQuery,
+    ],
+    queryFn: query.debounced(questionnaireResponseTemplateApi.list, {
+      queryParams: {
+        questionnaire: filterStructuredQuestionnaireSlugs(questionnaireSlug),
+        name: templateSearchQuery || undefined,
+        facility: facilityId,
+        limit: 20,
+      },
+    }),
+    enabled: !!questionnaireSlug && !!serviceRequestToAddToTemplate,
+  });
+
+  const addToTemplateMutation = useMutation({
+    mutationFn: (params: {
+      template: QuestionnaireResponseTemplateReadSpec;
+      serviceRequest: ServiceRequestApplyActivityDefinitionSpec;
+    }) => {
+      const existingServiceRequests =
+        params.template.template_data?.activity_definition || [];
+      const serviceRequestForTemplate = buildServiceRequestForTemplate(
+        params.serviceRequest,
+      );
+
+      return mutate(questionnaireResponseTemplateApi.update, {
+        pathParams: {
+          id: params.template.id!,
+        },
+      })({
+        name: params.template.name,
+        description: params.template.description || "",
+        template_data: {
+          ...params.template.template_data,
+          activity_definition: [
+            ...existingServiceRequests,
+            serviceRequestForTemplate,
+          ],
+        },
+        users: [currentUser.username],
+        facility_organizations: selectedOrganizations || [],
+      });
+    },
+    onSuccess: (_, variables) => {
+      toast.success(
+        t("service_request_added_to_template", {
+          template: variables.template.name,
+        }),
+      );
+      queryClient.invalidateQueries({
+        queryKey: ["questionnaire_response_templates", questionnaireSlug],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["questionnaireResponseTemplates", questionnaireSlug],
+      });
+      setServiceRequestToAddToTemplate(null);
+      setTemplateSearchQuery("");
+    },
+    onError: () => {
+      toast.error(t("failed_to_add_to_template"));
+    },
+  });
+
+  // Mutation for creating a new template with the service request
+  const createTemplateWithServiceRequestMutation = useMutation({
+    mutationFn: (params: {
+      name: string;
+      serviceRequest: ServiceRequestApplyActivityDefinitionSpec;
+    }) => {
+      const serviceRequestForTemplate = buildServiceRequestForTemplate(
+        params.serviceRequest,
+      );
+
+      return mutate(questionnaireResponseTemplateApi.create)({
+        name: params.name,
+        description: "",
+        ...(questionnaireSlug &&
+        questionnaireSlug !== "service_request" &&
+        questionnaireSlug !== "medication_request"
+          ? { questionnaire: questionnaireSlug }
+          : {}),
+        facility: facilityId,
+        template_data: {
+          medication_request: [],
+          activity_definition: [serviceRequestForTemplate],
+        },
+        users: [currentUser.username],
+        facility_organizations: selectedOrganizations || [],
+      });
+    },
+    onSuccess: (_, variables) => {
+      toast.success(
+        t("template_created_with_service_request", {
+          template: variables.name,
+        }),
+      );
+      queryClient.invalidateQueries({
+        queryKey: ["questionnaire_response_templates", questionnaireSlug],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["questionnaireResponseTemplates", questionnaireSlug],
+      });
+      setServiceRequestToAddToTemplate(null);
+      setTemplateSearchQuery("");
+      setIsCreatingNewTemplate(false);
+      setNewTemplateName("");
+    },
+  });
+
+  const handleAddToTemplate = (
+    serviceRequest: ServiceRequestApplyActivityDefinitionSpec,
+  ) => {
+    setServiceRequestToAddToTemplate(serviceRequest);
+    setIsCreatingNewTemplate(false);
+    setNewTemplateName("");
+  };
+
+  const handleCreateNewTemplateWithServiceRequest = () => {
+    if (!serviceRequestToAddToTemplate || !newTemplateName.trim()) return;
+    createTemplateWithServiceRequestMutation.mutate({
+      name: newTemplateName.trim(),
+      serviceRequest: serviceRequestToAddToTemplate,
+    });
+  };
+
+  const handleSelectTemplate = (
+    template: QuestionnaireResponseTemplateReadSpec,
+  ) => {
+    if (!serviceRequestToAddToTemplate) return;
+    addToTemplateMutation.mutate({
+      template,
+      serviceRequest: serviceRequestToAddToTemplate,
+    });
+  };
+
+  const handleRequesterChange = (
+    index: number,
+    user: UserReadMinimal | undefined,
+  ) => {
+    handleUpdateServiceRequest(index, { requester: user || currentUser });
+  };
+
+  const handleApplyRequesterToAll = (user: UserReadMinimal | undefined) => {
+    const newServiceRequests = serviceRequests.map((sr) => ({
+      ...sr,
+      service_request: {
+        ...sr.service_request,
+        requester: user || currentUser,
+      },
+    }));
+
+    setServiceRequests(newServiceRequests);
+    updateQuestionnaireResponseCB(
+      [{ type: "service_request", value: newServiceRequests }],
+      questionnaireResponse.question_id,
+    );
+  };
+
+  const handleClearAllRequesters = () => {
+    const newServiceRequests = serviceRequests.map((sr) => ({
+      ...sr,
+      service_request: {
+        ...sr.service_request,
+        requester: currentUser,
+      },
+    }));
+
+    setServiceRequests(newServiceRequests);
+    updateQuestionnaireResponseCB(
+      [{ type: "service_request", value: newServiceRequests }],
+      questionnaireResponse.question_id,
+    );
+  };
 
   const {
     data: selectedActivityDefinitionData,
@@ -519,12 +646,21 @@ export function ServiceRequestQuestion({
         encounter: encounterId,
       };
 
-      setPreviewServiceRequest(newServiceRequest);
-
+      setServiceRequests([...serviceRequests, newServiceRequest]);
+      updateQuestionnaireResponseCB(
+        [
+          {
+            type: "service_request",
+            value: [...serviceRequests, newServiceRequest],
+          },
+        ],
+        questionnaireResponse.question_id,
+      );
       setActivityDefinitionsMap((prev) => ({
         ...prev,
         [selectedActivityDefinition]: selectedActivityDefinitionData,
       }));
+      setSelectedActivityDefinition(null);
     }
   }, [
     selectedActivityDefinition,
@@ -532,23 +668,6 @@ export function ServiceRequestQuestion({
     encounterId,
     currentUser,
   ]);
-
-  const handleAddServiceRequest = () => {
-    if (!previewServiceRequest) return;
-
-    setServiceRequests([...serviceRequests, previewServiceRequest]);
-    updateQuestionnaireResponseCB(
-      [
-        {
-          type: "service_request",
-          value: [...serviceRequests, previewServiceRequest],
-        },
-      ],
-      questionnaireResponse.question_id,
-    );
-    setPreviewServiceRequest(null);
-    setSelectedActivityDefinition(null);
-  };
 
   const handleRemoveServiceRequest = (index: number) => {
     const newServiceRequests = serviceRequests.filter(
@@ -589,22 +708,6 @@ export function ServiceRequestQuestion({
     );
   };
 
-  const handlePreviewServiceRequestUpdate = (
-    updates: Partial<ServiceRequestReadSpec>,
-  ) => {
-    if (!previewServiceRequest) return;
-
-    const { locations: _locations, ...otherUpdates } = updates;
-
-    setPreviewServiceRequest({
-      ...previewServiceRequest,
-      service_request: {
-        ...previewServiceRequest.service_request,
-        ...otherUpdates,
-      },
-    });
-  };
-
   // Effect to sync service requests with questionnaire response
   useEffect(() => {
     const initialServiceRequests =
@@ -629,15 +732,222 @@ export function ServiceRequestQuestion({
     setSelectedActivityDefinition(def?.slug || null);
   };
 
+  // Handler for adding a single service request from a template
+  const handleAddSingleServiceRequest = async (
+    templateSR: ActivityDefinitionTemplateSpec,
+  ) => {
+    try {
+      const activityDefinitionData = await query(
+        activityDefinitionApi.retrieveActivityDefinition,
+        {
+          pathParams: {
+            facilityId: facilityId,
+            activityDefinitionSlug: templateSR.slug,
+          },
+        },
+      )({ signal: new AbortController().signal });
+
+      // Store the activity definition in the map
+      setActivityDefinitionsMap((prev) => ({
+        ...prev,
+        [templateSR.slug]: activityDefinitionData,
+      }));
+
+      const newServiceRequest: ServiceRequestApplyActivityDefinitionSpec = {
+        service_request: {
+          title:
+            templateSR.service_request?.title || activityDefinitionData.title,
+          status: templateSR.service_request?.status || Status.active,
+          intent: templateSR.service_request?.intent || Intent.order,
+          priority: templateSR.service_request?.priority || Priority.routine,
+          category:
+            templateSR.service_request?.category ||
+            activityDefinitionData.classification,
+          do_not_perform: templateSR.service_request?.do_not_perform ?? false,
+          note: templateSR.service_request?.note || null,
+          code: templateSR.service_request?.code || activityDefinitionData.code,
+          body_site:
+            templateSR.service_request?.body_site ||
+            activityDefinitionData.body_site,
+          occurance: templateSR.service_request?.occurance || null,
+          patient_instruction:
+            templateSR.service_request?.patient_instruction || null,
+          requester: currentUser,
+          locations:
+            templateSR.service_request?.locations ||
+            activityDefinitionData.locations?.map((location) => location.id) ||
+            [],
+        },
+        activity_definition: templateSR.slug,
+        encounter: encounterId,
+      };
+
+      const newServiceRequests = [...serviceRequests, newServiceRequest];
+      setServiceRequests(newServiceRequests);
+      updateQuestionnaireResponseCB(
+        [{ type: "service_request", value: newServiceRequests }],
+        questionnaireResponse.question_id,
+      );
+    } catch {
+      toast.error(t("failed_to_add_service_request"));
+    }
+  };
+
+  const handleApplyTemplate = async (
+    template: QuestionnaireResponseTemplateReadSpec,
+  ) => {
+    const templateServiceRequests = template.template_data?.activity_definition;
+    if (!templateServiceRequests?.length) {
+      toast.info(t("template_has_no_service_requests"));
+      throw new Error("Template has no service requests");
+    }
+
+    try {
+      // Fetch activity definitions for each service request in the template
+      const newServiceRequestsPromises = templateServiceRequests.map(
+        async (templateSR) => {
+          try {
+            const activityDefinitionData = await query(
+              activityDefinitionApi.retrieveActivityDefinition,
+              {
+                pathParams: {
+                  facilityId: facilityId,
+                  activityDefinitionSlug: templateSR.slug,
+                },
+              },
+            )({ signal: new AbortController().signal });
+
+            // Store the activity definition in the map
+            setActivityDefinitionsMap((prev) => ({
+              ...prev,
+              [templateSR.slug]: activityDefinitionData,
+            }));
+
+            // Create the service request, merging template data with activity definition
+            const newServiceRequest: ServiceRequestApplyActivityDefinitionSpec =
+              {
+                service_request: {
+                  title:
+                    templateSR.service_request?.title ||
+                    activityDefinitionData.title,
+                  status: templateSR.service_request?.status || Status.active,
+                  intent: templateSR.service_request?.intent || Intent.order,
+                  priority:
+                    templateSR.service_request?.priority || Priority.routine,
+                  category:
+                    templateSR.service_request?.category ||
+                    activityDefinitionData.classification,
+                  do_not_perform:
+                    templateSR.service_request?.do_not_perform ?? false,
+                  note: templateSR.service_request?.note || null,
+                  code:
+                    templateSR.service_request?.code ||
+                    activityDefinitionData.code,
+                  body_site:
+                    templateSR.service_request?.body_site ||
+                    activityDefinitionData.body_site,
+                  occurance: templateSR.service_request?.occurance || null,
+                  patient_instruction:
+                    templateSR.service_request?.patient_instruction || null,
+                  requester: currentUser,
+                  locations:
+                    templateSR.service_request?.locations ||
+                    activityDefinitionData.locations?.map(
+                      (location) => location.id,
+                    ) ||
+                    [],
+                },
+                activity_definition: templateSR.slug,
+                encounter: encounterId,
+              };
+
+            return newServiceRequest;
+          } catch {
+            // If fetching fails, skip this service request but continue with others
+            return null;
+          }
+        },
+      );
+
+      const results = await Promise.all(newServiceRequestsPromises);
+      const validServiceRequests = results.filter(
+        (sr): sr is ServiceRequestApplyActivityDefinitionSpec => sr !== null,
+      );
+
+      if (validServiceRequests.length === 0) {
+        toast.error(t("failed_to_apply_template"));
+        throw new Error("Failed to apply template - no valid service requests");
+      }
+
+      const newServiceRequests = [...serviceRequests, ...validServiceRequests];
+      setServiceRequests(newServiceRequests);
+      updateQuestionnaireResponseCB(
+        [{ type: "service_request", value: newServiceRequests }],
+        questionnaireResponse.question_id,
+      );
+
+      // Show warning if some service requests failed
+      if (validServiceRequests.length < templateServiceRequests.length) {
+        toast.warning(
+          t("template_partially_applied", {
+            applied: validServiceRequests.length,
+            total: templateServiceRequests.length,
+          }),
+        );
+      } else {
+        toast.success(
+          t("template_applied_service_requests", {
+            count: validServiceRequests.length,
+            name: template.name,
+          }),
+        );
+      }
+    } catch (error) {
+      toast.error(t("failed_to_apply_template"));
+      throw error;
+    }
+  };
+
   return (
     <div className="space-y-4">
+      <AddToTemplateDialog
+        open={!!serviceRequestToAddToTemplate}
+        onOpenChange={(open) => {
+          if (!open) {
+            setServiceRequestToAddToTemplate(null);
+            setTemplateSearchQuery("");
+            setIsCreatingNewTemplate(false);
+            setNewTemplateName("");
+            setSelectedOrganizations(null);
+          }
+        }}
+        item={serviceRequestToAddToTemplate}
+        itemDisplayName={(sr) => sr.service_request.title}
+        itemType="service_request"
+        isCreatingNewTemplate={isCreatingNewTemplate}
+        setIsCreatingNewTemplate={setIsCreatingNewTemplate}
+        newTemplateName={newTemplateName}
+        setNewTemplateName={setNewTemplateName}
+        templateSearchQuery={templateSearchQuery}
+        setTemplateSearchQuery={setTemplateSearchQuery}
+        templatesData={templatesData}
+        isLoadingTemplates={isLoadingTemplates}
+        onCreateNewTemplate={handleCreateNewTemplateWithServiceRequest}
+        onSelectTemplate={handleSelectTemplate}
+        isCreating={createTemplateWithServiceRequestMutation.isPending}
+        isAdding={addToTemplateMutation.isPending}
+        facilityId={facilityId}
+        selectedOrganizations={selectedOrganizations}
+        onSelectedOrganizationsChange={setSelectedOrganizations}
+      />
+
       {serviceRequests.map((serviceRequest, index) => (
         <ServiceRequestForm
           key={`${serviceRequest.service_request.code.code}-${index}`}
           serviceRequest={serviceRequest}
           onUpdate={(updates) => handleUpdateServiceRequest(index, updates)}
           onRemove={() => handleRemoveServiceRequest(index)}
-          onAdd={handleAddServiceRequest}
+          onAddToTemplate={questionnaireSlug ? handleAddToTemplate : undefined}
           disabled={disabled}
           errors={errors}
           questionId={questionnaireResponse.question_id}
@@ -646,6 +956,8 @@ export function ServiceRequestQuestion({
           activityDefinition={
             activityDefinitionsMap[serviceRequest.activity_definition]
           }
+          requester={serviceRequest.service_request.requester}
+          onRequesterChange={(user) => handleRequesterChange(index, user)}
         />
       ))}
 
@@ -669,37 +981,77 @@ export function ServiceRequestQuestion({
         </div>
       )}
 
-      {previewServiceRequest && !isLoadingSelectedAD && (
-        <ServiceRequestForm
-          serviceRequest={previewServiceRequest}
-          activityDefinition={selectedActivityDefinitionData}
-          onUpdate={handlePreviewServiceRequestUpdate}
-          onRemove={() => {
-            setPreviewServiceRequest(null);
-            setSelectedActivityDefinition(null);
-          }}
-          onAdd={handleAddServiceRequest}
-          disabled={disabled}
-          isPreview
-          facilityId={facilityId}
-        />
-      )}
-
-      <div className="space-y-2 w-full">
-        <ResourceDefinitionCategoryPicker<ActivityDefinitionReadSpec>
-          facilityId={facilityId}
-          value={selectedActivityDefinitionData || undefined}
-          onValueChange={handleActivityDefinitionSelect}
-          placeholder={t("select_activity_definition")}
-          disabled={disabled}
-          className="w-full"
-          resourceType={ResourceCategoryResourceType.activity_definition}
-          listDefinitions={{
-            queryFn: activityDefinitionApi.listActivityDefinition,
-            pathParams: { facilityId },
-          }}
-          translationBaseKey="activity_definition"
-        />
+      <div className="flex flex-wrap items-center gap-2 w-full">
+        <div className="flex-1 min-w-[200px]">
+          <ResourceDefinitionCategoryPicker<ActivityDefinitionReadSpec>
+            facilityId={facilityId}
+            value={selectedActivityDefinitionData || undefined}
+            onValueChange={handleActivityDefinitionSelect}
+            placeholder={t("select_activity_definition")}
+            disabled={disabled}
+            className="w-full"
+            resourceType={ResourceCategoryResourceType.activity_definition}
+            listDefinitions={{
+              queryFn: activityDefinitionApi.listActivityDefinition,
+              pathParams: { facilityId },
+              queryParams: { status: Status.active },
+            }}
+            translationBaseKey="activity_definition"
+          />
+        </div>
+        {serviceRequests.length > 1 && (
+          <div className="flex items-center gap-2 border border-gray-400 rounded-md">
+            <span className="text-xs font-medium text-gray-800 whitespace-nowrap pl-3">
+              {t("requester")}:
+            </span>
+            <UserSelector
+              selected={undefined}
+              onChange={handleApplyRequesterToAll}
+              facilityId={facilityId}
+              trigger={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-3 text-xs"
+                  disabled={disabled}
+                >
+                  {t("apply_to_all")}
+                  <ChevronDown className="size-3" />
+                </Button>
+              }
+              contentAlign="center"
+              contentClassName="w-80"
+              onClear={handleClearAllRequesters}
+            />
+          </div>
+        )}
+        {questionnaireSlug && (
+          <ManageResponseTemplatesSheet
+            questionnaireSlug={questionnaireSlug}
+            facilityId={facilityId}
+            onTemplateSelect={handleApplyTemplate}
+            onActivityDefinitionSelect={handleAddSingleServiceRequest}
+            disabled={disabled}
+            key_filter="activity_definition"
+            currentActivityDefinitions={serviceRequests.map((sr) => ({
+              slug: sr.activity_definition,
+              service_request: {
+                title: sr.service_request.title,
+                status: sr.service_request.status,
+                intent: sr.service_request.intent,
+                priority: sr.service_request.priority,
+                category: sr.service_request.category,
+                code: sr.service_request.code,
+                do_not_perform: sr.service_request.do_not_perform,
+                body_site: sr.service_request.body_site,
+                note: sr.service_request.note,
+                patient_instruction: sr.service_request.patient_instruction,
+                occurance: sr.service_request.occurance,
+                locations: sr.service_request.locations,
+              },
+            }))}
+          />
+        )}
       </div>
     </div>
   );

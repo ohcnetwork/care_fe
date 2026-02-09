@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { PatientListRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { LocationDetail } from "@/types/location/location";
 import { Organization } from "@/types/organization/organization";
@@ -33,6 +34,7 @@ export interface DeliveryOrderCreate extends DeliveryOrder {
   origin?: string;
   destination: string;
   extensions: Record<string, unknown>;
+  patient?: string;
 }
 
 export interface DeliveryOrderUpdate extends DeliveryOrder {
@@ -52,4 +54,6 @@ export interface DeliveryOrderRetrieve extends DeliveryOrder {
   supplier?: Organization;
   tags: TagConfig[];
   extensions?: Record<string, unknown>;
+  patient?: PatientListRead;
+  patient_invoice_id?: string;
 }

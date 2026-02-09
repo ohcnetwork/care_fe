@@ -47,6 +47,7 @@ export function ChargeItemDefinitionsList({
         onCreateItem={onCreateItem}
         createItemLabel={t("add_definition")}
         createItemIcon="l-plus"
+        showMonetaryComponentsOption
         itemSearchConfig={{
           listItems: {
             queryFn: chargeItemDefinitionApi.listChargeItemDefinition,

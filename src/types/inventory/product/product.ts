@@ -22,6 +22,7 @@ export interface ProductBase {
   status: ProductStatusOptions;
   batch?: ProductBatch;
   expiration_date?: string;
+  standard_pack_size?: number;
 }
 
 export interface ProductCreate extends Omit<ProductBase, "id"> {

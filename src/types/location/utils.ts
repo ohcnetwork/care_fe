@@ -17,3 +17,22 @@ export function buildLocationHierarchy(location: LocationRead) {
 
   return hierarchy;
 }
+
+/**
+ * Gets a formatted path string for a location showing its full hierarchy
+ * @param location - The location object to get the path for
+ * @param separator - The separator to use between path segments (default: " → ")
+ * @returns Formatted path string from root to leaf (e.g., "Building A → Floor 1 → Room 101")
+ */
+export function getLocationPath(
+  location: Pick<LocationRead, "name" | "parent">,
+  separator = " → ",
+): string {
+  const path = [location.name];
+  let current = location.parent;
+  while (current && current.id) {
+    path.unshift(current.name);
+    current = current.parent;
+  }
+  return path.length > 1 ? path.join(separator) : path[0] || "";
+}

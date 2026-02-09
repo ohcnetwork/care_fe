@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { BatchSuccessResponse } from "@/types/base/batch/batch";
-import { PatientListRead } from "@/types/emr/patient/patient";
+import { PatientListRead, PatientRead } from "@/types/emr/patient/patient";
 import { LocationRead } from "@/types/location/location";
 
 export interface DispenseOrderBatchResponse {
@@ -32,6 +32,13 @@ export interface DispenseOrderBase {
 }
 
 export interface DispenseOrderRead extends DispenseOrderBase {
+  patient: PatientRead;
+  location: LocationRead;
+  created_date: string;
+  modified_date: string;
+}
+
+export interface DispenseOrderList extends DispenseOrderBase {
   patient: PatientListRead;
   location: LocationRead;
   created_date: string;

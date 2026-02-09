@@ -1,35 +1,43 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node
+// For format details, see https://aka.ms/devcontainer.json
 {
-  "name": "CARE Frontend Development",
+  "name": "CARE Frontend",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
   "features": {
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
-      "moby": true,
-      "installDockerBuildx": true,
-      "version": "latest",
-      "dockerDashComposeVersion": "v2"
-    },
-    "ghcr.io/devcontainers/features/git:1": {
-      "ppa": true,
-      "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/github-cli:1": {
-      "installDirectlyFromGitHubRelease": true,
-      "version": "latest"
-    }
+    "ghcr.io/devcontainers/features/github-cli:1": {}
   },
+
+  // Lifecycle commands — all run in bash (Bookworm default)
+  "waitFor": "onCreateCommand",
+  "onCreateCommand": "npm install --no-audit --no-fund && npm run postinstall && npm run setup",
+  "postCreateCommand": "echo '✅ CARE Frontend ready — run: npm run dev'",
+  "postAttachCommand": {
+    "dev-server": "npm run dev"
+  },
+
+  "containerEnv": {
+    "REACT_CARE_API_URL": "https://careapi.ohc.network",
+    "NODE_OPTIONS": "--max-old-space-size=4096"
+  },
+  "remoteEnv": {
+    "REACT_CARE_API_URL": "https://careapi.ohc.network"
+  },
+
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "8gb",
+    "storage": "32gb"
+  },
+
   "customizations": {
     "vscode": {
       "settings": {
-        "typescript.suggest.autoImports": true,
-        "typescript.updateImportsOnFileMove.enabled": "always",
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.codeActionsOnSave": {
-          "source.fixAll.eslint": "explicit",
-          "source.organizeImports": "explicit"
+          "source.fixAll.eslint": "explicit"
         },
+        "typescript.suggest.autoImports": true,
+        "typescript.updateImportsOnFileMove.enabled": "always",
         "eslint.validate": [
           "javascript",
           "javascriptreact",
@@ -37,93 +45,31 @@
           "typescriptreact"
         ],
         "tailwindCSS.includeLanguages": {
-          "typescript": "javascript",
           "typescriptreact": "javascript"
-        },
-        "emmet.includeLanguages": {
-          "typescript": "html",
-          "typescriptreact": "html"
         },
         "files.associations": {
           "*.css": "tailwindcss"
         },
-        "editor.quickSuggestions": {
-          "strings": true
-        },
-        "css.validate": false,
-        "less.validate": false,
-        "scss.validate": false,
-        "terminal.integrated.defaultProfile.linux": "bash",
-        "git.autofetch": true,
-        "git.enableSmartCommit": true,
-        "explorer.confirmDelete": false,
-        "explorer.confirmDragAndDrop": false
+        "terminal.integrated.defaultProfile.linux": "bash"
       },
       "extensions": [
         "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
         "bradlc.vscode-tailwindcss",
         "yoavbls.pretty-ts-errors",
-        "dbaeumer.vscode-eslint",
-        "ms-vscode.vscode-typescript-next",
-        "ms-vscode.vscode-json",
-        "formulahendry.auto-rename-tag",
-        "christian-kohler.path-intellisense",
         "usernamehw.errorlens",
-        "gruntfuggly.todo-tree",
-        "ms-playwright.playwright",
+        "christian-kohler.path-intellisense",
         "github.vscode-pull-request-github",
-        "eamodio.gitlens",
-        "streetsidesoftware.code-spell-checker",
-        "zignd.html-css-class-completion",
-        "ms-vscode.vscode-html-language-features",
-        "ms-vscode.vscode-css-language-features",
-        "ms-vscode.vscode-emmet",
-        "wix.vscode-import-cost",
-        "christian-kohler.npm-intellisense"
+        "eamodio.gitlens"
       ]
     }
   },
-  "hostRequirements": {
-    "cpus": 4,
-    "memory": "16gb",
-    "storage": "32gb"
-  },
-  "containerEnv": {
-    "REACT_CARE_API_URL": "https://careapi.ohc.network",
-    "NODE_OPTIONS": "--max-old-space-size=4096",
-    "npm_config_cache": "/tmp/.npm"
-  },
-  "remoteEnv": {
-    "REACT_CARE_API_URL": "https://careapi.ohc.network"
-  },
-    "waitFor": "onCreateCommand",
-    "onCreateCommand": "set -euo pipefail; \
-  npm install --no-audit --no-fund; \
-  npm exec -y tsx -- --version >/dev/null 2>&1 || true; \
-  npm run postinstall; \
-  npm run setup",
-  "postCreateCommand": "echo 'CARE Frontend development environment is ready! Run npm run dev to start the development server.'",
-  "postAttachCommand": {
-    "server": "npm run dev"
-  },
+
   "portsAttributes": {
     "4000": {
-      "label": "CARE Frontend Application",
+      "label": "CARE Frontend",
       "onAutoForward": "openPreview"
-    },
-    "4001": {
-      "label": "CARE Frontend Application (Alt)",
-      "onAutoForward": "openPreview"
-    },
-    "9000": {
-      "label": "CARE Backend API (if running locally)",
-      "onAutoForward": "silent"
     }
   },
-  "forwardPorts": [
-    4000,
-    4001,
-    9000
-  ],
-  "shutdownAction": "stopCompose"
+  "forwardPorts": [4000]
 }

@@ -67,6 +67,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
@@ -76,6 +77,15 @@ import {
   extractDispenseOrderFromBatchResponse,
 } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
+import {
+  isGreaterThan,
+  isLessThanOrEqual,
+  isZero,
+  round,
+  zodDecimal,
+} from "@/Utils/decimal";
+import { isLotAllowedForDispensing } from "@/Utils/inventory";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 interface SelectedLocation {
   id: string;
@@ -95,10 +105,10 @@ interface Props {
 interface FormItemType {
   reference_id: string;
   productKnowledge: ProductKnowledgeBase;
-  quantity: number;
+  quantity: string;
   lots: Array<{
     selectedInventoryId: string;
-    quantity: number;
+    quantity: string;
   }>;
 }
 
@@ -108,11 +118,11 @@ const createFormSchema = () =>
       z.object({
         reference_id: z.string().uuid(),
         productKnowledge: z.any(),
-        quantity: z.number().min(1),
+        quantity: zodDecimal({ min: 1 }),
         lots: z.array(
           z.object({
             selectedInventoryId: z.string(),
-            quantity: z.number().min(1),
+            quantity: zodDecimal({ min: 1 }),
           }),
         ),
       }),
@@ -170,6 +180,8 @@ export default function DispenseDrawer({
     name: "items",
   });
 
+  useShortcutSubContext("patient:search:-global", { ignoreInputFields: true });
+
   useEffect(() => {
     form.clearErrors();
     form.trigger();
@@ -219,7 +231,7 @@ export default function DispenseDrawer({
     fetchMissingInventories();
   }, [productKnowledgeInventoriesMap, facilityId, currentLocation.id]);
 
-  // Auto-select single lot if only one inventory is available
+  // Auto-select first valid (non-expired) lot by default
   useEffect(() => {
     fields.forEach((field, index) => {
       const inventories =
@@ -228,15 +240,21 @@ export default function DispenseDrawer({
 
       if (
         inventories !== undefined &&
-        inventories?.length === 1 &&
+        inventories?.length &&
         !currentLots.some((lot) => lot.selectedInventoryId)
       ) {
-        form.setValue(`items.${index}.lots`, [
-          {
-            selectedInventoryId: inventories[0].id,
-            quantity: 1,
-          },
-        ]);
+        const validLot = inventories.find((inv) =>
+          isLotAllowedForDispensing(inv.product.expiration_date),
+        );
+
+        if (validLot) {
+          form.setValue(`items.${index}.lots`, [
+            {
+              selectedInventoryId: validLot.id,
+              quantity: "1",
+            },
+          ]);
+        }
       }
     });
   }, [productKnowledgeInventoriesMap, fields, form]);
@@ -368,7 +386,7 @@ export default function DispenseDrawer({
 
       const itemsWithZeroQuantity = itemsInStock.filter((item) => {
         return item.lots.some(
-          (lot) => lot.selectedInventoryId.length > 0 && lot.quantity === 0,
+          (lot) => lot.selectedInventoryId.length > 0 && isZero(lot.quantity),
         );
       });
 
@@ -389,18 +407,19 @@ export default function DispenseDrawer({
           productKnowledgeInventoriesMap[item.productKnowledge.id] || [];
 
         for (const lot of item.lots) {
-          if (!lot.selectedInventoryId || lot.quantity <= 0) continue;
+          if (!lot.selectedInventoryId || isLessThanOrEqual(lot.quantity, 0))
+            continue;
 
           const inventory = inventoryList.find(
             (inv) => inv.id === lot.selectedInventoryId,
           );
-          if (inventory && lot.quantity > inventory.net_content) {
+          if (inventory && isGreaterThan(lot.quantity, inventory.net_content)) {
             toast.error(
               t("quantity_exceeds_available_stock", {
                 item: item.productKnowledge.name,
                 lot: inventory.product.batch?.lot_number || "N/A",
                 requested: lot.quantity,
-                available: inventory.net_content,
+                available: round(inventory.net_content),
               }),
             );
             hasErrors = true;
@@ -453,7 +472,7 @@ export default function DispenseDrawer({
             authorizing_request: null,
             item: selectedInventory.id,
             quantity: lot.quantity,
-            days_supply: 1,
+            days_supply: "1",
             fully_dispensed: true,
             create_dispense_order: {
               alternate_identifier: alternateIdentifier,
@@ -528,7 +547,7 @@ export default function DispenseDrawer({
       >
         <div className="sticky top-0 z-10 border-b bg-gray-50 border-gray-200">
           <div className="absolute inset-x-0 top-0 h-2 w-16 mx-auto rounded-3xl bg-gray-300 mt-2" />
-          <SheetHeader className="max-w-4xl mx-auto w-full py-5 flex flex-row justify-between items-center pt-7">
+          <SheetHeader className="max-w-6xl mx-auto w-full py-5 flex flex-row justify-between items-center pt-7">
             <SheetTitle className="text-xl font-semibold m-0">
               {t("dispense")}
             </SheetTitle>
@@ -541,7 +560,7 @@ export default function DispenseDrawer({
             </Button>
           </SheetHeader>
         </div>
-        <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full min-h-0 -m-4">
+        <div className="flex-1 flex flex-col max-w-6xl mx-auto w-full min-h-0 -m-4">
           {/* Selected Location */}
           <div className="my-4 px-3 md:mr-4">
             <Button
@@ -574,7 +593,7 @@ export default function DispenseDrawer({
 
           <div className="flex-1 overflow-y-auto sm:pr-4 px-3">
             <Form {...form}>
-              <form>
+              <form onSubmit={(e) => e.preventDefault()}>
                 {fields.length === 0 ? (
                   <EmptyState
                     icon={
@@ -592,11 +611,11 @@ export default function DispenseDrawer({
                           append({
                             reference_id: crypto.randomUUID(),
                             productKnowledge: product,
-                            quantity: 1,
+                            quantity: "1",
                             lots: [
                               {
                                 selectedInventoryId: "",
-                                quantity: 1,
+                                quantity: "1",
                               },
                             ],
                           });
@@ -740,15 +759,8 @@ export default function DispenseDrawer({
                                                         type="number"
                                                         min={0}
                                                         {...formField}
-                                                        onChange={(e) => {
-                                                          formField.onChange(
-                                                            parseInt(
-                                                              e.target.value,
-                                                            ) || 0,
-                                                          );
-                                                        }}
                                                         className="border-gray-300 border rounded-md w-24"
-                                                        placeholder="0"
+                                                        autoFocus
                                                       />
                                                     </FormControl>
                                                     <FormMessage />
@@ -861,6 +873,7 @@ export default function DispenseDrawer({
                                   <Button
                                     variant="ghost"
                                     size="icon"
+                                    type="button"
                                     onClick={() => remove(index)}
                                     className="hover:text-red-600 hover:bg-white"
                                     aria-label={t("remove_item", {
@@ -885,11 +898,11 @@ export default function DispenseDrawer({
                           append({
                             reference_id: crypto.randomUUID(),
                             productKnowledge: product,
-                            quantity: 1,
+                            quantity: "1",
                             lots: [
                               {
                                 selectedInventoryId: "",
-                                quantity: 1,
+                                quantity: "1",
                               },
                             ],
                           });
@@ -912,7 +925,7 @@ export default function DispenseDrawer({
         {/* Footer */}
         {fields.length === 0 ? null : (
           <div className="sticky bottom-0 py-4 bg-white border-t px-4">
-            <div className="max-w-4xl mx-auto w-full flex justify-between items-center">
+            <div className="max-w-6xl mx-auto w-full flex justify-between items-center">
               <div className="text-xs text-gray-950 font-medium italic">
                 {t("selected_items_count", {
                   count: itemsCount,
@@ -933,6 +946,7 @@ export default function DispenseDrawer({
                 >
                   <Check className="size-4" />
                   {isPending ? t("dispensing") : t("confirm_dispense")}
+                  <ShortcutBadge actionId="submit-action" />
                 </Button>
               </div>
             </div>

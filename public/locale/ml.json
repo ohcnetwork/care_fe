@@ -2594,7 +2594,6 @@
   "start_dose": "ആരംഭ ഡോസ്",
   "start_new_clinical_encounter": "ഒരു പുതിയ ക്ലിനിക്കൽ എൻകൗണ്ടർ ആരംഭിക്കുക",
   "start_time": "ആരംഭ സമയം",
-  "start_time_before_authored_error": "ആരംഭ സമയം മരുന്ന് നിർദ്ദേശിച്ചതിന് മുമ്പാകരുത്",
   "start_time_future_error": "ആരംഭ സമയം ഭാവിയിൽ ആയിരിക്കരുത്",
   "start_time_must_be_before_end_time": "ആരംഭ സമയം അവസാന സമയത്തിനു മുമ്പാകണം",
   "start_time_required": "ആരംഭ സമയം ആവശ്യമാണ്",

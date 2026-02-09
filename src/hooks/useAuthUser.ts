@@ -20,7 +20,6 @@ export interface AuthContextType {
 }
 
 export const AuthUserContext = createContext<AuthContextType | null>(null);
-window.AuthUserContext = AuthUserContext;
 
 export const useAuthContext = () => {
   const ctx = useContext(AuthUserContext);
