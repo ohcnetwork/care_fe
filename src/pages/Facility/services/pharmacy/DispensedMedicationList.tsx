@@ -1255,11 +1255,11 @@ export default function DispensedMedicationList({
       {/* Left Panel - Medications */}
       <div className="lg:col-span-3 space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <h2 className="text-lg font-semibold text-gray-900">
             {t("medications")}
           </h2>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Button variant="outline" size="sm" asChild>
               <Link
                 href={`/facility/${facilityId}/locations/${locationId}/medication_requests/?patient_external_id=${patient.id}&patient_name=${encodeURIComponent(patient.name || "")}`}
