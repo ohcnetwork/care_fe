@@ -1616,29 +1616,124 @@ export function InvoiceShow({
 
         <AlertDialog
           open={activePaymentsDialogOpen}
-          onOpenChange={(open) => {
-            setActivePaymentsDialogOpen(open);
-            if (!open) {
-              setTimeout(() => setSelectedStatus(null), 150);
-            }
-          }}
+          onOpenChange={setActivePaymentsDialogOpen}
         >
-          <AlertDialogContent>
+          <AlertDialogContent className="max-w-lg">
             <AlertDialogHeader>
               <AlertDialogTitle>
                 {selectedStatus === InvoiceStatus.entered_in_error
-                  ? t("cannot_mark_as_entered_in_error")
-                  : t("cannot_cancel_invoice")}
+                  ? t("mark_as_entered_in_error_warning")
+                  : t("cancel_invoice_warning")}
               </AlertDialogTitle>
-              <AlertDialogDescription>
-                {t("invoice_has_active_payments_or_credit_notes")}
+              <AlertDialogDescription asChild>
+                <div className="space-y-4">
+                  <p>
+                    {t("invoice_has_active_payments_or_credit_notes_warning")}
+                  </p>
+
+                  {/* Active Payments Summary */}
+                  {invoice?.payments?.filter(
+                    (p) => p.status === PaymentReconciliationStatus.active,
+                  ).length > 0 && (
+                    <div className="bg-gray-50 border border-gray-200 rounded-md p-3 space-y-2">
+                      <div className="text-sm font-medium text-gray-700">
+                        {t("active_payments")}
+                      </div>
+                      {invoice.payments
+                        .filter(
+                          (p) =>
+                            p.status === PaymentReconciliationStatus.active,
+                        )
+                        .map((payment, index) => (
+                          <div
+                            key={payment.id}
+                            className="flex justify-between text-sm border-t border-gray-100 pt-1"
+                          >
+                            <span className="text-gray-600">
+                              {index + 1}.{" "}
+                              {
+                                PAYMENT_RECONCILIATION_METHOD_MAP[
+                                  payment.method
+                                ]
+                              }
+                              {payment.reference_number &&
+                                ` (${payment.reference_number})`}
+                            </span>
+                            <span className="font-medium text-gray-900">
+                              <MonetaryDisplay amount={payment.amount} />
+                            </span>
+                          </div>
+                        ))}
+                      <div className="flex justify-between text-sm border-t border-gray-200 pt-2 font-medium">
+                        <span className="text-gray-700">{t("total")}</span>
+                        <span className="text-green-600">
+                          <MonetaryDisplay amount={invoice.total_payments} />
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Active Credit Notes Summary */}
+                  {invoice?.credit_notes?.filter(
+                    (p) => p.status === PaymentReconciliationStatus.active,
+                  ).length > 0 && (
+                    <div className="bg-gray-50 border border-gray-200 rounded-md p-3 space-y-2">
+                      <div className="text-sm font-medium text-gray-700">
+                        {t("active_credit_notes")}
+                      </div>
+                      {invoice.credit_notes
+                        .filter(
+                          (p) =>
+                            p.status === PaymentReconciliationStatus.active,
+                        )
+                        .map((creditNote, index) => (
+                          <div
+                            key={creditNote.id}
+                            className="flex justify-between text-sm border-t border-gray-100 pt-1"
+                          >
+                            <span className="text-gray-600">
+                              {index + 1}.{" "}
+                              {
+                                PAYMENT_RECONCILIATION_METHOD_MAP[
+                                  creditNote.method
+                                ]
+                              }
+                              {creditNote.reference_number &&
+                                ` (${creditNote.reference_number})`}
+                            </span>
+                            <span className="font-medium text-gray-900">
+                              <MonetaryDisplay amount={creditNote.amount} />
+                            </span>
+                          </div>
+                        ))}
+                      <div className="flex justify-between text-sm border-t border-gray-200 pt-2 font-medium">
+                        <span className="text-gray-700">{t("total")}</span>
+                        <span className="text-red-600">
+                          <MonetaryDisplay
+                            amount={invoice.total_credit_notes}
+                          />
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>
-                {t("close")}
+              <AlertDialogCancel onClick={() => setSelectedStatus(null)}>
+                {t("cancel")}
                 <ShortcutBadge actionId="cancel-action" />
               </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  setActivePaymentsDialogOpen(false);
+                  setReasonDialogOpen(true);
+                }}
+                className={cn(buttonVariants({ variant: "destructive" }))}
+              >
+                {t("proceed")}
+                <ShortcutBadge actionId="submit-action" />
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
