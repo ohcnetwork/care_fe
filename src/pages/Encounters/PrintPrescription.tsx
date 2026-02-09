@@ -6,7 +6,6 @@ import { PrescriptionPreview } from "@/components/Prescription/PrescriptionPrevi
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
@@ -31,30 +30,15 @@ export const PrintPrescription = ({
 }: PrintPrescriptionProps) => {
   const { t } = useTranslation();
 
-  const { data: dispenseOrder, isLoading: isLoadingDispenseOrder } = useQuery({
-    queryKey: ["dispenseOrder", facilityId, dispenseOrderId],
-    queryFn: query(dispenseOrderApi.get, {
-      pathParams: { facilityId, id: dispenseOrderId! },
-    }),
-    enabled: !!dispenseOrderId && !!facilityId,
-  });
-
-  const resolvedPatientId = patientId ?? dispenseOrder?.patient?.id;
-
   const { data: encounterPrescriptions, isLoading: isLoadingEncounter } =
     useQuery({
-      queryKey: [
-        "prescriptions-list",
-        resolvedPatientId,
-        encounterId,
-        facilityId,
-      ],
+      queryKey: ["prescriptions-list", patientId, encounterId, facilityId],
       queryFn: query.paginated(prescriptionApi.list, {
-        pathParams: { patientId: resolvedPatientId! },
+        pathParams: { patientId: patientId! },
         queryParams: { encounter: encounterId, facility: facilityId },
         pageSize: 100,
       }),
-      enabled: !!encounterId && !!resolvedPatientId && !!facilityId,
+      enabled: !!encounterId && !!patientId && !!facilityId,
     });
 
   const { data: medicationDispenses, isLoading: isLoadingDispenses } = useQuery<
@@ -70,6 +54,8 @@ export const PrintPrescription = ({
     enabled: !!dispenseOrderId && !!locationId,
   });
 
+  const dispenseOrder = medicationDispenses?.results?.[0]?.order;
+
   const dispensePrescriptionIds = useMemo(() => {
     const ids = new Set<string>();
     medicationDispenses?.results?.forEach((dispense) => {
@@ -82,15 +68,15 @@ export const PrintPrescription = ({
   }, [medicationDispenses]);
 
   // Single prescription
-  if (prescriptionId && !resolvedPatientId) {
+  if (prescriptionId && !patientId) {
     return <div>{t("patient_not_found")}</div>;
   }
 
-  if (prescriptionId && resolvedPatientId) {
+  if (prescriptionId && patientId) {
     return (
       <PrescriptionPreview
         prescriptionIds={[prescriptionId]}
-        patientId={resolvedPatientId}
+        patientId={patientId}
         facilityId={facilityId}
       />
     );
@@ -101,11 +87,11 @@ export const PrintPrescription = ({
     return <Loading />;
   }
 
-  if (encounterId && !resolvedPatientId) {
+  if (encounterId && !patientId) {
     return <div>{t("patient_not_found")}</div>;
   }
 
-  if (encounterId && resolvedPatientId) {
+  if (encounterId && patientId) {
     const encounterPrescriptionIds =
       encounterPrescriptions?.results?.map((p) => p.id) ?? [];
 
@@ -116,26 +102,22 @@ export const PrintPrescription = ({
     return (
       <PrescriptionPreview
         prescriptionIds={encounterPrescriptionIds}
-        patientId={resolvedPatientId}
+        patientId={patientId}
         facilityId={facilityId}
       />
     );
   }
 
   // Dispense order
-  if (
-    dispenseOrderId &&
-    locationId &&
-    (isLoadingDispenseOrder || isLoadingDispenses)
-  ) {
+  if (dispenseOrderId && locationId && isLoadingDispenses) {
     return <Loading />;
   }
 
-  if (dispenseOrderId && locationId && !resolvedPatientId) {
+  if (dispenseOrderId && locationId && !dispenseOrder?.patient?.id) {
     return <div>{t("patient_not_found")}</div>;
   }
 
-  if (dispenseOrderId && locationId && resolvedPatientId) {
+  if (dispenseOrderId && locationId && dispenseOrder?.patient?.id) {
     if (dispensePrescriptionIds.length === 0) {
       return <div>{t("no_prescriptions_found")}</div>;
     }
@@ -143,9 +125,9 @@ export const PrintPrescription = ({
     return (
       <PrescriptionPreview
         prescriptionIds={dispensePrescriptionIds}
-        patientId={resolvedPatientId}
+        patientId={dispenseOrder.patient.id}
         facilityId={facilityId}
-        locationName={dispenseOrder?.location?.name}
+        locationName={dispenseOrder.location.name}
       />
     );
   }
