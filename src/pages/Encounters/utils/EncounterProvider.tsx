@@ -13,7 +13,7 @@ import { getPermissions, Permissions } from "@/common/Permissions";
 import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { usePermissions } from "@/context/PermissionContext";
 import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounterAsCompletedDialog";
-import { useEncounterProgressController } from "@/pages/Encounters/utils/utils";
+import { useEncounterProgressController } from "@/pages/Encounters/utils/useEncounterProgressController";
 import {
   completedEncounterStatus,
   EncounterRead,
@@ -51,11 +51,7 @@ type EncounterContextType = {
   canRestartSelectedEncounter: boolean;
   canWriteClinicalData: boolean;
 
-  isEndEncounterPending: boolean;
-
   actions: {
-    markAsCompleted: () => void;
-    endEncounter: (encounter: EncounterRead, closeEncounter: boolean) => void;
     assignLocation: () => void;
     viewLocationHistory: () => void;
     manageCareTeam: () => void;
@@ -244,18 +240,7 @@ export function EncounterProvider({
         canWritePrimaryEncounter,
         canReadClinicalData,
         canWriteClinicalData,
-        isEndEncounterPending,
         actions: {
-          markAsCompleted: () => {
-            if (toDischarge) {
-              navigate(
-                `/facility/${selectedEncounter?.facility.id}/patient/${selectedEncounter?.patient.id}/encounter/${selectedEncounter?.id}/questionnaire/encounter?toDischarge=true`,
-              );
-              return;
-            }
-            setActiveAction(EncounterAction.MarkAsCompleted);
-          },
-          endEncounter,
           assignLocation: () => {
             setActiveAction(EncounterAction.AssignLocation);
           },

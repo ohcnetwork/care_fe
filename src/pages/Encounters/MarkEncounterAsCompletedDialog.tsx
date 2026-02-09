@@ -15,15 +15,14 @@ import { buttonVariants } from "@/components/ui/button";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { useEncounterProgressController } from "@/pages/Encounters/utils/useEncounterProgressController";
 
 export function MarkEncounterAsCompletedDialog(
   props: React.ComponentProps<typeof AlertDialog>,
 ) {
   const { t } = useTranslation();
-  const {
-    selectedEncounter: encounter,
-    actions: { endEncounter },
-  } = useEncounter();
+  const { selectedEncounter: encounter } = useEncounter();
+  const { completeEncounter } = useEncounterProgressController();
 
   if (!encounter) return null;
 
@@ -46,7 +45,7 @@ export function MarkEncounterAsCompletedDialog(
           <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
           <AlertDialogAction
             className={buttonVariants({ variant: "primary" })}
-            onClick={() => endEncounter(encounter, true)}
+            onClick={() => completeEncounter({ encounter })}
           >
             {t("mark_as_complete")}
           </AlertDialogAction>
