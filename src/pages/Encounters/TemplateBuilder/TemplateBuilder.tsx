@@ -340,7 +340,7 @@ export default function TemplateBuilder({
   }
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-auto sm:h-screen flex flex-col">
       <div className="border-b p-4">
         <div className="flex flex-col sm:flex-row gap-2 items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -507,7 +507,7 @@ export default function TemplateBuilder({
         </Form>
       </div>
 
-      <div className="flex-1 flex flex-col sm:flex-row">
+      <div className="flex-1 flex flex-col sm:overflow-y-auto sm:flex-row">
         {/* Main Editor - 3/4 of screen */}
         <div className="flex-2! p-4 overflow-auto">
           {previewState.isActive ? (
@@ -560,8 +560,8 @@ export default function TemplateBuilder({
                 <CardTitle className="text-lg">{t("fields")}</CardTitle>
               </CardHeader>
               <CardContent className="flex-1 overflow-hidden p-0">
-                <ScrollArea className="h-full">
-                  <div className="p-4 space-y-1">
+                <ScrollArea className="h-96 sm:h-full">
+                  <div className="px-4 space-y-1">
                     {selectedContext.fields.map((field) => (
                       <FieldItem
                         key={field.key}
@@ -692,7 +692,7 @@ function TemplateEditor({
         control={form.control}
         name="template_data"
         render={({ field: { ...field } }) => (
-          <FormItem className="h-full flex flex-col">
+          <FormItem className="h-96 sm:h-full flex flex-col">
             <FormLabel>{t("template_html")}</FormLabel>
             <FormControl>
               <Textarea
