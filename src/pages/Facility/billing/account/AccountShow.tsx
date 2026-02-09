@@ -112,7 +112,7 @@ export function AccountShow({
     sheetOpen: boolean;
     reason: AccountBillingStatus;
   }>({ sheetOpen: false, reason: AccountBillingStatus.closed_baddebt });
-  const [{ encounterId }] = useQueryParams();
+  const [qParams] = useQueryParams();
   const { facility } = useCurrentFacility();
   const { hasPermission } = usePermissions();
 
@@ -129,6 +129,8 @@ export function AccountShow({
       pathParams: { facilityId, accountId },
     }),
   });
+
+  const encounterId = qParams.encounterId || account?.primary_encounter.id;
 
   const { data: billableChargeItems } = useQuery({
     queryKey: ["billableChargeItems", accountId],
