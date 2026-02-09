@@ -433,6 +433,7 @@ export function ChargeItemsTable({
                             className="flex items-center gap-0.5 underline text-gray-600"
                             title={t("view_invoice")}
                           >
+                            {item.paid_invoice.number}
                             <ExternalLinkIcon className="size-3.5" />
                           </Link>
                         )}
