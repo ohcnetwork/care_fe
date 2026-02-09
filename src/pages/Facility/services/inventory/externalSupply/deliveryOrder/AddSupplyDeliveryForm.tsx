@@ -462,8 +462,8 @@ export function AddSupplyDeliveryForm({
           form.setValue(`items.${index}.charge_item_definition`, {
             slug: chargeItemSlug,
           });
+          form.setValue(`items.${index}.is_manually_edited`, false);
         }
-        form.setValue(`items.${index}.is_manually_edited`, false);
       }
 
       // Only create Product if we don't already have one from our creation
