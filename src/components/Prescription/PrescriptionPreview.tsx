@@ -163,17 +163,9 @@ export const PrescriptionPreview = ({
   // Combine fetched prescription data
   const prescriptions = useMemo(() => {
     return prescriptionQueries
-      .filter((q) => q.data)
-      .map((q) => q.data as PrescriptionRead)
-      .sort((a, b) => {
-        // Sort by created date (newest first)
-        const dateA = new Date(a.created_date).getTime();
-        const dateB = new Date(b.created_date).getTime();
-        return dateB - dateA;
-      });
+      .map((q) => q.data)
+      .filter((data): data is PrescriptionRead => !!data);
   }, [prescriptionQueries]);
-
-  const patient = prescriptions[0]?.encounter?.patient;
 
   const hasMedications = prescriptions.some(
     (prescription) =>
@@ -183,7 +175,7 @@ export const PrescriptionPreview = ({
   // Determine date display
   const displayDate = useMemo(() => {
     if (prescriptions.length === 1) {
-      const encounterStart = prescriptions[0]?.encounter?.period?.start;
+      const encounterStart = prescriptions[0].encounter.period.start;
       return encounterStart
         ? format(new Date(encounterStart), "dd MMM yyyy, EEEE")
         : format(new Date(), "dd MMM yyyy, EEEE");
@@ -212,13 +204,7 @@ export const PrescriptionPreview = ({
     );
   }
 
-  if (!patient) {
-    return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
-        {t("patient_not_found")}
-      </div>
-    );
-  }
+  const patient = prescriptions[0].encounter.patient;
 
   return (
     <PrintPreview
@@ -231,12 +217,12 @@ export const PrescriptionPreview = ({
         <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
           <div className="flex items-start gap-4">
             <div className="text-left">
-              <h1 className="text-2xl font-medium">{facility?.name}</h1>
+              <h1 className="text-xl font-medium">{facility?.name}</h1>
               {facility?.address && (
-                <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
+                <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-xs">
                   {facility.address}
                   {facility.phone_number && (
-                    <p className="text-gray-500 text-sm">
+                    <p className="text-gray-500 text-xs">
                       {t("phone")}: {facility.phone_number}
                     </p>
                   )}
