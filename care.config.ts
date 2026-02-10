@@ -147,6 +147,12 @@ const careConfig = {
     true,
   ),
 
+  /**
+   * Default payment method to preselect when recording a new payment
+   * Valid values: cash, ccca, cchk, cdac, chck, ddpo, debc
+   */
+  defaultPaymentMethod: env.REACT_DEFAULT_PAYMENT_METHOD,
+
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
         const [module, cdn] = app.split("@");
