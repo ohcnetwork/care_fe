@@ -39,6 +39,7 @@ export function PatientIDScanDialog({
       inputLabel={t("patient_id")}
       inputPlaceholder={t("enter_patient_id")}
       extractValue={extractPatientId}
+      autoStartScanning={true}
     />
   );
 }
