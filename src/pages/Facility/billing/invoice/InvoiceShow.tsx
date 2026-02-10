@@ -50,7 +50,7 @@ import {
   SquareArrowOutUpRight,
 } from "lucide-react";
 import { Link, navigate, useQueryParams } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import AddChargeItemSheet from "@/components/Billing/Invoice/AddChargeItemSheet";
@@ -136,6 +136,12 @@ export function InvoiceShow({
       pathParams: { facilityId, invoiceId },
     }),
   });
+
+  useEffect(() => {
+    if (invoice?.status === InvoiceStatus.issued) {
+      setIsPaymentSheetOpen(true);
+    }
+  }, [invoice?.status]);
 
   const patient = invoice?.account.patient;
 
