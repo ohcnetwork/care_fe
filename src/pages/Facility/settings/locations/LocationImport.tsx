@@ -58,7 +58,6 @@ const LocationFormLabels = {
 
 const mapLabelToForm = (label: string): LocationForm | undefined => {
   const formKey = LocationFormLabels[label as keyof typeof LocationFormLabels];
-  console.log("Mapping label", label, "to form", formKey);
   return formKey as LocationForm | undefined;
 };
 
@@ -68,14 +67,12 @@ const processRowLocations = (data: string[][]) => {
     locationData: string[],
     locations: LocationImportT[],
   ): LocationImportT[] => {
-    console.log("Processing location:", locationData);
     const [location, location_type, description] = locationData.slice(0, 3);
     const tail = locationData.slice(3);
 
     const existingLocation = locations.find((l) => l.name === location);
 
     if (existingLocation && tail.length > 0 && tail[0] !== "") {
-      console.log("Processing new children for location:", location);
       return [
         ...locations.filter((l) => l.name !== location),
         {
@@ -95,9 +92,7 @@ const processRowLocations = (data: string[][]) => {
         children: [],
       };
       let children: LocationImportT[] = [];
-      console.log("Adding new location:", newLocation);
-      if (tail.length > 0 && tail[0] != "") {
-        console.log("Processing children for location:", location);
+      if (tail.length > 0 && tail[0] !== "") {
         children = processAtLocation(tail, newLocation.children);
       }
       return [
@@ -114,7 +109,6 @@ const processRowLocations = (data: string[][]) => {
     locations = processAtLocation(locationRow, locations);
   }
 
-  console.log(locations);
   return locations;
 };
 
@@ -519,7 +513,6 @@ export function useSaveLocations(facilityId: string) {
 
   // Effect: process the next batch whenever the queue changes
   useEffect(() => {
-    console.log("Processing queue:", queue);
     if (queue.length === 0) return;
 
     const { parentId, nodes: allNodes } = queue[0];
@@ -550,8 +543,6 @@ export function useSaveLocations(facilityId: string) {
         mode: n.mode,
       }));
 
-    console.log("Saving locations:", toSave);
-
     if (toSave.length === 0) {
       // dequeue empty and let effect run again
       setQueue((prev) => prev.slice(1));
@@ -575,7 +566,6 @@ export function useSaveLocations(facilityId: string) {
 
   // Entry point: start the saving process
   const saveLocations = useCallback((roots: LocationImportT[]) => {
-    console.log("Saving locations:", roots);
     setQueue([{ parentId: undefined, nodes: roots }]);
   }, []);
 
