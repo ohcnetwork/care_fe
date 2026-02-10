@@ -44,6 +44,7 @@ interface EncounterProgressControllerReturnType {
     encounter: EncounterRead;
     onDischargeRequired?: () => void;
   }) => void;
+  encounterRequiresDischarge: (encounter: EncounterRead) => boolean;
 }
 
 const getCompleteEncounterRequest = (encounter: EncounterRead) => {
@@ -201,5 +202,7 @@ export function useEncounterProgressController(): EncounterProgressControllerRet
       }
       batchRequest({ requests, encounter });
     },
+
+    encounterRequiresDischarge,
   };
 }

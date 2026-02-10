@@ -7,6 +7,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { PLUGIN_Component } from "@/PluginEngine";
+import { EncounterStatus } from "@/types/emr/encounter/encounter";
 import { Account } from "./summary-panel-details-tab/account";
 import { DepartmentsAndTeams } from "./summary-panel-details-tab/department-and-team";
 import { DischargeDetails } from "./summary-panel-details-tab/discharge-summary";
@@ -110,7 +111,10 @@ export const SummaryPanelActionsTab = () => {
             onClick={() => markAsCompleted()}
           >
             <CheckIcon />
-            {t("mark_as_completed")}
+            {selectedEncounter?.encounter_class === "imp" &&
+            selectedEncounter?.status !== EncounterStatus.DISCHARGED
+              ? t("mark_for_discharge")
+              : t("mark_as_completed")}
           </Button>
         </div>
       </div>

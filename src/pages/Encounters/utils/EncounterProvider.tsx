@@ -23,6 +23,7 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { useEncounterProgressController } from "./useEncounterProgressController";
 
 type EncounterContextType = {
   facilityId?: string;
@@ -92,6 +93,8 @@ export function EncounterProvider({
     { selectedEncounter: selectedEncounterId = primaryEncounterId },
     setQParams,
   ] = useQueryParams();
+
+  const { encounterRequiresDischarge } = useEncounterProgressController();
 
   const { data: patient, isLoading: isPatientLoading } = useQuery({
     queryKey: ["patient", patientId],
@@ -239,6 +242,13 @@ export function EncounterProvider({
             setActiveAction(EncounterAction.AssignLocation);
           },
           markAsCompleted: () => {
+            if (!selectedEncounter) return;
+            if (encounterRequiresDischarge(selectedEncounter)) {
+              navigate(
+                `/facility/${selectedEncounter.facility.id}/patient/${selectedEncounter.patient.id}/encounter/${selectedEncounter.id}/questionnaire/encounter?toDischarge=true`,
+              );
+              return;
+            }
             setActiveAction(EncounterAction.MarkAsCompleted);
           },
           viewLocationHistory: () => {

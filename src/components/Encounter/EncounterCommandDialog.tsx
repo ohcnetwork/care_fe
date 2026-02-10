@@ -34,7 +34,10 @@ import query from "@/Utils/request/query";
 import { useCareApps } from "@/hooks/useCareApps";
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
+import {
+  EncounterRead,
+  EncounterStatus,
+} from "@/types/emr/encounter/encounter";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -225,7 +228,11 @@ export function EncounterCommandDialog({
         },
         {
           id: "mark-as-completed",
-          label: t("mark_as_completed"),
+          label:
+            encounter.encounter_class === "imp" &&
+            encounter?.status !== EncounterStatus.DISCHARGED
+              ? t("mark_for_discharge")
+              : t("mark_as_completed"),
           shortcut: getShortcutDisplay("mark-as-completed"),
           icon: <CheckCircle2 />,
         },
