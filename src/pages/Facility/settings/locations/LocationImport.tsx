@@ -170,9 +170,7 @@ export default function LocationImport({ facilityId }: LocationImportProps) {
         setProcessedLocations(processRowLocations(data));
         setCurrentStep("review");
       } catch (error) {
-        console.error("=== CSV PROCESSING ERROR ===");
-        console.error("Error details:", error);
-        console.error("=== END ERROR LOG ===");
+        console.error("CSV processing failed:", error);
         setUploadError("Error processing CSV file");
       }
     };
