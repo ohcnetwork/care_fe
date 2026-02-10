@@ -159,11 +159,6 @@ export default function MedicationReturnShow({
     enabled: !!dispenseOrderId && !!locationId,
   });
 
-  const invoiceIds =
-    medicationDispensesResponse?.results.flatMap(
-      (item) => item.charge_item?.paid_invoice?.id ?? [],
-    ) || [];
-
   function handleSupplyDeliverySuccess() {
     queryClient.invalidateQueries({
       queryKey: ["supplyDeliveries", deliveryOrderId],
@@ -498,7 +493,14 @@ export default function MedicationReturnShow({
                       className="p-0 h-auto text-primary-600 font-semibold"
                       onClick={() => {
                         // Filter out the return invoice itself from related invoices
-                        const relatedInvoiceIds = invoiceIds.filter(
+                        const relatedInvoiceIds = [
+                          ...new Set(
+                            medicationDispensesResponse?.results.flatMap(
+                              (item) =>
+                                item.charge_item?.paid_invoice?.id ?? [],
+                            ) || [],
+                          ),
+                        ].filter(
                           (id) => id !== deliveryOrder.patient_invoice_id,
                         );
                         const queryParams = new URLSearchParams({

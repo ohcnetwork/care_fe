@@ -53,7 +53,9 @@ export function PrintInvoices({ facilityId, invoiceIds }: PrintInvoicesProps) {
   const { t } = useTranslation();
 
   // Parse comma-separated invoice IDs
-  const invoiceIdArray = invoiceIds.split(",").map((id) => id.trim());
+  const invoiceIdArray = Array.from(
+    new Set(invoiceIds.split(",").map((id) => id.trim())),
+  );
 
   // Fetch all invoices using useQueries
   const invoiceQueries = useQueries({
