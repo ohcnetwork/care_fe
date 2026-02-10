@@ -848,21 +848,22 @@ export function displayMedicationName(
 export function computeMedicationDispenseQuantity(
   medication: MedicationRequestRead,
 ): string {
+  const DEFAULT_QTY = "1";
   const instruction = medication.dosage_instruction[0];
   if (!instruction) {
-    return "0";
+    return DEFAULT_QTY;
   }
 
   const doseValue = instruction.dose_and_rate?.dose_quantity?.value;
   if (!doseValue) {
-    return "0";
+    return DEFAULT_QTY;
   }
 
   const unitCode = instruction.dose_and_rate?.dose_quantity?.unit?.code;
   const nonVolumetric = ["{tbl}", "{count}"];
 
   if (unitCode && !nonVolumetric.includes(unitCode)) {
-    return "";
+    return DEFAULT_QTY;
   }
 
   if (instruction.as_needed_boolean) {

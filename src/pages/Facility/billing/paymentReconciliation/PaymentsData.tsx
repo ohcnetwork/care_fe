@@ -77,9 +77,11 @@ const SORT_OPTIONS = {
 export default function PaymentsData({
   facilityId,
   accountId,
+  hideAccountColumn = false,
 }: {
   facilityId: string;
   accountId?: string;
+  hideAccountColumn?: boolean;
 }) {
   const { t } = useTranslation();
   const [createdBy, setCreatedBy] = useState<UserReadMinimal | undefined>(
@@ -281,7 +283,7 @@ export default function PaymentsData({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t("account")}</TableHead>
+                {!hideAccountColumn && <TableHead>{t("account")}</TableHead>}
                 <TableHead>{t("date")}</TableHead>
                 <TableHead>{t("invoice")}</TableHead>
                 <TableHead>{t("type")}</TableHead>
@@ -295,24 +297,26 @@ export default function PaymentsData({
             <TableBody>
               {payments.map((payment) => (
                 <TableRow key={payment.id}>
-                  <TableCell>
-                    <Button variant="link" asChild>
-                      <Link
-                        href={`/facility/${facilityId}/billing/account/${payment.account?.id}`}
-                        className="hover:text-primary "
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <div className="text-base flex items-center gap-1 underline underline-offset-2">
-                          {payment.account?.name}
-                          <CareIcon
-                            icon="l-external-link-alt"
-                            className="size-3"
-                          />
-                        </div>
-                      </Link>
-                    </Button>
-                  </TableCell>
+                  {!hideAccountColumn && (
+                    <TableCell>
+                      <Button variant="link" asChild>
+                        <Link
+                          href={`/facility/${facilityId}/billing/account/${payment.account?.id}`}
+                          className="hover:text-primary "
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <div className="text-base flex items-center gap-1 underline underline-offset-2">
+                            {payment.account?.name}
+                            <CareIcon
+                              icon="l-external-link-alt"
+                              className="size-3"
+                            />
+                          </div>
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  )}
                   <TableCell>
                     {payment.payment_datetime
                       ? format(
@@ -330,7 +334,7 @@ export default function PaymentsData({
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          {t("view_invoice")}
+                          {payment.target_invoice.number || t("view_invoice")}
                           <CareIcon
                             icon="l-external-link-alt"
                             className="size-3"

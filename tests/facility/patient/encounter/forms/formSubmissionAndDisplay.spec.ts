@@ -68,14 +68,7 @@ test.describe("Form Submission and Display in Encounter Overview", () => {
     const formsSection = page.getByText("Forms").first();
     await formsSection.scrollIntoViewIfNeeded();
 
-    // Click on the form selector to add a form
-    const formSelector = page
-      .getByRole("combobox")
-      .filter({ hasText: /choose form|select forms/i })
-      .first();
-
-    await formSelector.scrollIntoViewIfNeeded();
-    await formSelector.click();
+    await page.getByRole("button", { name: "Forms" }).click();
 
     // Wait for the command input to appear
     await page.locator("[cmdk-input]").waitFor({ state: "visible" });
@@ -94,9 +87,9 @@ test.describe("Form Submission and Display in Encounter Overview", () => {
     await page.waitForURL(/\/questionnaire\//, { timeout: 10000 });
 
     // Wait for the form to load by waiting for a key form field to be visible
-    await expect(page.getByText("Is bilateral air entry present?")).toBeVisible(
-      { timeout: 10000 },
-    );
+    await expect(
+      page.getByText("Is bilateral air entry present?").nth(0),
+    ).toBeVisible({ timeout: 10000 });
 
     // Generate random values for form inputs
     const bilateralAirEntry = "yes";

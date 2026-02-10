@@ -8,6 +8,7 @@ import { GenericSelectedBadge } from "@/components/ui/multi-filter/genericFilter
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationRead } from "@/types/location/location";
+import { UserReadMinimal } from "@/types/user/user";
 
 // Generic color palette for cycling through options
 export const COLOR_PALETTE = [
@@ -41,7 +42,8 @@ export type FilterValues =
   | FilterDateRange
   | FacilityOrganizationRead[]
   | LocationRead[]
-  | ActivityDefinitionFilterValue[];
+  | ActivityDefinitionFilterValue[]
+  | UserReadMinimal[];
 
 export type FilterMode = "single" | "multi";
 
@@ -59,6 +61,10 @@ export type LocationFilterMeta = {
   facilityId?: string;
 };
 export type ActivityDefinitionFilterMeta = {
+  facilityId?: string;
+};
+
+export type FacilityUserFilterMeta = {
   facilityId?: string;
 };
 
@@ -109,13 +115,25 @@ export interface ActivityDefinitionFilterConfig extends BaseFilterConfig {
   meta: ActivityDefinitionFilterMeta;
 }
 
+export interface CareTeamFilterConfig extends BaseFilterConfig {
+  type: "care_team";
+  meta: FacilityUserFilterMeta;
+}
+
+export interface FacilityUserFilterConfig extends BaseFilterConfig {
+  type: "facility_user";
+  meta: FacilityUserFilterMeta;
+}
+
 export type FilterConfig =
   | CommandFilterConfig
   | TagFilterConfig
   | DateFilterConfig
   | DepartmentFilterConfig
   | LocationFilterConfig
-  | ActivityDefinitionFilterConfig;
+  | ActivityDefinitionFilterConfig
+  | CareTeamFilterConfig
+  | FacilityUserFilterConfig;
 
 export interface OperationConfig {
   selectedOperation: Operation | null;
@@ -171,7 +189,9 @@ export function createFilterConfig(
     | "date"
     | "department"
     | "location"
-    | "activity_definition",
+    | "activity_definition"
+    | "care_team"
+    | "facility_user",
   options: FilterOption[],
   meta?: {
     resource?: TagResource;
@@ -248,6 +268,18 @@ export function createFilterConfig(
         type: "activity_definition",
         meta: { facilityId },
       } as ActivityDefinitionFilterConfig;
+    case "facility_user":
+      return {
+        ...baseConfig,
+        type: "facility_user",
+        meta: { facilityId },
+      } as FacilityUserFilterConfig;
+    case "care_team":
+      return {
+        ...baseConfig,
+        type: "care_team",
+        meta: { facilityId },
+      } as CareTeamFilterConfig;
     case "command":
       return {
         ...baseConfig,
