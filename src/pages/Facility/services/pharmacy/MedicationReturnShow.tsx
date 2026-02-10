@@ -159,6 +159,11 @@ export default function MedicationReturnShow({
     enabled: !!dispenseOrderId && !!locationId,
   });
 
+  const invoiceIds =
+    medicationDispensesResponse?.results.flatMap(
+      (item) => item.charge_item?.paid_invoice?.id ?? [],
+    ) || [];
+
   function handleSupplyDeliverySuccess() {
     queryClient.invalidateQueries({
       queryKey: ["supplyDeliveries", deliveryOrderId],
@@ -491,11 +496,24 @@ export default function MedicationReturnShow({
                     <Button
                       variant="link"
                       className="p-0 h-auto text-primary-600 font-semibold"
-                      onClick={() =>
+                      onClick={() => {
+                        // Filter out the return invoice itself from related invoices
+                        const relatedInvoiceIds = invoiceIds.filter(
+                          (id) => id !== deliveryOrder.patient_invoice_id,
+                        );
+                        const queryParams = new URLSearchParams({
+                          sourceUrl: basePath + "/order/" + deliveryOrderId,
+                        });
+                        if (relatedInvoiceIds.length > 0) {
+                          queryParams.set(
+                            "relatedInvoices",
+                            relatedInvoiceIds.join(","),
+                          );
+                        }
                         navigate(
-                          `/facility/${facilityId}/billing/invoices/${deliveryOrder.patient_invoice_id}?sourceUrl=${encodeURIComponent(basePath + "/order/" + deliveryOrderId)}`,
-                        )
-                      }
+                          `/facility/${facilityId}/billing/invoices/${deliveryOrder.patient_invoice_id}?${queryParams.toString()}`,
+                        );
+                      }}
                     >
                       {t("view_invoice")}
                       <ExternalLink className="ml-1 size-4" />

@@ -336,7 +336,7 @@ export function InvoiceShow({
     invoice?.status !== InvoiceStatus.entered_in_error &&
     invoice?.status !== InvoiceStatus.cancelled;
 
-  const [{ sourceUrl }] = useQueryParams();
+  const [{ sourceUrl, relatedInvoices }] = useQueryParams();
 
   const alertButtonText = (() => {
     if (sourceUrl?.includes("medication_return")) {
@@ -643,16 +643,28 @@ export function InvoiceShow({
               )}
               <Button
                 variant="outline"
-                asChild
                 className="border-gray-400 gap-1"
+                onClick={() => {
+                  if (relatedInvoices) {
+                    // Navigate to multi-invoice print with all invoices
+                    const allInvoiceIds = [
+                      ...relatedInvoices.split(","),
+                      invoiceId,
+                    ].join(",");
+                    navigate(
+                      `/facility/${facilityId}/billing/invoices/${allInvoiceIds}/print`,
+                    );
+                  } else {
+                    // Navigate to single invoice print
+                    navigate(
+                      `/facility/${facilityId}/billing/invoice/${invoiceId}/print`,
+                    );
+                  }
+                }}
               >
-                <Link
-                  href={`/facility/${facilityId}/billing/invoice/${invoiceId}/print`}
-                >
-                  <CareIcon icon="l-print" className="size-4" />
-                  {t("print")}
-                  <ShortcutBadge actionId="print-invoice" />
-                </Link>
+                <CareIcon icon="l-print" className="size-4" />
+                {t("print")}
+                <ShortcutBadge actionId="print-invoice" />
               </Button>
               {canEdit && (
                 <DropdownMenu>
