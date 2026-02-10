@@ -13,7 +13,6 @@ import { getPermissions, Permissions } from "@/common/Permissions";
 import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { usePermissions } from "@/context/PermissionContext";
 import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounterAsCompletedDialog";
-import { useEncounterProgressController } from "@/pages/Encounters/utils/useEncounterProgressController";
 import {
   completedEncounterStatus,
   EncounterRead,
@@ -53,6 +52,7 @@ type EncounterContextType = {
 
   actions: {
     assignLocation: () => void;
+    markAsCompleted: () => void;
     viewLocationHistory: () => void;
     manageCareTeam: () => void;
     manageDepartments: () => void;
@@ -186,12 +186,6 @@ export function EncounterProvider({
     null,
   );
 
-  const { endEncounter, isPending: isEndEncounterPending } =
-    useEncounterProgressController();
-  const toDischarge =
-    selectedEncounter?.encounter_class === "imp" &&
-    selectedEncounter?.status !== "discharged";
-
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -243,6 +237,9 @@ export function EncounterProvider({
         actions: {
           assignLocation: () => {
             setActiveAction(EncounterAction.AssignLocation);
+          },
+          markAsCompleted: () => {
+            setActiveAction(EncounterAction.MarkAsCompleted);
           },
           viewLocationHistory: () => {
             setActiveAction(EncounterAction.LocationHistory);

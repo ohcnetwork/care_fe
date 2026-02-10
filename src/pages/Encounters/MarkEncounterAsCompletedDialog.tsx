@@ -16,6 +16,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { useEncounterProgressController } from "@/pages/Encounters/utils/useEncounterProgressController";
+import { navigate } from "raviger";
 
 export function MarkEncounterAsCompletedDialog(
   props: React.ComponentProps<typeof AlertDialog>,
@@ -45,7 +46,18 @@ export function MarkEncounterAsCompletedDialog(
           <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
           <AlertDialogAction
             className={buttonVariants({ variant: "primary" })}
-            onClick={() => completeEncounter({ encounter })}
+            onClick={() =>
+              completeEncounter({
+                encounter,
+                onDischargeRequired: () => {
+                  if (encounter) {
+                    navigate(
+                      `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?toDischarge=true`,
+                    );
+                  }
+                },
+              })
+            }
           >
             {t("mark_as_complete")}
           </AlertDialogAction>

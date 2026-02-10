@@ -7,7 +7,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   EncounterRead,
   EncounterStatus,
@@ -19,12 +18,13 @@ import {
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 
+import { useEncounterProgressController } from "@/pages/Encounters/utils/useEncounterProgressController";
 import { renderTokenNumber } from "@/types/tokens/token/token";
 import mutate from "@/Utils/request/mutate";
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle, ExternalLinkIcon } from "lucide-react";
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 export const AppointmentEncounterHeader = ({
@@ -67,7 +67,11 @@ const AppointmentEncounterHeaderActions = ({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const { actions, isEndEncounterPending } = useEncounter();
+  const {
+    completeEverything,
+    completeAppointment,
+    isPending: isEndEncounterPending,
+  } = useEncounterProgressController();
 
   const { mutate: startEncounter } = useMutation({
     mutationFn: mutate(encounterApi.update, {
@@ -126,7 +130,18 @@ const AppointmentEncounterHeaderActions = ({
         variant="outline"
         className="w-full sm:w-auto"
         disabled={isEndEncounterPending}
-        onClick={() => actions.markAsCompleted()}
+        onClick={() =>
+          completeEverything({
+            encounter,
+            onDischargeRequired: () => {
+              if (encounter) {
+                navigate(
+                  `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?toDischarge=true`,
+                );
+              }
+            },
+          })
+        }
       >
         <CheckCircle />
         {t("complete")}
@@ -141,7 +156,7 @@ const AppointmentEncounterHeaderActions = ({
           <DropdownMenuContent className="min-w-[59px]" align="end">
             <DropdownMenuItem
               className="p-2.5"
-              onClick={() => actions.endEncounter(encounter, false)}
+              onClick={() => completeAppointment({ encounter })}
             >
               <div className="flex flex-col items-start">
                 <span className="text-sm font-medium text-black">

@@ -20,11 +20,11 @@ export const SummaryPanelActionsTab = () => {
 
   const {
     actions: {
-      markAsCompleted,
       assignLocation,
       manageDepartments,
       manageCareTeam,
       dispense,
+      markAsCompleted,
     },
     selectedEncounter,
   } = useEncounter();
@@ -107,7 +107,7 @@ export const SummaryPanelActionsTab = () => {
           <Button
             variant="outline_primary"
             className="justify-start sm:@sm:justify-center"
-            onClick={markAsCompleted}
+            onClick={() => markAsCompleted()}
           >
             <CheckIcon />
             {t("mark_as_completed")}
