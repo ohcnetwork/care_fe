@@ -309,13 +309,7 @@ export function InvoiceShow({
             : invoice?.issue_date,
       };
 
-      updateInvoice(data, {
-        onSuccess: () => {
-          if (status === InvoiceStatus.issued) {
-            setIsPaymentSheetOpen(true);
-          }
-        },
-      });
+      updateInvoice(data);
     }
   };
 
