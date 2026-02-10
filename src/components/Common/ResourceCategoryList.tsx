@@ -549,8 +549,8 @@ export function ResourceCategoryList<
 
       <Pagination
         totalCount={
-          isSearching && itemSearchConfig && itemsResponse
-            ? itemsResponse.count || 0
+          isSearching && itemSearchConfig
+            ? itemsResponse?.count || 0
             : categoriesResponse?.count || 0
         }
       />
