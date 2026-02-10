@@ -180,10 +180,12 @@ test.describe("Patient Files", () => {
     await page.getByRole("button", { name: /view/i }).first().click();
 
     // Wait for file viewer to load
-    await expect(page.getByRole("button", { name: "Close" })).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: "Close", exact: true }),
+    ).toBeVisible({
       timeout: 5000,
     });
-    await page.getByRole("button", { name: "Close" }).click();
+    await page.getByRole("button", { name: "Close", exact: true }).click();
 
     // Save current URL for navigation
     const currentUrl = page.url();
