@@ -317,6 +317,12 @@ export function PaymentReconciliationSheet({
       const initialAmount = invoice?.total_gross
         ? round(new Decimal(invoice.total_gross).abs())
         : "";
+
+      // Determine the default payment method
+      const defaultMethod = careConfig.defaultPaymentMethod
+        ? (careConfig.defaultPaymentMethod as PaymentReconciliationPaymentMethod)
+        : undefined;
+
       form.reset({
         reconciliation_type: isCreditNote
           ? undefined
@@ -327,7 +333,7 @@ export function PaymentReconciliationSheet({
         kind: PaymentReconciliationKind.deposit,
         issuer_type: PaymentReconciliationIssuerType.patient,
         outcome: PaymentReconciliationOutcome.complete,
-        method: undefined,
+        method: defaultMethod,
         payment_datetime: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
         amount: initialAmount,
         tendered_amount: initialAmount,
