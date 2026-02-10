@@ -1,17 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  ArrowUpRightSquare,
+  ArrowRightIcon,
   CheckCircle,
   MoreVertical,
-  ReceiptTextIcon,
+  PrinterIcon,
 } from "lucide-react";
-import { Link, navigate } from "raviger";
-import React, { useMemo } from "react";
+import { Link } from "raviger";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +20,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
@@ -40,6 +40,7 @@ import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilte
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import {
   dateFilter,
+  encounterClassFilter,
   tagFilter,
 } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
@@ -48,7 +49,6 @@ import {
   FilterDateRange,
   longDateRangeOptions,
 } from "@/components/ui/multi-filter/utils/Utils";
-import useBreakpoints from "@/hooks/useBreakpoints";
 import { CreateDispenseSheet } from "@/pages/Facility/services/pharmacy/CreateDispenseSheet";
 import {
   ENCOUNTER_CLASS_ICONS,
@@ -77,9 +77,8 @@ import {
   formatDateTime,
   formatName,
 } from "@/Utils/utils";
-import careConfig from "@careConfig";
 
-export default function MedicationRequestList({
+export default function PrescriptionQueue({
   facilityId,
   locationId,
 }: {
@@ -92,11 +91,7 @@ export default function MedicationRequestList({
     limit: 14,
     cacheBlacklist: ["patient_external_id", "patient_name"],
   });
-  const encounterClassFilterVisibleTabs = useBreakpoints({
-    default: 2,
-    md: 3,
-    xl: 4,
-  });
+
   const tagIds = qParams.tags?.split(",") || [];
   const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
   const selectedTags = tagQueries
@@ -106,6 +101,7 @@ export default function MedicationRequestList({
   // Create filter configurations
   const filters = useMemo(
     () => [
+      encounterClassFilter(),
       tagFilter("tags", TagResource.PRESCRIPTION, "multi", "tags"),
       dateFilter("created_date", t("date"), longDateRangeOptions),
     ],
@@ -171,8 +167,7 @@ export default function MedicationRequestList({
     queryFn: query.debounced(prescriptionApi.summary, {
       pathParams: { facilityId },
       queryParams: {
-        patient: qParams.search,
-        status: qParams.status || "active",
+        status: qParams.status || PrescriptionStatus.active,
         patient_external_id: qParams.patient_external_id,
         encounter_class: qParams.encounter_class,
         tags: qParams.tags,
@@ -189,6 +184,54 @@ export default function MedicationRequestList({
     }),
   });
 
+  const isFilteredByPatient = !!qParams.patient_external_id;
+
+  // State for selected prescription IDs
+  const [selectedPrescriptionIds, setSelectedPrescriptionIds] = useState<
+    string[]
+  >([]);
+
+  // Auto-select all prescriptions when filtered by patient and data loads
+  useEffect(() => {
+    if (isFilteredByPatient && prescriptionQueue?.results) {
+      const allIds = prescriptionQueue.results.map((item) => item.id);
+      setSelectedPrescriptionIds(allIds);
+    } else {
+      setSelectedPrescriptionIds([]);
+    }
+  }, [
+    isFilteredByPatient,
+    prescriptionQueue?.results,
+    qParams.status,
+    qParams.page,
+  ]);
+
+  // Handle select all toggle
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const allIds = prescriptionQueue?.results?.map((item) => item.id) || [];
+      setSelectedPrescriptionIds(allIds);
+    } else {
+      setSelectedPrescriptionIds([]);
+    }
+  };
+
+  // Handle individual checkbox toggle
+  const handleSelectPrescription = (prescriptionId: string) => {
+    setSelectedPrescriptionIds((prev) =>
+      prev.includes(prescriptionId)
+        ? prev.filter((id) => id !== prescriptionId)
+        : [...prev, prescriptionId],
+    );
+  };
+
+  // Check if all prescriptions on current page are selected
+  const allSelected =
+    (prescriptionQueue?.results?.length ?? 0) > 0 &&
+    prescriptionQueue?.results?.every((item) =>
+      selectedPrescriptionIds.includes(item.id),
+    );
+
   const { mutate: completePrescription } = useMutation({
     mutationFn: ({
       patientId,
@@ -199,7 +242,7 @@ export default function MedicationRequestList({
     }) =>
       mutate(prescriptionApi.update, {
         pathParams: { patientId, id: prescriptionId },
-      })({ status: "completed" }),
+      })({ status: PrescriptionStatus.completed }),
     onSuccess: () => {
       toast.success(t("prescription_marked_as_completed"));
       queryClient.invalidateQueries({
@@ -260,33 +303,6 @@ export default function MedicationRequestList({
           patientId={qParams.patient_external_id}
           patientName={qParams.patient_name}
         />
-        <FilterTabs
-          value={
-            qParams.encounter_class
-              ? `encounter_class__${qParams.encounter_class}`
-              : ""
-          }
-          onValueChange={(value) =>
-            updateQuery({
-              encounter_class: value
-                ? value.replace("encounter_class__", "")
-                : "",
-            })
-          }
-          options={[...careConfig.encounterClasses].map(
-            (ec) => `encounter_class__${ec}`,
-          )}
-          showAllOption={true}
-          allOptionLabel="all"
-          variant="background"
-          showMoreDropdown={true}
-          maxVisibleTabs={encounterClassFilterVisibleTabs}
-          defaultVisibleOptions={[
-            "encounter_class__imp",
-            "encounter_class__amb",
-            "encounter_class__emer",
-          ]}
-        />
         <MultiFilter
           selectedFilters={selectedFilters}
           onFilterChange={handleFilterChange}
@@ -297,20 +313,54 @@ export default function MedicationRequestList({
           className="flex flex-wrap md:flex-row items-start"
           facilityId={facilityId}
         />
-
-        {qParams.patient_external_id && (
-          <div className="ml-auto items-end">
-            <Button variant="outline_primary" asChild>
-              <Link
-                href={`/medication_requests/patient/${qParams.patient_external_id}/bill`}
-              >
-                <ReceiptTextIcon strokeWidth={1.5} />
-                {t("bill_all_pending_prescriptions")}
-              </Link>
-            </Button>
-          </div>
-        )}
       </div>
+
+      {/* Selection bar when filtered by patient */}
+      {isFilteredByPatient && (
+        <div className="mt-4 border border-gray-300 bg-white rounded-lg p-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-col gap-1">
+              <span className="text-sm font-semibold text-gray-950">
+                {t("select_prescriptions_to_bill")}
+              </span>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={allSelected}
+                  onCheckedChange={handleSelectAll}
+                  aria-label={t("select_all")}
+                  id="select-all-prescriptions"
+                />
+                <label
+                  htmlFor="select-all-prescriptions"
+                  className="text-sm font-medium cursor-pointer"
+                >
+                  {t("select_all")}
+                </label>
+              </div>
+            </div>
+            <div className="ml-auto flex items-center gap-2">
+              <Button variant="link" className="underline">
+                {/* TODO: wire this */}
+                <PrinterIcon />
+                {t("print_all_rx")}
+              </Button>
+              <Button variant="outline_primary" asChild>
+                <Link
+                  href={`/medication_requests/patient/${qParams.patient_external_id}/bill?prescriptions=${selectedPrescriptionIds.join(",")}`}
+                  className={
+                    selectedPrescriptionIds.length === 0
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
+                >
+                  {t("bill_selected_prescriptions")}
+                  <ArrowRightIcon />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Table section */}
       <div className="mt-4">
@@ -331,35 +381,56 @@ export default function MedicationRequestList({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t("patient_name")}</TableHead>
-                <TableHead>{t("by")}</TableHead>
-                <TableHead>{t("tags", { count: 2 })}</TableHead>
+                {isFilteredByPatient && <TableHead className="min-w-8" />}
+                <TableHead className="w-1/3">{t("patient_name")}</TableHead>
+                <TableHead className="w-1/3">
+                  {t("encounter_status_location")}
+                </TableHead>
+                <TableHead className="w-1/3">
+                  {t("tags", { count: 2 })}
+                </TableHead>
                 <TableHead>{t("action")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {prescriptionQueue?.results?.map((item: PrescriptionSummary) => (
                 <TableRow key={item.id} className="group">
+                  {isFilteredByPatient && (
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedPrescriptionIds.includes(item.id)}
+                        onCheckedChange={() =>
+                          handleSelectPrescription(item.id)
+                        }
+                        aria-label={t("select_prescription")}
+                      />
+                    </TableCell>
+                  )}
                   <TableCell
-                    className="font-semibold group-hover:underline cursor-pointer"
-                    onClick={() =>
-                      updateQuery({
-                        patient_external_id: item.encounter.patient.id,
-                        patient_name: item.encounter.patient.name,
-                      })
-                    }
+                    className="cursor-pointer min-h-15"
+                    onClick={() => {
+                      if (isFilteredByPatient) {
+                        handleSelectPrescription(item.id);
+                      } else {
+                        updateQuery({
+                          patient_external_id: item.encounter.patient.id,
+                          patient_name: item.encounter.patient.name,
+                        });
+                      }
+                    }}
                   >
-                    {item.encounter.patient.name}
-                    <div className="text-xs text-gray-500">
-                      {t("by")}: {formatName(item.prescribed_by)}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {t("at")}: {formatDateTime(item.created_date)}
+                    <span className="underline decoration-1 underline-offset-2 font-semibold">
+                      {item.encounter.patient.name}
+                    </span>
+                    <div className="text-sm font-medium text-gray-700">
+                      <span>{formatName(item.prescribed_by)}</span>
+                      <span> · </span>
+                      <span>{formatDateTime(item.created_date)}</span>
                     </div>
                   </TableCell>
 
                   <TableCell className="text-sm">
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-2">
                       <div className="space-x-1">
                         <Badge
                           size="sm"
@@ -393,8 +464,8 @@ export default function MedicationRequestList({
                         </Badge>
                       </div>
                       {item.encounter.current_location && (
-                        <div className="flex items-center gap-1 text-sm text-gray-700">
-                          <span>
+                        <div className="bg-gray-100 py-1 px-3">
+                          <span className="text-gray-800">
                             {getLocationPath(item.encounter.current_location)}
                           </span>
                         </div>
@@ -438,29 +509,12 @@ export default function MedicationRequestList({
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2 self-center">
-                      <Button
-                        variant="outline"
-                        className="font-semibold"
-                        onClick={() => {
-                          navigate(
-                            `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}/prescription/${item.id}/bill`,
-                          );
-                        }}
-                      >
-                        <ReceiptTextIcon strokeWidth={1.5} />
-                        {t("bill")}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="font-semibold"
-                        onClick={() => {
-                          navigate(
-                            `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}/prescription/${item.id}`,
-                          );
-                        }}
-                      >
-                        <ArrowUpRightSquare strokeWidth={1.5} />
-                        {t("see_prescription")}
+                      <Button variant="outline" className="font-semibold">
+                        <Link
+                          href={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}/prescription/${item.id}`}
+                        >
+                          {t("view_prescription")}
+                        </Link>
                       </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

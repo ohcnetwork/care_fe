@@ -26,9 +26,9 @@ import AllMedicationBillForm from "@/pages/Facility/services/pharmacy/AllMedicat
 import DispensesView from "@/pages/Facility/services/pharmacy/DispensesView";
 import MedicationBillForm from "@/pages/Facility/services/pharmacy/MedicationBillForm";
 import MedicationDispenseHistory from "@/pages/Facility/services/pharmacy/MedicationDispenseHistory";
-import MedicationRequestList from "@/pages/Facility/services/pharmacy/MedicationRequestList";
 import MedicationReturnList from "@/pages/Facility/services/pharmacy/MedicationReturnList";
 import MedicationReturnShow from "@/pages/Facility/services/pharmacy/MedicationReturnShow";
+import PrescriptionQueue from "@/pages/Facility/services/pharmacy/PrescriptionQueue";
 import PrescriptionsView, {
   PharmacyMedicationTab,
 } from "@/pages/Facility/services/pharmacy/PrescriptionsView";
@@ -48,7 +48,7 @@ const getRoutes = (facilityId: string, locationId: string) => ({
   "/beds": () => <BedsList facilityId={facilityId} locationId={locationId} />,
   // Pharmacy
   "/medication_requests": () => (
-    <MedicationRequestList facilityId={facilityId} locationId={locationId} />
+    <PrescriptionQueue facilityId={facilityId} locationId={locationId} />
   ),
   "/medication_requests/patient/:patientId/prescription/:prescriptionId": ({
     patientId,

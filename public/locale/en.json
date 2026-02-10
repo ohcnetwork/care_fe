@@ -942,6 +942,7 @@
   "bill": "Bill",
   "bill_all_pending_prescriptions": "Bill All Pending Prescriptions",
   "bill_medication": "Bill Medication",
+  "bill_selected_prescriptions": "Bill Selected Rx",
   "bill_medications": "Bill Medications",
   "bill_selected": "Bill Selected",
   "bill_this": "Bill This",
@@ -4291,6 +4292,7 @@
   "principal_diagnosis": "Principal diagnosis",
   "print": "Print",
   "print_all_prescriptions": "Print All Prescriptions",
+  "print_all_rx": "Print All Rx",
   "print_all_qr_codes": "Print All QR Codes",
   "print_all_responses": "Print all {{title}} responses",
   "print_appointment": "Print Appointment",
@@ -5190,6 +5192,7 @@
   "select_preference": "Select Preference",
   "select_prescription": "Select prescription",
   "select_prescription_to_view_details": "Select prescription to view details",
+  "select_prescriptions_to_bill": "Select prescriptions to bill",
   "select_previous": "Select Previous Fields",
   "select_primary_encounter": "Select primary encounter",
   "select_priority": "Select Priority",
@@ -6283,5 +6286,7 @@
   "your_request_order_list": "Your Request Order List",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
-  "℞": "℞"
+  "℞": "℞",
+  "encounter_status_location": "Encounter / Status  / Location",
+  "view_prescription": "View Rx"
 }
