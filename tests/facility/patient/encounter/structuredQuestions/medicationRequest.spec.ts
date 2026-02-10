@@ -162,7 +162,7 @@ test.describe("Medication Request Questionnaire", () => {
       .locator('button[role="combobox"]:not([disabled])')
       .filter({ hasText: "Select frequency" })
       .click();
-    await page.getByRole("option").filter({ hasText: frequency }).click();
+    await page.getByRole("option", { name: frequency, exact: true }).click();
 
     await page
       .locator('input[type="number"]:not([disabled])')
