@@ -291,6 +291,14 @@ const careConfig = {
   ),
 
   /**
+   * Open record payment window automatically after invoice is issued if set to "true"
+   */
+  openRecordPaymentAfterInvoiceIssued: booleanFromString(
+    env.REACT_OPEN_RECORD_PAYMENT_AFTER_INVOICE_ISSUED,
+    false,
+  ),
+
+  /**
    * Decimal calculation configuration
    */
   decimal: {

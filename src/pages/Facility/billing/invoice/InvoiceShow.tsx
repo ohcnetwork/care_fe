@@ -86,6 +86,7 @@ import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import careConfig from "@careConfig";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -305,7 +306,10 @@ export function InvoiceShow({
 
       updateInvoice(data, {
         onSuccess: () => {
-          if (status === InvoiceStatus.issued) {
+          if (
+            status === InvoiceStatus.issued &&
+            careConfig.openRecordPaymentAfterInvoiceIssued
+          ) {
             setIsPaymentSheetOpen(true);
           }
         },
