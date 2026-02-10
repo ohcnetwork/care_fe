@@ -73,6 +73,7 @@ export function ManageQueueFinishedTab({
             <TableRow>
               <TableHead>{t("token_number")}</TableHead>
               <TableHead>{t("patient_name")}</TableHead>
+              <TableHead>{t("encounter")}</TableHead>
               <TableHead>{t("service_points")}</TableHead>
               <TableHead>{t("status")}</TableHead>
               <TableHead className="w-[100px]">{t("actions")}</TableHead>
@@ -110,6 +111,15 @@ export function ManageQueueFinishedTab({
                   ) : (
                     <span className="text-gray-500">-</span>
                   )}
+                </TableCell>
+                <TableCell>
+                  <Link
+                    href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
+                    className="hover:underline transition-colors flex items-center gap-1"
+                  >
+                    {t("encounter")}
+                    <ExternalLink className="size-3" />
+                  </Link>
                 </TableCell>
                 <TableCell>
                   {token.sub_queue?.name || (

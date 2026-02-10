@@ -12,6 +12,7 @@ import {
   Ticket,
   Wallet,
 } from "lucide-react";
+import { useState } from "react";
 
 import { pharmacyDispenseServiceAtom } from "@/atoms/pharmacy";
 import { getPermissions } from "@/common/Permissions";
@@ -25,6 +26,7 @@ import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
+import { UpcomingAppointmentCard } from "@/pages/Appointments/components/UpcomingAppointmentCard";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -41,13 +43,13 @@ interface QParams {
   year_of_birth: string;
   partial_id: string;
   flow?: "queue" | "dispense";
-  createEncounter?: "true";
+  action?: "schedule" | "create_encounter";
 }
 
 export default function VerifyPatient() {
   useShortcutSubContext("facility:patient:home");
   const { t } = useTranslation();
-  const [{ phone_number, year_of_birth, partial_id, flow, createEncounter }] =
+  const [{ phone_number, year_of_birth, partial_id, flow, action }] =
     useQueryParams<QParams>();
   const queryClient = useQueryClient();
 
@@ -60,6 +62,8 @@ export default function VerifyPatient() {
 
   const isQueueFlow = flow === "queue";
   const isDispenseFlow = flow === "dispense" && pharmacyDispenseService != null;
+
+  const [activeTab, setActiveTab] = useState("encounters");
 
   const { hasPermission } = usePermissions();
   const isTab = useBreakpoints({ default: true, lg: false });
@@ -81,7 +85,7 @@ export default function VerifyPatient() {
     queryFn: query(patientApi.searchRetrieve, {
       body: { phone_number: phone_number ?? "", year_of_birth, partial_id },
     }),
-    enabled: !!(year_of_birth && partial_id),
+    enabled: !!(partial_id && (year_of_birth || phone_number)),
   });
 
   if (isVerifyingPatient || !facility) {
@@ -132,13 +136,19 @@ export default function VerifyPatient() {
                 </PatientInfoCard>
               </div>
 
+              <UpcomingAppointmentCard
+                patientId={patientData.id}
+                facilityId={facilityId}
+                onViewAllAppointments={() => setActiveTab("appointments")}
+              />
+
               <div className="grid gap-4 grid-cols-2  lg:grid-cols-3">
                 {canCreateEncounter && (
                   <CreateEncounterForm
                     patientId={patientData.id}
                     facilityId={facilityId}
                     patientName={patientData.name}
-                    defaultOpen={isQueueFlow || createEncounter === "true"}
+                    defaultOpen={isQueueFlow || action === "create_encounter"}
                     trigger={
                       <QuickAction
                         icon={<SquareActivity className="text-orange-500" />}
@@ -161,6 +171,7 @@ export default function VerifyPatient() {
                   <BookAppointmentSheet
                     patientId={patientData.id}
                     facilityId={facilityId}
+                    defaultOpen={action === "schedule"}
                     trigger={
                       <QuickAction
                         icon={<Stethoscope className="text-purple-500" />}
@@ -168,6 +179,15 @@ export default function VerifyPatient() {
                         actionId="schedule-appointment"
                       />
                     }
+                    onSuccess={() => {
+                      queryClient.invalidateQueries({
+                        queryKey: [
+                          "upcoming-appointment",
+                          patientData.id,
+                          facilityId,
+                        ],
+                      });
+                    }}
                   />
                 )}
 
@@ -201,6 +221,8 @@ export default function VerifyPatient() {
                 canListEncounters={canListEncounters}
                 canWriteAppointment={canWriteAppointment}
                 canListTokens={canListTokens}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
                 actions={(encounter) => (
                   <div className="flex gap-2 items-center">
                     {flow === "dispense" && pharmacyDispenseService && (

@@ -29,7 +29,7 @@ export const Account = () => {
   } = useEncounter();
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["defaultAccount", facilityId, patientId],
+    queryKey: ["defaultAccount", facilityId, patientId, encounter?.id],
     queryFn: query(accountApi.defaultAccount, {
       pathParams: { facilityId: facilityId || "" },
       body: {
@@ -37,6 +37,7 @@ export const Account = () => {
         facility: facilityId || "",
         encounter: encounter?.id || "",
       },
+      silent: true,
     }),
     enabled: !!facilityId && !!encounter?.id,
   });

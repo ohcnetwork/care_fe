@@ -98,7 +98,8 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
     await page.getByRole("button", { name: "Load from order" }).click();
     await page.getByRole("button", { name: "Done" }).click();
     await page.getByRole("button", { name: "Select stock" }).nth(1).click();
-    await page.locator("div").filter({ hasText: "₹20" }).nth(3).click();
+    await page.locator("div").filter({ hasText: "₹20.00" }).nth(3).click();
+    await page.mouse.click(0, 0);
     await page.getByRole("button", { name: "Save" }).click();
     await page.getByRole("button", { name: "Mark as Approved" }).click();
     await page.goto(pharmacybasePath + "/inventory/internal/dispatch");
@@ -119,7 +120,8 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
     await page.getByRole("button", { name: "Load from order" }).click();
     await page.getByRole("button", { name: "Done" }).click();
     await page.getByRole("button", { name: "Select stock" }).nth(1).click();
-    await page.locator("div").filter({ hasText: "₹20" }).nth(3).click();
+    await page.locator("div").filter({ hasText: "₹20.00" }).nth(3).click();
+    await page.mouse.click(0, 0);
     await page.getByRole("button", { name: "Save" }).click();
     await page.getByRole("button", { name: "Mark as Approved" }).click();
     await page.goto(pharmacybasePath + "/inventory/internal/dispatch");
@@ -135,7 +137,7 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
       .getByRole("button", { name: "View Details" })
       .click();
     await page
-      .getByRole("row", { name: "Item Requested Qty." })
+      .getByRole("row", { name: "Requested Qty." })
       .getByRole("checkbox")
       .click();
     await page.getByRole("button", { name: "Mark as Completed" }).click();

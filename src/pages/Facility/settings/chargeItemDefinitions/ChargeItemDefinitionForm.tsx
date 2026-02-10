@@ -10,6 +10,7 @@ import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -152,6 +153,7 @@ export function ChargeItemDefinitionForm({
       base_price: zodDecimal({ message: t("base_price_is_required") }),
       mrp: zodDecimal({ min: 0 }).optional().nullable(),
       purchase_price: zodDecimal({ min: 0 }).optional().nullable(),
+      can_edit_charge_item: z.boolean(),
       price_components: z.array(
         z.object({
           monetary_component_type: z.nativeEnum(MonetaryComponentType),
@@ -207,6 +209,8 @@ export function ChargeItemDefinitionForm({
       purchase_price: purchasePriceComponent?.amount
         ? round(purchasePriceComponent.amount)
         : null,
+      // Can edit charge item
+      can_edit_charge_item: initialData?.can_edit_charge_item ?? true,
       // Price components (excluding base price, MRP, and Purchase Price components)
       price_components:
         initialData?.price_components
@@ -625,6 +629,24 @@ export function ChargeItemDefinitionForm({
                       />
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="can_edit_charge_item"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>{t("can_edit_charge_item")}</FormLabel>
+                    </div>
                   </FormItem>
                 )}
               />
