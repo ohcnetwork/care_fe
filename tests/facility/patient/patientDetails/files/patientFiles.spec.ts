@@ -52,6 +52,7 @@ test.describe("Patient Files", () => {
     await expect(page.getByText(fileUploadSuccessToast)).toBeVisible({
       timeout: 10000,
     });
+    await page.getByRole("button", { name: "Close toast" }).click();
     return response;
   };
 
