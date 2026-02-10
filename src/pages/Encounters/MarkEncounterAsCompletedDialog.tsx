@@ -50,11 +50,9 @@ export function MarkEncounterAsCompletedDialog(
               completeEncounter({
                 encounter,
                 onDischargeRequired: () => {
-                  if (encounter) {
-                    navigate(
-                      `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?toDischarge=true`,
-                    );
-                  }
+                  navigate(
+                    `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?toDischarge=true`,
+                  );
                 },
               })
             }
