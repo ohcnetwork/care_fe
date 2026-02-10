@@ -108,6 +108,7 @@ import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/Appo
 import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { TokenGenerationSheet } from "@/pages/Appointments/components/TokenGenerationSheet";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
 import { FacilityRead } from "@/types/facility/facility";
@@ -128,6 +129,7 @@ export default function AppointmentDetail(props: Props) {
   const [params, setQueryParams] = useQueryParams();
   const { showSuccess } = params;
   const [{ from_queue }] = useQueryParams();
+  const { actions } = useEncounter();
 
   useShortcutSubContext("facility:appointment");
 
@@ -473,10 +475,7 @@ export default function AppointmentDetail(props: Props) {
                         title={t("start_consultation")}
                         actionId="start-consultation"
                         onClick={() => {
-                          updateAppointment({
-                            status: AppointmentStatus.IN_CONSULTATION,
-                            note: appointment.note,
-                          });
+                          actions.startEncounter();
                           navigate(
                             `/facility/${facilityId}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
                           );
@@ -499,10 +498,7 @@ export default function AppointmentDetail(props: Props) {
                           />
                         }
                         onSuccess={() => {
-                          updateAppointment({
-                            status: AppointmentStatus.IN_CONSULTATION,
-                            note: appointment.note,
-                          });
+                          actions.startEncounter();
                         }}
                       />
                     ))}

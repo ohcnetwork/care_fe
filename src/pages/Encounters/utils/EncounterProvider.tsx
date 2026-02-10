@@ -52,10 +52,10 @@ type EncounterContextType = {
   canWriteClinicalData: boolean;
 
   isEndEncounterPending: boolean;
-
   actions: {
     markAsCompleted: () => void;
-    endEncounter: (encounter: EncounterRead, closeEncounter: boolean) => void;
+    endEncounter: (closeEncounter: boolean) => void;
+    startEncounter: () => void;
     assignLocation: () => void;
     viewLocationHistory: () => void;
     manageCareTeam: () => void;
@@ -190,8 +190,11 @@ export function EncounterProvider({
     null,
   );
 
-  const { endEncounter, isPending: isEndEncounterPending } =
-    useEncounterProgressController();
+  const {
+    endEncounter,
+    isPending: isEndEncounterPending,
+    startEncounter,
+  } = useEncounterProgressController(selectedEncounter);
   const toDischarge =
     selectedEncounter?.encounter_class === "imp" &&
     selectedEncounter?.status !== "discharged";
@@ -256,6 +259,7 @@ export function EncounterProvider({
             setActiveAction(EncounterAction.MarkAsCompleted);
           },
           endEncounter,
+          startEncounter,
           assignLocation: () => {
             setActiveAction(EncounterAction.AssignLocation);
           },

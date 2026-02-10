@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -25,7 +25,10 @@ import {
   TokenUpdate,
 } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
+import { TokenSubQueueStatus } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
+import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 
 export const buildEncounterUrl = (
   patientId: string,
@@ -42,22 +45,32 @@ type CompleteEncounterVariables = {
   requests: BatchRequestBody<
     AppointmentUpdateRequest | TokenUpdate | EncounterEdit
   >["requests"];
-  encounter?: EncounterRead;
 };
 
-export function useEncounterProgressController() {
+export function useEncounterProgressController(
+  encounter: EncounterRead | undefined,
+) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+
+  const { data: servicePoints } = useQuery({
+    queryKey: ["servicePoints", encounter?.facility.id],
+    queryFn: query(tokenSubQueueApi.list, {
+      pathParams: { facility_id: encounter?.facility.id ?? "" },
+      queryParams: {
+        resource_type: encounter?.appointment?.resource_type,
+        resource_id: encounter?.appointment?.resource?.id,
+        status: TokenSubQueueStatus.ACTIVE,
+      },
+    }),
+    enabled: !!encounter?.appointment,
+  });
 
   const { mutate: batchRequest, isPending: isBatchRequestPending } =
     useMutation({
       mutationFn: (variables: CompleteEncounterVariables) =>
         mutate(batchApi.batchRequest)({ requests: variables.requests }),
-      onSuccess: (
-        results: BatchRequestResponse,
-        variables: CompleteEncounterVariables,
-      ) => {
-        const encounter = variables.encounter;
+      onSuccess: (results: BatchRequestResponse) => {
         queryClient.invalidateQueries({
           queryKey: ["encounter", encounter?.id],
         });
@@ -85,11 +98,63 @@ export function useEncounterProgressController() {
       },
     });
 
-  const endEncounter = (
-    encounter: EncounterRead,
-    completeEncounter: boolean,
-  ) => {
-    const appointment = encounter?.appointment;
+  const startEncounter = () => {
+    if (!encounter) {
+      return;
+    }
+
+    const requests: BatchRequestBody<
+      AppointmentUpdateRequest | TokenUpdate | EncounterEdit
+    >["requests"] = [];
+
+    requests.push({
+      url: encounterApi.update.path.replace("{id}", encounter.id),
+      method: encounterApi.update.method,
+      reference_id: "encounter-started",
+      body: {
+        ...encounter,
+        status: EncounterStatus.IN_PROGRESS,
+      },
+    });
+
+    if (encounter.appointment) {
+      requests.push({
+        url: scheduleApi.appointments.update.path
+          .replace("{facilityId}", encounter.facility.id)
+          .replace("{id}", encounter.appointment.id),
+        method: scheduleApi.appointments.update.method,
+        reference_id: "appointment-started",
+        body: {
+          status: AppointmentStatus.IN_CONSULTATION,
+          note: encounter.appointment.note,
+        },
+      });
+    }
+
+    if (encounter.appointment?.token) {
+      requests.push({
+        url: tokenApi.update.path
+          .replace("{facility_id}", encounter.facility.id)
+          .replace("{queue_id}", encounter.appointment.token.queue.id)
+          .replace("{id}", encounter.appointment.token.id),
+        method: tokenApi.update.method,
+        reference_id: "token-started",
+        body: {
+          ...encounter.appointment.token,
+          status: TokenStatus.IN_PROGRESS,
+          sub_queue: servicePoints?.results[0]?.id || null,
+        },
+      });
+    }
+    batchRequest({ requests });
+  };
+
+  const endEncounter = (completeEncounter: boolean) => {
+    if (!encounter) {
+      return;
+    }
+
+    const appointment = encounter.appointment;
     const requests: BatchRequestBody<
       AppointmentUpdateRequest | TokenUpdate | EncounterEdit
     >["requests"] = [];
@@ -151,11 +216,12 @@ export function useEncounterProgressController() {
       });
     }
 
-    batchRequest({ requests, encounter });
+    batchRequest({ requests });
   };
 
   return {
     endEncounter,
     isPending: isBatchRequestPending,
+    startEncounter,
   };
 }

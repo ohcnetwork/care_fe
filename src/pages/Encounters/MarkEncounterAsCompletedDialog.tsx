@@ -46,7 +46,7 @@ export function MarkEncounterAsCompletedDialog(
           <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
           <AlertDialogAction
             className={buttonVariants({ variant: "primary" })}
-            onClick={() => endEncounter(encounter, true)}
+            onClick={() => endEncounter(true)}
           >
             {t("mark_as_complete")}
           </AlertDialogAction>

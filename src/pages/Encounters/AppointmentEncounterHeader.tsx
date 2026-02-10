@@ -13,7 +13,6 @@ import {
   EncounterStatus,
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
-import encounterApi from "@/types/emr/encounter/encounterApi";
 import {
   AppointmentRead,
   AppointmentStatus,
@@ -21,8 +20,6 @@ import {
 } from "@/types/scheduling/schedule";
 
 import { renderTokenNumber } from "@/types/tokens/token/token";
-import mutate from "@/Utils/request/mutate";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, ExternalLinkIcon } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -86,26 +83,11 @@ const AppointmentEncounterHeaderActions = ({
   appointment: AppointmentRead;
 }) => {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
 
   const { actions, isEndEncounterPending } = useEncounter();
 
-  const { mutate: startEncounter } = useMutation({
-    mutationFn: mutate(encounterApi.update, {
-      pathParams: { id: encounter.id },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["encounter", encounter.id],
-      });
-    },
-  });
-
   const handleStartEncounter = () => {
-    startEncounter({
-      ...encounter,
-      status: EncounterStatus.IN_PROGRESS,
-    });
+    actions.startEncounter();
   };
 
   const options = getOptions(encounter);
@@ -177,7 +159,7 @@ const AppointmentEncounterHeaderActions = ({
                 if (option === "mark_as_complete") {
                   actions.markAsCompleted();
                 } else if (option === "close_appointment") {
-                  actions.endEncounter(encounter, false);
+                  actions.endEncounter(false);
                 }
               }}
             >
