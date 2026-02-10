@@ -131,18 +131,18 @@ export function MedicationBillRow({
           )}
         />
       </TableCell>
-      <TableCell className={cn(tableCellClass, "max-w-xs")}>
+      <TableCell className={cn(tableCellClass, "max-w-xs align-top")}>
         <div
           className={cn(
-            "flex items-center justify-between gap-2",
+            "flex items-center justify-between gap-2 min-w-0",
             !isChecked && "opacity-60 line-through",
           )}
         >
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="font-medium text-gray-950 text-base flex items-center">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="whitespace-pre-wrap wrap-break-word">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                  <span className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
                     {displayProductKnowledge?.name ||
                       field.medication?.medication?.display ||
                       t("unknown_medication")}
@@ -289,7 +289,7 @@ export function MedicationBillRow({
                   )}
                 </div>
                 {(substitution || hasNoProductKnowledge) && (
-                  <div className="text-gray-500 font-normal italic line-through text-sm">
+                  <div className="text-gray-500 font-normal italic line-through text-sm whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
                     {hasNoProductKnowledge
                       ? field.medication?.medication?.display
                       : productKnowledge?.name}
@@ -378,7 +378,7 @@ export function MedicationBillRow({
             <Button
               variant="outline"
               size="sm"
-              className="border-gray-400 border text-gray-950 hover:bg-gray-50"
+              className="border-gray-400 border text-gray-950 hover:bg-gray-50 shrink-0 self-start"
               type="button"
               disabled={!isChecked}
               onClick={() => {
