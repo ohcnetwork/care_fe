@@ -147,6 +147,12 @@ const careConfig = {
     true,
   ),
 
+  /**
+   * Default payment method for payment reconciliation
+   * Optional: if not set, no default method will be preselected
+   */
+  defaultPaymentMethod: env.REACT_DEFAULT_PAYMENT_METHOD,
+
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
         const [module, cdn] = app.split("@");

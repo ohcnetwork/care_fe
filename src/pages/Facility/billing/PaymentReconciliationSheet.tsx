@@ -327,7 +327,9 @@ export function PaymentReconciliationSheet({
         kind: PaymentReconciliationKind.deposit,
         issuer_type: PaymentReconciliationIssuerType.patient,
         outcome: PaymentReconciliationOutcome.complete,
-        method: undefined,
+        method: careConfig.defaultPaymentMethod as
+          | PaymentReconciliationPaymentMethod
+          | undefined,
         payment_datetime: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
         amount: initialAmount,
         tendered_amount: initialAmount,
