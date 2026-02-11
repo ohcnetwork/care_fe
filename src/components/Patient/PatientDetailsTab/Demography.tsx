@@ -260,6 +260,12 @@ export const Demography = (props: PatientProps) => {
             });
           }}
           canWrite={canWritePatient}
+          trigger={
+            <Button variant="outline" disabled={false}>
+              <CareIcon icon="l-edit-alt" className="text-md pr-1" />
+              {t("edit")}
+            </Button>
+          }
         />
       ),
       details: patientData.instance_tags.map((t) => ({
