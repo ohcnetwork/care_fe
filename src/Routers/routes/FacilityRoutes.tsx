@@ -15,6 +15,7 @@ import { PrintChargeItems } from "@/pages/Facility/billing/account/components/Pr
 import InvoiceList from "@/pages/Facility/billing/invoice/InvoiceList";
 import InvoiceShow from "@/pages/Facility/billing/invoice/InvoiceShow";
 import PrintInvoice from "@/pages/Facility/billing/invoice/PrintInvoice";
+import PrintInvoices from "@/pages/Facility/billing/invoice/PrintInvoices";
 import PaymentReconciliationList from "@/pages/Facility/billing/paymentReconciliation/PaymentReconciliationList";
 import PaymentReconciliationShow from "@/pages/Facility/billing/paymentReconciliation/PaymentReconciliationShow";
 import PrintPaymentReconciliation from "@/pages/Facility/billing/paymentReconciliation/PrintPaymentReconciliation";
@@ -155,6 +156,10 @@ const FacilityRoutes: AppRoutes = {
     facilityId,
     invoiceId,
   }) => <PrintInvoice facilityId={facilityId} invoiceId={invoiceId} />,
+  "/facility/:facilityId/billing/invoices/:invoiceIds/print": ({
+    facilityId,
+    invoiceIds,
+  }) => <PrintInvoices facilityId={facilityId} invoiceIds={invoiceIds} />,
   "/facility/:facilityId/billing/payments": ({ facilityId }) => (
     <PaymentReconciliationList facilityId={facilityId} />
   ),
