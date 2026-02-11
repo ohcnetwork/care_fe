@@ -1,8 +1,15 @@
-import Editor, { OnMount } from "@monaco-editor/react";
+import type { OnMount } from "@monaco-editor/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type * as Monaco from "monaco-editor";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -61,7 +68,9 @@ import {
   generateSingleObjectInsertion,
   insertAtCursor,
 } from "./templateUtils";
-
+const Editor = lazy(() =>
+  import("@monaco-editor/react").then((mod) => ({ default: mod.Editor })),
+);
 const templateBuilderSchema = z.object({
   name: z.string().min(1),
   slug_value: z
@@ -726,40 +735,48 @@ function TemplateEditor({
             <FormLabel className="shrink-0">{t("template_html")}</FormLabel>
             <FormControl>
               <div className="flex-1 min-h-0 h-full border rounded-md overflow-hidden">
-                <Editor
-                  height="100%"
-                  defaultLanguage="html"
-                  value={field.value}
-                  onChange={(value) => field.onChange(value ?? "")}
-                  onMount={onEditorMount}
-                  theme="vs-dark"
-                  options={{
-                    minimap: { enabled: false },
-                    fontSize: 14,
-                    fontFamily: "monospace",
-                    lineNumbers: "on",
-                    wordWrap: "on",
-                    automaticLayout: true,
-                    scrollBeyondLastLine: false,
-                    tabSize: 2,
-                    formatOnPaste: true,
-                    formatOnType: true,
-                    bracketPairColorization: { enabled: true },
-                    autoClosingBrackets: "always",
-                    autoClosingQuotes: "always",
-                    folding: true,
-                    foldingHighlight: true,
-                    scrollbar: {
-                      vertical: "hidden",
-                      horizontal: "hidden",
-                      alwaysConsumeMouseWheel: false,
-                    },
-                    suggest: {
-                      showKeywords: true,
-                      showSnippets: true,
-                    },
-                  }}
-                />
+                <Suspense
+                  fallback={
+                    <div className="flex h-full items-center justify-center bg-zinc-900 text-zinc-400">
+                      {t("loading")}
+                    </div>
+                  }
+                >
+                  <Editor
+                    height="100%"
+                    defaultLanguage="html"
+                    value={field.value}
+                    onChange={(value) => field.onChange(value ?? "")}
+                    onMount={onEditorMount}
+                    theme="vs-dark"
+                    options={{
+                      minimap: { enabled: false },
+                      fontSize: 14,
+                      fontFamily: "monospace",
+                      lineNumbers: "on",
+                      wordWrap: "on",
+                      automaticLayout: true,
+                      scrollBeyondLastLine: false,
+                      tabSize: 2,
+                      formatOnPaste: true,
+                      formatOnType: true,
+                      bracketPairColorization: { enabled: true },
+                      autoClosingBrackets: "always",
+                      autoClosingQuotes: "always",
+                      folding: true,
+                      foldingHighlight: true,
+                      scrollbar: {
+                        vertical: "hidden",
+                        horizontal: "hidden",
+                        alwaysConsumeMouseWheel: false,
+                      },
+                      suggest: {
+                        showKeywords: true,
+                        showSnippets: true,
+                      },
+                    }}
+                  />
+                </Suspense>
               </div>
             </FormControl>
           </FormItem>
