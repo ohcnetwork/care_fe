@@ -12,7 +12,7 @@ import {
   Star,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -159,6 +159,13 @@ export function ResourceDefinitionCategoryPicker<T>({
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [breadcrumbsExpanded, setBreadcrumbsExpanded] = useState(false);
+
+  // Sync open state with defaultOpen prop for controlled auto-open behavior
+  useEffect(() => {
+    if (defaultOpen) {
+      setOpen(true);
+    }
+  }, [defaultOpen]);
 
   // Fetch categories for current level
   const { data: categoriesResponse, isLoading: isLoadingCategories } = useQuery(

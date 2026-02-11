@@ -45,10 +45,12 @@ export default function InvoicesData({
   facilityId,
   accountId,
   showIdentifierFilter = false,
+  hideAccountColumn = false,
 }: {
   facilityId: string;
   accountId?: string;
   showIdentifierFilter?: boolean;
+  hideAccountColumn?: boolean;
 }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
@@ -169,7 +171,7 @@ export default function InvoicesData({
               <TableRow>
                 <TableHead>{t("invoice_number")}</TableHead>
                 <TableHead>{t("invoice_date")}</TableHead>
-                <TableHead>{t("account")}</TableHead>
+                {!hideAccountColumn && <TableHead>{t("account")}</TableHead>}
                 <TableHead>{t("status")}</TableHead>
                 <TableHead>{t("total")}</TableHead>
                 <TableHead>{t("actions")}</TableHead>
@@ -190,24 +192,26 @@ export default function InvoicesData({
                     </div>
                   </TableCell>
 
-                  <TableCell>
-                    <Button variant="link" asChild>
-                      <Link
-                        href={`/facility/${facilityId}/billing/account/${invoice.account?.id}`}
-                        className="hover:text-primary "
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <div className="text-base flex items-center gap-1 underline underline-offset-2">
-                          {invoice.account?.name}
-                          <CareIcon
-                            icon="l-external-link-alt"
-                            className="size-3"
-                          />
-                        </div>
-                      </Link>
-                    </Button>
-                  </TableCell>
+                  {!hideAccountColumn && (
+                    <TableCell>
+                      <Button variant="link" asChild>
+                        <Link
+                          href={`/facility/${facilityId}/billing/account/${invoice.account?.id}`}
+                          className="hover:text-primary "
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <div className="text-base flex items-center gap-1 underline underline-offset-2">
+                            {invoice.account?.name}
+                            <CareIcon
+                              icon="l-external-link-alt"
+                              className="size-3"
+                            />
+                          </div>
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  )}
 
                   <TableCell>
                     <Badge variant={INVOICE_STATUS_COLORS[invoice.status]}>
