@@ -1,11 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { ChevronDown, Plus, X } from "lucide-react";
+import { ChevronDown, FileText, Plus, X } from "lucide-react";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
+
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +25,11 @@ import {
   MonetaryDisplay,
 } from "@/components/ui/monetary-display";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -38,6 +45,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 
 import UserSelector from "@/components/Common/UserSelector";
 
@@ -103,6 +111,11 @@ const formSchema = z.object({
       title: z.string(),
       status: z.nativeEnum(ChargeItemStatus),
       description: z
+        .string()
+        .optional()
+        .nullable()
+        .transform((val) => (val === "" ? null : val)),
+      note: z
         .string()
         .optional()
         .nullable()
@@ -233,6 +246,7 @@ export function EditInvoiceTable({
           title: item.title,
           status: item.status as ChargeItemStatus,
           description: item.description || "",
+          note: item.note || "",
           baseAmount: round(baseComponent?.amount || "0"),
           quantity: round(item.quantity),
           taxComponents,
@@ -278,6 +292,7 @@ export function EditInvoiceTable({
         }),
       ],
       description: item.description || undefined,
+      note: item.note || undefined,
       performer_actor: performers[item.id]?.id,
     }));
 
@@ -506,6 +521,7 @@ export function EditInvoiceTable({
                       )}
                   </div>
                 </TableHead>
+                <TableHead className="w-16 text-center">{t("note")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -835,10 +851,48 @@ export function EditInvoiceTable({
                           );
                         })()}
                       </TableCell>
+                      <TableCell className="text-center">
+                        <FormField
+                          control={form.control}
+                          name={`items.${index}.note`}
+                          render={({ field }) => (
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className={cn(
+                                    "bg-gray-100",
+                                    field.value && "bg-primary-100",
+                                  )}
+                                >
+                                  <FileText
+                                    className={cn(
+                                      "size-4",
+                                      field.value && "text-primary-600",
+                                    )}
+                                  />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="p-0" align="end">
+                                <Textarea
+                                  {...field}
+                                  value={field.value ?? ""}
+                                  onChange={(e) =>
+                                    field.onChange(e.target.value)
+                                  }
+                                  placeholder={t("add_notes")}
+                                  disabled={!canEditRow}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          )}
+                        />
+                      </TableCell>
                     </TableRow>
                     {rowErrors.length > 0 && (
                       <TableRow className="bg-red-50 hover:bg-red-50">
-                        <TableCell colSpan={6} className="py-2">
+                        <TableCell colSpan={7} className="py-2">
                           <ul className="list-disc list-inside text-sm text-red-600 space-y-0.5">
                             {rowErrors.map((error, i) => (
                               <li key={i}>{error}</li>
