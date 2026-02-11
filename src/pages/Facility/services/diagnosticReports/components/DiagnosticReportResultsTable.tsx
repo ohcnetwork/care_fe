@@ -31,7 +31,7 @@ export function DiagnosticReportResultsTable({
       observation.reference_range && observation.reference_range.length > 0,
   );
   const hasInterpretation = observations.some(
-    (observation) => observation.interpretation,
+    (observation) => observation.interpretation?.display,
   );
   const hasComponentReferenceRange = observations.some(
     (observation) =>
@@ -44,7 +44,9 @@ export function DiagnosticReportResultsTable({
   const hasComponentInterpretation = observations.some(
     (observation) =>
       observation.component &&
-      observation.component.some((component) => component.interpretation),
+      observation.component.some(
+        (component) => component.interpretation?.display,
+      ),
   );
   const showReferenceRange = hasReferenceRange || hasComponentReferenceRange;
   const showInterpretation = hasInterpretation || hasComponentInterpretation;

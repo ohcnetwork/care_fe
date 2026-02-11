@@ -1,7 +1,9 @@
 import { format } from "date-fns";
-import { useState } from "react";
+import { useAtom } from "jotai";
+import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
+import { scheduleServiceTypeAtom } from "@/atoms/scheduleServiceTypeAtom";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -72,6 +74,29 @@ export function validateAppointmentQuestion(
   });
 }
 
+function getInitialResourceState(
+  cachedServiceType: SchedulableResourceType,
+  currentUser: ReturnType<typeof useAuthUser>,
+): ScheduleResourceFormState {
+  switch (cachedServiceType) {
+    case SchedulableResourceType.Practitioner:
+      return {
+        resource: currentUser,
+        resource_type: SchedulableResourceType.Practitioner,
+      };
+    case SchedulableResourceType.Location:
+      return {
+        resource: null,
+        resource_type: SchedulableResourceType.Location,
+      };
+    case SchedulableResourceType.HealthcareService:
+      return {
+        resource: null,
+        resource_type: SchedulableResourceType.HealthcareService,
+      };
+  }
+}
+
 export function AppointmentQuestion({
   question,
   questionnaireResponse,
@@ -82,11 +107,29 @@ export function AppointmentQuestion({
 }: AppointmentQuestionProps) {
   const { t } = useTranslation();
   const currentUser = useAuthUser();
+  const [cachedServiceType, setCachedServiceType] = useAtom(
+    scheduleServiceTypeAtom,
+  );
   const [selectedResource, setSelectedResource] =
-    useState<ScheduleResourceFormState>({
-      resource: currentUser,
-      resource_type: SchedulableResourceType.Practitioner,
-    });
+    useState<ScheduleResourceFormState>(() =>
+      getInitialResourceState(cachedServiceType, currentUser),
+    );
+
+  useEffect(() => {
+    if (selectedResource.resource_type !== cachedServiceType) {
+      setSelectedResource(
+        getInitialResourceState(cachedServiceType, currentUser),
+      );
+    }
+  }, [cachedServiceType, currentUser, selectedResource.resource_type]);
+
+  const handleResourceChange = (resource: ScheduleResourceFormState) => {
+    setSelectedResource(resource);
+    if (resource.resource_type !== cachedServiceType) {
+      setCachedServiceType(resource.resource_type);
+    }
+  };
+
   const [open, setOpen] = useState(false);
   const { hasError } = useFieldError(question.id, errors);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -147,7 +190,7 @@ export function AppointmentQuestion({
         reason={value.note || ""}
         setReason={(reason) => handleUpdate({ note: reason })}
         selectedResource={selectedResource}
-        setSelectedResource={setSelectedResource}
+        setSelectedResource={handleResourceChange}
       />
 
       <div>

@@ -62,4 +62,16 @@ export default {
     TBody: Type<void>(),
     TRes: Type<void>(),
   },
+  addFavorite: {
+    path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/add_favorite/",
+    method: HttpMethod.POST,
+    TBody: Type<{ favorite_list?: string }>(),
+    TRes: Type<void>(),
+  },
+  removeFavorite: {
+    path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/remove_favorite/",
+    method: HttpMethod.POST,
+    TBody: Type<{ favorite_list?: string }>(),
+    TRes: Type<void>(),
+  },
 };

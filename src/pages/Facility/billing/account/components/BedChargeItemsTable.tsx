@@ -232,12 +232,17 @@ export function BedChargeItemsTable({
   const locationHistory = encounter?.location_history || [];
 
   const { data: chargeItems, isLoading } = useQuery({
-    queryKey: ["chargeItems", accountId],
+    queryKey: [
+      "chargeItems",
+      accountId,
+      qParams,
+      ChargeItemServiceResource.bed_association,
+    ],
     queryFn: query(chargeItemApi.listChargeItem, {
       pathParams: { facilityId },
       queryParams: {
         account: accountId,
-        status: qParams.charge_item_status,
+        status: qParams.status,
         service_resource: ChargeItemServiceResource.bed_association,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
@@ -311,12 +316,12 @@ export function BedChargeItemsTable({
       <div className="mb-4">
         {/* Desktop Tabs */}
         <Tabs
-          value={qParams.charge_item_status ?? "all"}
-          onValueChange={(value) =>
+          value={qParams.status ?? "all"}
+          onValueChange={(value) => {
             updateQuery({
-              charge_item_status: value === "all" ? undefined : value,
-            })
-          }
+              status: value === "all" ? undefined : value,
+            });
+          }}
           className="max-sm:hidden"
         >
           <TabsList>
@@ -330,10 +335,10 @@ export function BedChargeItemsTable({
         </Tabs>
         {/* Mobile Select */}
         <Select
-          value={qParams.charge_item_status ?? "all"}
+          value={qParams.status ?? "all"}
           onValueChange={(value) =>
             updateQuery({
-              charge_item_status: value === "all" ? undefined : value,
+              status: value === "all" ? undefined : value,
             })
           }
         >

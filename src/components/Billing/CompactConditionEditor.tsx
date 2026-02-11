@@ -34,6 +34,7 @@ import {
   Metrics,
   TagOperationValue,
 } from "@/types/base/condition/condition";
+import { ENCOUNTER_CLASS } from "@/types/emr/encounter/encounter";
 
 interface CompactConditionEditorProps {
   conditions: ConditionForm[];
@@ -254,6 +255,41 @@ function RenderInput({
           </FormControl>
         </FormItem>
       </div>
+    );
+  }
+
+  if (
+    metric === "encounter_class" &&
+    operation === ConditionOperation.equality
+  ) {
+    return (
+      <FormField
+        control={form.control}
+        name="value"
+        render={({ field }) => (
+          <FormItem className="flex-1">
+            <FormControl>
+              <Select
+                value={field.value as string}
+                onValueChange={(value) => {
+                  field.onChange(value);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("select_a_value")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {ENCOUNTER_CLASS.map((encounterClass) => (
+                    <SelectItem key={encounterClass} value={encounterClass}>
+                      {t(`encounter_class__${encounterClass}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormControl>
+          </FormItem>
+        )}
+      />
     );
   }
 
