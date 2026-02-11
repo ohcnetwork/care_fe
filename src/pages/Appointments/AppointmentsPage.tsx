@@ -104,6 +104,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAuthUser from "@/hooks/useAuthUser";
+import { renderTokenNumber } from "@/types/tokens/token/token";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import careConfig from "@careConfig";
 import { PractitionerSelector } from "./components/PractitionerSelector";
@@ -745,8 +746,8 @@ function AppointmentCard({
           <div className="flex">
             <div className="bg-gray-100 px-2 py-1 ml-px text-center rounded-md">
               <p className="text-[10px] uppercase">{t("token")}</p>
-              <p className="font-bold text-2xl uppercase">
-                {appointment.token?.number ?? "--"}
+              <p className="font-bold text-lg uppercase">
+                {renderTokenNumber(appointment.token)}
               </p>
             </div>
           </div>
@@ -968,7 +969,7 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
         {t(appointment.status)}
       </TableCell>
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white rounded-r-lg">
-        {appointment.token?.number ?? "--"}
+        {appointment.token ? renderTokenNumber(appointment.token) : "--"}
       </TableCell>
     </>
   );

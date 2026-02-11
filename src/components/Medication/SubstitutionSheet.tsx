@@ -46,12 +46,16 @@ import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/product
 interface SubstitutionSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  originalProductKnowledge: ProductKnowledgeBase | undefined;
+  originalProductKnowledge?: ProductKnowledgeBase;
+  /** Used when no original product knowledge exists (e.g., medication without linked product) */
+  originalMedicationName?: string;
   currentSubstitution?: {
     substitutedProductKnowledge?: ProductKnowledgeBase;
     type?: SubstitutionType;
     reason?: SubstitutionReason;
   };
+  /** Pre-selected substitute product (optional) */
+  preSelectedProduct?: ProductKnowledgeBase;
   onSave: (
     substitutionDetails?: {
       substitutedProductKnowledge: ProductKnowledgeBase;
@@ -76,20 +80,24 @@ export function SubstitutionSheet({
   open,
   onOpenChange,
   originalProductKnowledge,
+  originalMedicationName,
   currentSubstitution,
+  preSelectedProduct,
   onSave,
   facilityId: _facilityId,
 }: SubstitutionSheetProps) {
   const { t } = useTranslation();
   const [selectedSubstitute, setSelectedSubstitute] = useState<
     ProductKnowledgeBase | undefined
-  >(currentSubstitution?.substitutedProductKnowledge);
+  >(currentSubstitution?.substitutedProductKnowledge || preSelectedProduct);
 
   const form = useForm<SubstitutionFormValues>({
     resolver: zodResolver(substitutionSchema),
     defaultValues: {
       substitutedProductKnowledge:
-        currentSubstitution?.substitutedProductKnowledge || undefined,
+        currentSubstitution?.substitutedProductKnowledge ||
+        preSelectedProduct ||
+        undefined,
       type: currentSubstitution?.type || SubstitutionType.E,
       reason: currentSubstitution?.reason || SubstitutionReason.OS,
     },
@@ -97,16 +105,16 @@ export function SubstitutionSheet({
 
   useEffect(() => {
     if (open) {
+      const initialProduct =
+        currentSubstitution?.substitutedProductKnowledge || preSelectedProduct;
       form.reset({
-        substitutedProductKnowledge:
-          currentSubstitution?.substitutedProductKnowledge || undefined,
+        substitutedProductKnowledge: initialProduct || undefined,
         type: currentSubstitution?.type || SubstitutionType.E,
         reason: currentSubstitution?.reason || SubstitutionReason.OS,
       });
-      setSelectedSubstitute(currentSubstitution?.substitutedProductKnowledge);
-      // No need to set search term anymore
+      setSelectedSubstitute(initialProduct);
     }
-  }, [open, currentSubstitution, form]);
+  }, [open, currentSubstitution, preSelectedProduct, form]);
 
   useEffect(() => {
     form.setValue("substitutedProductKnowledge", selectedSubstitute, {
@@ -130,7 +138,8 @@ export function SubstitutionSheet({
     setSelectedSubstitute(product);
   };
 
-  if (!originalProductKnowledge) return null;
+  const displayName =
+    originalProductKnowledge?.name || originalMedicationName || "";
 
   const handleClearSubstitution = () => {
     onSave(null); // Pass null to indicate clearing
@@ -148,9 +157,7 @@ export function SubstitutionSheet({
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span>{t("substituting_for")}:</span>
-                <Badge variant="secondary">
-                  {originalProductKnowledge.name}
-                </Badge>
+                <Badge variant="secondary">{displayName}</Badge>
               </div>
               <p className="text-sm text-muted-foreground">
                 {t("select_alternative_medication_and_provide_details")}

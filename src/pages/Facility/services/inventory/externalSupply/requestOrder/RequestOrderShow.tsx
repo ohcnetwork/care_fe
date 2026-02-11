@@ -4,7 +4,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Box, ChevronLeft, Edit, Hash, Truck } from "lucide-react";
+import { Box, ChevronLeft, Edit, Hash, Printer, Truck } from "lucide-react";
 import { Link } from "raviger";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -358,6 +358,12 @@ export function RequestOrderShow({
             </div>
           </div>
           <div className="flex items-center justify-end gap-2">
+            <Button variant="outline" asChild>
+              <Link href={`${requestOrderId}/print`}>
+                <Printer className="size-4" /> {t("print")}
+                <ShortcutBadge actionId="print-button" />
+              </Link>
+            </Button>
             {isRequester && (
               <Button variant="outline" asChild>
                 <Link href={`${requestOrderId}/edit`}>

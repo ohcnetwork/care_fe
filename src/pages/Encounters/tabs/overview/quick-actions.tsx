@@ -67,6 +67,7 @@ export function QuickAction({
   shortcut,
   href,
   actionId,
+  basePath,
   onClick,
   ...props
 }: {
@@ -75,6 +76,7 @@ export function QuickAction({
   shortcut?: string;
   href?: string;
   props?: React.ComponentProps<"div">;
+  basePath?: string;
   onClick?: () => void;
   actionId?: string;
 }) {
@@ -83,7 +85,7 @@ export function QuickAction({
 
   if (href) {
     return (
-      <Link href={href} className={className}>
+      <Link basePath={basePath} href={href} className={className}>
         <QuickActionContent
           icon={icon}
           title={title}
