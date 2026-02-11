@@ -152,6 +152,12 @@ export function RoleSelect({
     if (inView && hasNextPage) fetchNextPage();
   }, [inView, hasNextPage, fetchNextPage]);
 
+  useEffect(() => {
+    if (!open) {
+      setSearchTerm("");
+    }
+  }, [open]);
+
   const renderTriggerButton = () => (
     <Button
       variant="outline"
