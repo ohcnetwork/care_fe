@@ -220,20 +220,27 @@ export function MultiFilterStyleTagSelector({
         ) : (
           <TagIcon className="h-3 w-3" />
         )}
-        <span className="truncate">
-          {isLoading
-            ? t("updating_tags")
-            : selected.length > 0
-              ? selected.map((t) => (
-                  <Badge
-                    key={t.id}
-                    className="bg-blue-100 text-blue-900 border-blue-300"
-                  >
-                    {t.display}
-                  </Badge>
-                ))
-              : t("add_tags")}
-        </span>
+        <div className="flex gap-1 truncate">
+          {isLoading ? (
+            <span>{t("updating_tags")}</span>
+          ) : selected.length > 0 ? (
+            selected.slice(0, 3).map((t) => (
+              <Badge
+                key={t.id}
+                className="bg-blue-100 text-blue-900 border-blue-300"
+              >
+                {t.display}
+              </Badge>
+            ))
+          ) : (
+            <span>{t("add_tags")}</span>
+          )}
+          {selected.length > 3 && (
+            <Badge className="bg-gray-100 text-gray-900 border-gray-300">
+              +{selected.length - 3} {t("more")}
+            </Badge>
+          )}
+        </div>
       </div>
     </Button>
   );
