@@ -310,6 +310,7 @@ export default function LocationContent({
         limit: ITEMS_PER_PAGE,
         offset: (currentPage - 1) * ITEMS_PER_PAGE,
         name: searchQuery || undefined,
+        status: "active",
         ...(selectedLocationId ? {} : { mine: true, mode: "kind" }),
       },
     }),
