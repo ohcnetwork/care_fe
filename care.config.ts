@@ -4,6 +4,7 @@ import {
   EncounterClass,
   EncounterDischargeDisposition,
 } from "@/types/emr/encounter/encounter";
+import { PaymentReconciliationPaymentMethod } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 
 import { NonEmptyArray } from "@/Utils/types";
 import Decimal from "decimal.js";
@@ -146,6 +147,26 @@ const careConfig = {
     env.REACT_PAYMENT_LOCATION_REQUIRED,
     true,
   ),
+
+  /**
+   * Default payment method to preselect when recording a new payment
+   * Valid values: cash, ccca, cchk, cdac, chck, ddpo, debc
+   */
+  defaultPaymentMethod: (() => {
+    const method = env.REACT_DEFAULT_PAYMENT_METHOD;
+    if (!method) return undefined;
+    
+    // Validate the payment method value
+    const validMethods = Object.values(PaymentReconciliationPaymentMethod);
+    if (validMethods.includes(method as PaymentReconciliationPaymentMethod)) {
+      return method as PaymentReconciliationPaymentMethod;
+    }
+    
+    console.warn(
+      `Invalid REACT_DEFAULT_PAYMENT_METHOD: "${method}". Valid values are: ${validMethods.join(", ")}`
+    );
+    return undefined;
+  })(),
 
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {

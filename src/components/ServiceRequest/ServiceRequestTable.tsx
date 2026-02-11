@@ -19,6 +19,7 @@ import {
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import { LocationNode } from "@/components/Location/LocationTree";
+import { cn } from "@/lib/utils";
 import {
   SERVICE_REQUEST_PRIORITY_COLORS,
   SERVICE_REQUEST_STATUS_COLORS,
@@ -30,6 +31,7 @@ interface ServiceRequestTableProps {
   facilityId: string;
   locationId?: string;
   showPatientInfo?: boolean;
+  onPatientClick?: (request: ServiceRequestReadSpec) => void;
 }
 
 export default function ServiceRequestTable({
@@ -37,6 +39,7 @@ export default function ServiceRequestTable({
   facilityId,
   locationId,
   showPatientInfo = true,
+  onPatientClick,
 }: ServiceRequestTableProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -64,9 +67,18 @@ export default function ServiceRequestTable({
         </TableHeader>
         <TableBody className="bg-white">
           {requests.map((request) => (
-            <TableRow key={request.id} className="divide-x divide-gray-200">
+            <TableRow
+              key={request.id}
+              className="divide-x divide-gray-200 group"
+            >
               {showPatientInfo && (
-                <TableCell className="font-medium">
+                <TableCell
+                  className={cn(
+                    "font-medium",
+                    onPatientClick && "group-hover:underline cursor-pointer",
+                  )}
+                  onClick={() => onPatientClick?.(request)}
+                >
                   <div className="font-semibold text-gray-900">
                     {request.encounter.patient.name}
                   </div>

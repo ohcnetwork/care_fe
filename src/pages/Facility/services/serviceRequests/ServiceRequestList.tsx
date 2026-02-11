@@ -474,6 +474,12 @@ export default function ServiceRequestList({
                 requests={serviceRequests}
                 facilityId={facilityId}
                 locationId={locationId}
+                onPatientClick={(request) =>
+                  updateQuery({
+                    patient: request.encounter.patient.id,
+                    patient_name: request.encounter.patient.name,
+                  })
+                }
               />
             </div>
           </>
