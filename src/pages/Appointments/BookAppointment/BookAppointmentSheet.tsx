@@ -45,7 +45,7 @@ export default function BookAppointmentSheet({
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="md:w-[90%] !max-w-none h-full overflow-y-auto">
+      <SheetContent className="md:w-[90%] max-w-none! h-full overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{t("book_appointment")}</SheetTitle>
         </SheetHeader>
