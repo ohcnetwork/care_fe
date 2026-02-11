@@ -108,7 +108,7 @@ export const SummaryPanelActionsTab = () => {
           <Button
             variant="outline_primary"
             className="justify-start sm:@sm:justify-center"
-            onClick={() => markAsCompleted()}
+            onClick={markAsCompleted}
           >
             <CheckIcon />
             {selectedEncounter?.encounter_class === "imp" &&

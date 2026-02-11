@@ -16,6 +16,7 @@ import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounter
 import {
   completedEncounterStatus,
   EncounterRead,
+  EncounterStatus,
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
@@ -23,7 +24,6 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { useEncounterProgressController } from "./useEncounterProgressController";
 
 type EncounterContextType = {
   facilityId?: string;
@@ -93,8 +93,6 @@ export function EncounterProvider({
     { selectedEncounter: selectedEncounterId = primaryEncounterId },
     setQParams,
   ] = useQueryParams();
-
-  const { encounterRequiresDischarge } = useEncounterProgressController();
 
   const { data: patient, isLoading: isPatientLoading } = useQuery({
     queryKey: ["patient", patientId],
@@ -243,7 +241,10 @@ export function EncounterProvider({
           },
           markAsCompleted: () => {
             if (!selectedEncounter) return;
-            if (encounterRequiresDischarge(selectedEncounter)) {
+            if (
+              selectedEncounter.encounter_class === "imp" &&
+              selectedEncounter.status !== EncounterStatus.DISCHARGED
+            ) {
               navigate(
                 `/facility/${selectedEncounter.facility.id}/patient/${selectedEncounter.patient.id}/encounter/${selectedEncounter.id}/questionnaire/encounter?toDischarge=true`,
               );
