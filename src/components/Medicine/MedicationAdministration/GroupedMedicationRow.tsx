@@ -20,8 +20,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
-import { formatDosage } from "@/components/Medicine/utils";
+import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
 
 import { MedicationAdministrationRead } from "@/types/emr/medicationAdministration/medicationAdministration";
 import {
@@ -108,10 +107,7 @@ const IndividualMedicationRow: React.FC<{
             )}
           >
             {formatDosage(medication.dosage_instruction[0])},{" "}
-            {
-              getFrequencyDisplay(medication.dosage_instruction[0]?.timing)
-                ?.meaning
-            }
+            {formatFrequency(medication.dosage_instruction[0])}
           </span>
           <Badge
             variant={medication.status === "active" ? "green" : "secondary"}
@@ -322,14 +318,10 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
               {latestActiveRequest && (
                 <div className="text-sm text-gray-600 mt-0.5">
                   {formatDosage(latestActiveRequest.dosage_instruction[0])}
-                  {getFrequencyDisplay(
-                    latestActiveRequest.dosage_instruction[0]?.timing,
-                  )?.meaning && <span className="text-gray-400"> · </span>}
-                  {
-                    getFrequencyDisplay(
-                      latestActiveRequest.dosage_instruction[0]?.timing,
-                    )?.meaning
-                  }
+                  {formatFrequency(
+                    latestActiveRequest.dosage_instruction[0],
+                  ) && <span className="text-gray-400"> · </span>}
+                  {formatFrequency(latestActiveRequest.dosage_instruction[0])}
                 </div>
               )}
 

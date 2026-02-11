@@ -52,9 +52,10 @@ import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import UserSelector from "@/components/Common/UserSelector";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
+import { DosageFrequencyInput } from "@/components/Medicine/DosageFrequencyInput";
+import { DurationInput } from "@/components/Medicine/DurationInput";
 import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
-import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
-import { MedicationTimingSelect } from "@/components/Medicine/MedicationTimingSelect";
+import { formatFrequency } from "@/components/Medicine/utils";
 import { AddToTemplateDialog } from "@/components/Questionnaire/AddToTemplateDialog";
 import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
 import MedicationValueSetSelect from "@/components/Questionnaire/MedicationValueSetSelect";
@@ -69,17 +70,17 @@ import { formatDosage } from "@/components/Medicine/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
 import {
+  buildTimingForTextDosage,
+  displayMedicationName,
   DoseRange,
+  formatDurationLabel,
   INACTIVE_MEDICATION_STATUSES,
   MEDICATION_REQUEST_INTENT,
-  MEDICATION_REQUEST_TIMING_OPTIONS,
   MedicationRequestCreate,
   MedicationRequestDosageInstruction,
   MedicationRequestIntent,
   MedicationRequestRead,
   MedicationRequestTemplateSpec,
-  UCUM_TIME_UNITS,
-  displayMedicationName,
   parseMedicationStringToRequest,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
@@ -101,7 +102,7 @@ import {
   validateFields,
 } from "@/types/questionnaire/validation";
 import { UserReadMinimal } from "@/types/user/user";
-import { isZero, round } from "@/Utils/decimal";
+import { round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
@@ -231,7 +232,9 @@ const MEDICATION_REQUEST_FIELDS = {
       const dosageInstruction =
         value as MedicationRequestCreate["dosage_instruction"][0];
       return !!(
-        dosageInstruction?.timing || dosageInstruction?.as_needed_boolean
+        dosageInstruction?.timing ||
+        dosageInstruction?.as_needed_boolean ||
+        dosageInstruction?.text
       );
     },
   },
@@ -921,8 +924,7 @@ export function MedicationRequestQuestion({
                       render: (instructions) => {
                         const dosage = formatDosage(instructions[0]) || "";
                         const frequency =
-                          getFrequencyDisplay(instructions[0]?.timing)
-                            ?.meaning || "-";
+                          formatFrequency(instructions[0]) || "-";
                         return `${dosage}\n${frequency}`;
                       },
                     },
@@ -1276,15 +1278,12 @@ export function MedicationRequestQuestion({
                                             .dose_range,
                                         )}
 
-                                      {dosageInstruction?.as_needed_boolean
-                                        ? ` · ${t("as_needed_prn")}`
-                                        : dosageInstruction?.timing?.code
-                                            ?.code &&
-                                          ` · ${MEDICATION_REQUEST_TIMING_OPTIONS[dosageInstruction.timing.code.code]?.display || ""}`}
+                                      {formatFrequency(dosageInstruction) &&
+                                        ` · ${formatFrequency(dosageInstruction)}`}
 
                                       {dosageInstruction?.timing?.repeat
                                         ?.bounds_duration?.value &&
-                                        ` · ${dosageInstruction.timing.repeat.bounds_duration.value} ${dosageInstruction.timing.repeat.bounds_duration.unit}`}
+                                        ` · ${formatDurationLabel(dosageInstruction.timing.repeat.bounds_duration)}`}
                                     </div>
                                   )}
                                 </div>
@@ -1715,15 +1714,9 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           {t("frequency")}
           <span className="text-red-500 ml-0.5">*</span>
         </Label>
-        <MedicationTimingSelect
-          timing={dosageInstruction?.timing}
-          asNeeded={dosageInstruction?.as_needed_boolean}
-          onTimingChange={(timing, asNeeded) => {
-            handleUpdateDosageInstruction({
-              as_needed_boolean: asNeeded,
-              timing,
-            });
-          }}
+        <DosageFrequencyInput
+          dosageInstruction={dosageInstruction}
+          onDosageInstructionChange={handleUpdateDosageInstruction}
           disabled={disabled || isReadOnly}
           hasError={hasError(MEDICATION_REQUEST_FIELDS.FREQUENCY.key)}
         />
@@ -1735,102 +1728,71 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Duration */}
+      {/* Duration */}
       <div className="lg:px-2 p-1 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("duration")}
         </Label>
-        <div
-          className={cn(
-            "flex gap-2",
-            hasError(MEDICATION_REQUEST_FIELDS.DURATION.key) &&
-              "border border-red-500 rounded-md p-1",
-            dosageInstruction?.as_needed_boolean &&
-              "opacity-50 bg-gray-100 rounded-md",
-          )}
-        >
-          {dosageInstruction?.timing && (
-            <Input
-              type="number"
-              inputMode="decimal"
-              pattern="[0-9]*[.]?[0-9]*"
-              min={0}
-              value={
-                isZero(dosageInstruction.timing.repeat.bounds_duration.value)
-                  ? ""
-                  : dosageInstruction.timing.repeat.bounds_duration?.value
-              }
-              onChange={(e) => {
-                const value = e.target.value;
-                if (!dosageInstruction.timing) return;
+        <DurationInput
+          value={dosageInstruction?.timing?.repeat?.bounds_duration}
+          onChange={(duration) => {
+            if (!duration) {
+              // Clear duration
+              if (dosageInstruction?.timing) {
                 handleUpdateDosageInstruction({
                   timing: {
                     ...dosageInstruction.timing,
                     repeat: {
                       ...dosageInstruction.timing.repeat,
-                      bounds_duration: {
-                        value: value,
-                        unit: dosageInstruction.timing.repeat.bounds_duration
-                          .unit,
-                      },
+                      bounds_duration: { value: "0", unit: "d" },
                     },
                   },
                 });
-              }}
-              disabled={
-                disabled ||
-                !dosageInstruction?.timing?.repeat ||
-                dosageInstruction?.as_needed_boolean ||
-                isReadOnly
               }
-              className="h-9 text-base sm:text-sm"
-            />
-          )}
-          <Select
-            value={
-              dosageInstruction?.timing?.repeat?.bounds_duration?.unit ??
-              UCUM_TIME_UNITS[0]
+              return;
             }
-            onValueChange={(unit: (typeof UCUM_TIME_UNITS)[number]) => {
-              if (dosageInstruction?.timing?.repeat) {
-                const value =
-                  dosageInstruction?.timing?.repeat?.bounds_duration?.value ??
-                  0;
+
+            if (dosageInstruction?.timing) {
+              // Timing exists -- update bounds_duration
+              handleUpdateDosageInstruction({
+                timing: {
+                  ...dosageInstruction.timing,
+                  repeat: {
+                    ...dosageInstruction.timing.repeat,
+                    bounds_duration: duration,
+                  },
+                },
+              });
+            } else {
+              // No timing yet -- create a minimal timing with just duration.
+              // If there's a text-based frequency (e.g. "1-1/2-0"), infer
+              // the dose count from the M-A-N slots.
+              if (dosageInstruction?.text) {
+                handleUpdateDosageInstruction({
+                  timing: buildTimingForTextDosage(
+                    dosageInstruction.text,
+                    duration,
+                  ),
+                });
+              } else {
                 handleUpdateDosageInstruction({
                   timing: {
-                    ...dosageInstruction.timing,
                     repeat: {
-                      ...dosageInstruction.timing.repeat,
-                      bounds_duration: { value, unit },
+                      frequency: 1,
+                      period: "1",
+                      period_unit: "d",
+                      bounds_duration: duration,
                     },
                   },
                 });
               }
-            }}
-            disabled={
-              disabled ||
-              !dosageInstruction?.timing?.repeat ||
-              dosageInstruction?.as_needed_boolean ||
-              isReadOnly
             }
-          >
-            <SelectTrigger
-              className={cn(
-                "h-9 text-sm w-full",
-                dosageInstruction?.as_needed_boolean &&
-                  "cursor-not-allowed bg-gray-50",
-              )}
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {UCUM_TIME_UNITS.map((unit) => (
-                <SelectItem key={unit} value={unit}>
-                  {unit}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+          }}
+          disabled={
+            disabled || dosageInstruction?.as_needed_boolean || isReadOnly
+          }
+          hasError={hasError(MEDICATION_REQUEST_FIELDS.DURATION.key)}
+        />
         <FieldError
           fieldKey={MEDICATION_REQUEST_FIELDS.DURATION.key}
           questionId={questionId}
