@@ -69,6 +69,7 @@ export default function VerifyPatient() {
   const isTab = useBreakpoints({ default: true, lg: false });
 
   const {
+    canViewAppointments,
     canWriteAppointment,
     canCreateEncounter,
     canListEncounters,
@@ -136,11 +137,13 @@ export default function VerifyPatient() {
                 </PatientInfoCard>
               </div>
 
-              <UpcomingAppointmentCard
-                patientId={patientData.id}
-                facilityId={facilityId}
-                onViewAllAppointments={() => setActiveTab("appointments")}
-              />
+              {canViewAppointments && (
+                <UpcomingAppointmentCard
+                  patientId={patientData.id}
+                  facilityId={facilityId}
+                  onViewAllAppointments={() => setActiveTab("appointments")}
+                />
+              )}
 
               <div className="grid gap-4 grid-cols-2  lg:grid-cols-3">
                 {canCreateEncounter && (
