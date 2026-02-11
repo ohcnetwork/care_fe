@@ -108,20 +108,18 @@ export default function ServiceRequestTable({
                 </Badge>
               </TableCell>
               <TableCell>
-                <div className="flex flex-wrap gap-1">
-                  <TagAssignmentSheet
-                    entityType="service_request"
-                    entityId={request.id}
-                    facilityId={facilityId}
-                    currentTags={request.tags ?? []}
-                    onUpdate={() => {
-                      queryClient.invalidateQueries({
-                        queryKey: ["serviceRequests", facilityId],
-                      });
-                    }}
-                    patientId={request.encounter.patient.id}
-                  />
-                </div>
+                <TagAssignmentSheet
+                  entityType="service_request"
+                  entityId={request.id}
+                  facilityId={facilityId}
+                  currentTags={request.tags ?? []}
+                  onUpdate={() => {
+                    queryClient.invalidateQueries({
+                      queryKey: ["serviceRequests", facilityId],
+                    });
+                  }}
+                  patientId={request.encounter.patient.id}
+                />
               </TableCell>
               <TableCell>
                 <div className="text-xs text-gray-500">
