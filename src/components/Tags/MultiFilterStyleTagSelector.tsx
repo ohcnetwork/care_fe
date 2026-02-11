@@ -224,7 +224,14 @@ export function MultiFilterStyleTagSelector({
           {isLoading
             ? t("updating_tags")
             : selected.length > 0
-              ? `${selected.length} ${t("tags", { count: selected.length })}`
+              ? selected.map((t) => (
+                  <Badge
+                    key={t.id}
+                    className="bg-blue-100 text-blue-900 border-blue-300"
+                  >
+                    {t.display}
+                  </Badge>
+                ))
               : t("add_tags")}
         </span>
       </div>

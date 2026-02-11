@@ -64,7 +64,7 @@ function TreeViewItem({
           <Checkbox checked={isSelected} className="h-4 w-4" />
           <div
             className={cn(
-              "h-3 w-3 rounded-full flex-shrink-0 border",
+              "h-3 w-3 rounded-full shrink-0 border",
               getColorForOrg(org.id, 0),
             )}
           />
@@ -161,14 +161,17 @@ function DepartmentFilterDropdown({
   );
 
   return (
-    <div className="p-3 max-h-[30vh] overflow-y-auto">
-      <Input
-        placeholder={t("search_departments_placeholder")}
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="h-8 text-sm mb-3"
-      />
-      <div>
+    <div>
+      <div className="p-3 border-b">
+        <Input
+          placeholder={t("search_departments_placeholder")}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => e.stopPropagation()}
+          className="h-8 text-base sm:text-sm"
+        />
+      </div>
+      <div className="p-3 max-h-[30vh] overflow-y-auto">
         {/* Selected Departments */}
         {selectedOrgs.length > 0 && (
           <>
@@ -287,9 +290,9 @@ export const SelectedDepartmentBadge = ({
   const org = selected[0];
 
   return (
-    <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+    <div className="flex items-center gap-2 min-w-0 shrink-0">
       <span
-        className={cn(firstColor, "rounded-full w-2 h-2 border flex-shrink-0")}
+        className={cn(firstColor, "rounded-full w-2 h-2 border shrink-0")}
       />
       <span className="text-sm whitespace-nowrap truncate max-w-[150px]">
         {org.name}

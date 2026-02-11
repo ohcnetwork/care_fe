@@ -80,7 +80,7 @@ export const PrescriptionContent = ({
                 instructions: [remarks, notes].filter(Boolean).join("\n"),
               };
             })}
-            className="text-sm font-medium whitespace-break-spaces text-gray-950"
+            className="text-sm font-semibold whitespace-break-spaces text-gray-950"
             cellConfig={{
               medicine: { className: "text-left" },
             }}
@@ -213,92 +213,98 @@ export const PrescriptionPreview = ({
       disabled={!hasMedications}
     >
       <div className="max-w-5xl mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
-          <div className="flex items-start gap-4">
-            <div className="text-left">
-              <h1 className="text-xl font-medium">{facility?.name}</h1>
-              {facility?.address && (
-                <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-xs">
-                  {facility.address}
-                  {facility.phone_number && (
-                    <p className="text-gray-500 text-xs">
-                      {t("phone")}: {facility.phone_number}
-                    </p>
-                  )}
-                </div>
+        <div>
+          {/* Header */}
+          <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
+            <div className="flex items-start gap-4">
+              <div className="text-left">
+                <h1 className="text-2xl font-medium">{facility?.name}</h1>
+                {facility?.address && (
+                  <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
+                    {facility.address}
+                    {facility.phone_number && (
+                      <p className="text-gray-500 text-sm">
+                        {t("phone")}: {facility.phone_number}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+            <QRCodeSVG value={patient.id} size={50} level="Q" marginSize={0} />
+            <img
+              src={careConfig.mainLogo?.dark}
+              alt="Logo"
+              className="h-10 w-auto object-contain mb-2 sm:mb-0 text-end"
+            />
+          </div>
+
+          {/* Patient Details */}
+          <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-6 pb-3">
+            <div className="space-y-1">
+              <DetailRow label={t("patient")} value={patient.name} isStrong />
+              <DetailRow
+                label={`${t("age")} / ${t("sex")}`}
+                value={
+                  patient
+                    ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
+                    : undefined
+                }
+                isStrong
+              />
+              {patient.instance_identifiers
+                ?.filter(
+                  ({ config }) =>
+                    config.config.use === PatientIdentifierUse.official,
+                )
+                .map((identifier) => (
+                  <DetailRow
+                    key={identifier.config.id}
+                    label={identifier.config.config.display}
+                    value={identifier.value}
+                    isStrong
+                  />
+                ))}
+            </div>
+            <div className="space-y-1">
+              <DetailRow label={t("date")} value={displayDate} isStrong />
+              <DetailRow
+                label={t("mobile_number")}
+                value={patient && formatPhoneNumberIntl(patient.phone_number)}
+                isStrong
+              />
+              {locationName && (
+                <DetailRow
+                  label={t("location")}
+                  value={locationName}
+                  isStrong
+                />
               )}
             </div>
           </div>
-          <QRCodeSVG value={patient.id} size={50} level="Q" marginSize={0} />
-          <img
-            src={careConfig.mainLogo?.dark}
-            alt="Logo"
-            className="h-10 w-auto object-contain mb-2 sm:mb-0 text-end"
+
+          {/* Prescription Groups */}
+          {prescriptions.length > 1 && (
+            <div className="mb-4 text-sm text-gray-500 border-b pb-2">
+              {t("prescriptions_count", { count: prescriptions.length })}
+            </div>
+          )}
+
+          {prescriptions.map((prescription, index) => (
+            <div key={prescription.id}>
+              {index > 0 && (
+                <div className="border-t border-dashed border-gray-300 my-6" />
+              )}
+              <PrescriptionContent prescription={prescription} />
+            </div>
+          ))}
+
+          {/* Footer */}
+          <PrintFooter
+            leftContent={t("computer_generated_prescription")}
+            className="text-sm"
           />
         </div>
-
-        {/* Patient Details */}
-        <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-6 pb-3">
-          <div className="space-y-1">
-            <DetailRow label={t("patient")} value={patient.name} isStrong />
-            <DetailRow
-              label={`${t("age")} / ${t("sex")}`}
-              value={
-                patient
-                  ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
-                  : undefined
-              }
-              isStrong
-            />
-            {patient.instance_identifiers
-              ?.filter(
-                ({ config }) =>
-                  config.config.use === PatientIdentifierUse.official,
-              )
-              .map((identifier) => (
-                <DetailRow
-                  key={identifier.config.id}
-                  label={identifier.config.config.display}
-                  value={identifier.value}
-                  isStrong
-                />
-              ))}
-          </div>
-          <div className="space-y-1">
-            <DetailRow label={t("date")} value={displayDate} isStrong />
-            <DetailRow
-              label={t("mobile_number")}
-              value={patient && formatPhoneNumberIntl(patient.phone_number)}
-              isStrong
-            />
-            {locationName && (
-              <DetailRow label={t("location")} value={locationName} isStrong />
-            )}
-          </div>
-        </div>
-
-        {/* Prescription Groups */}
-        {prescriptions.length > 1 && (
-          <div className="mb-4 text-sm text-gray-500 border-b pb-2">
-            {t("prescriptions_count", { count: prescriptions.length })}
-          </div>
-        )}
-
-        {prescriptions.map((prescription, index) => (
-          <div key={prescription.id}>
-            {index > 0 && (
-              <div className="border-t border-dashed border-gray-300 my-6" />
-            )}
-            <PrescriptionContent prescription={prescription} />
-          </div>
-        ))}
-
-        {/* Footer */}
-        <PrintFooter
-          leftContent={t("computer_generated_prescription")}
-          className="text-sm"
-        />
       </div>
     </PrintPreview>
   );
