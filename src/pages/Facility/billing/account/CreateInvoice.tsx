@@ -383,6 +383,25 @@ export function CreateInvoicePage({
     }
   }, [chargeItems, form]);
 
+  // Auto-open AddChargeItemsBillingSheet when no charge items exist
+  useEffect(() => {
+    if (
+      !isLoading &&
+      !preSelectedChargeItems &&
+      chargeItems.length === 0 &&
+      !disableCreateChargeItems &&
+      account?.patient
+    ) {
+      setIsAddChargeItemsOpen(true);
+    }
+  }, [
+    isLoading,
+    preSelectedChargeItems,
+    chargeItems.length,
+    disableCreateChargeItems,
+    account?.patient,
+  ]);
+
   return (
     <div className="container mx-auto md:px-4 pb-6">
       {showHeader && (
