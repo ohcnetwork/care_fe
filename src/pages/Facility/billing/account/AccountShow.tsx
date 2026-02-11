@@ -247,7 +247,13 @@ export function AccountShow({
   const tabs = {
     invoices: {
       label: t("invoices"),
-      component: <InvoicesData facilityId={facilityId} accountId={accountId} />,
+      component: (
+        <InvoicesData
+          facilityId={facilityId}
+          accountId={accountId}
+          hideAccountColumn
+        />
+      ),
 
       shortcutId: "switch-to-invoices-tab",
     },
