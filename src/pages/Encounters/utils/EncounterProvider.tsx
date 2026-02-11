@@ -13,7 +13,6 @@ import { getPermissions, Permissions } from "@/common/Permissions";
 import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { usePermissions } from "@/context/PermissionContext";
 import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounterAsCompletedDialog";
-import { useEncounterProgressController } from "@/pages/Encounters/utils/utils";
 import {
   completedEncounterStatus,
   EncounterRead,
@@ -24,6 +23,7 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { useEncounterProgressController } from "./useEncounterProgressController";
 
 type EncounterContextType = {
   facilityId?: string;
@@ -51,12 +51,9 @@ type EncounterContextType = {
   canRestartSelectedEncounter: boolean;
   canWriteClinicalData: boolean;
 
-  isEndEncounterPending: boolean;
   actions: {
-    markAsCompleted: () => void;
-    endEncounter: (closeEncounter: boolean) => void;
-    startEncounter: () => void;
     assignLocation: () => void;
+    markAsCompleted: () => void;
     viewLocationHistory: () => void;
     manageCareTeam: () => void;
     manageDepartments: () => void;
@@ -127,6 +124,8 @@ export function EncounterProvider({
       }),
     });
 
+  const { encounterRequiresDischarge } = useEncounterProgressController();
+
   const setSelectedEncounter = (encounterId: string | null) => {
     setQParams(
       { selectedEncounter: encounterId },
@@ -190,15 +189,6 @@ export function EncounterProvider({
     null,
   );
 
-  const {
-    endEncounter,
-    isPending: isEndEncounterPending,
-    startEncounter,
-  } = useEncounterProgressController(selectedEncounter);
-  const toDischarge =
-    selectedEncounter?.encounter_class === "imp" &&
-    selectedEncounter?.status !== "discharged";
-
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -247,21 +237,19 @@ export function EncounterProvider({
         canWritePrimaryEncounter,
         canReadClinicalData,
         canWriteClinicalData,
-        isEndEncounterPending,
         actions: {
+          assignLocation: () => {
+            setActiveAction(EncounterAction.AssignLocation);
+          },
           markAsCompleted: () => {
-            if (toDischarge) {
+            if (!selectedEncounter) return;
+            if (encounterRequiresDischarge(selectedEncounter)) {
               navigate(
-                `/facility/${selectedEncounter?.facility.id}/patient/${selectedEncounter?.patient.id}/encounter/${selectedEncounter?.id}/questionnaire/encounter?toDischarge=true`,
+                `/facility/${selectedEncounter.facility.id}/patient/${selectedEncounter.patient.id}/encounter/${selectedEncounter.id}/questionnaire/encounter?toDischarge=true`,
               );
               return;
             }
             setActiveAction(EncounterAction.MarkAsCompleted);
-          },
-          endEncounter,
-          startEncounter,
-          assignLocation: () => {
-            setActiveAction(EncounterAction.AssignLocation);
           },
           viewLocationHistory: () => {
             setActiveAction(EncounterAction.LocationHistory);

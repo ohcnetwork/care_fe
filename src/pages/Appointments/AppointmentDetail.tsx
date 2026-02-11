@@ -34,6 +34,7 @@ import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
   ENCOUNTER_STATUS_COLORS,
+  EncounterRead,
   EncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import {
@@ -108,7 +109,7 @@ import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/Appo
 import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { TokenGenerationSheet } from "@/pages/Appointments/components/TokenGenerationSheet";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
-import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { useEncounterProgressController } from "@/pages/Encounters/utils/useEncounterProgressController";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
 import { FacilityRead } from "@/types/facility/facility";
@@ -129,7 +130,6 @@ export default function AppointmentDetail(props: Props) {
   const [params, setQueryParams] = useQueryParams();
   const { showSuccess } = params;
   const [{ from_queue }] = useQueryParams();
-  const { actions } = useEncounter();
 
   useShortcutSubContext("facility:appointment");
 
@@ -150,6 +150,8 @@ export default function AppointmentDetail(props: Props) {
     }),
     enabled: canViewAppointments && !!facility,
   });
+
+  const { startEncounter } = useEncounterProgressController(appointment);
 
   useEffect(() => {
     // Don't redirect while facility is still loading
@@ -475,7 +477,11 @@ export default function AppointmentDetail(props: Props) {
                         title={t("start_consultation")}
                         actionId="start-consultation"
                         onClick={() => {
-                          actions.startEncounter();
+                          startEncounter({
+                            encounter:
+                              appointment.associated_encounter as EncounterRead,
+                            appointment,
+                          });
                           navigate(
                             `/facility/${facilityId}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
                           );
@@ -497,8 +503,11 @@ export default function AppointmentDetail(props: Props) {
                             actionId="start-consultation"
                           />
                         }
-                        onSuccess={() => {
-                          actions.startEncounter();
+                        onSuccess={(data) => {
+                          startEncounter({
+                            encounter: data,
+                            appointment,
+                          });
                         }}
                       />
                     ))}

@@ -114,6 +114,7 @@ export function useEncounterShortcuts() {
       "add-questionnaire": () => {
         document.dispatchEvent(new CustomEvent("open-forms-dialog"));
       },
+      "mark-as-completed": () => actions.markAsCompleted(),
       plots: () => navigate(buildEncounterUrl("/plots")),
       observations: () => navigate(buildEncounterUrl("/observations")),
       medicines: () => navigate(buildEncounterUrl("/medicines")),
@@ -122,7 +123,6 @@ export function useEncounterShortcuts() {
       devices: () => navigate(buildEncounterUrl("/devices")),
       consents: () => navigate(buildEncounterUrl("/consents")),
 
-      "mark-as-completed": () => actions.markAsCompleted(),
       "assign-location": () => actions.assignLocation(),
       "view-location-history": () => actions.viewLocationHistory(),
       "manage-care-team": () => actions.manageCareTeam(),

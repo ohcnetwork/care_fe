@@ -7,11 +7,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   EncounterRead,
   EncounterStatus,
-  inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import {
   AppointmentRead,
@@ -19,31 +17,12 @@ import {
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 
+import { useEncounterProgressController } from "@/pages/Encounters/utils/useEncounterProgressController";
 import { renderTokenNumber } from "@/types/tokens/token/token";
-import { ChevronDown, ExternalLinkIcon } from "lucide-react";
-import { Link } from "raviger";
+import { DotsVerticalIcon } from "@radix-ui/react-icons";
+import { CheckCircle, ExternalLinkIcon } from "lucide-react";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
-
-const getOptions = (encounter: EncounterRead) => {
-  const options: ("close_appointment" | "mark_as_complete")[] = [];
-
-  if (
-    encounter.status === EncounterStatus.PLANNED ||
-    encounter.status === EncounterStatus.ON_HOLD
-  ) {
-    return ["start_encounter"];
-  }
-
-  if (encounter.appointment?.status !== AppointmentStatus.FULFILLED) {
-    options.push("close_appointment");
-  }
-
-  if (!inactiveEncounterStatus.includes(encounter.status)) {
-    options.push("mark_as_complete");
-  }
-
-  return options;
-};
 
 export const AppointmentEncounterHeader = ({
   appointment,
@@ -84,20 +63,21 @@ const AppointmentEncounterHeaderActions = ({
 }) => {
   const { t } = useTranslation();
 
-  const { actions, isEndEncounterPending } = useEncounter();
+  const {
+    completeEverything,
+    completeAppointment,
+    isPending: isEndEncounterPending,
+    startEncounter,
+  } = useEncounterProgressController(appointment);
 
   const handleStartEncounter = () => {
-    actions.startEncounter();
+    startEncounter({ encounter, appointment });
   };
 
-  const options = getOptions(encounter);
-
-  if (options.length === 0) {
-    return null;
-  }
-
-  if (options.length === 1) {
-    const [option] = options;
+  if (
+    encounter.status === EncounterStatus.PLANNED ||
+    encounter.status === EncounterStatus.ON_HOLD
+  ) {
     return (
       <div
         className={cn(
@@ -106,22 +86,14 @@ const AppointmentEncounterHeaderActions = ({
         )}
       >
         <span className="text-sm text-black">
-          {option === "mark_as_complete"
-            ? t("do_you_want_to_complete_this_encounter")
-            : t("do_you_want_to_start_this_encounter")}
+          {t("do_you_want_to_start_this_encounter")}
         </span>
         <Button
           variant="outline"
           className="w-full sm:w-auto text-sm font-semibold text-black"
-          onClick={
-            option === "mark_as_complete"
-              ? actions.markAsCompleted
-              : handleStartEncounter
-          }
+          onClick={handleStartEncounter}
         >
-          {option === "mark_as_complete"
-            ? t("complete_encounter")
-            : t("start_encounter")}
+          {t("start_encounter")}
         </Button>
       </div>
     );
@@ -130,51 +102,55 @@ const AppointmentEncounterHeaderActions = ({
   return (
     <div
       className={cn(
-        "w-full sm:w-auto space-x-2",
+        "flex items-center w-full sm:w-auto space-x-2",
         appointment.token && "border-l border-gray-300 pl-2",
       )}
     >
-      <span className="text-sm text-black">
+      <span className="text-sm text-black pr-2">
         {t("how_do_you_to_finish_this_visit")}
       </span>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            className="w-full sm:w-auto"
-            disabled={isEndEncounterPending}
-          >
-            <span className="text-sm font-semibold text-black">
-              {t("end_actions")}
-            </span>
-            <ChevronDown className="size-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="min-w-[59px]" align="start">
-          {options.map((option) => (
+      <Button
+        variant="outline"
+        className="w-full sm:w-auto"
+        disabled={isEndEncounterPending}
+        onClick={() =>
+          completeEverything({
+            encounter,
+            onDischargeRequired: () => {
+              navigate(
+                `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?toDischarge=true`,
+              );
+            },
+          })
+        }
+      >
+        <CheckCircle />
+        {t("complete")}
+      </Button>
+      {encounter.appointment?.status !== AppointmentStatus.FULFILLED && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost">
+              <DotsVerticalIcon className="text-gray-700" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="min-w-[59px]" align="end">
             <DropdownMenuItem
-              key={option}
               className="p-2.5"
-              onClick={() => {
-                if (option === "mark_as_complete") {
-                  actions.markAsCompleted();
-                } else if (option === "close_appointment") {
-                  actions.endEncounter(false);
-                }
-              }}
+              onClick={() => completeAppointment({ encounter })}
             >
               <div className="flex flex-col items-start">
                 <span className="text-sm font-medium text-black">
-                  {t(option)}
+                  {t("close_appointment")}
                 </span>
                 <p className="text-xs text-gray-700">
-                  {t(`${option}_description`)}
+                  {t("close_appointment_description")}
                 </p>
               </div>
             </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </div>
   );
 };
