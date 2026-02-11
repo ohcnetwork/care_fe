@@ -74,6 +74,10 @@ export default function EncounterQuestionnaire({
                     navigate(
                       `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/medicines`,
                     );
+                  } else if (questionnaireSlug === "service_request") {
+                    navigate(
+                      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/service_requests`,
+                    );
                   } else {
                     navigate(
                       `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
