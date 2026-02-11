@@ -70,9 +70,15 @@ export default function EncounterQuestionnaire({
               questionnaireSlug={questionnaireSlug}
               onSubmit={() => {
                 if (encounterId && facilityId) {
-                  navigate(
-                    `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
-                  );
+                  if (questionnaireSlug === "medication_request") {
+                    navigate(
+                      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/medicines`,
+                    );
+                  } else {
+                    navigate(
+                      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+                    );
+                  }
                 } else if (facilityId) {
                   navigate(
                     `/facility/${facilityId}/patient/${patientId}/updates`,
