@@ -76,7 +76,7 @@ export function LocationPicker({
         parent: currentParent ? currentParent : undefined,
         mode: "kind",
         ordering: "sort_index",
-        name: searchQuery,
+        name: searchQuery || undefined,
         status: "active",
         mine: currentParent ? undefined : true,
       },
