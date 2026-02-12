@@ -43,9 +43,16 @@ export function DosageFrequencyInput({
   const [searchQuery, setSearchQuery] = useState("");
 
   // Derive current value from existing dosage instruction (reverse mapping)
+  // Only the fields read by fhirDosageToFrequencyValue are listed as deps
+  // to avoid recomputing when unrelated dosageInstruction fields change.
   const currentValue = useMemo(
     () => fhirDosageToFrequencyValue(dosageInstruction),
-    [dosageInstruction],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      dosageInstruction?.text,
+      dosageInstruction?.timing,
+      dosageInstruction?.as_needed_boolean,
+    ],
   );
 
   // Dynamically generate options based on what the user is typing

@@ -82,6 +82,7 @@ import {
   MedicationRequestRead,
   MedicationRequestTemplateSpec,
   parseMedicationStringToRequest,
+  sumManSlots,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
@@ -1768,9 +1769,12 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               });
             } else {
               // No timing yet -- create a minimal timing with just duration.
-              // If there's a text-based frequency (e.g. "1-1/2-0"), infer
-              // the dose count from the M-A-N slots.
-              if (dosageInstruction?.text) {
+              // Only infer frequency from M-A-N text patterns (e.g. "1-1/2-0").
+              // For non-M-A-N text like "STAT", create timing with just duration.
+              if (
+                dosageInstruction?.text &&
+                sumManSlots(dosageInstruction.text) !== null
+              ) {
                 handleUpdateDosageInstruction({
                   timing: buildTimingForTextDosage(
                     dosageInstruction.text,

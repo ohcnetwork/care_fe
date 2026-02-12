@@ -1072,8 +1072,7 @@ export function generateManSuggestions(
  * "0-0-1"   → 1
  */
 export function countManDosesPerDay(manString: string): number {
-  const manFullRe = /^[\d]+(?:\/[\d]+)?(-[\d]+(?:\/[\d]+)?){1,3}$/;
-  if (!manFullRe.test(manString)) return 1; // fallback
+  if (!MAN_FULL_RE.test(manString)) return 1; // fallback
   const slots = manString.split("-");
   const nonZero = slots.filter((s) => evalSlot(s) > 0).length;
   return Math.max(nonZero, 1); // at least 1
@@ -1087,8 +1086,7 @@ export function countManDosesPerDay(manString: string): number {
  * Returns null if the string isn't a valid M-A-N pattern.
  */
 export function sumManSlots(manString: string): number | null {
-  const manFullRe = /^[\d]+(?:\/[\d]+)?(-[\d]+(?:\/[\d]+)?){1,3}$/;
-  if (!manFullRe.test(manString)) return null;
+  if (!MAN_FULL_RE.test(manString)) return null;
   const slots = manString.split("-");
   let total = 0;
   for (const slot of slots) {
@@ -1140,7 +1138,10 @@ export function manToFhirTiming(
   if (preset) {
     const timingOption = MEDICATION_REQUEST_TIMING_OPTIONS[preset.timingKey];
     if (timingOption) {
-      return { timing: { ...timingOption.timing }, asNeeded: false };
+      return {
+        timing: structuredClone(timingOption.timing),
+        asNeeded: false,
+      };
     }
   }
 
@@ -1148,7 +1149,10 @@ export function manToFhirTiming(
   const directKey = manString.toUpperCase();
   if (directKey in MEDICATION_REQUEST_TIMING_OPTIONS) {
     const timingOption = MEDICATION_REQUEST_TIMING_OPTIONS[directKey];
-    return { timing: { ...timingOption.timing }, asNeeded: false };
+    return {
+      timing: structuredClone(timingOption.timing),
+      asNeeded: false,
+    };
   }
 
   // Non-standard pattern — no FHIR timing match
@@ -1279,7 +1283,6 @@ export function parseDurationString(input: string): BoundsDuration | undefined {
     wks: "wk",
     week: "wk",
     weeks: "wk",
-    m: "mo",
     mo: "mo",
     mos: "mo",
     month: "mo",

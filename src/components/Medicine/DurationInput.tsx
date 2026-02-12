@@ -11,6 +11,7 @@ import {
   encodeDurationValue,
   formatDurationLabel,
   generateDurationSuggestions,
+  parseDurationString,
 } from "@/types/emr/medicationRequest/medicationRequest";
 
 interface DurationInputProps {
@@ -63,7 +64,9 @@ export function DurationInput({
       return;
     }
 
-    const decoded = decodeDurationValue(selectedValue);
+    // Try encoded format first (e.g. "5-d"), then raw text (e.g. "5 days")
+    const decoded =
+      decodeDurationValue(selectedValue) || parseDurationString(selectedValue);
     if (decoded) {
       onChange(decoded);
     }
