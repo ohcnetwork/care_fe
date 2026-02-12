@@ -309,7 +309,8 @@ function ResponseActionsMenu({
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 hover:bg-gray-100 text-gray-500 hover:text-gray-700"
+            className="size-7 text-gray-500"
+            aria-label={t("more_actions")}
           >
             <MoreVertical className="size-4" />
           </Button>
@@ -558,75 +559,80 @@ export function ResponseCard({
     item.status === QuestionnaireResponseStatus.EnteredInError;
   const [isExpanded, setIsExpanded] = useState(!isEnteredInError);
 
+  const header = (
+    <CardHeader
+      className={cn(
+        "flex flex-row items-center py-2 px-3",
+        isEnteredInError && "hover:bg-gray-50",
+      )}
+    >
+      {showTitle && (
+        <CardTitle
+          className={cn(
+            "text-base font-medium",
+            onTitleClick &&
+              !isEnteredInError &&
+              "cursor-pointer hover:bg-gray-100 rounded px-1.5 py-0.5",
+          )}
+          onClick={(e) => {
+            if (item.questionnaire?.id && onTitleClick && !isEnteredInError) {
+              e.stopPropagation();
+              onTitleClick(item.questionnaire.id);
+            }
+          }}
+        >
+          {title}
+        </CardTitle>
+      )}
+      {isEnteredInError && (
+        <Badge variant="destructive" className="ml-2">
+          {t("entered_in_error")}
+        </Badge>
+      )}
+      <div className="ml-auto flex items-center gap-1">
+        {isEnteredInError && (
+          <ChevronDown
+            className={cn(
+              "size-4 transition-transform text-gray-500",
+              isExpanded && "rotate-180",
+            )}
+          />
+        )}
+        {!isPrintPreview && (
+          <div onClick={(e) => e.stopPropagation()}>
+            <ResponseActionsMenu item={item} patientId={patientId} />
+          </div>
+        )}
+      </div>
+    </CardHeader>
+  );
+
+  const content = (
+    <CardContent className="px-3 pb-3 pt-0">
+      <ResponseCardContent item={item} />
+    </CardContent>
+  );
+
   return (
     <Card
       className={cn(
         "shadow-none border rounded-md",
-        isEnteredInError && "opacity-70",
+        isEnteredInError && "opacity-60",
       )}
     >
-      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-        <CollapsibleTrigger
-          asChild
-          disabled={!isEnteredInError}
-          className={cn(isEnteredInError && "cursor-pointer")}
-        >
-          <CardHeader
-            className={cn(
-              "flex flex-row items-center py-2 px-3",
-              isEnteredInError && "hover:bg-gray-50",
-            )}
-          >
-            {showTitle && (
-              <CardTitle
-                className={cn(
-                  "text-base font-medium",
-                  onTitleClick &&
-                    !isEnteredInError &&
-                    "cursor-pointer hover:bg-gray-100 rounded px-1.5 py-0.5",
-                )}
-                onClick={(e) => {
-                  if (
-                    item.questionnaire?.id &&
-                    onTitleClick &&
-                    !isEnteredInError
-                  ) {
-                    e.stopPropagation();
-                    onTitleClick(item.questionnaire.id);
-                  }
-                }}
-              >
-                {title}
-              </CardTitle>
-            )}
-            {isEnteredInError && (
-              <Badge variant="destructive" className="ml-2">
-                {t("entered_in_error")}
-              </Badge>
-            )}
-            <div className="ml-auto flex items-center gap-1">
-              {isEnteredInError && (
-                <ChevronDown
-                  className={cn(
-                    "size-4 transition-transform text-gray-500",
-                    isExpanded && "rotate-180",
-                  )}
-                />
-              )}
-              {!isPrintPreview && (
-                <div onClick={(e) => e.stopPropagation()}>
-                  <ResponseActionsMenu item={item} patientId={patientId} />
-                </div>
-              )}
-            </div>
-          </CardHeader>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <CardContent className="px-3 pb-3 pt-0">
-            <ResponseCardContent item={item} />
-          </CardContent>
-        </CollapsibleContent>
-      </Collapsible>
+      {isEnteredInError ? (
+        <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+          <CollapsibleTrigger asChild className="cursor-pointer">
+            {header}
+          </CollapsibleTrigger>
+          <CollapsibleContent>{content}</CollapsibleContent>
+        </Collapsible>
+      ) : (
+        <>
+          {header}
+          {content}
+        </>
+      )}
     </Card>
   );
 }
