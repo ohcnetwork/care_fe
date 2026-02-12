@@ -216,7 +216,7 @@ const TokenCard = ({
               </div>
             )}
           </div>
-          {hideFacilityInfo ? null : (
+          {!hideFacilityInfo && (
             <div className="flex-1 min-w-0">
               <h3 className="text-sm font-semibold tracking-tight wrap-break-word">
                 {facility.name}
