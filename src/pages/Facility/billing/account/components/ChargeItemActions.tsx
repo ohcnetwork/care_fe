@@ -9,7 +9,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -89,7 +88,6 @@ export function ChargeItemActionsMenu({
           </DropdownMenuItem>
           {item.status === ChargeItemStatus.billable && (
             <>
-              <DropdownMenuSeparator />
               {STATUS_CHANGE_TARGETS.map((status) => (
                 <DropdownMenuItem
                   key={status}
