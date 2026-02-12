@@ -124,6 +124,10 @@ export interface TokenSlot {
   availability: {
     name: string;
     tokens_per_slot: number;
+    schedule: {
+      id: string;
+      name: string;
+    };
   };
   start_datetime: string; // timezone naive datetime
   end_datetime: string; // timezone naive datetime

@@ -336,7 +336,7 @@ export default function ConsentFormSheet({
                       <DateTimeInput
                         {...field}
                         value={field.value}
-                        onDateChange={(val) => field.onChange(val)}
+                        onDateChange={(val) => field.onChange(val ?? null)}
                       />
                       <FormMessage />
                     </FormItem>

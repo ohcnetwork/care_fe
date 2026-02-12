@@ -1,3 +1,4 @@
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { LocationRead } from "@/types/location/location";
 
 export const LOCATION_ASSOCIATION_STATUSES = [
@@ -21,7 +22,7 @@ export type LocationAssociationRead = {
 export interface LocationAssociation {
   meta: Record<string, any>;
   id: string | null;
-  encounter: string;
+  encounter: EncounterRead;
   start_datetime: string;
   end_datetime: string | null;
   status: LocationAssociationStatus;

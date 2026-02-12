@@ -29,7 +29,7 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
       className={cn("grid grid-cols-2 sm:grid-cols-4 gap-3", props.className)}
     >
       <QuickAction
-        icon={<AllergyIcon className="text-yellow-700" />}
+        icon={<AllergyIcon className="text-red-700" />}
         title={t("allergy")}
         shortcut={getShortcutDisplay("add-allergy")}
         href={`questionnaire/allergy_intolerance`}
@@ -67,6 +67,7 @@ export function QuickAction({
   shortcut,
   href,
   actionId,
+  basePath,
   onClick,
   ...props
 }: {
@@ -75,6 +76,7 @@ export function QuickAction({
   shortcut?: string;
   href?: string;
   props?: React.ComponentProps<"div">;
+  basePath?: string;
   onClick?: () => void;
   actionId?: string;
 }) {
@@ -83,7 +85,7 @@ export function QuickAction({
 
   if (href) {
     return (
-      <Link href={href} className={className}>
+      <Link basePath={basePath} href={href} className={className}>
         <QuickActionContent
           icon={icon}
           title={title}

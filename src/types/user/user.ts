@@ -53,6 +53,7 @@ export interface CurrentUserRead extends UserRead, Permissions {
   pf_endpoint: string | null;
   pf_p256dh: string | null;
   pf_auth: string | null;
+  preferences: Record<string, unknown>;
 }
 
 // Todo: Once backend adds a proper public user read spec, add it here and update the usages where applicable

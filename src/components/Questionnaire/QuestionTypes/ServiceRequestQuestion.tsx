@@ -1,10 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
-import { Pencil, Trash2 } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ChevronDown, MoreVerticalIcon, Pencil } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
+import UserSelector from "@/components/Common/UserSelector";
+import ManageResponseTemplatesSheet from "@/components/Questionnaire/ManageResponseTemplatesSheet";
+import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
+import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +16,13 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -21,16 +32,13 @@ import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/reso
 import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 
-import UserSelector from "@/components/Common/UserSelector";
-import ManageResponseTemplatesSheet from "@/components/Questionnaire/ManageResponseTemplatesSheet";
-import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
-import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
-
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { add } from "@/Utils/decimal";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { getBasePrice } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import {
@@ -42,12 +50,39 @@ import {
 } from "@/types/emr/serviceRequest/serviceRequest";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import { Question } from "@/types/questionnaire/question";
 import {
   ActivityDefinitionTemplateSpec,
   QuestionnaireResponseTemplateReadSpec,
 } from "@/types/questionnaire/questionnaireResponseTemplate";
+import { questionnaireResponseTemplateApi } from "@/types/questionnaire/questionnaireResponseTemplateApi";
 import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
 import { Decimal } from "decimal.js";
+
+import { AddToTemplateDialog } from "@/components/Questionnaire/AddToTemplateDialog";
+import { filterStructuredQuestionnaireSlugs } from "@/components/Questionnaire/data/StructuredFormData";
+
+export function buildServiceRequestForTemplate(
+  serviceRequest: ServiceRequestApplyActivityDefinitionSpec,
+): ActivityDefinitionTemplateSpec {
+  return {
+    slug: serviceRequest.activity_definition,
+    service_request: {
+      title: serviceRequest.service_request.title,
+      status: serviceRequest.service_request.status,
+      intent: serviceRequest.service_request.intent,
+      priority: serviceRequest.service_request.priority,
+      category: serviceRequest.service_request.category,
+      code: serviceRequest.service_request.code,
+      do_not_perform: serviceRequest.service_request.do_not_perform,
+      body_site: serviceRequest.service_request.body_site,
+      note: serviceRequest.service_request.note,
+      patient_instruction: serviceRequest.service_request.patient_instruction,
+      occurance: serviceRequest.service_request.occurance,
+      locations: serviceRequest.service_request.locations,
+    },
+  };
+}
 
 // Extend the base type to use UserReadMinimal for requester
 interface ServiceRequestApplyActivityDefinitionSpec extends Omit<
@@ -74,6 +109,7 @@ interface ServiceRequestQuestionProps {
   disabled?: boolean;
   errors?: QuestionValidationError[];
   questionnaireSlug?: string;
+  question: Question;
 }
 
 const SERVICE_REQUEST_FIELDS = {
@@ -128,27 +164,36 @@ interface ServiceRequestFormProps {
   onRemove?: () => void;
   onAdd?: () => void;
   onCancel?: () => void;
+  onAddToTemplate?: (
+    serviceRequest: ServiceRequestApplyActivityDefinitionSpec,
+  ) => void;
   disabled?: boolean;
   errors?: QuestionValidationError[];
   questionId?: string;
   index?: number;
   activityDefinition?: ActivityDefinitionReadSpec;
   facilityId?: string;
+  requester?: UserReadMinimal;
+  onRequesterChange?: (user: UserReadMinimal | undefined) => void;
 }
 
 function ServiceRequestForm({
   serviceRequest,
   onUpdate,
   onRemove,
+  onAddToTemplate,
   disabled,
   errors,
   questionId,
   index,
   activityDefinition,
   facilityId = "",
+  requester,
+  onRequesterChange,
 }: ServiceRequestFormProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -201,21 +246,56 @@ function ServiceRequestForm({
                 >
                   <Pencil className="h-4 w-4 text-gray-600" />
                 </Button>
-                {onRemove && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onRemove();
-                    }}
-                    disabled={disabled}
-                  >
-                    <Trash2 className="h-4 w-4 text-gray-600" />
-                  </Button>
-                )}
+                <DropdownMenu
+                  open={isDropdownOpen}
+                  onOpenChange={setIsDropdownOpen}
+                >
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      disabled={disabled}
+                    >
+                      <MoreVerticalIcon className="h-4 w-4 text-gray-600" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {onAddToTemplate && (
+                      <>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setIsDropdownOpen(false);
+                            onAddToTemplate(serviceRequest);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          {t("add_to_template")}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
+                    {onRemove && (
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setIsDropdownOpen(false);
+                          onRemove();
+                        }}
+                        className="text-red-500 cursor-pointer"
+                      >
+                        {t("remove")}
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </div>
@@ -289,8 +369,13 @@ function ServiceRequestForm({
               <div className="space-y-2">
                 <Label>{t("requester")}</Label>
                 <UserSelector
-                  selected={serviceRequest.service_request.requester}
-                  onChange={(user) => onUpdate?.({ requester: user })}
+                  selected={
+                    requester || serviceRequest.service_request.requester
+                  }
+                  onChange={(user) => {
+                    onRequesterChange?.(user);
+                    onUpdate?.({ requester: user });
+                  }}
                   placeholder={t("select_requester")}
                   facilityId={facilityId}
                 />
@@ -321,6 +406,7 @@ export function ServiceRequestQuestion({
   encounterId,
   errors,
   questionnaireSlug,
+  question,
 }: ServiceRequestQuestionProps) {
   const { t } = useTranslation();
   const currentUser = useAuthUser() as CurrentUserRead;
@@ -336,6 +422,194 @@ export function ServiceRequestQuestion({
   const [activityDefinitionsMap, setActivityDefinitionsMap] = useState<
     Record<string, ActivityDefinitionReadSpec>
   >({});
+
+  const [serviceRequestToAddToTemplate, setServiceRequestToAddToTemplate] =
+    useState<ServiceRequestApplyActivityDefinitionSpec | null>(null);
+  const [templateSearchQuery, setTemplateSearchQuery] = useState("");
+  const [isCreatingNewTemplate, setIsCreatingNewTemplate] = useState(false);
+  const [newTemplateName, setNewTemplateName] = useState("");
+  const [selectedOrganizations, setSelectedOrganizations] = useState<
+    string[] | null
+  >(null);
+
+  const queryClient = useQueryClient();
+
+  const { data: templatesData, isLoading: isLoadingTemplates } = useQuery({
+    queryKey: [
+      "questionnaire_response_templates",
+      questionnaireSlug,
+      templateSearchQuery,
+    ],
+    queryFn: query.debounced(questionnaireResponseTemplateApi.list, {
+      queryParams: {
+        questionnaire: filterStructuredQuestionnaireSlugs(questionnaireSlug),
+        name: templateSearchQuery || undefined,
+        facility: facilityId,
+        limit: 20,
+      },
+    }),
+    enabled: !!questionnaireSlug && !!serviceRequestToAddToTemplate,
+  });
+
+  const addToTemplateMutation = useMutation({
+    mutationFn: (params: {
+      template: QuestionnaireResponseTemplateReadSpec;
+      serviceRequest: ServiceRequestApplyActivityDefinitionSpec;
+    }) => {
+      const existingServiceRequests =
+        params.template.template_data?.activity_definition || [];
+      const serviceRequestForTemplate = buildServiceRequestForTemplate(
+        params.serviceRequest,
+      );
+
+      return mutate(questionnaireResponseTemplateApi.update, {
+        pathParams: {
+          id: params.template.id!,
+        },
+      })({
+        name: params.template.name,
+        description: params.template.description || "",
+        template_data: {
+          ...params.template.template_data,
+          activity_definition: [
+            ...existingServiceRequests,
+            serviceRequestForTemplate,
+          ],
+        },
+        users: [currentUser.username],
+        facility_organizations: selectedOrganizations || [],
+      });
+    },
+    onSuccess: (_, variables) => {
+      toast.success(
+        t("service_request_added_to_template", {
+          template: variables.template.name,
+        }),
+      );
+      queryClient.invalidateQueries({
+        queryKey: ["questionnaire_response_templates", questionnaireSlug],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["questionnaireResponseTemplates", questionnaireSlug],
+      });
+      setServiceRequestToAddToTemplate(null);
+      setTemplateSearchQuery("");
+    },
+    onError: () => {
+      toast.error(t("failed_to_add_to_template"));
+    },
+  });
+
+  // Mutation for creating a new template with the service request
+  const createTemplateWithServiceRequestMutation = useMutation({
+    mutationFn: (params: {
+      name: string;
+      serviceRequest: ServiceRequestApplyActivityDefinitionSpec;
+    }) => {
+      const serviceRequestForTemplate = buildServiceRequestForTemplate(
+        params.serviceRequest,
+      );
+
+      return mutate(questionnaireResponseTemplateApi.create)({
+        name: params.name,
+        description: "",
+        ...(questionnaireSlug &&
+        questionnaireSlug !== "service_request" &&
+        questionnaireSlug !== "medication_request"
+          ? { questionnaire: questionnaireSlug }
+          : {}),
+        facility: facilityId,
+        template_data: {
+          medication_request: [],
+          activity_definition: [serviceRequestForTemplate],
+        },
+        users: [currentUser.username],
+        facility_organizations: selectedOrganizations || [],
+      });
+    },
+    onSuccess: (_, variables) => {
+      toast.success(
+        t("template_created_with_service_request", {
+          template: variables.name,
+        }),
+      );
+      queryClient.invalidateQueries({
+        queryKey: ["questionnaire_response_templates", questionnaireSlug],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["questionnaireResponseTemplates", questionnaireSlug],
+      });
+      setServiceRequestToAddToTemplate(null);
+      setTemplateSearchQuery("");
+      setIsCreatingNewTemplate(false);
+      setNewTemplateName("");
+    },
+  });
+
+  const handleAddToTemplate = (
+    serviceRequest: ServiceRequestApplyActivityDefinitionSpec,
+  ) => {
+    setServiceRequestToAddToTemplate(serviceRequest);
+    setIsCreatingNewTemplate(false);
+    setNewTemplateName("");
+  };
+
+  const handleCreateNewTemplateWithServiceRequest = () => {
+    if (!serviceRequestToAddToTemplate || !newTemplateName.trim()) return;
+    createTemplateWithServiceRequestMutation.mutate({
+      name: newTemplateName.trim(),
+      serviceRequest: serviceRequestToAddToTemplate,
+    });
+  };
+
+  const handleSelectTemplate = (
+    template: QuestionnaireResponseTemplateReadSpec,
+  ) => {
+    if (!serviceRequestToAddToTemplate) return;
+    addToTemplateMutation.mutate({
+      template,
+      serviceRequest: serviceRequestToAddToTemplate,
+    });
+  };
+
+  const handleRequesterChange = (
+    index: number,
+    user: UserReadMinimal | undefined,
+  ) => {
+    handleUpdateServiceRequest(index, { requester: user || currentUser });
+  };
+
+  const handleApplyRequesterToAll = (user: UserReadMinimal | undefined) => {
+    const newServiceRequests = serviceRequests.map((sr) => ({
+      ...sr,
+      service_request: {
+        ...sr.service_request,
+        requester: user || currentUser,
+      },
+    }));
+
+    setServiceRequests(newServiceRequests);
+    updateQuestionnaireResponseCB(
+      [{ type: "service_request", value: newServiceRequests }],
+      questionnaireResponse.question_id,
+    );
+  };
+
+  const handleClearAllRequesters = () => {
+    const newServiceRequests = serviceRequests.map((sr) => ({
+      ...sr,
+      service_request: {
+        ...sr.service_request,
+        requester: currentUser,
+      },
+    }));
+
+    setServiceRequests(newServiceRequests);
+    updateQuestionnaireResponseCB(
+      [{ type: "service_request", value: newServiceRequests }],
+      questionnaireResponse.question_id,
+    );
+  };
 
   const {
     data: selectedActivityDefinitionData,
@@ -640,12 +914,45 @@ export function ServiceRequestQuestion({
 
   return (
     <div className="space-y-4">
+      <QuestionLabel question={question} />
+      <AddToTemplateDialog
+        open={!!serviceRequestToAddToTemplate}
+        onOpenChange={(open) => {
+          if (!open) {
+            setServiceRequestToAddToTemplate(null);
+            setTemplateSearchQuery("");
+            setIsCreatingNewTemplate(false);
+            setNewTemplateName("");
+            setSelectedOrganizations(null);
+          }
+        }}
+        item={serviceRequestToAddToTemplate}
+        itemDisplayName={(sr) => sr.service_request.title}
+        itemType="service_request"
+        isCreatingNewTemplate={isCreatingNewTemplate}
+        setIsCreatingNewTemplate={setIsCreatingNewTemplate}
+        newTemplateName={newTemplateName}
+        setNewTemplateName={setNewTemplateName}
+        templateSearchQuery={templateSearchQuery}
+        setTemplateSearchQuery={setTemplateSearchQuery}
+        templatesData={templatesData}
+        isLoadingTemplates={isLoadingTemplates}
+        onCreateNewTemplate={handleCreateNewTemplateWithServiceRequest}
+        onSelectTemplate={handleSelectTemplate}
+        isCreating={createTemplateWithServiceRequestMutation.isPending}
+        isAdding={addToTemplateMutation.isPending}
+        facilityId={facilityId}
+        selectedOrganizations={selectedOrganizations}
+        onSelectedOrganizationsChange={setSelectedOrganizations}
+      />
+
       {serviceRequests.map((serviceRequest, index) => (
         <ServiceRequestForm
           key={`${serviceRequest.service_request.code.code}-${index}`}
           serviceRequest={serviceRequest}
           onUpdate={(updates) => handleUpdateServiceRequest(index, updates)}
           onRemove={() => handleRemoveServiceRequest(index)}
+          onAddToTemplate={questionnaireSlug ? handleAddToTemplate : undefined}
           disabled={disabled}
           errors={errors}
           questionId={questionnaireResponse.question_id}
@@ -654,6 +961,8 @@ export function ServiceRequestQuestion({
           activityDefinition={
             activityDefinitionsMap[serviceRequest.activity_definition]
           }
+          requester={serviceRequest.service_request.requester}
+          onRequesterChange={(user) => handleRequesterChange(index, user)}
         />
       ))}
 
@@ -695,6 +1004,32 @@ export function ServiceRequestQuestion({
             translationBaseKey="activity_definition"
           />
         </div>
+        {serviceRequests.length > 1 && (
+          <div className="flex items-center gap-2 border border-gray-400 rounded-md">
+            <span className="text-xs font-medium text-gray-800 whitespace-nowrap pl-3">
+              {t("requester")}:
+            </span>
+            <UserSelector
+              selected={undefined}
+              onChange={handleApplyRequesterToAll}
+              facilityId={facilityId}
+              trigger={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-3 text-xs"
+                  disabled={disabled}
+                >
+                  {t("apply_to_all")}
+                  <ChevronDown className="size-3" />
+                </Button>
+              }
+              contentAlign="center"
+              contentClassName="w-80"
+              onClear={handleClearAllRequesters}
+            />
+          </div>
+        )}
         {questionnaireSlug && (
           <ManageResponseTemplatesSheet
             questionnaireSlug={questionnaireSlug}

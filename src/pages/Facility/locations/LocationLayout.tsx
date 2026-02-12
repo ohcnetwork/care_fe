@@ -20,6 +20,7 @@ import DeliveryOrderForm from "@/pages/Facility/services/inventory/externalSuppl
 import { DeliveryOrderList } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderList";
 import { DeliveryOrderShow } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderShow";
 import { PrintDeliveryOrder } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/PrintDeliveryOrder";
+import { PrintRequestOrder } from "@/pages/Facility/services/inventory/externalSupply/requestOrder/PrintRequestOrder";
 import { ToDispatch } from "@/pages/Facility/services/inventory/ToDispatch";
 import { ToReceive } from "@/pages/Facility/services/inventory/ToReceive";
 import AllMedicationBillForm from "@/pages/Facility/services/pharmacy/AllMedicationBillForm";
@@ -34,7 +35,6 @@ import PrescriptionsView, {
 } from "@/pages/Facility/services/pharmacy/PrescriptionsView";
 import { PrintDispenseOrder } from "@/pages/Facility/services/pharmacy/PrintDispenseOrder";
 import { PrintMedicationReturn } from "@/pages/Facility/services/pharmacy/PrintMedicationReturn";
-import { PrintPharmacyPrescription } from "@/pages/Facility/services/pharmacy/PrintPharmacyPrescription";
 import ServiceRequestList from "@/pages/Facility/services/serviceRequests/ServiceRequestList";
 import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
@@ -65,13 +65,14 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       prescriptionId={prescriptionId}
     />
   ),
-  "/medication_requests/patient/:patientId/print": ({
-    patientId,
-  }: {
-    patientId: string;
-  }) => (
-    <PrintPharmacyPrescription facilityId={facilityId} patientId={patientId} />
-  ),
+  // Todo: Re-check if this route is needed
+  // "/medication_requests/patient/:patientId/print": ({
+  //   patientId,
+  // }: {
+  //   patientId: string;
+  // }) => (
+  //   <PrintPharmacyPrescription facilityId={facilityId} patientId={patientId} />
+  // ),
   "/medication_requests/patient/:patientId/bill": ({
     patientId,
   }: {
@@ -185,6 +186,15 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       internal={true}
     />
   ),
+  //Print Internal Order
+  "/inventory/internal/:type/orders/:id/print": ({ id }: { id: string }) => (
+    <PrintRequestOrder
+      facilityId={facilityId}
+      locationId={locationId}
+      requestOrderId={id}
+      internal={true}
+    />
+  ),
   // Create Delivery
   "/inventory/internal/:type/deliveries/new": () => (
     <DeliveryOrderForm
@@ -284,6 +294,15 @@ const getRoutes = (facilityId: string, locationId: string) => ({
   // Edit External Order
   "/inventory/external/orders/:tab/:id/edit": ({ id }: { id: string }) => (
     <RequestOrderForm
+      facilityId={facilityId}
+      locationId={locationId}
+      requestOrderId={id}
+      internal={false}
+    />
+  ),
+  // Print External Order
+  "/inventory/external/orders/:tab/:id/print": ({ id }: { id: string }) => (
+    <PrintRequestOrder
       facilityId={facilityId}
       locationId={locationId}
       requestOrderId={id}

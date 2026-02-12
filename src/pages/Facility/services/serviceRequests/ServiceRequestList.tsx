@@ -358,7 +358,7 @@ export default function ServiceRequestList({
           ? dateTimeQueryString(new Date(qParams.created_date_after))
           : undefined,
         created_date_before: qParams.created_date_before
-          ? dateTimeQueryString(new Date(qParams.created_date_before))
+          ? dateTimeQueryString(new Date(qParams.created_date_before), true)
           : undefined,
       },
     }),
@@ -474,6 +474,12 @@ export default function ServiceRequestList({
                 requests={serviceRequests}
                 facilityId={facilityId}
                 locationId={locationId}
+                onPatientClick={(request) =>
+                  updateQuery({
+                    patient: request.encounter.patient.id,
+                    patient_name: request.encounter.patient.name,
+                  })
+                }
               />
             </div>
           </>

@@ -25,6 +25,7 @@ import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { add, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 
 interface Props {
   appointmentId: string;
@@ -84,7 +85,10 @@ export default function AppointmentPrint(props: Props) {
   const hasChargeItems = chargeItems?.results && chargeItems.results.length > 0;
 
   return (
-    <PrintPreview title={t("appointment_details")} autoPrint>
+    <PrintPreview
+      title={t("appointment_details")}
+      autoPrint={{ enabled: true }}
+    >
       <div className="max-w-7xl mx-auto text-sm">
         {/* Header with Facility Name and Logo */}
         <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
@@ -214,8 +218,13 @@ export default function AppointmentPrint(props: Props) {
 
         {/* Footer */}
         <PrintFooter
-          leftContent={format(new Date(), "PP 'at' p")}
-          rightContent={facility.name}
+          rightContent={format(new Date(), "PP 'at' p")}
+          leftContent={
+            <>
+              <span className="font-semibold">{t("last_updated_by")}: </span>
+              {formatName(appointment.updated_by)}
+            </>
+          }
           className="text-xs"
         />
       </div>

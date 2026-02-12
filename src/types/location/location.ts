@@ -18,6 +18,8 @@ import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityO
 
 export type Status = "active" | "inactive" | "unknown";
 
+export type SystemAvailabilityStatus = "available" | "reserved";
+
 export type OperationalStatus = "C" | "H" | "O" | "U" | "K" | "I";
 
 export type LocationMode = "instance" | "kind";
@@ -39,6 +41,7 @@ export interface LocationDetail extends LocationBase {
   has_children: boolean;
   organizations: FacilityOrganizationRead[];
   sort_index: number;
+  system_availability_status: SystemAvailabilityStatus;
 }
 
 export interface LocationRead extends LocationBase {
@@ -47,6 +50,7 @@ export interface LocationRead extends LocationBase {
   parent?: LocationRead;
   current_encounter?: EncounterRead;
   sort_index: number;
+  system_availability_status: SystemAvailabilityStatus;
 }
 
 export type LocationMinSpec = Omit<LocationRead, "current_encounter">;

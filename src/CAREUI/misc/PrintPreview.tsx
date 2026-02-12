@@ -12,7 +12,7 @@ import Page from "@/components/Common/Page";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAppHistory from "@/hooks/useAppHistory";
-import useAutoPrint from "@/hooks/useAutoPrint";
+import useAutoPrint, { AutoPrintOptions } from "@/hooks/useAutoPrint";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
@@ -28,7 +28,7 @@ type Props = {
   title: string;
   showBackButton?: boolean;
   watermark?: WatermarkProps;
-  autoPrint?: boolean;
+  autoPrint?: AutoPrintOptions;
 };
 
 export default function PrintPreview(props: Props) {
@@ -36,7 +36,12 @@ export default function PrintPreview(props: Props) {
   const { goBack } = useAppHistory();
   const { t } = useTranslation();
   useShortcutSubContext();
-  useAutoPrint({ enabled: (props.autoPrint ?? false) && !props.disabled });
+
+  const { isPrinting } = useAutoPrint({
+    ...props.autoPrint,
+    enabled: (props.autoPrint?.enabled ?? false) && !props.disabled,
+  });
+
   return (
     <div className="flex items-center justify-center">
       <Page
@@ -53,7 +58,11 @@ export default function PrintPreview(props: Props) {
                 {t("back")}
               </Button>
             )}
-            <Button variant="primary" disabled={props.disabled} onClick={print}>
+            <Button
+              variant="primary"
+              disabled={props.disabled || isPrinting}
+              onClick={print}
+            >
               <CareIcon icon="l-print" className="text-lg" />
               {t("print")}
               <ShortcutBadge actionId="print-button" className="bg-white" />

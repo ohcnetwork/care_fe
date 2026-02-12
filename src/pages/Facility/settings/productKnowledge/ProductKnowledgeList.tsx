@@ -52,6 +52,7 @@ export default function ProductKnowledgeList({
             queryParams: {
               facility: facilityId,
               status: ProductKnowledgeStatus.active,
+              include_instance: false,
             },
           },
           searchParamName: "name",

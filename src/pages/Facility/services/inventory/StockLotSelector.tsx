@@ -63,7 +63,7 @@ export default function StockLotSelector({
   locationId,
   productKnowledge,
   availableInventories,
-  dontRestrictExpired = true,
+  dontRestrictExpired = false,
   disabled = false,
   showUnitPrice = true,
   net_content_gt = 0,
