@@ -62,16 +62,15 @@ const PrescriptionContent = ({
               const instruction = medication.dosage_instruction[0];
               const remarks = formatSig(instruction);
               const notes = medication.note;
-              const freqText = formatFrequency(instruction) || "-";
+              const freqText = formatFrequency(instruction);
               const additionalInstr =
                 instruction?.additional_instruction?.[0]?.display;
               return {
                 medicine: displayMedicationName(medication),
                 status: t(`medication_status_${medication.status}`),
                 dosage: formatDosage(instruction),
-                frequency: additionalInstr
-                  ? `${freqText}, ${additionalInstr}`
-                  : freqText,
+                frequency:
+                  [freqText, additionalInstr].filter(Boolean).join(", ") || "-",
                 duration: formatDuration(instruction) || "-",
                 instructions: [remarks, notes].filter(Boolean).join("\n"),
               };

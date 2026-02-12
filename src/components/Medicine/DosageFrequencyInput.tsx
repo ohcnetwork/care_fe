@@ -12,7 +12,6 @@ import {
   manToFhirTiming,
   MEDICATION_REQUEST_TIMING_OPTIONS,
   MedicationRequestDosageInstruction,
-  Timing,
 } from "@/types/emr/medicationRequest/medicationRequest";
 
 interface DosageFrequencyInputProps {
@@ -130,6 +129,7 @@ export function DosageFrequencyInput({
       onDosageInstructionChange({
         timing: undefined,
         as_needed_boolean: false,
+        as_needed_for: undefined,
         text: undefined,
       });
       return;
@@ -148,33 +148,22 @@ export function DosageFrequencyInput({
         });
       } else {
         // Standard FHIR timing (from M-A-N preset or direct FHIR code)
-        // Check if it's a M-A-N preset to store the text
         const preset = MAN_FREQUENCY_PRESETS.find((p) => p.man === value);
         onDosageInstructionChange({
           timing: fhirMapping.timing,
           as_needed_boolean: false,
+          as_needed_for: undefined,
           text: preset ? preset.man : undefined,
         });
       }
     } else {
-      // Check if it's a direct FHIR timing key
-      const directKey = value.toUpperCase();
-      if (directKey in MEDICATION_REQUEST_TIMING_OPTIONS) {
-        const timingOption = MEDICATION_REQUEST_TIMING_OPTIONS[directKey];
-        onDosageInstructionChange({
-          timing: { ...timingOption.timing } as Timing,
-          as_needed_boolean: false,
-          text: undefined,
-        });
-      } else {
-        // Non-standard M-A-N or freeform -- store as text
-        onDosageInstructionChange({
-          text: value,
-          as_needed_boolean: false,
-          // Keep timing undefined for non-standard patterns
-          timing: undefined,
-        });
-      }
+      // Non-standard M-A-N or freeform -- store as text
+      onDosageInstructionChange({
+        text: value,
+        as_needed_boolean: false,
+        as_needed_for: undefined,
+        timing: undefined,
+      });
     }
   };
 

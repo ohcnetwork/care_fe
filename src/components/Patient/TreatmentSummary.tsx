@@ -553,14 +553,15 @@ export default function TreatmentSummary({
                           .join(", ");
                       const remarks = formatSig(instruction);
                       const notes = medication.note;
-                      const freqText = formatFrequency(instruction) || "-";
+                      const freqText = formatFrequency(instruction);
                       return {
                         medicine: displayMedicationName(medication),
                         status: t(`medication_status__${medication.status}`),
                         dosage: formatDosage(instruction),
-                        frequency: instruction?.additional_instruction?.length
-                          ? `${freqText}, ${additionalInstructions}`
-                          : freqText,
+                        frequency:
+                          [freqText, additionalInstructions]
+                            .filter(Boolean)
+                            .join(", ") || "-",
                         duration: formatDuration(instruction) || "-",
                         instructions: `${remarks || "-"}${notes ? ` (${t("note")}: ${notes})` : ""}`,
                       };

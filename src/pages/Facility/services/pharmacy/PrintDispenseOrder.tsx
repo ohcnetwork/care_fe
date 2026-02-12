@@ -82,7 +82,7 @@ const DispenseOrderContent = ({
               { key: "prepared_date" },
             ]}
             rows={dispenses.map((dispense) => {
-              const instruction = dispense.dosage_instruction[0] ?? {};
+              const instruction = dispense.dosage_instruction?.[0];
 
               return {
                 medicine: dispense.item.product.product_knowledge.name,

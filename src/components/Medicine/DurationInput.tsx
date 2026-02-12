@@ -64,7 +64,9 @@ export function DurationInput({
     }
 
     const decoded = decodeDurationValue(selectedValue);
-    onChange(decoded);
+    if (decoded) {
+      onChange(decoded);
+    }
   };
 
   return (

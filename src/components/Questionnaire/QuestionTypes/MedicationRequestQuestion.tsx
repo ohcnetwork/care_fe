@@ -1265,27 +1265,31 @@ export function MedicationRequestQuestion({
                                       </Button>
                                     </div>
                                   </div>
-                                  {expandedMedicationIndex !== index && (
-                                    <div className="text-sm mt-1 text-gray-600">
-                                      {dosageInstruction?.dose_and_rate
-                                        ?.dose_quantity &&
-                                        `${round(dosageInstruction.dose_and_rate.dose_quantity.value)} ${dosageInstruction.dose_and_rate.dose_quantity.unit?.display || ""}`}
+                                  {expandedMedicationIndex !== index &&
+                                    (() => {
+                                      const freq =
+                                        formatFrequency(dosageInstruction);
+                                      return (
+                                        <div className="text-sm mt-1 text-gray-600">
+                                          {dosageInstruction?.dose_and_rate
+                                            ?.dose_quantity &&
+                                            `${round(dosageInstruction.dose_and_rate.dose_quantity.value)} ${dosageInstruction.dose_and_rate.dose_quantity.unit?.display || ""}`}
 
-                                      {dosageInstruction?.dose_and_rate
-                                        ?.dose_range &&
-                                        formatDoseRange(
-                                          dosageInstruction.dose_and_rate
-                                            .dose_range,
-                                        )}
+                                          {dosageInstruction?.dose_and_rate
+                                            ?.dose_range &&
+                                            formatDoseRange(
+                                              dosageInstruction.dose_and_rate
+                                                .dose_range,
+                                            )}
 
-                                      {formatFrequency(dosageInstruction) &&
-                                        ` · ${formatFrequency(dosageInstruction)}`}
+                                          {freq && ` · ${freq}`}
 
-                                      {dosageInstruction?.timing?.repeat
-                                        ?.bounds_duration?.value &&
-                                        ` · ${formatDurationLabel(dosageInstruction.timing.repeat.bounds_duration)}`}
-                                    </div>
-                                  )}
+                                          {dosageInstruction?.timing?.repeat
+                                            ?.bounds_duration?.value &&
+                                            ` · ${formatDurationLabel(dosageInstruction.timing.repeat.bounds_duration)}`}
+                                        </div>
+                                      );
+                                    })()}
                                 </div>
                               </CardHeader>
                             </CollapsibleTrigger>
@@ -1727,7 +1731,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           index={index}
         />
       </div>
-      {/* Duration */}
       {/* Duration */}
       <div className="lg:px-2 p-1 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">

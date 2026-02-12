@@ -106,8 +106,12 @@ const IndividualMedicationRow: React.FC<{
               isInactive && medication.status === "ended" && "line-through",
             )}
           >
-            {formatDosage(medication.dosage_instruction[0])},{" "}
-            {formatFrequency(medication.dosage_instruction[0])}
+            {[
+              formatDosage(medication.dosage_instruction[0]),
+              formatFrequency(medication.dosage_instruction[0]),
+            ]
+              .filter(Boolean)
+              .join(", ")}
           </span>
           <Badge
             variant={medication.status === "active" ? "green" : "secondary"}
@@ -315,15 +319,19 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
               </div>
 
               {/* Latest prescription dosage and frequency */}
-              {latestActiveRequest && (
-                <div className="text-sm text-gray-600 mt-0.5">
-                  {formatDosage(latestActiveRequest.dosage_instruction[0])}
-                  {formatFrequency(
+              {latestActiveRequest &&
+                (() => {
+                  const freq = formatFrequency(
                     latestActiveRequest.dosage_instruction[0],
-                  ) && <span className="text-gray-400"> · </span>}
-                  {formatFrequency(latestActiveRequest.dosage_instruction[0])}
-                </div>
-              )}
+                  );
+                  return (
+                    <div className="text-sm text-gray-600 mt-0.5">
+                      {formatDosage(latestActiveRequest.dosage_instruction[0])}
+                      {freq && <span className="text-gray-400"> · </span>}
+                      {freq}
+                    </div>
+                  );
+                })()}
 
               {/* Status and route badges */}
               <div className="flex flex-wrap gap-1 mt-1">

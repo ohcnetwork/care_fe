@@ -1171,10 +1171,13 @@ export function fhirDosageToFrequencyValue(
 ): string {
   if (!dosageInstruction) return "";
 
-  // 1. Explicit text
+  // 1. PRN/SOS takes highest priority
+  if (dosageInstruction.as_needed_boolean) return "SOS";
+
+  // 2. Explicit text
   if (dosageInstruction.text) return dosageInstruction.text;
 
-  // 2. Check timing code against M-A-N presets
+  // 3. Check timing code against M-A-N presets
   if (dosageInstruction.timing?.code?.code) {
     const code = dosageInstruction.timing.code.code;
     // Find preset with matching timing key
@@ -1191,9 +1194,6 @@ export function fhirDosageToFrequencyValue(
     );
     if (timingKey) return timingKey;
   }
-
-  // 3. PRN/SOS
-  if (dosageInstruction.as_needed_boolean) return "SOS";
 
   return "";
 }
@@ -1471,13 +1471,16 @@ export function computeTotalDoseQuantity(
   // M-A-N text patterns: compute from actual slot values
   if (instruction.text) {
     const slotSum = sumManSlots(instruction.text);
-    if (slotSum === null) return null;
-    const durationDays = convertToDays(
-      bounds_duration.value,
-      bounds_duration.unit,
-    );
-    if (!durationDays.greaterThan(0)) return null;
-    return multiply(multiply(doseValue, slotSum), durationDays) as Decimal;
+    if (slotSum !== null) {
+      const durationDays = convertToDays(
+        bounds_duration.value,
+        bounds_duration.unit,
+      );
+      if (durationDays.greaterThan(0)) {
+        return multiply(multiply(doseValue, slotSum), durationDays) as Decimal;
+      }
+    }
+    // Not a valid M-A-N pattern -- fall through to standard FHIR computation
   }
 
   // Standard FHIR: dose × numberOfDoses
@@ -1526,6 +1529,5 @@ export function computeMedicationDispenseQuantity(
   if (instruction.as_needed_boolean) return round(doseValue);
 
   const total = computeTotalDoseQuantity(instruction);
-  console.log("total", total);
   return total ? roundUp(total) : doseValue;
 }

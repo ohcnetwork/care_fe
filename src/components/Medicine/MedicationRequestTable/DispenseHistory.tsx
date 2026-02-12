@@ -158,7 +158,7 @@ export function DispenseHistory({
           </TableHeader>
           <TableBody className="bg-white">
             {medications.map((medication: MedicationDispenseRead) => {
-              const instruction = medication.dosage_instruction[0] ?? {};
+              const instruction = medication.dosage_instruction?.[0];
 
               return (
                 <TableRow

@@ -172,7 +172,7 @@ function MedicationTable({ medications }: MedicationTableProps) {
         </TableHeader>
         <TableBody>
           {medications.map((medication) => {
-            const instruction = medication.dosage_instruction[0] ?? {};
+            const instruction = medication.dosage_instruction?.[0];
 
             const dosageText = formatDosage(instruction) || null;
             const frequencyText = formatFrequency(instruction);

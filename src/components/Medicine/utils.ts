@@ -142,5 +142,5 @@ export function formatTotalUnits(
     return `${round(total)} ${doseUnit}${isTapered ? " (tapered)" : ""}`;
   }
 
-  return `${round(doseValue)} ${unitText}`;
+  return `${round(doseValue)} ${doseUnit}`;
 }
