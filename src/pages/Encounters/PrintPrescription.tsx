@@ -67,70 +67,42 @@ export const PrintPrescription = ({
     return Array.from(ids);
   }, [medicationDispenses]);
 
-  // Single prescription
-  if (prescriptionId && !patientId) {
-    return <div>{t("patient_not_found")}</div>;
-  }
-
-  if (prescriptionId && patientId) {
-    return (
-      <PrescriptionPreview
-        prescriptionIds={[prescriptionId]}
-        patientId={patientId}
-        facilityId={facilityId}
-      />
-    );
-  }
-
-  // Encounter
-  if (encounterId && isLoadingEncounter) {
+  // Handle loading states
+  if (
+    (encounterId && isLoadingEncounter) ||
+    (dispenseOrderId && locationId && isLoadingDispenses)
+  ) {
     return <Loading />;
   }
 
-  if (encounterId && !patientId) {
+  // Resolve props based on print mode
+  const isDispenseMode = !!(dispenseOrderId && locationId);
+  const resolvedPatientId = isDispenseMode
+    ? dispenseOrder?.patient?.id
+    : patientId;
+  const resolvedPrescriptionIds = prescriptionId
+    ? [prescriptionId]
+    : encounterId
+      ? (encounterPrescriptions?.results?.map((p) => p.id) ?? [])
+      : dispensePrescriptionIds;
+  const resolvedLocationName = isDispenseMode
+    ? dispenseOrder?.location?.name
+    : undefined;
+
+  if (!resolvedPatientId) {
     return <div>{t("patient_not_found")}</div>;
   }
 
-  if (encounterId && patientId) {
-    const encounterPrescriptionIds =
-      encounterPrescriptions?.results?.map((p) => p.id) ?? [];
-
-    if (encounterPrescriptionIds.length === 0) {
-      return <div>{t("no_prescriptions_found")}</div>;
-    }
-
-    return (
-      <PrescriptionPreview
-        prescriptionIds={encounterPrescriptionIds}
-        patientId={patientId}
-        facilityId={facilityId}
-      />
-    );
+  if (resolvedPrescriptionIds.length === 0) {
+    return <div>{t("no_prescriptions_found")}</div>;
   }
 
-  // Dispense order
-  if (dispenseOrderId && locationId && isLoadingDispenses) {
-    return <Loading />;
-  }
-
-  if (dispenseOrderId && locationId && !dispenseOrder?.patient?.id) {
-    return <div>{t("patient_not_found")}</div>;
-  }
-
-  if (dispenseOrderId && locationId && dispenseOrder?.patient?.id) {
-    if (dispensePrescriptionIds.length === 0) {
-      return <div>{t("no_prescriptions_found")}</div>;
-    }
-
-    return (
-      <PrescriptionPreview
-        prescriptionIds={dispensePrescriptionIds}
-        patientId={dispenseOrder.patient.id}
-        facilityId={facilityId}
-        locationName={dispenseOrder.location.name}
-      />
-    );
-  }
-
-  return <div>{t("prescription_not_found")}</div>;
+  return (
+    <PrescriptionPreview
+      prescriptionIds={resolvedPrescriptionIds}
+      patientId={resolvedPatientId}
+      facilityId={facilityId}
+      locationName={resolvedLocationName}
+    />
+  );
 };
