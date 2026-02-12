@@ -116,7 +116,7 @@ export default function MedicationValueSetSelect({
         facility: facilityId,
         limit: 100,
         offset: 0,
-        name: search,
+        alternate_names: search,
         category: search ? undefined : currentCategory,
         status: ProductKnowledgeStatus.active,
       },

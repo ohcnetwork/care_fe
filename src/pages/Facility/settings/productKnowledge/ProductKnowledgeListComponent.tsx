@@ -50,7 +50,7 @@ function ProductKnowledgeCard({
       <CardContent className="p-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
                 <CareIcon icon="l-folder" className="h-5 w-5" />
               </div>
@@ -190,7 +190,7 @@ export function ProductKnowledgeList({
         category: categorySlug,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        name: qParams.search,
+        alternate_names: qParams.search,
         product_type: qParams.product_type,
         status: qParams.status,
       },

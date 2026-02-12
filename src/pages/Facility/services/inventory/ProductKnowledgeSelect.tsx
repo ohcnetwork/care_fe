@@ -49,7 +49,7 @@ export function ProductKnowledgeSelect({
 
   return (
     <ResourceDefinitionCategoryPicker<ProductKnowledgeBase>
-      searchParamName="name"
+      searchParamName="alternate_names"
       facilityId={facilityId}
       value={value}
       onValueChange={(

@@ -55,7 +55,7 @@ export default function ProductKnowledgeList({
               include_instance: false,
             },
           },
-          searchParamName: "name",
+          searchParamName: "alternate_names",
           queryKeyPrefix: "productKnowledgeSearch",
         }}
       >
