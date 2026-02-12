@@ -167,7 +167,9 @@ export function getDiscountAmount(
 ): Decimal {
   const base = baseAmount ?? getBasePrice(priceComponents);
   const discounts = priceComponents.filter(
-    (c) => c.monetary_component_type === MonetaryComponentType.discount,
+    (c) =>
+      c.monetary_component_type === MonetaryComponentType.discount &&
+      c.conditions?.length === 0,
   );
 
   return discounts.reduce(

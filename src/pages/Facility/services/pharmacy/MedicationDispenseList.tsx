@@ -22,8 +22,6 @@ import {
 import { EmptyState } from "@/components/ui/empty-state";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -35,7 +33,12 @@ import {
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { formatDoseRange, formatTotalUnits } from "@/components/Medicine/utils";
+import {
+  formatDoseRange,
+  formatDuration,
+  formatFrequency,
+  formatTotalUnits,
+} from "@/components/Medicine/utils";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 
 import query from "@/Utils/request/query";
@@ -52,6 +55,7 @@ import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import { Markdown } from "@/components/ui/markdown";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { cn } from "@/lib/utils";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
@@ -62,7 +66,7 @@ import {
 } from "@/types/emr/prescription/prescription";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { DispensedItemsSheet } from "./MedicationBillForm";
+import { DispensedItemsSheet } from "./components/DispensedItemsSheet";
 
 interface MedicationTableProps {
   medications: MedicationRequestRead[];
@@ -90,6 +94,7 @@ function MedicationTable({
             <TableHead className="text-gray-700">
               {t("dispense_status")}
             </TableHead>
+            <TableHead className="text-gray-700">{t("instructions")}</TableHead>
             <TableHead className="text-gray-700">{t("status")}</TableHead>
             {medications.some(
               (medication) =>
@@ -105,8 +110,6 @@ function MedicationTable({
         <TableBody className="bg-white">
           {medications.map((medication: MedicationRequestRead) => {
             const instruction = medication.dosage_instruction[0];
-            const frequency = instruction?.timing?.code;
-            const duration = instruction?.timing?.repeat?.bounds_duration;
             const dosage = instruction?.dose_and_rate?.dose_quantity;
 
             return (
@@ -119,23 +122,25 @@ function MedicationTable({
                     : "bg-gray-200",
                 )}
               >
-                <TableCell className="font-semibold text-gray-950 flex items-center gap-2">
-                  {displayMedicationName(medication)}
-                  {medication?.dispense_status ===
-                    MedicationRequestDispenseStatus.partial && (
-                    <Button
-                      variant="secondary"
-                      type="button"
-                      size="xs"
-                      className="flex gap-1"
-                      onClick={() => {
-                        setDispensedMedicationId?.(medication.id);
-                      }}
-                    >
-                      <CareIcon icon="l-eye" className="size-4" />
-                      {t("view_dispensed")}
-                    </Button>
-                  )}
+                <TableCell className="font-semibold text-gray-950 h-full items-center max-w-xs break-words">
+                  <span className="flex flex-col gap-2">
+                    {displayMedicationName(medication)}
+                    {medication?.dispense_status ===
+                      MedicationRequestDispenseStatus.partial && (
+                      <Button
+                        variant="secondary"
+                        type="button"
+                        size="xs"
+                        className="flex gap-1"
+                        onClick={() => {
+                          setDispensedMedicationId?.(medication.id);
+                        }}
+                      >
+                        <CareIcon icon="l-eye" className="size-4" />
+                        {t("view_dispensed")}
+                      </Button>
+                    )}
+                  </span>
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
                   {dosage
@@ -143,22 +148,19 @@ function MedicationTable({
                     : formatDoseRange(instruction?.dose_and_rate?.dose_range)}
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
-                  {instruction?.as_needed_boolean
-                    ? `${t("as_needed_prn")} ${
-                        instruction?.as_needed_for?.display
-                          ? `(${instruction.as_needed_for.display})`
-                          : ""
-                      }`
-                    : frequency?.display || "-"}
+                  {formatFrequency(instruction) || "-"}
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
-                  {duration ? `${duration.value} ${duration.unit}` : "-"}
+                  {formatDuration(instruction) || "-"}
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
                   {formatTotalUnits(medication.dosage_instruction, t("units"))}
                 </TableCell>
                 <TableCell>
                   <Badge>{t(medication.dispense_status || "incomplete")}</Badge>
+                </TableCell>
+                <TableCell className="whitespace-pre-wrap text-gray-950 font-medium">
+                  {medication.note || "-"}
                 </TableCell>
                 <TableCell>
                   <Badge
@@ -227,7 +229,6 @@ export default function MedicationDispenseList({
   const [dispenseFilter, setDispenseFilter] = useState<
     "all" | keyof typeof MedicationRequestDispenseStatus
   >("all");
-  const [groupByDispense, setGroupByDispense] = useState(true);
 
   const { data: prescription, isLoading } = useQuery({
     queryKey: ["prescription", patientId, prescriptionId],
@@ -314,22 +315,6 @@ export default function MedicationDispenseList({
       displayMedicationName(a).localeCompare(displayMedicationName(b)),
     );
 
-  const groupedByDispense: Record<
-    "incomplete" | "partial" | "complete",
-    MedicationRequestRead[]
-  > = {
-    incomplete: [],
-    partial: [],
-    complete: [],
-  };
-  for (const m of filteredMedications) {
-    const key = (m.dispense_status || "incomplete") as
-      | "incomplete"
-      | "partial"
-      | "complete";
-    groupedByDispense[key]?.push(m);
-  }
-
   return (
     <div>
       {prescription.encounter.patient && (
@@ -391,16 +376,6 @@ export default function MedicationDispenseList({
                 onClear={() => setDispenseFilter("all")}
               />
             </div>
-            <div className="flex items-center gap-2 ml-auto">
-              <Label htmlFor="group-by" className="text-sm text-gray-700">
-                {t("group_by")}: {t("dispense_status")}
-              </Label>
-              <Switch
-                id="group-by"
-                checked={groupByDispense}
-                onCheckedChange={setGroupByDispense}
-              />
-            </div>
           </div>
           <div className="ml-auto flex gap-2">
             <Button
@@ -456,7 +431,7 @@ export default function MedicationDispenseList({
           <div className="space-y-2">
             <div className="bg-white border rounded-md p-1">
               <div className="flex md:flex-row flex-col items-start md:items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-1">
                   <div className="text-sm text-gray-700 flex items-center gap-2">
                     <UserIcon className="size-4 text-gray-600" />
                     <span className="text-gray-900">
@@ -539,76 +514,47 @@ export default function MedicationDispenseList({
               </div>
             </div>
 
-            {groupByDispense ? (
-              <div className="space-y-6">
-                {(["incomplete", "partial", "complete"] as const).map((key) =>
-                  groupedByDispense[key].length > 0 ? (
-                    <div key={key} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-base font-semibold text-gray-900">
-                          {t(key)} ({groupedByDispense[key].length})
-                        </h3>
-                      </div>
-                      <MedicationTable
-                        medications={groupedByDispense[key]}
-                        setDispensedMedicationId={setDispensedMedicationId}
-                        setMedicationToMarkComplete={
-                          setMedicationToMarkComplete
-                        }
-                      />
-                    </div>
-                  ) : null,
-                )}
-                {filteredMedications.length === 0 && (
-                  <EmptyState
-                    title={t("no_results")}
-                    description={t("try_adjusting_your_filters")}
-                    icon={
-                      <CareIcon
-                        icon="l-search"
-                        className="text-primary size-6"
-                      />
-                    }
-                  />
-                )}
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  {t("pharmacy_medications")}
-                </h2>
-                <MedicationTable
-                  medications={filteredMedications}
-                  setDispensedMedicationId={setDispensedMedicationId}
-                  setMedicationToMarkComplete={setMedicationToMarkComplete}
+            <div className="space-y-2">
+              <h2 className="text-lg font-semibold text-gray-900">
+                {t("medications")}
+              </h2>
+              <MedicationTable
+                medications={filteredMedications}
+                setDispensedMedicationId={setDispensedMedicationId}
+                setMedicationToMarkComplete={setMedicationToMarkComplete}
+              />
+              {filteredMedications.length === 0 && (
+                <EmptyState
+                  title={t("no_results")}
+                  description={t("try_adjusting_your_filters")}
+                  icon={
+                    <CareIcon icon="l-search" className="text-primary size-6" />
+                  }
                 />
-                {filteredMedications.length === 0 && (
-                  <EmptyState
-                    title={t("no_results")}
-                    description={t("try_adjusting_your_filters")}
-                    icon={
-                      <CareIcon
-                        icon="l-search"
-                        className="text-primary size-6"
-                      />
-                    }
-                  />
-                )}
-              </div>
-            )}
+              )}
+            </div>
           </div>
+          {prescription.note && (
+            <div className="mt-6 mb-6 text-sm text-gray-600">
+              <p className="font-semibold mb-1">{t("note")}</p>
+              <Markdown
+                content={prescription.note}
+                prose={false}
+                className="text-sm"
+              />
+            </div>
+          )}
         </div>
       )}
       {dispensedMedicationId && (
         <DispensedItemsSheet
           open={!!dispensedMedicationId}
-          onOpenChange={(open) => {
+          onOpenChange={(open: boolean) => {
             if (!open) {
               setDispensedMedicationId(null);
             }
           }}
           medicationRequestId={dispensedMedicationId}
-          facilityId={facilityId}
         />
       )}
       <ConfirmActionDialog

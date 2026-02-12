@@ -25,6 +25,7 @@ import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { add, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 
 interface Props {
   appointmentId: string;
@@ -217,8 +218,13 @@ export default function AppointmentPrint(props: Props) {
 
         {/* Footer */}
         <PrintFooter
-          leftContent={format(new Date(), "PP 'at' p")}
-          rightContent={facility.name}
+          rightContent={format(new Date(), "PP 'at' p")}
+          leftContent={
+            <>
+              <span className="font-semibold">{t("last_updated_by")}: </span>
+              {formatName(appointment.updated_by)}
+            </>
+          }
           className="text-xs"
         />
       </div>

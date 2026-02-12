@@ -151,7 +151,13 @@ export default function CreateEncounterForm({
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={() => {
+        setIsOpen(!isOpen);
+        form.reset();
+      }}
+    >
       <SheetTrigger asChild>
         {trigger || (
           <Button
@@ -358,6 +364,7 @@ export default function CreateEncounterForm({
                           form.setValue("organizations", value);
                         }
                       }}
+                      favoriteList="encounter_departments"
                     />
                     <FormMessage />
                   </FormItem>

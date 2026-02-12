@@ -517,7 +517,7 @@ export default function AppointmentDetail(props: Props) {
                       trigger={
                         <QuickAction
                           icon={<SquareActivity className="text-orange-500" />}
-                          title={t("create_encounter")}
+                          title={t("create_planned_encounter")}
                           actionId="create-encounter"
                         />
                       }
@@ -533,6 +533,7 @@ export default function AppointmentDetail(props: Props) {
                     icon={<PrinterIcon className="size-4" />}
                     title={t("print_appointment")}
                     actionId="print-appointment"
+                    basePath="/"
                     href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}/print`}
                   />
 
@@ -540,6 +541,7 @@ export default function AppointmentDetail(props: Props) {
                     icon={<Wallet className="size-4" />}
                     title={t("accounts")}
                     actionId="goto-account"
+                    basePath="/"
                     href={`/facility/${facilityId}/billing/account?status=active&patient_filter=${appointment.patient.id}&patient_name=${appointment.patient.name}`}
                   />
                 </div>
