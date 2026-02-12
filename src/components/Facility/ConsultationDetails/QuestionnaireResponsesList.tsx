@@ -321,16 +321,18 @@ function ResponseActionsMenu({
               {t("print_this_response")}
             </DropdownMenuItem>
           </Link>
-          <Link
-            href={`questionnaire/${item.questionnaire?.id}/responses/print`}
-          >
-            <DropdownMenuItem>
-              <Printer className="size-4" />
-              {t("print_all_responses", {
-                title: item.questionnaire?.title,
-              })}
-            </DropdownMenuItem>
-          </Link>
+          {item.questionnaire && (
+            <Link
+              href={`questionnaire/${item.questionnaire.id}/responses/print`}
+            >
+              <DropdownMenuItem>
+                <Printer className="size-4" />
+                {t("print_all_responses", {
+                  title: item.questionnaire.title,
+                })}
+              </DropdownMenuItem>
+            </Link>
+          )}
           {isUnstructured && (
             <>
               <DropdownMenuSeparator />
