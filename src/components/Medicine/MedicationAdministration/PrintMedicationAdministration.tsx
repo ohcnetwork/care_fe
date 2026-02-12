@@ -19,8 +19,7 @@ import {
 
 import Loading from "@/components/Common/Loading";
 import PrintFooter from "@/components/Common/PrintFooter";
-import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
-import { formatDosage } from "@/components/Medicine/utils";
+import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
 
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { MedicationAdministrationRead } from "@/types/emr/medicationAdministration/medicationAdministration";
@@ -443,7 +442,7 @@ const DrugChartTable = ({
             const routeText = dosage?.route?.display;
             const frequencyText = isPRN
               ? t("as_needed")
-              : getFrequencyDisplay(dosage?.timing)?.meaning;
+              : formatFrequency(dosage);
 
             return (
               <tr key={group.productId} className={cn(isPRN && "bg-pink-50")}>
