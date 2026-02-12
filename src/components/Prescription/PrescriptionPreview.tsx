@@ -2,7 +2,6 @@ import careConfig from "@careConfig";
 import { useQueries } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { QRCodeSVG } from "qrcode.react";
-import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
@@ -142,7 +141,7 @@ export const PrescriptionPreview = ({
   const { t } = useTranslation();
   const { facility } = useCurrentFacility();
 
-  const prescriptionQueries = useQueries({
+  const { prescriptions, isLoading } = useQueries({
     queries: prescriptionIds.map((prescriptionId) => ({
       queryKey: ["prescription", patientId, prescriptionId, facilityId],
       queryFn: query(prescriptionApi.get, {
@@ -154,18 +153,13 @@ export const PrescriptionPreview = ({
       }),
       enabled: !!patientId && !!prescriptionId && !!facilityId,
     })),
+    combine: (results) => ({
+      prescriptions: results
+        .map((r) => r.data)
+        .filter((data): data is PrescriptionRead => !!data),
+      isLoading: results.some((r) => r.isLoading || r.isFetching),
+    }),
   });
-
-  const isLoading = prescriptionQueries.some(
-    (q) => q.isLoading || q.isFetching,
-  );
-
-  // Combine fetched prescription data
-  const prescriptions = useMemo(() => {
-    return prescriptionQueries
-      .map((q) => q.data)
-      .filter((data): data is PrescriptionRead => !!data);
-  }, [prescriptionQueries]);
 
   const hasMedications = prescriptions.some(
     (prescription) =>
