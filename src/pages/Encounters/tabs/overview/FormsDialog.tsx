@@ -21,7 +21,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-const MAX_FAVORITES = 5;
+import careConfig from "@careConfig";
 
 export const FormDialog = ({
   subjectType,
@@ -62,7 +62,7 @@ export const FormDialog = ({
       queryParams: {
         favorite_list: "favorites_form",
         silent: true,
-        limit: 5,
+        limit: careConfig.maxFormDialogFavorites,
       },
     }),
   });
@@ -103,8 +103,12 @@ export const FormDialog = ({
     if (isFavorited) {
       removeFavoriteMutation.mutate(slug);
     } else {
-      if (favorites.length >= MAX_FAVORITES) {
-        toast.error(t("max_favorites_reached", { count: MAX_FAVORITES }));
+      if (favorites.length >= careConfig.maxFormDialogFavorites) {
+        toast.error(
+          t("max_favorites_reached", {
+            count: careConfig.maxFormDialogFavorites,
+          }),
+        );
         return;
       }
       addFavoriteMutation.mutate(slug);
