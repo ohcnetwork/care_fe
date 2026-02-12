@@ -20,6 +20,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
 import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
 
 import { MedicationAdministrationRead } from "@/types/emr/medicationAdministration/medicationAdministration";
@@ -100,19 +101,20 @@ const IndividualMedicationRow: React.FC<{
         )}
       >
         <div className="flex items-center gap-2 flex-wrap">
-          <span
+          <DosageInstructionList
+            instructions={medication.dosage_instruction}
             className={cn(
               "text-sm font-medium text-gray-700",
               isInactive && medication.status === "ended" && "line-through",
             )}
-          >
-            {[
-              formatDosage(medication.dosage_instruction[0]),
-              formatFrequency(medication.dosage_instruction[0]),
-            ]
-              .filter(Boolean)
-              .join(", ")}
-          </span>
+            gap="sm"
+            renderItem={(di) => {
+              const text = [formatDosage(di), formatFrequency(di)]
+                .filter(Boolean)
+                .join(", ");
+              return text || null;
+            }}
+          />
           <Badge
             variant={medication.status === "active" ? "green" : "secondary"}
             className="text-xs"
@@ -319,19 +321,24 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
               </div>
 
               {/* Latest prescription dosage and frequency */}
-              {latestActiveRequest &&
-                (() => {
-                  const freq = formatFrequency(
-                    latestActiveRequest.dosage_instruction[0],
-                  );
-                  return (
-                    <div className="text-sm text-gray-600 mt-0.5">
-                      {formatDosage(latestActiveRequest.dosage_instruction[0])}
-                      {freq && <span className="text-gray-400"> · </span>}
-                      {freq}
-                    </div>
-                  );
-                })()}
+              {latestActiveRequest && (
+                <DosageInstructionList
+                  instructions={latestActiveRequest.dosage_instruction}
+                  className="mt-0.5"
+                  itemClassName="text-sm text-gray-600"
+                  gap="sm"
+                  renderItem={(di) => {
+                    const freq = formatFrequency(di);
+                    return (
+                      <>
+                        {formatDosage(di)}
+                        {freq && <span className="text-gray-400"> · </span>}
+                        {freq}
+                      </>
+                    );
+                  }}
+                />
+              )}
 
               {/* Status and route badges */}
               <div className="flex flex-wrap gap-1 mt-1">

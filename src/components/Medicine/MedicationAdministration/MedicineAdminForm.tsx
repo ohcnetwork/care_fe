@@ -423,31 +423,30 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-3 bg-gray-50 rounded-lg">
-        <div>
-          <Label className="text-xs text-gray-500">{t("dosage")}</Label>
-          <p className="font-medium">
-            {formatDosage(medication.dosage_instruction[0])}
-          </p>
-        </div>
-        <div>
-          <Label className="text-xs text-gray-500">{t("frequency")}</Label>
-          <p className="font-medium">
-            {formatFrequency(medication.dosage_instruction[0]) || "-"}
-          </p>
-        </div>
-        <div>
-          <Label className="text-xs text-gray-500">{t("route")}</Label>
-          <p className="font-medium">
-            {medication.dosage_instruction[0]?.route?.display || t("oral")}
-          </p>
-        </div>
-        <div>
-          <Label className="text-xs text-gray-500">{t("duration")}</Label>
-          <p className="font-medium">
-            {formatDuration(medication.dosage_instruction[0]) || "-"}
-          </p>
-        </div>
+      <div className="space-y-2">
+        {medication.dosage_instruction.map((di, idx) => (
+          <div
+            key={idx}
+            className="grid grid-cols-2 md:grid-cols-4 gap-4 p-3 bg-gray-50 rounded-lg"
+          >
+            <div>
+              <Label className="text-xs text-gray-500">{t("dosage")}</Label>
+              <p className="font-medium">{formatDosage(di)}</p>
+            </div>
+            <div>
+              <Label className="text-xs text-gray-500">{t("frequency")}</Label>
+              <p className="font-medium">{formatFrequency(di) || "-"}</p>
+            </div>
+            <div>
+              <Label className="text-xs text-gray-500">{t("route")}</Label>
+              <p className="font-medium">{di?.route?.display || t("oral")}</p>
+            </div>
+            <div>
+              <Label className="text-xs text-gray-500">{t("duration")}</Label>
+              <p className="font-medium">{formatDuration(di) || "-"}</p>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* All prescriptions in the group */}
@@ -459,9 +458,13 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
           </div>
           <div className="space-y-1.5">
             {otherGroupRequests.map((req) => {
-              const dosage = req.dosage_instruction[0];
               const isCurrentMedication = req.id === medication.id;
               const canSelect = !isCurrentMedication && onMedicationChange;
+              const instructionSummaries = req.dosage_instruction.map((di) => {
+                const dosage = formatDosage(di);
+                const freq = formatFrequency(di);
+                return { dosage, freq };
+              });
               return (
                 <button
                   type="button"
@@ -482,26 +485,32 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                         className="size-4 text-primary-600"
                       />
                     )}
-                    <span
-                      className={
-                        isCurrentMedication
-                          ? "text-primary-700 font-medium"
-                          : "text-gray-700"
-                      }
-                    >
-                      {formatDosage(dosage)}
-                    </span>
-                    {formatFrequency(dosage) && (
-                      <span
-                        className={
-                          isCurrentMedication
-                            ? "text-primary-500"
-                            : "text-gray-400"
-                        }
-                      >
-                        · {formatFrequency(dosage)}
-                      </span>
-                    )}
+                    <div className="flex flex-col gap-0.5">
+                      {instructionSummaries.map((summary, idx) => (
+                        <div key={idx} className="flex items-center gap-1">
+                          <span
+                            className={
+                              isCurrentMedication
+                                ? "text-primary-700 font-medium"
+                                : "text-gray-700"
+                            }
+                          >
+                            {summary.dosage}
+                          </span>
+                          {summary.freq && (
+                            <span
+                              className={
+                                isCurrentMedication
+                                  ? "text-primary-500"
+                                  : "text-gray-400"
+                              }
+                            >
+                              · {summary.freq}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   <Badge
                     variant={req.status === "active" ? "green" : "secondary"}
