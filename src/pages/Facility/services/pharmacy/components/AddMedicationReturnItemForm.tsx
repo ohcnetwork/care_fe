@@ -45,14 +45,25 @@ import {
   SupplyDeliveryStatus,
   SupplyDeliveryType,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
-import { round, zodDecimal } from "@/Utils/decimal";
+import { round, roundWhole } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
 const returnItemSchema = z.object({
   supplied_inventory_item: z.string().min(1, "Please select a stock item"),
   supplied_item: z.string().optional(), // Product ID from the inventory item
-  supplied_item_quantity: zodDecimal({ min: 1 }),
+  supplied_item_quantity: z
+    .string()
+    .refine((val) => !isNaN(Number(val)) && val.trim() !== "", {
+      message: "Must be a valid number",
+    })
+    .refine((val) => Number.isInteger(Number(val)), {
+      message: "Must be a whole number",
+    })
+    .refine((val) => Number(val) >= 1, {
+      message: "Must be at least 1",
+    })
+    .transform(roundWhole),
   product_knowledge: z
     .custom<ProductKnowledgeBase>()
     .refine((data) => data?.slug, {
@@ -149,7 +160,7 @@ export function AddMedicationReturnItemForm({
     const itemsFromDispenses = selectedMedicationDispenses.map((dispense) => ({
       supplied_inventory_item: dispense.item.id,
       supplied_item: dispense.item.product.id,
-      supplied_item_quantity: dispense.quantity,
+      supplied_item_quantity: roundWhole(dispense.quantity),
       product_knowledge: dispense.item.product.product_knowledge,
     }));
     form.setValue("items", itemsFromDispenses);
@@ -177,11 +188,27 @@ export function AddMedicationReturnItemForm({
           toast.error(t("select_stock_at_row", { row: index + 1 }));
           return false;
         }
+        const matchingDispense = medicationDispenses.find(
+          (d) => d.item.id === item.supplied_inventory_item,
+        );
+        if (
+          matchingDispense &&
+          Number(item.supplied_item_quantity) >
+            Number(matchingDispense.quantity)
+        ) {
+          toast.error(
+            t("return_quantity_exceeds_dispensed", {
+              max: round(matchingDispense.quantity),
+              product: item.product_knowledge?.name,
+            }),
+          );
+          return false;
+        }
       }
 
       return true;
     },
-    [t],
+    [t, medicationDispenses],
   );
 
   async function onSubmit(data: FormValues) {
@@ -379,19 +406,50 @@ export function AddMedicationReturnItemForm({
                               <FormField
                                 control={form.control}
                                 name={`items.${index}.supplied_item_quantity`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <Input
-                                        type="number"
-                                        min={1}
-                                        className="w-20"
-                                        {...field}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
+                                render={({ field }) => {
+                                  const suppliedInventoryItem = form.watch(
+                                    `items.${index}.supplied_inventory_item`,
+                                  );
+                                  const matchingDispense =
+                                    medicationDispenses.find(
+                                      (d) =>
+                                        d.item.id === suppliedInventoryItem,
+                                    );
+                                  const maxQty = matchingDispense
+                                    ? Math.floor(
+                                        Number(matchingDispense.quantity),
+                                      )
+                                    : undefined;
+                                  return (
+                                    <FormItem>
+                                      <FormControl>
+                                        <Input
+                                          type="number"
+                                          min={1}
+                                          max={maxQty}
+                                          step={1}
+                                          className="w-20"
+                                          {...field}
+                                          onChange={(e) => {
+                                            const raw = e.target.value;
+                                            const num = Number(raw);
+                                            if (
+                                              raw !== "" &&
+                                              !Number.isInteger(num)
+                                            ) {
+                                              field.onChange(
+                                                String(Math.floor(num)),
+                                              );
+                                              return;
+                                            }
+                                            field.onChange(raw);
+                                          }}
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  );
+                                }}
                               />
                             </TableCell>
                             <TableCell className="align-top p-2">

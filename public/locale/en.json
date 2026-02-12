@@ -4782,6 +4782,7 @@
   "retrieve_with_year_of_birth": "Retrieve with year of birth",
   "retrieve_with_year_of_birth_help": "Allow searching for a patient using this identifier and their year of birth.",
   "return_excess_stock": "Return Excess Stock",
+  "return_quantity_exceeds_dispensed": "Return quantity for {{product}} cannot exceed dispensed amount (max: {{max}})",
   "return_to": "Return To",
   "return_to_care": "Return to Care",
   "return_to_list": "Return to List",
