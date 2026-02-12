@@ -61,8 +61,9 @@ interface Props {
   patientName: string;
   appointment?: string;
   trigger?: React.ReactNode;
-  onSuccess?: () => void;
+  onSuccess?: (encounter: EncounterRead) => void;
   disableRedirectOnSuccess?: boolean;
+  defaultOpen?: boolean;
   defaultStatus?:
     | EncounterStatus.PLANNED
     | EncounterStatus.IN_PROGRESS
@@ -77,9 +78,10 @@ export default function CreateEncounterForm({
   trigger,
   onSuccess,
   disableRedirectOnSuccess = false,
+  defaultOpen = false,
   defaultStatus = EncounterStatus.PLANNED,
 }: Props) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(defaultOpen);
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   useShortcutSubContext();
@@ -124,7 +126,7 @@ export default function CreateEncounterForm({
       setIsOpen(false);
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["encounters", patientId] });
-      onSuccess?.();
+      onSuccess?.(data);
       if (!disableRedirectOnSuccess) {
         navigate(
           `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates`,
@@ -149,7 +151,13 @@ export default function CreateEncounterForm({
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={() => {
+        setIsOpen(!isOpen);
+        form.reset();
+      }}
+    >
       <SheetTrigger asChild>
         {trigger || (
           <Button
@@ -275,7 +283,7 @@ export default function CreateEncounterForm({
                     >
                       <FormControl>
                         <SelectTrigger ref={field.ref}>
-                          <SelectValue placeholder="Select status" />
+                          <SelectValue placeholder={t("select_status")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -307,7 +315,7 @@ export default function CreateEncounterForm({
                     >
                       <FormControl>
                         <SelectTrigger ref={field.ref}>
-                          <SelectValue placeholder="Select priority" />
+                          <SelectValue placeholder={t("select_priority")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -357,6 +365,7 @@ export default function CreateEncounterForm({
                           form.setValue("organizations", value);
                         }
                       }}
+                      favoriteList="encounter_departments"
                     />
                     <FormMessage />
                   </FormItem>

@@ -18,6 +18,8 @@ import {
 
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
+import { LocationNode } from "@/components/Location/LocationTree";
+import { cn } from "@/lib/utils";
 import {
   SERVICE_REQUEST_PRIORITY_COLORS,
   SERVICE_REQUEST_STATUS_COLORS,
@@ -29,6 +31,7 @@ interface ServiceRequestTableProps {
   facilityId: string;
   locationId?: string;
   showPatientInfo?: boolean;
+  onPatientClick?: (request: ServiceRequestReadSpec) => void;
 }
 
 export default function ServiceRequestTable({
@@ -36,6 +39,7 @@ export default function ServiceRequestTable({
   facilityId,
   locationId,
   showPatientInfo = true,
+  onPatientClick,
 }: ServiceRequestTableProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -57,14 +61,24 @@ export default function ServiceRequestTable({
             <TableHead>{t("status")}</TableHead>
             <TableHead>{t("priority")}</TableHead>
             <TableHead>{t("tags", { count: 2 })}</TableHead>
+            <TableHead>{t("location")}</TableHead>
             <TableHead>{t("actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="bg-white">
           {requests.map((request) => (
-            <TableRow key={request.id} className="divide-x divide-gray-200">
+            <TableRow
+              key={request.id}
+              className="divide-x divide-gray-200 group"
+            >
               {showPatientInfo && (
-                <TableCell className="font-medium">
+                <TableCell
+                  className={cn(
+                    "font-medium",
+                    onPatientClick && "group-hover:underline cursor-pointer",
+                  )}
+                  onClick={() => onPatientClick?.(request)}
+                >
                   <div className="font-semibold text-gray-900">
                     {request.encounter.patient.name}
                   </div>
@@ -97,11 +111,16 @@ export default function ServiceRequestTable({
               </TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1">
-                  {request.tags.map((tag) => (
+                  {request.tags.slice(0, 2).map((tag) => (
                     <Badge key={tag.id} variant="secondary" className="text-xs">
                       {tag.display}
                     </Badge>
                   ))}
+                  {request.tags.length > 2 && (
+                    <Badge variant="secondary" className="text-xs">
+                      +{request.tags.length - 2}
+                    </Badge>
+                  )}
                   <TagAssignmentSheet
                     entityType="service_request"
                     entityId={request.id}
@@ -125,6 +144,16 @@ export default function ServiceRequestTable({
                       )
                     }
                   />
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="text-xs text-gray-500">
+                  {request.encounter.current_location && (
+                    <LocationNode
+                      location={request.encounter.current_location}
+                      isLast={true}
+                    />
+                  )}
                 </div>
               </TableCell>
               <TableCell className="text-left">

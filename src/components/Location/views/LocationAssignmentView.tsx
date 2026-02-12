@@ -19,7 +19,7 @@ interface LocationAssignmentViewProps {
   selectedLocation: LocationRead | null;
   selectedLinkedBed: LocationAssociationRead | null;
   locationHistory: LocationRead[];
-  selectedBed: string | null;
+  selectedBed: LocationRead | null;
   currentLocation?: LocationAssociationRead;
   plannedLocations: LocationAssociationRead[];
   activeLocations: LocationAssociationRead[];
@@ -156,7 +156,7 @@ export function LocationAssignmentView({
       <div className="mt-8 flex justify-end gap-2">
         <Button
           variant="outline"
-          disabled={!selectedBed && !selectedLinkedBed}
+          disabled={!selectedBed}
           onClick={onScheduleForLater}
         >
           {t("schedule_for_later")}

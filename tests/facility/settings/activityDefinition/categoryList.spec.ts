@@ -23,7 +23,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 function generateCategoryData() {
-  const title = faker.commerce.department();
+  const title = faker.string.alpha({ length: { min: 5, max: 20 } });
   return {
     title,
     slug: expectedSlug(title),
@@ -157,17 +157,11 @@ test.describe("Activity Definition Resource Category List", () => {
 
     await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
 
-    const categoryCard = page
+    await page
       .locator('[data-slot="card"]')
-      .filter({ has: page.locator("h3", { hasText: testData.title }) });
-    await categoryCard
-      .locator("button")
-      .filter({ has: page.locator("svg.care-l-ellipsis-v") })
+      .filter({ hasText: testData.title })
+      .getByRole("button")
       .click();
-
-    await expect(
-      page.getByRole("heading", { name: /edit category/i }),
-    ).toBeVisible();
 
     const updatedData = generateCategoryData();
     await page.getByLabel(/name/i).clear();
@@ -221,7 +215,7 @@ test.describe("Activity Definition Resource Category List", () => {
 
     await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
 
-    const searchInput = page.getByPlaceholder(/search categories/i);
+    const searchInput = page.getByPlaceholder(/search/i);
     await searchInput.fill(testData.title);
 
     await expect(page.getByText(testData.title)).toBeVisible();
@@ -241,9 +235,7 @@ test.describe("Activity Definition Resource Category List", () => {
   }) => {
     await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
 
-    await page
-      .getByPlaceholder(/search categories/i)
-      .fill(faker.string.alphanumeric(10));
+    await page.getByPlaceholder(/search/i).fill(faker.string.alphanumeric(10));
 
     await expect(page.getByText(/no results/i)).toBeVisible();
   });

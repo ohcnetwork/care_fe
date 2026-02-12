@@ -34,9 +34,11 @@ import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryCo
 import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 
 interface AddChargeItemSheetProps {
   facilityId: string;
@@ -210,13 +212,14 @@ export default function AddChargeItemSheet({
                       <TableHead>{t("item")}</TableHead>
                       <TableHead>{t("quantity")}</TableHead>
                       <TableHead>{t("unit_price")}</TableHead>
+                      <TableHead>{t("performer")}</TableHead>
                       <TableHead>{t("total")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {!items.length ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center">
+                        <TableCell colSpan={6} className="text-center">
                           {t("no_charge_items")}
                         </TableCell>
                       </TableRow>
@@ -233,11 +236,14 @@ export default function AddChargeItemSheet({
                             />
                           </TableCell>
                           <TableCell>{item.title}</TableCell>
-                          <TableCell>{item.quantity}</TableCell>
+                          <TableCell>{round(item.quantity)}</TableCell>
                           <TableCell>
                             <MonetaryDisplay
                               amount={getBaseComponent(item)?.amount || "0"}
                             />
+                          </TableCell>
+                          <TableCell>
+                            {formatName(item.performer_actor)}
                           </TableCell>
                           <TableCell>
                             <MonetaryDisplay amount={item.total_price} />

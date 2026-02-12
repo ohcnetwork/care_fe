@@ -34,6 +34,7 @@ export enum TagResource {
   ACTIVITY_DEFINITION = "activity_definition",
   SERVICE_REQUEST = "service_request",
   CHARGE_ITEM = "charge_item",
+  CHARGE_ITEM_DEFINITION = "charge_item_definition",
   PATIENT = "patient",
   PRESCRIPTION = "medication_request_prescription",
   DELIVERY_ORDER = "supply_delivery_order",

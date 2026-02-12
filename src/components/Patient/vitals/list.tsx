@@ -10,8 +10,8 @@ import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Code } from "@/types/base/code/code";
 import { ObservationListRead } from "@/types/emr/observation/observation";
-
 import observationApi from "@/types/emr/observation/observationApi";
+
 import { VitalsObservation, VitalsTable } from "./VitalsTable";
 
 interface CodeGroup {
@@ -65,7 +65,7 @@ function extractVitals(
           (fields) => fields.main_code?.code === code.code,
         );
         vitalsObject[code.display] = {
-          value: vitalField?.value.value || undefined,
+          value: vitalField?.value.value ?? undefined,
           unit: vitalField?.value.unit?.code,
         };
       }
@@ -101,7 +101,7 @@ export const VitalsList = ({
       encounterId,
       filteredVitalCodes.map((c) => c.code),
     ],
-    queryFn: async ({ pageParam = 0 }) => {
+    queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query(observationApi.list, {
         pathParams: { patientId },
         queryParams: {
@@ -110,8 +110,8 @@ export const VitalsList = ({
           codes: filteredVitalCodes.map((c) => c.code).join(","),
           offset: String(pageParam),
         },
-      })({ signal: new AbortController().signal });
-      return response;
+      })({ signal });
+      return response as PaginatedResponse<ObservationListRead>;
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {

@@ -17,16 +17,54 @@ type HeaderRow = {
 };
 
 type TableRowType = Record<string, string | undefined>;
+
+type CellConfig = {
+  value?: string;
+  className?: string;
+  render?: (value: string | undefined) => React.ReactNode;
+};
+
 interface GenericTableProps {
   headers: HeaderRow[];
   rows: TableRowType[] | undefined;
+  className?: string;
+  classNameCell?: string;
+  cellConfig?: Record<string, CellConfig>;
+  renderCell?: (
+    key: string,
+    value: string | undefined,
+    rowIndex: number,
+  ) => React.ReactNode;
 }
 
-export default function PrintTable({ headers, rows }: GenericTableProps) {
+export default function PrintTable({
+  headers,
+  rows,
+  className,
+  classNameCell,
+  cellConfig,
+  renderCell,
+}: GenericTableProps) {
   const { t } = useTranslation();
 
+  const getCellContent = (
+    key: string,
+    value: string | undefined,
+    rowIndex: number,
+  ) => {
+    if (renderCell) {
+      return renderCell(key, value, rowIndex);
+    }
+
+    if (cellConfig?.[key]?.render) {
+      return cellConfig[key].render(value);
+    }
+
+    return value;
+  };
+
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200">
+    <div className="overflow-hidden rounded border border-gray-200">
       <Table className="w-full">
         <TableHeader>
           <TableRow className="bg-transparent hover:bg-transparent divide-x divide-gray-200 border-b-gray-200">
@@ -49,14 +87,21 @@ export default function PrintTable({ headers, rows }: GenericTableProps) {
             rows.map((row, index) => (
               <TableRow
                 key={index}
-                className="bg-transparent hover:bg-transparent divide-x divide-gray-200"
+                className={cn(
+                  "bg-transparent hover:bg-transparent divide-x divide-gray-200",
+                  className,
+                )}
               >
                 {headers.map(({ key }) => (
                   <TableCell
-                    className="break-words whitespace-normal text-center"
+                    className={cn(
+                      "wrap-break-words whitespace-normal text-center",
+                      classNameCell,
+                      cellConfig?.[key]?.className,
+                    )}
                     key={key}
                   >
-                    {row[key] || "-"}
+                    {getCellContent(key, row[key], index)}
                   </TableCell>
                 ))}
               </TableRow>

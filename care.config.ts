@@ -4,8 +4,10 @@ import {
   EncounterClass,
   EncounterDischargeDisposition,
 } from "@/types/emr/encounter/encounter";
+import { PaymentReconciliationPaymentMethod } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 
 import { NonEmptyArray } from "@/Utils/types";
+import Decimal from "decimal.js";
 import { CountryCode } from "libphonenumber-js/types.cjs";
 
 const env = import.meta.env;
@@ -131,12 +133,40 @@ const careConfig = {
     parseInt(env.REACT_AUTO_REFRESH_INTERVAL || "10", 10) * 1000,
 
   /**
+   * App update check interval in milliseconds (env var in seconds, default: 86400 seconds = 24 hours)
+   * Clamped to minimum 60 seconds to prevent accidental hot polling
+   */
+  appUpdateCheckInterval:
+    Math.max(parseInt(env.REACT_APP_UPDATE_CHECK_INTERVAL || "86400", 10), 60) *
+    1000,
+
+  /**
    * Flag to make location field mandatory for payment reconciliation
    */
   paymentLocationRequired: booleanFromString(
     env.REACT_PAYMENT_LOCATION_REQUIRED,
     true,
   ),
+
+  /**
+   * Default payment method to preselect when recording a new payment
+   * Valid values: cash, ccca, cchk, cdac, chck, ddpo, debc
+   */
+  defaultPaymentMethod: (() => {
+    const method = env.REACT_DEFAULT_PAYMENT_METHOD;
+    if (!method) return undefined;
+    
+    // Validate the payment method value
+    const validMethods = Object.values(PaymentReconciliationPaymentMethod);
+    if (validMethods.includes(method as PaymentReconciliationPaymentMethod)) {
+      return method as PaymentReconciliationPaymentMethod;
+    }
+    
+    console.warn(
+      `Invalid REACT_DEFAULT_PAYMENT_METHOD: "${method}". Valid values are: ${validMethods.join(", ")}`
+    );
+    return undefined;
+  })(),
 
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
@@ -246,6 +276,14 @@ const careConfig = {
   ),
 
   /**
+   * Show token generation button in patient home if set to "true"
+   */
+  enableTokenGenerationInPatientHome: booleanFromString(
+    env.REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME,
+    false,
+  ),
+
+  /**
    * Default state for tax inclusive pricing in inventory
    * When true, base price is calculated from MRP by removing tax
    */
@@ -254,6 +292,61 @@ const careConfig = {
       env.REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE,
       false,
     ),
+    /**
+     * Number of months offset for expiry restriction.
+     * 0 = current month, 1 = next month, etc.
+     * Products expiring before the end of (current month + offset) will be restricted.
+     * Set to null (default) to disable expiry restriction entirely.
+     */
+    expiryMonthOffset: env.REACT_INVENTORY_EXPIRY_MONTH_OFFSET
+      ? parseInt(env.REACT_INVENTORY_EXPIRY_MONTH_OFFSET, 10)
+      : null,
+  },
+
+  /**
+   * Open schedule window automatically after patient registration if set to "true"
+   */
+  openScheduleAfterPatientRegistration: booleanFromString(
+    env.REACT_OPEN_SCHEDULE_AFTER_PATIENT_REGISTRATION,
+    false,
+  ),
+
+  /**
+   * Decimal calculation configuration
+   */
+  decimal: {
+    /**
+     * Maximum precision for decimal calculations (max_digits in backend)
+     */
+    precision: env.REACT_DECIMAL_PRECISION
+      ? parseInt(env.REACT_DECIMAL_PRECISION, 10)
+      : 20,
+
+    /**
+     * Accounting display precision
+     * Matches backend `ACCOUNTING_PRECISION` config
+     */
+    accountingPrecision: env.REACT_ACCOUNTING_PRECISION
+      ? parseInt(env.REACT_ACCOUNTING_PRECISION, 10)
+      : 2,
+
+    /**
+     * Rounding method for decimal calculations
+     * Matches backend `DECIMAL_ROUNDING_METHOD` config
+     */
+    rounding: (() => {
+      const method = (env.REACT_DECIMAL_ROUNDING_METHOD || "ROUND_HALF_UP") as
+        | "ROUND_UP"
+        | "ROUND_DOWN"
+        | "ROUND_CEIL"
+        | "ROUND_FLOOR"
+        | "ROUND_HALF_UP"
+        | "ROUND_HALF_DOWN"
+        | "ROUND_HALF_EVEN"
+        | "ROUND_HALF_CEIL"
+        | "ROUND_HALF_FLOOR";
+      return Decimal[method] as Decimal.Rounding;
+    })(),
   },
 } as const;
 

@@ -167,13 +167,6 @@ const ScheduleExceptionItem = (
           onConfirm={() => deleteException()}
         />
       </div>
-      {/* TODO: Add this information */}
-      {/* <div className="px-4 py-2">
-        <Callout className="mt-2" variant="warning" badge="Warning">
-          (TODO: Placeholder; replace this) 3 booked appointments were cancelled
-          when you marked this leave. These may need to be rescheduled.
-        </Callout>
-      </div> */}
     </div>
   );
 };

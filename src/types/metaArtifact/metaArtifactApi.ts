@@ -1,5 +1,9 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse, UpsertRequest } from "@/Utils/request/types";
+import {
+  HttpMethod,
+  PaginatedResponse,
+  Type,
+  UpsertRequest,
+} from "@/Utils/request/types";
 import {
   MetaArtifactCreateRequest,
   MetaArtifactResponse,
