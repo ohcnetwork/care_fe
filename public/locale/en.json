@@ -5120,6 +5120,7 @@
   "select_dispense_order": "Select Dispense Order",
   "select_display_style": "Select Display Style",
   "select_doctor": "Select Doctor",
+  "select_dosage_instruction": "Select Dosage Instruction",
   "select_eligible_policy": "Select an Eligible Insurance Policy",
   "select_existing_consent": "Select an existing consent",
   "select_facility": "Select Facility",

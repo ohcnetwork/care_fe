@@ -35,6 +35,20 @@ export const STATUS_COLORS = {
 } as const;
 
 // Utility Functions
+
+export function getDosageFromInstruction(
+  instruction: MedicationRequestRead["dosage_instruction"][number] | undefined,
+) {
+  return {
+    site: instruction?.site,
+    route: instruction?.route,
+    method: instruction?.method,
+    dose: instruction?.dose_and_rate?.dose_quantity && {
+      value: instruction.dose_and_rate.dose_quantity.value,
+      unit: instruction.dose_and_rate.dose_quantity.unit,
+    },
+  };
+}
 export function createMedicationAdministrationRequest(
   medication: MedicationRequestRead,
   encounterId: string,
