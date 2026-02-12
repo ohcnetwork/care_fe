@@ -195,7 +195,7 @@ export default function TagAssignmentSheet({
 
       return mutate(apiEndpoint, {
         pathParams: {
-         [pathParamKey]: entityId,
+          [pathParamKey]: entityId,
           ...(facilityId && { facilityId }),
           ...(patientId && { patientId }),
         },
