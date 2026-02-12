@@ -5,6 +5,7 @@ import AppointmentsPage from "@/pages/Appointments/AppointmentsPage";
 import { PrintAppointments } from "@/pages/Appointments/components/PrintAppointments";
 import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
 import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
+import TokenEncounterRedirect from "@/pages/Facility/queues/TokenEncounterRedirect";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import { Redirect } from "raviger";
 
@@ -38,6 +39,17 @@ const ScheduleRoutes: AppRoutes = {
   }) => (
     <Redirect
       to={`/facility/${facilityId}/practitioner/${practitionerId}/queues/${queueId}/ongoing`}
+    />
+  ),
+  "/facility/:facilityId/queue/:queueId/token/:tokenId": ({
+    facilityId,
+    queueId,
+    tokenId,
+  }) => (
+    <TokenEncounterRedirect
+      facilityId={facilityId}
+      tokenId={tokenId}
+      queueId={queueId}
     />
   ),
 

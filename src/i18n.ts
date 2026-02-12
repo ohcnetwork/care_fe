@@ -42,6 +42,8 @@ const namespaceToUrl = (namespace: string) => {
   return undefined;
 };
 
+const fetchOptions = { cache: "no-store" as RequestCache };
+
 export async function initI18n() {
   // Fetch plugin configurations from API
   try {
@@ -75,7 +77,7 @@ export async function initI18n() {
           const remoteUrl = `${careConfig.i18nUrl}/${language}.json`;
           const localUrl = `/locale/${language}.json`;
           Promise.all([
-            fetch(remoteUrl)
+            fetch(remoteUrl, fetchOptions)
               .then((response) => {
                 if (!response.ok) {
                   throw new Error(`HTTP error! status: ${response.status}`);
@@ -89,7 +91,7 @@ export async function initI18n() {
                 );
                 return {};
               }),
-            fetch(localUrl)
+            fetch(localUrl, fetchOptions)
               .then((response) => {
                 if (!response.ok) {
                   throw new Error(`HTTP error! status: ${response.status}`);
@@ -125,7 +127,7 @@ export async function initI18n() {
           return;
         }
 
-        fetch(`${baseUrl}/locale/${language}.json`)
+        fetch(`${baseUrl}/locale/${language}.json`, fetchOptions)
           .then((response) => {
             if (!response.ok) {
               throw new Error(`HTTP error! status: ${response.status}`);

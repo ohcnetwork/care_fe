@@ -50,7 +50,6 @@ import {
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 import query from "@/Utils/request/query";
-import { isAppleDevice } from "@/Utils/utils";
 
 interface Props {
   onSelect: (value: Code) => void;
@@ -118,7 +117,6 @@ export default function MedicationValueSetSelect({
         limit: 100,
         offset: 0,
         name: search,
-        product_type: "medication",
         category: search ? undefined : currentCategory,
         status: ProductKnowledgeStatus.active,
       },
@@ -303,10 +301,10 @@ function MedicationValueSetSelectTabs({
     >
       <TabsList className="flex w-full">
         <TabsTrigger value="product" className="flex-1">
-          {t("in_stock")}
+          {t("product")}
         </TabsTrigger>
         <TabsTrigger value="valueset" className="flex-1">
-          {t("medication_list")}
+          {t("medication")}
         </TabsTrigger>
       </TabsList>
     </Tabs>
@@ -502,7 +500,7 @@ export function MedicationValueSetSelectTabContent({
                 onValueChange={onSearchChange}
                 value={search}
                 className="border-none ring-0 text-base sm:text-sm"
-                autoFocus={!isAppleDevice}
+                autoFocus
               />
             </div>
 

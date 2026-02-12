@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
+import UserSelector from "@/components/Common/UserSelector";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,14 +33,17 @@ import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPr
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
+import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import {
   ChargeItemDefinitionBase,
   ChargeItemDefinitionRead,
+  ChargeItemDefinitionStatus,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
+import { UserReadMinimal } from "@/types/user/user";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
@@ -54,6 +58,7 @@ interface AddChargeItemsBillingSheetProps {
 
 interface ApplyChargeItemDefinitionRequestWithObject extends ApplyChargeItemDefinitionRequest {
   charge_item_definition_object: ChargeItemDefinitionRead;
+  performer_actor_object?: UserReadMinimal;
 }
 
 export default function AddChargeItemsBillingSheet({
@@ -115,6 +120,17 @@ export default function AddChargeItemsBillingSheet({
       ),
     );
   };
+
+  const handleUpdatePerformer = (index: number, user: UserReadMinimal) => {
+    setSelectedItems(
+      selectedItems.map((item, i) =>
+        i === index
+          ? { ...item, performer_actor: user.id, performer_actor_object: user }
+          : item,
+      ),
+    );
+  };
+
   const handleSubmit = () => {
     if (isPending || isSubmitting) {
       return;
@@ -127,8 +143,11 @@ export default function AddChargeItemsBillingSheet({
     setIsSubmitting(true);
     applyChargeItems({
       requests: selectedItems.map(
-        ({ charge_item_definition_object: _discard, ...charge_item }) =>
-          charge_item,
+        ({
+          charge_item_definition_object: _discard,
+          performer_actor_object: _discardPerformer,
+          ...charge_item
+        }) => charge_item,
       ),
     });
   };
@@ -189,10 +208,12 @@ export default function AddChargeItemsBillingSheet({
                             </label>
                             <div className="flex items-center gap-1">
                               <span>
-                                {item.charge_item_definition_object
-                                  .price_components?.[0]?.amount || 0}{" "}
-                                {item.charge_item_definition_object
-                                  .price_components?.[0]?.code?.code || "INR"}
+                                <MonetaryDisplay
+                                  amount={
+                                    item.charge_item_definition_object
+                                      .price_components?.[0]?.amount || 0
+                                  }
+                                />
                               </span>
                               {item.charge_item_definition_object
                                 .price_components?.length > 0 && (
@@ -216,6 +237,21 @@ export default function AddChargeItemsBillingSheet({
                               )}
                             </div>
                           </div>
+
+                          <div className="space-y-1">
+                            <label className="text-sm text-gray-500">
+                              {t("performer")}
+                            </label>
+                            <UserSelector
+                              selected={item.performer_actor_object}
+                              onChange={(user) =>
+                                handleUpdatePerformer(index, user)
+                              }
+                              placeholder={t("select_performer")}
+                              facilityId={facilityId}
+                              disabled={disabled}
+                            />
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -227,6 +263,7 @@ export default function AddChargeItemsBillingSheet({
                         <TableHead>{t("name")}</TableHead>
                         <TableHead>{t("quantity")}</TableHead>
                         <TableHead>{t("price")}</TableHead>
+                        <TableHead>{t("performer")}</TableHead>
                         <TableHead className="w-[100px]"></TableHead>
                       </TableRow>
                     </TableHeader>
@@ -250,10 +287,12 @@ export default function AddChargeItemsBillingSheet({
                           <TableCell>
                             <div className="flex items-center gap-1">
                               <span>
-                                {item.charge_item_definition_object
-                                  .price_components?.[0]?.amount || 0}{" "}
-                                {item.charge_item_definition_object
-                                  .price_components?.[0]?.code?.code || "INR"}
+                                <MonetaryDisplay
+                                  amount={
+                                    item.charge_item_definition_object
+                                      .price_components?.[0]?.amount || 0
+                                  }
+                                />
                               </span>
                               {item.charge_item_definition_object
                                 .price_components?.length > 0 && (
@@ -275,6 +314,17 @@ export default function AddChargeItemsBillingSheet({
                                 </Popover>
                               )}
                             </div>
+                          </TableCell>
+                          <TableCell>
+                            <UserSelector
+                              selected={item.performer_actor_object}
+                              onChange={(user) =>
+                                handleUpdatePerformer(index, user)
+                              }
+                              placeholder={t("select_performer")}
+                              facilityId={facilityId}
+                              disabled={disabled}
+                            />
                           </TableCell>
                           <TableCell>
                             <Button
@@ -315,9 +365,11 @@ export default function AddChargeItemsBillingSheet({
                 listDefinitions={{
                   queryFn: chargeItemDefinitionApi.listChargeItemDefinition,
                   pathParams: { facilityId },
-                  queryParams: { status: "active" },
+                  queryParams: { status: ChargeItemDefinitionStatus.active },
                 }}
                 translationBaseKey="charge_item_definition"
+                data-shortcut-id="keydown-action"
+                defaultOpen={open}
               />
             </div>
 

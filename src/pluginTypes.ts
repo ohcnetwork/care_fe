@@ -139,6 +139,7 @@ export type PluginManifest = {
   routes?: AppRoutes;
   extends?: readonly SupportedPluginExtensions[];
   navItems?: NavigationLink[];
+  billingNavItems?: NavigationLink[];
   userNavItems?: NavigationLink[];
   adminNavItems?: NavigationLink[];
   organizationTabs?: PluginOrganizationTab[];
