@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { formatPatientAge } from "@/Utils/utils";
 import { resourceTypeToResourcePathSlug } from "@/components/Schedule/useScheduleResource";
+import TagBadge from "@/components/Tags/TagBadge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
@@ -16,19 +17,20 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import {
-  Appointment,
+  AppointmentRead,
   formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
 import { TokenRead, renderTokenNumber } from "@/types/tokens/token/token";
 import { formatDate } from "date-fns";
 import { PrinterIcon } from "lucide-react";
 import { Link } from "raviger";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 interface Props {
   id?: string;
   token?: TokenRead;
   facility: FacilityRead;
-  appointment?: Appointment;
+  appointment?: AppointmentRead;
   inPrintMode?: boolean;
 }
 
@@ -49,6 +51,10 @@ const TokenCard = ({
   const patientWithIdentifiers = appointment?.patient as
     | PatientRead
     | undefined;
+
+  const patientTags =
+    patientWithIdentifiers?.instance_tags ?? patient?.instance_tags;
+  const appointmentTags = appointment?.tags ?? [];
 
   return (
     <Card
@@ -75,7 +81,7 @@ const TokenCard = ({
               <Label className="text-gray-600 text-sm">
                 {t("patient_name")}:
               </Label>
-              <p className="font-semibold break-words text-sm">
+              <p className="font-semibold wrap-break-word text-sm">
                 {patient?.name || "--"}
               </p>
               {patient && (
@@ -98,6 +104,25 @@ const TokenCard = ({
                     <p className="font-semibold text-sm">{identifier.value}</p>
                   </div>
                 ))}
+              {patient?.phone_number && (
+                <div>
+                  <Label className="text-gray-600 text-sm">{t("phone")}:</Label>
+                  <p className="font-semibold text-sm">
+                    {formatPhoneNumberIntl(patient.phone_number) ||
+                      patient.phone_number}
+                  </p>
+                </div>
+              )}
+              {patient?.address?.trim() && (
+                <div>
+                  <Label className="text-gray-600 text-sm">
+                    {t("address")}:
+                  </Label>
+                  <p className="font-semibold text-sm whitespace-pre-wrap">
+                    {patient.address}
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-between items-start gap-4">
@@ -112,7 +137,7 @@ const TokenCard = ({
                           )}
                           :
                         </Label>
-                        <p className="font-semibold break-words text-sm">
+                        <p className="font-semibold wrap-break-word text-sm">
                           {formatScheduleResourceName(appointment)}
                         </p>
                       </div>
@@ -132,16 +157,6 @@ const TokenCard = ({
                       </div>
                     </>
                   )}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-semibold tracking-tight break-words">
-                    {facility.name}
-                  </h3>
-                  <div className="text-sm text-gray-600">
-                    <span>{facility.pincode}</span>
-                    <div className="whitespace-normal">{`Ph.: ${facility.phone_number}`}</div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -164,6 +179,50 @@ const TokenCard = ({
                 className="ml-2"
               />
             </div>
+            {(patientTags?.length || appointmentTags.length > 0) && (
+              <div className="mt-2 flex flex-col gap-2 max-w-48">
+                {patientTags?.length ? (
+                  <div className="flex flex-col">
+                    <Label className="text-gray-600 text-xs">
+                      {t("tags", { count: patientTags.length })}:
+                    </Label>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {patientTags.map((tag) => (
+                        <TagBadge
+                          key={tag.id}
+                          tag={tag}
+                          hierarchyDisplay
+                          className="text-xs"
+                          variant="outline"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                {appointmentTags.length > 0 ? (
+                  <div className="flex flex-col">
+                    <Label className="text-gray-600 text-xs">
+                      {t("appointment")}{" "}
+                      {t("tags", {
+                        count: appointmentTags.length,
+                      })}
+                      :
+                    </Label>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {appointmentTags.map((tag) => (
+                        <TagBadge
+                          key={tag.id}
+                          tag={tag}
+                          hierarchyDisplay
+                          className="text-xs"
+                          variant="outline"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            )}
           </div>
         </div>
         {appointment && !inPrintMode && (
