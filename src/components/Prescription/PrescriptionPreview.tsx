@@ -172,17 +172,13 @@ export const PrescriptionPreview = ({
       prescription.medications && prescription.medications.length > 0,
   );
 
-  // Determine date display
-  const displayDate = useMemo(() => {
-    if (prescriptions.length === 1) {
-      const encounterStart = prescriptions[0].encounter.period.start;
-      return encounterStart
-        ? format(new Date(encounterStart), "dd MMM yyyy, EEEE")
-        : format(new Date(), "dd MMM yyyy, EEEE");
-    }
-    // Multiple prescriptions: use current date
-    return format(new Date(), "dd MMM yyyy, EEEE");
-  }, [prescriptions]);
+  const displayDate =
+    prescriptions.length === 1 && prescriptions[0].encounter.period.start
+      ? format(
+          new Date(prescriptions[0].encounter.period.start),
+          "dd MMM yyyy, EEEE",
+        )
+      : null;
 
   if (isLoading) {
     return <Loading />;
@@ -267,7 +263,9 @@ export const PrescriptionPreview = ({
                 ))}
             </div>
             <div className="space-y-1">
-              <DetailRow label={t("date")} value={displayDate} isStrong />
+              {prescriptions.length === 1 && (
+                <DetailRow label={t("date")} value={displayDate} isStrong />
+              )}
               <DetailRow
                 label={t("mobile_number")}
                 value={patient && formatPhoneNumberIntl(patient.phone_number)}
