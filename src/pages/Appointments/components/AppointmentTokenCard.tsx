@@ -184,7 +184,7 @@ const TokenCard = ({
                 {patientTags?.length ? (
                   <div className="flex flex-col">
                     <Label className="text-gray-600 text-xs">
-                      {t("tags", { count: patientTags.length })}:
+                      {t("tags")}:
                     </Label>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {patientTags.map((tag) => (
@@ -202,11 +202,7 @@ const TokenCard = ({
                 {appointmentTags.length > 0 ? (
                   <div className="flex flex-col">
                     <Label className="text-gray-600 text-xs">
-                      {t("appointment")}{" "}
-                      {t("tags", {
-                        count: appointmentTags.length,
-                      })}
-                      :
+                      {t("appointment")} {t("tags")}:
                     </Label>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {appointmentTags.map((tag) => (
