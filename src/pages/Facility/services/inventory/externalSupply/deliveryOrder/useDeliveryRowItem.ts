@@ -20,7 +20,7 @@ import { ProductRead } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
 import query from "@/Utils/request/query";
 
-import { add, divide, round } from "@/Utils/decimal";
+import { add, divide, multiply, round } from "@/Utils/decimal";
 import {
   SupplyDeliveryFormValues,
   SupplyDeliveryItemValues,
@@ -58,6 +58,8 @@ export function useDeliveryRowItem({
     supplied_item: suppliedItem,
     batch_number: batchNumber,
     unit_price: unitPrice,
+    purchase_price: purchasePrice,
+    total_purchase_price: totalPurchasePrice,
     supplied_item_quantity: quantity = "1",
     supplied_item_pack_quantity: packQuantity,
     supplied_item_pack_size: packSize,
@@ -87,6 +89,8 @@ export function useDeliveryRowItem({
       expiry_date: "",
       charge_item_definition: undefined,
       unit_price: "0",
+      purchase_price: undefined,
+      total_purchase_price: undefined,
       informational_components: [],
       tax_components: [],
       discount_components: [],
@@ -166,6 +170,25 @@ export function useDeliveryRowItem({
         );
       }
 
+      if (product.standard_pack_size) {
+        setField("supplied_item_pack_size", product.standard_pack_size);
+      }
+
+      // Auto-populate tpr = purchase_price × quantity
+      if (product.purchase_price != null) {
+        const packQty =
+          form.getValues(`items.${index}.supplied_item_pack_quantity`) || 1;
+        const packSz =
+          product.standard_pack_size ||
+          form.getValues(`items.${index}.supplied_item_pack_size`) ||
+          1;
+        const qty = packQty * packSz;
+        setField(
+          "total_purchase_price",
+          round(multiply(product.purchase_price, qty)),
+        );
+      }
+
       const chargeItemDef = product.charge_item_definition;
       if (chargeItemDef) {
         setField("charge_item_definition", chargeItemDef);
@@ -212,7 +235,7 @@ export function useDeliveryRowItem({
       setField("is_manually_edited", false);
       setIsCreatingNew(false);
     },
-    [setField],
+    [setField, form, index],
   );
 
   // Auto-fill from last product when product knowledge is selected
@@ -297,6 +320,28 @@ export function useDeliveryRowItem({
     }
   }, [packQuantity, packSize, setField]);
 
+  // Auto-calculate purchase_price = tpr / (pack_size × pack_quantity)
+  useEffect(() => {
+    if (
+      totalPurchasePrice &&
+      packSize &&
+      packSize > 0 &&
+      packQuantity &&
+      packQuantity > 0
+    ) {
+      const newPurchasePrice = round(
+        divide(totalPurchasePrice, packSize * packQuantity),
+      );
+      if (newPurchasePrice !== purchasePrice) {
+        setField("purchase_price", newPurchasePrice);
+      }
+    } else {
+      if (purchasePrice) {
+        setField("purchase_price", undefined);
+      }
+    }
+  }, [totalPurchasePrice, packSize, packQuantity, purchasePrice, setField]);
+
   // Update informational component
   const updateInformationalComponent = useCallback(
     (code: Code, value: number) => {
@@ -323,6 +368,8 @@ export function useDeliveryRowItem({
     suppliedItem,
     batchNumber,
     unitPrice,
+    purchasePrice,
+    totalPurchasePrice,
     quantity,
     packQuantity,
     packSize,
