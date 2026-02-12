@@ -6,14 +6,7 @@ import {
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { UserReadMinimal } from "@/types/user/user";
-import {
-  add,
-  divide,
-  isZero,
-  multiply,
-  round,
-  roundWhole,
-} from "@/Utils/decimal";
+import { add, divide, isZero, multiply, round, roundUp } from "@/Utils/decimal";
 import Decimal from "decimal.js";
 
 export const MEDICATION_REQUEST_STATUS_COLORS = {
@@ -1534,5 +1527,5 @@ export function computeMedicationDispenseQuantity(
 
   const total = computeTotalDoseQuantity(instruction);
   console.log("total", total);
-  return total ? roundWhole(total) : doseValue;
+  return total ? roundUp(total) : doseValue;
 }
