@@ -214,15 +214,6 @@ const TokenCard = ({
               </div>
             )}
           </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-semibold tracking-tight wrap-break-word">
-              {facility.name}
-            </h3>
-            <div className="text-sm text-gray-600">
-              <span>{facility.pincode}</span>
-              <div className="whitespace-normal">{`${t("phone")}: ${facility.phone_number}`}</div>
-            </div>
-          </div>
         </div>
         {appointment && !inPrintMode && (
           <div>
