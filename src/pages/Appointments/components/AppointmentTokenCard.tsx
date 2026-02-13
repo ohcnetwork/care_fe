@@ -32,7 +32,6 @@ interface Props {
   facility: FacilityRead;
   appointment?: AppointmentRead;
   inPrintMode?: boolean;
-  hideFacilityInfo?: boolean;
 }
 
 const TokenCard = ({
@@ -41,7 +40,6 @@ const TokenCard = ({
   facility,
   appointment,
   inPrintMode = false,
-  hideFacilityInfo = false,
 }: Props) => {
   const { t } = useTranslation();
   const isLargeScreen = useBreakpoints({ lg: true, default: false });
@@ -216,17 +214,15 @@ const TokenCard = ({
               </div>
             )}
           </div>
-          {!hideFacilityInfo && (
-            <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-semibold tracking-tight wrap-break-word">
-                {facility.name}
-              </h3>
-              <div className="text-sm text-gray-600">
-                <span>{facility.pincode}</span>
-                <div className="whitespace-normal">{`Ph.: ${facility.phone_number}`}</div>
-              </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-semibold tracking-tight wrap-break-word">
+              {facility.name}
+            </h3>
+            <div className="text-sm text-gray-600">
+              <span>{facility.pincode}</span>
+              <div className="whitespace-normal">{`Ph.: ${facility.phone_number}`}</div>
             </div>
-          )}
+          </div>
         </div>
         {appointment && !inPrintMode && (
           <div>

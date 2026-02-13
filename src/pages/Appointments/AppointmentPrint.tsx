@@ -121,7 +121,6 @@ export default function AppointmentPrint(props: Props) {
               token={appointment.token ?? undefined}
               facility={facility}
               inPrintMode={true}
-              hideFacilityInfo={true}
             />
           </div>
 
