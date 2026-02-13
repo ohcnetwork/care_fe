@@ -1,13 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
+import { Download } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { encounterListFiltersAtom } from "@/atoms/encounterFilterAtom";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   careTeamFilter,
@@ -44,8 +47,14 @@ import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { UserReadMinimal } from "@/types/user/user";
+import { exportCSV } from "@/Utils/exportCSV";
 import query from "@/Utils/request/query";
-import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
+import {
+  dateQueryString,
+  dateTimeQueryString,
+  formatDateTime,
+  formatPatientAge,
+} from "@/Utils/utils";
 import careConfig from "@careConfig";
 import { subDays } from "date-fns";
 
@@ -264,6 +273,72 @@ export function EncounterList({
     propEncounters ||
     queryEncounters?.results ||
     (queryEncounter ? [queryEncounter] : []);
+
+  const handleExportCSV = () => {
+    if (encounters.length === 0) {
+      toast.info(t("no_encounters_to_export"));
+      return;
+    }
+
+    const columns = [
+      {
+        header: t("patient_name"),
+        accessor: (e: EncounterListRead | EncounterRead) => e.patient.name,
+      },
+      {
+        header: t("phone_number"),
+        accessor: (e: EncounterListRead | EncounterRead) =>
+          e.patient.phone_number,
+      },
+      {
+        header: t("age"),
+        accessor: (e: EncounterListRead | EncounterRead) =>
+          formatPatientAge(e.patient, true),
+      },
+      {
+        header: t("gender"),
+        accessor: (e: EncounterListRead | EncounterRead) =>
+          t(`GENDER__${e.patient.gender}`),
+      },
+      {
+        header: t("encounter_status"),
+        accessor: (e: EncounterListRead | EncounterRead) =>
+          t(`encounter_status__${e.status}`),
+      },
+      {
+        header: t("encounter_class"),
+        accessor: (e: EncounterListRead | EncounterRead) =>
+          t(`encounter_class__${e.encounter_class}`),
+      },
+      {
+        header: t("priority"),
+        accessor: (e: EncounterListRead | EncounterRead) =>
+          t(`encounter_priority__${e.priority}`),
+      },
+      {
+        header: t("start_date"),
+        accessor: (e: EncounterListRead | EncounterRead) =>
+          e.period.start ? formatDateTime(e.period.start) : "",
+      },
+      {
+        header: t("end_date"),
+        accessor: (e: EncounterListRead | EncounterRead) =>
+          e.period.end ? formatDateTime(e.period.end) : "",
+      },
+      {
+        header: t("facility"),
+        accessor: (e: EncounterListRead | EncounterRead) => e.facility.name,
+      },
+      {
+        header: t("location"),
+        accessor: (e: EncounterListRead | EncounterRead) =>
+          e.current_location?.name ?? "",
+      },
+    ];
+
+    const date = new Date().toISOString().split("T")[0];
+    exportCSV(encounters, columns, `encounters-${date}.csv`);
+  };
 
   const tagIds = qParams.tags?.split(",") || [];
   const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
@@ -538,6 +613,16 @@ export function EncounterList({
                   facilityId={facilityId}
                 />
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportCSV}
+                disabled={isFetching || encounters.length === 0}
+                className="self-start"
+              >
+                <Download className="size-4 mr-1" />
+                {t("export_as_csv")}
+              </Button>
             </div>
 
             <Separator className="hidden md:block" />
