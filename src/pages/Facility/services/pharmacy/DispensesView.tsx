@@ -173,7 +173,7 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
               onSuccess={(deliveryOrder) => {
                 // Navigate to the medication return detail page
                 navigate(
-                  `/facility/${facilityId}/locations/${locationId}/medication_return/order/${deliveryOrder.id}/?dispenseOrderId=${dispenseOrderId}`,
+                  `/facility/${facilityId}/locations/${locationId}/medication_return/order/${deliveryOrder.id}/?dispenseOrderIds=${dispenseOrderId}`,
                 );
               }}
               trigger={
