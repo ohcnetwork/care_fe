@@ -220,7 +220,7 @@ const TokenCard = ({
             </h3>
             <div className="text-sm text-gray-600">
               <span>{facility.pincode}</span>
-              <div className="whitespace-normal">{`Ph.: ${facility.phone_number}`}</div>
+              <div className="whitespace-normal">{`${t("phone")}: ${facility.phone_number}`}</div>
             </div>
           </div>
         </div>
