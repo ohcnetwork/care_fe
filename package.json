@@ -160,6 +160,7 @@
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.21.0",
     "@typescript-eslint/parser": "^8.21.0",
+    "baseline-browser-mapping": "^2.9.19",
     "dompurify": "^3.2.5",
     "dotenv": "^16.4.5",
     "eslint": "^9.18.0",
