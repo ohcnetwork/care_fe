@@ -15,7 +15,6 @@ import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Hash } from "lucide-react";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -92,36 +91,18 @@ export default function RequestOrderTable({
                 {t(request.priority)}
               </Badge>
             </TableCell>
-            <TableCell className="sm:w-60 md:w-80">
-              <div className="flex flex-wrap gap-1">
-                <TagAssignmentSheet
-                  entityType="request_order"
-                  entityId={request.id}
-                  facilityId={facilityId}
-                  currentTags={request.tags ?? []}
-                  onUpdate={() => {
-                    queryClient.invalidateQueries({
-                      queryKey: ["requestOrders", locationId, internal],
-                    });
-                  }}
-                  trigger={
-                    request.tags && request.tags.length > 0 ? (
-                      <Button variant="outline" size="xs">
-                        <Hash className="size-3" /> {t("tags")}
-                      </Button>
-                    ) : (
-                      <Button variant="outline" size="xs">
-                        <Hash className="size-3" /> {t("add_tags")}
-                      </Button>
-                    )
-                  }
-                />
-                {request.tags.map((tag) => (
-                  <Badge key={tag.id} variant="secondary" className="text-xs">
-                    {tag.display}
-                  </Badge>
-                ))}
-              </div>
+            <TableCell>
+              <TagAssignmentSheet
+                entityType="request_order"
+                entityId={request.id}
+                facilityId={facilityId}
+                currentTags={request.tags ?? []}
+                onUpdate={() => {
+                  queryClient.invalidateQueries({
+                    queryKey: ["requestOrders", locationId, internal],
+                  });
+                }}
+              />
             </TableCell>
             <TableCell>
               <Button
