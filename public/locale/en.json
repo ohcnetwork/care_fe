@@ -2367,6 +2367,7 @@
   "export_as_csv": "Export as CSV",
   "export_encounters": "Export Encounters",
   "export_live_patients": "Export Live Patients",
+  "export_truncated": "Export truncated: showing {{exported}} of {{total}} encounters",
   "exporting": "Exporting",
   "external": "External",
   "external_id": "External ID",

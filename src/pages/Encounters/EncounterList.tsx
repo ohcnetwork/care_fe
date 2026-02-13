@@ -48,6 +48,7 @@ import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { UserReadMinimal } from "@/types/user/user";
 import { exportCSV } from "@/Utils/exportCSV";
+import { maskName, maskPhone } from "@/Utils/maskUtils";
 import query, { callApi } from "@/Utils/request/query";
 import {
   dateQueryString,
@@ -276,22 +277,6 @@ export function EncounterList({
 
   const [isExporting, setIsExporting] = useState(false);
 
-  const maskName = (name: string): string => {
-    return name
-      .split(" ")
-      .map((part) =>
-        part.length > 0
-          ? part[0] + "*".repeat(Math.max(part.length - 1, 2))
-          : "",
-      )
-      .join(" ");
-  };
-
-  const maskPhone = (phone: string): string => {
-    if (phone.length <= 4) return phone;
-    return "*".repeat(phone.length - 4) + phone.slice(-4);
-  };
-
   const handleExportCSV = async () => {
     setIsExporting(true);
     try {
@@ -319,16 +304,21 @@ export function EncounterList({
       });
 
       const allEncounters = allEncountersResponse?.results ?? [];
+      const totalCount = allEncountersResponse?.count ?? 0;
 
       if (allEncounters.length === 0) {
         toast.info(t("no_encounters_to_export"));
         return;
       }
 
-      // Audit log for PII export
-      console.info(
-        `[AUDIT] CSV export triggered: ${allEncounters.length} encounters exported at ${new Date().toISOString()}`,
-      );
+      if (allEncounters.length < totalCount) {
+        toast.warning(
+          t("export_truncated", {
+            exported: allEncounters.length,
+            total: totalCount,
+          }),
+        );
+      }
 
       const columns = [
         {
