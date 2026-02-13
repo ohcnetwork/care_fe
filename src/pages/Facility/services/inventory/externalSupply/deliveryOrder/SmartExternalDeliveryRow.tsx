@@ -92,6 +92,8 @@ export function SmartExternalDeliveryRow({
     suppliedItem,
     batchNumber,
     unitPrice,
+    purchasePrice,
+    totalPurchasePrice,
     packQuantity,
     packSize,
     taxComponents,
@@ -514,6 +516,42 @@ export function SmartExternalDeliveryRow({
           </TableCell>
         );
       })}
+
+      {/* Total Purchase Price (user-entered) */}
+      <TableCell className="align-top p-2">
+        <div className="flex items-center">
+          <span className="text-xs text-gray-500 mr-1">{CURRENCY_SYMBOL}</span>
+          <Input
+            type="number"
+            min={0}
+            step="0.01"
+            value={totalPurchasePrice || ""}
+            placeholder="0"
+            onChange={(e) => {
+              setField("total_purchase_price", e.target.value || undefined);
+              markAsEdited();
+            }}
+            disabled={!productKnowledge}
+            className="w-[100px]"
+          />
+        </div>
+      </TableCell>
+
+      {/* Purchase Price (auto-calculated: tpr / pack_quantity) */}
+      <TableCell className="align-top p-2">
+        <div className="flex items-center">
+          <span className="text-xs text-gray-500 mr-1">{CURRENCY_SYMBOL}</span>
+          <Input
+            type="number"
+            min={0}
+            step="0.01"
+            value={purchasePrice || ""}
+            placeholder="0"
+            disabled
+            className="w-[90px] bg-gray-100 text-gray-600"
+          />
+        </div>
+      </TableCell>
 
       {/* Taxes */}
       <TableCell className="align-top p-2">

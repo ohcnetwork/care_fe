@@ -148,7 +148,7 @@ export function SupplyDeliveryTable({
       <TableHeader>
         <TableRow>
           {showAllCheckbox && (
-            <TableHead>
+            <TableHead rowSpan={2}>
               <Checkbox
                 checked={allInProgressSelected && selectedDeliveries.length > 0}
                 disabled={inProgressDeliveries.length === 0}
@@ -160,31 +160,48 @@ export function SupplyDeliveryTable({
               <ShortcutBadge actionId="select-all" alwaysShow={false} />
             </TableHead>
           )}
-          <TableHead>{t("item")}</TableHead>
-          <TableHead>{t("batch")}</TableHead>
-          <TableHead>{t("requested_qty")}</TableHead>
-          {!internal && <TableHead>{t("pack_size")}</TableHead>}
-          {!internal && <TableHead>{t("pack_qty")}</TableHead>}
-          <TableHead>
+          <TableHead rowSpan={2}>{t("item")}</TableHead>
+          <TableHead rowSpan={2}>{t("batch")}</TableHead>
+          <TableHead rowSpan={2}>{t("requested_qty")}</TableHead>
+          {!internal && <TableHead rowSpan={2}>{t("pack_size")}</TableHead>}
+          {!internal && <TableHead rowSpan={2}>{t("pack_qty")}</TableHead>}
+          <TableHead rowSpan={2}>
             {isRequester ? t("received_qty") : t("dispatched_qty")}
           </TableHead>
-          <TableHead>
+          <TableHead rowSpan={2}>
             {isRequester ? t("received_date") : t("dispatched_date")}
           </TableHead>
+          <TableHead
+            colSpan={1 + informationalCodes.length}
+            className="text-center border-b"
+          >
+            {t("sale")}
+          </TableHead>
+          {!internal && (
+            <TableHead colSpan={2} className="text-center border-b">
+              {t("purchase")}
+            </TableHead>
+          )}
+          <TableHead rowSpan={2}>{t("tax")}</TableHead>
+          <TableHead rowSpan={2}>{t("disc")}</TableHead>
+          <TableHead rowSpan={2}>{t("status")}</TableHead>
+          <TableHead rowSpan={2}>{t("condition")}</TableHead>
+          {extensionFields.map((field) => (
+            <TableHead rowSpan={2} key={`${field.extensionName}-${field.name}`}>
+              {field.label}
+            </TableHead>
+          ))}
+          {showActionsColumn && (
+            <TableHead rowSpan={2}>{t("actions")}</TableHead>
+          )}
+        </TableRow>
+        <TableRow>
           <TableHead>{t("item_price")}</TableHead>
           {informationalCodes.map((code) => (
             <TableHead key={code.code}>{code.display}</TableHead>
           ))}
-          <TableHead>{t("tax")}</TableHead>
-          <TableHead>{t("disc")}</TableHead>
-          <TableHead>{t("status")}</TableHead>
-          <TableHead>{t("condition")}</TableHead>
-          {extensionFields.map((field) => (
-            <TableHead key={`${field.extensionName}-${field.name}`}>
-              {field.label}
-            </TableHead>
-          ))}
-          {showActionsColumn && <TableHead>{t("actions")}</TableHead>}
+          {!internal && <TableHead>{t("tpr")}</TableHead>}
+          {!internal && <TableHead className="border-r">{t("pr")}</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody className="text-sm">
@@ -261,6 +278,18 @@ export function SupplyDeliveryTable({
                 </TableCell>
               );
             })}
+            {!internal && (
+              <TableCell>
+                <MonetaryDisplay amount={delivery.total_purchase_price} />
+              </TableCell>
+            )}
+            {!internal && (
+              <TableCell>
+                <MonetaryDisplay
+                  amount={delivery.supplied_item?.purchase_price}
+                />
+              </TableCell>
+            )}
             <TableCell>
               <MonetaryDisplay
                 factor={add(
