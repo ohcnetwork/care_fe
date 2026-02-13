@@ -18,7 +18,7 @@ const DOSAGE_UNITS = [
   "count",
 ];
 
-const DURATION_UNITS = ["d", "h", "wk", "mo", "a"];
+const DURATION_UNITS = ["days", "hours", "weeks", "months", "years"];
 
 const INTENT_OPTIONS = [
   "proposal",
