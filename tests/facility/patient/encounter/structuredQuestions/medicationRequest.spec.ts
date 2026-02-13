@@ -1,3 +1,4 @@
+import { frequencies } from "@/tests/facility/patient/encounter/medicine/prescriptionTestData";
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import { getEncounterId } from "tests/support/encounterId";
@@ -16,25 +17,6 @@ const DOSAGE_UNITS = [
   "drop",
   "international unit",
   "count",
-];
-
-const FREQUENCY_OPTIONS = [
-  "BID (1-0-1)",
-  "TID (1-1-1)",
-  "QID (1-1-1-1)",
-  "AM (1-0-0)",
-  "PM (0-0-1)",
-  "QD (Once a day)",
-  "QOD (Alternate days)",
-  "Q1H (Every 1 hour)",
-  "Q2H (Every 2 hours)",
-  "Q3H (Every 3 hours)",
-  "Q4H (Every 4 hours)",
-  "Q6H (Every 6 hours)",
-  "Q8H (Every 8 hours)",
-  "BED (0-0-1)",
-  "WK (Weekly)",
-  "MO (Monthly)",
 ];
 
 const DURATION_UNITS = ["d", "h", "wk", "mo", "a"];
@@ -111,9 +93,9 @@ test.describe("Medication Request Questionnaire", () => {
   let medicationName: string;
   let dosageQuantity: number;
   let dosageUnit: string;
-  let frequency: string;
   let durationUnit: string;
   let duration: number;
+  let frequencyData: { input: string; display: string };
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
@@ -122,7 +104,7 @@ test.describe("Medication Request Questionnaire", () => {
     medicationName = faker.helpers.arrayElement(medicationOptions);
     dosageQuantity = faker.number.int(INT_MAX);
     dosageUnit = faker.helpers.arrayElement(DOSAGE_UNITS);
-    frequency = faker.helpers.arrayElement(FREQUENCY_OPTIONS);
+    frequencyData = faker.helpers.arrayElement(frequencies);
     durationUnit = faker.helpers.arrayElement(DURATION_UNITS);
     duration = faker.number.int({ min: 1, max: INT_MAX });
 
@@ -160,19 +142,19 @@ test.describe("Medication Request Questionnaire", () => {
 
     await page
       .locator('button[role="combobox"]:not([disabled])')
-      .filter({ hasText: "Select frequency" })
+      .filter({ hasText: "eg. 1-0-1" })
       .click();
-    await page.getByRole("option", { name: frequency, exact: true }).click();
+    await page.getByPlaceholder("Type eg. 1-0-1").fill(frequencyData.input);
+    await page.getByRole("option", { name: frequencyData.display }).click();
+
+    await page.getByRole("combobox", { name: "1 day" }).click();
+    await page
+      .getByPlaceholder("Type eg. 5 days, 2 weeks")
+      .fill(`${duration} ${durationUnit}`);
 
     await page
-      .locator('input[type="number"]:not([disabled])')
-      .fill(duration.toString());
-
-    await page
-      .locator('button[role="combobox"]:not([disabled])')
-      .filter({ hasText: /^d$|^h$|^mo$|^wk$|^a$/ })
+      .getByRole("option", { name: `${duration} ${durationUnit}` })
       .click();
-    await page.getByRole("option", { name: durationUnit }).click();
 
     // Select random additional instruction - target only enabled button
     const instruction = faker.helpers.arrayElement(instructionOptions);
@@ -242,7 +224,7 @@ test.describe("Medication Request Questionnaire", () => {
       .locator('[data-slot="table-body"] tr')
       .filter({ hasText: medicationName })
       .filter({ hasText: `${dosageQuantity.toFixed(2)} ${dosageUnit}` })
-      .filter({ hasText: frequency })
+      .filter({ hasText: frequencyData.display })
       .filter({ hasText: `${duration} ${durationUnit}` });
 
     await expect(medicationRow).toBeVisible();
@@ -277,19 +259,19 @@ test.describe("Medication Request Questionnaire", () => {
 
     await page
       .locator('button[role="combobox"]:not([disabled])')
-      .filter({ hasText: "Select frequency" })
+      .filter({ hasText: "eg. 1-0-1" })
       .click();
-    await page.getByRole("option").filter({ hasText: frequency }).click();
+    await page.getByPlaceholder("Type eg. 1-0-1").fill(frequencyData.input);
+    await page.getByRole("option", { name: frequencyData.display }).click();
+
+    await page.getByRole("combobox", { name: "1 day" }).click();
+    await page
+      .getByPlaceholder("Type eg. 5 days, 2 weeks")
+      .fill(`${duration} ${durationUnit}`);
 
     await page
-      .locator('input[type="number"]:not([disabled])')
-      .fill(duration.toString());
-
-    await page
-      .locator('button[role="combobox"]:not([disabled])')
-      .filter({ hasText: /^d$|^h$|^mo$|^wk$|^a$/ })
+      .getByRole("option", { name: `${duration} ${durationUnit}` })
       .click();
-    await page.getByRole("option", { name: durationUnit }).click();
 
     await page.getByRole("button", { name: "Submit" }).click();
 
@@ -308,7 +290,7 @@ test.describe("Medication Request Questionnaire", () => {
       .locator('[data-slot="table-body"] tr')
       .filter({ hasText: medicationName })
       .filter({ hasText: `${dosageQuantity.toFixed(2)} ${dosageUnit}` })
-      .filter({ hasText: frequency })
+      .filter({ hasText: frequencyData.display })
       .filter({ hasText: `${duration} ${durationUnit}` });
 
     await expect(medicationRow).toBeVisible();
@@ -331,14 +313,8 @@ test.describe("Medication Request Questionnaire", () => {
 
     await page.getByRole("button", { name: "Submit" }).click();
 
-    await expect(
-      page.getByText("Dosage*+This field is required"),
-    ).toBeVisible();
+    await expect(page.getByText("Dosage*This field is required")).toBeVisible();
 
-    await expect(
-      page.locator("div").filter({
-        hasText: /^Frequency\*Select frequencyThis field is required$/,
-      }),
-    ).toBeVisible();
+    await expect(page.getByText("Frequency*eg. 1-0-1This field")).toBeVisible();
   });
 });
