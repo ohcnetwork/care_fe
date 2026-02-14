@@ -31,8 +31,7 @@ import {
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
-import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
-import { formatDosage } from "@/components/Medicine/utils";
+import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
 import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
@@ -340,9 +339,7 @@ export function MedicationStatementQuestion({
                   label: t("dosage"),
                   render: (instructions) => {
                     const dosage = formatDosage(instructions[0]) || "";
-                    const frequency =
-                      getFrequencyDisplay(instructions[0]?.timing)?.meaning ||
-                      "-";
+                    const frequency = formatFrequency(instructions[0]) || "-";
                     return `${dosage}\n${frequency}`;
                   },
                 },
