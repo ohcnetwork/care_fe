@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUp,
-  Check,
   ChevronLeft,
   Component,
   Loader2,
@@ -38,6 +37,8 @@ import {
 } from "@/components/ui/popover";
 
 import query from "@/Utils/request/query";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
@@ -197,36 +198,28 @@ export function MultiFilterStyleTagSelector({
             }
           }}
         >
-          <button
-            type="button"
-            role="checkbox"
-            aria-checked={isSelected(tag)}
-            data-state={isSelected(tag) ? "checked" : "unchecked"}
-            className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-4 w-4"
-          >
-            {isSelected(tag) && (
-              <span className="flex items-center justify-center text-current transition-none">
-                <Check className="size-3.5" />
-              </span>
-            )}
-          </button>
           {tag.has_children ? (
-            // 🔹 Parent Tag (Group)
+            // Group Tags
             <div className="flex items-center justify-between w-full min-w-0">
               <div className="flex items-center gap-2 min-w-0">
                 <Component className="h-4 w-4 text-gray-600 flex-shrink-0" />
                 <span className="text-sm truncate">{tag.display}</span>
               </div>
 
-              <Badge className="text-xs px-1 py-0.5 bg-gray-100 border-gray-300 text-gray-900">
-                {t("group")}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge className="text-xs px-1 py-0.5 bg-gray-100 border-gray-300 text-gray-900">
+                  {t("group")}
+                </Badge>
+                <ArrowRight className="size-4 text-gray-400" />
+              </div>
             </div>
           ) : (
             // Other Tags
-            renderTagNameWithParent(tag)
+            <>
+              <Checkbox checked={isSelected(tag)} className="size-4" />
+              {renderTagNameWithParent(tag)}
+            </>
           )}
-          {tag.has_children && <ArrowRight className="h-4 w-4 text-gray-400" />}
         </div>
       ))}
     </div>
@@ -294,12 +287,11 @@ export function MultiFilterStyleTagSelector({
               <div className="flex-1 overflow-hidden flex flex-col">
                 {/* Search */}
                 <div className="px-4 pb-3">
-                  <input
-                    type="text"
+                  <Input
                     placeholder={t("search_tags")}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-xs transition-colors file:border-0 file:bg-transparent focus:ring-primary-500 focus:border-primary-500 file:text-sm file:font-medium file:text-gray-950 placeholder:text-gray-500 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm duration-300 h-8 text-sm"
+                    className="h-8"
                   />
                 </div>
 
@@ -317,17 +309,7 @@ export function MultiFilterStyleTagSelector({
                           className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
                           onClick={() => handleSelect(tag)}
                         >
-                          <button
-                            type="button"
-                            role="checkbox"
-                            aria-checked="true"
-                            data-state="checked"
-                            className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-4 w-4"
-                          >
-                            <span className="flex items-center justify-center text-current transition-none">
-                              <Check className="size-3.5" />
-                            </span>
-                          </button>
+                          <Checkbox checked className="size-4" />
                           {renderTagNameWithParent(tag)}
                         </div>
                       ))}
@@ -404,21 +386,10 @@ export function MultiFilterStyleTagSelector({
                           className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
                           onClick={() => handleSelect(childTag)}
                         >
-                          <button
-                            type="button"
-                            role="checkbox"
-                            aria-checked={isSelected(childTag)}
-                            data-state={
-                              isSelected(childTag) ? "checked" : "unchecked"
-                            }
-                            className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-4 w-4"
-                          >
-                            {isSelected(childTag) && (
-                              <span className="flex items-center justify-center text-current transition-none">
-                                <Check className="size-3.5" />
-                              </span>
-                            )}
-                          </button>
+                          <Checkbox
+                            checked={isSelected(childTag)}
+                            className="size-4"
+                          />
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <div className="h-3 w-3 rounded-full flex-shrink-0 border bg-green-100 border-green-300"></div>
                             <span className="text-sm truncate">
@@ -465,12 +436,11 @@ export function MultiFilterStyleTagSelector({
               {/* Content */}
               <div className="p-2 max-h-[calc(100vh-28rem)] overflow-y-auto">
                 {/* Search */}
-                <input
-                  type="text"
+                <Input
                   placeholder={t("search_tags")}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-xs transition-colors file:border-0 file:bg-transparent focus:ring-primary-500 focus:border-primary-500 file:text-sm file:font-medium file:text-gray-950 placeholder:text-gray-500 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm duration-300 h-10 text-sm mb-2"
+                  className="h-8 mb-2"
                 />
 
                 <div>
@@ -486,17 +456,7 @@ export function MultiFilterStyleTagSelector({
                           className="focus:bg-gray-100 focus:text-gray-900 relative rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5 cursor-pointer"
                           onClick={() => handleSelect(tag)}
                         >
-                          <button
-                            type="button"
-                            role="checkbox"
-                            aria-checked="true"
-                            data-state="checked"
-                            className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-4 w-4"
-                          >
-                            <span className="flex items-center justify-center text-current transition-none">
-                              <Check className="size-3.5" />
-                            </span>
-                          </button>
+                          <Checkbox checked className="size-4" />
                           {renderTagNameWithParent(tag)}
                         </div>
                       ))}
@@ -556,23 +516,10 @@ export function MultiFilterStyleTagSelector({
                                     className="focus:bg-gray-100 focus:text-gray-900 relative rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-1 cursor-pointer"
                                     onClick={() => handleSelect(childTag)}
                                   >
-                                    <button
-                                      type="button"
-                                      role="checkbox"
-                                      aria-checked={isSelected(childTag)}
-                                      data-state={
-                                        isSelected(childTag)
-                                          ? "checked"
-                                          : "unchecked"
-                                      }
-                                      className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-4 w-4"
-                                    >
-                                      {isSelected(childTag) && (
-                                        <span className="flex items-center justify-center text-current transition-none">
-                                          <Check className="size-3.5" />
-                                        </span>
-                                      )}
-                                    </button>
+                                    <Checkbox
+                                      checked={isSelected(childTag)}
+                                      className="size-4"
+                                    />
                                     <div className="flex items-center gap-2 flex-1">
                                       <div className="h-3 w-3 rounded-full flex-shrink-0 border bg-green-100 border-green-300"></div>
                                       <span className="text-sm">
@@ -606,21 +553,10 @@ export function MultiFilterStyleTagSelector({
                           className="focus:bg-gray-100 focus:text-gray-900 relative rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5 cursor-pointer"
                           onClick={() => handleSelect(tag)}
                         >
-                          <button
-                            type="button"
-                            role="checkbox"
-                            aria-checked={isSelected(tag)}
-                            data-state={
-                              isSelected(tag) ? "checked" : "unchecked"
-                            }
-                            className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-4 w-4"
-                          >
-                            {isSelected(tag) && (
-                              <span className="flex items-center justify-center text-current transition-none">
-                                <Check className="size-3.5" />
-                              </span>
-                            )}
-                          </button>
+                          <Checkbox
+                            checked={isSelected(tag)}
+                            className="size-4"
+                          />
                           {renderTagNameWithParent(tag)}
                         </div>
                       ))}
