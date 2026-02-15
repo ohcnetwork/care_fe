@@ -200,8 +200,8 @@ export function SupplyDeliveryTable({
           {informationalCodes.map((code) => (
             <TableHead key={code.code}>{code.display}</TableHead>
           ))}
-          {!internal && <TableHead>{t("tpr")}</TableHead>}
           {!internal && <TableHead className="border-r">{t("pr")}</TableHead>}
+          {!internal && <TableHead>{t("tpr")}</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody className="text-sm">
@@ -280,14 +280,14 @@ export function SupplyDeliveryTable({
             })}
             {!internal && (
               <TableCell>
-                <MonetaryDisplay amount={delivery.total_purchase_price} />
+                <MonetaryDisplay
+                  amount={delivery.supplied_item?.purchase_price}
+                />
               </TableCell>
             )}
             {!internal && (
               <TableCell>
-                <MonetaryDisplay
-                  amount={delivery.supplied_item?.purchase_price}
-                />
+                <MonetaryDisplay amount={delivery.total_purchase_price} />
               </TableCell>
             )}
             <TableCell>
