@@ -107,6 +107,8 @@ export function MultiFilterStyleTagSelector({
       (open && !!groupPopoverOpen) || (childDrawerOpen && !!selectedGroup),
   });
 
+  const isSelected = (tag: TagConfig) => selected.some((t) => t.id === tag.id);
+
   // Select/deselect tag
   const handleSelect = (tag: TagConfig) => {
     // If tag has a parent, enforce single selection per group
@@ -123,9 +125,7 @@ export function MultiFilterStyleTagSelector({
         t.parent.id === parentId,
     );
 
-    const isCurrentlySelected = selected.some((t) => t.id === tag.id);
-
-    if (isCurrentlySelected) {
+    if (isSelected(tag)) {
       onChange(selected.filter((t) => t.id !== tag.id));
     } else {
       onChange([
@@ -133,10 +133,6 @@ export function MultiFilterStyleTagSelector({
         tag,
       ]);
     }
-  };
-
-  const _handleGroupClick = (groupId: string) => {
-    setGroupPopoverOpen(groupPopoverOpen === groupId ? null : groupId);
   };
 
   const handleMobileGroupClick = (group: TagConfig) => {
@@ -148,8 +144,6 @@ export function MultiFilterStyleTagSelector({
     setChildDrawerOpen(false);
     setSelectedGroup(null);
   };
-
-  const isSelected = (tag: TagConfig) => selected.some((t) => t.id === tag.id);
 
   const filteredSelectedTags = selected.filter((t) =>
     t.display.toLowerCase().includes(search.toLowerCase()),
@@ -167,16 +161,16 @@ export function MultiFilterStyleTagSelector({
     return (
       <div className="flex items-center gap-2 max-w-xs truncate">
         <span className="text-sm flex flex-row items-center gap-1 min-w-0">
-          {tag.parent && <Component className="h-3 w-3 text-black/80" />}
+          {tag.parent && <Component className="size-3 text-black/80" />}
           {tag.parent && (
             <span className="flex gap-1 items-center flex-shrink-0">
               <span className="text-gray-700 truncate">
                 {tag.parent.display}
               </span>
-              <ArrowRight className="h-3 w-3 flex-shrink-0" />
+              <ArrowRight className="size-3 flex-shrink-0" />
             </span>
           )}
-          <div className="h-3 w-3 rounded-full flex-shrink-0 border bg-blue-100 border-blue-300"></div>
+          <div className="size-3 rounded-full flex-shrink-0 border bg-blue-100 border-blue-300"></div>
           <span className="truncate">{tag.display}</span>
         </span>
       </div>
@@ -202,7 +196,7 @@ export function MultiFilterStyleTagSelector({
             // Group Tags
             <div className="flex items-center justify-between w-full min-w-0">
               <div className="flex items-center gap-2 min-w-0">
-                <Component className="h-4 w-4 text-gray-600 flex-shrink-0" />
+                <Component className="size-4 text-gray-600 flex-shrink-0" />
                 <span className="text-sm truncate">{tag.display}</span>
               </div>
 
@@ -240,30 +234,32 @@ export function MultiFilterStyleTagSelector({
     >
       <div className="flex items-center gap-2 min-w-0 w-full">
         {isLoading ? (
-          <Loader2 className="h-3 w-3 animate-spin" />
+          <Loader2 className="size-3 animate-spin" />
         ) : (
-          <TagIcon className="h-3 w-3" />
+          <TagIcon className="size-3" />
         )}
 
-        <div className="flex gap-1 flex-wrap min-w-0 w-full overflow-hidden">
+        <div>
           {isLoading ? (
             <span>{t("updating_tags")}</span>
           ) : selected.length > 0 ? (
-            selected.slice(0, 3).map((t) => (
-              <Badge
-                key={t.id}
-                className="bg-blue-100 text-blue-900 border-blue-300 whitespace-normal break-words overflow-wrap-anywhere"
-              >
-                {t.display}
-              </Badge>
-            ))
+            <div className="flex gap-1 flex-wrap min-w-0 w-full overflow-hidden">
+              {selected.slice(0, 3).map((t) => (
+                <Badge
+                  key={t.id}
+                  className="bg-blue-100 text-blue-900 border-blue-300 whitespace-normal break-words overflow-wrap-anywhere"
+                >
+                  {t.display}
+                </Badge>
+              ))}
+              {selected.length > 3 && (
+                <Badge className="bg-gray-100 text-gray-900 border-gray-300 shrink-0">
+                  +{selected.length - 3} {t("more")}
+                </Badge>
+              )}
+            </div>
           ) : (
             <span>{t("add_tags")}</span>
-          )}
-          {selected.length > 3 && (
-            <Badge className="bg-gray-100 text-gray-900 border-gray-300 shrink-0">
-              +{selected.length - 3} {t("more")}
-            </Badge>
           )}
         </div>
       </div>
@@ -277,7 +273,7 @@ export function MultiFilterStyleTagSelector({
         <>
           <Drawer open={mobileDrawerOpen} onOpenChange={setMobileDrawerOpen}>
             <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-            <DrawerContent className="flex flex-col max-h-[85vh]">
+            <DrawerContent className="flex flex-col min-h-[50vh] max-h-[85vh]">
               <DrawerHeader className="pb-3">
                 <DrawerTitle className="flex items-center gap-2">
                   {t("manage_tags")}
@@ -361,12 +357,12 @@ export function MultiFilterStyleTagSelector({
                     variant="ghost"
                     size="sm"
                     onClick={handleMobileBack}
-                    className="p-1 h-8 w-8"
+                    className="p-1 size-8"
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="size-4" />
                   </Button>
                   <DrawerTitle className="flex items-center gap-2">
-                    <Component className="h-4 w-4" />
+                    <Component className="size-4" />
                     {selectedGroup?.display}
                   </DrawerTitle>
                 </div>
@@ -391,7 +387,7 @@ export function MultiFilterStyleTagSelector({
                             className="size-4"
                           />
                           <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <div className="h-3 w-3 rounded-full flex-shrink-0 border bg-green-100 border-green-300"></div>
+                            <div className="size-3 rounded-full flex-shrink-0 border bg-green-100 border-green-300"></div>
                             <span className="text-sm truncate">
                               {childTag.display}
                             </span>
@@ -424,9 +420,9 @@ export function MultiFilterStyleTagSelector({
                   variant="ghost"
                   size="sm"
                   onClick={() => setOpen(false)}
-                  className="h-6 w-6 p-0"
+                  className="size-6 p-0"
                 >
-                  <ArrowLeft className="h-4 w-4" />
+                  <ArrowLeft className="size-4" />
                 </Button>
                 <span className="text-sm font-medium">
                   {t("tags", { count: selected.length })}
@@ -460,13 +456,13 @@ export function MultiFilterStyleTagSelector({
                           {renderTagNameWithParent(tag)}
                         </div>
                       ))}
-                      <div className="bg-gray-200 -mx-1 my-1 h-px"></div>
                     </>
                   )}
 
                   {/* Tag Groups */}
                   {filteredGroupTags.length > 0 && (
                     <>
+                      <div className="bg-gray-200 -mx-1 my-1 h-px"></div>
                       <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide mt-2">
                         {t("tag_groups")}
                       </div>
@@ -482,7 +478,7 @@ export function MultiFilterStyleTagSelector({
                               <div className="focus:bg-gray-100 focus:text-gray-900 cursor-default rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5">
                                 <div className="flex items-center gap-2 flex-1 justify-between">
                                   <div className="flex items-center gap-1">
-                                    <Component className="h-4 w-4 text-black/80" />
+                                    <Component className="size-4 text-black/80" />
                                     <span className="text-sm">
                                       {tag.display}
                                     </span>
@@ -521,7 +517,7 @@ export function MultiFilterStyleTagSelector({
                                       className="size-4"
                                     />
                                     <div className="flex items-center gap-2 flex-1">
-                                      <div className="h-3 w-3 rounded-full flex-shrink-0 border bg-green-100 border-green-300"></div>
+                                      <div className="size-3 rounded-full flex-shrink-0 border bg-green-100 border-green-300"></div>
                                       <span className="text-sm">
                                         {childTag.display}
                                       </span>
@@ -537,13 +533,13 @@ export function MultiFilterStyleTagSelector({
                           </Popover>
                         </div>
                       ))}
-                      <div className="bg-gray-200 -mx-1 my-1 h-px"></div>
                     </>
                   )}
 
                   {/* Other Tags */}
                   {filteredOtherTags.length > 0 && (
                     <>
+                      <div className="bg-gray-200 -mx-1 my-1 h-px"></div>
                       <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide mt-2">
                         {t("other_tags")}
                       </div>

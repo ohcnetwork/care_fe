@@ -302,11 +302,7 @@ export default function TagConfigView({
                   onSuccess={handleAddChildSuccess}
                   facilityId={facilityId}
                   trigger={
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={!!tagConfig.parent}
-                    >
+                    <Button variant="outline" size="sm">
                       <CareIcon icon="l-plus" className="size-4 mr-2" />
                       {t("add_child_tag")}
                     </Button>
