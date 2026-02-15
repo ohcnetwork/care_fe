@@ -106,7 +106,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           type: "module",
         },
         injectManifest: {
-          maximumFileSizeToCacheInBytes: 8000000,
+          maximumFileSizeToCacheInBytes: 80000000,
         },
         manifest: {
           name: "Care",
