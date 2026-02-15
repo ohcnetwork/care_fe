@@ -1,10 +1,19 @@
 /* eslint-disable i18next/no-literal-string */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import query from "@/Utils/request/query";
 import { Persona } from "@/components/ai-elements/persona";
 import { cn } from "@/lib/utils";
+import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
+import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
+import { completedEncounterStatus } from "@/types/emr/encounter/encounter";
+import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
+import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
+import symptomApi from "@/types/emr/symptom/symptomApi";
 import { RealtimeAgent, RealtimeSession } from "@openai/agents/realtime";
 import { PaperPlaneIcon } from "@radix-ui/react-icons";
+import { useQuery } from "@tanstack/react-query";
 import { getEncoding } from "js-tiktoken";
 import {
   AlertCircle,
@@ -86,7 +95,13 @@ export default function NurseAssistant(props: {
   show: boolean;
   setShow: (show: boolean) => void;
 }) {
-  const { patient, patientId, primaryEncounterId } = useEncounter();
+  const {
+    patient,
+    patientId,
+    selectedEncounterId,
+    selectedEncounter,
+    facilityId,
+  } = useEncounter();
 
   const { show, setShow } = props;
 
@@ -105,6 +120,90 @@ export default function NurseAssistant(props: {
   const [project, setProject] = useState<Project | null>(null);
   const [isProjectLoading, setIsProjectLoading] = useState(true);
   const [language, setLanguage] = useState<Language>("english");
+
+  const { data: allergies, isLoading: isAllergiesLoading } = useQuery({
+    queryKey: ["allergies", patientId, selectedEncounterId],
+    queryFn: query.paginated(allergyIntoleranceApi.getAllergy, {
+      pathParams: { patientId },
+      queryParams: {
+        encounter: (
+          selectedEncounter?.status
+            ? completedEncounterStatus.includes(selectedEncounter.status)
+            : false
+        )
+          ? selectedEncounterId
+          : undefined,
+      },
+      pageSize: 100,
+    }),
+  });
+
+  const { data: symptoms, isLoading: isSymptomsLoading } = useQuery({
+    queryKey: ["symptoms", patientId, selectedEncounterId],
+    queryFn: query.paginated(symptomApi.listSymptoms, {
+      pathParams: { patientId },
+      queryParams: { encounter: selectedEncounterId },
+      pageSize: 100,
+    }),
+    enabled: !!patientId && !!selectedEncounterId,
+  });
+
+  const { data: diagnoses, isLoading: isDiagnosesLoading } = useQuery({
+    queryKey: ["diagnosis", patientId, selectedEncounterId],
+    queryFn: query.paginated(diagnosisApi.listDiagnosis, {
+      pathParams: { patientId },
+      queryParams: {
+        encounter: selectedEncounterId,
+        category: "encounter_diagnosis,chronic_condition",
+      },
+      pageSize: 100,
+    }),
+    enabled: !!patientId && !!selectedEncounterId,
+  });
+
+  const { data: medications, isLoading: isMedicationsLoading } = useQuery({
+    queryKey: ["medication_requests", patientId, selectedEncounterId],
+    queryFn: query.paginated(medicationRequestApi.list, {
+      pathParams: { patientId },
+      queryParams: {
+        encounter: selectedEncounterId,
+        facility: facilityId,
+        product_type: "medication",
+      },
+      pageSize: 100,
+    }),
+    enabled: !!selectedEncounterId,
+  });
+  const { data: medicationStatement, isLoading: isMedicationStatementLoading } =
+    useQuery({
+      queryKey: ["medication_statements", patientId],
+      queryFn: query.paginated(medicationStatementApi.list, {
+        pathParams: { patientId },
+        pageSize: 100,
+      }),
+      enabled: !!patientId,
+    });
+
+  const { data: serviceRequests, isLoading: isServiceRequestsLoading } =
+    useQuery({
+      queryKey: ["service_requests", patientId, selectedEncounterId],
+      queryFn: query.paginated(serviceRequestApi.listServiceRequest, {
+        pathParams: { facilityId: facilityId || "" },
+        queryParams: {
+          encounter: selectedEncounterId,
+        },
+        pageSize: 100,
+      }),
+      enabled: !!selectedEncounterId && !!facilityId,
+    });
+
+  const isDataLoading =
+    isAllergiesLoading ||
+    isSymptomsLoading ||
+    isDiagnosesLoading ||
+    isMedicationsLoading ||
+    isMedicationStatementLoading ||
+    isServiceRequestsLoading;
 
   const sessionRef = useRef<RealtimeSession | null>(null);
   const agentRef = useRef<RealtimeAgent | null>(null);
@@ -145,8 +244,151 @@ export default function NurseAssistant(props: {
   // Build instructions from project prompt + contexts + patient data
   const instructions = useMemo(() => {
     const patientInfo = patient
-      ? `Patient: ${patient.name}, ID: ${patientId}, Encounter: ${primaryEncounterId}`
-      : `Patient ID: ${patientId}, Encounter: ${primaryEncounterId}`;
+      ? `
+        Patient Name: ${patient.name},
+        ID: ${patientId}
+        Encounter ID: ${selectedEncounterId}
+        Blood Group : ${patient.blood_group}
+        Gender: ${patient.gender}
+        Age : ${patient.year_of_birth ? new Date().getFullYear() - patient.year_of_birth : patient.date_of_birth ? Math.floor((Date.now() - new Date(patient.date_of_birth).getTime()) / (365.25 * 24 * 60 * 60 * 1000)) : "Unknown"}
+        ${patient.deceased_datetime ? `Deceased: Yes (on ${new Date(patient.deceased_datetime).toLocaleDateString()})` : "Deceased: No"}
+
+        ${
+          diagnoses?.results.length
+            ? `
+# Diagnoses:
+${diagnoses.results
+  .map(
+    (report) => `
+## ${report.code?.display}
+Status: ${report.clinical_status} (${report.verification_status})
+Severity: ${report.severity}
+Onset Date: ${report.onset?.onset_datetime ? new Date(report.onset.onset_datetime).toLocaleString() : "N/A"}
+`,
+  )
+  .join("\n\n")}
+`
+            : ``
+        }
+
+        ${
+          allergies?.results.length
+            ? `
+# Allergies:
+${allergies.results
+  .map(
+    (allergy) => `
+## ${allergy.code.display}
+Category: ${allergy.category}
+Clinical Status: ${allergy.clinical_status}
+Verification Status: ${allergy.verification_status}
+Criticality: ${allergy.criticality}
+${allergy.last_occurrence ? `Last Occurrence: ${new Date(allergy.last_occurrence).toLocaleString()}` : ""}
+${allergy.note ? `Note: ${allergy.note}` : ""}
+`,
+  )
+  .join("\n\n")}
+`
+            : ``
+        }
+
+        ${
+          symptoms?.results.length
+            ? `
+# Symptoms:
+${symptoms.results
+  .map(
+    (symptom) => `
+## ${symptom.code.display}
+Clinical Status: ${symptom.clinical_status}
+Verification Status: ${symptom.verification_status}
+Severity: ${symptom.severity}
+${symptom.onset?.onset_datetime ? `Onset Date: ${new Date(symptom.onset.onset_datetime).toLocaleString()}` : ""}
+${symptom.note ? `Note: ${symptom.note}` : ""}
+`,
+  )
+  .join("\n\n")}
+`
+            : ``
+        }
+
+        ${
+          medications?.results.length
+            ? `
+# Prescribed Medications (Current Encounter):
+${medications.results
+  .map(
+    (med) => `
+## ${med.medication.display}
+Status: ${med.status}
+Intent: ${med.intent}
+Category: ${med.category}
+Priority: ${med.priority}
+${med.dosage_instruction?.length ? `Dosage: ${med.dosage_instruction.map((d) => d.text || `${d.dose_and_rate?.dose_quantity?.value ?? ""} ${d.dose_and_rate?.dose_quantity?.unit?.display ?? ""}`.trim() || "N/A").join("; ")}` : ""}
+${
+  med.dosage_instruction?.length
+    ? `Route: ${
+        med.dosage_instruction
+          .map((d) => d.route?.display)
+          .filter(Boolean)
+          .join(", ") || "N/A"
+      }`
+    : ""
+}
+${med.note ? `Note: ${med.note}` : ""}
+Authored On: ${new Date(med.authored_on).toLocaleString()}
+`,
+  )
+  .join("\n\n")}
+`
+            : ``
+        }
+
+        ${
+          medicationStatement?.results.length
+            ? `
+# Current Medications (Medication Statements):
+${medicationStatement.results
+  .map(
+    (stmt) => `
+## ${stmt.medication.display}
+Status: ${stmt.status}
+Dosage: ${stmt.dosage_text || "N/A"}
+Information Source: ${stmt.information_source}
+${stmt.reason ? `Reason: ${stmt.reason}` : ""}
+${stmt.note ? `Note: ${stmt.note}` : ""}
+${stmt.effective_period ? `Effective Period: ${stmt.effective_period.start ? new Date(stmt.effective_period.start).toLocaleDateString() : "Unknown"} - ${stmt.effective_period.end ? new Date(stmt.effective_period.end).toLocaleDateString() : "Ongoing"}` : ""}
+`,
+  )
+  .join("\n\n")}
+`
+            : ``
+        }
+
+        ${
+          serviceRequests?.results.length
+            ? `
+# Service Requests:
+${serviceRequests.results
+  .map(
+    (req) => `
+## ${req.code?.display || req.title}
+Status: ${req.status}
+Intent: ${req.intent}
+Priority: ${req.priority}
+Category: ${req.category}
+${req.body_site ? `Body Site: ${req.body_site.display}` : ""}
+${req.occurance ? `Occurrence: ${new Date(req.occurance).toLocaleString()}` : ""}
+${req.patient_instruction ? `Patient Instructions: ${req.patient_instruction}` : ""}
+${req.note ? `Note: ${req.note}` : ""}
+`,
+  )
+  .join("\n\n")}
+`
+            : ``
+        }
+      `
+      : `NO PATIENT DATA AVAILABLE for Patient ID: ${patientId} and Encounter ID: ${selectedEncounterId}`;
 
     const basePrompt =
       project?.prompt?.content ??
@@ -168,9 +410,19 @@ export default function NurseAssistant(props: {
     return `${basePrompt}\n\nPatient Data:\n${patientInfo}${
       contextsBlock ? `\n\nContext:\n${contextsBlock}` : ""
     }${languageInstruction}`;
-  }, [patient, patientId, primaryEncounterId, project, language]);
-
-  console.log("Instructions:", instructions);
+  }, [
+    patient,
+    patientId,
+    selectedEncounterId,
+    project,
+    language,
+    diagnoses,
+    allergies,
+    symptoms,
+    medications,
+    medicationStatement,
+    serviceRequests,
+  ]);
 
   // Calculate tokens whenever messages or instructions change
   useEffect(() => {
@@ -408,7 +660,7 @@ export default function NurseAssistant(props: {
           body: JSON.stringify({
             projectId: project?.id,
             patientId,
-            encounterId: primaryEncounterId,
+            encounterId: selectedEncounterId,
           }),
         });
 
@@ -457,7 +709,7 @@ export default function NurseAssistant(props: {
     [
       instructions,
       patientId,
-      primaryEncounterId,
+      selectedEncounterId,
       project,
       setupSessionListeners,
     ],
@@ -700,7 +952,7 @@ export default function NurseAssistant(props: {
             placeholder={
               isLimitReached ? "Conversation limit reached" : "Type here"
             }
-            disabled={isLoading || isLimitReached}
+            disabled={isLoading || isLimitReached || isDataLoading}
             className="m-0 min-h-20 min-w-60 w-full resize-none rounded-lg border-black/10 bg-white/50 p-2 backdrop-blur-sm disabled:opacity-50"
           />
           <div className="flex items-center gap-2 justify-between p-1">
@@ -709,10 +961,11 @@ export default function NurseAssistant(props: {
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as Language)}
-                disabled={isConnected || isLoading}
+                disabled={isConnected || isLoading || isDataLoading}
                 className={cn(
                   "rounded-md border-black/10 bg-white/50 px-2 py-1 text-xs backdrop-blur-sm w-20",
-                  (isConnected || isLoading) && "cursor-not-allowed opacity-50",
+                  (isConnected || isLoading || isDataLoading) &&
+                    "cursor-not-allowed opacity-50",
                 )}
                 title="Select language"
               >
@@ -805,11 +1058,16 @@ export default function NurseAssistant(props: {
               ) : (
                 <button
                   onClick={() => connect(false)}
-                  disabled={isLoading || isLimitReached || isProjectLoading}
+                  disabled={
+                    isLoading ||
+                    isLimitReached ||
+                    isProjectLoading ||
+                    isDataLoading
+                  }
                   className="flex aspect-square w-8 items-center justify-center rounded-full bg-neutral-200 disabled:opacity-50"
                   title="Connect voice"
                 >
-                  {isLoading || isProjectLoading ? (
+                  {isLoading || isProjectLoading || isDataLoading ? (
                     <Loader2 size={18} className="animate-spin" />
                   ) : (
                     <MicIcon size={20} className="opacity-50" />
@@ -824,7 +1082,8 @@ export default function NurseAssistant(props: {
                   isLoading ||
                   !inputText.trim() ||
                   isLimitReached ||
-                  isProjectLoading
+                  isProjectLoading ||
+                  isDataLoading
                 }
                 className="flex aspect-square w-8 items-center justify-center rounded-full bg-primary-500 text-white disabled:opacity-50"
                 title="Send message"
