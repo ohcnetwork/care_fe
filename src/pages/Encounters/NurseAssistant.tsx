@@ -32,6 +32,16 @@ const LANGUAGES = [
   { value: "english", label: "English" },
   { value: "hindi", label: "Hindi" },
   { value: "gujarati", label: "Gujarati" },
+  { value: "marathi", label: "Marathi" },
+  { value: "bengali", label: "Bengali" },
+  { value: "tamil", label: "Tamil" },
+  { value: "telugu", label: "Telugu" },
+  { value: "kannada", label: "Kannada" },
+  { value: "malayalam", label: "Malayalam" },
+  { value: "punjabi", label: "Punjabi" },
+  { value: "odia", label: "Odia" },
+  { value: "assamese", label: "Assamese" },
+  { value: "meitei", label: "Manipuri/Meitei" },
 ] as const;
 
 type Language = (typeof LANGUAGES)[number]["value"];

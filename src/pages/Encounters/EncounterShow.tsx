@@ -258,7 +258,7 @@ export const EncounterShow = (props: Props) => {
                   <Button
                     variant="primary_gradient"
                     onClick={() => setActionsOpen(true)}
-                    className="text-base font-semibold rounded-md w-full"
+                    className="text-base font-semibold rounded-md w-50 shrink-0"
                   >
                     {t("encounter_actions")}
                     <CommandShortcut className="text-white hidden md:inline">
