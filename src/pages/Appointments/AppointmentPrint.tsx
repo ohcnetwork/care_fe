@@ -119,7 +119,6 @@ export default function AppointmentPrint(props: Props) {
             <TokenCard
               appointment={appointment}
               token={appointment.token ?? undefined}
-              facility={facility}
               inPrintMode={true}
             />
           </div>

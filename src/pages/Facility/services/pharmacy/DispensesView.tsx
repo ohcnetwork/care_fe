@@ -12,7 +12,10 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
-import { DISPENSE_ORDER_STATUS_STYLES } from "@/types/emr/dispenseOrder/dispenseOrder";
+import {
+  DISPENSE_ORDER_STATUS_STYLES,
+  DispenseOrderStatus,
+} from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import { MedicationDispenseStatus } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
@@ -166,26 +169,28 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
               {t("status")}:{" "}
               {t(`dispense_order_status__${dispenseOrder.status}`)}
             </Badge>
-            <MedicationReturnSheet
-              facilityId={facilityId}
-              locationId={locationId}
-              patient={dispenseOrder.patient}
-              onSuccess={(deliveryOrder) => {
-                // Navigate to the medication return detail page
-                navigate(
-                  `/facility/${facilityId}/locations/${locationId}/medication_return/order/${deliveryOrder.id}/?dispenseOrderIds=${dispenseOrderId}`,
-                );
-              }}
-              trigger={
-                <Button
-                  variant="outline"
-                  className="border-gray-400 font-semibold"
-                >
-                  <RotateCcw className="size-4" />
-                  Medication Return
-                </Button>
-              }
-            />
+            {dispenseOrder.status === DispenseOrderStatus.completed && (
+              <MedicationReturnSheet
+                facilityId={facilityId}
+                locationId={locationId}
+                patient={dispenseOrder.patient}
+                onSuccess={(deliveryOrder) => {
+                  // Navigate to the medication return detail page
+                  navigate(
+                    `/facility/${facilityId}/locations/${locationId}/medication_return/order/${deliveryOrder.id}/?dispenseOrderIds=${dispenseOrderId}`,
+                  );
+                }}
+                trigger={
+                  <Button
+                    variant="outline"
+                    className="border-gray-400 font-semibold"
+                  >
+                    <RotateCcw className="size-4" />
+                    {t("medication_return")}
+                  </Button>
+                }
+              />
+            )}
             <Button
               variant="outline"
               className="border-gray-400 font-semibold"

@@ -748,11 +748,11 @@ export function AddSupplyDeliveryForm({
                                     {code.display}
                                   </TableHead>
                                 ))}
-                                <TableHead className="min-w-[120px] text-xs font-semibold">
-                                  {t("tpr")}
-                                </TableHead>
                                 <TableHead className="min-w-[100px] text-xs font-semibold border-r">
                                   {t("pr")}
+                                </TableHead>
+                                <TableHead className="min-w-[120px] text-xs font-semibold">
+                                  {t("tpr")}
                                 </TableHead>
                               </TableRow>
                             </>

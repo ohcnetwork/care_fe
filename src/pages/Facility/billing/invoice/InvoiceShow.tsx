@@ -1139,6 +1139,12 @@ export function InvoiceShow({
                       </div>
                     ))}
 
+                  {/* Subtotal */}
+                  <div className="flex w-64 justify-between">
+                    <span className="text-gray-500">{t("net_amount")}</span>
+                    <MonetaryDisplay amount={invoice.total_net} />
+                  </div>
+
                   {/* Taxes */}
                   {invoice.total_price_components
                     ?.filter(
@@ -1159,12 +1165,6 @@ export function InvoiceShow({
                         </span>
                       </div>
                     ))}
-
-                  {/* Subtotal */}
-                  <div className="flex w-64 justify-between">
-                    <span className="text-gray-500">{t("net_amount")}</span>
-                    <MonetaryDisplay amount={invoice.total_net} />
-                  </div>
 
                   <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
 
