@@ -23,6 +23,12 @@ import * as z from "zod";
 
 import { cn } from "@/lib/utils";
 
+import {
+  formatDosage,
+  formatDuration,
+  formatFrequency,
+} from "@/components/Medicine/utils";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -197,17 +203,12 @@ function MedicationsPreview({
             );
           }
 
-          const dosage = med.dosage_instruction?.[0];
-          const doseQty = dosage?.dose_and_rate?.dose_quantity;
-          const timing = dosage?.timing?.code?.code;
-          const duration = dosage?.timing?.repeat?.bounds_duration;
+          const instruction = med.dosage_instruction?.[0];
 
           const dosageInfo = [
-            doseQty?.value &&
-              `${doseQty.value}${doseQty.unit?.display ? ` ${doseQty.unit.display}` : ""}`,
-            timing,
-            duration?.value &&
-              `${duration.value}${duration.unit ? ` ${duration.unit}` : ""}`,
+            formatDosage(instruction),
+            formatFrequency(instruction),
+            formatDuration(instruction),
           ]
             .filter(Boolean)
             .join(" • ");

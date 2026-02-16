@@ -225,50 +225,24 @@ export function ChargeItemDefinitionDetail({
           />
 
           {/* Tags Section */}
-          <Card className="mb-4">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>{t("tags_proper")}</CardTitle>
-                <TagAssignmentSheet
-                  entityType="charge_item_definition"
-                  entityId={chargeItemDefinition.slug}
-                  pathParamKey="slug"
-                  facilityId={facilityId}
-                  currentTags={chargeItemDefinition.tags}
-                  onUpdate={() => {
-                    queryClient.invalidateQueries({
-                      queryKey: ["chargeItemDefinitions", slug],
-                    });
-                  }}
-                  trigger={
-                    <Button variant="ghost" size="sm">
-                      <CareIcon icon="l-setting" className="mr-2 size-4" />
-                      {t("manage_tags")}
-                    </Button>
-                  }
-                />
-              </div>
-            </CardHeader>
-            <CardContent>
-              {chargeItemDefinition.tags.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {chargeItemDefinition.tags.map((tag) => (
-                    <Badge key={tag.id} variant="secondary">
-                      {tag.display}
-                    </Badge>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500">{t("no_tags")}</p>
-              )}
-            </CardContent>
-          </Card>
+          <TagAssignmentSheet
+            entityType="charge_item_definition"
+            entityId={chargeItemDefinition.slug}
+            pathParamKey="slug"
+            facilityId={facilityId}
+            currentTags={chargeItemDefinition.tags}
+            onUpdate={() => {
+              queryClient.invalidateQueries({
+                queryKey: ["chargeItemDefinitions", slug],
+              });
+            }}
+          />
 
           {(chargeItemDefinition.description ||
             chargeItemDefinition.purpose ||
             chargeItemDefinition.derived_from_uri ||
             chargeItemDefinition.can_edit_charge_item !== undefined) && (
-            <Card className="mb-4">
+            <Card className="my-4">
               <CardHeader>
                 <CardTitle>{t("details")}</CardTitle>
               </CardHeader>
