@@ -2058,6 +2058,7 @@
   "enable_when__any": "Any one or more of the conditions must be met",
   "enable_when_conditions": "Enable when conditions",
   "enabled": "Enabled",
+  "include_filters": "Include filters",
   "enabled_only_for_partially_dispensed": "Enabled only for partially dispensed medications",
   "encounter": "Encounter",
   "encounter_actions": "Encounter Actions",
