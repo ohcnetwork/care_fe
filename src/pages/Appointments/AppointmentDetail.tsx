@@ -828,11 +828,13 @@ const AppointmentActions = ({
       queryClient.invalidateQueries({
         queryKey: ["appointment", appointment.id],
       });
-      updateToken({
-        status: TokenStatus.CANCELLED,
-        sub_queue: appointment.token?.sub_queue?.id || null,
-        note: "",
-      });
+      if (appointment.token) {
+        updateToken({
+          status: TokenStatus.CANCELLED,
+          sub_queue: appointment.token.sub_queue?.id || null,
+          note: "",
+        });
+      }
     },
   });
 
@@ -1121,11 +1123,13 @@ const AppointmentActions = ({
                           status: AppointmentStatus.NO_SHOW,
                           note: note,
                         });
-                        updateToken({
-                          status: TokenStatus.CANCELLED,
-                          sub_queue: appointment.token?.sub_queue?.id || null,
-                          note: "",
-                        });
+                        if (appointment.token) {
+                          updateToken({
+                            status: TokenStatus.CANCELLED,
+                            sub_queue: appointment.token.sub_queue?.id || null,
+                            note: "",
+                          });
+                        }
                       }}
                       className={cn(buttonVariants({ variant: "destructive" }))}
                       disabled={!note.trim()}
