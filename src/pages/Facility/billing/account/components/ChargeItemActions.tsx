@@ -1,5 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
-import { MoreHorizontal, PencilIcon } from "lucide-react";
+import {
+  Ban,
+  CircleAlert,
+  CircleOff,
+  LucideIcon,
+  MoreHorizontal,
+  PencilIcon,
+} from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -27,6 +34,13 @@ const STATUS_CHANGE_TARGETS = [
   ChargeItemStatus.entered_in_error,
   ChargeItemStatus.aborted,
 ] as const;
+
+const STATUS_ICONS: Record<(typeof STATUS_CHANGE_TARGETS)[number], LucideIcon> =
+  {
+    [ChargeItemStatus.not_billable]: CircleOff,
+    [ChargeItemStatus.entered_in_error]: CircleAlert,
+    [ChargeItemStatus.aborted]: Ban,
+  };
 
 interface ChargeItemActionsMenuProps {
   item: ChargeItemRead;
@@ -88,15 +102,19 @@ export function ChargeItemActionsMenu({
           </DropdownMenuItem>
           {item.status === ChargeItemStatus.billable && (
             <>
-              {STATUS_CHANGE_TARGETS.map((status) => (
-                <DropdownMenuItem
-                  key={status}
-                  onClick={() => setPendingStatus(status)}
-                  className="cursor-pointer"
-                >
-                  <span>{t("mark_as_status", { status: t(status) })}</span>
-                </DropdownMenuItem>
-              ))}
+              {STATUS_CHANGE_TARGETS.map((status) => {
+                const Icon = STATUS_ICONS[status];
+                return (
+                  <DropdownMenuItem
+                    key={status}
+                    onClick={() => setPendingStatus(status)}
+                    className="cursor-pointer"
+                  >
+                    <Icon className="mr-2 size-4" />
+                    <span>{t("mark_as_status", { status: t(status) })}</span>
+                  </DropdownMenuItem>
+                );
+              })}
             </>
           )}
         </DropdownMenuContent>
