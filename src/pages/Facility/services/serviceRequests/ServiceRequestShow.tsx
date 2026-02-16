@@ -326,38 +326,40 @@ export default function ServiceRequestShow({
                 request?.diagnostic_reports?.[0]?.status ===
                   DiagnosticReportStatus.final) && (
                 <div className="flex items-center gap-2">
-                  {!disableEdit && (
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="font-semibold border border-gray-400"
-                        >
-                          {t("mark_as_complete")}
-                          <ShortcutBadge actionId="mark-as-complete" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            {t("confirm_completion")}
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            {t("service_request_completion_confirmation")}
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => completeServiceRequest({})}
+                  {!disableEdit &&
+                    request?.diagnostic_reports?.[0]?.status ===
+                      DiagnosticReportStatus.final && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="font-semibold border border-gray-400"
                           >
-                            {t("confirm")}
-                            <ShortcutBadge actionId="enter-action" />
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  )}
+                            {t("mark_as_complete")}
+                            <ShortcutBadge actionId="mark-as-complete" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              {t("confirm_completion")}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {t("service_request_completion_confirmation")}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => completeServiceRequest({})}
+                            >
+                              {t("confirm")}
+                              <ShortcutBadge actionId="enter-action" />
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
                   {request?.diagnostic_reports?.[0]?.status ===
                     DiagnosticReportStatus.final && (
                     <Button
