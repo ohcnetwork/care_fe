@@ -513,63 +513,70 @@ const DrugChartTable = ({
                         )}
                       >
                         {hasAdmins ? (
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <button
-                                type="button"
-                                className="w-full h-full min-h-[28px] cursor-pointer hover:bg-green-200 transition-colors print:cursor-default flex items-center justify-center"
+                          <>
+                            {/* Print version - simple content without popover */}
+                            <div className="hidden print:flex items-center justify-center w-full h-full">
+                              {cellContent}
+                            </div>
+                            {/* Screen version - with popover for details */}
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <button
+                                  type="button"
+                                  className="w-full h-full min-h-[28px] cursor-pointer hover:bg-green-200 transition-colors flex items-center justify-center print:hidden"
+                                >
+                                  {cellContent}
+                                </button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="w-64 p-0 print:hidden"
+                                side="top"
                               >
-                                {cellContent}
-                              </button>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              className="w-64 p-0 print:hidden"
-                              side="top"
-                            >
-                              <div className="bg-gray-50 px-3 py-2 border-b">
-                                <div className="font-semibold text-sm">
-                                  {group.productName}
-                                </div>
-                                <div className="text-xs text-gray-500">
-                                  {format(date, "EEE, dd MMM")} · {slot.label}
-                                </div>
-                              </div>
-                              <div className="max-h-48 overflow-y-auto">
-                                {admins.map((admin, idx) => (
-                                  <div
-                                    key={admin.id}
-                                    className={cn(
-                                      "px-3 py-2 text-sm",
-                                      idx !== admins.length - 1 && "border-b",
-                                    )}
-                                  >
-                                    <div className="flex justify-between items-start">
-                                      <span className="font-medium">
-                                        {format(
-                                          new Date(
-                                            admin.occurrence_period_start,
-                                          ),
-                                          "HH:mm",
-                                        )}
-                                      </span>
-                                      <span className="text-xs text-gray-600">
-                                        {admin.dosage?.dose?.value}{" "}
-                                        {admin.dosage?.dose?.unit?.display}
-                                      </span>
-                                    </div>
-                                    <div className="text-xs text-gray-600 mt-0.5">
-                                      {t("by")} {formatName(admin.created_by)}
-                                    </div>
-                                    {admin.note && (
-                                      <div className="text-xs text-gray-500 mt-1 italic">
-                                        {admin.note}
-                                      </div>
-                                    )}
+                                <div className="bg-gray-50 px-3 py-2 border-b">
+                                  <div className="font-semibold text-sm">
+                                    {group.productName}
                                   </div>
-                                ))}
-                              </div>
-                            </PopoverContent>
-                          </Popover>
+                                  <div className="text-xs text-gray-500">
+                                    {format(date, "EEE, dd MMM")} · {slot.label}
+                                  </div>
+                                </div>
+                                <div className="max-h-48 overflow-y-auto">
+                                  {admins.map((admin, idx) => (
+                                    <div
+                                      key={admin.id}
+                                      className={cn(
+                                        "px-3 py-2 text-sm",
+                                        idx !== admins.length - 1 && "border-b",
+                                      )}
+                                    >
+                                      <div className="flex justify-between items-start">
+                                        <span className="font-medium">
+                                          {format(
+                                            new Date(
+                                              admin.occurrence_period_start,
+                                            ),
+                                            "HH:mm",
+                                          )}
+                                        </span>
+                                        <span className="text-xs text-gray-600">
+                                          {admin.dosage?.dose?.value}{" "}
+                                          {admin.dosage?.dose?.unit?.display}
+                                        </span>
+                                      </div>
+                                      <div className="text-xs text-gray-600 mt-0.5">
+                                        {t("by")} {formatName(admin.created_by)}
+                                      </div>
+                                      {admin.note && (
+                                        <div className="text-xs text-gray-500 mt-1 italic">
+                                          {admin.note}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          </>
                         ) : (
                           <span className="text-gray-200">·</span>
                         )}
