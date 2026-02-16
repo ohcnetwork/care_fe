@@ -793,18 +793,6 @@ const AppointmentActions = ({
 
   const [note, setNote] = useState(appointment.note);
 
-  const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
-    mutationFn: mutate(scheduleApis.appointments.cancel, {
-      pathParams: { facilityId, id: appointment.id },
-    }),
-    onSuccess: () => {
-      toast.success(t("appointment_cancelled"));
-      queryClient.invalidateQueries({
-        queryKey: ["appointment", appointment.id],
-      });
-    },
-  });
-
   const { mutate: updateToken } = useMutation({
     mutationFn: mutate(tokenApi.update, {
       pathParams: {
@@ -827,6 +815,23 @@ const AppointmentActions = ({
           facilityId,
           appointment.token?.queue.id || "",
         ],
+      });
+    },
+  });
+
+  const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
+    mutationFn: mutate(scheduleApis.appointments.cancel, {
+      pathParams: { facilityId, id: appointment.id },
+    }),
+    onSuccess: () => {
+      toast.success(t("appointment_cancelled"));
+      queryClient.invalidateQueries({
+        queryKey: ["appointment", appointment.id],
+      });
+      updateToken({
+        status: TokenStatus.CANCELLED,
+        sub_queue: appointment.token?.sub_queue?.id || null,
+        note: "",
       });
     },
   });
@@ -1167,17 +1172,12 @@ const AppointmentActions = ({
                   <AlertDialogFooter>
                     <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                     <AlertDialogAction
-                      onClick={() => {
+                      onClick={() =>
                         cancelAppointment({
                           reason: "cancelled",
                           note: note,
-                        });
-                        updateToken({
-                          status: TokenStatus.CANCELLED,
-                          sub_queue: appointment.token?.sub_queue?.id || null,
-                          note: "",
-                        });
-                      }}
+                        })
+                      }
                       className={cn(buttonVariants({ variant: "destructive" }))}
                       disabled={!note.trim()}
                     >
@@ -1217,14 +1217,9 @@ const AppointmentActions = ({
                 <AlertDialogFooter>
                   <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                   <AlertDialogAction
-                    onClick={() => {
-                      updateToken({
-                        status: TokenStatus.CANCELLED,
-                        sub_queue: appointment.token?.sub_queue?.id || null,
-                        note: "",
-                      });
-                      cancelAppointment({ reason: "entered_in_error" });
-                    }}
+                    onClick={() =>
+                      cancelAppointment({ reason: "entered_in_error" })
+                    }
                     className={cn(buttonVariants({ variant: "destructive" }))}
                   >
                     {isCancelling ? (
