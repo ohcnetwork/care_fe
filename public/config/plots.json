@@ -72,6 +72,16 @@
                         "display": "FiO2"
                     }
                 ]
+            },
+            {
+                "title": "Girth",
+                "codes": [
+                    {
+                        "code": "8280-0",
+                        "system": "http://loinc.org",
+                        "display": "Girth"
+                    }
+                ]
             }
         ]
     },
@@ -272,7 +282,7 @@
         "name": "Nutrition",
         "groups": [
             {
-                "title": "Fluid intake intravascular Measured",
+                "title": "Fluid Intake Intravascular Measured",
                 "codes": [
                     {
                         "code": "8975-5",
@@ -282,7 +292,7 @@
                 ]
             },
             {
-                "title": "Fluid intake oral Measured",
+                "title": "Fluid Intake Oral Measured",
                 "codes": [
                     {
                         "code": "9000-1",
@@ -292,7 +302,7 @@
                 ]
             },
              {
-                "title": "Fluid output wound drain",
+                "title": "Fluid Output Wound Drain",
                 "codes": [
                     {
                         "code": "9203-1",
@@ -302,7 +312,17 @@
                 ]
             },
             {
-                "title": "Urine output",
+                "title": "Fluid Output Gastric tube",
+                "codes": [
+                    {
+                        "code": "9149-6",
+                        "system": "http://loinc.org",
+                        "display": "Fluid output gastric tube"
+                    }
+                ]
+            },
+            {
+                "title": "Urine Output",
                 "codes": [
                     {
                         "code": "9187-6",
@@ -312,7 +332,7 @@
                 ]
             },
             {
-                "title": "Fluid intake total Measured",
+                "title": "Fluid Intake Total Measured",
                 "codes": [
                     {
                         "code": "9103-3",
@@ -322,7 +342,7 @@
                 ]
             },
             {
-                "title": "Fluid output total Measured",
+                "title": "Fluid Output Total Measured",
                 "codes": [
                     {
                         "code": "9257-7",
@@ -344,6 +364,16 @@
                         "code": "104103-7",
                         "system": "http://loinc.org",
                         "display": "Dialysis Fluid Balance"
+                    }
+                ]
+            },
+            {
+                "title": "Transfusion",
+                "codes": [
+                    {
+                        "code": "10415-8",
+                        "system": "http://loinc.org",
+                        "display": "Transfusion"
                     }
                 ]
             }
