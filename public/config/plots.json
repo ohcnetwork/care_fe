@@ -82,6 +82,16 @@
                         "display": "Girth"
                     }
                 ]
+            },
+            {
+                "title": "Body weight",
+                "codes": [
+                    {
+                        "code": "29463-7",
+                        "system": "http://loinc.org",
+                        "display": "Weight"
+                    }
+                ]
             }
         ]
     },
