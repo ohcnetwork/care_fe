@@ -161,6 +161,7 @@ export function ChargeItemDefinitionForm({
           factor: zodDecimal({ min: 0, max: 100 }).optional().nullable(),
           amount: zodDecimal({ min: 0 }).optional().nullable(),
           conditions: z.array(conditionSchema),
+          global_component: z.boolean().optional(),
         }),
       ),
     });
