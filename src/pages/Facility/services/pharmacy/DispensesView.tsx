@@ -186,7 +186,7 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
                     className="border-gray-400 font-semibold"
                   >
                     <RotateCcw className="size-4" />
-                    Medication Return
+                    {t("medication_return")}
                   </Button>
                 }
               />
