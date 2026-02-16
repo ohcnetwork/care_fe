@@ -218,7 +218,7 @@ export function MonetaryComponentSelector({
   };
 
   const handleToggleGlobal = (component: MonetaryComponent) => {
-    const isCurrentlyGlobal = component.global_component !== false;
+    const isCurrentlyGlobal = component.global_component === true;
     onSelectionChange(
       selectedComponents.map((c) =>
         isSameComponentCode(c, component)
@@ -428,7 +428,7 @@ export function MonetaryComponentSelector({
               const componentRead = components.find((c) =>
                 isSameComponentCode(c, component),
               );
-              const isGlobal = component.global_component !== false;
+              const isGlobal = component.global_component === true;
 
               return (
                 <div
