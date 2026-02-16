@@ -188,22 +188,6 @@ export function AddMedicationReturnItemForm({
           toast.error(t("select_stock_at_row", { row: index + 1 }));
           return false;
         }
-        const matchingDispense = medicationDispenses.find(
-          (d) => d.item.id === item.supplied_inventory_item,
-        );
-        if (
-          matchingDispense &&
-          Number(item.supplied_item_quantity) >
-            Number(matchingDispense.quantity)
-        ) {
-          toast.error(
-            t("return_quantity_exceeds_dispensed", {
-              max: round(matchingDispense.quantity),
-              product: item.product_knowledge?.name,
-            }),
-          );
-          return false;
-        }
       }
 
       return true;
