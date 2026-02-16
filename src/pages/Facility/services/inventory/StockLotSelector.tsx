@@ -40,6 +40,7 @@ interface StockLotSelectorProps {
   className?: string;
   showexpiry?: boolean;
   enableSearch?: boolean;
+  showQuantity?: boolean;
   multiSelect?: boolean;
   facilityId?: string;
   locationId?: string;
@@ -58,6 +59,7 @@ export default function StockLotSelector({
   className = "",
   showexpiry = true,
   enableSearch = false,
+  showQuantity = true,
   multiSelect = false,
   facilityId,
   locationId,
@@ -192,21 +194,23 @@ export default function StockLotSelector({
                             />
                           </Badge>
                         )}
-                        <Badge
-                          variant={
-                            selectedInventory?.status === "active" &&
-                            isPositive(selectedInventory?.net_content || 0)
-                              ? "primary"
-                              : "destructive"
-                          }
-                          className="border-none rounded-sm text-xs px-1 py-0"
-                        >
-                          {selectedInventory && (
-                            <>{round(selectedInventory.net_content)} </>
-                          )}
-                          {selectedInventory?.product.product_knowledge
-                            .base_unit.display || t("units")}
-                        </Badge>
+                        {showQuantity && (
+                          <Badge
+                            variant={
+                              selectedInventory?.status === "active" &&
+                              isPositive(selectedInventory?.net_content || 0)
+                                ? "primary"
+                                : "destructive"
+                            }
+                            className="border-none rounded-sm text-xs px-1 py-0"
+                          >
+                            {selectedInventory && (
+                              <>{round(selectedInventory.net_content)} </>
+                            )}
+                            {selectedInventory?.product.product_knowledge
+                              .base_unit.display || t("units")}
+                          </Badge>
+                        )}
                       </div>
                     </div>
                     {showexpiry &&
@@ -300,17 +304,20 @@ export default function StockLotSelector({
                           }
                         />
                       </Badge>
-                      <Badge
-                        variant={
-                          inv.status === "active" && isPositive(inv.net_content)
-                            ? "primary"
-                            : "destructive"
-                        }
-                      >
-                        {round(inv.net_content)}{" "}
-                        {inv.product.product_knowledge.base_unit.display ||
-                          t("units")}
-                      </Badge>
+                      {showQuantity && (
+                        <Badge
+                          variant={
+                            inv.status === "active" &&
+                            isPositive(inv.net_content)
+                              ? "primary"
+                              : "destructive"
+                          }
+                        >
+                          {round(inv.net_content)}{" "}
+                          {inv.product.product_knowledge.base_unit.display ||
+                            t("units")}
+                        </Badge>
+                      )}
                       {inv.product?.expiration_date && (
                         <Badge
                           variant={getExpiryBadgeVariant(

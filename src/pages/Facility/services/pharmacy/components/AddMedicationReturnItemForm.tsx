@@ -192,7 +192,7 @@ export function AddMedicationReturnItemForm({
 
       return true;
     },
-    [t, medicationDispenses],
+    [t],
   );
 
   async function onSubmit(data: FormValues) {
@@ -340,6 +340,7 @@ export function AddMedicationReturnItemForm({
                                     <FormControl>
                                       <StockLotSelector
                                         net_content_gt={-1}
+                                        showQuantity={false}
                                         selectedLots={
                                           field.value
                                             ? [
