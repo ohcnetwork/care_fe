@@ -44,6 +44,23 @@ export default function EncounterQuestionnaire({
     enabled: !!encounterId,
   });
 
+  const handleSubmit = useCallback(() => {
+    if (encounterId && facilityId) {
+      const base = `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}`;
+      const tab =
+        questionnaireSlug === "medication_request"
+          ? "medicines"
+          : questionnaireSlug === "service_request"
+            ? "service_requests"
+            : "updates";
+      navigate(`${base}/${tab}`);
+    } else if (facilityId) {
+      navigate(`/facility/${facilityId}/patient/${patientId}/updates`);
+    } else {
+      navigate(`/patient/${patientId}/updates`);
+    }
+  }, [questionnaireSlug, facilityId, patientId, encounterId]);
+
   return (
     <Page
       title={t("questionnaire_one")}
@@ -69,30 +86,7 @@ export default function EncounterQuestionnaire({
               subjectType={subjectType}
               encounterId={encounterId}
               questionnaireSlug={questionnaireSlug}
-              onSubmit={useCallback(() => {
-                if (encounterId && facilityId) {
-                  const base = `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}`;
-                  const tab =
-                    questionnaireSlug === "medication_request"
-                      ? "medicines"
-                      : questionnaireSlug === "service_request"
-                        ? "service_requests"
-                        : "updates";
-                  navigate(`${base}/${tab}`);
-                } else if (facilityId) {
-                  navigate(
-                    `/facility/${facilityId}/patient/${patientId}/updates`,
-                  );
-                } else {
-                  navigate(`/patient/${patientId}/updates`);
-                }
-              }, [
-                questionnaireSlug,
-                facilityId,
-                patientId,
-                encounterId,
-                navigate,
-              ])}
+              onSubmit={handleSubmit}
               onCancel={() => goBack()}
             />
           </CardContent>
