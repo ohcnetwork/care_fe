@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
+import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -68,21 +69,16 @@ export default function EncounterQuestionnaire({
               subjectType={subjectType}
               encounterId={encounterId}
               questionnaireSlug={questionnaireSlug}
-              onSubmit={() => {
+              onSubmit={useCallback(() => {
                 if (encounterId && facilityId) {
-                  if (questionnaireSlug === "medication_request") {
-                    navigate(
-                      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/medicines`,
-                    );
-                  } else if (questionnaireSlug === "service_request") {
-                    navigate(
-                      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/service_requests`,
-                    );
-                  } else {
-                    navigate(
-                      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
-                    );
-                  }
+                  const base = `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}`;
+                  const tab =
+                    questionnaireSlug === "medication_request"
+                      ? "medicines"
+                      : questionnaireSlug === "service_request"
+                        ? "service_requests"
+                        : "updates";
+                  navigate(`${base}/${tab}`);
                 } else if (facilityId) {
                   navigate(
                     `/facility/${facilityId}/patient/${patientId}/updates`,
@@ -90,7 +86,13 @@ export default function EncounterQuestionnaire({
                 } else {
                   navigate(`/patient/${patientId}/updates`);
                 }
-              }}
+              }, [
+                questionnaireSlug,
+                facilityId,
+                patientId,
+                encounterId,
+                navigate,
+              ])}
               onCancel={() => goBack()}
             />
           </CardContent>
