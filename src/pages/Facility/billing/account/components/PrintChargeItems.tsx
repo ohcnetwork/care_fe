@@ -141,9 +141,7 @@ export const PrintChargeItems = (props: {
     let updatedQuery = { ...filterQuery };
 
     if ("created_date" in filterQuery) {
-      const dateRange = filterQuery.created_date as
-        | FilterDateRange
-        | undefined;
+      const dateRange = filterQuery.created_date as FilterDateRange | undefined;
       updatedQuery = {
         ...updatedQuery,
         created_date: undefined,
@@ -202,6 +200,14 @@ export const PrintChargeItems = (props: {
     };
   };
 
+  const hasDateFilter = !!(
+    qParams.created_date_after || qParams.created_date_before
+  );
+  const hasCreatedByFilter = !!qParams.created_by;
+  const hasCategoryFilter = !!selectedCategory;
+  const canShowAccountSummary =
+    !hasDateFilter && !hasCreatedByFilter && !hasCategoryFilter;
+
   const hideCategoryLabel = `${t("hide_category_grouping")}`;
   const hidePaymentTypeLabel = `${t("hide_payment_type_grouping")}`;
   const summaryLabel = `${t("summary")}`;
@@ -242,7 +248,13 @@ export const PrintChargeItems = (props: {
   });
 
   const { data: paymentsResponse, isLoading: isLoadingPayments } = useQuery({
-    queryKey: ["payments", accountId],
+    queryKey: [
+      "payments",
+      accountId,
+      qParams.created_by,
+      qParams.created_date_after,
+      qParams.created_date_before,
+    ],
     queryFn: query.paginated(
       paymentReconciliationApi.listPaymentReconciliation,
       {
@@ -250,6 +262,8 @@ export const PrintChargeItems = (props: {
         queryParams: {
           account: accountId,
           ordering: "-payment_datetime",
+          created_by: qParams.created_by,
+          ...getDateQueryParams(),
         },
         pageSize: 100,
       },
@@ -308,16 +322,6 @@ export const PrintChargeItems = (props: {
   return (
     <div>
       <div className="max-w-5xl mx-auto no-print mb-4 flex flex-wrap justify-start items-center gap-4 p-4 bg-gray-50 border rounded-md border-gray-200">
-        <MultiFilter
-          selectedFilters={selectedFilters}
-          onFilterChange={handleFilterChange}
-          onOperationChange={handleOperationChange}
-          onClearAll={handleClearAll}
-          onClearFilter={handleClearFilter}
-          className="flex flex-row-reverse flex-wrap sm:items-center"
-          facilityId={facilityId}
-        />
-
         <div className="gap-2 flex items-center">
           <Switch
             id="summary-mode"
@@ -510,6 +514,16 @@ export const PrintChargeItems = (props: {
               </div>
             );
           })()}
+
+        <MultiFilter
+          selectedFilters={selectedFilters}
+          onFilterChange={handleFilterChange}
+          onOperationChange={handleOperationChange}
+          onClearAll={handleClearAll}
+          onClearFilter={handleClearFilter}
+          className="flex flex-row-reverse flex-wrap sm:items-center"
+          facilityId={facilityId}
+        />
       </div>
       <PrintPreview
         title={t("charge_items")}
@@ -1702,7 +1716,7 @@ export const PrintChargeItems = (props: {
                       )}
 
                       {/* Account Summary Section */}
-                      {account && (
+                      {account && canShowAccountSummary && (
                         <div className="overflow-hidden mt-4">
                           <Table className="w-full border [&_th]:text-xs [&_td]:text-xs">
                             <TableHeader className="[&_tr]:border [&_th]:p-0.5 [&_th]:h-auto">
