@@ -265,7 +265,7 @@ const TokenActions = ({
         </div>
       )}
       {appointment.id && (
-        <div className="flex items-center justify-center border-r border-gray-300">
+        <div className="flex items-center justify-center">
           <Button variant="ghost" className="rounded-r-none pl-2 " asChild>
             <Link
               href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointment.id}`}
@@ -294,7 +294,7 @@ const TokenActions = ({
         </div>
       )}
       {token && (
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center border-l border-gray-300">
           <Button variant="link" className="underline ">
             <Link
               basePath="/"
