@@ -69,7 +69,11 @@ export default function NoActiveAccountWarningDialog({
         <AlertDialogFooter>
           <AlertDialogCancel>{t("proceed")}</AlertDialogCancel>
           <AlertDialogAction
-            onClick={() => navigate(`/facility/${facilityId}/billing/account`)}
+            onClick={() =>
+              navigate(
+                `/facility/${facilityId}/billing/account?patient_filter=${patientId}`,
+              )
+            }
           >
             {t("go_to_accounts")}
           </AlertDialogAction>
