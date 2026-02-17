@@ -11,7 +11,9 @@ import {
 
 import query from "@/Utils/request/query";
 import { dateQueryString, getMonthStartAndEnd } from "@/Utils/utils";
+import { BatchSuccessResponse } from "@/types/base/batch/batch";
 import {
+  Appointment,
   AvailabilityHeatmapResponse,
   PublicAppointment,
   SchedulableResourceType,
@@ -136,6 +138,16 @@ const getInfiniteAvailabilityHeatmap = ({
   }
 
   return result;
+};
+
+export interface AppointmentBatchResponse {
+  results: BatchSuccessResponse<{ appointment: Appointment }>;
+}
+
+export const extractAppointmentFromBatchResponse = (
+  response: AppointmentBatchResponse,
+): Appointment => {
+  return response.results.data?.appointment;
 };
 
 export const formatAppointmentSlotTime = (appointment: PublicAppointment) => {
