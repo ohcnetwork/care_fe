@@ -219,6 +219,7 @@ export function DeliveryOrderShow({
         queryParams: {
           order: deliveryOrderId,
           facility: facilityId,
+          ordering: "created_date",
         },
       }),
       enabled: !!deliveryOrderId,

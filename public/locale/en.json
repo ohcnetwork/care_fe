@@ -1,4 +1,5 @@
 {
+  "#": "#",
   "2FA_backup_code": "2FA Backup Code",
   "404_message": "This page doesn't exist or may have been moved. Please check the URL and try again.",
   "APPETITE__CANNOT_BE_ASSESSED": "Cannot be assessed",
@@ -2058,7 +2059,6 @@
   "enable_when__any": "Any one or more of the conditions must be met",
   "enable_when_conditions": "Enable when conditions",
   "enabled": "Enabled",
-  "include_filters": "Include filters",
   "enabled_only_for_partially_dispensed": "Enabled only for partially dispensed medications",
   "encounter": "Encounter",
   "encounter_actions": "Encounter Actions",
@@ -2713,6 +2713,7 @@
   "inactive": "Inactive",
   "include": "Include",
   "include_cancelled": "Include Cancelled",
+  "include_filters": "Include filters",
   "include_rules": "Include rules",
   "includes_all_taxes": "Includes all applicable taxes",
   "incoming": "Incoming",

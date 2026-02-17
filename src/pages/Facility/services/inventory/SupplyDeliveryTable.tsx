@@ -36,6 +36,7 @@ import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryCo
 import { ExtensionEntityType } from "@/types/extensions/extensions";
 import { DeliveryOrderStatus } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import {
+  ACTIVE_SUPPLY_DELIVERY_STATUSES,
   SUPPLY_DELIVERY_CONDITION_COLORS,
   SUPPLY_DELIVERY_STATUS_COLORS,
   SupplyDeliveryRead,
@@ -143,6 +144,22 @@ export function SupplyDeliveryTable({
     selectedDeliveries.length,
   ]);
 
+  // Build a map of delivery id -> serial number for non-cancelled deliveries
+  const serialNumberMap = useMemo(() => {
+    const map = new Map<string, number>();
+    let serial = 1;
+    for (const delivery of deliveries) {
+      if (
+        ACTIVE_SUPPLY_DELIVERY_STATUSES.includes(
+          delivery.status as (typeof ACTIVE_SUPPLY_DELIVERY_STATUSES)[number],
+        )
+      ) {
+        map.set(delivery.id, serial++);
+      }
+    }
+    return map;
+  }, [deliveries]);
+
   return (
     <Table>
       <TableHeader>
@@ -160,6 +177,7 @@ export function SupplyDeliveryTable({
               <ShortcutBadge actionId="select-all" alwaysShow={false} />
             </TableHead>
           )}
+          <TableHead rowSpan={2}>{t("#")}</TableHead>
           <TableHead rowSpan={2}>{t("item")}</TableHead>
           <TableHead rowSpan={2}>{t("batch")}</TableHead>
           <TableHead rowSpan={2}>{t("requested_qty")}</TableHead>
@@ -219,6 +237,7 @@ export function SupplyDeliveryTable({
                 )}
               </TableCell>
             )}
+            <TableCell>{serialNumberMap.get(delivery.id)}</TableCell>
             <TableCell
               className={cn(onDeliveryClick && "cursor-pointer underline")}
               onClick={() => onDeliveryClick?.(delivery)}
