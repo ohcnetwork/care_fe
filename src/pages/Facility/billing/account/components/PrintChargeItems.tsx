@@ -16,6 +16,13 @@ import PrintFooter from "@/components/Common/PrintFooter";
 import { Button } from "@/components/ui/button";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
+  createdByFilter,
+  dateFilter,
+} from "@/components/ui/multi-filter/filterConfigs";
+import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
+import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
+import { FilterDateRange } from "@/components/ui/multi-filter/utils/Utils";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -51,6 +58,7 @@ import {
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import { UserReadMinimal } from "@/types/user/user";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -124,6 +132,76 @@ export const PrintChargeItems = (props: {
 
   const { qParams, updateQuery } = useFilters({ disableCache: true });
 
+  const filters = [
+    dateFilter("created_date", t("created_date")),
+    createdByFilter("created_by"),
+  ];
+
+  const onFilterUpdate = (filterQuery: Record<string, unknown>) => {
+    let updatedQuery = { ...filterQuery };
+
+    if ("created_date" in filterQuery) {
+      const dateRange = filterQuery.created_date as
+        | FilterDateRange
+        | undefined;
+      updatedQuery = {
+        ...updatedQuery,
+        created_date: undefined,
+        created_date_after: dateRange?.from?.toISOString() || undefined,
+        created_date_before: dateRange?.to?.toISOString() || undefined,
+      };
+    }
+
+    if ("created_by" in filterQuery) {
+      const createdByValue = filterQuery.created_by as
+        | UserReadMinimal
+        | UserReadMinimal[]
+        | undefined;
+      const user = Array.isArray(createdByValue)
+        ? createdByValue[0]
+        : createdByValue;
+      updatedQuery = {
+        ...updatedQuery,
+        created_by: user?.id || undefined,
+      };
+    }
+
+    updateQuery(updatedQuery);
+  };
+
+  const {
+    selectedFilters,
+    handleFilterChange,
+    handleOperationChange,
+    handleClearAll,
+    handleClearFilter,
+  } = useMultiFilterState(filters, onFilterUpdate, {
+    ...qParams,
+    created_date:
+      qParams.created_date_after || qParams.created_date_before
+        ? {
+            from: qParams.created_date_after
+              ? new Date(qParams.created_date_after as string)
+              : undefined,
+            to: qParams.created_date_before
+              ? new Date(qParams.created_date_before as string)
+              : undefined,
+          }
+        : undefined,
+    created_by: [],
+  });
+
+  const getDateQueryParams = () => {
+    const dateRange = selectedFilters.created_date?.selected as
+      | FilterDateRange
+      | undefined;
+    if (!dateRange) return {};
+    return {
+      created_date_after: dateRange.from?.toISOString(),
+      created_date_before: dateRange.to?.toISOString(),
+    };
+  };
+
   const hideCategoryLabel = `${t("hide_category_grouping")}`;
   const hidePaymentTypeLabel = `${t("hide_payment_type_grouping")}`;
   const summaryLabel = `${t("summary")}`;
@@ -141,13 +219,23 @@ export const PrintChargeItems = (props: {
   });
 
   const { data: chargeItems, isLoading } = useQuery({
-    queryKey: ["chargeItems", accountId, selectedStatuses, qParams.ordering],
+    queryKey: [
+      "chargeItems",
+      accountId,
+      selectedStatuses,
+      qParams.ordering,
+      qParams.created_by,
+      qParams.created_date_after,
+      qParams.created_date_before,
+    ],
     queryFn: query.paginated(chargeItemApi.listChargeItem, {
       pathParams: { facilityId },
       queryParams: {
         account: accountId,
         status: selectedStatuses.join(","),
         ordering: qParams.ordering,
+        created_by: qParams.created_by,
+        ...getDateQueryParams(),
       },
       pageSize: 100,
     }),
@@ -220,6 +308,16 @@ export const PrintChargeItems = (props: {
   return (
     <div>
       <div className="max-w-5xl mx-auto no-print mb-4 flex flex-wrap justify-start items-center gap-4 p-4 bg-gray-50 border rounded-md border-gray-200">
+        <MultiFilter
+          selectedFilters={selectedFilters}
+          onFilterChange={handleFilterChange}
+          onOperationChange={handleOperationChange}
+          onClearAll={handleClearAll}
+          onClearFilter={handleClearFilter}
+          className="flex flex-row-reverse flex-wrap sm:items-center"
+          facilityId={facilityId}
+        />
+
         <div className="gap-2 flex items-center">
           <Switch
             id="summary-mode"
