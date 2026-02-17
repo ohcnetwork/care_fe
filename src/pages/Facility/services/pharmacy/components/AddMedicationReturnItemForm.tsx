@@ -45,7 +45,7 @@ import {
   SupplyDeliveryStatus,
   SupplyDeliveryType,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
-import { round, zodDecimal } from "@/Utils/decimal";
+import { roundWhole, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
@@ -53,6 +53,7 @@ const returnItemSchema = z.object({
   supplied_inventory_item: z.string().min(1, "Please select a stock item"),
   supplied_item: z.string().optional(), // Product ID from the inventory item
   supplied_item_quantity: zodDecimal({ min: 1 }),
+  original_dispense_quantity: z.string().optional(),
   product_knowledge: z
     .custom<ProductKnowledgeBase>()
     .refine((data) => data?.slug, {
@@ -97,6 +98,7 @@ export function AddMedicationReturnItemForm({
       supplied_inventory_item: "",
       supplied_item: "",
       supplied_item_quantity: "1",
+      original_dispense_quantity: undefined,
     }),
     [],
   );
@@ -149,7 +151,8 @@ export function AddMedicationReturnItemForm({
     const itemsFromDispenses = selectedMedicationDispenses.map((dispense) => ({
       supplied_inventory_item: dispense.item.id,
       supplied_item: dispense.item.product.id,
-      supplied_item_quantity: dispense.quantity,
+      supplied_item_quantity: roundWhole(dispense.quantity),
+      original_dispense_quantity: roundWhole(dispense.quantity),
       product_knowledge: dispense.item.product.product_knowledge,
     }));
     form.setValue("items", itemsFromDispenses);
@@ -379,19 +382,30 @@ export function AddMedicationReturnItemForm({
                               <FormField
                                 control={form.control}
                                 name={`items.${index}.supplied_item_quantity`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <Input
-                                        type="number"
-                                        min={1}
-                                        className="w-20"
-                                        {...field}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
+                                render={({ field }) => {
+                                  const originalQuantity = form.watch(
+                                    `items.${index}.original_dispense_quantity`,
+                                  );
+                                  return (
+                                    <FormItem>
+                                      <FormControl>
+                                        <Input
+                                          type="number"
+                                          min={1}
+                                          max={
+                                            originalQuantity
+                                              ? Number(originalQuantity)
+                                              : undefined
+                                          }
+                                          step="1"
+                                          className="w-20"
+                                          {...field}
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  );
+                                }}
                               />
                             </TableCell>
                             <TableCell className="align-top p-2">
@@ -539,7 +553,7 @@ export function AddMedicationReturnItemForm({
                       )}
                     </div>
                     <div className="text-sm font-medium">
-                      {round(dispense.quantity)}
+                      {roundWhole(dispense.quantity)}
                     </div>
                   </div>
                 ))}
