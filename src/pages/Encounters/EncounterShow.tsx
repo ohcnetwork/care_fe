@@ -95,7 +95,7 @@ export const EncounterShow = (props: Props) => {
 
   const canAccess = canReadClinicalData || canReadSelectedEncounter;
   const hasToken = primaryEncounter?.appointment?.token;
-  const hasAppointmentId = primaryEncounter?.appointment?.id;
+  const hasAppointmentId = Boolean(primaryEncounter?.appointment?.id);
 
   const canViewAppointmentEncounterHeader = hasToken || hasAppointmentId;
 
