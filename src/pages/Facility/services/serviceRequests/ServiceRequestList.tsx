@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Hash, ScanQrCode } from "lucide-react";
+import { ScanQrCode } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -116,55 +116,18 @@ function ServiceRequestCard({
               )}
               {/* Tags */}
               <div className="mt-2 flex flex-wrap gap-1">
-                {request.tags && request.tags.length > 0 && (
-                  <>
-                    {request.tags.map((tag) => (
-                      <Badge
-                        key={tag.id}
-                        variant="secondary"
-                        className="text-xs"
-                      >
-                        {tag.display}
-                      </Badge>
-                    ))}
-                    <TagAssignmentSheet
-                      entityType="service_request"
-                      entityId={request.id}
-                      facilityId={facilityId}
-                      currentTags={request.tags}
-                      onUpdate={() => {
-                        queryClient.invalidateQueries({
-                          queryKey: ["serviceRequests", facilityId],
-                        });
-                      }}
-                      patientId={request.encounter.patient.id}
-                      trigger={
-                        <Button variant="outline" size="xs">
-                          <Hash className="size-3" /> {t("tags")}
-                        </Button>
-                      }
-                    />
-                  </>
-                )}
-                {(!request.tags || request.tags.length === 0) && (
-                  <TagAssignmentSheet
-                    entityType="service_request"
-                    entityId={request.id}
-                    facilityId={facilityId}
-                    currentTags={request.tags}
-                    onUpdate={() => {
-                      queryClient.invalidateQueries({
-                        queryKey: ["serviceRequests", facilityId],
-                      });
-                    }}
-                    patientId={request.encounter.patient.id}
-                    trigger={
-                      <Button variant="outline" size="xs">
-                        <Hash className="size-3" /> {t("add_tags")}
-                      </Button>
-                    }
-                  />
-                )}
+                <TagAssignmentSheet
+                  entityType="service_request"
+                  entityId={request.id}
+                  facilityId={facilityId}
+                  currentTags={request.tags}
+                  onUpdate={() => {
+                    queryClient.invalidateQueries({
+                      queryKey: ["serviceRequests", facilityId],
+                    });
+                  }}
+                  patientId={request.encounter.patient.id}
+                />
               </div>
             </div>
           </div>
