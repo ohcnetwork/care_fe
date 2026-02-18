@@ -33,7 +33,12 @@ import {
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { formatDoseRange, formatTotalUnits } from "@/components/Medicine/utils";
+import {
+  formatDoseRange,
+  formatDuration,
+  formatFrequency,
+  formatTotalUnits,
+} from "@/components/Medicine/utils";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 
 import query from "@/Utils/request/query";
@@ -105,8 +110,6 @@ function MedicationTable({
         <TableBody className="bg-white">
           {medications.map((medication: MedicationRequestRead) => {
             const instruction = medication.dosage_instruction[0];
-            const frequency = instruction?.timing?.code;
-            const duration = instruction?.timing?.repeat?.bounds_duration;
             const dosage = instruction?.dose_and_rate?.dose_quantity;
 
             return (
@@ -145,16 +148,10 @@ function MedicationTable({
                     : formatDoseRange(instruction?.dose_and_rate?.dose_range)}
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
-                  {instruction?.as_needed_boolean
-                    ? `${t("as_needed_prn")} ${
-                        instruction?.as_needed_for?.display
-                          ? `(${instruction.as_needed_for.display})`
-                          : ""
-                      }`
-                    : frequency?.display || "-"}
+                  {formatFrequency(instruction) || "-"}
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
-                  {duration ? `${duration.value} ${duration.unit}` : "-"}
+                  {formatDuration(instruction) || "-"}
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
                   {formatTotalUnits(medication.dosage_instruction, t("units"))}

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -36,7 +37,11 @@ export function PinPageDialog({ url }: PinPageDialogProps) {
   } = useUserPreferences();
   const { facilityId } = useCurrentFacilitySilently();
 
-  const currentUrl = url ?? window.location.pathname;
+  const [includeQueryParams, setIncludeQueryParams] = useState(false);
+  const pathUrl = includeQueryParams
+    ? window.location.pathname + window.location.search
+    : window.location.pathname;
+  const currentUrl = url ? url : pathUrl;
   const isAlreadyPinned = isCustomLink(currentUrl);
   const isLimitReached = !canAddMoreLinks && !isAlreadyPinned;
   useShortcutSubContext("facility");
@@ -49,6 +54,7 @@ export function PinPageDialog({ url }: PinPageDialogProps) {
       // Try to get a sensible default title from the page
       const pageTitle = document.title?.replace(" | CARE", "") || "";
       setTitle(pageTitle);
+      setIncludeQueryParams(false);
     }
   }, [open]);
 
@@ -106,7 +112,7 @@ export function PinPageDialog({ url }: PinPageDialogProps) {
             <div className="py-4">
               <p className="text-sm text-gray-600">
                 {t("pin_page_current_url")}:{" "}
-                <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">
+                <code className="bg-gray-100 px-1 py-0.5 rounded text-xs break-all">
                   {currentUrl}
                 </code>
               </p>
@@ -126,9 +132,24 @@ export function PinPageDialog({ url }: PinPageDialogProps) {
               </div>
               <div className="space-y-2">
                 <Label>{t("url")}</Label>
-                <p className="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-md border">
+                <p className="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-md border break-all">
                   {currentUrl}
                 </p>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="include-query-params"
+                    checked={includeQueryParams}
+                    onCheckedChange={(checked) =>
+                      setIncludeQueryParams(checked === true)
+                    }
+                  />
+                  <Label
+                    htmlFor="include-query-params"
+                    className="text-sm font-normal cursor-pointer"
+                  >
+                    {t("include_filters")}
+                  </Label>
+                </div>
               </div>
             </div>
           )}

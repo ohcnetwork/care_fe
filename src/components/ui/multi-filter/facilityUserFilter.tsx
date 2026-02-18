@@ -85,14 +85,17 @@ function FacilityUserFilterDropdown({
   );
 
   return (
-    <div className="p-3 max-h-[30vh] overflow-y-auto">
-      <Input
-        placeholder={t("search_users_placeholder")}
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="h-8 text-sm mb-3"
-      />
-      <div>
+    <div>
+      <div className="p-3 border-b">
+        <Input
+          placeholder={t("search_users_placeholder")}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => e.stopPropagation()}
+          className="h-8 text-base sm:text-sm"
+        />
+      </div>
+      <div className="p-3 max-h-[30vh] overflow-y-auto">
         {/* Selected Users */}
         {selectedUsers.length > 0 && (
           <>

@@ -1,4 +1,4 @@
-import { Box, Eye, Hash } from "lucide-react";
+import { Box, Eye } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -22,6 +22,7 @@ import {
   DELIVERY_ORDER_STATUS_COLORS,
   DeliveryOrderRetrieve,
 } from "@/types/inventory/deliveryOrder/deliveryOrder";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface Props {
@@ -66,8 +67,9 @@ export default function DeliveryOrderTable({
           <TableHead>{internal ? t("origin") : t("supplier")}</TableHead>
           <TableHead>{t("deliver_to")}</TableHead>
           <TableHead>{t("status")}</TableHead>
-          <TableHead>{t("tags", { count: 2 })}</TableHead>
-          <TableHead className="w-28">{t("actions")}</TableHead>
+          <TableHead className="w-45">{t("tags", { count: 2 })}</TableHead>
+          <TableHead className="w-48">{t("created_by")}</TableHead>
+          <TableHead className="w-36">{t("actions")}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -84,40 +86,34 @@ export default function DeliveryOrderTable({
               </Badge>
             </TableCell>
             <TableCell className="sm:w-60 md:w-80">
-              <div className="flex flex-wrap gap-1">
-                <TagAssignmentSheet
-                  entityType="delivery_order"
-                  entityId={delivery.id}
-                  facilityId={facilityId}
-                  currentTags={delivery.tags ?? []}
-                  onUpdate={() => {
-                    queryClient.invalidateQueries({
-                      queryKey: [
-                        "deliveryOrders",
-                        locationId,
-                        internal,
-                        ...(isRequester ? [isRequester] : []),
-                      ],
-                    });
-                  }}
-                  trigger={
-                    delivery.tags && delivery.tags.length > 0 ? (
-                      <Button variant="outline" size="xs">
-                        <Hash className="size-3" /> {t("tags")}
-                      </Button>
-                    ) : (
-                      <Button variant="outline" size="xs">
-                        <Hash className="size-3" /> {t("add_tags")}
-                      </Button>
-                    )
-                  }
-                />
-                {delivery.tags.map((tag) => (
-                  <Badge key={tag.id}>{tag.display}</Badge>
-                ))}
+              <TagAssignmentSheet
+                entityType="delivery_order"
+                entityId={delivery.id}
+                facilityId={facilityId}
+                currentTags={delivery.tags ?? []}
+                onUpdate={() => {
+                  queryClient.invalidateQueries({
+                    queryKey: [
+                      "deliveryOrders",
+                      locationId,
+                      internal,
+                      ...(isRequester ? [isRequester] : []),
+                    ],
+                  });
+                }}
+              />
+            </TableCell>
+            <TableCell className="w-48">
+              <div className="flex flex-col">
+                <span className="font-medium">
+                  {formatName(delivery.created_by)}
+                </span>
+                <span className="text-xs text-gray-500">
+                  {formatDateTime(delivery.created_date)}
+                </span>
               </div>
             </TableCell>
-            <TableCell>
+            <TableCell className="w-36">
               <Button
                 variant="outline"
                 onClick={() =>

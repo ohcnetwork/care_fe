@@ -87,6 +87,7 @@ const priceComponentSchema = z.object({
   factor: zodDecimal({ min: 0, max: 100 }).optional().nullable(),
   amount: zodDecimal({ min: 0 }).optional().nullable(),
   conditions: z.array(conditionSchema).optional(),
+  global_component: z.boolean().optional(),
 });
 
 const chargeItemBaseSchema = z.object({
