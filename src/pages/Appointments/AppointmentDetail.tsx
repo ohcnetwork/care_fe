@@ -109,10 +109,7 @@ import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/A
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { TokenGenerationSheet } from "@/pages/Appointments/components/TokenGenerationSheet";
-import {
-  AppointmentBatchResponse,
-  extractAppointmentFromBatchResponse,
-} from "@/pages/Appointments/utils";
+import { extractAppointmentFromBatchResponse } from "@/pages/Appointments/utils";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { BatchRequestBody } from "@/types/base/batch/batch";
@@ -843,9 +840,7 @@ const AppointmentActions = ({
         setIsRescheduleOpen(false);
         setSelectedSlotId(undefined);
         setRescheduleReason("");
-        const newAppointment = extractAppointmentFromBatchResponse(
-          response as unknown as AppointmentBatchResponse,
-        );
+        const newAppointment = extractAppointmentFromBatchResponse(response);
         navigate(
           `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${newAppointment.id}`,
         );
@@ -1192,12 +1187,12 @@ const AppointmentActions = ({
                   <AlertDialogFooter>
                     <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                     <AlertDialogAction
-                      onClick={() => {
+                      onClick={() =>
                         updateAppointment({
                           status: AppointmentStatus.NO_SHOW,
                           note: note,
-                        });
-                      }}
+                        })
+                      }
                       className={cn(buttonVariants({ variant: "destructive" }))}
                       disabled={!note.trim()}
                     >

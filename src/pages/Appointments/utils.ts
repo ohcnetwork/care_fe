@@ -11,7 +11,10 @@ import {
 
 import query from "@/Utils/request/query";
 import { dateQueryString, getMonthStartAndEnd } from "@/Utils/utils";
-import { BatchSuccessResponse } from "@/types/base/batch/batch";
+import {
+  BatchRequestResponse,
+  BatchRequestResult,
+} from "@/types/base/batch/batch";
 import {
   Appointment,
   AvailabilityHeatmapResponse,
@@ -140,15 +143,24 @@ const getInfiniteAvailabilityHeatmap = ({
   return result;
 };
 
-export interface AppointmentBatchResponse {
-  results: BatchSuccessResponse<{ appointment: Appointment }>;
-}
+/** Batch response containing a reschedule result with the new appointment */
+export type AppointmentBatchResponse = BatchRequestResponse<{
+  appointment: Appointment;
+}>;
 
-export const extractAppointmentFromBatchResponse = (
-  response: AppointmentBatchResponse,
-): Appointment => {
-  return response.results.data?.appointment;
-};
+const RESCHEDULE_REFERENCE_ID = "reschedule-appointment";
+
+export function extractAppointmentFromBatchResponse(
+  response: BatchRequestResponse,
+): Appointment {
+  const result = response.results.find(
+    (r: BatchRequestResult) => r.reference_id === RESCHEDULE_REFERENCE_ID,
+  );
+  if (!result?.data) {
+    throw new Error("Reschedule result not found in batch response");
+  }
+  return (result.data as { appointment: Appointment }).appointment;
+}
 
 export const formatAppointmentSlotTime = (appointment: PublicAppointment) => {
   if (!appointment.token_slot?.start_datetime) {
