@@ -805,53 +805,53 @@ const AppointmentActions = ({
 
   const [note, setNote] = useState(appointment.note);
 
-  const { mutate: batchRequsetAppointment, isPending: isBatchRequestPending } =
-    useMutation({
-      mutationFn: mutate(batchApi.batchRequest),
-      onSuccess: () => {
-        toast.success(t("appointment_cancelled"));
-        queryClient.invalidateQueries({
-          queryKey: ["appointment", appointment.id],
-        });
-        if (appointment.token) {
-          queryClient.invalidateQueries({
-            queryKey: [
-              "infinite-tokens",
-              facilityId,
-              appointment.token?.queue.id || "",
-            ],
-          });
-          queryClient.invalidateQueries({
-            queryKey: [
-              "token-queue-summary",
-              facilityId,
-              appointment.token?.queue.id || "",
-            ],
-          });
-        }
-      },
-    });
+  type AppointmentBatchInput = {
+    requests: BatchRequestBody<
+      AppointmentCancelRequest | AppointmentRescheduleRequest | TokenUpdate
+    >["requests"];
+    mode: "cancel" | "reschedule";
+  };
 
   const {
-    mutate: batchRequestReschedule,
-    isPending: isBatchRequestRescheduling,
+    mutate: submitAppointmentBatch,
+    isPending: isAppointmentBatchPending,
   } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest),
-    onSuccess: (response) => {
-      toast.success(t("appointment_rescheduled"));
+    mutationFn: (input: AppointmentBatchInput) =>
+      mutate(batchApi.batchRequest)({ requests: input.requests }),
+    onSuccess: (response, input: AppointmentBatchInput) => {
       queryClient.invalidateQueries({
         queryKey: ["appointment", appointment.id],
       });
-
-      setIsRescheduleOpen(false);
-      setSelectedSlotId(undefined);
-      setRescheduleReason("");
-      const newAppointment = extractAppointmentFromBatchResponse(
-        response as AppointmentBatchResponse,
-      );
-      navigate(
-        `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${newAppointment.id}`,
-      );
+      if (appointment.token) {
+        queryClient.invalidateQueries({
+          queryKey: [
+            "infinite-tokens",
+            facilityId,
+            appointment.token?.queue.id || "",
+          ],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [
+            "token-queue-summary",
+            facilityId,
+            appointment.token?.queue.id || "",
+          ],
+        });
+      }
+      if (input.mode === "reschedule") {
+        toast.success(t("appointment_rescheduled"));
+        setIsRescheduleOpen(false);
+        setSelectedSlotId(undefined);
+        setRescheduleReason("");
+        const newAppointment = extractAppointmentFromBatchResponse(
+          response as unknown as AppointmentBatchResponse,
+        );
+        navigate(
+          `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${newAppointment.id}`,
+        );
+      } else {
+        toast.success(t("appointment_cancelled"));
+      }
     },
   });
 
@@ -893,12 +893,10 @@ const AppointmentActions = ({
         },
       });
     }
-    batchRequestReschedule({
-      requests: requests,
-    });
+    submitAppointmentBatch({ requests, mode: "reschedule" });
   };
 
-  const handleAppointmentTokenUpdate = ({
+  const handleAppointmentTokenCancel = ({
     reason,
     note,
   }: {
@@ -937,9 +935,7 @@ const AppointmentActions = ({
         },
       });
     }
-    batchRequsetAppointment({
-      requests: requests,
-    });
+    submitAppointmentBatch({ requests, mode: "cancel" });
   };
 
   if (AppointmentFinalStatuses.includes(currentStatus)) {
@@ -1147,11 +1143,11 @@ const AppointmentActions = ({
                           <Button
                             variant="default"
                             disabled={
-                              !selectedSlotId || isBatchRequestRescheduling
+                              !selectedSlotId || isAppointmentBatchPending
                             }
                             onClick={handleRescheduleAppointment}
                           >
-                            {isBatchRequestRescheduling
+                            {isAppointmentBatchPending
                               ? t("rescheduling")
                               : t("reschedule")}
                           </Button>
@@ -1248,7 +1244,7 @@ const AppointmentActions = ({
                     <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={() =>
-                        handleAppointmentTokenUpdate({
+                        handleAppointmentTokenCancel({
                           reason: "cancelled",
                           note: note,
                         })
@@ -1256,7 +1252,7 @@ const AppointmentActions = ({
                       className={cn(buttonVariants({ variant: "destructive" }))}
                       disabled={!note.trim()}
                     >
-                      {isBatchRequestPending ? (
+                      {isAppointmentBatchPending ? (
                         <Loader2 className="size-4 animate-spin mr-2" />
                       ) : (
                         t("confirm")
@@ -1293,13 +1289,13 @@ const AppointmentActions = ({
                   <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() =>
-                      handleAppointmentTokenUpdate({
+                      handleAppointmentTokenCancel({
                         reason: "entered_in_error",
                       })
                     }
                     className={cn(buttonVariants({ variant: "destructive" }))}
                   >
-                    {isBatchRequestPending ? (
+                    {isAppointmentBatchPending ? (
                       <Loader2 className="size-4 animate-spin mr-2" />
                     ) : (
                       t("confirm")
