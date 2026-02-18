@@ -427,7 +427,8 @@ export const DiagnosticReportsTab = ({
       const response = await query(diagnosticReportApi.listDiagnosticReports, {
         pathParams: { patient_external_id: patientId },
         queryParams: {
-          encounter: encounterId,
+          encounter: encounterId ?? undefined,
+          patient: patientId,
           limit: LIMIT,
           offset: pageParam,
         },
