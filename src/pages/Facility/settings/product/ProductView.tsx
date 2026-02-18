@@ -135,6 +135,20 @@ export default function ProductView({ facilityId, productId }: Props) {
                 </p>
               </div>
             )}
+            {product.standard_pack_size != null && (
+              <div>
+                <p className="text-sm text-gray-500">
+                  {t("standard_pack_size")}
+                </p>
+                <p className="text-gray-700">{product.standard_pack_size}</p>
+              </div>
+            )}
+            {product.purchase_price != null && (
+              <div>
+                <p className="text-sm text-gray-500">{t("purchase_price")}</p>
+                <p className="text-gray-700">{product.purchase_price}</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 

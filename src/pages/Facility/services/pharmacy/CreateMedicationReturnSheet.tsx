@@ -1,22 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, QrCode, Search, X } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
 import { navigate } from "raviger";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Trans, useTranslation } from "react-i18next";
-import { isValidPhoneNumber } from "react-phone-number-input";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Command,
-  CommandGroup,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import {
   Form,
   FormControl,
@@ -26,15 +19,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { PhoneInput } from "@/components/ui/phone-input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -44,27 +28,14 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
-import PatientIDScanDialog from "@/components/Scan/PatientIDScanDialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { PatientIdentifierSelector } from "@/components/Patient/PatientIdentifierSelector";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
-  getPartialId,
   PartialPatientModel,
   PatientListRead,
-  PatientRead,
 } from "@/types/emr/patient/patient";
-import patientApi from "@/types/emr/patient/patientApi";
 import {
   DeliveryOrderRetrieve,
   DeliveryOrderStatus,
@@ -72,8 +43,6 @@ import {
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import careConfig from "@careConfig";
 
 const medicationReturnSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -92,21 +61,11 @@ export function CreateMedicationReturnSheet({
   trigger,
 }: CreateMedicationReturnSheetProps) {
   const { t } = useTranslation();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const { facility } = useCurrentFacility();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<
     PatientListRead | PartialPatientModel | null
   >(null);
-  const [pendingPatient, setPendingPatient] = useState<
-    PatientListRead | PartialPatientModel | null
-  >(null);
-  const [searchType, setSearchType] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [yearOfBirth, setYearOfBirth] = useState("");
-  const [verificationOpen, setVerificationOpen] = useState(false);
-  const [scanDialogOpen, setScanDialogOpen] = useState(false);
 
   type FormValues = z.infer<typeof medicationReturnSchema>;
 
@@ -118,74 +77,7 @@ export function CreateMedicationReturnSheet({
     },
   });
 
-  // Combine instance and facility identifier configs
-  const allIdentifierConfigs = useMemo(
-    () => [
-      ...(facility?.patient_instance_identifier_configs || []),
-      ...(facility?.patient_facility_identifier_configs || []),
-    ],
-    [
-      facility?.patient_instance_identifier_configs,
-      facility?.patient_facility_identifier_configs,
-    ],
-  );
-
-  // Set default search type to first identifier config (prioritize phone number)
-  useEffect(() => {
-    if (allIdentifierConfigs.length && !searchType) {
-      const phoneConfig = allIdentifierConfigs.find(
-        (c) => c.config.system === careConfig.phoneNumberConfigSystem,
-      );
-      setSearchType(phoneConfig?.id || allIdentifierConfigs[0].id);
-    }
-  }, [allIdentifierConfigs, searchType]);
-
-  // Check if current search type is phone number
-  const isPhoneNumberConfig =
-    allIdentifierConfigs.find((c) => c.id === searchType)?.config.system ===
-    careConfig.phoneNumberConfigSystem;
-
-  // Patient search query (for identifier-based search)
-  const { data: patientList, isFetching: isPatientFetching } = useQuery({
-    queryKey: ["patient-search", searchTerm, searchType],
-    queryFn: query.debounced(patientApi.search, {
-      body:
-        searchType && searchTerm
-          ? { config: searchType, value: searchTerm, page_size: 20 }
-          : {},
-    }),
-    enabled:
-      !!searchType &&
-      !!searchTerm &&
-      (!isPhoneNumberConfig || isValidPhoneNumber(searchTerm)),
-  });
-
   useShortcutSubContext("facility:pharmacy");
-
-  // Patient verification query
-  const { data: verifiedPatient, refetch: verifyPatient } = useQuery({
-    queryKey: ["patient-verify", pendingPatient?.id, yearOfBirth],
-    queryFn: query(patientApi.searchRetrieve, {
-      pathParams: { facilityId },
-      body: {
-        phone_number: pendingPatient?.phone_number ?? "",
-        year_of_birth: String(yearOfBirth),
-        partial_id: pendingPatient ? getPartialId(pendingPatient) : "",
-      },
-    }),
-    enabled: false,
-  });
-
-  // Auto-focus input when search type changes
-  useEffect(() => {
-    if (searchType) {
-      // Small delay to ensure the input is rendered after type change
-      const timer = setTimeout(() => {
-        inputRef.current?.focus();
-      }, 0);
-      return () => clearTimeout(timer);
-    }
-  }, [searchType]);
 
   const { mutate: createDeliveryOrder, isPending: isCreating } = useMutation({
     mutationFn: mutate(deliveryOrderApi.createDeliveryOrder, {
@@ -208,16 +100,12 @@ export function CreateMedicationReturnSheet({
 
   const resetState = () => {
     setSelectedPatient(null);
-    setPendingPatient(null);
-    setSearchTerm("");
-    setYearOfBirth("");
     form.reset();
   };
 
-  const handleSelectPatient = useCallback(
+  const handlePatientSelect = useCallback(
     (patient: PatientListRead | PartialPatientModel) => {
       setSelectedPatient(patient);
-      setSearchTerm("");
       form.reset({
         name: `${t("medication_return")} - ${patient.name}`,
         note: "",
@@ -226,53 +114,10 @@ export function CreateMedicationReturnSheet({
     [form, t],
   );
 
-  // Handle successful verification
-  useEffect(() => {
-    if (verifiedPatient) {
-      handleSelectPatient(verifiedPatient);
-      setVerificationOpen(false);
-      setYearOfBirth("");
-      setPendingPatient(null);
-    }
-  }, [verifiedPatient, handleSelectPatient]);
-
-  const handlePatientSelect = (
-    patient: PatientListRead | PartialPatientModel,
-  ) => {
-    if (patientList?.partial) {
-      setPendingPatient(patient);
-      setVerificationOpen(true);
-      setYearOfBirth("");
-    } else {
-      handleSelectPatient(patient);
-    }
-  };
-
-  const handleVerify = () => {
-    if (!pendingPatient || !yearOfBirth || yearOfBirth.length !== 4) {
-      toast.error(t("valid_year_of_birth"));
-      return;
-    }
-    verifyPatient();
-  };
-
-  const handleScanSuccess = (scannedPatientId: string) => {
-    setSelectedPatient({
-      id: scannedPatientId,
-      name: t("scanned_patient"),
-    } as PatientRead);
-    form.reset({
-      name: `${t("medication_return")} - ${t("scanned_patient")}`,
-      note: "",
-    });
-    setScanDialogOpen(false);
-  };
-
-  const handleClearPatient = () => {
+  const handleClearPatient = useCallback(() => {
     setSelectedPatient(null);
-    setSearchTerm("");
     form.reset({ name: "", note: "" });
-  };
+  }, [form]);
 
   function onSubmit(data: FormValues) {
     if (!selectedPatient) {
@@ -289,353 +134,113 @@ export function CreateMedicationReturnSheet({
     });
   }
 
-  const selectedConfig = allIdentifierConfigs.find((c) => c.id === searchType);
-
-  const searchStateMessage = (() => {
-    if (!searchType) {
-      return t("select_search_type");
-    }
-
-    if (!searchTerm) {
-      return t("start_typing_to_search");
-    }
-
-    if (isPhoneNumberConfig && !isValidPhoneNumber(searchTerm)) {
-      return t("enter_valid_phone_number_to_search");
-    }
-
-    if (isPatientFetching) {
-      return `${t("searching_term", { term: searchTerm })}...`;
-    }
-
-    if (!patientList?.results.length) {
-      return t("no_matches_found");
-    }
-
-    return null;
-  })();
-
   return (
-    <>
-      <Sheet
-        open={isOpen}
-        onOpenChange={(open) => {
-          setIsOpen(open);
-          if (!open) resetState();
-        }}
-      >
-        <SheetTrigger asChild>
-          {trigger || (
-            <Button>
-              <Plus className="size-4 mr-1" />
-              {t("create_medication_return")}
-              <ShortcutBadge actionId="medication-return" />
-            </Button>
-          )}
-        </SheetTrigger>
-        <SheetContent className="sm:max-w-lg overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>{t("create_medication_return")}</SheetTitle>
-            <SheetDescription>
-              {selectedPatient
-                ? t("create_medication_return_description", {
-                    patientName: selectedPatient.name,
-                  })
-                : t("select_patient_to_create_return")}
-            </SheetDescription>
-          </SheetHeader>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open);
+        if (!open) resetState();
+      }}
+    >
+      <SheetTrigger asChild>
+        {trigger || (
+          <Button>
+            <Plus className="size-4 mr-1" />
+            {t("create_medication_return")}
+            <ShortcutBadge actionId="medication-return" />
+          </Button>
+        )}
+      </SheetTrigger>
+      <SheetContent className="sm:max-w-lg overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>{t("create_medication_return")}</SheetTitle>
+          <SheetDescription>
+            {selectedPatient
+              ? t("create_medication_return_description", {
+                  patientName: selectedPatient.name,
+                })
+              : t("select_patient_to_create_return")}
+          </SheetDescription>
+        </SheetHeader>
 
-          <div className="space-y-6 mt-6">
-            {/* Patient Selection */}
-            {!selectedPatient ? (
-              <Card className="p-0">
-                <CardContent className="p-4 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Label>{t("select_patient")}</Label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setScanDialogOpen(true)}
-                    >
-                      <QrCode className="size-4 mr-1" />
-                      {t("scan")}
-                    </Button>
-                  </div>
+        <div className="space-y-6 mt-6">
+          <PatientIdentifierSelector
+            facilityId={facilityId}
+            selectedPatient={selectedPatient}
+            onPatientSelect={handlePatientSelect}
+            onClearPatient={handleClearPatient}
+          />
 
-                  {/* Search Type Selector */}
-                  {allIdentifierConfigs.length > 2 ? (
-                    <div>
-                      <label className="text-xs text-gray-600 mb-1.5 ml-1 block">
-                        {t("search_by")}
-                      </label>
-                      <Select value={searchType} onValueChange={setSearchType}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {allIdentifierConfigs.map((config) => (
-                            <SelectItem key={config.id} value={config.id}>
-                              {config.config.display}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  ) : allIdentifierConfigs.length >= 2 ? (
-                    <Tabs
-                      value={searchType}
-                      onValueChange={(value) => {
-                        setSearchType(value);
-                        setSearchTerm("");
-                      }}
-                      className="w-full"
-                    >
-                      <TabsList className="w-full h-auto p-0.5 shadow-inner rounded-md">
-                        {allIdentifierConfigs.map((config) => (
-                          <TabsTrigger
-                            key={config.id}
-                            value={config.id}
-                            className="flex-1 rounded-sm truncate"
-                          >
-                            <span className="truncate">
-                              {config.config.display}
-                            </span>
-                          </TabsTrigger>
-                        ))}
-                      </TabsList>
-                    </Tabs>
-                  ) : null}
-
-                  {/* Search Input */}
-                  <div className="relative">
-                    {isPhoneNumberConfig ? (
-                      <PhoneInput
-                        ref={inputRef}
-                        placeholder={
-                          selectedConfig?.config.display || t("search")
-                        }
-                        value={searchTerm}
-                        onChange={(value) => setSearchTerm(value || "")}
-                        className="border-gray-300"
-                      />
-                    ) : (
-                      <>
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none z-10" />
-                        <Input
-                          ref={inputRef}
-                          type="text"
-                          placeholder={
-                            selectedConfig?.config.display || t("search")
-                          }
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="pl-9"
-                        />
-                      </>
-                    )}
-                    {searchTerm && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-2 top-1/2 -translate-y-1/2 size-6 text-gray-400 hover:bg-transparent"
-                        onClick={() => setSearchTerm("")}
-                        aria-label={t("clear")}
-                      >
-                        <X className="size-4" />
-                      </Button>
-                    )}
-                  </div>
-
-                  {/* Search Results */}
-                  {searchStateMessage ? (
-                    <Card className="flex items-center justify-center border bg-gray-50 rounded-sm shadow-none">
-                      <div className="text-sm text-gray-950 text-center p-5">
-                        {searchStateMessage}
-                      </div>
-                    </Card>
-                  ) : (
-                    <>
-                      <div className="text-xs text-gray-700">
-                        <Trans
-                          i18nKey="found_patient_with_this"
-                          values={{
-                            count: patientList?.results.length || 0,
-                            identifier: isPhoneNumberConfig
-                              ? t("phone_number").toLowerCase()
-                              : t("identifier").toLowerCase(),
-                          }}
-                          components={{
-                            strong: <span className="font-medium" />,
-                          }}
-                        />
-                      </div>
-                      <Command shouldFilter={false} className="border rounded">
-                        <CommandList className="max-h-48 overflow-y-auto">
-                          <CommandGroup className="p-0">
-                            {patientList?.results.map((patient) => (
-                              <CommandItem
-                                key={patient.id}
-                                value={patient.id}
-                                onSelect={() => handlePatientSelect(patient)}
-                                className="px-4 py-2.5 cursor-pointer hover:bg-gray-50 aria-selected:bg-gray-50"
-                              >
-                                <span className="text-sm text-gray-900">
-                                  {patient.name}
-                                </span>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-            ) : (
-              <>
-                {/* Selected Patient Display */}
+          {selectedPatient && (
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-6"
+              >
                 <Card className="p-0 bg-gray-50">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs text-gray-500">{t("patient")}</p>
-                        <p className="font-medium">{selectedPatient.name}</p>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleClearPatient}
-                      >
-                        <X className="size-4" />
-                        {t("change")}
-                      </Button>
-                    </div>
+                  <CardContent className="space-y-4 p-4 rounded-md">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("name")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              className="h-9"
+                              placeholder={t("enter_return_name")}
+                              {...field}
+                              autoFocus
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="note"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {t("note")}
+                            <span className="text-gray-500 text-sm italic">
+                              {" "}
+                              ({t("optional")})
+                            </span>
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea
+                              rows={3}
+                              placeholder={t("enter_return_note")}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </CardContent>
                 </Card>
 
-                {/* Return Details Form */}
-                <Form {...form}>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-6"
+                <SheetFooter className="gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsOpen(false)}
                   >
-                    <Card className="p-0 bg-gray-50">
-                      <CardContent className="space-y-4 p-4 rounded-md">
-                        <FormField
-                          control={form.control}
-                          name="name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>{t("name")}</FormLabel>
-                              <FormControl>
-                                <Input
-                                  className="h-9"
-                                  placeholder={t("enter_return_name")}
-                                  {...field}
-                                  autoFocus
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="note"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>
-                                {t("note")}
-                                <span className="text-gray-500 text-sm italic">
-                                  {" "}
-                                  ({t("optional")})
-                                </span>
-                              </FormLabel>
-                              <FormControl>
-                                <Textarea
-                                  rows={3}
-                                  placeholder={t("enter_return_note")}
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </CardContent>
-                    </Card>
-
-                    <SheetFooter className="gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        {t("cancel")}
-                      </Button>
-                      <Button type="submit" disabled={isCreating}>
-                        {isCreating ? t("creating") : t("create_return")}
-                      </Button>
-                    </SheetFooter>
-                  </form>
-                </Form>
-              </>
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      <PatientIDScanDialog
-        open={scanDialogOpen}
-        onOpenChange={setScanDialogOpen}
-        onScanSuccess={handleScanSuccess}
-      />
-
-      <Dialog open={verificationOpen} onOpenChange={setVerificationOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("verify_patient_identity")}</DialogTitle>
-            <DialogDescription>
-              {t("patient_birth_year_for_identity")}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <Input
-              type="text"
-              placeholder={`${t("year_of_birth")} (YYYY)`}
-              value={yearOfBirth}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (/^\d{0,4}$/.test(value)) {
-                  setYearOfBirth(value);
-                }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleVerify();
-                }
-              }}
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setVerificationOpen(false);
-                setPendingPatient(null);
-              }}
-            >
-              {t("cancel")}
-            </Button>
-            <Button className="mb-2" onClick={handleVerify}>
-              {t("verify")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+                    {t("cancel")}
+                  </Button>
+                  <Button type="submit" disabled={isCreating}>
+                    {isCreating ? t("creating") : t("create_return")}
+                  </Button>
+                </SheetFooter>
+              </form>
+            </Form>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }

@@ -261,7 +261,7 @@ interface ItemSearchConfig<T extends BaseSearchableItem> {
     queryFn: {
       path: string;
       method: "GET";
-      TRes: { results: T[] };
+      TRes: { results: T[]; count: number };
     };
     pathParams?: Record<string, string>;
     queryParams?: Record<string, unknown>;
@@ -547,7 +547,13 @@ export function ResourceCategoryList<
         />
       )}
 
-      <Pagination totalCount={categoriesResponse?.count || 0} />
+      <Pagination
+        totalCount={
+          isSearching && itemSearchConfig
+            ? itemsResponse?.count || 0
+            : categoriesResponse?.count || 0
+        }
+      />
     </div>
   );
 }

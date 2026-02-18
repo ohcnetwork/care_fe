@@ -517,7 +517,7 @@ export default function AppointmentDetail(props: Props) {
                       trigger={
                         <QuickAction
                           icon={<SquareActivity className="text-orange-500" />}
-                          title={t("create_encounter")}
+                          title={t("create_planned_encounter")}
                           actionId="create-encounter"
                         />
                       }

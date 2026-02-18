@@ -3,6 +3,7 @@ import { PatientListRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { LocationDetail } from "@/types/location/location";
 import { Organization } from "@/types/organization/organization";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum DeliveryOrderStatus {
   draft = "draft",
@@ -48,6 +49,7 @@ export interface DeliveryOrderUpdate extends DeliveryOrder {
 export interface DeliveryOrderRetrieve extends DeliveryOrder {
   id: string;
   created_date: string;
+  created_by: UserReadMinimal;
   modified_date: string;
   origin?: LocationDetail;
   destination: LocationDetail;
