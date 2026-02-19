@@ -51,13 +51,16 @@ test.describe("Create Patient Prescription", () => {
     });
 
     await test.step("Fill medication details", async () => {
-      await page.getByPlaceholder("Enter a number...").last().click();
-      await page.getByPlaceholder("Enter a number...").last().fill(dosage);
+      await page.getByPlaceholder("Enter a number...").first().click();
+      await page.getByPlaceholder("Enter a number...").first().fill(dosage);
       await page.keyboard.press("Enter");
 
-      await page.getByText("Select frequency").last().click();
-      await page.getByPlaceholder("Search frequency").fill(frequency);
-      await page.getByRole("option", { name: frequency }).nth(0).click();
+      await page.getByText("eg. 1-0-1").first().click();
+      await page.getByPlaceholder("Type eg. 1-0-1").fill(frequency.input);
+      await page
+        .getByRole("option", { name: frequency.display })
+        .nth(0)
+        .click();
 
       // expand
       await page.getByTitle("Show Advanced Fields").first().click();
@@ -98,7 +101,7 @@ test.describe("Create Patient Prescription", () => {
       await expect(table).toBeVisible({ timeout: 10000 });
       await expect(table).toContainText(medicineName);
       await expect(table).toContainText(dosage);
-      await expect(table).toContainText(frequency);
+      await expect(table).toContainText(frequency.display);
       await expect(table).toContainText(selectedInstruction);
       await expect(page.getByText(`Note${notes}`)).toBeVisible();
     });

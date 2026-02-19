@@ -348,6 +348,13 @@ const careConfig = {
       return Decimal[method] as Decimal.Rounding;
     })(),
   },
+
+  /**
+   * Maximum number of forms that can be favorited in the forms dialog
+   */
+  maxFormDialogFavorites: env.REACT_MAX_FORM_DIALOG_FAVORITES
+    ? parseInt(env.REACT_MAX_FORM_DIALOG_FAVORITES, 10)
+    : 5,
 } as const;
 
 export default careConfig;
