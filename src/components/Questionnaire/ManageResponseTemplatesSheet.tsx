@@ -810,57 +810,39 @@ export default function ManageResponseTemplatesSheet({
   const renderTemplateList = () => (
     <div className="space-y-3">
       {/* Action Buttons */}
-      <div className="flex gap-2">
-        {hasItemsToSave && (
-          <Button
-            variant="outline"
-            className="flex-1 gap-2 h-9"
-            onClick={() => {
-              setSavingCurrent(true);
-              setViewMode("create");
-              setEditableMedications(
-                currentMedications.map(
-                  (med) =>
-                    buildMedicationForTemplate(
-                      med,
-                    ) as MedicationRequestTemplateSpec,
-                ),
-              );
-              setEditableActivityDefinitions([...currentActivityDefinitions]);
-            }}
-          >
-            <SaveIcon className="size-3.5" />
-            <span className="text-xs">{t("save_current")}</span>
-            <Badge variant="secondary" className="ml-auto text-xs px-1.5">
-              {totalItemsCount}
-            </Badge>
-          </Button>
-        )}
+      {hasItemsToSave && (
         <Button
           variant="outline"
-          className={cn("gap-2 h-9", hasItemsToSave ? "flex-1" : "w-full")}
+          className="flex-1 gap-2 h-9"
           onClick={() => {
-            setEditingTemplate(null);
-            setSavingCurrent(false);
-            form.reset({
-              name: "",
-              description: "",
-            });
+            setSavingCurrent(true);
             setViewMode("create");
+            setEditableMedications(
+              currentMedications.map(
+                (med) =>
+                  buildMedicationForTemplate(
+                    med,
+                  ) as MedicationRequestTemplateSpec,
+              ),
+            );
+            setEditableActivityDefinitions([...currentActivityDefinitions]);
           }}
         >
-          <PlusIcon className="size-3.5" />
-          <span className="text-xs">{t("new_template")}</span>
+          <SaveIcon className="size-3.5" />
+          <span className="text-xs">{t("save_current")}</span>
+          <Badge variant="secondary" className="ml-auto text-xs px-1.5">
+            {totalItemsCount}
+          </Badge>
         </Button>
-      </div>
+      )}
 
-      <div className="relative">
+      <div className="relative mt-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
         <Input
           placeholder={t("search_templates")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="h-9 text-sm pl-9 pr-9"
+          className="h-9 text-sm px-9"
         />
         {searchQuery && (
           <Button
