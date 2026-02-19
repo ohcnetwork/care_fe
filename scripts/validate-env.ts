@@ -167,6 +167,7 @@ const envSchema = z
         message: `Must be one of: ${VALID_ROUNDING_METHODS.join(", ")}`,
       })
       .optional(),
+    REACT_MAX_FORM_DIALOG_FAVORITES: numberAsString.optional(),
   })
   .superRefine(async (data, ctx) => {
     // Ensure at least one API URL configuration is provided

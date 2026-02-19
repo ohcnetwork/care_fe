@@ -1,4 +1,5 @@
 {
+  "#": "#",
   "2FA_backup_code": "2FA Backup Code",
   "404_message": "This page doesn't exist or may have been moved. Please check the URL and try again.",
   "APPETITE__CANNOT_BE_ASSESSED": "Cannot be assessed",
@@ -1315,6 +1316,8 @@
   "confirm_cancel_payment": "Confirm Cancel Payment",
   "confirm_completion": "Confirm Completion",
   "confirm_delete": "Confirm Delete",
+  "confirm_discard": "Discard draft form",
+  "confirm_discard_draft_form": "Are you sure you want to discard this draft form? This action cannot be undone.",
   "confirm_discharge": "Confirm Patient Discharge",
   "confirm_discontinue": "Confirm Discontinue",
   "confirm_dispense": "Confirm Dispense",
@@ -3205,6 +3208,7 @@
   "max": "Max",
   "max_dosage_24_hrs": "Max. dosage in 24 hrs.",
   "max_dosage_in_24hrs_gte_base_dosage_error": "Max. dosage in 24 hours must be greater than or equal to base dosage",
+  "max_favorites_reached": "You've reached the limit. Only {{count}} forms can be favourited.",
   "max_size_for_image_uploaded_should_be": "Max size for image uploaded should be {{maxSize}}.",
   "max_value": "Max Value",
   "maximum_characters_allowed": "Maximum {{count}} characters are allowed",

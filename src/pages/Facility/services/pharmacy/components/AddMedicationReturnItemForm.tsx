@@ -329,6 +329,7 @@ export function AddMedicationReturnItemForm({
                                     <FormControl>
                                       <StockLotSelector
                                         net_content_gt={-1}
+                                        hideQuantity
                                         selectedLots={
                                           field.value
                                             ? [
