@@ -215,48 +215,52 @@ export function DiagnosticReportForm({
   }, [fullReport]);
 
   // Upserting observations for a diagnostic report
-  const { mutate: upsertObservations, isPending: isUpsertingObservations } =
-    useMutation({
-      mutationFn: mutate(observationApi.upsertObservations, {
-        pathParams: {
-          patient_external_id: patientId,
-          external_id: latestReport?.id || "",
-        },
-      }),
-      onSuccess: () => {
-        toast.success("Test results saved successfully");
-        queryClient.invalidateQueries({
-          queryKey: ["serviceRequest", serviceRequestId],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["diagnosticReport", latestReport?.id],
-        });
+  const {
+    mutateAsync: upsertObservations,
+    isPending: isUpsertingObservations,
+  } = useMutation({
+    mutationFn: mutate(observationApi.upsertObservations, {
+      pathParams: {
+        patient_external_id: patientId,
+        external_id: latestReport?.id || "",
       },
-      onError: (err: any) => {
-        toast.error(
-          `Failed to save test results: ${err.message || "Unknown error"}`,
-        );
-      },
-    });
+    }),
+    onSuccess: () => {
+      toast.success("Test results saved successfully");
+      queryClient.invalidateQueries({
+        queryKey: ["serviceRequest", serviceRequestId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["diagnosticReport", latestReport?.id],
+      });
+    },
+    onError: (err: any) => {
+      toast.error(
+        `Failed to save test results: ${err.message || "Unknown error"}`,
+      );
+    },
+  });
 
-  const { mutate: updateDiagnosticReport, isPending: isUpdatingReport } =
-    useMutation({
-      mutationFn: mutate(diagnosticReportApi.updateDiagnosticReport, {
-        pathParams: {
-          patient_external_id: patientId,
-          external_id: latestReport?.id || "",
-        },
-      }),
-      onSuccess: () => {
-        toast.success(t("conclusion_updated_successfully"));
-        queryClient.invalidateQueries({
-          queryKey: ["diagnosticReport", latestReport?.id],
-        });
+  const {
+    mutateAsync: updateDiagnosticReport,
+    isPending: isUpdatingReport,
+  } = useMutation({
+    mutationFn: mutate(diagnosticReportApi.updateDiagnosticReport, {
+      pathParams: {
+        patient_external_id: patientId,
+        external_id: latestReport?.id || "",
       },
-      onError: () => {
-        toast.success(t("failed_to_update_conclusion"));
-      },
-    });
+    }),
+    onSuccess: () => {
+      toast.success(t("conclusion_updated_successfully"));
+      queryClient.invalidateQueries({
+        queryKey: ["diagnosticReport", latestReport?.id],
+      });
+    },
+    onError: () => {
+      toast.error(t("failed_to_update_conclusion"));
+    },
+  });
 
   // Initialize file upload hook
   const fileUpload = useFileUpload({
@@ -489,7 +493,7 @@ export function DiagnosticReportForm({
     }
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!hasReport) {
       // First create a report if none exists
       handleCreateReport();
@@ -645,14 +649,16 @@ export function DiagnosticReportForm({
         .filter((obs): obs is ObservationUpsertRequest => obs !== null);
 
       if (fullReport) {
-        // Upsert observations
+        // Upsert observations first, then update the report so a failure
+        // in either step is reported independently and the user is not left
+        // with a partially-saved report without knowing which part failed.
         if (formattedObservations.length > 0) {
-          upsertObservations({
+          await upsertObservations({
             observations: formattedObservations,
           });
         }
 
-        updateDiagnosticReport({
+        await updateDiagnosticReport({
           id: fullReport.id,
           status: fullReport.status,
           category: fullReport.category,
