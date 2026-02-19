@@ -24,6 +24,7 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 
+import { CreateMedicationReturnSheet } from "@/pages/Facility/services/pharmacy/CreateMedicationReturnSheet";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
   DeliveryOrderRetrieve,
@@ -77,10 +78,16 @@ export default function MedicationReturnList({
   return (
     <Page title={t("medication_return")} hideTitleOnPage>
       <div className="space-y-4">
-        <div>
-          <h1 className="text-xl font-semibold text-gray-900">
-            {t("medication_return")}
-          </h1>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900">
+              {t("medication_return")}
+            </h1>
+          </div>
+          <CreateMedicationReturnSheet
+            facilityId={facilityId}
+            locationId={locationId}
+          />
         </div>
 
         {/* Status Tabs */}

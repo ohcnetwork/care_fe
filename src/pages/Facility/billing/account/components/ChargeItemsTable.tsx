@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ChevronDown,
   ChevronUp,
@@ -8,8 +8,9 @@ import {
   Zap,
 } from "lucide-react";
 import { Link, navigate } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useInView } from "react-intersection-observer";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 
@@ -20,6 +21,7 @@ import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   chargeItemServiceResourceFilter,
   chargeItemStatusFilter,
+  createdByFilter,
   dateFilter,
 } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
@@ -50,6 +52,7 @@ import {
   MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { UserReadMinimal } from "@/types/user/user";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
 
@@ -88,6 +91,8 @@ function PriceComponentRow({ label, components }: PriceComponentRowProps) {
             <TableCell></TableCell>
             <TableCell></TableCell>
             <TableCell></TableCell>
+            <TableCell></TableCell>
+            <TableCell></TableCell>
           </TableRow>
         );
       })}
@@ -118,7 +123,7 @@ export function ChargeItemsTable({
 
   // Register shortcuts for this table
   useShortcutSubContext("facility:billing");
-  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+  const { qParams, updateQuery } = useFilters({
     limit: 15,
     disableCache: true,
   });
@@ -127,15 +132,28 @@ export function ChargeItemsTable({
   const filters = [
     chargeItemStatusFilter("status"),
     chargeItemServiceResourceFilter("service_resource"),
+    createdByFilter("created_by"),
     dateFilter("created_date", t("created_date")),
   ];
 
-  const onFilterUpdate = (query: Record<string, unknown>) => {
+  const onFilterUpdate = (filterQuery: Record<string, unknown>) => {
+    const query = { ...filterQuery };
     for (const [key, value] of Object.entries(query)) {
       switch (key) {
         case "service_resource":
           query.service_resource = (value as string[])?.join(",");
           break;
+        case "created_by": {
+          const createdByValue = value as
+            | UserReadMinimal
+            | UserReadMinimal[]
+            | undefined;
+          const user = Array.isArray(createdByValue)
+            ? createdByValue[0]
+            : createdByValue;
+          query.created_by = user?.id || undefined;
+          break;
+        }
       }
     }
     updateQuery(query);
@@ -153,6 +171,7 @@ export function ChargeItemsTable({
     service_resource: qParams.service_resource
       ? qParams.service_resource.split(",")
       : undefined,
+    created_by: [],
     created_date:
       qParams.created_date_after || qParams.created_date_before
         ? {
@@ -178,29 +197,49 @@ export function ChargeItemsTable({
     };
   };
 
-  const { data: chargeItems, isLoading } = useQuery({
-    queryKey: ["chargeItems", accountId, qParams],
-    queryFn: query(chargeItemApi.listChargeItem, {
-      pathParams: { facilityId },
-      queryParams: {
-        account: accountId,
-        status: qParams.status,
-        service_resource: qParams.service_resource,
-        ordering: qParams.ordering,
-        title: qParams.title,
-        limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        ...getDateQueryParams(),
-      },
-    }),
-  }) as {
-    data: { results: ChargeItemRead[]; count: number } | undefined;
-    isLoading: boolean;
-  };
+  const RESULTS_PER_PAGE = 20;
+  const { ref: loadMoreRef, inView } = useInView();
+
+  const {
+    data: chargeItems,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useInfiniteQuery({
+    queryKey: ["infinite-chargeItems", accountId, qParams],
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(chargeItemApi.listChargeItem, {
+        pathParams: { facilityId },
+        queryParams: {
+          account: accountId,
+          status: qParams.status,
+          service_resource: qParams.service_resource,
+          created_by: qParams.created_by,
+          ordering: qParams.ordering,
+          title: qParams.title,
+          limit: RESULTS_PER_PAGE,
+          offset: pageParam,
+          ...getDateQueryParams(),
+        },
+      })({ signal });
+      return response as { results: ChargeItemRead[]; count: number };
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * RESULTS_PER_PAGE;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
+    select: (data) => data?.pages.flatMap((p) => p.results) ?? [],
+  });
+
+  useEffect(() => {
+    if (inView && hasNextPage) fetchNextPage();
+  }, [inView, hasNextPage, fetchNextPage]);
 
   const handleChargeItemsAdded = () => {
     queryClient.invalidateQueries({
-      queryKey: ["chargeItems", accountId, qParams],
+      queryKey: ["infinite-chargeItems", accountId],
     });
   };
 
@@ -309,7 +348,7 @@ export function ChargeItemsTable({
       </div>
       {isLoading ? (
         <TableSkeleton count={3} />
-      ) : !chargeItems?.results?.length ? (
+      ) : !chargeItems?.length ? (
         <EmptyState
           icon={<CareIcon icon="l-receipt" className="text-primary size-6" />}
           title={t("no_charge_items")}
@@ -321,13 +360,13 @@ export function ChargeItemsTable({
               <TableRow className="border-b">
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10"></TableHead>
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
+                  {t("created_by")}
+                </TableHead>
+                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
                   {t("item")}
                 </TableHead>
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
                   {t("resource")}
-                </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
-                  {t("mrp")}
                 </TableHead>
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
                   {t("unit_price")}
@@ -350,7 +389,7 @@ export function ChargeItemsTable({
               </TableRow>
             </TableHeader>
             <TableBody className="bg-white">
-              {chargeItems.results.flatMap((item) => {
+              {chargeItems.flatMap((item) => {
                 const isExpanded = expandedItems[item.id] || false;
                 const linkedResource = getLinkedResource(item);
 
@@ -376,6 +415,14 @@ export function ChargeItemsTable({
                         )}
                       </Button>
                     </TableCell>
+                    <TableCell className="border-x p-3 text-xs">
+                      <p className="text-gray-950">
+                        {formatName(item.created_by)}
+                      </p>
+                      <p className="text-gray-500">
+                        {formatDateTime(item.created_date)}
+                      </p>
+                    </TableCell>
                     <TableCell className="bor-medium">
                       {item.title}
                       {item.description && (
@@ -398,9 +445,6 @@ export function ChargeItemsTable({
                           {t(item.service_resource)}
                         </span>
                       )}
-                    </TableCell>
-                    <TableCell className="border-x p-3 text-gray-950">
-                      <MonetaryDisplay amount={mrpAmount} />
                     </TableCell>
                     <TableCell className="border-x p-3 text-gray-950">
                       <MonetaryDisplay
@@ -468,6 +512,26 @@ export function ChargeItemsTable({
                   />,
                 ];
 
+                const mrpRow = mrpAmount ? (
+                  <TableRow
+                    key={`${item.id}-mrp`}
+                    className="text-xs text-gray-500"
+                  >
+                    <TableCell></TableCell>
+                    <TableCell>{t("mrp")}</TableCell>
+                    <TableCell></TableCell>
+                    <TableCell>
+                      <MonetaryDisplay amount={mrpAmount} />
+                    </TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                  </TableRow>
+                ) : null;
+
                 // Add a summary row
                 const summaryRow = (
                   <TableRow
@@ -479,45 +543,39 @@ export function ChargeItemsTable({
                       {t("total")}
                     </TableCell>
                     <TableCell></TableCell>
-                    <TableCell></TableCell>
-                    <TableCell></TableCell>
                     <TableCell className="p-3">
                       <MonetaryDisplay amount={item.total_price} />
                     </TableCell>
-                    <TableCell className="text-gray-700 text-xs">
-                      <p>
-                        {t("created_by_user", {
-                          name: formatName(item.created_by),
-                        })}
-                      </p>
-                      <p>{formatDateTime(item.created_date)}</p>
-                    </TableCell>
-                    <TableCell className="text-gray-700 text-xs">
-                      <p>
-                        {t("updated_by_user", {
-                          name: formatName(item.updated_by),
-                        })}
-                      </p>
-                      <p>{formatDateTime(item.modified_date)}</p>
-                    </TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
                   </TableRow>
                 );
 
                 const emptyRow = (
                   <TableRow key={`${item.id}-empty`} className="bg-muted">
-                    <TableCell colSpan={7}></TableCell>
+                    <TableCell colSpan={10}></TableCell>
                   </TableRow>
                 );
 
-                return [mainRow, ...detailRows, summaryRow, emptyRow].filter(
-                  Boolean,
-                );
+                return [
+                  mainRow,
+                  mrpRow,
+                  ...detailRows,
+                  summaryRow,
+                  emptyRow,
+                ].filter(Boolean);
               })}
             </TableBody>
           </Table>
         </div>
       )}
-      <Pagination totalCount={chargeItems?.count || 0} />
+      {hasNextPage && (
+        <div ref={loadMoreRef} className="flex justify-center py-4">
+          {isFetchingNextPage && <TableSkeleton count={3} />}
+        </div>
+      )}
 
       <AddChargeItemsBillingSheet
         open={isAddChargeItemsOpen}

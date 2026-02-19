@@ -14,29 +14,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { reverseFrequencyOption } from "@/components/Questionnaire/QuestionTypes/MedicationRequestQuestion";
-
 import {
-  INACTIVE_MEDICATION_STATUSES,
-  MEDICATION_REQUEST_TIMING_OPTIONS,
-  MedicationRequestDosageInstruction,
-  MedicationRequestRead,
   displayMedicationName,
+  INACTIVE_MEDICATION_STATUSES,
+  MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 
-import { formatDosage, formatSig } from "./utils";
-
-export function getFrequencyDisplay(
-  timing?: MedicationRequestDosageInstruction["timing"],
-) {
-  if (!timing) return undefined;
-  const code = reverseFrequencyOption(timing);
-  if (!code) return undefined;
-  return {
-    code,
-    meaning: MEDICATION_REQUEST_TIMING_OPTIONS[code].display,
-  };
-}
+import {
+  formatDosage,
+  formatDuration,
+  formatFrequency,
+  formatSig,
+} from "./utils";
 
 interface MedicationsTableProps {
   medications: MedicationRequestRead[];
@@ -91,9 +80,8 @@ export const MedicationsTable = ({
           {(showInactive ? medications : activeMedications).map(
             (medication: MedicationRequestRead) => {
               const instruction = medication.dosage_instruction[0];
-              const frequency = getFrequencyDisplay(instruction?.timing);
               const dosage = formatDosage(instruction);
-              const duration = instruction?.timing?.repeat?.bounds_duration;
+              // Duration is now rendered via formatDuration(instruction)
               const remarks = formatSig(instruction);
               const notes = medication.note;
               const isInactive = INACTIVE_MEDICATION_STATUSES.includes(
@@ -117,9 +105,7 @@ export const MedicationsTable = ({
                   <TableCell className="py-2 px-3">{dosage}</TableCell>
                   <TableCell className="py-2 px-3 break-words whitespace-normal">
                     {" "}
-                    {instruction?.as_needed_boolean
-                      ? `${t("as_needed_prn")}`
-                      : frequency?.meaning}
+                    {formatFrequency(instruction) || "-"}
                     {(instruction?.additional_instruction ?? []).length > 0 && (
                       <div className="text-sm text-gray-600 space-y-1">
                         {instruction.additional_instruction?.map(
@@ -131,7 +117,7 @@ export const MedicationsTable = ({
                     )}
                   </TableCell>
                   <TableCell className="py-2 px-3">
-                    {duration ? `${duration.value} ${duration.unit}` : "-"}
+                    {formatDuration(instruction) || "-"}
                   </TableCell>
                   <TableCell className="py-2 px-3 break-words whitespace-normal">
                     {[remarks, notes].filter(Boolean).join("\n")}
