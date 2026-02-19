@@ -9,7 +9,7 @@ import {
   Truck,
 } from "lucide-react";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -45,10 +45,17 @@ import {
 import { EmptyState } from "@/components/ui/empty-state";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  getExtensionFieldsWithName,
+  getExtensionValue,
+  NamespacedExtensionData,
+} from "@/hooks/useExtensions";
+import useExtensionSchemas from "@/hooks/useExtensionSchemas";
 import { AddSupplyDeliveryForm } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/AddSupplyDeliveryForm";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { SupplyDeliveryTable } from "@/pages/Facility/services/inventory/SupplyDeliveryTable";
+import { ExtensionEntityType } from "@/types/extensions/extensions";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
   DeliveryOrderRetrieve,
@@ -164,6 +171,18 @@ export function DeliveryOrderShow({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { getExtensions } = useExtensionSchemas();
+
+  const allExtensions = getExtensions(
+    ExtensionEntityType.supply_delivery_order,
+    "read",
+  );
+
+  const extensionFields = useMemo(
+    () => getExtensionFieldsWithName(allExtensions),
+    [allExtensions],
+  );
+
   const [selectedDeliveries, setSelectedDeliveries] = useState<string[]>([]);
   const [confirmDialog, setConfirmDialog] = useState({
     open: false,
@@ -200,6 +219,7 @@ export function DeliveryOrderShow({
         queryParams: {
           order: deliveryOrderId,
           facility: facilityId,
+          ordering: "created_date",
         },
       }),
       enabled: !!deliveryOrderId,
@@ -621,6 +641,31 @@ export function DeliveryOrderShow({
                   </div>
                 </div>
               </div>
+
+              {extensionFields.map((field) => {
+                const value = getExtensionValue(
+                  deliveryOrder.extensions as NamespacedExtensionData,
+                  field.extensionName,
+                  field.name,
+                );
+                if (value === undefined || value === null) return null;
+
+                const displayValue =
+                  field.format === "date" || field.format === "date-time"
+                    ? formatDateTime(value as string)
+                    : String(value);
+
+                return (
+                  <div key={`${field.extensionName}-${field.name}`}>
+                    <label className="text-sm font-medium text-gray-700">
+                      {field.label}
+                    </label>
+                    <div className="text-lg font-semibold text-gray-950">
+                      {displayValue}
+                    </div>
+                  </div>
+                );
+              })}
               {deliveryOrder.created_by && (
                 <div>
                   <label className="text-sm font-medium text-gray-700">
