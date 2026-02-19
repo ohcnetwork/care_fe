@@ -121,7 +121,7 @@ export function AddMedicationReturnItemForm({
 
   const loadFromMedicationDispenses = () => {
     setIsSelectDialogOpen(true);
-    handleSelectAll(true);
+    handleSelectAll(false);
   };
 
   const handleSelectAll = (checked: boolean) => {
@@ -329,6 +329,7 @@ export function AddMedicationReturnItemForm({
                                     <FormControl>
                                       <StockLotSelector
                                         net_content_gt={-1}
+                                        hideQuantity
                                         selectedLots={
                                           field.value
                                             ? [
