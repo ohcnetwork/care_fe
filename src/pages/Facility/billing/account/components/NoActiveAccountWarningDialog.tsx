@@ -34,7 +34,7 @@ export default function NoActiveAccountWarningDialog({
   const { t } = useTranslation();
   const [showWarningDialog, setShowWarningDialog] = useState(false);
 
-  const { data: hasActiveAccount, isLoading } = useQuery({
+  const { data: hasActiveAccount, isFetching } = useQuery({
     queryKey: ["active-account-status", facilityId, patientId],
     queryFn: query(accountApi.listAccount, {
       pathParams: { facilityId },
@@ -49,13 +49,14 @@ export default function NoActiveAccountWarningDialog({
   });
 
   useEffect(() => {
-    if (isLoading) {
+    if (isFetching || hasActiveAccount == null) {
       return;
     }
-    setShowWarningDialog(hasActiveAccount === false);
-  }, [hasActiveAccount, isLoading]);
 
-  if (isLoading) {
+    setShowWarningDialog(hasActiveAccount === false);
+  }, [hasActiveAccount, isFetching]);
+
+  if (isFetching) {
     return null;
   }
 
