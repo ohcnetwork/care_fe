@@ -62,6 +62,7 @@ import { add, isPositive, round, subtract } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import Decimal from "decimal.js";
 
 interface AllSupplyDeliveriesProps {
@@ -472,7 +473,7 @@ export function RequestOrderShow({
 
         <Card className="border-none rounded-lg">
           <CardContent className="space-y-1 p-4">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-700">
                   {t("deliver_to")}
@@ -573,6 +574,21 @@ export function RequestOrderShow({
                   </Badge>
                 </div>
               </div>
+              {requestOrder.created_by && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    {t("created_by")}
+                  </label>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-md font-semibold text-gray-950">
+                      {formatName(requestOrder.created_by)}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {formatDateTime(requestOrder.created_date)}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {requestOrder.note && (
