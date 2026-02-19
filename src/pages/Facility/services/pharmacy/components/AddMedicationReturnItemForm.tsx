@@ -295,32 +295,38 @@ export function AddMedicationReturnItemForm({
                               <FormField
                                 control={form.control}
                                 name={`items.${index}.product_knowledge`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <ProductKnowledgeSelect
-                                        value={field.value}
-                                        onChange={(productKnowledge) => {
-                                          field.onChange(productKnowledge);
-                                          setNewlyAddedRowIndex(null);
-                                          // Reset inventory item when product changes
-                                          form.setValue(
-                                            `items.${index}.supplied_inventory_item`,
-                                            "",
-                                          );
-                                        }}
-                                        placeholder={t("select_product")}
-                                        className="w-full"
-                                        disableFavorites
-                                        hideClearButton
-                                        defaultOpen={
-                                          newlyAddedRowIndex === index
-                                        }
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
+                                render={({ field }) => {
+                                  const isLoadedFromDispense = !!form.watch(
+                                    `items.${index}.original_dispense_quantity`,
+                                  );
+                                  return (
+                                    <FormItem>
+                                      <FormControl>
+                                        <ProductKnowledgeSelect
+                                          value={field.value}
+                                          onChange={(productKnowledge) => {
+                                            field.onChange(productKnowledge);
+                                            setNewlyAddedRowIndex(null);
+                                            // Reset inventory item when product changes
+                                            form.setValue(
+                                              `items.${index}.supplied_inventory_item`,
+                                              "",
+                                            );
+                                          }}
+                                          placeholder={t("select_product")}
+                                          className="w-full"
+                                          disableFavorites
+                                          hideClearButton
+                                          defaultOpen={
+                                            newlyAddedRowIndex === index
+                                          }
+                                          disabled={isLoadedFromDispense}
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  );
+                                }}
                               />
                             </TableCell>
                             <TableCell className="align-top p-2">
