@@ -305,6 +305,15 @@ export default function DiagnosticReportPrint({
                 {formatName(report.requester)}
               </span>
             </div>
+            {report.encounter.current_location && (
+              <div className="grid grid-cols-[6rem_auto_1fr] items-center">
+                <span className="text-gray-600">{t("location")}</span>
+                <span className="text-gray-600">:</span>
+                <span className="font-semibold ml-2">
+                  {report.encounter.current_location.name}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="mt-8 space-y-8">

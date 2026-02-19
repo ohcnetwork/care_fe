@@ -65,6 +65,7 @@ import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryAp
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatDateTime, formatName } from "@/Utils/utils";
 
 interface Props {
   facilityId: string;
@@ -620,6 +621,21 @@ export function DeliveryOrderShow({
                   </div>
                 </div>
               </div>
+              {deliveryOrder.created_by && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    {t("created_by")}
+                  </label>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-md font-semibold text-gray-950">
+                      {formatName(deliveryOrder.created_by)}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {formatDateTime(deliveryOrder.created_date)}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
