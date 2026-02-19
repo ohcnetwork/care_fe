@@ -1,9 +1,16 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -13,22 +20,32 @@ import {
 } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { formatDateTime, formatName, properCase } from "@/Utils/utils";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { cn } from "@/lib/utils";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
-import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
+import {
+  QuestionnaireResponse,
+  QuestionnaireResponseStatus,
+} from "@/types/questionnaire/questionnaireResponse";
 import questionnaireResponseApi from "@/types/questionnaire/questionnaireResponseApi";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { t } from "i18next";
-import { Printer } from "lucide-react";
+import { BanIcon, ChevronDown, MoreVertical, Printer } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
+import { toast } from "sonner";
 
 interface Props {
   encounterId?: string;
@@ -86,6 +103,7 @@ function QuestionGroup({
   parentTitle?: string;
   isSingleGroup?: boolean;
 }) {
+  const { t } = useTranslation();
   const hasResponses = group.questions?.some((q) => {
     if (q.type === "group") {
       return q.questions?.some((subQ) =>
@@ -252,37 +270,103 @@ function QuestionGroup({
   );
 }
 
-function PrintButton({ item }: { item: QuestionnaireResponse }) {
+function ResponseActionsMenu({
+  item,
+  patientId,
+}: {
+  item: QuestionnaireResponse;
+  patientId: string;
+}) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
+  const isUnstructured = !!item.questionnaire;
+  const isEnteredInError =
+    item.status === QuestionnaireResponseStatus.EnteredInError;
+
+  const { mutate: updateStatus, isPending } = useMutation({
+    mutationFn: mutate(questionnaireResponseApi.update, {
+      pathParams: { patientId, responseId: item.id },
+    }),
+    onSuccess: () => {
+      toast.success(t("questionnaire_response_marked_as_entered_in_error"));
+      queryClient.invalidateQueries({
+        queryKey: ["questionnaireResponses", patientId],
+      });
+      setShowConfirmDialog(false);
+    },
+  });
+
+  if (isEnteredInError) {
+    return null;
+  }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 hover:bg-gray-100 text-gray-500 hover:text-gray-700"
-        >
-          <Printer className="size-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <Link href={`questionnaire_response/${item.id}/print`}>
-          <DropdownMenuItem>{t("print_this_response")}</DropdownMenuItem>
-        </Link>
-        <Link href={`questionnaire/${item.questionnaire?.id}/responses/print`}>
-          <DropdownMenuItem>
-            {t("print_all_responses", {
-              title: item.questionnaire?.title,
-            })}
-          </DropdownMenuItem>
-        </Link>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7 text-gray-500"
+            aria-label={t("more_actions")}
+          >
+            <MoreVertical className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <Link href={`questionnaire_response/${item.id}/print`}>
+            <DropdownMenuItem>
+              <Printer className="size-4" />
+              {t("print_this_response")}
+            </DropdownMenuItem>
+          </Link>
+          {item.questionnaire && (
+            <Link
+              href={`questionnaire/${item.questionnaire.id}/responses/print`}
+            >
+              <DropdownMenuItem>
+                <Printer className="size-4" />
+                {t("print_all_responses", {
+                  title: item.questionnaire.title,
+                })}
+              </DropdownMenuItem>
+            </Link>
+          )}
+          {isUnstructured && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onSelect={() => setShowConfirmDialog(true)}
+                className="text-red-500 focus:text-red-700"
+              >
+                <BanIcon className="size-4" />
+                {t("mark_as_entered_in_error")}
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <ConfirmActionDialog
+        open={showConfirmDialog}
+        onOpenChange={setShowConfirmDialog}
+        title={t("mark_as_entered_in_error")}
+        description={t("questionnaire_response_entered_in_error_warning")}
+        onConfirm={() =>
+          updateStatus({ status: QuestionnaireResponseStatus.EnteredInError })
+        }
+        confirmText={t("confirm")}
+        variant="destructive"
+        disabled={isPending}
+      />
+    </>
   );
 }
 
 function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
+  const { t } = useTranslation();
   const groups =
     item.questionnaire?.questions.filter(
       (q) =>
@@ -453,50 +537,93 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
 
 export function ResponseCard({
   item,
+  patientId,
   onTitleClick,
   showTitle = true,
   isPrintPreview = false,
 }: {
   item: QuestionnaireResponse;
+  patientId: string;
   isPrintPreview?: boolean;
   onTitleClick?: (questionnaireSlug: string) => void;
   showTitle?: boolean;
 }) {
+  const { t } = useTranslation();
   const isStructured = !item.questionnaire;
   const structuredType = Object.keys(item.structured_responses || {})[0];
   const title =
     isStructured && structuredType
       ? properCase(structuredType.replace(/_/g, " "))
       : item.questionnaire?.title || "";
+  const isEnteredInError =
+    item.status === QuestionnaireResponseStatus.EnteredInError;
+  const [isExpanded, setIsExpanded] = useState(!isEnteredInError);
 
   return (
-    <Card className="shadow-none border rounded-md">
-      <CardHeader className="flex flex-row items-center py-2 px-3">
-        {showTitle && (
-          <CardTitle
+    <Card
+      className={cn(
+        "shadow-none border rounded-md",
+        isEnteredInError && "opacity-70",
+      )}
+    >
+      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+        <CollapsibleTrigger asChild className="cursor-pointer">
+          <CardHeader
             className={cn(
-              "text-base font-medium",
-              onTitleClick &&
-                "cursor-pointer hover:bg-gray-100 rounded px-1.5 py-0.5",
+              "flex flex-row items-center py-2 px-3",
+              isEnteredInError && "hover:bg-gray-50",
             )}
-            onClick={() => {
-              if (item.questionnaire?.id && onTitleClick) {
-                onTitleClick(item.questionnaire.id);
-              }
-            }}
           >
-            {title}
-          </CardTitle>
-        )}
-        {!isPrintPreview && (
-          <div className="ml-auto">
-            <PrintButton item={item} />
-          </div>
-        )}
-      </CardHeader>
-      <CardContent className="px-3 pb-3 pt-0">
-        <ResponseCardContent item={item} />
-      </CardContent>
+            {showTitle && (
+              <CardTitle
+                className={cn(
+                  "text-base font-medium",
+                  onTitleClick &&
+                    !isEnteredInError &&
+                    "cursor-pointer hover:bg-gray-100 rounded px-1.5 py-0.5",
+                )}
+                onClick={(e) => {
+                  if (
+                    item.questionnaire?.id &&
+                    onTitleClick &&
+                    !isEnteredInError
+                  ) {
+                    e.stopPropagation();
+                    onTitleClick(item.questionnaire.id);
+                  }
+                }}
+              >
+                {title}
+              </CardTitle>
+            )}
+            {isEnteredInError && (
+              <Badge variant="destructive" className="ml-2">
+                {t("entered_in_error")}
+              </Badge>
+            )}
+            <div className="ml-auto flex items-center gap-1">
+              {isEnteredInError && (
+                <ChevronDown
+                  className={cn(
+                    "size-4 transition-transform text-gray-500",
+                    isExpanded && "rotate-180",
+                  )}
+                />
+              )}
+              {!isPrintPreview && (
+                <div onClick={(e) => e.stopPropagation()}>
+                  <ResponseActionsMenu item={item} patientId={patientId} />
+                </div>
+              )}
+            </div>
+          </CardHeader>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <CardContent className="px-3 pb-3 pt-0">
+            <ResponseCardContent item={item} />
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   );
 }
@@ -584,6 +711,7 @@ export default function QuestionnaireResponsesList({
                   <ResponseCard
                     key={item.id}
                     item={item}
+                    patientId={patientId}
                     isPrintPreview={isPrintPreview}
                   />
                 )}

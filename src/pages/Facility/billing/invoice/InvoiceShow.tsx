@@ -890,7 +890,7 @@ export function InvoiceShow({
                             <TableCell
                               className={cn(
                                 tableCellClass,
-                                "font-medium whitespace-pre-wrap",
+                                "font-semibold min-w-40",
                               )}
                             >
                               <InvoiceChargeItemTitle
@@ -899,7 +899,12 @@ export function InvoiceShow({
                                 isLoading={isLoadingDispenses}
                               />
                             </TableCell>
-                            <TableCell className={cn(tableCellClass)}>
+                            <TableCell
+                              className={cn(
+                                tableCellClass,
+                                "max-w-32 whitespace-pre-wrap",
+                              )}
+                            >
                               {formatName(item.performer_actor)}
                             </TableCell>
                             <TableCell
@@ -1139,6 +1144,12 @@ export function InvoiceShow({
                       </div>
                     ))}
 
+                  {/* Subtotal */}
+                  <div className="flex w-64 justify-between">
+                    <span className="text-gray-500">{t("net_amount")}</span>
+                    <MonetaryDisplay amount={invoice.total_net} />
+                  </div>
+
                   {/* Taxes */}
                   {invoice.total_price_components
                     ?.filter(
@@ -1159,12 +1170,6 @@ export function InvoiceShow({
                         </span>
                       </div>
                     ))}
-
-                  {/* Subtotal */}
-                  <div className="flex w-64 justify-between">
-                    <span className="text-gray-500">{t("net_amount")}</span>
-                    <MonetaryDisplay amount={invoice.total_net} />
-                  </div>
 
                   <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
 
