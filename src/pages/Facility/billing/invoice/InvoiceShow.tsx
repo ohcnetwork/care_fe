@@ -890,7 +890,7 @@ export function InvoiceShow({
                             <TableCell
                               className={cn(
                                 tableCellClass,
-                                "font-medium whitespace-pre-wrap",
+                                "font-semibold min-w-40",
                               )}
                             >
                               <InvoiceChargeItemTitle
@@ -899,7 +899,12 @@ export function InvoiceShow({
                                 isLoading={isLoadingDispenses}
                               />
                             </TableCell>
-                            <TableCell className={cn(tableCellClass)}>
+                            <TableCell
+                              className={cn(
+                                tableCellClass,
+                                "max-w-32 whitespace-pre-wrap",
+                              )}
+                            >
                               {formatName(item.performer_actor)}
                             </TableCell>
                             <TableCell

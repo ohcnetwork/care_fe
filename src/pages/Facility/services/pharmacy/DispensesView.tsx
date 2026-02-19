@@ -20,7 +20,7 @@ import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import { MedicationDispenseStatus } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import query from "@/Utils/request/query";
-import { formatDateTime } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import { PrescriptionSummary } from "@/types/emr/prescription/prescription";
@@ -150,6 +150,14 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
               <p className="text-sm text-gray-600">{dispenseOrder.note}</p>
             )}
             <div className="flex items-center gap-4 text-sm text-gray-700">
+              {dispenseOrder.created_by && (
+                <div>
+                  <span className="text-gray-500">{t("created_by")}:</span>{" "}
+                  <span className="font-medium">
+                    {formatName(dispenseOrder.created_by)}
+                  </span>
+                </div>
+              )}
               <div>
                 <span className="text-gray-500">{t("created_at")}:</span>{" "}
                 <span className="font-medium">
