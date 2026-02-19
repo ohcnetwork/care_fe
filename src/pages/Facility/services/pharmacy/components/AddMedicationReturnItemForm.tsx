@@ -121,7 +121,7 @@ export function AddMedicationReturnItemForm({
 
   const loadFromMedicationDispenses = () => {
     setIsSelectDialogOpen(true);
-    handleSelectAll(true);
+    handleSelectAll(false);
   };
 
   const handleSelectAll = (checked: boolean) => {
