@@ -26,6 +26,7 @@ export interface MonetaryComponent {
   amount?: string | null;
   tax_included_amount?: string;
   conditions?: Condition[];
+  global_component?: boolean;
 }
 
 export interface MonetaryComponentRead extends MonetaryComponent {
