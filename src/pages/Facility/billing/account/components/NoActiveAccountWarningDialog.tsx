@@ -31,7 +31,7 @@ export default function NoActiveAccountWarningDialog({
   const [showWarningDialog, setShowWarningDialog] = useState(false);
 
   const { data: hasActiveAccount, isLoading } = useQuery({
-    queryKey: ["active-account-status", patientId],
+    queryKey: ["active-account-status", facilityId, patientId],
     queryFn: query(accountApi.listAccount, {
       pathParams: { facilityId },
       queryParams: {
