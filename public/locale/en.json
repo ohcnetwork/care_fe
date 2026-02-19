@@ -1316,6 +1316,8 @@
   "confirm_cancel_payment": "Confirm Cancel Payment",
   "confirm_completion": "Confirm Completion",
   "confirm_delete": "Confirm Delete",
+  "confirm_discard": "Discard draft form",
+  "confirm_discard_draft_form": "Are you sure you want to discard this draft form? This action cannot be undone.",
   "confirm_discharge": "Confirm Patient Discharge",
   "confirm_discontinue": "Confirm Discontinue",
   "confirm_dispense": "Confirm Dispense",

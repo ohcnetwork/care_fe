@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -33,6 +35,8 @@ export function FormSubmissionDrafts({
 }: FormSubmissionDraftsProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [submissionToDiscard, setSubmissionToDiscard] =
+    useState<FormSubmissionRead | null>(null);
 
   const { data: formSubmissions } = useQuery({
     queryKey: ["formSubmissions", encounterId],
@@ -96,7 +100,7 @@ export function FormSubmissionDrafts({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => discardSubmission(submission)}
+                      onClick={() => setSubmissionToDiscard(submission)}
                       disabled={isDiscarding}
                     >
                       {t("discard")}
@@ -131,6 +135,24 @@ export function FormSubmissionDrafts({
           );
         })}
       </div>
+
+      <ConfirmActionDialog
+        open={!!submissionToDiscard}
+        onOpenChange={(open) => {
+          if (!open) setSubmissionToDiscard(null);
+        }}
+        title={t("confirm_discard")}
+        description={t("confirm_discard_draft_form")}
+        onConfirm={() => {
+          if (submissionToDiscard) {
+            discardSubmission(submissionToDiscard);
+            setSubmissionToDiscard(null);
+          }
+        }}
+        confirmText={t("discard")}
+        variant="destructive"
+        disabled={isDiscarding}
+      />
     </div>
   );
 }
