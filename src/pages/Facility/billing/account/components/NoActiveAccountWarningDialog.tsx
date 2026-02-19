@@ -14,7 +14,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-import { AccountBase, AccountStatus } from "@/types/billing/account/Account";
+import {
+  AccountBase,
+  AccountBillingStatus,
+  AccountStatus,
+} from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -38,6 +42,7 @@ export default function NoActiveAccountWarningDialog({
         patient: patientId,
         limit: 1,
         status: AccountStatus.active,
+        billing_status: AccountBillingStatus.open,
       },
     }),
     select: (data: PaginatedResponse<AccountBase>) => data.count > 0,
