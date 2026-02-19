@@ -842,7 +842,7 @@ export default function ManageResponseTemplatesSheet({
           placeholder={t("search_templates")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="text-sm px-9"
+          className="h-9 text-sm px-9"
         />
         {searchQuery && (
           <Button
