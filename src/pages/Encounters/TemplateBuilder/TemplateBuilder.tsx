@@ -76,9 +76,9 @@ const templateBuilderSchema = z.object({
       message: t("slug_format_message"),
     }),
   status: z.enum(TemplateStatuses),
-  template_type: z.enum(TemplateTypes),
+  template_type: z.enum(TemplateTypes, { required_error: t("field_required") }),
   default_format: z.enum(TemplateFormats),
-  context: z.string().min(1),
+  context: z.string().min(1, { message: t("field_required") }),
   description: z.string().optional(),
   template_data: z.string().min(1),
 });
@@ -115,12 +115,17 @@ export default function TemplateBuilder({
     },
   });
 
+  const selectedTemplateType = form.watch("template_type");
   const { data: schema, isLoading } = useQuery({
     queryKey: ["templateSchema"],
     queryFn: query(templateApi.retrieveSchema),
   });
 
   const availableContexts = schema?.contexts ?? {};
+  const reportTypes = schema?.report_types ?? {};
+  const supportedContexts = selectedTemplateType
+    ? (reportTypes[selectedTemplateType]?.supported_contexts ?? null)
+    : null;
 
   const { data: template } = useQuery({
     queryKey: ["template", slug],
@@ -204,8 +209,18 @@ export default function TemplateBuilder({
     }
   }, [template, availableContexts]);
 
+  useEffect(() => {
+    if (!selectedTemplateType || !selectedContext || !supportedContexts) return;
+    if (!supportedContexts.includes(selectedContext.slug)) {
+      setSelectedContext(null);
+      form.setValue("context", "", { shouldValidate: false });
+    }
+  }, [selectedTemplateType]);
+
   // Handle template save
   const handleSaveTemplate = async () => {
+    const isValid = await form.trigger();
+    if (!isValid) return;
     const formData = form.getValues();
     const templateData = {
       template_type: formData.template_type,
@@ -230,6 +245,8 @@ export default function TemplateBuilder({
 
   // Handle template preview
   const handlePreviewTemplate = async () => {
+    const isValid = await form.trigger();
+    if (!isValid) return;
     const formData = form.getValues();
     const previewData = {
       template_data: formData.template_data,
@@ -340,50 +357,56 @@ export default function TemplateBuilder({
   }
 
   return (
-    <div className="h-auto sm:h-screen flex flex-col">
-      <div className="border-b p-4">
-        <div className="flex flex-col sm:flex-row gap-2 items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <BackButton
-              size="icon"
-              to={`/facility/${facilityId}/template`}
-              aria-label={t("back")}
-            >
-              <ChevronLeft />
-            </BackButton>
-            <div>
-              <h1 className="text-2xl font-bold">{t("template_builder")}</h1>
-              <p className="text-sm text-muted-foreground">
-                {t("template_builder_description")}
-              </p>
+    <Form {...form}>
+      <div className="h-auto sm:h-screen flex flex-col">
+        <div className="border-b p-4">
+          <div className="flex flex-col sm:flex-row gap-2 items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <BackButton
+                size="icon"
+                to={`/facility/${facilityId}/template`}
+                aria-label={t("back")}
+              >
+                <ChevronLeft />
+              </BackButton>
+              <div>
+                <h1 className="text-2xl font-bold">{t("template_builder")}</h1>
+                <p className="text-sm text-muted-foreground">
+                  {t("template_builder_description")}
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center justify-end gap-2 w-full sm:w-auto">
+              <Button
+                type="button"
+                className="flex-1 sm:flex-none"
+                onClick={() =>
+                  setPreviewState({ isActive: false, data: null, format: null })
+                }
+                disabled={!previewState.isActive}
+              >
+                {t("clear_preview")}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1 sm:flex-none"
+                onClick={handlePreviewTemplate}
+                disabled={previewState.isActive}
+              >
+                {t("preview_template")}
+              </Button>
+              <Button
+                type="button"
+                className="flex-1 sm:flex-none"
+                onClick={handleSaveTemplate}
+              >
+                {t("save_template")}
+              </Button>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              onClick={() =>
-                setPreviewState({ isActive: false, data: null, format: null })
-              }
-              disabled={!previewState.isActive}
-            >
-              {t("clear_preview")}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handlePreviewTemplate}
-              disabled={previewState.isActive}
-            >
-              {t("preview_template")}
-            </Button>
-            <Button type="button" onClick={handleSaveTemplate}>
-              {t("save_template")}
-            </Button>
-          </div>
-        </div>
 
-        {/* Template metadata fields */}
-        <Form {...form}>
+          {/* Template metadata fields */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-start">
             <FormField
               control={form.control}
@@ -484,7 +507,10 @@ export default function TemplateBuilder({
               name="template_type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("report_type")}</FormLabel>
+                  <FormLabel>
+                    {t("report_type")}
+                    <span className="text-destructive ml-1">*</span>
+                  </FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
@@ -504,87 +530,109 @@ export default function TemplateBuilder({
               )}
             />
           </div>
-        </Form>
-      </div>
-
-      <div className="flex-1 flex flex-col sm:overflow-y-auto sm:flex-row">
-        {/* Main Editor - 3/4 of screen */}
-        <div className="flex-2! p-4 overflow-auto">
-          {previewState.isActive ? (
-            <PreviewContent
-              previewData={previewState.data}
-              format={previewState.format}
-            />
-          ) : (
-            <TemplateEditor form={form} textareaRef={textareaRef} />
-          )}
         </div>
 
-        {/* Sidebar - 1/4 of screen */}
-        <div className="flex-1 border-l p-4 overflow-auto flex flex-col gap-4">
-          {/* Context Selector */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">{t("select_context")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Select
-                value={selectedContext?.slug}
-                onValueChange={(value) =>
-                  setSelectedContext(availableContexts[value])
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t("select_context")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.values(availableContexts).map((context) => (
-                    <SelectItem key={context.slug} value={context.slug}>
-                      {context.display_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selectedContext?.description && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  {selectedContext.description}
-                </p>
-              )}
-            </CardContent>
-          </Card>
+        <div className="flex-1 flex flex-col sm:overflow-y-auto sm:flex-row">
+          {/* Main Editor - 3/4 of screen */}
+          <div className="flex-2! p-4 overflow-auto">
+            {previewState.isActive ? (
+              <PreviewContent
+                previewData={previewState.data}
+                format={previewState.format}
+              />
+            ) : (
+              <TemplateEditor form={form} textareaRef={textareaRef} />
+            )}
+          </div>
 
-          {/* Fields List */}
-          {selectedContext && (
-            <Card className="flex-1 flex flex-col overflow-hidden">
+          {/* Sidebar - 1/4 of screen */}
+          <div className="flex-1 border-l p-4 flex flex-col gap-4 min-w-64">
+            {/* Context Selector */}
+            <Card>
               <CardHeader>
-                <CardTitle className="text-lg">{t("fields")}</CardTitle>
+                <CardTitle className="text-lg">
+                  {t("select_context")}
+                  <span className="text-destructive ml-1">*</span>
+                </CardTitle>
               </CardHeader>
-              <CardContent className="flex-1 overflow-hidden p-0">
-                <ScrollArea className="h-96 sm:h-full">
-                  <div className="px-4 space-y-1">
-                    {selectedContext.fields.map((field) => (
-                      <FieldItem
-                        key={field.key}
-                        field={field}
-                        expandedFields={expandedFields}
-                        toggleFieldExpansion={toggleFieldExpansion}
-                        onClick={handleFieldClick}
-                      />
-                    ))}
-                  </div>
-                </ScrollArea>
+              <CardContent>
+                <FormField
+                  control={form.control}
+                  name="context"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Select
+                        value={field.value}
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          setSelectedContext(availableContexts[value]);
+                        }}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t("select_context")} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.values(availableContexts).map((context) => (
+                            <SelectItem
+                              key={context.slug}
+                              value={context.slug}
+                              disabled={
+                                supportedContexts !== null &&
+                                !supportedContexts.includes(context.slug)
+                              }
+                            >
+                              {context.display_name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {selectedContext?.description && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {selectedContext.description}
+                  </p>
+                )}
               </CardContent>
             </Card>
-          )}
 
-          {!selectedContext && (
-            <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-4">
-              <p>{t("select_context_to_view_fields")}</p>
-            </div>
-          )}
+            {/* Fields List */}
+            {selectedContext && (
+              <Card className="flex-1 flex flex-col overflow-hidden">
+                <CardHeader>
+                  <CardTitle className="text-lg">{t("fields")}</CardTitle>
+                </CardHeader>
+                <CardContent className="flex-1 overflow-hidden p-0">
+                  <ScrollArea className="h-96 sm:h-full">
+                    <div className="px-4 space-y-1">
+                      {selectedContext.fields.map((field) => (
+                        <FieldItem
+                          key={field.key}
+                          field={field}
+                          expandedFields={expandedFields}
+                          toggleFieldExpansion={toggleFieldExpansion}
+                          onClick={handleFieldClick}
+                        />
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            )}
+
+            {!selectedContext && (
+              <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-4">
+                <p>{t("select_context_to_view_fields")}</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </Form>
   );
 }
 
