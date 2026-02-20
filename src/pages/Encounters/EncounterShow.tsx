@@ -94,8 +94,8 @@ export const EncounterShow = (props: Props) => {
   useEncounterShortcuts();
 
   const canAccess = canReadClinicalData || canReadSelectedEncounter;
-  const hasToken = primaryEncounter?.appointment?.token;
-  const hasAppointmentId = Boolean(primaryEncounter?.appointment?.id);
+  const hasToken = !!primaryEncounter?.appointment?.token;
+  const hasAppointmentId = !!primaryEncounter?.appointment?.id;
 
   const canViewAppointmentEncounterHeader = hasToken || hasAppointmentId;
 
