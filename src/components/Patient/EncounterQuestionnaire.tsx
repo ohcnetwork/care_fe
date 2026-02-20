@@ -46,14 +46,7 @@ export default function EncounterQuestionnaire({
 
   const handleSubmit = useCallback(() => {
     if (encounterId && facilityId) {
-      const base = `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}`;
-      const tab =
-        questionnaireSlug === "medication_request"
-          ? "medicines"
-          : questionnaireSlug === "service_request"
-            ? "service_requests"
-            : "updates";
-      navigate(`${base}/${tab}`);
+      goBack();
     } else if (facilityId) {
       navigate(`/facility/${facilityId}/patient/${patientId}/updates`);
     } else {
