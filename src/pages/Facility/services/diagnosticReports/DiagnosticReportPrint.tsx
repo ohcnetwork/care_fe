@@ -209,7 +209,7 @@ export default function DiagnosticReportPrint({
   return (
     <div className="flex justify-center items-center">
       <PrintPreview
-        title={`${t("diagnostic_report")} - ${report.code?.display || report.service_request?.title || t("diagnostic_report")}`}
+        title={`${t("diagnostic_report", { count: 1 })} - ${report.code?.display || report.service_request?.title || t("diagnostic_report", { count: 1 })}`}
       >
         <div className="max-w-4xl mx-auto">
           {/* Header with Facility Name and Logo */}
@@ -237,7 +237,8 @@ export default function DiagnosticReportPrint({
           </div>
 
           <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold my-2">
-            {report.service_request?.title || t("diagnostic_report")}
+            {report.service_request?.title ||
+              t("diagnostic_report", { count: 1 })}
           </h2>
 
           {/* Patient Details */}
@@ -304,6 +305,15 @@ export default function DiagnosticReportPrint({
                 {formatName(report.requester)}
               </span>
             </div>
+            {report.encounter.current_location && (
+              <div className="grid grid-cols-[6rem_auto_1fr] items-center">
+                <span className="text-gray-600">{t("location")}</span>
+                <span className="text-gray-600">:</span>
+                <span className="font-semibold ml-2">
+                  {report.encounter.current_location.name}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="mt-8 space-y-8">

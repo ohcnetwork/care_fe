@@ -2,12 +2,14 @@ import { atomWithStorage, createJSONStorage } from "jotai/utils";
 
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
+import { UserReadMinimal } from "@/types/user/user";
 
 export interface EncounterHistoryFilters {
   status?: string;
   selectedTags: TagConfig[];
   tagsBehavior: string;
   selectedOrg?: FacilityOrganizationRead;
+  selectedCareTeamMember?: UserReadMinimal;
   dateFrom?: string; // ISO string for serialization
   dateTo?: string; // ISO string for serialization
 }
@@ -17,6 +19,7 @@ const defaultHistoryFilters: EncounterHistoryFilters = {
   selectedTags: [],
   tagsBehavior: "any",
   selectedOrg: undefined,
+  selectedCareTeamMember: undefined,
   dateFrom: undefined,
   dateTo: undefined,
 };
@@ -38,6 +41,7 @@ export interface EncounterListFilters {
   selectedTags: TagConfig[];
   tagsBehavior: string;
   selectedOrg?: FacilityOrganizationRead;
+  selectedCareTeamMember?: UserReadMinimal;
   dateFrom?: string; // ISO string for serialization
   dateTo?: string; // ISO string for serialization
 }
@@ -48,6 +52,7 @@ const defaultListFilters: EncounterListFilters = {
   selectedTags: [],
   tagsBehavior: "any",
   selectedOrg: undefined,
+  selectedCareTeamMember: undefined,
   dateFrom: undefined,
   dateTo: undefined,
 };
