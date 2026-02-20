@@ -52,7 +52,7 @@ export default function EncounterQuestionnaire({
     } else {
       navigate(`/patient/${patientId}/updates`);
     }
-  }, [questionnaireSlug, facilityId, patientId, encounterId]);
+  }, [facilityId, patientId, encounterId, goBack]);
 
   return (
     <Page
