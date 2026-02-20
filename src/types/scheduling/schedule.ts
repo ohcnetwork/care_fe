@@ -8,6 +8,7 @@ import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/c
 import { EncounterListRead } from "@/types/emr/encounter/encounter";
 import {
   PatientListRead,
+  PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
@@ -124,6 +125,10 @@ export interface TokenSlot {
   availability: {
     name: string;
     tokens_per_slot: number;
+    schedule: {
+      id: string;
+      name: string;
+    };
   };
   start_datetime: string; // timezone naive datetime
   end_datetime: string; // timezone naive datetime
@@ -247,6 +252,7 @@ export type PublicAppointment = AppointmentBase & {
 };
 
 export type AppointmentRead = Appointment & {
+  patient: PatientRead;
   tags: TagConfig[];
   updated_by: UserReadMinimal | null;
   created_by: UserReadMinimal;

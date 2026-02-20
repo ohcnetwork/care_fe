@@ -369,6 +369,7 @@ export default function AddChargeItemsBillingSheet({
                 }}
                 translationBaseKey="charge_item_definition"
                 data-shortcut-id="keydown-action"
+                defaultOpen={open}
               />
             </div>
 

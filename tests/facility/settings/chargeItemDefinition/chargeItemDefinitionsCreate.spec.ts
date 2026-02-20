@@ -78,7 +78,7 @@ test.describe("Charge Item Definition Creation", () => {
     );
     await expect(
       page.getByRole("textbox", { name: /base price/i }),
-    ).toHaveValue(basePrice);
+    ).toHaveValue(Number(basePrice).toFixed(2));
   });
 
   test("create charge item definition with all fields", async ({ page }) => {
@@ -134,10 +134,18 @@ test.describe("Charge Item Definition Creation", () => {
       .click();
     await page.getByRole("checkbox").first().click();
     await page.getByRole("button", { name: "Done" }).click();
+    const switchElement = page.getByRole("switch", {
+      name: "Use facility global value",
+    });
+    if (await switchElement.isChecked()) {
+      await switchElement.click();
+    }
+    await page.waitForLoadState("networkidle");
     await page.getByRole("button", { name: "Add Condition" }).click();
+    // To do: make this metric agnostic/otherwise might have to adjust everytime we add a new metric
     await page
       .getByRole("combobox")
-      .filter({ hasText: /^Metric|Patient Age$/ })
+      .filter({ hasText: /^Metric|Encounter/ })
       .click();
     await page.getByRole("option", { name: "Patient Age" }).click();
     await page.getByRole("combobox").filter({ hasText: "In range" }).click();
@@ -158,12 +166,12 @@ test.describe("Charge Item Definition Creation", () => {
     await page.getByRole("link", { name: "View" }).click();
     await expect(page.getByRole("heading", { name: title })).toBeVisible();
     await expect(page.getByText(description)).toBeVisible();
-    await expect(page.getByText(purpose)).toBeVisible();
+    await expect(page.getByText(purpose).last()).toBeVisible();
     await expect(page.getByText(url)).toBeVisible();
     await expect(page.getByText(mrp)).toBeVisible();
     await expect(page.getByText(purchasePrice)).toBeVisible();
-    await expect(page.getByText("9%")).toBeVisible();
-    await expect(page.getByText("6%")).toBeVisible();
+    await expect(page.getByText("9.00%")).toBeVisible();
+    await expect(page.getByText("6.00%")).toBeVisible();
     await expect(
       page.getByText("Patient Age is in range 60 to 120 years"),
     ).toBeVisible();

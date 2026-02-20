@@ -5,13 +5,17 @@ import {
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import { format, isWithinInterval } from "date-fns";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import RadioInput from "@/components/ui/RadioInput";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
+import {
+  getUniqueSchedulesFromSlots,
+  groupSlotsByAvailability,
+} from "@/pages/Appointments/utils";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
@@ -79,16 +83,52 @@ export function AppointmentSlotPicker({
     [onSlotSelect, onSlotDetailsChange, slotsQuery.data],
   );
 
-  const { slotGroups, availableSlots } = useMemo(() => {
-    const slotGroups = groupSlotsByAvailability(slotsQuery.data || []);
+  const { slotGroups, availableSlots, uniqueSchedules } = useMemo(() => {
+    const allSlots = slotsQuery.data || [];
+    const uniqueSchedules = getUniqueSchedulesFromSlots(allSlots);
+    const slotGroups = groupSlotsByAvailability(allSlots);
     const availableSlots = slotGroups.flatMap((group) => group.slots);
-    return { slotGroups, availableSlots };
+    return { slotGroups, availableSlots, uniqueSchedules };
   }, [slotsQuery.data]);
 
-  // Pre-select the first slot for current date if there are any slots available
+  // State for selected schedule filter
+  const [selectedScheduleId, setSelectedScheduleId] = useState<string | null>(
+    null,
+  );
+
+  // Auto-select the first schedule when schedules change
   useEffect(() => {
-    handleSlotSelect(availableSlots?.[0]?.id);
-  }, [availableSlots, handleSlotSelect]);
+    if (uniqueSchedules.length > 0) {
+      setSelectedScheduleId(uniqueSchedules[0].id);
+    } else {
+      setSelectedScheduleId(null);
+    }
+  }, [uniqueSchedules]);
+
+  // Filter slots based on selected schedule
+  const filteredSlotGroups = useMemo(() => {
+    if (!selectedScheduleId) return slotGroups;
+    return slotGroups
+      .map((group) => ({
+        ...group,
+        slots: group.slots.filter(
+          (slot) =>
+            slotsQuery.data?.find((s) => s.id === slot.id)?.availability
+              .schedule.id === selectedScheduleId,
+        ),
+      }))
+      .filter((group) => group.slots.length > 0);
+  }, [slotGroups, selectedScheduleId, slotsQuery.data]);
+
+  const filteredAvailableSlots = useMemo(() => {
+    return filteredSlotGroups.flatMap((group) => group.slots);
+  }, [filteredSlotGroups]);
+
+  // Pre-select the first slot for current date if there are any slots available
+  // Also triggers when selected schedule changes
+  useEffect(() => {
+    handleSlotSelect(filteredAvailableSlots?.[0]?.id);
+  }, [filteredAvailableSlots, handleSlotSelect]);
 
   return (
     <div
@@ -120,6 +160,18 @@ export function AppointmentSlotPicker({
         </div>
       </div>
       <div className="border-b border-gray-200 w-full" />
+      {/* Schedule Filter */}
+      {uniqueSchedules.length > 1 && (
+        <RadioInput
+          options={uniqueSchedules.map((schedule) => ({
+            label: schedule.name,
+            value: schedule.id,
+          }))}
+          value={selectedScheduleId ?? ""}
+          onValueChange={setSelectedScheduleId}
+          required
+        />
+      )}
       {slotsQuery.isFetching ? (
         <div className="flex flex-wrap gap-4">
           {Array.from({ length: 8 }).map((_, index) => (
@@ -167,7 +219,7 @@ export function AppointmentSlotPicker({
             </div>
           )}
           {!!slotsQuery.data?.length &&
-            slotGroups.map(({ availability, slots }) => (
+            filteredSlotGroups.map(({ availability, slots }) => (
               <div key={availability.name} className="flex flex-col">
                 <div className="flex flex-row gap-2 items-center mb-2 mt-2 sm:mt-0">
                   <ClipboardCheck size={16} />

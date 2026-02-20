@@ -1,10 +1,13 @@
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationRead } from "@/types/location/location";
+import { UserReadMinimal } from "@/types/user/user";
 
+import RenderFacilityUserFilter from "@/components/ui/multi-filter/facilityUserFilter";
 import RenderActivityDefinitionFilter, {
   ActivityDefinitionFilterValue,
 } from "./activityDefinitionFilter";
+import RenderCareTeamFilter from "./careTeamFilter";
 import RenderDateFilter from "./dateFilter";
 import RenderDepartmentFilter from "./departmentFilter";
 import GenericFilter from "./genericFilter";
@@ -86,6 +89,26 @@ export default function FilterRenderer({
             {...commonProps}
             facilityId={facilityId || ""}
             selectedDefinitions={selected as ActivityDefinitionFilterValue[]}
+          />
+          <NavigationHelper isActiveFilter={true} />
+        </>
+      );
+    case "care_team":
+      return (
+        <>
+          <RenderCareTeamFilter
+            {...commonProps}
+            selectedUsers={selected as UserReadMinimal[]}
+          />
+          <NavigationHelper isActiveFilter={true} />
+        </>
+      );
+    case "facility_user":
+      return (
+        <>
+          <RenderFacilityUserFilter
+            {...commonProps}
+            selectedUsers={selected as UserReadMinimal[]}
           />
           <NavigationHelper isActiveFilter={true} />
         </>

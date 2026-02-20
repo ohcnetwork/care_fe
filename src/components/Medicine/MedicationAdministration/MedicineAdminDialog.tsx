@@ -27,6 +27,8 @@ interface Props {
   lastAdministeredBy?: string;
   administrationRequest: MedicationAdministrationRequest;
   patientId: string;
+  otherGroupRequests?: MedicationRequestRead[];
+  onMedicationChange?: (medication: MedicationRequestRead) => void;
 }
 
 export const MedicineAdminDialog = ({
@@ -37,6 +39,8 @@ export const MedicineAdminDialog = ({
   lastAdministeredBy,
   administrationRequest: initialRequest,
   patientId,
+  otherGroupRequests,
+  onMedicationChange,
 }: Props) => {
   const { t } = useTranslation();
 
@@ -86,7 +90,9 @@ export const MedicineAdminDialog = ({
             lastAdministeredBy={lastAdministeredBy}
             administrationRequest={administrationRequest}
             onChange={setAdministrationRequest}
+            onMedicationChange={onMedicationChange}
             isValid={setIsFormValid}
+            otherGroupRequests={otherGroupRequests}
           />
         </div>
 
