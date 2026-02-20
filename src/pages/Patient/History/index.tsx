@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { X } from "lucide-react";
+import { ArrowLeftIcon, X } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -15,6 +15,8 @@ import query from "@/Utils/request/query";
 import { MedicationHistory } from "@/pages/Patient/History/MedicationHistory";
 import patientApi from "@/types/emr/patient/patientApi";
 
+import { DiagnosticReportsTab } from "@/pages/Encounters/tabs/diagnostic-reports";
+import { Separator } from "@radix-ui/react-separator";
 import { AllergyHistory } from "./AllergyHistory";
 import { DiagnosesHistory } from "./DiagnosesHistory";
 import { ResponsesHistory } from "./ResponsesHistory";
@@ -22,10 +24,12 @@ import { SymptomsHistory } from "./SymptomsHistory";
 
 export function ClinicalHistoryPage({
   patientId,
+  facilityId,
   tab = "symptoms",
   fallBackUrl,
 }: {
   fallBackUrl?: string;
+  facilityId?: string;
   patientId: string;
   tab: string;
 }) {
@@ -58,6 +62,16 @@ export function ClinicalHistoryPage({
   });
 
   const tabs = {
+    responses: {
+      label: t("responses"),
+      component: <ResponsesHistory patientId={patientId} />,
+    },
+    diagnostic_reports: {
+      label: t("diagnostic_report_other", { count: 2 }),
+      component: (
+        <DiagnosticReportsTab patientId={patientId} facilityId={facilityId} />
+      ),
+    },
     symptoms: {
       label: t("past_symptoms"),
       component: <SymptomsHistory patientId={patientId} />,
@@ -74,10 +88,6 @@ export function ClinicalHistoryPage({
       label: t("past_medications"),
       component: <MedicationHistory patientId={patientId} />,
     },
-    responses: {
-      label: t("responses"),
-      component: <ResponsesHistory patientId={patientId} />,
-    },
   } as const;
 
   return (
@@ -90,16 +100,29 @@ export function ClinicalHistoryPage({
       hideTitleOnPage
     >
       <div className="flex justify-between items-center bg-gray-100 -mx-3 -mt-8 md:-mt-8 md:-mx-9 px-3 md:px-6 pb-3 pt-2 md:rounded-t-lg">
-        <div>
-          {patient ? (
-            <h5 className="text-lg font-semibold">
-              {t("patient_clinical_history_page_title", { name: patient.name })}
-            </h5>
-          ) : (
-            <Skeleton className="w-20 h-4" />
-          )}
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <div className="flex items-center gap-2 shrink-0">
+            <Button variant="outline" onClick={handleClose} size="icon">
+              <ArrowLeftIcon />
+            </Button>
+            <span className="text-sm text-gray-700">
+              {sourceUrl ? t("back_to_encounter") : t("back_to_patient")}
+            </span>
+          </div>
+          <Separator orientation="vertical" />
+          <div className="min-w-0">
+            {patient ? (
+              <h5 className="text-lg font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
+                {t("patient_clinical_history_page_title", {
+                  name: patient.name,
+                })}
+              </h5>
+            ) : (
+              <Skeleton className="w-20 h-4" />
+            )}
+          </div>
         </div>
-        <div>
+        <div className="shrink-0">
           <Button variant="outline" onClick={handleClose} size="icon">
             <X className="size-4" />
           </Button>

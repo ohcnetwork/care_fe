@@ -11,10 +11,10 @@ import { CalendarIcon, Logs } from "lucide-react";
 export function LocationNav() {
   const { t } = useTranslation();
 
-  const { facility } = useCurrentFacility();
-  const { location } = useCurrentLocation();
+  const { facilityId } = useCurrentFacility();
+  const { locationId } = useCurrentLocation();
 
-  const baseUrl = `/facility/${facility?.id}/locations/${location?.id}`;
+  const baseUrl = `/facility/${facilityId}/locations/${locationId}`;
 
   return (
     <NavMain
@@ -47,6 +47,10 @@ export function LocationNav() {
             {
               name: "℞ " + t("dispense"),
               url: `${baseUrl}/medication_dispense`,
+            },
+            {
+              name: t("medication_return"),
+              url: `${baseUrl}/medication_return`,
             },
           ],
         },

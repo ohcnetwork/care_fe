@@ -59,6 +59,7 @@ import {
   NumericRange,
   QualifiedRange,
 } from "@/types/base/qualifiedRange/qualifiedRange";
+import { ENCOUNTER_CLASS } from "@/types/emr/encounter/encounter";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
@@ -912,6 +913,41 @@ export function RenderConditionInput({
             />
             <AgeTypeSelector />
           </div>
+        );
+      }
+      break;
+    }
+    case "encounter_class": {
+      if (operation === ConditionOperation.equality) {
+        return (
+          <FormField
+            control={form.control}
+            name={`${fieldName}.value` as any}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Select
+                    value={field.value}
+                    onValueChange={(value) => {
+                      handleSetValue(value, index);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("select_a_value")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ENCOUNTER_CLASS.map((encounterClass) => (
+                        <SelectItem key={encounterClass} value={encounterClass}>
+                          {t(`encounter_class__${encounterClass}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         );
       }
       break;

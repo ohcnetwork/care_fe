@@ -10,6 +10,7 @@ import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -149,9 +150,10 @@ export function ChargeItemDefinitionForm({
           },
           { message: t("invalid_url") },
         ),
-      base_price: zodDecimal({ min: 0, message: t("base_price_is_required") }),
+      base_price: zodDecimal({ message: t("base_price_is_required") }),
       mrp: zodDecimal({ min: 0 }).optional().nullable(),
       purchase_price: zodDecimal({ min: 0 }).optional().nullable(),
+      can_edit_charge_item: z.boolean(),
       price_components: z.array(
         z.object({
           monetary_component_type: z.nativeEnum(MonetaryComponentType),
@@ -159,6 +161,7 @@ export function ChargeItemDefinitionForm({
           factor: zodDecimal({ min: 0, max: 100 }).optional().nullable(),
           amount: zodDecimal({ min: 0 }).optional().nullable(),
           conditions: z.array(conditionSchema),
+          global_component: z.boolean().optional(),
         }),
       ),
     });
@@ -207,6 +210,8 @@ export function ChargeItemDefinitionForm({
       purchase_price: purchasePriceComponent?.amount
         ? round(purchasePriceComponent.amount)
         : null,
+      // Can edit charge item
+      can_edit_charge_item: initialData?.can_edit_charge_item ?? true,
       // Price components (excluding base price, MRP, and Purchase Price components)
       price_components:
         initialData?.price_components
@@ -628,6 +633,24 @@ export function ChargeItemDefinitionForm({
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="can_edit_charge_item"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>{t("can_edit_charge_item")}</FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
             </CardContent>
           </Card>
         )}
@@ -661,8 +684,12 @@ export function ChargeItemDefinitionForm({
                                 field.onChange(e.target.value || "")
                               }
                               placeholder="0.00"
+                              allowNegative
                             />
                           </FormControl>
+                          <p className="text-xs text-muted-foreground">
+                            {t("negative_price_for_discount_hint")}
+                          </p>
                           <FormMessage />
                         </FormItem>
                       )}

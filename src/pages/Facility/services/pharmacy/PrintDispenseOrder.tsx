@@ -9,18 +9,16 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import Loading from "@/components/Common/Loading";
 import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
+import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
 
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { DispenseOrderRead } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
-import {
-  MedicationDispenseRead,
-  MedicationDispenseStatus,
-} from "@/types/emr/medicationDispense/medicationDispense";
+import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { PatientRead } from "@/types/emr/patient/patient";
-import patientApi from "@/types/emr/patient/patientApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+
 import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -84,20 +82,12 @@ const DispenseOrderContent = ({
               { key: "prepared_date" },
             ]}
             rows={dispenses.map((dispense) => {
-              const instruction = dispense.dosage_instruction[0] ?? {};
-              const frequency = instruction?.timing?.code;
-              const dosage = instruction?.dose_and_rate?.dose_quantity;
+              const instruction = dispense.dosage_instruction?.[0];
 
               return {
                 medicine: dispense.item.product.product_knowledge.name,
-                dosage: dosage ? `${dosage.value} ${dosage.unit.display}` : "-",
-                frequency: instruction?.as_needed_boolean
-                  ? `${t("as_needed_prn")} ${
-                      instruction?.as_needed_for?.display
-                        ? `(${instruction.as_needed_for.display})`
-                        : ""
-                    }`
-                  : frequency?.display || "-",
+                dosage: formatDosage(instruction) || "-",
+                frequency: formatFrequency(instruction) || "-",
                 quantity: round(dispense.quantity) || "-",
                 lot_batch_number:
                   dispense.item.product.batch?.lot_number || "-",
@@ -138,87 +128,87 @@ const DispenseOrderPreview = ({
       title={`${t("dispense_order")} - ${patient.name}`}
       disabled={!dispenses?.length}
     >
-      <div className="md:p-2 max-w-4xl mx-auto">
-        <div>
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
-            <img
-              src={careConfig.mainLogo?.dark}
-              alt="Care Logo"
-              className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2"
-            />
-            <div className="text-center sm:text-left sm:order-1">
-              <h1 className="text-3xl font-semibold">{facility?.name}</h1>
+      <div className="max-w-4xl mx-auto">
+        <div className="flex justify-between items-start mb-2 pb-2 border-b border-gray-200">
+          <div className="flex items-start gap-4">
+            <div className="text-left">
+              <h1 className="text-2xl font-medium">{facility?.name}</h1>
               {facility?.address && (
-                <div className="text-gray-500 whitespace-pre-wrap break-words text-sm">
+                <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
                   {facility.address}
                   {facility.phone_number && (
                     <p className="text-gray-500 text-sm">
-                      {facility.phone_number}
+                      {t("phone")}: {facility.phone_number}
                     </p>
                   )}
                 </div>
               )}
-              <h2 className="mt-2 text-gray-500 uppercase text-sm tracking-wide font-semibold">
-                {t("dispense_order")}
-              </h2>
             </div>
           </div>
-
-          {/* Patient Details */}
-          <div className="grid md:grid-cols-2 print:grid-cols-2 gap-x-12 gap-y-6 mb-8">
-            <div className="space-y-3">
-              <DetailRow label={t("patient")} value={patient.name} isStrong />
-              <DetailRow
-                label={`${t("age")} / ${t("sex")}`}
-                value={
-                  patient
-                    ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
-                    : undefined
-                }
-                isStrong
-              />
-              {patient?.instance_identifiers
-                ?.filter(
-                  ({ config }) =>
-                    config.config.use === PatientIdentifierUse.official,
-                )
-                .map((identifier) => (
-                  <DetailRow
-                    key={identifier.config.id}
-                    label={identifier.config.config.display}
-                    value={identifier.value}
-                    isStrong
-                  />
-                ))}
-            </div>
-            <div className="space-y-3">
-              <DetailRow
-                label={t("date")}
-                value={format(new Date(), "dd MMM yyyy, EEEE")}
-                isStrong
-              />
-              <DetailRow
-                label={t("mobile_number")}
-                value={patient && formatPhoneNumberIntl(patient.phone_number)}
-                isStrong
-              />
-              <DetailRow
-                label={t("location")}
-                value={dispenseOrder.location.name}
-                isStrong
-              />
-            </div>
-          </div>
-
-          <DispenseOrderContent
-            dispenseOrder={dispenseOrder}
-            dispenses={dispenses}
+          <img
+            src={careConfig.mainLogo?.dark}
+            alt="Logo"
+            className="h-10 w-auto object-contain mb-2 sm:mb-0 text-end"
           />
-
-          {/* Footer */}
-          <PrintFooter leftContent={t("computer_generated_document")} />
         </div>
+
+        <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold my-2">
+          {t("dispense_order")}
+        </h2>
+
+        {/* Patient Details */}
+        <div className="grid md:grid-cols-2 print:grid-cols-2 gap-6 border-t border-gray-200 pt-2">
+          <div className="space-y-2">
+            <DetailRow label={t("patient")} value={patient.name} isStrong />
+            <DetailRow
+              label={`${t("age")} / ${t("sex")}`}
+              value={
+                patient
+                  ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
+                  : undefined
+              }
+              isStrong
+            />
+            {patient?.instance_identifiers
+              ?.filter(
+                ({ config }) =>
+                  config.config.use === PatientIdentifierUse.official,
+              )
+              .map((identifier) => (
+                <DetailRow
+                  key={identifier.config.id}
+                  label={identifier.config.config.display}
+                  value={identifier.value}
+                  isStrong
+                />
+              ))}
+          </div>
+          <div className="space-y-2">
+            <DetailRow
+              label={t("date")}
+              value={format(new Date(), "dd MMM yyyy, EEEE")}
+              isStrong
+            />
+            <DetailRow
+              label={t("mobile_number")}
+              value={patient && formatPhoneNumberIntl(patient.phone_number)}
+              isStrong
+            />
+            <DetailRow
+              label={t("location")}
+              value={dispenseOrder.location.name}
+              isStrong
+            />
+          </div>
+        </div>
+
+        <DispenseOrderContent
+          dispenseOrder={dispenseOrder}
+          dispenses={dispenses}
+        />
+
+        {/* Footer */}
+        <PrintFooter leftContent={t("computer_generated_document")} />
       </div>
     </PrintPreview>
   );
@@ -245,14 +235,6 @@ export const PrintDispenseOrder = ({
     enabled: !!dispenseOrderId,
   });
 
-  const { data: patient, isLoading: isLoadingPatient } = useQuery({
-    queryKey: ["patient", dispenseOrder?.patient.id],
-    queryFn: query(patientApi.get, {
-      pathParams: { id: dispenseOrder?.patient.id ?? "" },
-    }),
-    enabled: !!dispenseOrder?.patient.id,
-  });
-
   const { data: medicationDispenses, isLoading: isLoadingDispenses } = useQuery<
     PaginatedResponse<MedicationDispenseRead>
   >({
@@ -261,17 +243,16 @@ export const PrintDispenseOrder = ({
       queryParams: {
         order: dispenseOrderId,
         location: locationId,
-        status: MedicationDispenseStatus.completed,
       },
     }),
-    enabled: !!dispenseOrderId,
+    enabled: !!dispenseOrderId && !!locationId,
   });
 
-  if (isLoadingOrder || isLoadingPatient || isLoadingDispenses) {
+  if (isLoadingOrder || isLoadingDispenses) {
     return <Loading />;
   }
 
-  if (!dispenseOrder || !patient) {
+  if (!dispenseOrder) {
     return (
       <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
         {t("dispense_order_not_found")}
@@ -291,7 +272,7 @@ export const PrintDispenseOrder = ({
     <DispenseOrderPreview
       dispenseOrder={dispenseOrder}
       dispenses={medicationDispenses.results}
-      patient={patient}
+      patient={dispenseOrder.patient}
     />
   );
 };

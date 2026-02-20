@@ -90,7 +90,7 @@ const processRowLocations = (data: string[][]) => {
         form: locationForm,
         mode: locationForm === "bd" ? "instance" : "kind",
         status: "active",
-        operational_status: "C",
+        operational_status: "U",
         description,
         children: [],
       };

@@ -1,5 +1,6 @@
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { formatDistanceToNow } from "date-fns";
 import { Hash, MoreVertical } from "lucide-react";
 import { Link, navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
@@ -246,7 +247,13 @@ export function AccountShow({
   const tabs = {
     invoices: {
       label: t("invoices"),
-      component: <InvoicesData facilityId={facilityId} accountId={accountId} />,
+      component: (
+        <InvoicesData
+          facilityId={facilityId}
+          accountId={accountId}
+          hideAccountColumn
+        />
+      ),
 
       shortcutId: "switch-to-invoices-tab",
     },
@@ -263,7 +270,13 @@ export function AccountShow({
     },
     payments: {
       label: t("payments"),
-      component: <PaymentsData facilityId={facilityId} accountId={accountId} />,
+      component: (
+        <PaymentsData
+          facilityId={facilityId}
+          accountId={accountId}
+          hideAccountColumn
+        />
+      ),
       shortcutId: "switch-to-payments-tab",
     },
     reports: {
@@ -346,8 +359,8 @@ export function AccountShow({
                       }
                     >
                       <CareIcon icon="l-plus" className="size-4" />
-                      {t("record_payment")}
-                      <ShortcutBadge actionId="record-payment-account" />
+                      {t("add_credit_payment")}
+                      <ShortcutBadge actionId="credit-payment-account" />
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -405,7 +418,7 @@ export function AccountShow({
                   }
                 >
                   <CareIcon icon="l-plus" className="size-4" />
-                  {t("payment")}
+                  {t("credit")}
                   <ShortcutBadge actionId="record-payment-account" />
                 </Button>
                 <DropdownMenu>
@@ -492,7 +505,7 @@ export function AccountShow({
             </div>
             <div>
               <p className="text-sm text-gray-700 font-medium">
-                {t("tags_other")}
+                {t("tags_proper")}
               </p>
               <div className="flex flex-wrap gap-1">
                 <TagAssignmentSheet
@@ -624,7 +637,7 @@ export function AccountShow({
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           <Button
             variant="outline"
             className="gap-2 border-gray-400 text-gray-950 hidden"
@@ -642,6 +655,25 @@ export function AccountShow({
               <CareIcon icon="l-refresh" className="size-4" />
               {rebalanceMutation.isPending ? t("rebalancing") : t("rebalance")}
             </Button>
+          )}
+          {account.calculated_at && (
+            <span
+              className="text-xs text-gray-500 cursor-default"
+              title={new Date(account.calculated_at).toLocaleString("en-IN", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+                second: "2-digit",
+              })}
+            >
+              {t("last_calculated_at", {
+                time: formatDistanceToNow(new Date(account.calculated_at), {
+                  addSuffix: true,
+                }),
+              })}
+            </span>
           )}
         </div>
       </div>
@@ -661,6 +693,7 @@ export function AccountShow({
         open={sheetOpen}
         onOpenChange={setSheetOpen}
         facilityId={facilityId}
+        patientId={account.patient.id}
         initialValues={account}
         isEdit
       />

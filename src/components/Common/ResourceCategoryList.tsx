@@ -261,7 +261,7 @@ interface ItemSearchConfig<T extends BaseSearchableItem> {
     queryFn: {
       path: string;
       method: "GET";
-      TRes: { results: T[] };
+      TRes: { results: T[]; count: number };
     };
     pathParams?: Record<string, string>;
     queryParams?: Record<string, unknown>;
@@ -425,7 +425,7 @@ export function ResourceCategoryList<
                 variant="outline"
                 onClick={handleCreateCategory}
                 disabled={isLeafCategory && !allowCategoryCreate}
-                hidden={isLeafCategory}
+                hidden={isLeafCategory && !allowCategoryCreate}
                 className="w-full sm:w-auto"
               >
                 <CareIcon icon="l-folder-plus" className="mr-2" />
@@ -547,7 +547,13 @@ export function ResourceCategoryList<
         />
       )}
 
-      <Pagination totalCount={categoriesResponse?.count || 0} />
+      <Pagination
+        totalCount={
+          isSearching && itemSearchConfig
+            ? itemsResponse?.count || 0
+            : categoriesResponse?.count || 0
+        }
+      />
     </div>
   );
 }
