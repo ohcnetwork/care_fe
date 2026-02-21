@@ -109,18 +109,17 @@ import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/A
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { TokenGenerationSheet } from "@/pages/Appointments/components/TokenGenerationSheet";
-import {
-  RESCHEDULE_REFERENCE_ID,
-  extractAppointmentFromBatchResponse,
-} from "@/pages/Appointments/utils";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { BatchRequestBody } from "@/types/base/batch/batch";
+import {
+  BatchRequestBody,
+  BatchRequestResponse,
+} from "@/types/base/batch/batch";
 import batchApi from "@/types/base/batch/batchApi";
 import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
 import { FacilityRead } from "@/types/facility/facility";
 import {
-  TokenActiveStatuses,
+  TokenFinalStatuses,
   TokenStatus,
   TokenUpdate,
 } from "@/types/tokens/token/token";
@@ -805,24 +804,140 @@ const AppointmentActions = ({
 
   const [note, setNote] = useState(appointment.note);
 
-  type AppointmentBatchInput = {
-    requests: BatchRequestBody<
-      AppointmentCancelRequest | AppointmentRescheduleRequest | TokenUpdate
-    >["requests"];
-    mode: "cancel" | "reschedule";
-  };
+  const { mutate: cancelAppointment, isPending: isCancellingAppointment } =
+    useMutation({
+      mutationFn: (variables: {
+        reason: "cancelled" | "entered_in_error";
+        note?: string;
+      }) => {
+        const requests: BatchRequestBody<
+          AppointmentCancelRequest | TokenUpdate
+        >["requests"] = [];
+        requests.push({
+          url: scheduleApis.appointments.cancel.path
+            .replace("{facilityId}", facilityId)
+            .replace("{id}", appointment.id),
+          method: scheduleApis.appointments.cancel.method,
+          reference_id: "cancel-appointment",
+          body: {
+            reason: variables.reason,
+            note: variables.note,
+          },
+        });
+        if (
+          appointment.token &&
+          !TokenFinalStatuses.includes(appointment.token.status)
+        ) {
+          requests.push({
+            url: tokenApi.update.path
+              .replace("{facility_id}", facilityId)
+              .replace("{queue_id}", appointment.token.queue.id)
+              .replace("{id}", appointment.token.id),
+            method: tokenApi.update.method,
+            reference_id: "token-cancelled",
+            body: {
+              note: appointment.token.note,
+              sub_queue: appointment.token.sub_queue?.id || null,
+              status: TokenStatus.CANCELLED,
+            },
+          });
+        }
+        return mutate(batchApi.batchRequest)({ requests });
+      },
+      onSuccess: (response: BatchRequestResponse<unknown>) => {
+        if (
+          response.results.find(
+            (result) => result.reference_id === "cancel-appointment",
+          )
+        ) {
+          queryClient.invalidateQueries({
+            queryKey: ["appointment", appointment.id],
+          });
+          toast.success(t("appointment_cancelled"));
+        }
+        if (
+          response.results.find(
+            (result) => result.reference_id === "token-cancelled",
+          )
+        ) {
+          queryClient.invalidateQueries({
+            queryKey: [
+              "infinite-tokens",
+              facilityId,
+              appointment.token?.queue.id || "",
+            ],
+          });
+          queryClient.invalidateQueries({
+            queryKey: [
+              "token-queue-summary",
+              facilityId,
+              appointment.token?.queue.id || "",
+            ],
+          });
+        }
+      },
+    });
 
   const {
-    mutate: submitAppointmentBatch,
-    isPending: isAppointmentBatchPending,
+    mutate: rescheduleAppointment,
+    isPending: isReschedulingAppointment,
   } = useMutation({
-    mutationFn: (input: AppointmentBatchInput) =>
-      mutate(batchApi.batchRequest)({ requests: input.requests }),
-    onSuccess: (response, input: AppointmentBatchInput) => {
-      queryClient.invalidateQueries({
-        queryKey: ["appointment", appointment.id],
+    mutationFn: () => {
+      const requests: BatchRequestBody<
+        AppointmentRescheduleRequest | TokenUpdate
+      >["requests"] = [];
+      requests.push({
+        url: scheduleApis.appointments.reschedule.path
+          .replace("{facilityId}", facilityId)
+          .replace("{id}", appointment.id),
+        method: scheduleApis.appointments.reschedule.method,
+        reference_id: "reschedule-appointment",
+        body: {
+          new_slot: selectedSlotId || "",
+          previous_booking_note: oldNote,
+          new_booking_note: newNote,
+          tags: appointment.tags.map((tag) => tag.id),
+        },
       });
       if (appointment.token) {
+        requests.push({
+          url: tokenApi.update.path
+            .replace("{facility_id}", facilityId)
+            .replace("{queue_id}", appointment.token.queue.id)
+            .replace("{id}", appointment.token.id),
+          method: tokenApi.update.method,
+          reference_id: "token-cancelled",
+          body: {
+            note: appointment.token.note,
+            sub_queue: appointment.token.sub_queue?.id || null,
+            status: TokenStatus.CANCELLED,
+          },
+        });
+      }
+      return mutate(batchApi.batchRequest)({ requests });
+    },
+    onSuccess: (response: BatchRequestResponse<unknown>) => {
+      if (
+        response.results.find(
+          (result) => result.reference_id === "reschedule-appointment",
+        )
+      ) {
+        queryClient.invalidateQueries({
+          queryKey: ["appointment", appointment.id],
+        });
+        const result = response.results.find(
+          (result) => result.reference_id === "reschedule-appointment",
+        );
+        const newAppointment = result?.data as Appointment;
+        navigate(
+          `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${newAppointment.id}`,
+        );
+      }
+      if (
+        response.results.find(
+          (result) => result.reference_id === "token-cancelled",
+        )
+      ) {
         queryClient.invalidateQueries({
           queryKey: [
             "infinite-tokens",
@@ -838,103 +953,8 @@ const AppointmentActions = ({
           ],
         });
       }
-      if (input.mode === "reschedule") {
-        toast.success(t("appointment_rescheduled"));
-        setIsRescheduleOpen(false);
-        setSelectedSlotId(undefined);
-        setRescheduleReason("");
-        const newAppointment = extractAppointmentFromBatchResponse(response);
-        navigate(
-          `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${newAppointment.id}`,
-        );
-      } else {
-        toast.success(t("appointment_cancelled"));
-      }
     },
   });
-
-  const handleRescheduleAppointment = () => {
-    const requests: BatchRequestBody<
-      AppointmentRescheduleRequest | TokenUpdate
-    >["requests"] = [];
-    if (selectedSlotId) {
-      requests.push({
-        url: scheduleApis.appointments.reschedule.path
-          .replace("{facilityId}", facilityId)
-          .replace("{id}", appointment.id),
-        method: scheduleApis.appointments.reschedule.method,
-        reference_id: RESCHEDULE_REFERENCE_ID,
-        body: {
-          new_slot: selectedSlotId,
-          previous_booking_note: oldNote,
-          new_booking_note: newNote,
-          tags: appointment.tags.map((tag) => tag.id),
-        },
-      });
-    }
-
-    if (
-      appointment?.token &&
-      TokenActiveStatuses.includes(appointment.token.status)
-    ) {
-      requests.push({
-        url: tokenApi.update.path
-          .replace("{facility_id}", facilityId)
-          .replace("{queue_id}", appointment.token.queue.id)
-          .replace("{id}", appointment.token.id),
-        method: tokenApi.update.method,
-        reference_id: "token-cancelled",
-        body: {
-          note: appointment.token.note,
-          sub_queue: appointment.token.sub_queue?.id || null,
-          status: TokenStatus.CANCELLED,
-        },
-      });
-    }
-    submitAppointmentBatch({ requests, mode: "reschedule" });
-  };
-
-  const handleAppointmentTokenCancel = ({
-    reason,
-    note,
-  }: {
-    reason: "cancelled" | "entered_in_error";
-    note?: string;
-  }) => {
-    const requests: BatchRequestBody<
-      AppointmentCancelRequest | TokenUpdate
-    >["requests"] = [];
-    requests.push({
-      url: scheduleApis.appointments.cancel.path
-        .replace("{facilityId}", facilityId)
-        .replace("{id}", appointment.id),
-      method: scheduleApis.appointments.cancel.method,
-      reference_id: "cancel-appointment",
-      body: {
-        reason: reason,
-        note: note || "",
-      },
-    });
-    if (
-      appointment?.token &&
-      TokenActiveStatuses.includes(appointment.token.status)
-    ) {
-      requests.push({
-        url: tokenApi.update.path
-          .replace("{facility_id}", facilityId)
-          .replace("{queue_id}", appointment.token.queue.id)
-          .replace("{id}", appointment.token.id),
-        method: tokenApi.update.method,
-        reference_id: "token-cancelled",
-        body: {
-          note: appointment.token.note,
-          sub_queue: appointment.token.sub_queue?.id || null,
-          status: TokenStatus.CANCELLED,
-        },
-      });
-    }
-    submitAppointmentBatch({ requests, mode: "cancel" });
-  };
 
   if (AppointmentFinalStatuses.includes(currentStatus)) {
     return null;
@@ -1141,11 +1161,11 @@ const AppointmentActions = ({
                           <Button
                             variant="default"
                             disabled={
-                              !selectedSlotId || isAppointmentBatchPending
+                              !selectedSlotId || isReschedulingAppointment
                             }
-                            onClick={handleRescheduleAppointment}
+                            onClick={() => rescheduleAppointment()}
                           >
-                            {isAppointmentBatchPending
+                            {isReschedulingAppointment
                               ? t("rescheduling")
                               : t("reschedule")}
                           </Button>
@@ -1193,7 +1213,7 @@ const AppointmentActions = ({
                       onClick={() =>
                         updateAppointment({
                           status: AppointmentStatus.NO_SHOW,
-                          note: note,
+                          note,
                         })
                       }
                       className={cn(buttonVariants({ variant: "destructive" }))}
@@ -1242,15 +1262,12 @@ const AppointmentActions = ({
                     <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={() =>
-                        handleAppointmentTokenCancel({
-                          reason: "cancelled",
-                          note: note,
-                        })
+                        cancelAppointment({ reason: "cancelled", note })
                       }
                       className={cn(buttonVariants({ variant: "destructive" }))}
                       disabled={!note.trim()}
                     >
-                      {isAppointmentBatchPending ? (
+                      {isCancellingAppointment ? (
                         <Loader2 className="size-4 animate-spin mr-2" />
                       ) : (
                         t("confirm")
@@ -1287,13 +1304,13 @@ const AppointmentActions = ({
                   <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() =>
-                      handleAppointmentTokenCancel({
+                      cancelAppointment({
                         reason: "entered_in_error",
                       })
                     }
                     className={cn(buttonVariants({ variant: "destructive" }))}
                   >
-                    {isAppointmentBatchPending ? (
+                    {isCancellingAppointment ? (
                       <Loader2 className="size-4 animate-spin mr-2" />
                     ) : (
                       t("confirm")
