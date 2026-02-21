@@ -15,7 +15,7 @@ export enum QuestionType {
 export interface ObservationDefinitionComponentSpec {
   code: Code;
   permitted_data_type: QuestionType;
-  permitted_unit: Code;
+  permitted_unit: Code | null;
   qualified_ranges: QualifiedRange[];
 }
 

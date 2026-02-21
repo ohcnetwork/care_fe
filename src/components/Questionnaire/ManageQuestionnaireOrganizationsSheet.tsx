@@ -40,7 +40,7 @@ import organizationApi from "@/types/organization/organizationApi";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 interface Props {
-  questionnaireId: string;
+  questionnaireSlug: string;
   trigger?: React.ReactNode;
 }
 
@@ -174,7 +174,7 @@ export function OrgSelector({
 }
 
 export default function ManageQuestionnaireOrganizationsSheet({
-  questionnaireId,
+  questionnaireSlug,
   trigger,
 }: Props) {
   const queryClient = useQueryClient();
@@ -187,9 +187,9 @@ export default function ManageQuestionnaireOrganizationsSheet({
   const isMobile = useBreakpoints({ default: true, sm: false });
 
   const { data: organizations, isLoading } = useQuery({
-    queryKey: ["questionnaire", questionnaireId, "organizations"],
+    queryKey: ["questionnaire", questionnaireSlug, "organizations"],
     queryFn: query(questionnaireApi.getOrganizations, {
-      pathParams: { slug: questionnaireId },
+      pathParams: { slug: questionnaireSlug },
     }),
     enabled: open,
   });
@@ -208,13 +208,13 @@ export default function ManageQuestionnaireOrganizationsSheet({
 
   const { mutate: setOrganizations, isPending: isUpdating } = useMutation({
     mutationFn: mutate(questionnaireApi.setOrganizations, {
-      pathParams: { slug: questionnaireId },
+      pathParams: { slug: questionnaireSlug },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["questionnaire", questionnaireId, "organizations"],
+        queryKey: ["questionnaire", questionnaireSlug, "organizations"],
       });
-      toast.success("Organizations updated successfully");
+      toast.success(t("organizations_updated_successfully"));
       setOpen(false);
     },
   });

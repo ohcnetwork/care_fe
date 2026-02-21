@@ -18,26 +18,13 @@ const DOSAGE_UNITS = [
   "count",
 ];
 
-const FREQUENCY_OPTIONS = [
-  "BID (1-0-1)",
-  "TID (1-1-1)",
-  "QID (1-1-1-1)",
-  "AM (1-0-0)",
-  "PM (0-0-1)",
-  "QD (Once a day)",
-  "QOD (Alternate days)",
-  "Q1H (Every 1 hour)",
-  "Q2H (Every 2 hours)",
-  "Q3H (Every 3 hours)",
-  "Q4H (Every 4 hours)",
-  "Q6H (Every 6 hours)",
-  "Q8H (Every 8 hours)",
-  "BED (0-0-1)",
-  "WK (Weekly)",
-  "MO (Monthly)",
+const DURATION_UNITS = [
+  { value: "d", label: "days" },
+  { value: "h", label: "hours" },
+  { value: "wk", label: "weeks" },
+  { value: "mo", label: "months" },
+  { value: "a", label: "years" },
 ];
-
-const DURATION_UNITS = ["d", "h", "wk", "mo", "a"];
 
 const INTENT_OPTIONS = [
   "proposal",
@@ -60,6 +47,14 @@ const medicationOptions = [
   "Mesna 600 mg oral tablet",
   "Senna 7.5 mg oral tablet",
   "Apixaban 5 mg oral tablet",
+];
+
+export const frequencies = [
+  { input: "1-0-1", display: "1-0-1 (Twice a day)" },
+  { input: "1-1-1", display: "1-1-1 (Thrice a day)" },
+  { input: "1-1-1-1", display: "1-1-1-1 (Four times a day)" },
+  { input: "Q2H", display: "Q2H (Every 2 hours)" },
+  { input: "Q1H", display: "Q1H (Every 1 hour)" },
 ];
 
 const instructionOptions = [
@@ -111,9 +106,11 @@ test.describe("Medication Request Questionnaire", () => {
   let medicationName: string;
   let dosageQuantity: number;
   let dosageUnit: string;
-  let frequency: string;
+  let durationLabel: string;
   let durationUnit: string;
   let duration: number;
+  let durationData: { value: string; label: string };
+  let frequencyData: { input: string; display: string };
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
@@ -122,8 +119,10 @@ test.describe("Medication Request Questionnaire", () => {
     medicationName = faker.helpers.arrayElement(medicationOptions);
     dosageQuantity = faker.number.int(INT_MAX);
     dosageUnit = faker.helpers.arrayElement(DOSAGE_UNITS);
-    frequency = faker.helpers.arrayElement(FREQUENCY_OPTIONS);
-    durationUnit = faker.helpers.arrayElement(DURATION_UNITS);
+    frequencyData = faker.helpers.arrayElement(frequencies);
+    durationData = faker.helpers.arrayElement(DURATION_UNITS);
+    durationLabel = durationData.label;
+    durationUnit = durationData.value;
     duration = faker.number.int({ min: 1, max: INT_MAX });
 
     questionnaireUrl = `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request`;
@@ -138,9 +137,9 @@ test.describe("Medication Request Questionnaire", () => {
 
     await page
       .getByRole("combobox")
-      .filter({ hasText: /Add (another )?Medication/i })
+      .filter({ hasText: /Add Medication/i })
       .click();
-    await page.getByRole("tab", { name: "Medication List" }).click();
+    await page.getByRole("tab", { name: "Medication" }).click();
     await page.getByPlaceholder(/Search Medications/i).fill(medicationName);
     await page
       .getByRole("option", { name: medicationName, exact: true })
@@ -160,22 +159,24 @@ test.describe("Medication Request Questionnaire", () => {
 
     await page
       .locator('button[role="combobox"]:not([disabled])')
-      .filter({ hasText: "Select frequency" })
+      .filter({ hasText: "eg. 1-0-1" })
       .click();
-    await page.getByRole("option").filter({ hasText: frequency }).click();
+    await page.getByPlaceholder("Type eg. 1-0-1").fill(frequencyData.input);
+    await page.getByRole("option", { name: frequencyData.display }).click();
+
+    await page.getByRole("combobox", { name: "1 day" }).click();
+    await page
+      .getByPlaceholder("Type eg. 5 days, 2 weeks")
+      .fill(`${duration} ${durationLabel}`);
 
     await page
-      .locator('input[type="number"]:not([disabled])')
-      .fill(duration.toString());
-
-    await page
-      .locator('button[role="combobox"]:not([disabled])')
-      .filter({ hasText: /^d$|^h$|^mo$|^wk$|^a$/ })
+      .getByRole("option", { name: `${duration} ${durationLabel}` })
       .click();
-    await page.getByRole("option", { name: durationUnit }).click();
 
     // Select random additional instruction - target only enabled button
     const instruction = faker.helpers.arrayElement(instructionOptions);
+
+    await page.getByTitle("Show Advanced Fields").first().click();
     await page
       .locator("button:not([disabled])")
       .filter({ hasText: "No instructions selected" })
@@ -239,8 +240,8 @@ test.describe("Medication Request Questionnaire", () => {
     const medicationRow = page
       .locator('[data-slot="table-body"] tr')
       .filter({ hasText: medicationName })
-      .filter({ hasText: `${dosageQuantity} ${dosageUnit}` })
-      .filter({ hasText: frequency })
+      .filter({ hasText: `${dosageQuantity.toFixed(2)} ${dosageUnit}` })
+      .filter({ hasText: frequencyData.display })
       .filter({ hasText: `${duration} ${durationUnit}` });
 
     await expect(medicationRow).toBeVisible();
@@ -253,9 +254,9 @@ test.describe("Medication Request Questionnaire", () => {
 
     await page
       .getByRole("combobox")
-      .filter({ hasText: /Add (another )?Medication/i })
+      .filter({ hasText: /Add Medication/i })
       .click();
-    await page.getByRole("tab", { name: "Medication List" }).click();
+    await page.getByRole("tab", { name: "Medication" }).click();
     await page.getByPlaceholder(/Search Medications/i).fill(medicationName);
     await page
       .getByRole("option", { name: medicationName, exact: true })
@@ -275,19 +276,19 @@ test.describe("Medication Request Questionnaire", () => {
 
     await page
       .locator('button[role="combobox"]:not([disabled])')
-      .filter({ hasText: "Select frequency" })
+      .filter({ hasText: "eg. 1-0-1" })
       .click();
-    await page.getByRole("option").filter({ hasText: frequency }).click();
+    await page.getByPlaceholder("Type eg. 1-0-1").fill(frequencyData.input);
+    await page.getByRole("option", { name: frequencyData.display }).click();
+
+    await page.getByRole("combobox", { name: "1 day" }).click();
+    await page
+      .getByPlaceholder("Type eg. 5 days, 2 weeks")
+      .fill(`${duration} ${durationLabel}`);
 
     await page
-      .locator('input[type="number"]:not([disabled])')
-      .fill(duration.toString());
-
-    await page
-      .locator('button[role="combobox"]:not([disabled])')
-      .filter({ hasText: /^d$|^h$|^mo$|^wk$|^a$/ })
+      .getByRole("option", { name: `${duration} ${durationLabel}` })
       .click();
-    await page.getByRole("option", { name: durationUnit }).click();
 
     await page.getByRole("button", { name: "Submit" }).click();
 
@@ -305,8 +306,8 @@ test.describe("Medication Request Questionnaire", () => {
     const medicationRow = page
       .locator('[data-slot="table-body"] tr')
       .filter({ hasText: medicationName })
-      .filter({ hasText: `${dosageQuantity} ${dosageUnit}` })
-      .filter({ hasText: frequency })
+      .filter({ hasText: `${dosageQuantity.toFixed(2)} ${dosageUnit}` })
+      .filter({ hasText: frequencyData.display })
       .filter({ hasText: `${duration} ${durationUnit}` });
 
     await expect(medicationRow).toBeVisible();
@@ -319,9 +320,9 @@ test.describe("Medication Request Questionnaire", () => {
 
     await page
       .getByRole("combobox")
-      .filter({ hasText: /Add (another )?Medication/i })
+      .filter({ hasText: /Add Medication/i })
       .click();
-    await page.getByRole("tab", { name: "Medication List" }).click();
+    await page.getByRole("tab", { name: "Medication" }).click();
     await page.getByPlaceholder(/Search Medications/i).fill(medicationName);
     await page
       .getByRole("option", { name: medicationName, exact: true })
@@ -333,10 +334,6 @@ test.describe("Medication Request Questionnaire", () => {
       page.getByText("Dosage*+This field is required"),
     ).toBeVisible();
 
-    await expect(
-      page.locator("div").filter({
-        hasText: /^Frequency\*Select frequencyThis field is required$/,
-      }),
-    ).toBeVisible();
+    await expect(page.getByText("Frequency*eg. 1-0-1This field")).toBeVisible();
   });
 });

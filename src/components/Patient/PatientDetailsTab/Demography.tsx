@@ -144,7 +144,7 @@ export const Demography = (props: PatientProps) => {
   const data: Data[] = [
     {
       id: "general-info",
-      allowEdit: canWritePatient && !!props.facilityId,
+      allowEdit: true,
       details: [
         <PLUGIN_Component
           key="patient_details_tab__demography__general_info"
@@ -260,6 +260,12 @@ export const Demography = (props: PatientProps) => {
             });
           }}
           canWrite={canWritePatient}
+          trigger={
+            <Button variant="outline" disabled={false}>
+              <CareIcon icon="l-edit-alt" className="text-md pr-1" />
+              {t("edit")}
+            </Button>
+          }
         />
       ),
       details: patientData.instance_tags.map((t) => ({

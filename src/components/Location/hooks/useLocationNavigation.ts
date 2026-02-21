@@ -23,7 +23,7 @@ export function useLocationNavigation({
     null,
   );
   const [locationHistory, setLocationHistory] = useState<LocationRead[]>([]);
-  const [selectedBed, setSelectedBed] = useState<string | null>(null);
+  const [selectedBed, setSelectedBed] = useState<LocationRead | null>(null);
   const [selectedLinkedBed, setSelectedLinkedBed] = useState<
     LocationAssociationRead | undefined
   >();
@@ -92,7 +92,7 @@ export function useLocationNavigation({
   });
 
   useEffect(() => {
-    if (locationsData && open) {
+    if (locationsData) {
       if (locationsPage === 1) {
         setAllLocations(locationsData.results);
       } else {
@@ -100,7 +100,7 @@ export function useLocationNavigation({
       }
       setHasMoreLocations(locationsData.count > locationsPage * ITEMS_PER_PAGE);
     }
-  }, [locationsData, locationsPage, open]);
+  }, [locationsData, locationsPage]);
 
   useEffect(() => {
     if (bedsData) {
@@ -142,8 +142,8 @@ export function useLocationNavigation({
     setSelectedBed(null);
   };
 
-  const handleBedSelect = (bedId: string) => {
-    setSelectedBed(bedId);
+  const handleBedSelect = (bed: LocationRead) => {
+    setSelectedBed(bed);
     setSelectedLinkedBed(undefined);
   };
 
@@ -193,6 +193,9 @@ export function useLocationNavigation({
     setAllBeds([]);
     setHasMoreLocations(true);
     setHasMoreBeds(true);
+    if (locationsData?.results) {
+      setAllLocations(locationsData.results);
+    }
   };
 
   return {

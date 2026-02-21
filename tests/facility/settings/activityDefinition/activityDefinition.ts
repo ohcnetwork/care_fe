@@ -5,6 +5,7 @@ import {
   closeAnyOpenPopovers,
   expectToast,
   selectFromCategoryPicker,
+  selectFromCommand,
   selectFromLocationMultiSelect,
   selectFromRequirements,
   selectFromValueSet,
@@ -79,6 +80,8 @@ export const CHARGE_ITEM_DEFINITIONS = [
   "Fasting Blood Glucose Test",
 ];
 
+export const HEALTHCARE_SERVICES = ["Pathology Lab"];
+
 export const STATUS_OPTIONS = [
   "Active",
   "Draft",
@@ -110,6 +113,7 @@ interface ActivityDefinitionData {
   chargeItem?: string;
   location?: string;
   diagnosticReportCode?: string;
+  healthcareService?: string;
 }
 
 export function generateActivityDefinitionData(
@@ -138,6 +142,7 @@ export function generateActivityDefinitionData(
       chargeItem: faker.helpers.arrayElement(CHARGE_ITEM_DEFINITIONS),
       location: faker.helpers.arrayElement(LOCATIONS),
       diagnosticReportCode: faker.helpers.arrayElement(DIAGNOSTIC_REPORT_CODES),
+      healthcareService: faker.helpers.arrayElement(HEALTHCARE_SERVICES),
     };
   }
 
@@ -224,6 +229,14 @@ export async function createActivityDefinition(
       navigateCategories: [data.chargeItemCategory!],
       search: data.chargeItem!,
       closeAfterSelect: true,
+    });
+
+    const healthcareServiceTrigger = page
+      .getByRole("combobox")
+      .filter({ hasText: /select.*healthcare service/i });
+    await selectFromCommand(page, healthcareServiceTrigger, {
+      search: data.healthcareService!,
+      itemIndex: 0,
     });
 
     const locationsTrigger = page

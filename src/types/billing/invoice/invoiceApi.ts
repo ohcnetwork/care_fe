@@ -1,5 +1,4 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 
 import {
   InvoiceCancel,
@@ -39,5 +38,15 @@ export default {
     method: HttpMethod.POST,
     TRes: Type<InvoiceRead>(),
     TBody: Type<InvoiceCancel>(),
+  },
+  lockInvoice: {
+    path: "/api/v1/facility/{facilityId}/invoice/{invoiceId}/lock/",
+    method: HttpMethod.POST,
+    TRes: Type<InvoiceRead>(),
+  },
+  unlockInvoice: {
+    path: "/api/v1/facility/{facilityId}/invoice/{invoiceId}/unlock/",
+    method: HttpMethod.POST,
+    TRes: Type<InvoiceRead>(),
   },
 } as const;

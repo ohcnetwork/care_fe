@@ -1,9 +1,9 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 
 import {
   LocationAssociation,
+  LocationAssociationRead,
   LocationAssociationRequest,
   LocationAssociationUpdate,
 } from "./association";
@@ -71,7 +71,7 @@ export default {
   getAssociation: {
     path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/association/{external_id}/",
     method: HttpMethod.GET,
-    TRes: Type<LocationAssociation>(),
+    TRes: Type<LocationAssociationRead>(),
   },
   updateAssociation: {
     path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/association/{external_id}/",

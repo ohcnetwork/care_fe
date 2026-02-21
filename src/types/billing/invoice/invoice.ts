@@ -28,17 +28,21 @@ export interface InvoiceBase {
   payment_terms?: string;
   note?: string;
   issue_date?: string;
+  locked: boolean;
 }
 
-export interface InvoiceCreate extends Omit<InvoiceBase, "id" | "number"> {
+export interface InvoiceCreate extends Omit<
+  InvoiceBase,
+  "id" | "number" | "locked"
+> {
   account: string;
   charge_items: string[];
 }
 
 export interface InvoiceList extends InvoiceBase {
   account: AccountRead;
-  total_net: number;
-  total_gross: number;
+  total_net: string;
+  total_gross: string;
   title: string;
   created_date: string;
   modified_date: string;
@@ -50,8 +54,11 @@ export interface InvoiceRead extends InvoiceList {
   payment_reconciliations?: PaymentReconciliationRead[];
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
-  total_payments: number;
   payments: PaymentReconciliationRead[];
+  total_payments: string;
+  credit_notes: PaymentReconciliationRead[];
+  total_credit_notes: string;
+  is_refund: boolean;
 }
 
 export interface InvoiceCancel {

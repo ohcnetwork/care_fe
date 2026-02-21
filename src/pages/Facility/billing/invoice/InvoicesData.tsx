@@ -10,7 +10,10 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
-import { invoiceStatusFilter } from "@/components/ui/multi-filter/filterConfigs";
+import {
+  createdByFilter,
+  invoiceStatusFilter,
+} from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 
@@ -34,16 +37,20 @@ import {
   InvoiceRead,
 } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
+import { UserReadMinimal } from "@/types/user/user";
 import query from "@/Utils/request/query";
+import { formatDateTime } from "@/Utils/utils";
 
 export default function InvoicesData({
   facilityId,
   accountId,
   showIdentifierFilter = false,
+  hideAccountColumn = false,
 }: {
   facilityId: string;
   accountId?: string;
   showIdentifierFilter?: boolean;
+  hideAccountColumn?: boolean;
 }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
@@ -51,9 +58,26 @@ export default function InvoicesData({
     disableCache: true,
   });
 
-  const filters = [invoiceStatusFilter("status")];
+  const filters = [
+    invoiceStatusFilter("status"),
+    createdByFilter("created_by"),
+  ];
 
-  const onFilterUpdate = (query: Record<string, unknown>) => {
+  const onFilterUpdate = (filterQuery: Record<string, unknown>) => {
+    let query = { ...filterQuery };
+    const createdByValue = filterQuery.created_by as
+      | UserReadMinimal
+      | UserReadMinimal[]
+      | undefined;
+    if (createdByValue !== undefined) {
+      const user = Array.isArray(createdByValue)
+        ? createdByValue[0]
+        : createdByValue;
+      query = {
+        ...query,
+        created_by: user?.id || undefined,
+      };
+    }
     updateQuery(query);
   };
 
@@ -66,6 +90,7 @@ export default function InvoicesData({
   } = useMultiFilterState(filters, onFilterUpdate, {
     ...qParams,
     status: qParams.status ? [qParams.status] : undefined,
+    created_by: [],
   });
 
   const { data: response, isLoading } = useQuery({
@@ -79,6 +104,7 @@ export default function InvoicesData({
         number: qParams.search,
         status: qParams.status,
         patient: qParams.patient,
+        created_by: qParams.created_by,
       },
     }),
   });
@@ -125,8 +151,9 @@ export default function InvoicesData({
           onOperationChange={handleOperationChange}
           onClearAll={handleClearAll}
           onClearFilter={handleClearFilter}
-          className="flex flex-row flex-wrap sm:items-center"
+          className="flex flex-row-reverse flex-wrap sm:items-center"
           facilityId={facilityId}
+          align="end"
         />
       </div>
       {isLoading ? (
@@ -143,7 +170,8 @@ export default function InvoicesData({
             <TableHeader>
               <TableRow>
                 <TableHead>{t("invoice_number")}</TableHead>
-                <TableHead>{t("account")}</TableHead>
+                <TableHead>{t("invoice_date")}</TableHead>
+                {!hideAccountColumn && <TableHead>{t("account")}</TableHead>}
                 <TableHead>{t("status")}</TableHead>
                 <TableHead>{t("total")}</TableHead>
                 <TableHead>{t("actions")}</TableHead>
@@ -155,25 +183,35 @@ export default function InvoicesData({
                   <TableCell>
                     <div>{invoice.number}</div>
                   </TableCell>
-
                   <TableCell>
-                    <Button variant="link" asChild>
-                      <Link
-                        href={`/facility/${facilityId}/billing/account/${invoice.account?.id}`}
-                        className="hover:text-primary "
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <div className="text-base flex items-center gap-1 underline underline-offset-2">
-                          {invoice.account?.name}
-                          <CareIcon
-                            icon="l-external-link-alt"
-                            className="size-3"
-                          />
-                        </div>
-                      </Link>
-                    </Button>
+                    <div>
+                      {formatDateTime(
+                        invoice.created_date,
+                        "DD/MM/YY, hh:mm A",
+                      )}
+                    </div>
                   </TableCell>
+
+                  {!hideAccountColumn && (
+                    <TableCell>
+                      <Button variant="link" asChild>
+                        <Link
+                          href={`/facility/${facilityId}/billing/account/${invoice.account?.id}`}
+                          className="hover:text-primary "
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <div className="text-base flex items-center gap-1 underline underline-offset-2">
+                            {invoice.account?.name}
+                            <CareIcon
+                              icon="l-external-link-alt"
+                              className="size-3"
+                            />
+                          </div>
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  )}
 
                   <TableCell>
                     <Badge variant={INVOICE_STATUS_COLORS[invoice.status]}>
@@ -181,10 +219,17 @@ export default function InvoicesData({
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <MonetaryDisplay
-                      className="font-medium"
-                      amount={String(invoice.total_gross)}
-                    />
+                    {invoice.locked ? (
+                      <Badge variant="secondary" className="gap-1">
+                        <CareIcon icon="l-lock" className="size-3" />
+                        {t("locked")}
+                      </Badge>
+                    ) : (
+                      <MonetaryDisplay
+                        className="font-medium"
+                        amount={invoice.total_gross}
+                      />
+                    )}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-4">

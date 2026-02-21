@@ -16,7 +16,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
-import DischargeConfirmationDialog from "@/components/Patient/DischargeConfirmationDialog";
+import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 
 import query from "@/Utils/request/query";
 import { cn } from "@/lib/utils";
@@ -47,6 +47,7 @@ import {
   validateFields,
 } from "@/types/questionnaire/validation";
 import careConfig from "@careConfig";
+import { useQueryParams } from "raviger";
 
 interface EncounterQuestionProps {
   question: Question;
@@ -79,7 +80,7 @@ export function validateEncounterQuestion(
   const errors: QuestionValidationError[] = [];
 
   if (
-    value?.status === "discharged" &&
+    value?.status === EncounterStatus.DISCHARGED &&
     ["imp", "obsenc", "emer"].includes(value.encounter_class) &&
     !value?.hospitalization?.discharge_disposition
   ) {
@@ -90,6 +91,7 @@ export function validateEncounterQuestion(
 }
 
 export function EncounterQuestion({
+  question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
@@ -108,6 +110,7 @@ export function EncounterQuestion({
     enabled: !!encounterId,
   });
   const { t } = useTranslation();
+  const [{ toDischarge }] = useQueryParams();
   const { hasError, getError } = useFieldError(
     questionnaireResponse.question_id,
     errors,
@@ -133,11 +136,11 @@ export function EncounterQuestion({
 
   useEffect(() => {
     if (
-      encounter.status === "discharged" ||
-      encounter.status === "completed" ||
-      encounter.status === "cancelled" ||
-      encounter.status === "discontinued" ||
-      encounter.status === "entered_in_error"
+      encounter.status === EncounterStatus.DISCHARGED ||
+      encounter.status === EncounterStatus.COMPLETED ||
+      encounter.status === EncounterStatus.CANCELLED ||
+      encounter.status === EncounterStatus.DISCONTINUED ||
+      encounter.status === EncounterStatus.ENTERED_IN_ERROR
     ) {
       if (!encounter.period.end) {
         handleUpdateEncounter({
@@ -175,7 +178,11 @@ export function EncounterQuestion({
   // Update encounter state when data is loaded
   useEffect(() => {
     if (encounterData) {
-      handleUpdateEncounter(transformEncounterForUpdate(encounterData));
+      const updates = transformEncounterForUpdate(encounterData);
+      if (toDischarge === "true") {
+        updates.status = EncounterStatus.DISCHARGED;
+      }
+      handleUpdateEncounter(updates);
     }
   }, [encounterData]);
 
@@ -199,7 +206,7 @@ export function EncounterQuestion({
 
     if (
       ["imp", "obsenc", "emer"].includes(encounter.encounter_class) &&
-      newEncounter.status === "discharged"
+      newEncounter.status === EncounterStatus.DISCHARGED
     ) {
       newEncounter.hospitalization = {
         ...newEncounter.hospitalization,
@@ -248,6 +255,7 @@ export function EncounterQuestion({
 
   return (
     <div className="space-y-6">
+      <QuestionLabel question={question} />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Basic Details */}
         <div className="space-y-2">
@@ -345,31 +353,27 @@ export function EncounterQuestion({
       </div>
 
       {/* Mark for discharge button - Show if not already discharged */}
-      {encounter.status !== "discharged" && (
+      {encounter.status !== EncounterStatus.DISCHARGED && (
         <div className="col-span-2 border border-gray-200 rounded-lg p-2 bg-gray-50">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
             <div className="space-y-1">
               <h3 className="text-sm font-medium">{t("discharge_patient")}</h3>
             </div>
-            <DischargeConfirmationDialog
-              encounter={encounter}
-              onConfirm={handleUpdateEncounter}
+            <Button
+              variant="outline"
+              size="sm"
               disabled={disabled}
-              trigger={
-                <Button
-                  type="button"
-                  data-testid="mark-as-discharged"
-                  disabled={disabled}
-                >
-                  {t("mark_for_discharge")}
-                </Button>
+              onClick={() =>
+                handleUpdateEncounter({ status: EncounterStatus.DISCHARGED })
               }
-            />
+            >
+              {t("mark_for_discharge")}
+            </Button>
           </div>
         </div>
       )}
 
-      {(encounter.status === "discharged" ||
+      {(encounter.status === EncounterStatus.DISCHARGED ||
         encounter.discharge_summary_advice) && (
         <div className="space-y-6">
           <div className="space-y-2">
@@ -442,7 +446,7 @@ export function EncounterQuestion({
             </div>
 
             {/* Show discharge disposition and date when status is discharged OR has discharge disposition */}
-            {(encounter.status === "discharged" ||
+            {(encounter.status === EncounterStatus.DISCHARGED ||
               encounter.hospitalization?.discharge_disposition) && (
               <>
                 <div className="space-y-2">
@@ -494,7 +498,7 @@ export function EncounterQuestion({
                   )}
                 </div>
 
-                {encounter.status === "discharged" && (
+                {encounter.status === EncounterStatus.DISCHARGED && (
                   <div className="space-y-2">
                     <Label>{t("discharge_date_time")}</Label>
                     <div className="flex gap-1 flex-wrap">

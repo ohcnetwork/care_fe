@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -22,14 +22,11 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import templateApi from "@/types/emr/template/templateApi";
 
-import mutate from "@/Utils/request/mutate";
 import { getPermissions } from "@/common/Permissions";
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import { usePermissions } from "@/context/PermissionContext";
 import { cn } from "@/lib/utils";
-import reportApi from "@/types/emr/report/reportApi";
-import { TemplateBaseRead, TemplateTypes } from "@/types/emr/template/template";
-import { toast } from "sonner";
+import { TemplateType, TemplateTypes } from "@/types/emr/template/template";
 import TemplateCard from "./TemplateCard";
 
 interface TemplateListProps {
@@ -40,6 +37,7 @@ interface TemplateListProps {
   onSuccess?: () => void;
   showFilters?: boolean;
   className?: string;
+  reportType?: TemplateType;
 }
 
 export default function TemplateList({
@@ -50,6 +48,7 @@ export default function TemplateList({
   onSuccess,
   showFilters = true,
   className,
+  reportType,
 }: TemplateListProps) {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
@@ -62,12 +61,12 @@ export default function TemplateList({
   });
 
   const { data: templatesData, isLoading: isTemplatesLoading } = useQuery({
-    queryKey: ["templates", facilityId, qParams],
+    queryKey: ["templates", facilityId, qParams, reportType],
     queryFn: query(templateApi.listTemplates, {
       queryParams: {
         facility: facilityId,
         name: qParams.name,
-        template_type: qParams.template_type,
+        template_type: reportType || qParams.template_type,
         status: qParams.status,
         limit: RESULTS_PER_PAGE_LIMIT,
         offset: ((qParams.page ?? 1) - 1) * RESULTS_PER_PAGE_LIMIT,
@@ -75,27 +74,6 @@ export default function TemplateList({
     }),
     enabled: enabled && canListTemplate,
   });
-
-  const { mutate: generateReport, isPending: isGenerating } = useMutation({
-    mutationFn: mutate(reportApi.createReport),
-    onSuccess: () => {
-      toast.success(t("report_generation_started"));
-      onSuccess?.();
-    },
-    onError: (error) => {
-      toast.error(error.message || t("report_generation_failed"));
-    },
-  });
-
-  const handleGenerateReport = (template: TemplateBaseRead) => {
-    generateReport({
-      template_id: template.id,
-      associating_id: associatingId ?? "",
-      output_format: template.default_format,
-      options: JSON.stringify({}),
-      force: false,
-    });
-  };
 
   return (
     <div className="space-y-4">
@@ -196,36 +174,11 @@ export default function TemplateList({
               <TemplateCard
                 key={template.id}
                 template={template}
-                buttons={
-                  <>
-                    {canWriteTemplate && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        asChild
-                      >
-                        <Link
-                          href={`/facility/${facilityId}/template/builder/${template.slug}`}
-                        >
-                          <CareIcon icon="l-pen" className="mr-1" />
-                          <span>{t("edit")}</span>
-                        </Link>
-                      </Button>
-                    )}
-                    {associatingId && canGenerateReportFromTemplate && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        onClick={() => handleGenerateReport(template)}
-                        disabled={isGenerating || template.status !== "active"}
-                      >
-                        {isGenerating ? t("generating") : t("generate_report")}
-                      </Button>
-                    )}
-                  </>
-                }
+                facilityId={facilityId}
+                canWriteTemplate={canWriteTemplate}
+                canGenerate={canGenerateReportFromTemplate}
+                associatingId={associatingId}
+                onSuccess={onSuccess}
               />
             ))}
           </div>
