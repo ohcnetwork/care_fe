@@ -266,17 +266,17 @@ export function EncounterQuestion({
             </SelectTrigger>
             <SelectContent>
               {Object.values(EncounterStatus)
-                .filter((encounterStatus: EncounterStatus) =>
-                  encounter.status === EncounterStatus.DISCHARGED
-                    ? encounterStatus === EncounterStatus.DISCHARGED
-                    : encounterStatus !== EncounterStatus.DISCHARGED &&
-                      encounterStatus !== EncounterStatus.UNKNOWN,
-                )
-                .map((encounterStatus: EncounterStatus) => (
-                  <SelectItem key={encounterStatus} value={encounterStatus}>
-                    {t(`encounter_status__${encounterStatus}`)}
-                  </SelectItem>
-                ))}
+    .filter((status) =>
+      encounter.status === EncounterStatus.DISCHARGED
+        ? status === EncounterStatus.DISCHARGED
+        : status !== EncounterStatus.DISCHARGED &&
+          status !== EncounterStatus.UNKNOWN
+    )
+    .map((status) => (
+      <SelectItem key={status} value={status}>
+        {t(`encounter_status__${status}`)}
+      </SelectItem>
+    ))}
             </SelectContent>
           </Select>
         </div>
