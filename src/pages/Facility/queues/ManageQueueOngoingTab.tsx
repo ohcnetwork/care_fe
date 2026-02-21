@@ -31,12 +31,18 @@ import {
   DoorOpenIcon,
   EyeIcon,
   Megaphone,
+  QrCode,
   SearchIcon,
   SettingsIcon,
 } from "lucide-react";
 import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
+
+import PatientIDScanDialog from "@/components/Scan/PatientIDScanDialog";
+import { useBarcodeScanner } from "@/hooks/useBarcodeScanner";
+
 import { ServicePointsDropDown } from "./ServicePointsDropDown";
 import { useQueueServicePoints } from "./useQueueServicePoints";
 
@@ -52,6 +58,43 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
     facilityId,
   });
   const [{ autoRefresh, search }, setQueryParams] = useQueryParams();
+  const [scanDialogOpen, setScanDialogOpen] = useState(false);
+
+  // Handle patient QR scan success
+  const handlePatientScanSuccess = (scannedPatientId: string) => {
+    // Navigate to patient verification with queue context
+    window.location.href = `/facility/${facilityId}/patients/verify?${new URLSearchParams(
+      {
+        phone_number: "", // Will be filled during verification
+        flow: "queue",
+        year_of_birth: "",
+        partial_id: scannedPatientId.slice(0, 5),
+        queue_id: queueId,
+      },
+    ).toString()}`;
+    toast.success(t("patient_qr_scanned_successfully"));
+  };
+
+  // Enable barcode scanner for external scanners
+  useBarcodeScanner({
+    onScan: (scannedId: string) => {
+      if (!scanDialogOpen) {
+        let extractedId = scannedId;
+        try {
+          const parsed = JSON.parse(scannedId);
+          if (parsed.uuid && typeof parsed.uuid === "string") {
+            extractedId = parsed.uuid;
+          }
+        } catch {
+          extractedId = scannedId;
+        }
+        handlePatientScanSuccess(extractedId);
+      }
+    },
+    enabled: !scanDialogOpen,
+    preventDefault: false,
+  });
+
   const { data: summary } = useQuery({
     queryKey: ["token-queue-summary", facilityId, queueId],
     queryFn: query(tokenQueueApi.summary, {
@@ -67,15 +110,29 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
           <Label className="text-gray-950 text-sm font-medium">
             {t("search_patients")}
           </Label>
-          <div className="relative w-64">
-            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
-            <Input
-              type="search"
-              placeholder={t("search_by_patient_name")}
-              value={search || ""}
-              onChange={(e) => setQueryParams({ search: e.target.value || "" })}
-              className="pl-10"
-            />
+          <div className="flex gap-2 items-end">
+            <div className="relative w-64">
+              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
+              <Input
+                type="search"
+                placeholder={t("search_by_patient_name")}
+                value={search || ""}
+                onChange={(e) =>
+                  setQueryParams({ search: e.target.value || "" })
+                }
+                className="pl-10"
+              />
+            </div>
+            <Button
+              variant="outline"
+              size="default"
+              onClick={() => setScanDialogOpen(true)}
+              className="shrink-0 gap-2"
+              title={t("scan_patient_qr_for_queue")}
+            >
+              <QrCode className="size-4" />
+              <span className="hidden sm:inline">{t("scan_patient")}</span>
+            </Button>
           </div>
         </div>
         <div className="flex flex-col gap-2">
@@ -199,6 +256,12 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
           </div>
         </QueueColumn>
       </div>
+
+      <PatientIDScanDialog
+        open={scanDialogOpen}
+        onOpenChange={setScanDialogOpen}
+        onScanSuccess={handlePatientScanSuccess}
+      />
     </div>
   );
 }
