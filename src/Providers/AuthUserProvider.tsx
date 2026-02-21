@@ -165,7 +165,7 @@ export default function AuthUserProvider({
     setAccessToken(null);
     setPatientToken(null);
 
-    await queryClient.resetQueries({ queryKey: ["currentUser"] });
+    queryClient.clear();
 
     const redirectURL = getRedirectURL();
     navigate(redirectURL ? `/login?redirect=${redirectURL}` : "/login");
