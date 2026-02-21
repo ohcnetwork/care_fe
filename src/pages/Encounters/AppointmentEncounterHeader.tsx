@@ -1,3 +1,4 @@
+import AppointmentTokenScanDialog from "@/components/Scan/AppointmentTokenScanDialog";
 import { resourceTypeToResourcePathSlug } from "@/components/Schedule/useScheduleResource";
 import { Button } from "@/components/ui/button";
 import {
@@ -6,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useBarcodeScanner } from "@/hooks/useBarcodeScanner";
 import { cn } from "@/lib/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
@@ -30,8 +32,10 @@ import {
   ChevronDown,
   ExternalLinkIcon,
   ListOrdered,
+  QrCode,
 } from "lucide-react";
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 /**
@@ -240,6 +244,43 @@ const TokenActions = ({
   resourceId: string;
 }) => {
   const { t } = useTranslation();
+  const [scanDialogOpen, setScanDialogOpen] = useState(false);
+
+  // Handle external barcode scanner input
+  const handleScanSuccess = (scannedId: string) => {
+    try {
+      // Parse scanned data to extract appointment/token ID
+      let appointmentId = scannedId.trim();
+
+      try {
+        const parsed = JSON.parse(scannedId);
+        if (
+          parsed.appointment_id ||
+          parsed.appointmentId ||
+          parsed.appointment
+        ) {
+          appointmentId =
+            parsed.appointment_id || parsed.appointmentId || parsed.appointment;
+        } else if (parsed.id) {
+          appointmentId = parsed.id;
+        }
+      } catch {
+        // Use as-is if not JSON
+      }
+
+      // Navigate to the scanned appointment
+      navigate(`/facility/${facilityId}/appointments/${appointmentId}`);
+    } catch (error) {
+      console.error("Failed to navigate:", error);
+    }
+  };
+
+  // Enable barcode scanner when not in dialog mode
+  useBarcodeScanner({
+    onScan: handleScanSuccess,
+    enabled: !scanDialogOpen,
+    preventDefault: false,
+  });
 
   if (!appointment?.id && !appointment?.token) {
     return null;
@@ -248,66 +289,95 @@ const TokenActions = ({
   const { token } = appointment;
 
   return (
-    <div className="flex gap-2">
-      {appointment.id && (
+    <>
+      <AppointmentTokenScanDialog
+        open={scanDialogOpen}
+        onOpenChange={setScanDialogOpen}
+        facilityId={facilityId}
+        onScanSuccess={() => {
+          setScanDialogOpen(false);
+        }}
+      />
+      <div className="flex gap-2">
+        {/* QR Scan Button */}
         <div className="flex items-center justify-center border-r border-gray-300">
-          <Button variant="ghost" className="rounded-r-none pl-2 " asChild>
-            <Link href={getQueueLink(appointment)}>
-              <div className="flex sm:flex-row flex-col items-center justify-center sm:gap-1">
-                <div className="flex gap-2 items-center underline">
-                  <CalendarRange className="size-4 text-black" />
-                  {t("list")}
-                  <ExternalLinkIcon className="size-4 text-black" />
-                </div>
+          <Button
+            variant="ghost"
+            className="rounded-r-none pl-2"
+            onClick={() => setScanDialogOpen(true)}
+            title={t("appointment_token_scan")}
+          >
+            <div className="flex sm:flex-row flex-col items-center justify-center sm:gap-1">
+              <div className="flex gap-2 items-center">
+                <QrCode className="size-4 text-black" />
+                <span className="hidden sm:inline text-sm">{t("scan")}</span>
               </div>
-            </Link>
+            </div>
           </Button>
         </div>
-      )}
-      {appointment.id && (
-        <div className="flex items-center justify-center border-r border-gray-300">
-          <Button variant="ghost" className="rounded-r-none pl-2 " asChild>
-            <Link
-              href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointment.id}`}
-            >
-              <div className="flex sm:flex-row flex-col items-center justify-center sm:gap-1">
-                {token ? (
-                  <>
-                    <span className="text-sm text-gray-600">{t("token")}:</span>
-                    <div className="flex whitespace-nowrap gap-1 items-center">
-                      <span className="text-sm text-black font-semibold underline ">
-                        {renderTokenNumber(token)}
-                      </span>
-                      <ExternalLinkIcon className="size-4 text-black" />
-                    </div>
-                  </>
-                ) : (
+
+        {appointment.id && (
+          <div className="flex items-center justify-center border-r border-gray-300">
+            <Button variant="ghost" className="rounded-r-none pl-2 " asChild>
+              <Link href={getQueueLink(appointment)}>
+                <div className="flex sm:flex-row flex-col items-center justify-center sm:gap-1">
                   <div className="flex gap-2 items-center underline">
-                    <CalendarCheck className="size-4 text-black" />
-                    {t("view")}
+                    <CalendarRange className="size-4 text-black" />
+                    {t("list")}
                     <ExternalLinkIcon className="size-4 text-black" />
                   </div>
-                )}
-              </div>
-            </Link>
-          </Button>
-        </div>
-      )}
-      {token && (
-        <div className="flex items-center justify-center">
-          <Button variant="link" className="underline ">
-            <Link
-              basePath="/"
-              className="flex items-center gap-1"
-              href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/queues/${token.queue.id}`}
-            >
-              <ListOrdered className="size-4 text-black" />
-              {t("queue")}
-              <ExternalLinkIcon className="size-4 text-black" />
-            </Link>
-          </Button>
-        </div>
-      )}
-    </div>
+                </div>
+              </Link>
+            </Button>
+          </div>
+        )}
+        {appointment.id && (
+          <div className="flex items-center justify-center border-r border-gray-300">
+            <Button variant="ghost" className="rounded-r-none pl-2 " asChild>
+              <Link
+                href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointment.id}`}
+              >
+                <div className="flex sm:flex-row flex-col items-center justify-center sm:gap-1">
+                  {token ? (
+                    <>
+                      <span className="text-sm text-gray-600">
+                        {t("token")}:
+                      </span>
+                      <div className="flex whitespace-nowrap gap-1 items-center">
+                        <span className="text-sm text-black font-semibold underline ">
+                          {renderTokenNumber(token)}
+                        </span>
+                        <ExternalLinkIcon className="size-4 text-black" />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex gap-2 items-center underline">
+                      <CalendarCheck className="size-4 text-black" />
+                      {t("view")}
+                      <ExternalLinkIcon className="size-4 text-black" />
+                    </div>
+                  )}
+                </div>
+              </Link>
+            </Button>
+          </div>
+        )}
+        {token && (
+          <div className="flex items-center justify-center">
+            <Button variant="link" className="underline ">
+              <Link
+                basePath="/"
+                className="flex items-center gap-1"
+                href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/queues/${token.queue.id}`}
+              >
+                <ListOrdered className="size-4 text-black" />
+                {t("queue")}
+                <ExternalLinkIcon className="size-4 text-black" />
+              </Link>
+            </Button>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
