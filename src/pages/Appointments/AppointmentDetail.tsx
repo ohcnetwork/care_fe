@@ -882,7 +882,7 @@ const AppointmentActions = ({
         method: tokenApi.update.method,
         reference_id: "token-cancelled",
         body: {
-          note: "",
+          note: appointment.token.note,
           sub_queue: appointment.token.sub_queue?.id || null,
           status: TokenStatus.CANCELLED,
         },
@@ -924,7 +924,7 @@ const AppointmentActions = ({
         method: tokenApi.update.method,
         reference_id: "token-cancelled",
         body: {
-          note: "",
+          note: appointment.token.note,
           sub_queue: appointment.token.sub_queue?.id || null,
           status: TokenStatus.CANCELLED,
         },
