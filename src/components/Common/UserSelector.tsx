@@ -52,6 +52,7 @@ interface Props {
 const PAGE_LIMIT = 50;
 
 interface UserCommandContentProps {
+  search: string;
   setSearch: (value: string) => void;
   usersList?: UserReadMinimal[];
   isFetching: boolean;
@@ -65,6 +66,7 @@ interface UserCommandContentProps {
 }
 
 function UserCommandContent({
+  search,
   setSearch,
   usersList,
   isFetching,
@@ -82,6 +84,7 @@ function UserCommandContent({
     <Command>
       <CommandInput
         placeholder={t("search")}
+        value={search}
         onValueChange={setSearch}
         className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
       />
@@ -253,6 +256,7 @@ export default function UserSelector({
         <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
           <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
             <UserCommandContent
+              search={search}
               setSearch={setSearch}
               usersList={usersList}
               isFetching={isFetching}
@@ -284,6 +288,7 @@ export default function UserSelector({
         sideOffset={4}
       >
         <UserCommandContent
+          search={search}
           setSearch={setSearch}
           usersList={usersList}
           isFetching={isFetching}
