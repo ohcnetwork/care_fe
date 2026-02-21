@@ -64,7 +64,7 @@ export default function EncounterQuestionnaire({
 
   const handleSubmit = useCallback(() => {
     if (encounterId && facilityId) {
-      return routeToCorrectTab();
+      routeToCorrectTab();
     } else if (facilityId) {
       navigate(`/facility/${facilityId}/patient/${patientId}/updates`);
     } else {
