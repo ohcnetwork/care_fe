@@ -23,6 +23,11 @@ export function handleHttpError(error: Error) {
     return;
   }
 
+  if (contentTooLarge(error)) {
+    toast.error(t("file_too_large"));
+    return;
+  }
+
   if (isSessionExpired(cause)) {
     handleSessionExpired();
     return;
@@ -81,6 +86,10 @@ function isBadRequest(error: HTTPError) {
 
 function isNotFound(error: HTTPError) {
   return error.status === 404;
+}
+
+function contentTooLarge(error: HTTPError) {
+  return error.status === 413;
 }
 
 type PydanticError = {

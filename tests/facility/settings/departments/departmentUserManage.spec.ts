@@ -73,7 +73,7 @@ test.describe("Department User Management", () => {
   }
 
   async function openEditRoleDialog(page: Page) {
-    await page.getByRole("button", { name: "Edit Role" }).first().click();
+    await page.getByRole("button", { name: "Edit" }).first().click();
   }
 
   async function updateRole(page: Page, newRole: string) {
