@@ -315,6 +315,10 @@ export default function ServiceRequestShow({
   const isFinal =
     request?.diagnostic_reports?.[0]?.status === DiagnosticReportStatus.final;
 
+  const canMarkAsComplete =
+    isFinal ||
+    CLASSIFICATIONS_CAN_BE_MARKED_AS_COMPLETE.includes(request.category);
+
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50 relative">
       <div className="flex-1 p-4 max-w-6xl">
@@ -332,10 +336,7 @@ export default function ServiceRequestShow({
 
             <div className="flex items-end gap-2">
               {(!request?.activity_definition?.diagnostic_report_codes ||
-                isFinal ||
-                CLASSIFICATIONS_CAN_BE_MARKED_AS_COMPLETE.includes(
-                  request.category,
-                )) && (
+                canMarkAsComplete) && (
                 <div className="flex items-center gap-2">
                   <>
                     {!disableEdit && (
