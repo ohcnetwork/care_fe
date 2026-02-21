@@ -3,22 +3,31 @@ import { expect, test, type Page } from "@playwright/test";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
+test.describe("Governance, Suppliers, and Roles Organization List UI and Navigation", () => {
   const organizationTypes = ["govt", "product_supplier", "role"] as const;
   type OrganizationType = (typeof organizationTypes)[number];
 
-  /**
-   * Navigate to specific organization type page
-   */
+  const searchInputName = "Search by department/team name";
+  const emptyStateText = "No Organizations Found";
+
+  function getSearchInput(page: Page) {
+    return page.getByRole("textbox", { name: searchInputName });
+  }
+
+  function getOrgCards(page: Page) {
+    return page
+      .locator('[data-slot="card"]')
+      .filter({ has: page.getByRole("heading", { level: 3 }) })
+      .filter({ hasNot: page.getByText(emptyStateText) });
+  }
+
   async function navigateToOrganizationType(
     page: Page,
     type: OrganizationType,
   ) {
     await page.goto(`/admin/organizations/${type}`);
     await page.waitForLoadState("domcontentloaded");
-    await page
-      .getByRole("textbox", { name: "Search by department/team name" })
-      .waitFor({ state: "visible" });
+    await getSearchInput(page).waitFor({ state: "visible" });
   }
 
   test("should navigate to organization type pages", async ({ page }) => {
@@ -26,16 +35,12 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
       await test.step(`Navigate to ${type} organizations page`, async () => {
         await navigateToOrganizationType(page, type);
         await expect(page).toHaveURL(
-          new RegExp(`.*\\/admin\\/organizations\\/${type}`),
+          new RegExp(`.*\\/admin\\/organizations\\/${type}$`),
         );
-        // Verify page heading is visible (h3 with translated text)
-        // Use .first() to avoid strict mode violation when multiple h3 elements exist
-        await expect(page.locator("h3").first()).toBeVisible();
-        // Verify organization list container is visible (search input or cards)
-        const searchInput = page.getByRole("textbox", {
-          name: "Search by department/team name",
-        });
-        await expect(searchInput).toBeVisible();
+        await expect(
+          page.getByRole("heading", { level: 3 }).first(),
+        ).toBeVisible();
+        await expect(getSearchInput(page)).toBeVisible();
       });
     }
   });
@@ -47,199 +52,112 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
       await test.step(`Verify cards for ${type} organizations`, async () => {
         await navigateToOrganizationType(page, type);
 
-        // Wait for loading to complete - check for either cards or empty state
-        const emptyState = page.getByText("No Organizations Found");
-        // Use data-slot selector to find organization cards
-        const cards = page.locator('[data-slot="card"]').filter({
-          has: page.getByRole("heading", { level: 3 }),
-        });
-
-        // Wait for either cards or empty state to appear (loading skeleton should be gone)
+        const cards = page
+          .locator('[data-slot="card"]')
+          .filter({ has: page.getByRole("heading", { level: 3 }) });
         const firstCard = cards.first();
+        const emptyState = page.getByText(emptyStateText);
+
         try {
-          // Try to wait for cards first with a timeout
-          await expect(firstCard).toBeVisible({ timeout: 10000 });
-
-          // Verify card structure
-          const orgName = firstCard.getByRole("heading", { level: 3 });
-          await expect(orgName).toBeVisible();
-
-          // Verify badge using data-slot selector
-          const badge = firstCard.locator('[data-slot="badge"]');
-          await expect(badge).toBeVisible();
-
-          const seeDetailsButton = firstCard.getByRole("link", {
-            name: /see details/i,
-          });
-          await expect(seeDetailsButton).toBeVisible();
+          await expect(firstCard).toBeVisible();
+          await expect(
+            firstCard.getByRole("heading", { level: 3 }),
+          ).toBeVisible();
+          await expect(firstCard.locator('[data-slot="badge"]')).toBeVisible();
+          await expect(
+            firstCard.getByRole("link", { name: /see details/i }),
+          ).toBeVisible();
         } catch {
-          // If cards don't appear, wait for and verify empty state is shown
-          // Empty state appears after loading completes - wait with longer timeout
-          await expect(emptyState).toBeVisible({ timeout: 15000 });
+          await expect(emptyState).toBeVisible();
         }
       });
     }
   });
 
+  // Search/tree/breadcrumb below use govt only (same UI for all types)
   test("should filter organizations by name when searching", async ({
     page,
   }) => {
     await navigateToOrganizationType(page, "govt");
 
-    // Get initial organization count (if any) - exclude empty state card
-    const initialCards = page
-      .locator('[data-slot="card"]')
-      .filter({
-        has: page.getByRole("heading", { level: 3 }),
-      })
-      .filter({ hasNot: page.getByText("No Organizations Found") });
+    const initialCards = getOrgCards(page);
     const initialCount = await initialCards.count();
-
-    // Verify search input is visible
-    const searchInput = page.getByRole("textbox", {
-      name: "Search by department/team name",
-    });
+    const searchInput = getSearchInput(page);
     await expect(searchInput).toBeVisible();
 
     if (initialCount > 0) {
-      // Get the name of the first organization to test with actual data
       const firstCard = initialCards.first();
       const firstOrgName = await firstCard
         .getByRole("heading", { level: 3 })
         .textContent()
-        .then((text) => text?.trim())
+        .then((t) => t?.trim())
         .catch(() => null);
 
       if (firstOrgName) {
-        // Test 1: Search with partial name of existing organization
-        const partialName = firstOrgName.substring(
-          0,
-          Math.min(5, firstOrgName.length),
-        );
+        const partialName = firstOrgName.slice(0, 5);
         await searchInput.fill(partialName);
-
-        // Wait for the search results to update by waiting for the matching organization to be visible
         await expect(
           page.getByText(firstOrgName, { exact: false }).first(),
-        ).toBeVisible({ timeout: 5000 });
-
-        // Verify search input has the search term
+        ).toBeVisible();
         await expect(searchInput).toHaveValue(partialName);
-
-        // Verify filtered results are displayed (should show at least the matching org)
-        const filteredCards = page
-          .locator('[data-slot="card"]')
-          .filter({
-            has: page.getByRole("heading", { level: 3 }),
-          })
-          .filter({ hasNot: page.getByText("No Organizations Found") });
-        const filteredCount = await filteredCards.count();
-        expect(filteredCount).toBeGreaterThan(0);
+        expect(await getOrgCards(page).count()).toBeGreaterThan(0);
       }
     }
 
-    // Test 2: Search for a non-existent organization
-    // Use a highly-unlikely-to-exist term (UUID generated via faker.string.uuid()) to make the empty-state assertion deterministic
     const searchTerm = `NonExistent_${faker.string.uuid()}`;
     await searchInput.fill(searchTerm);
-
-    // Wait for the search results to update by waiting for the empty state to appear
-    const emptyStateAfterSearch = page.getByText("No Organizations Found");
-    await expect(emptyStateAfterSearch).toBeVisible({ timeout: 5000 });
-
-    // Verify search input has the search term
+    await expect(page.getByText(emptyStateText)).toBeVisible();
     await expect(searchInput).toHaveValue(searchTerm);
 
-    // Test 3: Clear search
     await searchInput.clear();
-
-    // Verify all organizations are shown again (if there were any initially)
     if (initialCount > 0) {
-      // Wait for the cards to reappear after clearing search
-      const cardsAfterClear = page
-        .locator('[data-slot="card"]')
-        .filter({
-          has: page.getByRole("heading", { level: 3 }),
-        })
-        .filter({ hasNot: page.getByText("No Organizations Found") });
-      await expect(cardsAfterClear.first()).toBeVisible({ timeout: 5000 });
-      const countAfterClear = await cardsAfterClear.count();
-      expect(countAfterClear).toBeGreaterThanOrEqual(initialCount);
+      const cardsAfterClear = getOrgCards(page);
+      await expect(cardsAfterClear.first()).toBeVisible();
+      expect(await cardsAfterClear.count()).toBeGreaterThanOrEqual(
+        initialCount,
+      );
     }
   });
 
   test("should expand and collapse organization tree", async ({ page }) => {
     await navigateToOrganizationType(page, "govt");
 
-    // Get the ResizablePanel locator (treePanel) - tree is in the first ResizablePanel
-    // The tree is hidden on mobile (md:block), so skip test if not visible
     const treePanel = page.locator('[data-slot="resizable-panel"]').first();
-    const isTreeVisible = await treePanel.isVisible().catch(() => false);
-
-    if (!isTreeVisible) {
+    if (!(await treePanel.isVisible().catch(() => false))) {
       test.skip(true, "Tree navigation not visible (possibly mobile viewport)");
       return;
     }
 
-    // Assert tree panel is visible
     await expect(treePanel).toBeVisible();
+    await expect(treePanel.locator("div.space-y-1").first()).toBeVisible();
 
-    // Wait for organizations to load by waiting for at least one organization name to appear
-    // Tree nodes contain organization names as text
-    const treeContent = treePanel.locator("div.space-y-1");
-    await expect(treeContent.first()).toBeVisible({ timeout: 10000 });
-
-    // Check if any organization has children (toggle button exists)
-    // Toggle buttons are icon buttons with chevron icons (ChevronRight or ChevronDown)
     const expandButtons = treePanel
       .getByRole("button")
       .filter({ has: treePanel.locator("svg") });
-    const toggleCount = await expandButtons.count();
-
-    if (toggleCount === 0) {
-      test.skip(
-        true,
-        "No organizations with children available for tree expand/collapse test",
-      );
+    if ((await expandButtons.count()) === 0) {
+      test.skip(true, "No expandable nodes in tree");
       return;
     }
 
-    // Get the first expand button
-    const firstExpandButton = expandButtons.first();
+    const expandBtn = expandButtons.first();
+    await expect(expandBtn).toBeVisible();
 
-    // Assert expand button is visible
-    await expect(firstExpandButton).toBeVisible({ timeout: 5000 });
-
-    // Locate child container to verify state changes
-    // Child container is a div with pl-2 class that appears when expanded
-    // Find the parent node (div.space-y-1) that contains the button, then find its child container
-    const nodeWithButton = treePanel
+    const node = treePanel
       .locator("div.space-y-1")
-      .filter({ has: firstExpandButton })
+      .filter({ has: expandBtn })
       .first();
-    const childContainer = nodeWithButton.locator("div.pl-2").first();
+    const childContainer = node.locator("div.pl-2").first();
 
-    // Verify initial collapsed state: child container should not be visible
     await expect(childContainer).not.toBeVisible();
+    await expandBtn.click();
+    await expect(childContainer).toBeVisible();
 
-    // Click to expand
-    await firstExpandButton.click();
-
-    // Verify expansion by checking for child elements (this confirms the icon changed to expanded state)
-    await expect(childContainer).toBeVisible({ timeout: 5000 });
-
-    // Verify at least one child organization node is visible
-    // Child nodes are OrganizationTreeNode components with indentation
     const childNodes = childContainer.locator("div.space-y-1");
-    const childCount = await childNodes.count();
-    expect(childCount).toBeGreaterThan(0);
+    expect(await childNodes.count()).toBeGreaterThan(0);
     await expect(childNodes.first()).toBeVisible();
 
-    // Click to collapse
-    await firstExpandButton.click();
-
-    // Assert the childContainer collapsed (no longer visible) - this confirms the icon changed back to collapsed state
-    await expect(childContainer).not.toBeVisible({ timeout: 5000 });
+    await expandBtn.click();
+    await expect(childContainer).not.toBeVisible();
   });
 
   test("should navigate using breadcrumb when viewing child organization", async ({
@@ -247,70 +165,41 @@ test.describe("Governance, Suppliers, and Roles User Role Verification", () => {
   }) => {
     await navigateToOrganizationType(page, "govt");
 
-    // Check if there are any organization cards (exclude empty state)
-    const organizationCards = page
-      .locator('[data-slot="card"]')
-      .filter({
-        has: page.getByRole("heading", { level: 3 }),
-      })
-      .filter({ hasNot: page.getByText("No Organizations Found") });
-    const cardCount = await organizationCards.count();
-
-    if (cardCount === 0) {
-      test.skip(true, "No organizations available for govt org tests");
+    const organizationCards = getOrgCards(page);
+    if ((await organizationCards.count()) === 0) {
+      test.skip(true, "No orgs to test");
       return;
     }
 
-    // Get the first organization card
     const firstCard = organizationCards.first();
     await expect(firstCard).toBeVisible();
+    const orgName = await firstCard
+      .getByRole("heading", { level: 3 })
+      .textContent();
 
-    // Store the org name before navigating
-    const orgNameElement = firstCard.getByRole("heading", { level: 3 });
-    const orgName = await orgNameElement.textContent();
-
-    // Click on "See Details" to navigate to a child organization
     const seeDetailsLink = firstCard.getByRole("link", {
       name: /see details/i,
     });
     await expect(seeDetailsLink).toBeVisible();
-
     await seeDetailsLink.click();
     await page.waitForLoadState("domcontentloaded");
-    // Wait for breadcrumb to be visible as indicator that child page is loaded
+
     const breadcrumb = page.locator('[data-slot="breadcrumb"]');
     await breadcrumb.waitFor({ state: "visible" });
-
-    // Verify we're on a child organization page (URL should have an ID)
     await expect(page).toHaveURL(/.*\/admin\/organizations\/govt\/.+/);
-
-    // Verify breadcrumb is visible
     await expect(breadcrumb).toBeVisible();
 
-    // Verify breadcrumb contains "organizations" link
-    const organizationsLink = breadcrumb.getByRole("link", {
+    const organizationsLink = breadcrumb.getByRole("button", {
       name: /organizations/i,
     });
     await expect(organizationsLink).toBeVisible();
-
-    // Verify breadcrumb shows current organization name
     if (orgName) {
       await expect(breadcrumb.getByText(orgName.trim())).toBeVisible();
     }
 
-    // Click on organizations link in breadcrumb
     await organizationsLink.click();
     await page.waitForLoadState("domcontentloaded");
-    // Wait for search input to be visible as indicator that list page is loaded
-    const searchInput = page.getByRole("textbox", {
-      name: "Search by department/team name",
-    });
-    await searchInput.waitFor({ state: "visible" });
-
-    // Verify we navigated back to the list page
+    await getSearchInput(page).waitFor({ state: "visible" });
     await expect(page).toHaveURL(/.*\/admin\/organizations\/govt$/);
-
-    // Verify we're back on the list view (search input should be visible)
-    await expect(searchInput).toBeVisible();
   });
 });
