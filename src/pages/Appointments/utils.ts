@@ -11,9 +11,7 @@ import {
 
 import query from "@/Utils/request/query";
 import { dateQueryString, getMonthStartAndEnd } from "@/Utils/utils";
-import { BatchRequestResponse } from "@/types/base/batch/batch";
 import {
-  Appointment,
   AvailabilityHeatmapResponse,
   PublicAppointment,
   SchedulableResourceType,
@@ -139,11 +137,6 @@ const getInfiniteAvailabilityHeatmap = ({
 
   return result;
 };
-
-/** Batch response containing a reschedule result with the new appointment */
-export type AppointmentBatchResponse = BatchRequestResponse<{
-  appointment: Appointment;
-}>;
 
 export const formatAppointmentSlotTime = (appointment: PublicAppointment) => {
   if (!appointment.token_slot?.start_datetime) {
