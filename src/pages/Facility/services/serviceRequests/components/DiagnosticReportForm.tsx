@@ -227,15 +227,9 @@ export function DiagnosticReportForm({
         const hasFailure = data.results.some((r) => r.status_code >= 400);
         if (hasFailure) {
           toast.error(t("failed_to_save_diagnostic_report"));
-          queryClient.invalidateQueries({
-            queryKey: ["serviceRequest", serviceRequestId],
-          });
-          queryClient.invalidateQueries({
-            queryKey: ["diagnosticReport", latestReport?.id],
-          });
-          return;
+        } else {
+          toast.success(t("diagnostic_report_updated_successfully"));
         }
-        toast.success(t("diagnostic_report_updated_successfully"));
         queryClient.invalidateQueries({
           queryKey: ["serviceRequest", serviceRequestId],
         });
@@ -245,7 +239,10 @@ export function DiagnosticReportForm({
       },
       onError: (err: Error) => {
         toast.error(
-          `${t("failed_to_save_diagnostic_report")}: ${err.message || t("unknown_error")}`,
+          t("failed_to_save_diagnostic_report_detail", {
+            prefix: t("failed_to_save_diagnostic_report"),
+            detail: err.message || t("unknown_error"),
+          }),
         );
       },
     });
