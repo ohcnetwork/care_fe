@@ -278,8 +278,6 @@ export function EncounterQuestion({
                   </SelectItem>
                 ))}
             </SelectContent>
-
-
           </Select>
         </div>
 
