@@ -2,6 +2,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AlertCircle, ChevronDown, ChevronRight, Upload } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -119,6 +120,7 @@ const processRowLocations = (data: string[][]) => {
 };
 
 export default function LocationImport({ facilityId }: LocationImportProps) {
+  const { t } = useTranslation();
   const [processedLocations, setProcessedLocations] = useState<
     LocationImportT[]
   >([]);
@@ -133,7 +135,7 @@ export default function LocationImport({ facilityId }: LocationImportProps) {
     if (!file) return;
 
     if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
-      setUploadError("Please upload a valid CSV file");
+      setUploadError(t("please_upload_valid_csv"));
       return;
     }
 
@@ -195,8 +197,7 @@ export default function LocationImport({ facilityId }: LocationImportProps) {
               Import Locations from CSV
             </CardTitle>
             <CardDescription>
-              Upload a CSV file to import floor, room, and sub-room locations
-              with their hierarchy preserved.
+              {t("upload_csv_description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -213,17 +214,15 @@ export default function LocationImport({ facilityId }: LocationImportProps) {
                   <Upload className="h-12 w-12 text-gray-400" />
                   <div>
                     <p className="text-lg font-medium">
-                      Click to upload CSV file
+                      {t("click_to_upload_csv")}
                     </p>
-                    <p className="text-sm text-gray-500">or drag and drop</p>
+                    <p className="text-sm text-gray-500">{t("or_drag_and_drop")}</p>
                   </div>
                   <p className="text-xs text-gray-400">
-                    Expected columns: location, type, description (repeated for
-                    each hierarchy level)
+                    {t("expected_columns_description")}
                   </p>
                   <p className="text-xs text-gray-500 mt-2">
-                    Location types can use labels like "bed", "room", "ward",
-                    etc. The last description column is optional.
+                    {t("location_types_help")}
                   </p>
                   <Button
                     variant="outline"
@@ -242,7 +241,7 @@ Main Building,building,Main hospital building,Reception,room,Main reception area
                       window.URL.revokeObjectURL(url);
                     }}
                   >
-                    Download Sample CSV
+                    {t("download_sample_csv")}
                   </Button>
                 </div>
               </label>
@@ -257,7 +256,7 @@ Main Building,building,Main hospital building,Reception,room,Main reception area
 
             <div className="mt-4 p-4 bg-gray-50 rounded-lg">
               <h4 className="font-medium text-sm mb-2">
-                Valid Location Types:
+                {t("valid_location_types")}
               </h4>
               <div className="flex flex-wrap gap-2">
                 {Object.entries(LocationFormLabels).map(([key, label]) => (
@@ -277,9 +276,9 @@ Main Building,building,Main hospital building,Reception,room,Main reception area
     <div className="max-w-7xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle>Location Import Wizard</CardTitle>
+          <CardTitle>{t("location_import_wizard")}</CardTitle>
           <CardDescription>
-            Review and validate locations before importing
+            {t("review_and_validate_locations")}
           </CardDescription>
           <div className="mt-4">
             <Progress value={100} className="h-2" />
@@ -287,7 +286,7 @@ Main Building,building,Main hospital building,Reception,room,Main reception area
         </CardHeader>
         <CardContent>
           <div>
-            <h3 className="text-lg font-semibold mb-4">Review All Locations</h3>
+            <h3 className="text-lg font-semibold mb-4">{t("review_all_locations")}</h3>
             <HierarchicalLocationPreview locations={processedLocations} />
           </div>
           <div className="flex justify-end">
@@ -295,7 +294,7 @@ Main Building,building,Main hospital building,Reception,room,Main reception area
               className="mt-4"
               onClick={() => saveLocations(processedLocations)}
             >
-              Save
+              {t("save")}
             </Button>
           </div>
         </CardContent>
@@ -394,8 +393,7 @@ const HierarchicalLocationPreview = ({
                   </Badge>
                   {hasChildren && (
                     <Badge variant="outline" className="text-xs">
-                      {location.children.length} child
-                      {location.children.length !== 1 ? "ren" : ""}
+                      {location.children.length} {t(location.children.length === 1 ? "child" : "children")}
                     </Badge>
                   )}
                 </div>
@@ -420,7 +418,7 @@ const HierarchicalLocationPreview = ({
   if (locations.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        <p>No locations to preview</p>
+        <p>{t("no_locations_to_preview")}</p>
       </div>
     );
   }
@@ -428,14 +426,14 @@ const HierarchicalLocationPreview = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-lg font-medium">Location Hierarchy Preview</h4>
+        <h4 className="text-lg font-medium">{t("location_hierarchy_preview")}</h4>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setExpandedItems(new Set())}
           >
-            Collapse All
+            {t("collapse_all")}
           </Button>
           <Button
             variant="outline"
@@ -454,7 +452,7 @@ const HierarchicalLocationPreview = ({
               setExpandedItems(allNames);
             }}
           >
-            Expand All
+            {t("expand_all")}
           </Button>
         </div>
       </div>
@@ -464,7 +462,7 @@ const HierarchicalLocationPreview = ({
       </div>
 
       <div className="text-sm text-gray-500">
-        <p>Total locations: {countTotalLocations(locations)}</p>
+        <p>{t("total_locations")}: {countTotalLocations(locations)}</p>
       </div>
     </div>
   );
