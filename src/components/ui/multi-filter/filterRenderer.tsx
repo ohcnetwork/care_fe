@@ -3,6 +3,7 @@ import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityO
 import { LocationRead } from "@/types/location/location";
 import { UserReadMinimal } from "@/types/user/user";
 
+import RenderFacilityUserFilter from "@/components/ui/multi-filter/facilityUserFilter";
 import RenderActivityDefinitionFilter, {
   ActivityDefinitionFilterValue,
 } from "./activityDefinitionFilter";
@@ -96,6 +97,16 @@ export default function FilterRenderer({
       return (
         <>
           <RenderCareTeamFilter
+            {...commonProps}
+            selectedUsers={selected as UserReadMinimal[]}
+          />
+          <NavigationHelper isActiveFilter={true} />
+        </>
+      );
+    case "facility_user":
+      return (
+        <>
+          <RenderFacilityUserFilter
             {...commonProps}
             selectedUsers={selected as UserReadMinimal[]}
           />

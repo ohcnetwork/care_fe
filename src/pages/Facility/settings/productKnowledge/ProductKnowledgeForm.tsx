@@ -394,6 +394,7 @@ function ProductKnowledgeFormContent({
                                 .replace(/[^a-z0-9_-]/g, "");
                               form.setValue("slug_value", sanitizedValue, {
                                 shouldValidate: true,
+                                shouldDirty: true,
                               });
                             }}
                           />

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -66,6 +66,10 @@ export default function MedicationRequestTable() {
   const [selectedDispenseOrderId, setSelectedDispenseOrderId] = useState<
     string | undefined
   >();
+
+  useEffect(() => {
+    setSelectedPrescriptionId(undefined);
+  }, [encounterId]);
 
   return (
     <div className="space-y-2 h-full">

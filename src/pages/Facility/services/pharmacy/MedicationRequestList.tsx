@@ -5,7 +5,7 @@ import {
   MoreVertical,
   ReceiptTextIcon,
 } from "lucide-react";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -61,11 +61,7 @@ import {
   PrescriptionSummary,
 } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
-import {
-  getTagHierarchyDisplay,
-  TagConfig,
-  TagResource,
-} from "@/types/emr/tagConfig/tagConfig";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { getLocationPath } from "@/types/location/utils";
 import mutate from "@/Utils/request/mutate";
@@ -297,6 +293,19 @@ export default function MedicationRequestList({
           className="flex flex-wrap md:flex-row items-start"
           facilityId={facilityId}
         />
+
+        {qParams.patient_external_id && (
+          <div className="ml-auto items-end">
+            <Button variant="outline_primary" asChild>
+              <Link
+                href={`/medication_requests/patient/${qParams.patient_external_id}/bill`}
+              >
+                <ReceiptTextIcon strokeWidth={1.5} />
+                {t("bill_all_pending_prescriptions")}
+              </Link>
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Table section */}
@@ -326,8 +335,16 @@ export default function MedicationRequestList({
             </TableHeader>
             <TableBody>
               {prescriptionQueue?.results?.map((item: PrescriptionSummary) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-semibold">
+                <TableRow key={item.id} className="group">
+                  <TableCell
+                    className="font-semibold group-hover:underline cursor-pointer"
+                    onClick={() =>
+                      updateQuery({
+                        patient_external_id: item.encounter.patient.id,
+                        patient_name: item.encounter.patient.name,
+                      })
+                    }
+                  >
                     {item.encounter.patient.name}
                     <div className="text-xs text-gray-500">
                       {t("by")}: {formatName(item.prescribed_by)}
@@ -399,36 +416,10 @@ export default function MedicationRequestList({
                         }}
                         patientId={item.encounter.patient.id}
                       />
-                      {item.tags && item.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {item.tags.map((tag) => (
-                            <Badge
-                              key={tag.id}
-                              variant="outline"
-                              size="sm"
-                              className="text-xs"
-                            >
-                              {getTagHierarchyDisplay(tag)}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2 self-center">
-                      <Button
-                        variant="outline_primary"
-                        className="font-semibold"
-                        onClick={() => {
-                          navigate(
-                            `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}/bill`,
-                          );
-                        }}
-                      >
-                        <ReceiptTextIcon strokeWidth={1.5} />
-                        {t("bill_all")}
-                      </Button>
                       <Button
                         variant="outline"
                         className="font-semibold"
@@ -439,7 +430,7 @@ export default function MedicationRequestList({
                         }}
                       >
                         <ReceiptTextIcon strokeWidth={1.5} />
-                        {t("bill_this")}
+                        {t("bill")}
                       </Button>
                       <Button
                         variant="outline"

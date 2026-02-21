@@ -11,16 +11,8 @@ export interface QuickLinksPreferences {
   custom_links?: QuickLinkCustom[];
 }
 
-export interface UserPreference {
-  facility_quick_links?: QuickLinksPreferences;
-}
-
-export type UserPreferenceKey = keyof UserPreference;
-
-export interface UserPreferenceRequest<
-  K extends UserPreferenceKey = UserPreferenceKey,
-> {
-  preference: K;
-  version: string;
-  value: UserPreference[K];
+export interface UserPreferenceRequest {
+  preference: string;
+  version?: string;
+  value: Record<string, unknown>;
 }

@@ -8,8 +8,12 @@ import { Markdown } from "@/components/ui/markdown";
 
 import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
-import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
-import { formatDosage, formatSig } from "@/components/Medicine/utils";
+import {
+  formatDosage,
+  formatDuration,
+  formatFrequency,
+  formatSig,
+} from "@/components/Medicine/utils";
 
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -35,7 +39,7 @@ const PrescriptionContent = ({
   return (
     <div>
       {/* Prescription Symbol */}
-      <div className="text-2xl font-semibold mb-3 flex items-end gap-4">
+      <div className="text-xl font-semibold mb-3 flex items-end gap-4">
         <p>{t("℞")}</p>
         <p className="text-sm text-gray-600 font-semibold ">
           {formatDateTime(prescription.created_date, "DD/MM/YYYY hh:mm A")}
@@ -56,25 +60,25 @@ const PrescriptionContent = ({
             ]}
             rows={medications?.map((medication) => {
               const instruction = medication.dosage_instruction[0];
-              const frequency = getFrequencyDisplay(instruction?.timing);
-              const dosage = formatDosage(instruction);
-              const duration = instruction?.timing?.repeat?.bounds_duration;
               const remarks = formatSig(instruction);
               const notes = medication.note;
+              const freqText = formatFrequency(instruction);
+              const additionalInstr =
+                instruction?.additional_instruction?.[0]?.display;
               return {
                 medicine: displayMedicationName(medication),
                 status: t(`medication_status_${medication.status}`),
-                dosage: dosage,
-                frequency: instruction?.as_needed_boolean
-                  ? `${t("as_needed_prn")}`
-                  : (frequency?.meaning ?? "-") +
-                    (instruction?.additional_instruction?.[0]?.display
-                      ? `, ${instruction.additional_instruction[0].display}`
-                      : ""),
-                duration: duration ? `${duration.value} ${duration.unit}` : "-",
+                dosage: formatDosage(instruction),
+                frequency:
+                  [freqText, additionalInstr].filter(Boolean).join(", ") || "-",
+                duration: formatDuration(instruction) || "-",
                 instructions: [remarks, notes].filter(Boolean).join("\n"),
               };
             })}
+            className="text-sm font-semibold whitespace-break-spaces text-gray-950"
+            cellConfig={{
+              medicine: { className: "text-left" },
+            }}
           />
         </div>
       )}
@@ -92,7 +96,7 @@ const PrescriptionContent = ({
       <div className="w-full items-end mt-6 flex flex-row justify-end gap-1">
         <div className="text-right">
           <p className="text-sm text-gray-400">{t("prescribed_by")}</p>
-          <p className="text-sm text-gray-600 font-semibold">
+          <p className="text-base text-gray-600 font-semibold">
             {formatName(prescription.prescribed_by)}
           </p>
         </div>
@@ -136,7 +140,7 @@ export const PrescriptionPreview = ({
       autoPrint={{ enabled: !!prescription.medications?.length }}
       disabled={!prescription.medications?.length}
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <div>
           {/* Header */}
           <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
@@ -214,7 +218,10 @@ export const PrescriptionPreview = ({
           <PrescriptionContent prescription={prescription} />
 
           {/* Footer */}
-          <PrintFooter leftContent={t("computer_generated_prescription")} />
+          <PrintFooter
+            leftContent={t("computer_generated_prescription")}
+            className="text-sm"
+          />
         </div>
       </div>
     </PrintPreview>

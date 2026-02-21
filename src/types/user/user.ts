@@ -3,7 +3,6 @@ import { GENDER_TYPES } from "@/common/constants";
 import { Permissions } from "@/types/emr/permission/permission";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
-import { UserPreference } from "./userPreferences";
 
 export type UserType =
   | "doctor"
@@ -54,7 +53,7 @@ export interface CurrentUserRead extends UserRead, Permissions {
   pf_endpoint: string | null;
   pf_p256dh: string | null;
   pf_auth: string | null;
-  preferences: UserPreference;
+  preferences: Record<string, unknown>;
 }
 
 // Todo: Once backend adds a proper public user read spec, add it here and update the usages where applicable

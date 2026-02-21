@@ -134,11 +134,18 @@ test.describe("Charge Item Definition Creation", () => {
       .click();
     await page.getByRole("checkbox").first().click();
     await page.getByRole("button", { name: "Done" }).click();
-    await page.getByRole("button", { name: "Add Condition" }).click();
+    const switchElement = page.getByRole("switch", {
+      name: "Use facility global value",
+    });
+    if (await switchElement.isChecked()) {
+      await switchElement.click();
+    }
     await page.waitForLoadState("networkidle");
+    await page.getByRole("button", { name: "Add Condition" }).click();
+    // To do: make this metric agnostic/otherwise might have to adjust everytime we add a new metric
     await page
       .getByRole("combobox")
-      .filter({ hasText: /^Metric|Encounter Tags$/ })
+      .filter({ hasText: /^Metric|Encounter/ })
       .click();
     await page.getByRole("option", { name: "Patient Age" }).click();
     await page.getByRole("combobox").filter({ hasText: "In range" }).click();
