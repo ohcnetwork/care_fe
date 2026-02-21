@@ -109,7 +109,10 @@ import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/A
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { TokenGenerationSheet } from "@/pages/Appointments/components/TokenGenerationSheet";
-import { extractAppointmentFromBatchResponse } from "@/pages/Appointments/utils";
+import {
+  RESCHEDULE_REFERENCE_ID,
+  extractAppointmentFromBatchResponse,
+} from "@/pages/Appointments/utils";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { BatchRequestBody } from "@/types/base/batch/batch";
@@ -860,7 +863,7 @@ const AppointmentActions = ({
           .replace("{facilityId}", facilityId)
           .replace("{id}", appointment.id),
         method: scheduleApis.appointments.reschedule.method,
-        reference_id: "reschedule-appointment",
+        reference_id: RESCHEDULE_REFERENCE_ID,
         body: {
           new_slot: selectedSlotId,
           previous_booking_note: oldNote,

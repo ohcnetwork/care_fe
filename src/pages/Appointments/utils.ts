@@ -148,7 +148,7 @@ export type AppointmentBatchResponse = BatchRequestResponse<{
   appointment: Appointment;
 }>;
 
-const RESCHEDULE_REFERENCE_ID = "reschedule-appointment";
+export const RESCHEDULE_REFERENCE_ID = "reschedule-appointment";
 
 export function extractAppointmentFromBatchResponse(
   response: BatchRequestResponse,
