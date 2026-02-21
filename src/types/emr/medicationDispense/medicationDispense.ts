@@ -4,7 +4,6 @@ import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { MedicationRequestDosageInstruction } from "@/types/emr/medicationRequest/medicationRequest";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import { LocationRead } from "@/types/location/location";
-import { TFunction } from "i18next";
 
 export enum MedicationDispenseStatus {
   preparation = "preparation",
@@ -65,7 +64,7 @@ export enum SubstitutionReason {
 }
 
 export const getSubstitutionTypeDisplay = (
-  t: TFunction,
+  t: (key: string) => string,
   type: SubstitutionType,
 ) => {
   switch (type) {
@@ -93,7 +92,7 @@ export const getSubstitutionTypeDisplay = (
 };
 
 export const getSubstitutionReasonDisplay = (
-  t: TFunction,
+  t: (key: string) => string,
   reason: SubstitutionReason,
 ) => {
   switch (reason) {
@@ -111,7 +110,7 @@ export const getSubstitutionReasonDisplay = (
 };
 
 export const getSubstitutionTypeDescription = (
-  t: TFunction,
+  t: (key: string) => string,
   type: SubstitutionType,
 ) => {
   switch (type) {
@@ -139,7 +138,7 @@ export const getSubstitutionTypeDescription = (
 };
 
 export const getSubstitutionReasonDescription = (
-  t: TFunction,
+  t: (key: string) => string,
   reason: SubstitutionReason,
 ) => {
   switch (reason) {
