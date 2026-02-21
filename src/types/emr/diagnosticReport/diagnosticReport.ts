@@ -19,6 +19,29 @@ export const DIAGNOSTIC_REPORT_STATUS_COLORS = {
   final: "green",
 } as const satisfies Record<DiagnosticReportStatus, string>;
 
+export interface ActivityDefinitionMinimal {
+  id: string;
+  slug: string;
+  title: string;
+  classification: string;
+}
+
+export interface ServiceRequestMinimal {
+  id: string;
+  title: string;
+  status: string;
+  intent: string;
+  priority: string;
+  category: string;
+  do_not_perform: boolean;
+  note: string | null;
+  code: Code | null;
+  body_site: Code | null;
+  occurance: string | null;
+  patient_instruction: string | null;
+  activity_definition?: ActivityDefinitionMinimal;
+}
+
 export interface DiagnosticReportBase {
   id: string;
   status: DiagnosticReportStatus;
@@ -46,6 +69,7 @@ export interface DiagnosticReportRead extends Omit<DiagnosticReportBase, "id"> {
   id: string;
   encounter: EncounterRead;
   observations: ObservationRead[];
+  service_request?: ServiceRequestMinimal;
   created_by: UserReadMinimal;
   created_date: string;
   modified_date: string;

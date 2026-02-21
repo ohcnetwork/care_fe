@@ -87,6 +87,7 @@ const priceComponentSchema = z.object({
   factor: zodDecimal({ min: 0, max: 100 }).optional().nullable(),
   amount: zodDecimal({ min: 0 }).optional().nullable(),
   conditions: z.array(conditionSchema).optional(),
+  global_component: z.boolean().optional(),
 });
 
 const chargeItemBaseSchema = z.object({
@@ -419,6 +420,9 @@ export function EditInvoiceTable({
     return <div>{t("no_charge_items_found")}</div>;
   }
 
+  const hasEditableItems = chargeItems.some(
+    (ci) => ci.charge_item_definition?.can_edit_charge_item !== false,
+  );
   const filteredDiscounts = globalDiscounts.filter(getDiscountComponentKey);
 
   return (
@@ -462,43 +466,45 @@ export function EditInvoiceTable({
                 <TableHead>
                   <div className="flex items-center justify-center gap-2">
                     {t("discounts")}
-                    {filteredDiscounts.length > 0 && chargeItems.length > 1 && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 px-2 text-xs"
-                          >
-                            {t("apply_to_all")}
-                            <ChevronDown className="h-3 w-3 ml-1" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {filteredDiscounts.map((discount) => {
-                            const key = getDiscountComponentKey(discount);
-                            return (
-                              <DropdownMenuItem
-                                key={key}
-                                onClick={() =>
-                                  key && handleApplyGlobalDiscount(key)
-                                }
-                              >
-                                {discount.code?.display} @{" "}
-                                <MonetaryDisplay {...discount} />
-                              </DropdownMenuItem>
-                            );
-                          })}
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={handleClearAllDiscounts}
-                            className="text-destructive"
-                          >
-                            {t("clear_all")}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
+                    {filteredDiscounts.length > 0 &&
+                      chargeItems.length > 1 &&
+                      hasEditableItems && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 px-2 text-xs"
+                            >
+                              {t("apply_to_all")}
+                              <ChevronDown className="h-3 w-3 ml-1" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {filteredDiscounts.map((discount) => {
+                              const key = getDiscountComponentKey(discount);
+                              return (
+                                <DropdownMenuItem
+                                  key={key}
+                                  onClick={() =>
+                                    key && handleApplyGlobalDiscount(key)
+                                  }
+                                >
+                                  {discount.code?.display} @{" "}
+                                  <MonetaryDisplay {...discount} />
+                                </DropdownMenuItem>
+                              );
+                            })}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={handleClearAllDiscounts}
+                              className="text-destructive"
+                            >
+                              {t("clear_all")}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                   </div>
                 </TableHead>
               </TableRow>
@@ -508,6 +514,9 @@ export function EditInvoiceTable({
                 const rowErrors = getRowErrors(
                   form.formState.errors.items?.[index],
                 );
+                const canEditRow =
+                  chargeItems[index]?.charge_item_definition
+                    ?.can_edit_charge_item !== false;
 
                 return (
                   <React.Fragment key={item.id}>
@@ -542,6 +551,7 @@ export function EditInvoiceTable({
                                     );
                                   }}
                                   placeholder="0.00"
+                                  disabled={!canEditRow}
                                 />
                               </FormControl>
                             </FormItem>
@@ -560,6 +570,7 @@ export function EditInvoiceTable({
                                   {...field}
                                   min="1"
                                   step="1"
+                                  disabled={!canEditRow}
                                 />
                               </FormControl>
                             </FormItem>
@@ -653,6 +664,7 @@ export function EditInvoiceTable({
                                                       value,
                                                     );
                                                   }}
+                                                  disabled={!canEditRow}
                                                 >
                                                   <SelectTrigger>
                                                     <SelectValue
@@ -710,7 +722,8 @@ export function EditInvoiceTable({
                                         control={form.control}
                                         name={`items.${index}.discounts.${discountIndex}`}
                                         render={() => {
-                                          const isDisabled = !discount?.code;
+                                          const isDisabled =
+                                            !canEditRow || !discount?.code;
                                           const isPercentage =
                                             discount &&
                                             isPercentageBased(discount);
@@ -752,7 +765,8 @@ export function EditInvoiceTable({
                                         control={form.control}
                                         name={`items.${index}.discounts.${discountIndex}`}
                                         render={() => {
-                                          const isDisabled = !discount?.code;
+                                          const isDisabled =
+                                            !canEditRow || !discount?.code;
                                           const isPercentage =
                                             discount &&
                                             isPercentageBased(discount);
@@ -798,6 +812,7 @@ export function EditInvoiceTable({
                                             discountIndex,
                                           )
                                         }
+                                        disabled={!canEditRow}
                                       >
                                         <X className="h-4 w-4" />
                                       </Button>
@@ -811,7 +826,7 @@ export function EditInvoiceTable({
                                   size="sm"
                                   className="w-full"
                                   onClick={() => handleAddDiscount(index)}
-                                  disabled={hasEmptyRow}
+                                  disabled={hasEmptyRow || !canEditRow}
                                 >
                                   <Plus className="h-4 w-4 mr-2" />
                                   {t("add_discount")}

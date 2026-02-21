@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -45,27 +45,30 @@ import {
   AccountStatus,
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
-import { Period } from "@/types/emr/encounter/encounter";
+import { EncounterListRead, Period } from "@/types/emr/encounter/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 import { PatientRead } from "@/types/emr/patient/patient";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 
 const createBaseSchema = (t: (key: string) => string) =>
   z.object({
     name: z.string().min(1, t("name_is_required")),
-    description: z.string().optional(),
+    description: z.string().optional().nullable(),
     status: z.nativeEnum(AccountStatus),
     billing_status: z.nativeEnum(AccountBillingStatus),
     id: z.string().optional(),
     patient: z.custom<PatientRead>().optional(),
     service_period: z.custom<Period>().optional(),
+    primary_encounter: z.string().optional(),
   });
 
 interface AccountSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   facilityId: string;
-  patientId?: string;
+  patientId: string;
   initialValues?: AccountRead;
   isEdit?: boolean;
 }
@@ -81,6 +84,23 @@ export function AccountSheet({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { getExtensions } = useExtensionSchemas();
+
+  // Fetch patient encounters
+  const { data: encounters, isLoading: isLoadingEncounters } = useQuery({
+    queryKey: ["encounters", patientId, facilityId],
+    queryFn: query(encounterApi.list, {
+      queryParams: {
+        patient: patientId,
+        facility: facilityId,
+        ordering: "-created_date",
+        limit: 10,
+      },
+    }),
+    select(data: PaginatedResponse<EncounterListRead>) {
+      return data.results;
+    },
+    enabled: open,
+  });
 
   const ext = useMemo(
     () =>
@@ -102,13 +122,19 @@ export function AccountSheet({
 
   const methods = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialValues || {
-      name: "",
-      description: "",
-      status: AccountStatus.active,
-      billing_status: AccountBillingStatus.open,
-      extensions: ext.defaults,
-    },
+    defaultValues: initialValues
+      ? {
+          ...initialValues,
+          primary_encounter: initialValues.primary_encounter?.id,
+        }
+      : {
+          name: "",
+          description: "",
+          status: AccountStatus.active,
+          billing_status: AccountBillingStatus.open,
+          extensions: ext.defaults,
+          primary_encounter: undefined,
+        },
   });
 
   const extensions = useEntityExtensions({
@@ -121,13 +147,19 @@ export function AccountSheet({
   // Reset form when initialValues changes
   React.useEffect(() => {
     methods.reset(
-      initialValues || {
-        name: "",
-        description: "",
-        status: AccountStatus.active,
-        billing_status: AccountBillingStatus.open,
-        extensions: ext.defaults,
-      },
+      initialValues
+        ? {
+            ...initialValues,
+            primary_encounter: initialValues.primary_encounter?.id,
+          }
+        : {
+            name: "",
+            description: "",
+            status: AccountStatus.active,
+            billing_status: AccountBillingStatus.open,
+            extensions: ext.defaults,
+            primary_encounter: undefined,
+          },
     );
   }, [initialValues, methods, ext.defaults]);
 
@@ -155,6 +187,7 @@ export function AccountSheet({
             start: new Date().toISOString(),
           },
           patient: data.patient?.id || patientId!,
+          primary_encounter: data.primary_encounter,
           extensions: extensions.prepareForSubmit(
             data.extensions as NamespacedExtensionData,
           ),
@@ -226,7 +259,11 @@ export function AccountSheet({
                   <FormItem>
                     <FormLabel>{t("description")}</FormLabel>
                     <FormControl>
-                      <Textarea {...field} disabled={isCreating} />
+                      <Textarea
+                        {...field}
+                        disabled={isCreating}
+                        value={field.value || ""}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -292,6 +329,42 @@ export function AccountSheet({
                   </FormItem>
                 )}
               />
+
+              {isEdit && (
+                <FormField
+                  name="primary_encounter"
+                  control={methods.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("primary_encounter")}</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value || ""}
+                          onValueChange={field.onChange}
+                          disabled={isCreating || isLoadingEncounters}
+                        >
+                          <SelectTrigger ref={field.ref}>
+                            <SelectValue
+                              placeholder={t("select_primary_encounter")}
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {encounters?.map((encounter) => (
+                              <SelectItem
+                                key={encounter.id}
+                                value={encounter.id}
+                              >
+                                {`${t(encounter.encounter_class)} - ${t(encounter.status)} (${new Date(encounter.period.start || "").toLocaleDateString("en-IN")})`}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               {extensions.fields}
 

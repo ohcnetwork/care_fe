@@ -86,6 +86,10 @@ export function useEncounterShortcuts() {
     }
 
     return {
+      "add-service-request": () =>
+        navigate(buildEncounterUrl("/questionnaire/service_request")),
+      "add-medication-request": () =>
+        navigate(buildEncounterUrl("/questionnaire/medication_request")),
       "add-allergy": () =>
         navigate(buildEncounterUrl("/questionnaire/allergy_intolerance")),
       "add-symptoms": () =>
@@ -100,7 +104,7 @@ export function useEncounterShortcuts() {
         navigate(buildEncounterUrl("/diagnostic_reports")),
       "clinical-history": () =>
         navigate(
-          `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/history/symptoms?sourceUrl=${encodeURIComponent(
+          `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/history/responses?sourceUrl=${encodeURIComponent(
             buildEncounterUrl("/updates"),
           )}`,
         ),
@@ -124,6 +128,7 @@ export function useEncounterShortcuts() {
       "manage-care-team": () => actions.manageCareTeam(),
       "manage-departments": () => actions.manageDepartments(),
       dispense: () => actions.dispense(),
+      "restart-encounter": () => actions.restartEncounter(),
       "open-command-dialog": () => {
         document.dispatchEvent(
           new CustomEvent("open-encounter-command-dialog"),

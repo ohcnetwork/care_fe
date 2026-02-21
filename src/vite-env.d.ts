@@ -34,12 +34,16 @@ interface ImportMetaEnv {
   readonly REACT_DISABLE_PATIENT_LOGIN?: string;
   readonly REACT_CUSTOM_REMOTE_I18N_URL?: string;
   readonly REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE?: string;
+  readonly REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME?: string;
   readonly REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE?: string;
+  readonly REACT_OPEN_SCHEDULE_AFTER_PATIENT_REGISTRATION?: string;
   readonly REACT_AUTO_REFRESH_INTERVAL?: string;
   readonly REACT_AUTO_REFRESH_BY_DEFAULT?: string;
+  readonly REACT_APP_UPDATE_CHECK_INTERVAL?: string;
   readonly REACT_DECIMAL_PRECISION?: string;
   readonly REACT_ACCOUNTING_PRECISION?: string;
   readonly REACT_DECIMAL_ROUNDING_METHOD?: string;
+  readonly REACT_MAX_FORM_DIALOG_FAVORITES?: string;
 
   // Plugins related envs...
   readonly REACT_SENTRY_DSN?: string;
