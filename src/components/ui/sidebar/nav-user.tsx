@@ -22,7 +22,7 @@ import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import { useAppUpdates } from "@/hooks/useAppUpdates";
+import { useAppVersion } from "@/hooks/useAppVersion";
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 import { useCareApps } from "@/hooks/useCareApps";
 import { usePatientSignOut } from "@/hooks/usePatientSignOut";
@@ -40,7 +40,7 @@ export function FacilityNavUser({
   const { isMobile, open } = useSidebar();
   const { signOut } = useAuthContext();
   const careApps = useCareApps();
-  const { newVersion, updateApp } = useAppUpdates(false, undefined, true);
+  const { pendingUpdate, updateApp } = useAppVersion();
   const pluginNavItems = careApps.flatMap((c) =>
     !c.isLoading && c.userNavItems ? c.userNavItems : [],
   ) as NavigationLink[];
@@ -93,7 +93,7 @@ export function FacilityNavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
-            {newVersion && (
+            {pendingUpdate && (
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={updateApp}>

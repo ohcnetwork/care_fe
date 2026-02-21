@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 
+import { Separator } from "@/components/ui/separator";
 import {
   MonetaryComponent,
   MonetaryComponentType,
@@ -51,6 +52,8 @@ export default function ChargeItemPriceDisplay({
   const baseAmount = baseComponents[0]?.amount || "0";
   const mrpAmount = mrpComponents[0]?.amount;
   const purchasePriceAmount = purchasePriceComponents[0]?.amount;
+  const showAsterisk =
+    discountComponents.some((c) => c.conditions?.length) || false;
 
   const renderComponentValue = (
     component: MonetaryComponent,
@@ -101,6 +104,11 @@ export default function ChargeItemPriceDisplay({
           >
             <span className="max-w-40">
               {component.code?.display || t("discount")}
+              {component.conditions?.length ? (
+                <span className="ml-1 text-xs text-gray-400">
+                  ({t("conditional")})*
+                </span>
+              ) : null}
             </span>
             {renderComponentValue(component, "-")}
           </div>
@@ -130,6 +138,15 @@ export default function ChargeItemPriceDisplay({
             <span>{t("purchase_price")}</span>
             <MonetaryDisplay amount={purchasePriceAmount} />
           </div>
+        )}
+
+        {showAsterisk && (
+          <>
+            <Separator />
+            <p className="text-xs text-gray-400 mt-2">
+              *{t("conditional_discounts_not_applied")}
+            </p>
+          </>
         )}
       </div>
     </div>
