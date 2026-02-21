@@ -10,6 +10,7 @@ import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/
 import AddMultipleChargeItemsSheet from "@/pages/Facility/services/serviceRequests/components/AddMultipleChargeItemsSheet";
 import { ChargeItemCard } from "@/pages/Facility/services/serviceRequests/components/ChargeItemCard";
 
+import { ResourceCategorySubType } from "@/types/base/resourceCategory/resourceCategory";
 import {
   AccountBillingStatus,
   AccountStatus,
@@ -32,6 +33,7 @@ interface ChargeItemsSectionProps {
   sourceUrl?: string;
   encounterId?: string;
   disableCreateChargeItems?: boolean;
+  disableCreateChargeItemsSection?: boolean;
   viewOnly?: boolean;
 }
 
@@ -43,6 +45,7 @@ export function ChargeItemsSection({
   sourceUrl,
   encounterId,
   disableCreateChargeItems = false,
+  disableCreateChargeItemsSection = false,
   viewOnly = false,
 }: ChargeItemsSectionProps) {
   const { t } = useTranslation();
@@ -120,7 +123,7 @@ export function ChargeItemsSection({
                   <ShortcutBadge actionId="create-an-invoice" />
                 </Button>
               )}
-              {!disableCreateChargeItems && !viewOnly && (
+              {!disableCreateChargeItemsSection && !viewOnly && (
                 <Button
                   variant="outline"
                   size="sm"
@@ -179,6 +182,7 @@ export function ChargeItemsSection({
             queryKey: ["chargeItems", facilityId, resourceId],
           });
         }}
+        resourceSubType={ResourceCategorySubType.other}
       />
     </>
   );

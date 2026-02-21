@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -10,6 +10,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQueryParams } from "raviger";
 
 import { BookAppointmentDetails } from "./BookAppointmentDetails";
 import { BookingsList } from "./BookingsList";
@@ -19,6 +20,7 @@ interface Props {
   facilityId?: string;
   trigger?: React.ReactNode;
   onSuccess?: () => void;
+  defaultOpen?: boolean;
 }
 
 export default function BookAppointmentSheet({
@@ -26,14 +28,24 @@ export default function BookAppointmentSheet({
   facilityId,
   trigger,
   onSuccess,
+  defaultOpen,
 }: Props) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [qParams] = useQueryParams();
+  const [isOpen, setIsOpen] = useState(
+    defaultOpen || qParams.open_schedule === "true",
+  );
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (defaultOpen) {
+      setIsOpen(true);
+    }
+  }, [defaultOpen]);
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="md:w-[90%] !max-w-none h-full overflow-y-auto">
+      <SheetContent className="md:w-[90%] max-w-none! h-full overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{t("book_appointment")}</SheetTitle>
         </SheetHeader>

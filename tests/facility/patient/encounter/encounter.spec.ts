@@ -107,7 +107,8 @@ test.describe("Create an Encounter", () => {
       .textContent();
 
     // Store the phone number for future use (remove any whitespace and special characters)
-    const cleanPhoneNumber = phoneNumber?.replace(/\D/g, "");
+    // To do: make it country code agnostic
+    const cleanPhoneNumber = phoneNumber?.replace(/\D/g, "").slice(2);
     expect(cleanPhoneNumber).toMatch(/^\d+$/);
     const yearOfBirth = dobText?.match(/\d{4}/)?.[0];
 

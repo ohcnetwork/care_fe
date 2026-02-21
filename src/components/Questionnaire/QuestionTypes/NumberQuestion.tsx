@@ -27,8 +27,7 @@ export function NumberQuestion({
 }: NumberQuestionProps) {
   const handleChange = (value: string) => {
     const emptyValue = value === "";
-    const numericValue =
-      question.type === "decimal" ? parseFloat(value) : parseInt(value);
+    const numericValue = question.type === "decimal" ? value : parseInt(value);
 
     const newValues = [...questionnaireResponse.values];
     newValues[index] = {

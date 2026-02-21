@@ -135,6 +135,20 @@ export default function ProductView({ facilityId, productId }: Props) {
                 </p>
               </div>
             )}
+            {product.standard_pack_size != null && (
+              <div>
+                <p className="text-sm text-gray-500">
+                  {t("standard_pack_size")}
+                </p>
+                <p className="text-gray-700">{product.standard_pack_size}</p>
+              </div>
+            )}
+            {product.purchase_price != null && (
+              <div>
+                <p className="text-sm text-gray-500">{t("purchase_price")}</p>
+                <p className="text-gray-700">{product.purchase_price}</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -167,18 +181,20 @@ export default function ProductView({ facilityId, productId }: Props) {
                     {product.product_knowledge.slug}
                   </p>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/settings/product_knowledge/${product.product_knowledge.slug}`,
-                    )
-                  }
-                >
-                  <CareIcon icon="l-eye" className="mr-2 size-4" />
-                  {t("view_details")}
-                </Button>
+                {product.product_knowledge.is_instance_level === false && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/settings/product_knowledge/${product.product_knowledge.slug}`,
+                      )
+                    }
+                  >
+                    <CareIcon icon="l-eye" className="mr-2 size-4" />
+                    {t("view_details")}
+                  </Button>
+                )}
               </div>
             </div>
           </CardContent>

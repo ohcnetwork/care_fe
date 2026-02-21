@@ -4,6 +4,7 @@ import React from "react";
 import { Badge } from "@/components/ui/badge";
 
 import { formatName } from "@/Utils/utils";
+import { LocationNode } from "@/components/Location/LocationTree";
 import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
 import { ObservationDefinitionReadSpec } from "@/types/emr/observationDefinition/observationDefinition";
 import {
@@ -137,20 +138,6 @@ export function ServiceRequestDetails({
                 </div>
               </div>
             )}
-            {request.locations?.length > 0 && (
-              <div>
-                <div className="text-sm text-gray-600 mb-1">
-                  {t("locations")}
-                </div>
-                <div className="text-sm font-normal flex flex-wrap gap-1">
-                  {request.locations.map((location) => (
-                    <Badge key={location.id} variant="secondary">
-                      {location.name}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
             <div>
               <div className="text-sm text-gray-600 mb-1">
                 {t("requested by")}
@@ -159,6 +146,17 @@ export function ServiceRequestDetails({
                 {request.requester && formatName(request.requester)}
               </div>
             </div>
+            {request.encounter.current_location && (
+              <div>
+                <div className="text-sm text-gray-600 mb-1">
+                  {t("patient_location")}
+                </div>
+                <LocationNode
+                  location={request.encounter.current_location}
+                  isLast={true}
+                />
+              </div>
+            )}
           </div>
         </div>
 
