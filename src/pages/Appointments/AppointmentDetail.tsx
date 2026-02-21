@@ -925,13 +925,18 @@ const AppointmentActions = ({
         queryClient.invalidateQueries({
           queryKey: ["appointment", appointment.id],
         });
+        setIsRescheduleOpen(false);
+        setSelectedSlotId(undefined);
+        setRescheduleReason("");
         const result = response.results.find(
           (result) => result.reference_id === "reschedule-appointment",
         );
         const newAppointment = result?.data as Appointment;
-        navigate(
-          `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${newAppointment.id}`,
-        );
+        if (newAppointment) {
+          navigate(
+            `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${newAppointment.id}`,
+          );
+        }
       }
       if (
         response.results.find(
