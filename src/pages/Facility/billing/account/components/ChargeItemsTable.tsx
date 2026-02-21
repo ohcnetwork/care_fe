@@ -63,7 +63,7 @@ import { Switch } from "@/components/ui/switch";
 import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./AddChargeItemsBillingSheet";
-import { ChargeItemActionsMenu } from "./ChargeItemActions";
+import ChargeItemActionsMenu from "./ChargeItemActions";
 import QuickAddChargeItemsSheet from "./QuickAddChargeItemsSheet";
 
 interface PriceComponentRowProps {

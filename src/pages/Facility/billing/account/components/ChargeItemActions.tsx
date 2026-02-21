@@ -49,7 +49,7 @@ interface ChargeItemActionsMenuProps {
   onEdit: (item: ChargeItemRead) => void;
 }
 
-export function ChargeItemActionsMenu({
+export default function ChargeItemActionsMenu({
   item,
   facilityId,
   accountId,
@@ -76,6 +76,9 @@ export function ChargeItemActionsMenu({
     onSuccess: () => {
       toast.success(t("charge_item_updated"));
       queryClient.invalidateQueries({ queryKey: ["chargeItems", accountId] });
+      queryClient.invalidateQueries({
+        queryKey: ["infinite-chargeItems", accountId],
+      });
     },
   });
 
@@ -83,7 +86,7 @@ export function ChargeItemActionsMenu({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" aria-label={t("more_actions")}>
             <MoreHorizontal className="size-4" />
           </Button>
         </DropdownMenuTrigger>

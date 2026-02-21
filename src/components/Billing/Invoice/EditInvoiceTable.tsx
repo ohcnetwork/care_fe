@@ -292,8 +292,8 @@ export function EditInvoiceTable({
           return hasAmount || hasFactor;
         }),
       ],
-      description: item.description || undefined,
-      note: item.note || undefined,
+      description: item.description === null ? "" : item.description,
+      note: item.note === null ? "" : item.note,
       performer_actor: performers[item.id]?.id,
     }));
 
@@ -862,6 +862,7 @@ export function EditInvoiceTable({
                                 <Button
                                   variant="ghost"
                                   size="icon"
+                                  aria-label={t("note")}
                                   className={cn(
                                     "bg-gray-100",
                                     field.value && "bg-primary-100",

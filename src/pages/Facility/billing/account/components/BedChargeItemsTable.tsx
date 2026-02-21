@@ -50,7 +50,7 @@ import AddMultipleChargeItemsSheet from "@/pages/Facility/services/serviceReques
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { LocationAssociationRead } from "@/types/location/association";
 import { differenceInDays, differenceInHours, format } from "date-fns";
-import { ChargeItemActionsMenu } from "./ChargeItemActions";
+import ChargeItemActionsMenu from "./ChargeItemActions";
 
 interface PriceComponentRowProps {
   label: string;
