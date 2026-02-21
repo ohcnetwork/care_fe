@@ -1,14 +1,16 @@
+import { PluginManifestWithMeta } from "@/pluginTypes";
 import { CableIcon, Loader2Icon } from "lucide-react";
 import { Suspense, createContext, useContext } from "react";
 
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
-import { PluginManifest } from "@/pluginTypes";
+import OrganizationLayout from "@/pages/Organization/components/OrganizationLayout";
 import { PlugConfig } from "@/types/plugConfig";
 import { t } from "i18next";
 
 export type CareAppsContextType = Array<
-  PlugConfig & (({ isLoading: false } & PluginManifest) | { isLoading: true })
+  PlugConfig &
+    (({ isLoading: false } & PluginManifestWithMeta) | { isLoading: true })
 >;
 
 export const CareAppsContext = createContext<CareAppsContextType | null>(null);
@@ -109,3 +111,45 @@ export function usePluginRoutes() {
   }
   return routes;
 }
+
+export const useOrganizationRoutes = () => {
+  const careApps = useCareApps();
+
+  const pluginTabs = careApps.flatMap(
+    (c) => (!c.isLoading && c.organizationTabs) || [],
+  );
+
+  return {
+    ...Object.fromEntries(
+      pluginTabs.flatMap((t) => [
+        [
+          `/organization/:id/${t.slug}`,
+          ({ id }: { id: string }) => (
+            <OrganizationLayout id={id}>
+              {() => <t.component contextId={id} />}
+            </OrganizationLayout>
+          ),
+        ],
+        [
+          `/organization/:navOrganizationId/children/:id/${t.slug}`,
+          ({
+            navOrganizationId,
+            id,
+          }: {
+            navOrganizationId: string;
+            id: string;
+          }) => (
+            <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
+              {() => (
+                <t.component
+                  contextId={id}
+                  navOrganizationId={navOrganizationId}
+                />
+              )}
+            </OrganizationLayout>
+          ),
+        ],
+      ]),
+    ),
+  };
+};

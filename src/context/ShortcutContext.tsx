@@ -196,8 +196,31 @@ export function useShortcutDisplay() {
  * This is a one-liner alternative to manually managing sub-contexts.
  *
  * @param subContext - The sub-context to set (e.g., "facility:appointment:detail")
+ * @param options - Optional configuration
+ * @param options.ignoreInputFields - Whether shortcuts should run even when input fields are focused
+ *
+ * @example
+ * // Basic usage with just sub-context
+ * useShortcutSubContext("patient:search:-global");
+ *
+ * @example
+ * // With ignoreInputFields for dialogs/modals
+ * const [open, setOpen] = useState(false);
+ * useShortcutSubContext(
+ *   open ? "patient:search:-global" : undefined,
+ *   { ignoreInputFields: open }
+ * );
+ *
+ * @example
+ * // Always ignore input fields (e.g., for search pages)
+ * useShortcutSubContext("patient:search:-global", { ignoreInputFields: true });
  */
-export function useShortcutSubContext(subContext?: string) {
+export function useShortcutSubContext(
+  subContext?: string,
+  options?: {
+    ignoreInputFields?: boolean;
+  },
+) {
   const shortcuts = useShortcuts();
 
   // Set sub-context if provided
@@ -207,6 +230,13 @@ export function useShortcutSubContext(subContext?: string) {
       return () => shortcuts.setSubContext(undefined);
     }
   }, [subContext, shortcuts]);
+
+  useEffect(() => {
+    if (options?.ignoreInputFields !== undefined) {
+      shortcuts.setIgnoreInputFields(options.ignoreInputFields);
+      return () => shortcuts.setIgnoreInputFields(false);
+    }
+  }, [options?.ignoreInputFields, shortcuts]);
 
   return shortcuts;
 }

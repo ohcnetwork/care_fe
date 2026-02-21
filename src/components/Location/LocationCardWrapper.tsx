@@ -171,6 +171,7 @@ export function LocationCardWrapper({
                     <DateTimeInput
                       value={editingState.timeConfig.start?.toISOString()}
                       onDateChange={(newISO) =>
+                        newISO !== undefined &&
                         setEditingState((prev) => ({
                           ...prev,
                           timeConfig: {

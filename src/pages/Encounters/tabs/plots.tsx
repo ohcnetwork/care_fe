@@ -17,21 +17,20 @@ type QueryParams = {
   plot: ObservationPlotConfig[number]["id"];
 };
 
+const fetchOptions = { cache: "no-store" as RequestCache };
+
 export const EncounterPlotsTab = () => {
   const { t } = useTranslation();
   const [qParams, setQParams] = useQueryParams<QueryParams>();
 
-  const {
-    patientId,
-    selectedEncounterId: encounterId,
-    canReadClinicalData: canAccess,
-  } = useEncounter();
+  const { patientId, selectedEncounterId: encounterId } = useEncounter();
 
   const plotColumns = useBreakpoints({ default: 1, lg: 2 });
 
   const { data, isLoading } = useQuery<ObservationPlotConfig>({
     queryKey: ["plots-config"],
-    queryFn: () => fetch(careConfig.plotsConfigUrl).then((res) => res.json()),
+    queryFn: () =>
+      fetch(careConfig.plotsConfigUrl, fetchOptions).then((res) => res.json()),
   });
 
   if (isLoading || !data) {
@@ -70,7 +69,6 @@ export const EncounterPlotsTab = () => {
               encounterId={encounterId}
               codeGroups={tab.groups}
               gridCols={plotColumns}
-              canAccess={canAccess}
             />
           </TabsContent>
         ))}

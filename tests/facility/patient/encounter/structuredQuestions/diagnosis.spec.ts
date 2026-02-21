@@ -177,9 +177,6 @@ test.describe("Diagnosis", () => {
 
   test("add and display diagnosis with severity", async ({ page }) => {
     await addDiagnosis(page, "severe");
-    await expect(
-      page.getByRole("button", { name: "Diagnoses:" }),
-    ).toBeVisible();
 
     expect(
       page

@@ -16,6 +16,7 @@ import PageTitle from "@/components/Common/PageHeadTitle";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { entriesOf, keysOf } from "@/Utils/utils";
+import { useEffect } from "react";
 
 interface NavTabDefinition {
   label: string;
@@ -82,6 +83,13 @@ export const NavTabs = <TabKey extends string>({
     currentTab,
     showMoreAfterIndex,
   );
+
+  useEffect(() => {
+    // escape from currentTab if it's visible is false
+    if (currentTab && tabs[currentTab].visible === false) {
+      onTabChange(allTabKeys[0]);
+    }
+  }, [currentTab, allTabKeys, tabs, onTabChange]);
 
   return (
     <Tabs
