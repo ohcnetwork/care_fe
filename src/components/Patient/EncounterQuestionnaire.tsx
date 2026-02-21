@@ -98,7 +98,7 @@ export default function EncounterQuestionnaire({
               encounterId={encounterId}
               questionnaireSlug={questionnaireSlug}
               onSubmit={handleSubmit}
-              onCancel={() => goBack()}
+              onCancel={goBack}
             />
           </CardContent>
         </Card>
