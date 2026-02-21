@@ -222,11 +222,17 @@ export function DiagnosticReportForm({
   // Atomic batch mutation for saving observations and diagnostic report together
   const { mutate: saveDiagnosticResults, isPending: isSavingResults } =
     useMutation({
-      mutationFn: mutate(batchApi.batchRequest),
+      mutationFn: mutate(batchApi.batchRequest, { silent: true }),
       onSuccess: (data: BatchRequestResponse) => {
-        const hasFailure = data.results?.some((r) => r.status_code >= 400);
+        const hasFailure = data.results.some((r) => r.status_code >= 400);
         if (hasFailure) {
           toast.error(t("failed_to_save_diagnostic_report"));
+          queryClient.invalidateQueries({
+            queryKey: ["serviceRequest", serviceRequestId],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["diagnosticReport", latestReport?.id],
+          });
           return;
         }
         toast.success(t("diagnostic_report_updated_successfully"));
