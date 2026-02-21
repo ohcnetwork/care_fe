@@ -58,7 +58,6 @@ const LocationFormLabels = {
 
 const mapLabelToForm = (label: string): LocationForm | undefined => {
   const formKey = LocationFormLabels[label as keyof typeof LocationFormLabels];
-  console.log("Mapping label", label, "to form", formKey);
   return formKey as LocationForm | undefined;
 };
 
