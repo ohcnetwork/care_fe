@@ -230,6 +230,13 @@ export default function PaymentsData({
                   created_by_username: user.username,
                 });
               }}
+              onClear={() => {
+                setCreatedBy(undefined);
+                updateQuery({
+                  created_by: undefined,
+                  created_by_username: undefined,
+                });
+              }}
               placeholder={t("filter_by_user")}
               facilityId={facilityId}
             />
