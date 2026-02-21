@@ -724,7 +724,7 @@ export function DiagnosticReportForm({
             component.code.code
           ] || {
             value: "",
-            unit: component.permitted_unit?.code,
+            unit: "",
             interpretation: "",
           };
 

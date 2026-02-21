@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
-import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -28,11 +28,15 @@ import {
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import {
-  APPOINTMENT_STATUS_COLORS,
+  PatientIdentifier,
+  PatientIdentifierUse,
+} from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import {
   formatScheduleResourceName,
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
+import { renderTokenNumber } from "@/types/tokens/token/token";
 import { useEffect, useState } from "react";
 
 type PrintAppointmentsProps = {
@@ -51,6 +55,11 @@ export function PrintAppointments({
   const [selectedPatient, setSelectedPatient] = useState<PatientRead | null>(
     null,
   );
+
+  const practitioners = qParams.practitioners
+    ? qParams.practitioners.split(",")
+    : [];
+  const [sortByTokenNo, setSortByTokenNo] = useState(false);
   const { data: appointmentsData, isLoading } = useQuery({
     queryKey: [
       "print-appointments",
@@ -98,135 +107,179 @@ export function PrintAppointments({
     return <Loading />;
   }
 
-  const appointments = appointmentsData?.results ?? [];
+  const appointments = sortByTokenNo
+    ? [...(appointmentsData?.results ?? [])].sort((a, b) => {
+        if (!a.token && !b.token) return 0;
+        if (!a.token) return 1;
+        if (!b.token) return -1;
+        return a.token.number - b.token.number;
+      })
+    : (appointmentsData?.results ?? []);
   const totalCount = appointmentsData?.count ?? 0;
 
   return (
-    <PrintPreview title={t("appointments")}>
-      <div className="py-8 max-w-4xl mx-auto">
-        {/* Header with Facility Name and Logo */}
-        <div className="flex justify-between items-start pb-6 border-b border-gray-200">
-          <div className="space-y-4 break-all">
-            <h1 className="text-3xl font-semibold">{t("appointments")}</h1>
-          </div>
-          <img
-            src={careConfig.mainLogo?.dark}
-            alt="Care Logo"
-            className="h-10 w-auto object-contain ml-6"
+    <div>
+      <div className="max-w-4xl mx-auto no-print mb-4 flex flex-wrap justify-start items-center gap-4 p-4 bg-gray-50 border rounded-md border-gray-200">
+        <div className="gap-2 flex items-center">
+          <Switch
+            id="sort-by-token"
+            checked={sortByTokenNo}
+            onCheckedChange={setSortByTokenNo}
           />
+          <label htmlFor="sort-by-token" className="cursor-pointer text-sm">
+            {t("sort_by_token_no")}
+          </label>
         </div>
-
-        {/* Filter Summary */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-1 text-sm">
-            {qParams.date_from && qParams.date_to && (
-              <p className="text-gray-600">
-                {t("date_range")}:{" "}
-                {format(new Date(qParams.date_from), "dd MMM yyyy")} -{" "}
-                {format(new Date(qParams.date_to), "dd MMM yyyy")}
-              </p>
-            )}
-            {qParams.patient && (
-              <p className="text-gray-600">
-                {t("patient")}: {selectedPatient?.name}
-              </p>
-            )}
-          </div>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-gray-500">{t("generated_on")}</span>
-              <span>{format(new Date(), "dd MMM, yyyy h:mm a")}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">{t("total_appointments")}:</span>
-              <span>{totalCount}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-6 border-t border-gray-200 pt-6">
-          {/* Appointments Table */}
-          <div className="overflow-x-auto">
-            <Table className="w-full border">
-              <TableHeader>
-                <TableRow className="divide-x">
-                  <TableHead className="p-2 font-medium text-gray-500">
-                    {t("patient")}
-                  </TableHead>
-                  <TableHead className="p-2 font-medium text-gray-500">
-                    {t("practitioner", { count: 1 })}
-                  </TableHead>
-                  <TableHead className="p-2 font-medium text-gray-500">
-                    {t("appointment_time")}
-                  </TableHead>
-                  <TableHead className="p-2 font-medium text-gray-500">
-                    {t("token_no")}
-                  </TableHead>
-                  <TableHead className="p-2 font-medium text-gray-500">
-                    {t("status")}
-                  </TableHead>
-                  <TableHead className="p-2 font-medium text-gray-500">
-                    {t("tags")}
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {appointments.map((appointment) => (
-                  <TableRow key={appointment.id} className="border-b divide-x">
-                    <TableCell className="p-2 align-top break-words whitespace-normal">
-                      <div>
-                        <p className="font-medium">
-                          {appointment.patient.name}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {formatPatientAge(appointment.patient, true)},{" "}
-                          {t(`GENDER__${appointment.patient.gender}`)}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell className="p-2 align-top break-words whitespace-normal">
-                      {formatScheduleResourceName(appointment)}
-                    </TableCell>
-                    <TableCell className="p-2 align-top">
-                      {formatDateTime(
-                        appointment.token_slot.start_datetime,
-                        "ddd, DD MMM YYYY, HH:mm",
-                      )}
-                    </TableCell>
-                    <TableCell className="p-2 align-top">
-                      {appointment.token?.number ?? "--"}
-                    </TableCell>
-                    <TableCell className="p-2 align-top">
-                      <Badge
-                        variant={APPOINTMENT_STATUS_COLORS[appointment.status]}
-                      >
-                        {t(appointment.status)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="p-2 align-top">
-                      <div className="flex flex-wrap gap-1">
-                        {appointment.tags.map((tag) => (
-                          <Badge
-                            key={tag.id}
-                            variant="outline"
-                            className="text-xs"
-                          >
-                            {tag.display}
-                          </Badge>
-                        ))}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <PrintFooter className="mt-12 pt-4 border-t" />
       </div>
-    </PrintPreview>
+      <PrintPreview title={t("appointments")}>
+        <div className="py-8 max-w-4xl mx-auto">
+          {/* Header with Facility Name and Logo */}
+          <div className="flex justify-between items-start pb-6 border-b border-gray-200">
+            <div className="space-y-4 break-all">
+              <h1 className="text-3xl font-semibold">{t("appointments")}</h1>
+            </div>
+            <img
+              src={careConfig.mainLogo?.dark}
+              alt="Care Logo"
+              className="h-10 w-auto object-contain ml-6"
+            />
+          </div>
+
+          {/* Filter Summary */}
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1 text-sm">
+              {qParams.date_from && qParams.date_to && (
+                <p className="text-gray-600">
+                  {t("date_range")}:{" "}
+                  {format(new Date(qParams.date_from), "dd MMM yyyy")} -{" "}
+                  {format(new Date(qParams.date_to), "dd MMM yyyy")}
+                </p>
+              )}
+              {qParams.patient && (
+                <p className="text-gray-600">
+                  {t("patient")}: {selectedPatient?.name}
+                </p>
+              )}
+              {practitioners.length === 1 && (
+                <p className="text-gray-600">
+                  {t("practitioner", { count: 1 })}:{" "}
+                  {formatScheduleResourceName(appointments[0])}
+                </p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-gray-500">{t("generated_on")}</span>
+                <span>{format(new Date(), "dd MMM, yyyy h:mm a")}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">
+                  {t("total_appointments")}:
+                </span>
+                <span>{totalCount}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 border-t border-gray-200 pt-6">
+            {/* Appointments Table */}
+            <div className="overflow-x-auto">
+              <Table className="w-full border">
+                <TableHeader>
+                  <TableRow className="divide-x">
+                    <TableHead className="p-2 font-medium text-gray-500">
+                      {t("patient")}
+                    </TableHead>
+                    {practitioners.length > 1 && (
+                      <TableHead className="p-2 font-medium text-gray-500">
+                        {t("practitioner", { count: 1 })}
+                      </TableHead>
+                    )}
+                    <TableHead className="p-2 font-medium text-gray-500">
+                      {t("appointment_time")}
+                    </TableHead>
+                    <TableHead className="p-2 font-medium text-gray-500">
+                      {t("token_no")}
+                    </TableHead>
+                    <TableHead className="p-2 font-medium text-gray-500">
+                      {t("status")}
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {appointments.map((appointment) => (
+                    <TableRow
+                      key={appointment.id}
+                      className="border-b divide-x"
+                    >
+                      <TableCell className="p-2 align-top break-words whitespace-normal">
+                        <div>
+                          <p className="font-medium">
+                            {appointment.patient.name}
+                          </p>
+                          <p className="text-sm text-gray-600 flex items-center gap-1">
+                            {formatPatientAge(appointment.patient, true)},{" "}
+                            {t(`GENDER__${appointment.patient.gender}`)}
+                            {"instance_identifiers" in appointment.patient &&
+                              (
+                                appointment.patient
+                                  .instance_identifiers as PatientIdentifier[]
+                              )
+                                ?.filter(
+                                  ({ config }: PatientIdentifier) =>
+                                    config.config.use ===
+                                      PatientIdentifierUse.official &&
+                                    !config.config.auto_maintained,
+                                )
+                                .map((identifier: PatientIdentifier) => (
+                                  <p
+                                    key={identifier.config.id}
+                                    className="text-xs text-gray-600"
+                                  >
+                                    ({identifier.config.config.display}:{" "}
+                                    {identifier.value}){" "}
+                                  </p>
+                                ))}
+                          </p>
+                        </div>
+                      </TableCell>
+                      {practitioners.length > 1 && (
+                        <TableCell className="p-2 align-top break-words whitespace-normal">
+                          {formatScheduleResourceName(appointment)}
+                        </TableCell>
+                      )}
+                      <TableCell className="p-2 align-top flex flex-col gap-1">
+                        {formatDateTime(
+                          appointment.token_slot.start_datetime,
+                          "ddd, DD MMM YYYY",
+                        )}
+                        <span>
+                          {formatDateTime(
+                            appointment.token_slot.start_datetime,
+                            "hh:mm a",
+                          )}
+                        </span>
+                      </TableCell>
+                      <TableCell className="p-2 align-top">
+                        {appointment.token
+                          ? renderTokenNumber(appointment.token)
+                          : "--"}
+                      </TableCell>
+                      <TableCell className="p-2 align-top">
+                        {t(appointment.status)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <PrintFooter className="mt-12 pt-4 border-t" />
+        </div>
+      </PrintPreview>
+    </div>
   );
 }
 

@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   ChevronLeft,
   Edit,
@@ -83,7 +88,12 @@ export default function MedicationReturnShow({
     open: false,
     status: null,
   });
-  const [{ dispenseOrderId }] = useQueryParams<{ dispenseOrderId?: string }>();
+  const [{ dispenseOrderIds: dispenseOrderIdsParam }] = useQueryParams<{
+    dispenseOrderIds?: string;
+  }>();
+
+  const dispenseOrderIds =
+    dispenseOrderIdsParam?.split(",").filter(Boolean) || [];
 
   const { data: deliveryOrder, isLoading } = useQuery({
     queryKey: ["medicationReturns", deliveryOrderId],
@@ -147,16 +157,24 @@ export default function MedicationReturnShow({
     },
   });
 
-  const { data: medicationDispensesResponse } = useQuery({
-    queryKey: ["medication_dispense", dispenseOrderId, locationId],
-    queryFn: query(medicationDispenseApi.list, {
-      queryParams: {
-        location: locationId,
-        limit: 100,
-        order: dispenseOrderId,
-      },
-    }),
-    enabled: !!dispenseOrderId && !!locationId,
+  const { data: medicationDispenses } = useQueries({
+    queries: dispenseOrderIds.map((orderId) => ({
+      queryKey: ["medication_dispense", orderId, locationId],
+      queryFn: query(medicationDispenseApi.list, {
+        queryParams: {
+          location: locationId,
+          limit: 100,
+          order: orderId,
+        },
+      }),
+      enabled: !!orderId && !!locationId,
+    })),
+    combine: (results) => {
+      return {
+        data: results.flatMap((result) => result.data?.results || []),
+        loading: results.some((result) => result.isLoading),
+      };
+    },
   });
 
   function handleSupplyDeliverySuccess() {
@@ -491,11 +509,31 @@ export default function MedicationReturnShow({
                     <Button
                       variant="link"
                       className="p-0 h-auto text-primary-600 font-semibold"
-                      onClick={() =>
+                      onClick={() => {
+                        // Filter out the return invoice itself from related invoices
+                        const relatedInvoiceIds = [
+                          ...new Set(
+                            medicationDispenses.flatMap(
+                              (item) =>
+                                item.charge_item?.paid_invoice?.id ?? [],
+                            ) || [],
+                          ),
+                        ].filter(
+                          (id) => id !== deliveryOrder.patient_invoice_id,
+                        );
+                        const queryParams = new URLSearchParams({
+                          sourceUrl: basePath + "/order/" + deliveryOrderId,
+                        });
+                        if (relatedInvoiceIds.length > 0) {
+                          queryParams.set(
+                            "relatedInvoices",
+                            relatedInvoiceIds.join(","),
+                          );
+                        }
                         navigate(
-                          `/facility/${facilityId}/billing/invoices/${deliveryOrder.patient_invoice_id}?sourceUrl=${encodeURIComponent(basePath + "/order/" + deliveryOrderId)}`,
-                        )
-                      }
+                          `/facility/${facilityId}/billing/invoices/${deliveryOrder.patient_invoice_id}?${queryParams.toString()}`,
+                        );
+                      }}
                     >
                       {t("view_invoice")}
                       <ExternalLink className="ml-1 size-4" />
@@ -635,9 +673,7 @@ export default function MedicationReturnShow({
                     locationId={locationId}
                     onSuccess={handleSupplyDeliverySuccess}
                     medicationDispenses={
-                      dispenseOrderId && medicationDispensesResponse?.results
-                        ? medicationDispensesResponse.results
-                        : []
+                      dispenseOrderIds.length > 0 ? medicationDispenses : []
                     }
                   />
                 )}
