@@ -355,6 +355,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
                 form={form}
                 facilityId={facilityId}
                 patientId={patientId}
+                submitForm={form.handleSubmit(onSubmit)}
               />
               <AccordionItem
                 value="patient-basics"

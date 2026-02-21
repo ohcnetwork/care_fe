@@ -66,6 +66,7 @@ import { formatName } from "@/Utils/utils";
 import BackButton from "@/components/Common/BackButton";
 import { add, round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { format } from "date-fns";
 import AddChargeItemsBillingSheet from "./components/AddChargeItemsBillingSheet";
 import QuickAddChargeItemsSheet from "./components/QuickAddChargeItemsSheet";
 
@@ -588,8 +589,18 @@ export function CreateInvoicePage({
                               </Button>
                             </div>
                           </TableCell>
-                          <TableCell className="font-medium text-base border-y text-gray-950">
-                            {item.title}
+                          <TableCell className="border-y text-gray-950">
+                            <div className="font-medium text-base">
+                              {item.title}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {formatName(item.created_by)}
+                              {" · "}
+                              {format(
+                                new Date(item.created_date),
+                                "hh:mm a - dd MMM, yyyy",
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell className="font-medium text-base border-y text-gray-950">
                             {round(item.quantity)}
