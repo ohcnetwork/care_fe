@@ -25,6 +25,13 @@ interface Props {
   subjectType?: string;
 }
 
+// Map specific questionnaire slugs to their corresponding encounter tabs
+// Thsi facilitates Dynamic redirection, just add new structured inputs here.
+const SLUG_TO_TAB_MAP: Record<string, string> = {
+  medication_request: "medicines",
+  service_request: "service_requests",
+};
+
 export default function EncounterQuestionnaire({
   facilityId,
   patientId,
@@ -44,15 +51,26 @@ export default function EncounterQuestionnaire({
     enabled: !!encounterId,
   });
 
+  function routeToCorrectTab() {
+    if (questionnaireSlug) {
+      const targetTab = SLUG_TO_TAB_MAP[questionnaireSlug] || "updates";
+      navigate(
+        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/${targetTab}`,
+      );
+    } else {
+      goBack();
+    }
+  }
+
   const handleSubmit = useCallback(() => {
     if (encounterId && facilityId) {
-      goBack();
+      return routeToCorrectTab();
     } else if (facilityId) {
       navigate(`/facility/${facilityId}/patient/${patientId}/updates`);
     } else {
       navigate(`/patient/${patientId}/updates`);
     }
-  }, [facilityId, patientId, encounterId, goBack]);
+  }, [facilityId, patientId, encounterId, questionnaireSlug, goBack]);
 
   return (
     <Page
