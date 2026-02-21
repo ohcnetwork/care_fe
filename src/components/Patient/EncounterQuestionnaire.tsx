@@ -51,20 +51,16 @@ export default function EncounterQuestionnaire({
     enabled: !!encounterId,
   });
 
-  function routeToCorrectTab() {
-    if (questionnaireSlug) {
-      const targetTab = SLUG_TO_TAB_MAP[questionnaireSlug] || "updates";
-      navigate(
-        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/${targetTab}`,
-      );
-    } else {
-      goBack();
-    }
-  }
-
   const handleSubmit = useCallback(() => {
     if (encounterId && facilityId) {
-      routeToCorrectTab();
+      if (questionnaireSlug) {
+        const targetTab = SLUG_TO_TAB_MAP[questionnaireSlug] || "updates";
+        navigate(
+          `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/${targetTab}`,
+        );
+      } else {
+        goBack();
+      }
     } else if (facilityId) {
       navigate(`/facility/${facilityId}/patient/${patientId}/updates`);
     } else {
