@@ -71,6 +71,11 @@ interface ServiceRequestShowProps {
   locationId?: string;
 }
 
+const CLASSIFICATIONS_CAN_BE_MARKED_AS_COMPLETE = [
+  Classification.surgical_procedure,
+  Classification.counselling,
+];
+
 export default function ServiceRequestShow({
   facilityId,
   serviceRequestId,
@@ -328,7 +333,7 @@ export default function ServiceRequestShow({
             <div className="flex items-end gap-2">
               {(!request?.activity_definition?.diagnostic_report_codes ||
                 isFinal ||
-                ![Classification.laboratory, Classification.imaging].includes(
+                CLASSIFICATIONS_CAN_BE_MARKED_AS_COMPLETE.includes(
                   request.category,
                 )) && (
                 <div className="flex items-center gap-2">
