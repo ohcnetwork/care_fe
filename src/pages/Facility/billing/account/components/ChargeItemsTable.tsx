@@ -1,3 +1,4 @@
+import { CheckedState } from "@radix-ui/react-checkbox";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRightLeft,
@@ -279,6 +280,21 @@ export function ChargeItemsTable({
   const selectedChargeItems =
     chargeItems?.filter((item) => selectedItems.has(item.id)) ?? [];
 
+  useEffect(() => {
+    if (!chargeItems?.length) {
+      if (selectedItems.size > 0) {
+        setSelectedItems(new Set());
+      }
+      return;
+    }
+
+    const validIds = new Set(chargeItems.map((item) => item.id));
+    setSelectedItems((prev) => {
+      const next = new Set([...prev].filter((id) => validIds.has(id)));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [chargeItems, selectedItems.size]);
+
   const toggleItemExpand = (itemId: string) => {
     setExpandedItems((prev) => ({
       ...prev,
@@ -422,7 +438,9 @@ export function ChargeItemsTable({
                       !!chargeItems?.length &&
                       chargeItems.every((item) => selectedItems.has(item.id))
                     }
-                    onCheckedChange={handleSelectAll}
+                    onCheckedChange={(checked: CheckedState) =>
+                      handleSelectAll(checked === true)
+                    }
                     aria-label={t("select_all")}
                   />
                 </TableHead>
@@ -475,8 +493,8 @@ export function ChargeItemsTable({
                     <TableCell className="border-x p-3 text-gray-950">
                       <Checkbox
                         checked={selectedItems.has(item.id)}
-                        onCheckedChange={(checked: boolean) =>
-                          handleSelectItem(item.id, checked)
+                        onCheckedChange={(checked: CheckedState) =>
+                          handleSelectItem(item.id, checked === true)
                         }
                         aria-label={t("select_item")}
                       />

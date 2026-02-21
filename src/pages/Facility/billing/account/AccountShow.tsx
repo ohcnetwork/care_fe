@@ -226,6 +226,7 @@ export function AccountShow({
       },
       patient: account?.patient?.id || "",
       extensions: account?.extensions || {},
+      primary_encounter: account?.primary_encounter?.id,
     });
   };
 
@@ -719,12 +720,13 @@ export function AccountShow({
             <BillingLifecycleStepper
               account={account}
               isAccountBillingClosed={isAccountBillingClosed}
+              canUpdateAccount={canUpdateAccount}
               onAdvance={advanceBillingStatus}
               onSettleClose={() =>
-                setCloseAccountStatus({
-                  ...closeAccountStatus,
+                setCloseAccountStatus((prev) => ({
+                  ...prev,
                   sheetOpen: true,
-                })
+                }))
               }
             />
           </div>
@@ -832,16 +834,19 @@ const BILLING_STEPS = [
 function BillingLifecycleStepper({
   account,
   isAccountBillingClosed,
+  canUpdateAccount,
   onAdvance,
   onSettleClose,
 }: {
   account: AccountRead;
   isAccountBillingClosed: boolean;
+  canUpdateAccount: boolean;
   onAdvance: (status: AccountBillingStatus) => void;
   onSettleClose: () => void;
 }) {
   const { t } = useTranslation();
   const isActive = account.status === AccountStatus.active;
+  const canAdvance = canUpdateAccount && isActive && !isAccountBillingClosed;
 
   const currentStepIndex = (() => {
     if (isAccountBillingClosed) return 3;
@@ -859,7 +864,7 @@ function BillingLifecycleStepper({
   };
 
   const handleStepClick = (index: number) => {
-    if (!isActive || isAccountBillingClosed) return;
+    if (!canAdvance) return;
     if (index <= currentStepIndex) return;
 
     const step = BILLING_STEPS[index];
@@ -875,10 +880,8 @@ function BillingLifecycleStepper({
       {BILLING_STEPS.map((step, index) => {
         const isCompleted = index < currentStepIndex;
         const isCurrent = index === currentStepIndex;
-        const isNext =
-          index === currentStepIndex + 1 && isActive && !isAccountBillingClosed;
-        const isClickable =
-          isActive && !isAccountBillingClosed && index > currentStepIndex;
+        const isNext = index === currentStepIndex + 1 && canAdvance;
+        const isClickable = canAdvance && index > currentStepIndex;
 
         return (
           <div key={step} className="flex items-center">

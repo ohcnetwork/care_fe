@@ -1,8 +1,9 @@
+import { CheckedState } from "@radix-ui/react-checkbox";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ArrowRightLeft, EyeIcon } from "lucide-react";
 import { Link } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -148,9 +149,27 @@ export default function PaymentsData({
     }),
   });
 
-  const payments = (response?.results as PaymentReconciliationRead[]) || [];
+  const payments = useMemo(
+    () => (response?.results as PaymentReconciliationRead[]) || [],
+    [response?.results],
+  );
 
   const selectedPayments = payments.filter((p) => selectedItems.has(p.id));
+
+  useEffect(() => {
+    if (!payments.length) {
+      if (selectedItems.size > 0) {
+        setSelectedItems(new Set());
+      }
+      return;
+    }
+
+    const validIds = new Set(payments.map((payment) => payment.id));
+    setSelectedItems((prev) => {
+      const next = new Set([...prev].filter((id) => validIds.has(id)));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [payments, selectedItems.size]);
 
   const handleSelectItem = (id: string, checked: boolean) => {
     setSelectedItems((prev) => {
@@ -340,7 +359,9 @@ export default function PaymentsData({
                         !!payments?.length &&
                         payments.every((p) => selectedItems.has(p.id))
                       }
-                      onCheckedChange={handleSelectAll}
+                      onCheckedChange={(checked: CheckedState) =>
+                        handleSelectAll(checked === true)
+                      }
                       aria-label={t("select_all")}
                     />
                   </TableHead>
@@ -368,8 +389,8 @@ export default function PaymentsData({
                     <TableCell>
                       <Checkbox
                         checked={selectedItems.has(payment.id)}
-                        onCheckedChange={(checked: boolean) =>
-                          handleSelectItem(payment.id, checked)
+                        onCheckedChange={(checked: CheckedState) =>
+                          handleSelectItem(payment.id, checked === true)
                         }
                         aria-label={t("select_item")}
                       />
