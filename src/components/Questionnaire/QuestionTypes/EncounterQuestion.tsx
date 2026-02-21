@@ -243,6 +243,16 @@ export function EncounterQuestion({
     return <div>{t("loading_encounter")}</div>;
   }
 
+  const isDischarged = encounter.status === EncounterStatus.DISCHARGED;
+
+  const statusOptions = isDischarged
+    ? [EncounterStatus.DISCHARGED]
+    : Object.values(EncounterStatus).filter(
+        (status) =>
+          status !== EncounterStatus.DISCHARGED &&
+          status !== EncounterStatus.UNKNOWN,
+      );
+
   return (
     <div className="space-y-6">
       <QuestionLabel question={question} />
@@ -265,18 +275,11 @@ export function EncounterQuestion({
               <SelectValue placeholder={t("select_status")} />
             </SelectTrigger>
             <SelectContent>
-              {Object.values(EncounterStatus)
-    .filter((status) =>
-      encounter.status === EncounterStatus.DISCHARGED
-        ? status === EncounterStatus.DISCHARGED
-        : status !== EncounterStatus.DISCHARGED &&
-          status !== EncounterStatus.UNKNOWN
-    )
-    .map((status) => (
-      <SelectItem key={status} value={status}>
-        {t(`encounter_status__${status}`)}
-      </SelectItem>
-    ))}
+              {statusOptions.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {t(`encounter_status__${status}`)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
