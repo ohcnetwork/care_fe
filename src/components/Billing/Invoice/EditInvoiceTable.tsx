@@ -883,6 +883,7 @@ export function EditInvoiceTable({
                                     field.onChange(e.target.value)
                                   }
                                   placeholder={t("add_notes")}
+                                  aria-label={t("note")}
                                   disabled={!canEditRow}
                                 />
                               </PopoverContent>

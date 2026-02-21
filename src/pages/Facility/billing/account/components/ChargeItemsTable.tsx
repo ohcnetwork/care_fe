@@ -605,7 +605,7 @@ export function ChargeItemsTable({
         chargeItems={selectedChargeItem ? [selectedChargeItem] : []}
         onSuccess={() => {
           queryClient.invalidateQueries({
-            queryKey: ["chargeItems", accountId],
+            queryKey: ["infinite-chargeItems", accountId],
           });
         }}
         title={t("edit_charge_item")}
