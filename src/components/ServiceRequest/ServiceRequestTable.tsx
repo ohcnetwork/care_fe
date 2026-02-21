@@ -56,13 +56,15 @@ export default function ServiceRequestTable({
         <TableHeader className="bg-gray-100">
           <TableRow className="divide-gray-200">
             {showPatientInfo && <TableHead>{t("patient_name")}</TableHead>}
-            <TableHead>{t("service_type")}</TableHead>
-            <TableHead>
+            <TableHead className="text-center">{t("service_type")}</TableHead>
+            <TableHead className="text-center">
               {t("status")}/{t("priority")}
             </TableHead>
-            <TableHead>{t("tags", { count: 2 })}</TableHead>
-            <TableHead>{t("location")}</TableHead>
-            <TableHead>{t("actions")}</TableHead>
+            <TableHead className="text-center">
+              {t("tags", { count: 2 })}
+            </TableHead>
+            <TableHead className="text-center">{t("location")}</TableHead>
+            <TableHead className="text-right">{t("actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="bg-white">
@@ -87,7 +89,7 @@ export default function ServiceRequestTable({
                   </div>
                 </TableCell>
               )}
-              <TableCell>
+              <TableCell className="text-center">
                 <div>
                   <div className="text-lg">{request.title || "-"}</div>
                   {request.code?.display && (
@@ -97,7 +99,7 @@ export default function ServiceRequestTable({
                   )}
                 </div>
               </TableCell>
-              <TableCell className="flex flex-col gap-1">
+              <TableCell className="text-center flex flex-col gap-1">
                 <Badge variant={SERVICE_REQUEST_STATUS_COLORS[request.status]}>
                   {t(request.status)}
                 </Badge>
@@ -107,7 +109,7 @@ export default function ServiceRequestTable({
                   {t(request.priority)}
                 </Badge>
               </TableCell>
-              <TableCell>
+              <TableCell className="text-center">
                 <TagAssignmentSheet
                   entityType="service_request"
                   entityId={request.id}
@@ -121,7 +123,7 @@ export default function ServiceRequestTable({
                   patientId={request.encounter.patient.id}
                 />
               </TableCell>
-              <TableCell>
+              <TableCell className="text-center">
                 <div className="text-xs text-gray-500">
                   {request.encounter.current_location && (
                     <LocationNode
@@ -131,7 +133,7 @@ export default function ServiceRequestTable({
                   )}
                 </div>
               </TableCell>
-              <TableCell className="text-left">
+              <TableCell className="text-right">
                 <Button
                   variant="outline"
                   size="sm"

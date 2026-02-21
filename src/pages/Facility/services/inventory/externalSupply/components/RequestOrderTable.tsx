@@ -67,34 +67,40 @@ export default function RequestOrderTable({
       <TableHeader>
         <TableRow>
           <TableHead>{t("name")}</TableHead>
-          <TableHead>{internal ? t("origin") : t("supplier")}</TableHead>
-          <TableHead>{t("deliver_to")}</TableHead>
-          <TableHead>{t("status")}</TableHead>
-          <TableHead>{t("priority")}</TableHead>
-          <TableHead className="w-48">{t("tags", { count: 2 })}</TableHead>
-          <TableHead className="w-44">{t("created_by")}</TableHead>
-          <TableHead className="w-28">{t("actions")}</TableHead>
+          <TableHead className="text-center">
+            {internal ? t("origin") : t("supplier")}
+          </TableHead>
+          <TableHead className="text-center">{t("deliver_to")}</TableHead>
+          <TableHead className="text-center">{t("status")}</TableHead>
+          <TableHead className="text-center">{t("priority")}</TableHead>
+          <TableHead className="w-48 text-center">
+            {t("tags", { count: 2 })}
+          </TableHead>
+          <TableHead className="w-44 text-center">{t("created_by")}</TableHead>
+          <TableHead className="w-28 text-right">{t("actions")}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {requests.map((request: RequestOrderRetrieve) => (
           <TableRow key={request.id}>
             <TableCell className="font-semibold">{request.name}</TableCell>
-            <TableCell>
+            <TableCell className="text-center">
               {request.supplier?.name || request.origin?.name}
             </TableCell>
-            <TableCell>{request.destination.name}</TableCell>
-            <TableCell>
+            <TableCell className="text-center">
+              {request.destination.name}
+            </TableCell>
+            <TableCell className="text-center">
               <Badge variant={REQUEST_ORDER_STATUS_COLORS[request.status]}>
                 {t(request.status)}
               </Badge>
             </TableCell>
-            <TableCell>
+            <TableCell className="text-center">
               <Badge variant={REQUEST_ORDER_PRIORITY_COLORS[request.priority]}>
                 {t(request.priority)}
               </Badge>
             </TableCell>
-            <TableCell>
+            <TableCell className="text-center">
               <TagAssignmentSheet
                 entityType="request_order"
                 entityId={request.id}
@@ -107,7 +113,7 @@ export default function RequestOrderTable({
                 }}
               />
             </TableCell>
-            <TableCell>
+            <TableCell className="text-center">
               <div className="flex flex-col">
                 <span className="font-medium">
                   {formatName(request.created_by)}
@@ -117,7 +123,7 @@ export default function RequestOrderTable({
                 </span>
               </div>
             </TableCell>
-            <TableCell>
+            <TableCell className="text-right">
               <Button
                 variant="outline"
                 className="shadow-sm font-semibold text-gray-950"

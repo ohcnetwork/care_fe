@@ -257,13 +257,19 @@ export function AccountList({
             <TableHeader>
               <TableRow>
                 <TableHead>{t("account")}</TableHead>
-                <TableHead>{t("balance")}</TableHead>
-                <TableHead>{t("billable")}</TableHead>
-                <TableHead>{t("account_status")}</TableHead>
-                <TableHead>{t("billing_status")}</TableHead>
-                <TableHead>{t("period")}</TableHead>
-                <TableHead>{t("tags_proper")}</TableHead>
-                <TableHead>{t("action")}</TableHead>
+                <TableHead className="text-center">{t("balance")}</TableHead>
+                <TableHead className="text-center">{t("billable")}</TableHead>
+                <TableHead className="text-center">
+                  {t("account_status")}
+                </TableHead>
+                <TableHead className="text-center">
+                  {t("billing_status")}
+                </TableHead>
+                <TableHead className="text-center">{t("period")}</TableHead>
+                <TableHead className="text-center">
+                  {t("tags_proper")}
+                </TableHead>
+                <TableHead className="text-right">{t("action")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -286,7 +292,7 @@ export function AccountList({
                   </TableCell>
                   <TableCell
                     className={cn(
-                      "border-x p-3 text-base font-medium leading-6",
+                      "border-x p-3 text-center text-base font-medium leading-6",
                       isPositive(account.total_balance)
                         ? "text-gray-950"
                         : "text-green-700 italic",
@@ -294,17 +300,17 @@ export function AccountList({
                   >
                     <MonetaryDisplay amount={account.total_balance} />
                   </TableCell>
-                  <TableCell className="text-base font-medium leading-6 text-gray-950">
+                  <TableCell className="text-center text-base font-medium leading-6 text-gray-950">
                     <MonetaryDisplay
                       amount={account.total_billable_charge_items}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-center">
                     <Badge variant={ACCOUNT_STATUS_COLORS[account.status]}>
                       {t(account.status)}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-center">
                     <Badge
                       variant={
                         ACCOUNT_BILLING_STATUS_COLORS[account.billing_status]
@@ -313,7 +319,7 @@ export function AccountList({
                       {t(account.billing_status)}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-center">
                     <span className="text-gray-950 font-medium">
                       {account.service_period?.start
                         ? formatDate(account.service_period?.start)
@@ -322,7 +328,7 @@ export function AccountList({
                         ` - ${formatDate(account.service_period?.end)}`}
                     </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-center">
                     <TagAssignmentSheet
                       entityType="account"
                       entityId={account.id}
@@ -336,7 +342,7 @@ export function AccountList({
                       patientId={account.patient.id}
                     />
                   </TableCell>
-                  <TableCell className="whitespace-normal">
+                  <TableCell className="whitespace-normal text-right">
                     <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
                       <Button
                         variant="outline"

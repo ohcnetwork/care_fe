@@ -64,28 +64,34 @@ export default function DeliveryOrderTable({
       <TableHeader>
         <TableRow>
           <TableHead>{t("name")}</TableHead>
-          <TableHead>{internal ? t("origin") : t("supplier")}</TableHead>
-          <TableHead>{t("deliver_to")}</TableHead>
-          <TableHead>{t("status")}</TableHead>
-          <TableHead className="w-45">{t("tags", { count: 2 })}</TableHead>
-          <TableHead className="w-48">{t("created_by")}</TableHead>
-          <TableHead className="w-36">{t("actions")}</TableHead>
+          <TableHead className="text-center">
+            {internal ? t("origin") : t("supplier")}
+          </TableHead>
+          <TableHead className="text-center">{t("deliver_to")}</TableHead>
+          <TableHead className="text-center">{t("status")}</TableHead>
+          <TableHead className="w-45 text-center">
+            {t("tags", { count: 2 })}
+          </TableHead>
+          <TableHead className="w-48 text-center">{t("created_by")}</TableHead>
+          <TableHead className="w-36 text-right">{t("actions")}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {deliveries.map((delivery: DeliveryOrderRetrieve) => (
           <TableRow key={delivery.id}>
             <TableCell>{delivery.name}</TableCell>
-            <TableCell>
+            <TableCell className="text-center">
               {delivery.supplier?.name || delivery.origin?.name}
             </TableCell>
-            <TableCell>{delivery.destination.name}</TableCell>
-            <TableCell>
+            <TableCell className="text-center">
+              {delivery.destination.name}
+            </TableCell>
+            <TableCell className="text-center">
               <Badge variant={DELIVERY_ORDER_STATUS_COLORS[delivery.status]}>
                 {t(delivery.status)}
               </Badge>
             </TableCell>
-            <TableCell className="sm:w-60 md:w-80">
+            <TableCell className="sm:w-60 md:w-80 text-center">
               <TagAssignmentSheet
                 entityType="delivery_order"
                 entityId={delivery.id}
@@ -103,7 +109,7 @@ export default function DeliveryOrderTable({
                 }}
               />
             </TableCell>
-            <TableCell className="w-48">
+            <TableCell className="w-48 text-center">
               <div className="flex flex-col">
                 <span className="font-medium">
                   {formatName(delivery.created_by)}
@@ -113,7 +119,7 @@ export default function DeliveryOrderTable({
                 </span>
               </div>
             </TableCell>
-            <TableCell className="w-36">
+            <TableCell className="w-36 text-right">
               <Button
                 variant="outline"
                 onClick={() =>
