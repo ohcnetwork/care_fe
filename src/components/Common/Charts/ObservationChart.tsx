@@ -51,7 +51,6 @@ interface ObservationVisualizerProps {
   height?: number;
   gridCols?: number;
   encounterId: string;
-  canAccess: boolean;
 }
 
 interface ChartData {
@@ -102,7 +101,6 @@ export const ObservationVisualizer = ({
   encounterId,
   height = 300,
   gridCols = 2,
-  canAccess,
 }: ObservationVisualizerProps) => {
   const { t } = useTranslation();
 
@@ -126,7 +124,6 @@ export const ObservationVisualizer = ({
         codes: allCodes,
       },
     }),
-    enabled: canAccess,
   });
   if (isLoading) {
     return (

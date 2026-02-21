@@ -66,6 +66,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           "@tanstack/react-query",
           "raviger",
           "sonner",
+          "decimal.js",
         ],
       }),
       viteStaticCopy({
@@ -90,6 +91,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
             logLevel: ["error"],
           },
         },
+        enableBuild: false,
       }),
       treeShakeCareIcons({
         iconWhitelist: ["default"],

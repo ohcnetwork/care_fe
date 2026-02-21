@@ -130,7 +130,7 @@ function SubQueueCard({
   const handleUpdateSubQueue = () => {
     const trimmedName = subQueueName.trim();
     if (trimmedName.length === 0) {
-      toast.error("Service point name is required");
+      toast.error(t("service_point_name_required"));
       return;
     }
     updateSubQueue({

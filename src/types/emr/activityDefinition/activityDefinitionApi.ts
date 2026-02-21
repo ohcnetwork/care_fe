@@ -1,5 +1,4 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 
 import {
   ActivityDefinitionCreateSpec,
@@ -11,9 +10,6 @@ export default {
     path: "/api/v1/facility/{facilityId}/activity_definition/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<ActivityDefinitionReadSpec>>(),
-    defaultQueryParams: {
-      ordering: "-created_date",
-    },
   },
   retrieveActivityDefinition: {
     path: "/api/v1/facility/{facilityId}/activity_definition/{activityDefinitionSlug}/",
