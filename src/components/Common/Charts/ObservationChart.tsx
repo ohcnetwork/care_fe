@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { format, subHours } from "date-fns";
+import { format, roundToNearestMinutes, subHours } from "date-fns";
 import { CopyPlus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -108,10 +108,10 @@ const MORE_TIME_OPTIONS: { value: TimeRange; label: string }[] = [
   { value: "ALL", label: "All Data" },
 ];
 
-const getTimeRangeLabel = (range: TimeRange): string => {
+function getTimeRangeLabel(range: TimeRange): string {
   const allOptions = [...PRIMARY_TIME_OPTIONS, ...MORE_TIME_OPTIONS];
   return allOptions.find((o) => o.value === range)?.label || range;
-};
+}
 
 const TIME_RANGE_HOURS: Record<Exclude<TimeRange, "ALL">, number> = {
   "1H": 1,
@@ -122,10 +122,10 @@ const TIME_RANGE_HOURS: Record<Exclude<TimeRange, "ALL">, number> = {
   "72H": 72,
 };
 
-const getTimeRangeStartDate = (range: TimeRange): Date | null => {
+function getTimeRangeStartDate(range: TimeRange): Date | null {
   if (range === "ALL") return null;
   return subHours(new Date(), TIME_RANGE_HOURS[range]);
-};
+}
 
 const formatXAxisTick = (value: number, timeRange: TimeRange): string => {
   const date = new Date(value);
@@ -139,11 +139,8 @@ const formatXAxisTick = (value: number, timeRange: TimeRange): string => {
   return format(date, "dd/MM");
 };
 
-const roundToNearestMinute = (dateString: string): string => {
-  const date = new Date(dateString);
-  date.setSeconds(0, 0);
-  return date.toISOString();
-};
+const roundToNearestMinute = (dateString: string): string =>
+  roundToNearestMinutes(new Date(dateString), { nearestTo: 1 }).toISOString();
 
 const formatChartDate = (
   dateString: string,
@@ -164,7 +161,7 @@ export const ObservationVisualizer = ({
 }: ObservationVisualizerProps) => {
   const { t } = useTranslation();
   const [timeRanges, setTimeRanges] = useState<Record<number, TimeRange>>({});
-  const getTimeRange = (index: number): TimeRange => timeRanges[index] || "24H";
+  const getTimeRange = (index: number): TimeRange => timeRanges[index] || "ALL";
 
   const setTimeRange = (index: number, range: TimeRange) => {
     setTimeRanges((prev) => ({ ...prev, [index]: range }));
@@ -204,17 +201,18 @@ export const ObservationVisualizer = ({
   const processedDataByGroup = useMemo(() => {
     if (!data?.results?.length) return [];
 
+    // Build a one-time lookup Map from code string to its resultGroup
+    const resultByCode = new Map(data.results.map((rg) => [rg.code.code, rg]));
+
     return codeGroups.map((group, groupIndex) => {
-      const groupTimeRange = timeRanges[groupIndex] || "24H";
+      const groupTimeRange = timeRanges[groupIndex] || "ALL";
       const startDate = getTimeRangeStartDate(groupTimeRange);
       const processedData: { [key: string]: ChartData } = {};
 
       // First, collect all timestamps from all codes in the group
       const allTimestamps = new Set<string>();
       group.codes.forEach((code) => {
-        const resultGroup = data.results.find(
-          (rg) => rg.code.code === code.code,
-        );
+        const resultGroup = resultByCode.get(code.code);
         if (!resultGroup) return;
 
         resultGroup.results.forEach((observation) => {
@@ -242,9 +240,7 @@ export const ObservationVisualizer = ({
 
       // Then fill in the values for each code
       group.codes.forEach((code) => {
-        const resultGroup = data.results.find(
-          (rg) => rg.code.code === code.code,
-        );
+        const resultGroup = resultByCode.get(code.code);
         if (!resultGroup || !code.display) return;
 
         resultGroup.results.forEach((observation) => {
