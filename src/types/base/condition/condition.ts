@@ -279,7 +279,7 @@ export const removeConditionType = (
 ): QualifiedRange[] => {
   return qualifiedRanges.map((range) => ({
     ...range,
-    conditions: range.conditions.map((condition) => ({
+    conditions: range.conditions?.map((condition) => ({
       ...stripConditionType(condition as ConditionForm),
     })),
   }));
