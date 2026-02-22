@@ -79,6 +79,7 @@ import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 
+import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
 import BackButton from "@/components/Common/BackButton";
 import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
@@ -92,6 +93,7 @@ import { add, round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { format } from "date-fns";
 import AddChargeItemsBillingSheet from "./components/AddChargeItemsBillingSheet";
+import ChargeItemActionsMenu from "./components/ChargeItemActions";
 import QuickAddChargeItemsSheet from "./components/QuickAddChargeItemsSheet";
 
 const ITEMS_PER_PAGE = 200;
@@ -157,6 +159,9 @@ export function CreateInvoicePage({
   );
   const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = useState(false);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedChargeItem, setSelectedChargeItem] =
+    useState<ChargeItemRead | null>(null);
   const [pendingItem, setPendingItem] = useState<{
     definition: ChargeItemDefinitionRead;
     quantity: string;
@@ -543,13 +548,16 @@ export function CreateInvoicePage({
                         <TableHead className="font-semibold text-center">
                           {t("amount")} ({getCurrencySymbol()})
                         </TableHead>
+                        <TableHead className="font-semibold text-center w-[50px]">
+                          {t("actions")}
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {chargeItems.length === 0 ? (
                         <TableRow>
                           <TableCell
-                            colSpan={7}
+                            colSpan={8}
                             className="h-20 text-center text-gray-400"
                           >
                             {t("no_billable_items")}
@@ -617,6 +625,17 @@ export function CreateInvoicePage({
                                 <MonetaryDisplay
                                   amount={item.total_price}
                                   hideCurrency
+                                />
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <ChargeItemActionsMenu
+                                  item={item}
+                                  facilityId={facilityId}
+                                  accountId={accountId}
+                                  onEdit={(item) => {
+                                    setSelectedChargeItem(item);
+                                    setIsEditDialogOpen(true);
+                                  }}
                                 />
                               </TableCell>
                             </TableRow>
@@ -964,6 +983,21 @@ export function CreateInvoicePage({
             facilityId={facilityId}
             patientId={account.patient.id}
             onChargeItemsAdded={handleChargeItemsAdded}
+          />
+          <EditInvoiceDialog
+            open={isEditDialogOpen}
+            onOpenChange={(open) => {
+              setIsEditDialogOpen(open);
+              if (!open) setSelectedChargeItem(null);
+            }}
+            facilityId={facilityId}
+            chargeItems={selectedChargeItem ? [selectedChargeItem] : []}
+            onSuccess={() => {
+              handleChargeItemsAdded();
+              setIsEditDialogOpen(false);
+              setSelectedChargeItem(null);
+            }}
+            title={t("edit_charge_item")}
           />
         </>
       )}
