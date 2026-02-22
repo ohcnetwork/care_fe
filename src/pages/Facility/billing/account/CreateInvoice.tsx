@@ -947,7 +947,8 @@ export function CreateInvoicePage({
                 disabled={
                   createMutation.isPending ||
                   isAddChargeItemsOpen ||
-                  isQuickAddOpen
+                  isQuickAddOpen ||
+                  isEditDialogOpen
                 }
               >
                 {createMutation.isPending ? (

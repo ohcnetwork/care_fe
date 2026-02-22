@@ -78,7 +78,7 @@ export default function ChargeItemActionsMenu({
       }),
     onSuccess: () => {
       toast.success(t("charge_item_updated"));
-      queryClient.invalidateQueries({ queryKey: ["chargeItems", accountId] });
+      queryClient.invalidateQueries({ queryKey: ["chargeItems"] });
       queryClient.invalidateQueries({
         queryKey: ["infinite-chargeItems", accountId],
       });
