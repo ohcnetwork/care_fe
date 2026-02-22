@@ -117,7 +117,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   );
 
   return (
-    <Page title="">
+    <Page title={t("overview")} hideTitleOnPage>
       <div className="container mx-auto space-y-8">
         {/* Welcome Header */}
         <div className="rounded-lg">

@@ -105,7 +105,7 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
 
   if (!consent) {
     return (
-      <Page title="">
+      <Page title={t("consent_not_found")} hideTitleOnPage>
         <div className="flex flex-col items-center justify-center min-h-[50vh]">
           <FileText className="size-16 text-gray-300 mb-4" />
           <h2 className="text-xl font-semibold mb-2">
@@ -141,7 +141,7 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
         <ArrowLeft />
         <span>{t("back")}</span>
       </BackButton>
-      <Page title="">
+      <Page title={t("consent_details")} hideTitleOnPage>
         <div className="container mx-auto py-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 order-last lg:order-first">
