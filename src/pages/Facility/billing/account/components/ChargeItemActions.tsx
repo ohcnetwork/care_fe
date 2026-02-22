@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import {
+  ArrowRightLeft,
   Ban,
   CircleAlert,
   CircleOff,
@@ -47,6 +48,7 @@ interface ChargeItemActionsMenuProps {
   facilityId: string;
   accountId: string;
   onEdit: (item: ChargeItemRead) => void;
+  onChangeAccount?: (item: ChargeItemRead) => void;
 }
 
 export default function ChargeItemActionsMenu({
@@ -54,6 +56,7 @@ export default function ChargeItemActionsMenu({
   facilityId,
   accountId,
   onEdit,
+  onChangeAccount,
 }: ChargeItemActionsMenuProps) {
   const { t } = useTranslation();
   const [pendingStatus, setPendingStatus] = useState<ChargeItemStatus | null>(
@@ -103,6 +106,15 @@ export default function ChargeItemActionsMenu({
               <span>{t("edit")}</span>
             </div>
           </DropdownMenuItem>
+          {onChangeAccount && (
+            <DropdownMenuItem
+              onClick={() => onChangeAccount(item)}
+              className="cursor-pointer"
+            >
+              <ArrowRightLeft className="mr-2 size-4" />
+              <span>{t("change_account")}</span>
+            </DropdownMenuItem>
+          )}
           {item.status === ChargeItemStatus.billable && (
             <>
               {STATUS_CHANGE_TARGETS.map((status) => {
