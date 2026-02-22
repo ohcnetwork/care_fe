@@ -461,35 +461,30 @@ export function CreateInvoicePage({
             </span>
             <Badge variant="secondary">{t("draft")}</Badge>
           </div>
+          {!disableCreateChargeItems && (
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsQuickAddOpen(true)}
+              >
+                <Package className="size-4 mr-2" />
+                {t("quick_add")}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsAddChargeItemsOpen(true)}
+              >
+                <PlusIcon className="size-4 mr-2" />
+                {t("add_charge_items")}
+              </Button>
+            </div>
+          )}
         </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="pb-2">
-              <div className="flex justify-between items-center mb-4">
-                <div className="text-sm font-medium text-gray-950">
-                  {t("billable_charge_items")}
-                </div>
-                {!disableCreateChargeItems && (
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsQuickAddOpen(true)}
-                    >
-                      <Package className="size-4 mr-2" />
-                      {t("quick_add")}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsAddChargeItemsOpen(true)}
-                    >
-                      <PlusIcon className="size-4 mr-2" />
-                      {t("add_charge_items")}
-                    </Button>
-                  </div>
-                )}
-              </div>
+            <div className="p-4 border border-gray-200 bg-white text-gray-950 rounded-sm shadow-sm">
               {isLoading ? (
                 <TableSkeleton count={3} />
               ) : (
