@@ -391,7 +391,11 @@ export function InvoiceShow({
       <div className="space-y-8 relative">
         <div className="flex items-start justify-between flex-col sm:flex-row gap-4 sm:items-center border-b-3 border-double pb-4">
           <div className="flex gap-3 sm:gap-6 flex-col md:flex-row">
-            <BackButton variant="link" className="px-0 justify-start">
+            <BackButton
+              variant="link"
+              className="px-0 justify-start"
+              to={`/facility/${facilityId}/billing/account/${invoice.account.id}`}
+            >
               <ChevronLeft />
               <span>{t("back")}</span>
             </BackButton>
