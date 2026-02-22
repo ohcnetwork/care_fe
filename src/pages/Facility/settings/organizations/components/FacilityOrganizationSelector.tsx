@@ -564,6 +564,7 @@ export default function FacilityOrganizationSelector(
               return (
                 <div
                   key={index}
+                  data-slot="selected-org-item"
                   className="flex-1 flex items-center gap-3 rounded-md border border-sky-100 bg-sky-50/50 p-2.5"
                 >
                   <Building className="size-4 text-sky-600 shrink-0" />
