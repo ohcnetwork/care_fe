@@ -226,6 +226,12 @@ export default function UserSelector({
         role="combobox"
         className="min-w-60 w-full justify-start"
         disabled={disabled}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            setOpen(true);
+          }
+        }}
       >
         {selected ? (
           <div className="flex items-center gap-2">
