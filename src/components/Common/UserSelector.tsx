@@ -222,6 +222,7 @@ export default function UserSelector({
   const renderTriggerButton = () =>
     trigger || (
       <Button
+        type="button"
         variant="outline"
         role="combobox"
         className="min-w-60 w-full justify-start"

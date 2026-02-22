@@ -918,6 +918,7 @@ export function ResourceDefinitionCategoryPicker<T>({
           <div className="flex relative">
             <PopoverTrigger asChild ref={ref}>
               <Button
+                type="button"
                 variant="outline"
                 role="combobox"
                 aria-expanded={open}

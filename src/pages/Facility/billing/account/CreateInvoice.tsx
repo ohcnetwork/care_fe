@@ -77,7 +77,7 @@ import { UserReadMinimal } from "@/types/user/user";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { formatName } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
 import BackButton from "@/components/Common/BackButton";
@@ -91,7 +91,6 @@ import {
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import { add, round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import { format } from "date-fns";
 import AddChargeItemsBillingSheet from "./components/AddChargeItemsBillingSheet";
 import ChargeItemActionsMenu from "./components/ChargeItemActions";
 import QuickAddChargeItemsSheet from "./components/QuickAddChargeItemsSheet";
@@ -180,6 +179,9 @@ export function CreateInvoicePage({
         toast.success(t("charge_items_added_successfully"));
         setTimeout(() => pickerRef.current?.focus(), 100);
       },
+      onError: () => {
+        toast.error(t("charge_items_add_failed"));
+      },
     });
 
   const form = useForm<FormValues>({
@@ -256,7 +258,7 @@ export function CreateInvoicePage({
       }
 
       // Navigate to the new invoice
-      const invoiceUrl = `/facility/${facilityId}/billing/invoices/${invoice.id}?${sourceUrl ? `sourceUrl=${sourceUrl}` : ""}`;
+      const invoiceUrl = `/facility/${facilityId}/billing/invoices/${invoice.id}${sourceUrl ? `?sourceUrl=${sourceUrl}` : ""}`;
       if (redirectInNewTab) {
         window.open(invoiceUrl, "_blank");
         onSuccess?.();
@@ -264,9 +266,6 @@ export function CreateInvoicePage({
         onSuccess?.();
         navigate(invoiceUrl);
       }
-    },
-    onError: (error) => {
-      toast.error(error.message || t("failed_to_create_invoice"));
     },
   });
 
@@ -367,6 +366,12 @@ export function CreateInvoicePage({
 
   const handleConfirmPendingItem = useCallback(() => {
     if (!pendingItem || !account?.patient) return;
+    const qty = Number(pendingItem.quantity);
+    if (!Number.isFinite(qty) || qty <= 0) {
+      toast.error(t("quantity_must_be_positive"));
+      quantityInputRef.current?.focus();
+      return;
+    }
     applyInlineChargeItem({
       requests: [
         {
@@ -379,7 +384,7 @@ export function CreateInvoicePage({
         },
       ],
     });
-  }, [pendingItem, account?.patient, applyInlineChargeItem]);
+  }, [pendingItem, account?.patient, applyInlineChargeItem, t]);
 
   const handlePendingKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.defaultPrevented) return;
@@ -396,10 +401,11 @@ export function CreateInvoicePage({
       const willAutoOpen =
         !hasAutoOpenedPicker.current && chargeItems.length === 0;
       if (!willAutoOpen) {
-        setTimeout(() => pickerRef.current?.focus(), 200);
+        const timer = setTimeout(() => pickerRef.current?.focus(), 200);
+        return () => clearTimeout(timer);
       }
     }
-  }, [disableCreateChargeItems, isLoading]);
+  }, [disableCreateChargeItems, isLoading, chargeItems.length]);
 
   const tableHeadClass = "border-r border-gray-200 font-semibold text-center";
   const tableCellClass =
@@ -422,17 +428,17 @@ export function CreateInvoicePage({
             {account?.patient && (
               <>
                 <div>
-                  <label className="text-gray-700 text-sm font-medium">
+                  <span className="text-gray-700 text-sm font-medium">
                     {t("patient_name")}
-                  </label>
+                  </span>
                   <div className="font-semibold text-gray-950">
                     {account.patient.name}
                   </div>
                 </div>
                 <div>
-                  <label className="text-gray-700 text-sm font-medium">
+                  <span className="text-gray-700 text-sm font-medium">
                     {t("account")}
-                  </label>
+                  </span>
                   <Link
                     href={`/facility/${facilityId}/billing/account/${accountId}`}
                   >
@@ -443,9 +449,9 @@ export function CreateInvoicePage({
                   </Link>
                 </div>
                 <div>
-                  <label className="text-gray-700 text-sm font-medium">
+                  <span className="text-gray-700 text-sm font-medium">
                     {t("status")}
-                  </label>
+                  </span>
                   <div>
                     <Badge variant={ACCOUNT_STATUS_COLORS[account.status]}>
                       {t(account.status)}
@@ -557,14 +563,14 @@ export function CreateInvoicePage({
                       {chargeItems.length === 0 ? (
                         <TableRow>
                           <TableCell
-                            colSpan={8}
+                            colSpan={7}
                             className="h-20 text-center text-gray-400"
                           >
                             {t("no_billable_items")}
                           </TableCell>
                         </TableRow>
                       ) : (
-                        chargeItems.filter(Boolean).flatMap((item) => {
+                        chargeItems.filter(Boolean).map((item) => {
                           const baseComponent = getBaseComponent(item);
                           const baseAmount = baseComponent?.amount || "0";
 
@@ -597,9 +603,9 @@ export function CreateInvoicePage({
                                 <div className="text-xs text-gray-500">
                                   {formatName(item.created_by)}
                                   {" · "}
-                                  {format(
-                                    new Date(item.created_date),
-                                    "hh:mm a - dd MMM, yyyy",
+                                  {formatDateTime(
+                                    item.created_date,
+                                    "hh:mm a - DD MMM, YYYY",
                                   )}
                                 </div>
                               </TableCell>
@@ -867,7 +873,7 @@ export function CreateInvoicePage({
                     )}
                   />
                   <span className="font-medium">
-                    {t("payment_terms")} & {t("note")}
+                    {t("payment_terms_and_note")}
                   </span>
                   <span className="text-xs text-gray-400 group-hover:text-gray-500">
                     ({t("optional")})
@@ -931,6 +937,7 @@ export function CreateInvoicePage({
                 <Button
                   type="button"
                   variant="outline_primary"
+                  disabled={!locationId}
                   onClick={() =>
                     navigate(
                       `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}`,
@@ -948,7 +955,9 @@ export function CreateInvoicePage({
                   createMutation.isPending ||
                   isAddChargeItemsOpen ||
                   isQuickAddOpen ||
-                  isEditDialogOpen
+                  isEditDialogOpen ||
+                  isApplyingInline ||
+                  chargeItems.length === 0
                 }
               >
                 {createMutation.isPending ? (
