@@ -7,7 +7,9 @@ import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import duoToneIcons from "@/CAREUI/icons/DuoTonePaths.json";
 
-import Autocomplete, { AutoCompleteOption } from "@/components/ui/autocomplete";
+import GenericAutocomplete, {
+  GenericAutoCompleteOption,
+} from "@/components/ui/generic-autocomplete";
 
 import { cn } from "@/lib/utils";
 
@@ -53,18 +55,19 @@ export const HealthcareServiceSelector = ({
     }),
   });
 
-  const options: AutoCompleteOption<HealthcareServiceReadSpec>[] = useMemo(
-    () =>
-      services?.results.map((service) => ({
-        label: service.name,
-        value: service,
-        key: service.id,
-      })) || [],
-    [services?.results],
-  );
+  const options: GenericAutoCompleteOption<HealthcareServiceReadSpec>[] =
+    useMemo(
+      () =>
+        services?.results.map((service) => ({
+          label: service.name,
+          value: service,
+          key: service.id,
+        })) || [],
+      [services?.results],
+    );
 
   const renderOption = (
-    option: AutoCompleteOption<HealthcareServiceReadSpec>,
+    option: GenericAutoCompleteOption<HealthcareServiceReadSpec>,
     isSelected: boolean,
   ) => {
     const service = option.value;
@@ -102,7 +105,7 @@ export const HealthcareServiceSelector = ({
   };
 
   const renderRadioOption = (
-    option: AutoCompleteOption<HealthcareServiceReadSpec>,
+    option: GenericAutoCompleteOption<HealthcareServiceReadSpec>,
   ) => {
     const service = option.value;
     return (
@@ -136,7 +139,7 @@ export const HealthcareServiceSelector = ({
   };
 
   const renderSelected = (
-    option: AutoCompleteOption<HealthcareServiceReadSpec>,
+    option: GenericAutoCompleteOption<HealthcareServiceReadSpec>,
   ) => {
     const service = option.value;
     return (
@@ -166,7 +169,7 @@ export const HealthcareServiceSelector = ({
   ) => a?.id === b?.id;
 
   return (
-    <Autocomplete<HealthcareServiceReadSpec>
+    <GenericAutocomplete<HealthcareServiceReadSpec>
       options={options}
       value={selected}
       onChange={onSelect}
