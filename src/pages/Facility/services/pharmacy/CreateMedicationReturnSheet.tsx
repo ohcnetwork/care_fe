@@ -32,6 +32,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { PatientIdentifierSelector } from "@/components/Patient/PatientIdentifierSelector";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import NoActiveAccountWarningDialog from "@/pages/Facility/billing/account/components/NoActiveAccountWarningDialog";
 import {
   PartialPatientModel,
   PatientListRead,
@@ -172,72 +173,78 @@ export function CreateMedicationReturnSheet({
           />
 
           {selectedPatient && (
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6"
-              >
-                <Card className="p-0 bg-gray-50">
-                  <CardContent className="space-y-4 p-4 rounded-md">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("name")}</FormLabel>
-                          <FormControl>
-                            <Input
-                              className="h-9"
-                              placeholder={t("enter_return_name")}
-                              {...field}
-                              autoFocus
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+            <>
+              <NoActiveAccountWarningDialog
+                patientId={selectedPatient.id}
+                facilityId={facilityId}
+              />
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
+                >
+                  <Card className="p-0 bg-gray-50">
+                    <CardContent className="space-y-4 p-4 rounded-md">
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("name")}</FormLabel>
+                            <FormControl>
+                              <Input
+                                className="h-9"
+                                placeholder={t("enter_return_name")}
+                                {...field}
+                                autoFocus
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    <FormField
-                      control={form.control}
-                      name="note"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            {t("note")}
-                            <span className="text-gray-500 text-sm italic">
-                              {" "}
-                              ({t("optional")})
-                            </span>
-                          </FormLabel>
-                          <FormControl>
-                            <Textarea
-                              rows={3}
-                              placeholder={t("enter_return_note")}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </CardContent>
-                </Card>
+                      <FormField
+                        control={form.control}
+                        name="note"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              {t("note")}
+                              <span className="text-gray-500 text-sm italic">
+                                {" "}
+                                ({t("optional")})
+                              </span>
+                            </FormLabel>
+                            <FormControl>
+                              <Textarea
+                                rows={3}
+                                placeholder={t("enter_return_note")}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </CardContent>
+                  </Card>
 
-                <SheetFooter className="gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {t("cancel")}
-                  </Button>
-                  <Button type="submit" disabled={isCreating}>
-                    {isCreating ? t("creating") : t("create_return")}
-                  </Button>
-                </SheetFooter>
-              </form>
-            </Form>
+                  <SheetFooter className="gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {t("cancel")}
+                    </Button>
+                    <Button type="submit" disabled={isCreating}>
+                      {isCreating ? t("creating") : t("create_return")}
+                    </Button>
+                  </SheetFooter>
+                </form>
+              </Form>
+            </>
           )}
         </div>
       </SheetContent>

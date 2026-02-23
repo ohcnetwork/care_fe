@@ -10,7 +10,6 @@ import { z } from "zod";
 export enum ConditionOperation {
   equality = "equality",
   in_range = "in_range",
-  intersects_any = "intersects_any",
   has_tag = "has_tag",
 }
 
@@ -280,7 +279,7 @@ export const removeConditionType = (
 ): QualifiedRange[] => {
   return qualifiedRanges.map((range) => ({
     ...range,
-    conditions: range.conditions.map((condition) => ({
+    conditions: range.conditions?.map((condition) => ({
       ...stripConditionType(condition as ConditionForm),
     })),
   }));
