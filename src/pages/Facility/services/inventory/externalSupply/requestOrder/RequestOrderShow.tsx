@@ -703,11 +703,11 @@ export function RequestOrderShow({
                                             0,
                                             supplyRequest.remaining_quantity,
                                           ),
-                                        )}{" "}
+                                        )}
                                         {isNegative(
                                           supplyRequest.remaining_quantity,
                                         ) && (
-                                          <span className="text-sm text-gray-500">
+                                          <span className="text-sm text-gray-500 ml-1">
                                             (
                                             {t("excess_by", {
                                               quantity: abs(
