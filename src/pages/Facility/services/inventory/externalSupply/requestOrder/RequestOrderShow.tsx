@@ -709,7 +709,7 @@ export function RequestOrderShow({
                                         ) && (
                                           <span className="text-sm text-gray-500 ml-1">
                                             (
-                                            {t("excess_by", {
+                                            {t("extra_supplied_quantity", {
                                               quantity: abs(
                                                 supplyRequest.remaining_quantity,
                                               ),
