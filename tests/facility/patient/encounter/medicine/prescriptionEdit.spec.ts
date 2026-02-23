@@ -27,7 +27,7 @@ test.describe("Edit Patient Prescription", () => {
   test("Remove medication from patient prescription", async ({ page }) => {
     const medicineName = faker.helpers.arrayElement(medicineNames);
     const dosage = faker.number.int({ min: 1, max: 100 }).toString();
-    const frequency = faker.helpers.arrayElement(frequencies);
+    const frequencyData = faker.helpers.arrayElement(frequencies);
     const selectedInstruction = faker.helpers.arrayElement(instructions);
     const notes = "testing notes";
 
@@ -51,13 +51,16 @@ test.describe("Edit Patient Prescription", () => {
     });
 
     await test.step("Fill medication details", async () => {
-      await page.getByPlaceholder("Enter a number...").last().click();
-      await page.getByPlaceholder("Enter a number...").last().fill(dosage);
+      await page.getByPlaceholder("Enter a number...").first().click();
+      await page.getByPlaceholder("Enter a number...").first().fill(dosage);
       await page.keyboard.press("Enter");
 
-      await page.getByText("Select frequency").last().click();
-      await page.getByPlaceholder("Search frequency").fill(frequency);
-      await page.getByRole("option", { name: frequency }).nth(0).click();
+      await page.getByText("eg. 1-0-1").first().click();
+      await page.getByPlaceholder("Type eg. 1-0-1").fill(frequencyData.input);
+      await page
+        .getByRole("option", { name: frequencyData.display })
+        .nth(0)
+        .click();
 
       // expand
       await page.getByTitle("Show Advanced Fields").first().click();
@@ -98,7 +101,7 @@ test.describe("Edit Patient Prescription", () => {
       await expect(table).toBeVisible({ timeout: 10000 });
       await expect(table).toContainText(medicineName);
       await expect(table).toContainText(dosage);
-      await expect(table).toContainText(frequency);
+      await expect(table).toContainText(frequencyData.display);
       await expect(table).toContainText(selectedInstruction);
       await expect(page.getByText(`Note${notes}`)).toBeVisible();
     });
@@ -140,7 +143,7 @@ test.describe("Edit Patient Prescription", () => {
       const table = page.getByRole("table");
       await expect(table).toContainText(medicineName);
       await expect(table).toContainText(dosage);
-      await expect(table).toContainText(frequency);
+      await expect(table).toContainText(frequencyData.display);
       await expect(table).toContainText(selectedInstruction);
       await expect(page.getByText(`Note${notes}`)).toBeVisible();
     });

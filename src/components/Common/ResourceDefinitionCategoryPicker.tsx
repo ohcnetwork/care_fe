@@ -918,6 +918,7 @@ export function ResourceDefinitionCategoryPicker<T>({
           <div className="flex relative">
             <PopoverTrigger asChild ref={ref}>
               <Button
+                type="button"
                 variant="outline"
                 role="combobox"
                 aria-expanded={open}
@@ -932,6 +933,12 @@ export function ResourceDefinitionCategoryPicker<T>({
                 data-shortcut-id={shortcutId}
                 onClick={() => {
                   if (!open) {
+                    setOpen(true);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
                     setOpen(true);
                   }
                 }}

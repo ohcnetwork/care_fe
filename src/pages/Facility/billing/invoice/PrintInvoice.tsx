@@ -124,9 +124,10 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
   const getWatermark = () => {
     if (invoice.status === InvoiceStatus.cancelled) {
       return { text: t("cancelled"), color: "red" as const };
-    }
-    if (invoice.status === InvoiceStatus.entered_in_error) {
+    } else if (invoice.status === InvoiceStatus.entered_in_error) {
       return { text: t("entered_in_error"), color: "red" as const };
+    } else if (invoice.status === InvoiceStatus.draft) {
+      return { text: t("draft"), color: "gray" as const };
     }
     return undefined;
   };

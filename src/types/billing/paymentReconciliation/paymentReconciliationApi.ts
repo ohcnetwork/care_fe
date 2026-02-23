@@ -37,4 +37,13 @@ export default {
     TRes: Type<PaymentReconciliationRead>(),
     TBody: Type<PaymentReconciliationCancel>(),
   },
+  changeAccount: {
+    path: "/api/v1/facility/{facilityId}/payment_reconciliation/change_account/",
+    method: HttpMethod.POST,
+    TBody: Type<{
+      target_account: string;
+      payment_reconciliations: string[];
+    }>(),
+    TRes: Type<void>(),
+  },
 } as const;
