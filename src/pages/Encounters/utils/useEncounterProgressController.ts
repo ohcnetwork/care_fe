@@ -44,7 +44,6 @@ interface EncounterProgressControllerReturnType {
     encounter: EncounterRead;
     onDischargeRequired?: () => void;
   }) => void;
-  encounterRequiresDischarge: (encounter: EncounterRead) => boolean;
 }
 
 const getCompleteEncounterRequest = (encounter: EncounterRead) => {
@@ -106,7 +105,7 @@ const encounterRequiresDischarge = (encounter: EncounterRead) => {
 const canCompleteEncounter = (encounter: EncounterRead) => {
   return (
     encounterRequiresDischarge(encounter) === false &&
-    encounter.status != EncounterStatus.COMPLETED
+    encounter.status !== EncounterStatus.COMPLETED
   );
 };
 
@@ -122,6 +121,29 @@ const canCompleteToken = ({ appointment }: EncounterRead) => {
     return false;
   }
   return TokenActiveStatuses.includes(appointment.token.status);
+};
+
+const buildEncounterRequests = (
+  encounter: EncounterRead,
+): BatchRequestBody["requests"] => {
+  const requests: BatchRequestBody["requests"] = [];
+  if (canCompleteEncounter(encounter)) {
+    requests.push(getCompleteEncounterRequest(encounter));
+  }
+  return requests;
+};
+
+const buildAppointmentRequests = (
+  encounter: EncounterRead,
+): BatchRequestBody["requests"] => {
+  const requests: BatchRequestBody["requests"] = [];
+  if (canCompleteBooking(encounter)) {
+    requests.push(getCompleteAppointmentRequest(encounter));
+  }
+  if (canCompleteToken(encounter)) {
+    requests.push(getCompleteTokenRequest(encounter));
+  }
+  return requests;
 };
 
 export function useEncounterProgressController(): EncounterProgressControllerReturnType {
@@ -163,46 +185,35 @@ export function useEncounterProgressController(): EncounterProgressControllerRet
     isPending: isBatchRequestPending,
 
     completeEncounter: ({ encounter, onDischargeRequired }) => {
-      const requests: BatchRequestBody["requests"] = [];
       if (encounterRequiresDischarge(encounter)) {
         onDischargeRequired?.();
         return;
       }
-      if (canCompleteEncounter(encounter)) {
-        requests.push(getCompleteEncounterRequest(encounter));
-      }
-      batchRequest({ requests, encounter });
+      batchRequest({
+        requests: buildEncounterRequests(encounter),
+        encounter,
+      });
     },
 
     completeAppointment: ({ encounter }) => {
-      const requests: BatchRequestBody["requests"] = [];
-      if (canCompleteBooking(encounter)) {
-        requests.push(getCompleteAppointmentRequest(encounter));
-      }
-      if (canCompleteToken(encounter)) {
-        requests.push(getCompleteTokenRequest(encounter));
-      }
-      batchRequest({ requests, encounter });
+      batchRequest({
+        requests: buildAppointmentRequests(encounter),
+        encounter,
+      });
     },
 
     completeEverything: ({ encounter, onDischargeRequired }) => {
-      const requests: BatchRequestBody["requests"] = [];
       if (encounterRequiresDischarge(encounter)) {
         onDischargeRequired?.();
         return;
       }
-      if (canCompleteEncounter(encounter)) {
-        requests.push(getCompleteEncounterRequest(encounter));
-      }
-      if (canCompleteBooking(encounter)) {
-        requests.push(getCompleteAppointmentRequest(encounter));
-      }
-      if (canCompleteToken(encounter)) {
-        requests.push(getCompleteTokenRequest(encounter));
-      }
-      batchRequest({ requests, encounter });
+      batchRequest({
+        requests: [
+          ...buildEncounterRequests(encounter),
+          ...buildAppointmentRequests(encounter),
+        ],
+        encounter,
+      });
     },
-
-    encounterRequiresDischarge,
   };
 }
