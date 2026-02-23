@@ -80,7 +80,15 @@ async function fillAdditionalDetails(
   data: { address: string; pincode: string },
 ) {
   await test.step("Fill additional details", async () => {
-    await page.getByRole("button", { name: "Additional Details" }).click();
+    const additionalDetailsSection = page.getByRole("button", {
+      name: "Additional Details",
+    });
+    const additionalDetailsSectionText =
+      await additionalDetailsSection.textContent();
+
+    if (additionalDetailsSectionText?.toLowerCase().includes("optional")) {
+      await additionalDetailsSection.click();
+    }
 
     await page.getByRole("textbox", { name: "Address" }).fill(data.address);
     await page.getByRole("spinbutton", { name: "PIN Code" }).fill(data.pincode);
