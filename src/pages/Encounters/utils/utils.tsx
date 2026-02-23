@@ -83,6 +83,9 @@ export function useEncounterProgressController() {
           toast.success(t("appointment_closed_successfully"));
         }
       },
+      onError: () => {
+        toast.error(t("encounter_completion_failed"));
+      },
     });
 
   const endEncounter = (

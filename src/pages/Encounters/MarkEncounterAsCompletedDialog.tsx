@@ -22,6 +22,7 @@ export function MarkEncounterAsCompletedDialog(
   const { t } = useTranslation();
   const {
     selectedEncounter: encounter,
+    isEndEncounterPending,
     actions: { endEncounter },
   } = useEncounter();
 
@@ -46,6 +47,7 @@ export function MarkEncounterAsCompletedDialog(
           <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
           <AlertDialogAction
             className={buttonVariants({ variant: "primary" })}
+            disabled={isEndEncounterPending}
             onClick={() => endEncounter(encounter, true)}
           >
             {t("mark_as_complete")}
