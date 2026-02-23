@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import * as React from "react";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import TagBadge from "@/components/Tags/TagBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -12,8 +13,9 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { PrescriptionRead } from "@/types/emr/prescription/prescription";
+import { PrescritionList } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
+import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { ChevronDown, ReceiptTextIcon } from "lucide-react";
@@ -24,7 +26,7 @@ interface PrescriptionListSelectorProps {
   encounterId: string;
   facilityId?: string;
   selectedPrescriptionId?: string;
-  onSelectPrescription: (prescription: PrescriptionRead | undefined) => void;
+  onSelectPrescription: (prescription: PrescritionList | undefined) => void;
 }
 
 export default function PrescriptionListSelector({
@@ -45,9 +47,7 @@ export default function PrescriptionListSelector({
     enabled: !!patientId && !!encounterId,
   });
 
-  function handleSelectPrescription(
-    prescription: PrescriptionRead | undefined,
-  ) {
+  function handleSelectPrescription(prescription: PrescritionList | undefined) {
     onSelectPrescription(prescription);
     setOpenDrawer(false);
   }
@@ -70,7 +70,7 @@ export default function PrescriptionListSelector({
     <>
       <div className="hidden lg:block h-full overflow-y-auto pr-1">
         <PrescriptionList
-          prescriptions={(prescriptions?.results as PrescriptionRead[]) ?? []}
+          prescriptions={prescriptions?.results ?? []}
           selectedPrescriptionId={selectedPrescriptionId}
           onSelectPrescription={onSelectPrescription}
         />
@@ -99,7 +99,7 @@ export default function PrescriptionListSelector({
             ) : selectedPrescription ? (
               <Button
                 variant="outline"
-                className="w-full flex justify-between items-center py-6"
+                className="w-full flex justify-between items-center py-2 h-auto"
               >
                 <div className="flex gap-3">
                   <ReceiptTextIcon className="size-5 text-primary-600" />
@@ -115,6 +115,20 @@ export default function PrescriptionListSelector({
                       {t("prescribed_by")}:{" "}
                       {formatName(selectedPrescription.prescribed_by)}
                     </span>
+                    {selectedPrescription.tags &&
+                      selectedPrescription.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {selectedPrescription.tags.map((tag) => (
+                            <TagBadge
+                              className="text-xs"
+                              key={tag.id}
+                              tag={tag}
+                              hierarchyDisplay
+                              variant="teal"
+                            />
+                          ))}
+                        </div>
+                      )}
                   </div>
                 </div>
                 <ChevronDown className="size-5 text-gray-500 shrink-0 ml-2" />
@@ -132,9 +146,7 @@ export default function PrescriptionListSelector({
             </DrawerHeader>
             <div className="overflow-y-auto pr-2">
               <PrescriptionList
-                prescriptions={
-                  (prescriptions?.results as PrescriptionRead[]) ?? []
-                }
+                prescriptions={prescriptions?.results ?? []}
                 selectedPrescriptionId={selectedPrescriptionId}
                 onSelectPrescription={handleSelectPrescription}
               />
@@ -149,6 +161,7 @@ interface PrescriptionListItem {
   id: string | undefined;
   title: string;
   subtitle: string;
+  tags?: TagConfig[];
 }
 
 function PrescriptionList({
@@ -156,9 +169,9 @@ function PrescriptionList({
   selectedPrescriptionId,
   onSelectPrescription,
 }: {
-  prescriptions: PrescriptionRead[];
+  prescriptions: PrescritionList[];
   selectedPrescriptionId: string | undefined;
-  onSelectPrescription: (prescription: PrescriptionRead | undefined) => void;
+  onSelectPrescription: (prescription: PrescritionList | undefined) => void;
 }) {
   const { t } = useTranslation();
 
@@ -172,6 +185,7 @@ function PrescriptionList({
       id: p.id,
       title: formatDateTime(p.created_date, "DD/MM/YYYY hh:mm A"),
       subtitle: `${t("prescribed_by")}: ${formatName(p.prescribed_by)}`,
+      tags: p.tags,
     })),
   ];
 
@@ -211,6 +225,19 @@ function PrescriptionList({
                   <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
                     {item.subtitle}
                   </span>
+                  {item.tags && item.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {item.tags.map((tag) => (
+                        <TagBadge
+                          className="text-xs rounded-sm pb-1"
+                          key={tag.id}
+                          tag={tag}
+                          hierarchyDisplay
+                          variant="teal"
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
