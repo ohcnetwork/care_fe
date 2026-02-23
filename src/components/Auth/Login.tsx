@@ -73,6 +73,13 @@ interface OtpValidationError {
 
 type LoginMode = "staff" | "patient";
 
+interface LoginForm {
+  username: string;
+  password: string;
+  "g-recaptcha-response"?: string;
+  [key: string]: string | undefined;
+}
+
 interface LoginProps {
   forgot?: boolean;
 }
@@ -88,14 +95,14 @@ const Login = (props: LoginProps) => {
     resendOtpTimeout,
     disablePatientLogin,
   } = careConfig;
-  const initForm: any = {
+  const initForm: LoginForm = {
     username: "",
     password: "",
   };
   const { forgot } = props;
   const [params, setQueryParams] = useQueryParams();
   const { mode } = params;
-  const initErr: any = {};
+  const initErr: Record<string, string | null> = {};
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
   const [isCaptchaEnabled, setCaptcha] = useState(false);
@@ -135,8 +142,8 @@ const Login = (props: LoginProps) => {
       setOtpError("");
       toast.success(t("send_otp_success"));
     },
-    onError: (error: any) => {
-      const errors = error?.data || [];
+    onError: (error: unknown) => {
+      const errors = (error as { data?: OtpError[] })?.data || [];
       if (Array.isArray(errors) && errors.length > 0) {
         const firstError = errors[0] as OtpError;
         setOtpError(firstError.msg);
@@ -167,21 +174,25 @@ const Login = (props: LoginProps) => {
         patientLogin(tokenData, `/patient/home`);
       }
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const typedError = error as {
+        cause?: { errors?: OtpValidationError[] };
+        message?: string;
+      };
       let errorMessage = "invalid_otp";
       if (
-        error.cause &&
-        Array.isArray(error.cause.errors) &&
-        error.cause.errors.length > 0
+        typedError.cause &&
+        Array.isArray(typedError.cause.errors) &&
+        typedError.cause.errors.length > 0
       ) {
-        const otpError = error.cause.errors.find(
+        const otpError = typedError.cause.errors.find(
           (e: OtpValidationError) => e.otp,
         );
         if (otpError && otpError.otp) {
           errorMessage = otpError.otp;
         }
-      } else if (error.message) {
-        errorMessage = error.message;
+      } else if (typedError.message) {
+        errorMessage = typedError.message;
       }
       setOtpValidationError(errorMessage);
       toast.error(errorMessage);
@@ -197,7 +208,7 @@ const Login = (props: LoginProps) => {
   });
 
   // Login form validation
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name } = e.target;
     const fieldValue = Object.assign({}, form);
     const errorField = Object.assign({}, errors);
@@ -285,7 +296,7 @@ const Login = (props: LoginProps) => {
     submitForgetPassword(valid);
   };
 
-  const onCaptchaChange = (value: any) => {
+  const onCaptchaChange = (value: string | null) => {
     if (value && isCaptchaEnabled) {
       const formCaptcha = { ...form };
       formCaptcha["g-recaptcha-response"] = value;

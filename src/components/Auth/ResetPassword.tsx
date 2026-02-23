@@ -20,24 +20,32 @@ interface ResetPasswordProps {
   token: string;
 }
 
+interface ResetPasswordForm {
+  password: string;
+  confirm: string;
+  token: string;
+  [key: string]: string;
+}
+
 const ResetPassword = (props: ResetPasswordProps) => {
-  const initForm: any = {
+  const initForm: ResetPasswordForm = {
     password: "",
     confirm: "",
+    token: "",
   };
 
-  const initErr: any = {};
+  const initErr: Record<string, string> = {};
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
   const [isPasswordFieldFocused, setIsPasswordFieldFocused] = useState(false);
 
   const { t } = useTranslation();
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name } = e.target;
     const fieldValue = Object.assign({}, form);
     const errorField = Object.assign({}, errors);
     if (errorField[name]) {
-      errorField[name] = null;
+      errorField[name] = "";
       setErrors(errorField);
     }
     fieldValue[name] = value;
@@ -80,12 +88,12 @@ const ResetPassword = (props: ResetPasswordProps) => {
     },
     onError: (error) => {
       if (error.cause) {
-        setErrors(error.cause);
+        setErrors(error.cause as Record<string, string>);
       }
     },
   });
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     const valid = validateData();
     if (valid) {
