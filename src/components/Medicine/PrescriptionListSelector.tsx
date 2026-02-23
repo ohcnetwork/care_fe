@@ -21,6 +21,24 @@ import { formatDateTime, formatName } from "@/Utils/utils";
 import { ChevronDown, ReceiptTextIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+function PrescriptionTags({ tags }: { tags?: TagConfig[] }) {
+  if (!tags || tags.length === 0) return null;
+
+  return (
+    <div className="flex flex-wrap gap-1 mt-1">
+      {tags.map((tag) => (
+        <TagBadge
+          key={tag.id}
+          tag={tag}
+          hierarchyDisplay
+          variant="teal"
+          className="text-xs pb-1 rounded-sm"
+        />
+      ))}
+    </div>
+  );
+}
+
 interface PrescriptionListSelectorProps {
   patientId: string;
   encounterId: string;
@@ -115,20 +133,7 @@ export default function PrescriptionListSelector({
                       {t("prescribed_by")}:{" "}
                       {formatName(selectedPrescription.prescribed_by)}
                     </span>
-                    {selectedPrescription.tags &&
-                      selectedPrescription.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {selectedPrescription.tags.map((tag) => (
-                            <TagBadge
-                              className="text-xs"
-                              key={tag.id}
-                              tag={tag}
-                              hierarchyDisplay
-                              variant="teal"
-                            />
-                          ))}
-                        </div>
-                      )}
+                    <PrescriptionTags tags={selectedPrescription.tags} />
                   </div>
                 </div>
                 <ChevronDown className="size-5 text-gray-500 shrink-0 ml-2" />
@@ -225,19 +230,7 @@ function PrescriptionList({
                   <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
                     {item.subtitle}
                   </span>
-                  {item.tags && item.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {item.tags.map((tag) => (
-                        <TagBadge
-                          className="text-xs rounded-sm pb-1"
-                          key={tag.id}
-                          tag={tag}
-                          hierarchyDisplay
-                          variant="teal"
-                        />
-                      ))}
-                    </div>
-                  )}
+                  <PrescriptionTags tags={item.tags} />
                 </div>
               </div>
             </CardContent>
