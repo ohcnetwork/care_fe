@@ -109,11 +109,13 @@ export interface ChargeItemsTableProps {
   facilityId: string;
   accountId: string;
   patientId: string;
+  canAddChargeItems?: boolean;
 }
 export function ChargeItemsTable({
   facilityId,
   accountId,
   patientId,
+  canAddChargeItems,
 }: ChargeItemsTableProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -365,15 +367,17 @@ export function ChargeItemsTable({
             <Zap className="size-4 mr-2 text-amber-500" />
             {t("quick_add")}
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => setIsAddChargeItemsOpen(true)}
-            className="w-full sm:w-auto"
-          >
-            <PlusIcon className="size-4 mr-2" />
-            {t("add_charge_items")}
-            <ShortcutBadge actionId="add-charge-item" />
-          </Button>
+          {canAddChargeItems && (
+            <Button
+              variant="outline"
+              onClick={() => setIsAddChargeItemsOpen(true)}
+              className="w-full sm:w-auto"
+            >
+              <PlusIcon className="size-4 mr-2" />
+              {t("add_charge_items")}
+              <ShortcutBadge actionId="add-charge-item" />
+            </Button>
+          )}
         </div>
       </div>
       <div className="mb-4">

@@ -257,6 +257,10 @@ export function AccountShow({
     });
   };
 
+  const canAddChargeItems =
+    account?.status === AccountStatus.active &&
+    account?.billing_status === AccountBillingStatus.open;
+
   if (isLoading) {
     return <TableSkeleton count={5} />;
   }
@@ -297,6 +301,7 @@ export function AccountShow({
           facilityId={facilityId}
           accountId={accountId}
           patientId={account.patient.id}
+          canAddChargeItems={canAddChargeItems}
         />
       ),
       shortcutId: "switch-to-charge-items-tab",
