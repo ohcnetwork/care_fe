@@ -220,3 +220,13 @@ export function abs(value: string | number | Decimal): Decimal {
   }
   return new Decimal(value).abs();
 }
+
+/**
+ * Returns the maximum of given decimal values
+ */
+export function max(...values: (string | number | Decimal)[]): Decimal {
+  const result = values.map((v) =>
+    v === "" ? new Decimal(0) : new Decimal(v),
+  );
+  return Decimal.max(...result);
+}

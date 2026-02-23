@@ -63,6 +63,7 @@ import {
   add,
   isNegative,
   isPositive,
+  max,
   round,
   subtract,
 } from "@/Utils/decimal";
@@ -697,25 +698,24 @@ export function RequestOrderShow({
                                           ) && "text-red-500",
                                         )}
                                       >
+                                        {round(
+                                          max(
+                                            0,
+                                            supplyRequest.remaining_quantity,
+                                          ),
+                                        )}{" "}
                                         {isNegative(
                                           supplyRequest.remaining_quantity,
-                                        ) ? (
-                                          <div className="flex items-center gap-1">
-                                            <span>0</span>
-                                            <span className="text-sm text-gray-500">
-                                              (
-                                              {t("excess_by", {
-                                                quantity: abs(
-                                                  supplyRequest.remaining_quantity,
-                                                ),
-                                              })}
-                                              )
-                                            </span>
-                                          </div>
-                                        ) : (
-                                          round(
-                                            supplyRequest.remaining_quantity,
-                                          )
+                                        ) && (
+                                          <span className="text-sm text-gray-500">
+                                            (
+                                            {t("excess_by", {
+                                              quantity: abs(
+                                                supplyRequest.remaining_quantity,
+                                              ),
+                                            })}
+                                            )
+                                          </span>
                                         )}
                                       </TableCell>
                                       <TableCell>
