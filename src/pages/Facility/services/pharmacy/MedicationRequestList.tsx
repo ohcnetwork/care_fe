@@ -328,9 +328,11 @@ export default function MedicationRequestList({
             <TableHeader>
               <TableRow>
                 <TableHead>{t("patient_name")}</TableHead>
-                <TableHead>{t("by")}</TableHead>
-                <TableHead>{t("tags", { count: 2 })}</TableHead>
-                <TableHead>{t("action")}</TableHead>
+                <TableHead className="text-center">{t("by")}</TableHead>
+                <TableHead className="text-center">
+                  {t("tags", { count: 2 })}
+                </TableHead>
+                <TableHead className="text-right">{t("action")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -354,7 +356,7 @@ export default function MedicationRequestList({
                     </div>
                   </TableCell>
 
-                  <TableCell className="text-sm">
+                  <TableCell className="text-sm text-center">
                     <div className="flex flex-col gap-1">
                       <div className="space-x-1">
                         <Badge
@@ -398,7 +400,7 @@ export default function MedicationRequestList({
                     </div>
                   </TableCell>
 
-                  <TableCell>
+                  <TableCell className="text-center">
                     <div className="flex flex-wrap gap-2">
                       <TagAssignmentSheet
                         entityType="prescription"
@@ -418,8 +420,8 @@ export default function MedicationRequestList({
                       />
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2 self-center">
+                  <TableCell className="text-right">
+                    <div className="flex gap-2 self-center justify-end">
                       <Button
                         variant="outline"
                         className="font-semibold"

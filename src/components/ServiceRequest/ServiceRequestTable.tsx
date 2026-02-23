@@ -56,7 +56,9 @@ export default function ServiceRequestTable({
         <TableHeader className="bg-gray-100">
           <TableRow className="divide-gray-200">
             {showPatientInfo && <TableHead>{t("patient_name")}</TableHead>}
-            <TableHead className="text-center">{t("service_type")}</TableHead>
+            <TableHead className={showPatientInfo ? "text-center" : ""}>
+              {t("service_type")}
+            </TableHead>
             <TableHead className="text-center">
               {t("status")}/{t("priority")}
             </TableHead>
@@ -89,7 +91,7 @@ export default function ServiceRequestTable({
                   </div>
                 </TableCell>
               )}
-              <TableCell className="text-center">
+              <TableCell className={showPatientInfo ? "text-center" : ""}>
                 <div>
                   <div className="text-lg">{request.title || "-"}</div>
                   {request.code?.display && (
