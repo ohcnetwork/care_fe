@@ -65,10 +65,13 @@ export default function PrescriptionListSelector({
     enabled: !!patientId && !!encounterId,
   });
 
-  function handleSelectPrescription(prescription: PrescritionList | undefined) {
-    onSelectPrescription(prescription);
-    setOpenDrawer(false);
-  }
+  const handleSelectPrescription = React.useCallback(
+    (prescription: PrescritionList | undefined) => {
+      onSelectPrescription(prescription);
+      setOpenDrawer(false);
+    },
+    [onSelectPrescription],
+  );
 
   if (isLoading) {
     return (
