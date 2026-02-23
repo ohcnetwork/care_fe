@@ -899,7 +899,10 @@ const AppointmentActions = ({
           tags: appointment.tags.map((tag) => tag.id),
         },
       });
-      if (appointment.token) {
+      if (
+        appointment.token &&
+        !TokenFinalStatuses.includes(appointment.token.status)
+      ) {
         requests.push({
           url: tokenApi.update.path
             .replace("{facility_id}", facilityId)
