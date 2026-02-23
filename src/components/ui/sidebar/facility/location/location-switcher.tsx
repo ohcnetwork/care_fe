@@ -84,18 +84,18 @@ export function LocationSwitcher() {
             className="w-full flex items-center justify-between gap-3 py-6 px-2 rounded-md bg-white border border-gray-200"
             onClick={() => setOpenDialog(true)}
           >
-            <div className="flex items-center gap-2">
-              <MapPinIcon className="size-5 text-green-600" />
-              <div className="flex flex-col items-start">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <MapPinIcon className="size-5 text-green-600 shrink-0" />
+              <div className="flex flex-col items-start min-w-0 flex-1">
                 <span className="text-xs text-gray-500">
                   {t("current_location")}
                 </span>
-                <span className="text-sm font-medium text-gray-900">
+                <span className="text-sm font-medium text-gray-900 truncate w-full">
                   {location?.name}
                 </span>
               </div>
             </div>
-            <CareIcon icon="l-sort" />
+            <CareIcon icon="l-sort" className="shrink-0" />
           </Button>
           <Separator className="mt-4" />
         </div>
