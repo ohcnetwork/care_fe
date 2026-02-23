@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
+import { EllipsisVertical } from "lucide-react";
+import { Link } from "raviger";
 import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -36,6 +38,7 @@ import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryCo
 import { ExtensionEntityType } from "@/types/extensions/extensions";
 import { DeliveryOrderStatus } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import {
+  ACTIVE_SUPPLY_DELIVERY_STATUSES,
   SUPPLY_DELIVERY_CONDITION_COLORS,
   SUPPLY_DELIVERY_STATUS_COLORS,
   SupplyDeliveryRead,
@@ -45,7 +48,6 @@ import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryAp
 import { add, round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
-import { EllipsisVertical } from "lucide-react";
 
 interface SupplyDeliveryTableProps {
   deliveries: SupplyDeliveryRead[];
@@ -58,6 +60,8 @@ interface SupplyDeliveryTableProps {
   deliveryOrderStatus?: DeliveryOrderStatus;
   autoSelectOnMount?: boolean;
   isRequester?: boolean;
+  facilityId?: string;
+  linkToProduct?: boolean;
 }
 
 export function SupplyDeliveryTable({
@@ -71,6 +75,8 @@ export function SupplyDeliveryTable({
   deliveryOrderStatus,
   autoSelectOnMount = false,
   isRequester = false,
+  facilityId,
+  linkToProduct = false,
 }: SupplyDeliveryTableProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -143,6 +149,22 @@ export function SupplyDeliveryTable({
     selectedDeliveries.length,
   ]);
 
+  // Build a map of delivery id -> serial number for non-cancelled deliveries
+  const serialNumberMap = useMemo(() => {
+    const map = new Map<string, number>();
+    let serial = 1;
+    for (const delivery of deliveries) {
+      if (
+        ACTIVE_SUPPLY_DELIVERY_STATUSES.includes(
+          delivery.status as (typeof ACTIVE_SUPPLY_DELIVERY_STATUSES)[number],
+        )
+      ) {
+        map.set(delivery.id, serial++);
+      }
+    }
+    return map;
+  }, [deliveries]);
+
   return (
     <Table>
       <TableHeader>
@@ -160,6 +182,7 @@ export function SupplyDeliveryTable({
               <ShortcutBadge actionId="select-all" alwaysShow={false} />
             </TableHead>
           )}
+          <TableHead rowSpan={2}>{t("#")}</TableHead>
           <TableHead rowSpan={2}>{t("item")}</TableHead>
           <TableHead rowSpan={2}>{t("batch")}</TableHead>
           <TableHead rowSpan={2}>{t("requested_qty")}</TableHead>
@@ -219,16 +242,34 @@ export function SupplyDeliveryTable({
                 )}
               </TableCell>
             )}
+            <TableCell>{serialNumberMap.get(delivery.id)}</TableCell>
             <TableCell
               className={cn(onDeliveryClick && "cursor-pointer underline")}
               onClick={() => onDeliveryClick?.(delivery)}
             >
-              <div className="font-medium">
-                {internal
+              {(() => {
+                const productId = internal
+                  ? delivery.supplied_inventory_item?.product?.id
+                  : delivery.supplied_item?.id;
+                const productName = internal
                   ? delivery.supplied_inventory_item?.product?.product_knowledge
                       ?.name
-                  : delivery.supplied_item?.product_knowledge?.name}
-              </div>
+                  : delivery.supplied_item?.product_knowledge?.name;
+
+                if (linkToProduct && facilityId && productId) {
+                  return (
+                    <Link
+                      href={`/facility/${facilityId}/settings/product/${productId}`}
+                      className="font-medium text-primary-600 hover:underline"
+                      onClick={(e) => e.stopPropagation()}
+                      basePath="/"
+                    >
+                      {productName}
+                    </Link>
+                  );
+                }
+                return <div className="font-medium">{productName}</div>;
+              })()}
             </TableCell>
             <TableCell>
               {delivery.supplied_inventory_item?.product?.batch?.lot_number ||
