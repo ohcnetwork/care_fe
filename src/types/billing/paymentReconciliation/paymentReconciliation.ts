@@ -32,7 +32,7 @@ export enum PaymentReconciliationKind {
 
 export enum PaymentReconciliationIssuerType {
   patient = "patient",
-  insurance = "insurance",
+  insurer = "insurer",
 }
 
 export enum PaymentReconciliationOutcome {
@@ -98,6 +98,7 @@ export interface PaymentReconciliationCreate extends Omit<
   account: string;
   is_credit_note?: boolean;
   location?: string;
+  extensions?: Record<string, Record<string, unknown>>;
 }
 
 export type PaymentReconciliationUpdate = Omit<PaymentReconciliationBase, "id">;
@@ -109,6 +110,9 @@ export interface PaymentReconciliationRead extends PaymentReconciliationBase {
   location: LocationRead | null;
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
+  created_date: string;
+  modified_date: string;
+  extensions?: Record<string, Record<string, unknown>>;
 }
 
 export interface PaymentReconciliationCancel {

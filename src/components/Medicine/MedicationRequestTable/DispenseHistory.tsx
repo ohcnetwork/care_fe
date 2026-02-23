@@ -18,6 +18,8 @@ import Loading from "@/components/Common/Loading";
 import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { EmptyState } from "@/components/ui/empty-state";
 
+import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
+
 import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
@@ -156,9 +158,7 @@ export function DispenseHistory({
           </TableHeader>
           <TableBody className="bg-white">
             {medications.map((medication: MedicationDispenseRead) => {
-              const instruction = medication.dosage_instruction[0] ?? {};
-              const frequency = instruction?.timing?.code;
-              const dosage = instruction?.dose_and_rate?.dose_quantity;
+              const instruction = medication.dosage_instruction?.[0];
 
               return (
                 <TableRow
@@ -169,18 +169,10 @@ export function DispenseHistory({
                     {medication.item.product.product_knowledge.name}
                   </TableCell>
                   <TableCell className="text-gray-950">
-                    {dosage
-                      ? `${round(dosage.value)} ${dosage.unit.display}`
-                      : "-"}
+                    {formatDosage(instruction) || "-"}
                   </TableCell>
                   <TableCell className="text-gray-950">
-                    {instruction?.as_needed_boolean
-                      ? `${t("as_needed_prn")} ${
-                          instruction?.as_needed_for?.display
-                            ? `(${instruction.as_needed_for.display})`
-                            : ""
-                        }`
-                      : frequency?.display || "-"}
+                    {formatFrequency(instruction) || "-"}
                   </TableCell>
                   <TableCell className="text-gray-950 font-medium">
                     {medication.quantity ? round(medication.quantity) : "-"}
@@ -215,7 +207,7 @@ export function DispenseHistory({
                         hidden={!facilityId}
                       >
                         <Link
-                          href={`/facility/${facilityId}/locations/${medication.location.id}/medication_dispense/${dispenseOrderId ? `order/${dispenseOrderId}/${medication.status}?payment_status=${medication.charge_item?.paid_invoice?.status === InvoiceStatus.balanced ? "paid" : "unpaid"}` : ""}`}
+                          href={`/facility/${facilityId}/locations/${medication.location.id}/medication_dispense/${dispenseOrderId ? `order/${dispenseOrderId}/?status=${medication.status}&payment_status=${medication.charge_item?.paid_invoice?.status === InvoiceStatus.balanced ? "paid" : "unpaid"}` : ""}`}
                         >
                           {t("dispense")}
                         </Link>

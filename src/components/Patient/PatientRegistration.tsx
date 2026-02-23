@@ -72,12 +72,18 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
+interface QParams {
+  phone_number?: string;
+  flow?: "dispense";
+  createEncounter?: "true";
+}
+
 export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   useShortcutSubContext();
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
-  const [{ phone_number }] = useQueryParams();
+  const [{ phone_number, flow }] = useQueryParams<QParams>();
 
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
@@ -227,6 +233,10 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
           phone_number: resp.phone_number,
           year_of_birth: resp.year_of_birth,
           partial_id: resp?.id?.slice(0, 5),
+          ...(flow && { flow, createEncounter: "true" }),
+          ...(careConfig.openScheduleAfterPatientRegistration && {
+            open_schedule: "true",
+          }),
         },
       });
     },
@@ -345,6 +355,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
                 form={form}
                 facilityId={facilityId}
                 patientId={patientId}
+                submitForm={form.handleSubmit(onSubmit)}
               />
               <AccordionItem
                 value="patient-basics"
@@ -790,9 +801,7 @@ const AdditionalDetailsContent = ({
         name="pincode"
         render={({ field }) => (
           <FormItem>
-            <FormLabel aria-required={!quickRegistration}>
-              {t("pincode")}
-            </FormLabel>
+            <FormLabel>{t("pincode")}</FormLabel>
             <FormControl>
               <Input
                 {...field}
@@ -890,7 +899,7 @@ const AdditionalDetailsContent = ({
                     <DateTimeInput
                       id="death-datetime"
                       value={field.value ?? ""}
-                      onDateChange={field.onChange}
+                      onDateChange={(val) => field.onChange(val ?? null)}
                       max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
                     />
                   </FormControl>
@@ -1011,7 +1020,7 @@ const getFormSchema = (t: TFunction) => {
         : z.string().trim().nonempty(t("field_required")),
       permanent_address_same_as_address: z.boolean(),
       geo_organization: geoOrgValidator(t),
-      pincode: isQuick ? validators().pincode.optional() : validators().pincode,
+      pincode: validators().pincode.optional(),
 
       is_deceased: z.boolean(),
       deceased_datetime: tzAwareDateTime.optional().nullable(),

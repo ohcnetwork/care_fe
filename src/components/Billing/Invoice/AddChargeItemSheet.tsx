@@ -80,7 +80,7 @@ export default function AddChargeItemSheet({
 
   const handleChargeItemsAdded = () => {
     queryClient.invalidateQueries({
-      queryKey: ["charge-items", qParams],
+      queryKey: ["chargeItems", qParams],
     });
   };
 
@@ -91,7 +91,7 @@ export default function AddChargeItemSheet({
   };
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["charge-items", qParams],
+    queryKey: ["chargeItems", qParams],
     queryFn: query.debounced(chargeItemApi.listChargeItem, {
       pathParams: { facilityId },
       queryParams: {

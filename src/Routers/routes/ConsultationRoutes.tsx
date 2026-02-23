@@ -18,14 +18,6 @@ const ExcalidrawEditor = lazy(
 );
 
 const consultationRoutes: AppRoutes = {
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/prescriptions/print":
-    ({ facilityId, encounterId, patientId }) => (
-      <PrintPrescription
-        facilityId={facilityId}
-        encounterId={encounterId}
-        patientId={patientId}
-      />
-    ),
   "/facility/:facilityId/patient/:patientId/prescription/:prescriptionId/print":
     ({ facilityId, patientId, prescriptionId }) => (
       <PrintPrescription

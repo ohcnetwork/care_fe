@@ -30,23 +30,61 @@ function PDFRenderer({ fileUrl }: { fileUrl: string }) {
   const { t } = useTranslation();
 
   return (
-    <Document
-      file={fileUrl}
-      onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-      error={<div className="text-red-500">{t("error_loading_pdf")}</div>}
-      loading={<div className="text-gray-500">{t("loading")}</div>}
-    >
-      <div className="flex flex-col justify-center w-full">
-        {Array.from(new Array(numPages), (_, index) => (
-          <Page
-            key={`page_${index + 1}`}
-            pageNumber={index + 1}
-            width={Math.min(window.innerWidth * 0.9, 600)}
-            scale={1.2}
-          />
-        ))}
-      </div>
-    </Document>
+    <div className="break-before-page">
+      <Document
+        file={fileUrl}
+        onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+        error={<div className="text-red-500">{t("error_loading_pdf")}</div>}
+        loading={<div className="text-gray-500">{t("loading")}</div>}
+      >
+        <div className="flex flex-col justify-center w-full">
+          {Array.from(new Array(numPages), (_, index) => (
+            <Page
+              key={`page_${index + 1}`}
+              pageNumber={index + 1}
+              width={Math.min(window.innerWidth * 0.9, 600)}
+              scale={1.2}
+            />
+          ))}
+        </div>
+      </Document>
+    </div>
+  );
+}
+
+function ImageRenderer({
+  fileUrl,
+  fileName,
+}: {
+  fileUrl: string;
+  fileName?: string;
+}) {
+  const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  return (
+    <div className="break-before-page flex flex-col justify-center w-full">
+      {isLoading && (
+        <div className="text-gray-500 text-center py-4">{t("loading")}</div>
+      )}
+      {hasError && (
+        <div className="text-red-500 text-center py-4">
+          {t("error_loading_image")}
+        </div>
+      )}
+      <img
+        src={fileUrl}
+        alt={fileName || t("diagnostic_report_image")}
+        className={`max-w-full h-auto mx-auto ${isLoading || hasError ? "hidden" : ""}`}
+        style={{ maxWidth: "600px" }}
+        onLoad={() => setIsLoading(false)}
+        onError={() => {
+          setIsLoading(false);
+          setHasError(true);
+        }}
+      />
+    </div>
   );
 }
 
@@ -148,16 +186,30 @@ export default function DiagnosticReportPrint({
     );
   }
 
-  // Filter files - only include PDFs with URLs
+  // Filter files - separate PDFs and images with URLs
   const pdfFiles = files.results.filter((file) => {
-    if (!file.id || !fileUrls[file.id] || !file.extension) return false;
+    if (!file.id || !fileUrls[file.id] || !file.extension || file.is_archived)
+      return false;
     return file.extension.toLowerCase().endsWith("pdf");
+  });
+
+  const imageFiles = files.results.filter((file) => {
+    if (!file.id || !fileUrls[file.id] || !file.extension || file.is_archived)
+      return false;
+    const ext = file.extension.toLowerCase();
+    return (
+      ext.endsWith("jpg") ||
+      ext.endsWith("jpeg") ||
+      ext.endsWith("png") ||
+      ext.endsWith("gif") ||
+      ext.endsWith("webp")
+    );
   });
 
   return (
     <div className="flex justify-center items-center">
       <PrintPreview
-        title={`${t("diagnostic_report")} - ${report.code?.display || t("diagnostic_report")}`}
+        title={`${t("diagnostic_report", { count: 1 })} - ${report.code?.display || report.service_request?.title || t("diagnostic_report", { count: 1 })}`}
       >
         <div className="max-w-4xl mx-auto">
           {/* Header with Facility Name and Logo */}
@@ -185,7 +237,8 @@ export default function DiagnosticReportPrint({
           </div>
 
           <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold my-2">
-            {t("diagnostic_report")}
+            {report.service_request?.title ||
+              t("diagnostic_report", { count: 1 })}
           </h2>
 
           {/* Patient Details */}
@@ -252,6 +305,15 @@ export default function DiagnosticReportPrint({
                 {formatName(report.requester)}
               </span>
             </div>
+            {report.encounter.current_location && (
+              <div className="grid grid-cols-[6rem_auto_1fr] items-center">
+                <span className="text-gray-600">{t("location")}</span>
+                <span className="text-gray-600">:</span>
+                <span className="font-semibold ml-2">
+                  {report.encounter.current_location.name}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="mt-8 space-y-8">
@@ -297,6 +359,20 @@ export default function DiagnosticReportPrint({
                     {pdfFiles.map((file) => (
                       <div key={`content-${file.id}`}>
                         <PDFRenderer fileUrl={fileUrls[file.id!]} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {imageFiles.length > 0 && (
+                <div className="mt-8">
+                  <div className="space-y-12">
+                    {imageFiles.map((file) => (
+                      <div key={`content-${file.id}`}>
+                        <ImageRenderer
+                          fileUrl={fileUrls[file.id!]}
+                          fileName={file.name}
+                        />
                       </div>
                     ))}
                   </div>

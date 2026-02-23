@@ -6,7 +6,7 @@ import {
   ExternalLink,
   FileCheck2,
 } from "lucide-react";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -292,18 +292,15 @@ export function DiagnosticReportReview({
 
                 {fullReport?.status === DiagnosticReportStatus.final && (
                   <div className="flex justify-end">
-                    <Button
-                      variant="primary"
-                      className="gap-2"
-                      onClick={() =>
-                        navigate(
-                          `/facility/${facilityId}/patient/${patientId}/diagnostic_reports/${fullReport?.id}`,
-                        )
-                      }
+                    <Link
+                      basePath="/"
+                      href={`/facility/${facilityId}/patient/${patientId}/diagnostic_reports/${fullReport?.id}`}
                     >
-                      <ExternalLink className="h-4 w-4" />
-                      {t("view_report")}
-                    </Button>
+                      <Button variant="primary" className="gap-2">
+                        <ExternalLink className="h-4 w-4" />
+                        {t("view_report")}
+                      </Button>
+                    </Link>
                   </div>
                 )}
 

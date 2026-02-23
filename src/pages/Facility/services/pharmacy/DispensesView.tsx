@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeftIcon, PrinterIcon } from "lucide-react";
+import { ArrowLeftIcon, PrinterIcon, RotateCcw } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -12,12 +12,15 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
-import { DISPENSE_ORDER_STATUS_STYLES } from "@/types/emr/dispenseOrder/dispenseOrder";
+import {
+  DISPENSE_ORDER_STATUS_STYLES,
+  DispenseOrderStatus,
+} from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import { MedicationDispenseStatus } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import query from "@/Utils/request/query";
-import { formatDateTime } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import { PrescriptionSummary } from "@/types/emr/prescription/prescription";
@@ -25,6 +28,7 @@ import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import { PaginatedResponse } from "@/Utils/request/types";
 import DispensedMedicationList from "./DispensedMedicationList";
+import { MedicationReturnSheet } from "./MedicationReturnSheet";
 
 interface Props {
   facilityId: string;
@@ -146,6 +150,14 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
               <p className="text-sm text-gray-600">{dispenseOrder.note}</p>
             )}
             <div className="flex items-center gap-4 text-sm text-gray-700">
+              {dispenseOrder.created_by && (
+                <div>
+                  <span className="text-gray-500">{t("created_by")}:</span>{" "}
+                  <span className="font-medium">
+                    {formatName(dispenseOrder.created_by)}
+                  </span>
+                </div>
+              )}
               <div>
                 <span className="text-gray-500">{t("created_at")}:</span>{" "}
                 <span className="font-medium">
@@ -165,6 +177,28 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
               {t("status")}:{" "}
               {t(`dispense_order_status__${dispenseOrder.status}`)}
             </Badge>
+            {dispenseOrder.status === DispenseOrderStatus.completed && (
+              <MedicationReturnSheet
+                facilityId={facilityId}
+                locationId={locationId}
+                patient={dispenseOrder.patient}
+                onSuccess={(deliveryOrder) => {
+                  // Navigate to the medication return detail page
+                  navigate(
+                    `/facility/${facilityId}/locations/${locationId}/medication_return/order/${deliveryOrder.id}/?dispenseOrderIds=${dispenseOrderId}`,
+                  );
+                }}
+                trigger={
+                  <Button
+                    variant="outline"
+                    className="border-gray-400 font-semibold"
+                  >
+                    <RotateCcw className="size-4" />
+                    {t("medication_return")}
+                  </Button>
+                }
+              />
+            )}
             <Button
               variant="outline"
               className="border-gray-400 font-semibold"

@@ -1,692 +1,37 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { formatDate } from "date-fns";
-import { ArrowLeft, Eye, Info, MoreVertical, Shuffle } from "lucide-react";
-import { navigate, useQueryParams } from "raviger";
-import React, { useEffect, useMemo, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { ArrowLeft } from "lucide-react";
+import { navigate } from "raviger";
+import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { toast } from "sonner";
-import { z } from "zod";
 
-import { cn } from "@/lib/utils";
-
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { MonetaryDisplay } from "@/components/ui/monetary-display";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { Switch } from "@/components/ui/switch";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
-import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
-
-import ComboboxQuantityInput from "@/components/Common/ComboboxQuantityInput";
-import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
-import Page from "@/components/Common/Page";
-import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { SubstitutionSheet } from "@/components/Medication/SubstitutionSheet";
-import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
-import { formatDoseRange, formatTotalUnits } from "@/components/Medicine/utils";
-import { reverseFrequencyOption } from "@/components/Questionnaire/QuestionTypes/MedicationRequestQuestion";
-import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
-
-import useFilters from "@/hooks/useFilters";
 
 import BackButton from "@/components/Common/BackButton";
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
+import Page from "@/components/Common/Page";
+import { SubstitutionSheet } from "@/components/Medication/SubstitutionSheet";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
+
+import NoActiveAccountWarningDialog from "@/pages/Facility/billing/account/components/NoActiveAccountWarningDialog";
+import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
+import { AddMedicationSheet } from "@/pages/Facility/services/pharmacy/components/AddMedicationSheet";
+import { DispensedItemsSheet } from "@/pages/Facility/services/pharmacy/components/DispensedItemsSheet";
+import { MedicationBillTable } from "@/pages/Facility/services/pharmacy/components/MedicationBillTable";
+import { useMedicationBill } from "@/pages/Facility/services/pharmacy/hooks/useMedicationBill";
+
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
-import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import batchApi from "@/types/base/batch/batchApi";
-import { Code } from "@/types/base/code/code";
-import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
-  AccountBillingStatus,
-  AccountStatus,
-} from "@/types/billing/account/Account";
-import accountApi from "@/types/billing/account/accountApi";
-import {
-  ChargeItemBatchResponse,
-  ChargeItemRead,
-  extractChargeItemsFromBatchResponse,
-} from "@/types/billing/chargeItem/chargeItem";
-import {
-  DispenseOrderBatchResponse,
-  extractDispenseOrderFromBatchResponse,
-} from "@/types/emr/dispenseOrder/dispenseOrder";
-import {
-  MEDICATION_DISPENSE_STATUS_COLORS,
-  MedicationDispenseCategory,
-  MedicationDispenseCreate,
-  MedicationDispenseRead,
-  MedicationDispenseStatus,
-  SubstitutionReason,
-  SubstitutionType,
-  getSubstitutionReasonDescription,
-  getSubstitutionReasonDisplay,
-  getSubstitutionTypeDescription,
-  getSubstitutionTypeDisplay,
-} from "@/types/emr/medicationDispense/medicationDispense";
-import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
-import {
-  DoseRange,
-  MEDICATION_REQUEST_TIMING_OPTIONS,
+  computeMedicationDispenseQuantity,
   MedicationRequestDispenseStatus,
   MedicationRequestDosageInstruction,
   MedicationRequestRead,
-  UCUM_TIME_UNITS,
 } from "@/types/emr/medicationRequest/medicationRequest";
-import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
-import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
-import { InventoryRead } from "@/types/inventory/product/inventory";
-import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
-import {
-  add,
-  divide,
-  isGreaterThan,
-  isLessThanOrEqual,
-  isZero,
-  multiply,
-  round,
-  zodDecimal,
-} from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import Decimal from "decimal.js";
 
 interface Props {
   patientId: string;
   prescriptionId: string;
 }
-
-function convertDurationToDays(value: string, unit: string) {
-  switch (unit) {
-    case "h":
-      return divide(value, 24).round();
-    case "d":
-      return new Decimal(value);
-    case "wk":
-      return multiply(value, 7);
-    case "mo":
-      return multiply(value, 30); // approximating month as 30 days
-    case "a":
-      return multiply(value, 365); // approximating year as 365 days
-    default:
-      return new Decimal(value);
-  }
-}
-
-const formSchema = z.object({
-  items: z.array(
-    z.object({
-      reference_id: z.string().uuid(),
-      medication: z.any(),
-      productKnowledge: z.any(),
-      isSelected: z.boolean(),
-      daysSupply: zodDecimal({ min: 1 }),
-      fully_dispensed: z.boolean(),
-      dosageInstructions: z.any().optional(),
-      lots: z
-        .array(
-          z.object({
-            selectedInventoryId: z.string().uuid(),
-            quantity: zodDecimal({ min: 0 }),
-          }),
-        )
-        .min(1),
-      substitution: z
-        .object({
-          substitutedProductKnowledge: z.any(), // ProductKnowledgeBase of the substitute
-          type: z.nativeEnum(SubstitutionType),
-          reason: z.nativeEnum(SubstitutionReason),
-        })
-        .optional(),
-      prescriptionId: z.string().optional(), // Add prescription group identifier
-    }),
-  ),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
-interface AddMedicationSheetProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  selectedProduct?: ProductKnowledgeBase;
-  onAdd: (
-    product: ProductKnowledgeBase,
-    dosageInstructions: MedicationRequestDosageInstruction[],
-  ) => void;
-  existingDosageInstructions?: MedicationRequestDosageInstruction;
-  isEditing: boolean;
-  onChange?: (dosageInstructions: MedicationRequestDosageInstruction[]) => void;
-}
-
-const AddMedicationSheet = ({
-  open,
-  onOpenChange,
-  selectedProduct,
-  onAdd,
-  existingDosageInstructions,
-  isEditing,
-  onChange,
-}: AddMedicationSheetProps) => {
-  const { t } = useTranslation();
-  const [localDosageInstruction, setLocalDosageInstruction] =
-    useState<MedicationRequestDosageInstruction>({
-      dose_and_rate: undefined,
-      timing: undefined,
-      as_needed_boolean: false,
-      route: undefined,
-      site: undefined,
-      method: undefined,
-      additional_instruction: undefined,
-      as_needed_for: undefined,
-    });
-  const [showDosageDialog, setShowDosageDialog] = useState(false);
-
-  // Update local state when the sheet opens or when editing a different item
-  useEffect(() => {
-    if (open && existingDosageInstructions) {
-      setLocalDosageInstruction(existingDosageInstructions);
-    } else if (open) {
-      resetForm();
-      if (selectedProduct?.base_unit) {
-        handleUpdateDosageInstruction({
-          dose_and_rate: {
-            type: "ordered",
-            dose_quantity: {
-              value: "0",
-              unit: selectedProduct.base_unit,
-            },
-          },
-        });
-      }
-    } else {
-      resetForm();
-    }
-  }, [open, existingDosageInstructions, selectedProduct]);
-
-  const handleUpdateDosageInstruction = (
-    updates: Partial<MedicationRequestDosageInstruction>,
-  ) => {
-    setLocalDosageInstruction((prev) => ({
-      ...prev,
-      ...updates,
-    }));
-  };
-
-  const resetForm = () => {
-    setLocalDosageInstruction({
-      dose_and_rate: undefined,
-      timing: undefined,
-      as_needed_boolean: false,
-      route: undefined,
-      site: undefined,
-      method: undefined,
-      additional_instruction: undefined,
-      as_needed_for: undefined,
-    });
-    setShowDosageDialog(false);
-  };
-
-  const handleSheetOpenChange = (open: boolean) => {
-    if (!open) {
-      resetForm();
-    }
-    onOpenChange(open);
-  };
-
-  const handleSave = () => {
-    if (isEditing) {
-      onChange?.([localDosageInstruction]);
-    } else {
-      if (selectedProduct) {
-        onAdd(selectedProduct, [localDosageInstruction]);
-      }
-    }
-    onOpenChange(false);
-    resetForm();
-  };
-
-  // Helper functions for additional instructions
-  const currentInstructions =
-    localDosageInstruction?.additional_instruction || [];
-
-  const addInstruction = (instruction: Code) => {
-    const currentInstructions =
-      localDosageInstruction?.additional_instruction || [];
-    if (!currentInstructions.some((inst) => inst.code === instruction.code)) {
-      handleUpdateDosageInstruction({
-        additional_instruction: [...currentInstructions, instruction],
-      });
-    }
-  };
-
-  const removeInstruction = (code: string) => {
-    const currentInstructions =
-      localDosageInstruction?.additional_instruction || [];
-    handleUpdateDosageInstruction({
-      additional_instruction: currentInstructions.filter(
-        (inst) => inst.code !== code,
-      ),
-    });
-  };
-
-  return (
-    <Sheet open={open} onOpenChange={handleSheetOpenChange}>
-      <SheetContent
-        side="bottom"
-        className="max-h-[90vh] min-h-[50vh] px-4 pt-2 pb-0 rounded-t-lg overflow-y-auto pb-safe"
-      >
-        <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto bg-gray-300 mt-2" />
-        <div className="mt-6 h-full flex flex-col">
-          <div className="flex items-center justify-between mb-6 px-20">
-            <SheetHeader>
-              <SheetTitle>
-                {isEditing
-                  ? t("edit_dosage_instructions")
-                  : t("add_medication")}
-              </SheetTitle>
-            </SheetHeader>
-          </div>
-          <div className="flex-1 px-0 md:px-20">
-            <div className="space-y-6">
-              {selectedProduct && (
-                <>
-                  <div>
-                    <Label className="text-sm text-gray-500 mb-1.5 block">
-                      {t("selected")} {t("product")}
-                    </Label>
-                    <div className="font-medium text-lg">
-                      {selectedProduct.name}
-                    </div>
-                  </div>
-                  <div className="space-y-4 pb-4">
-                    {/* Dosage and Frequency Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Dosage */}
-                      <div>
-                        <Label className="mb-1.5 block text-sm">
-                          {t("dosage")}
-                          <span className="text-red-500 ml-0.5">*</span>
-                        </Label>
-                        <div>
-                          {localDosageInstruction?.dose_and_rate?.dose_range ? (
-                            <Input
-                              readOnly
-                              value={formatDoseRange(
-                                localDosageInstruction.dose_and_rate.dose_range,
-                              )}
-                              onClick={() => setShowDosageDialog(true)}
-                              className={cn("h-9 text-sm cursor-pointer mb-3")}
-                            />
-                          ) : (
-                            <>
-                              <div className="flex gap-2">
-                                <div className="flex-1">
-                                  <ComboboxQuantityInput
-                                    quantity={
-                                      localDosageInstruction?.dose_and_rate
-                                        ?.dose_quantity
-                                    }
-                                    onChange={(value) => {
-                                      if (value) {
-                                        handleUpdateDosageInstruction({
-                                          dose_and_rate: {
-                                            type: "ordered",
-                                            dose_quantity: value,
-                                            dose_range: undefined,
-                                          },
-                                        });
-                                      } else {
-                                        handleUpdateDosageInstruction({
-                                          dose_and_rate: undefined,
-                                        });
-                                      }
-                                    }}
-                                  />
-                                </div>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="size-9 rounded-full hover:bg-transparent"
-                                  onClick={() => setShowDosageDialog(true)}
-                                >
-                                  +
-                                </Button>
-                              </div>
-                            </>
-                          )}
-                        </div>
-
-                        {localDosageInstruction?.dose_and_rate?.dose_range && (
-                          <Popover
-                            open={showDosageDialog}
-                            onOpenChange={setShowDosageDialog}
-                          >
-                            <PopoverTrigger asChild>
-                              <div className="w-full" />
-                            </PopoverTrigger>
-                            <PopoverContent className="w-55 p-4" align="start">
-                              <DosageDialog
-                                dosageRange={
-                                  localDosageInstruction.dose_and_rate
-                                    .dose_range
-                                }
-                                onChange={(value) => {
-                                  handleUpdateDosageInstruction({
-                                    dose_and_rate: value,
-                                  });
-                                  setShowDosageDialog(false);
-                                }}
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        )}
-                      </div>
-
-                      {/* Frequency */}
-                      <div>
-                        <Label className="mb-1.5 block text-sm">
-                          {t("frequency")}
-                          <span className="text-red-500 ml-0.5">*</span>
-                        </Label>
-                        <Select
-                          value={
-                            localDosageInstruction?.as_needed_boolean
-                              ? "PRN"
-                              : reverseFrequencyOption(
-                                  localDosageInstruction?.timing,
-                                )
-                          }
-                          onValueChange={(value) => {
-                            if (value === "PRN") {
-                              handleUpdateDosageInstruction({
-                                as_needed_boolean: true,
-                                timing: undefined,
-                              });
-                            } else {
-                              const timingOption =
-                                MEDICATION_REQUEST_TIMING_OPTIONS[
-                                  value as keyof typeof MEDICATION_REQUEST_TIMING_OPTIONS
-                                ];
-                              handleUpdateDosageInstruction({
-                                as_needed_boolean: false,
-                                timing: timingOption.timing,
-                              });
-                            }
-                          }}
-                        >
-                          <SelectTrigger className={cn("h-9 text-sm")}>
-                            <SelectValue placeholder={t("select_frequency")} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="PRN">
-                              {t("as_needed_prn")}
-                            </SelectItem>
-                            {Object.entries(
-                              MEDICATION_REQUEST_TIMING_OPTIONS,
-                            ).map(([key, option]) => (
-                              <SelectItem key={key} value={key}>
-                                {option.display}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    {/* Duration and Method Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Duration */}
-                      <div>
-                        <Label className="mb-1.5 block text-sm">
-                          {t("duration")}
-                        </Label>
-                        <div
-                          className={cn(
-                            "flex gap-2",
-                            localDosageInstruction?.as_needed_boolean &&
-                              "opacity-50 bg-gray-100 rounded-md",
-                          )}
-                        >
-                          {localDosageInstruction?.timing && (
-                            <Input
-                              type="number"
-                              min={0}
-                              value={
-                                isZero(
-                                  localDosageInstruction.timing.repeat
-                                    .bounds_duration.value,
-                                )
-                                  ? ""
-                                  : localDosageInstruction.timing.repeat
-                                      .bounds_duration?.value
-                              }
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                if (!localDosageInstruction.timing) return;
-                                handleUpdateDosageInstruction({
-                                  timing: {
-                                    ...localDosageInstruction.timing,
-                                    repeat: {
-                                      ...localDosageInstruction.timing.repeat,
-                                      bounds_duration: {
-                                        value,
-                                        unit: localDosageInstruction.timing
-                                          .repeat.bounds_duration.unit,
-                                      },
-                                    },
-                                  },
-                                });
-                              }}
-                              className="h-9 text-sm"
-                            />
-                          )}
-                          <Select
-                            value={
-                              localDosageInstruction?.timing?.repeat
-                                ?.bounds_duration?.unit ?? UCUM_TIME_UNITS[0]
-                            }
-                            onValueChange={(
-                              unit: (typeof UCUM_TIME_UNITS)[number],
-                            ) => {
-                              if (localDosageInstruction?.timing?.repeat) {
-                                const value =
-                                  localDosageInstruction?.timing?.repeat
-                                    ?.bounds_duration?.value ?? 0;
-                                handleUpdateDosageInstruction({
-                                  timing: {
-                                    ...localDosageInstruction.timing,
-                                    repeat: {
-                                      ...localDosageInstruction.timing.repeat,
-                                      bounds_duration: { value, unit },
-                                    },
-                                  },
-                                });
-                              }
-                            }}
-                          >
-                            <SelectTrigger
-                              className={cn(
-                                "h-9 text-sm w-full",
-                                localDosageInstruction?.as_needed_boolean &&
-                                  "cursor-not-allowed bg-gray-50",
-                              )}
-                            >
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {UCUM_TIME_UNITS.map((unit) => (
-                                <SelectItem key={unit} value={unit}>
-                                  {unit}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
-                      {/* Method */}
-                      <div>
-                        <Label className="mb-1.5 block text-sm">
-                          {t("method")}
-                        </Label>
-                        <ValueSetSelect
-                          system="system-administration-method"
-                          value={localDosageInstruction?.method}
-                          onSelect={(method) => {
-                            handleUpdateDosageInstruction({ method });
-                          }}
-                          placeholder={t("select_method")}
-                          count={20}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Instructions */}
-                    <div>
-                      <Label className="mb-1.5 block text-sm">
-                        {t("instructions")}
-                      </Label>
-                      {localDosageInstruction?.as_needed_boolean ? (
-                        <div className="space-y-2">
-                          <ValueSetSelect
-                            system="system-as-needed-reason"
-                            value={
-                              localDosageInstruction?.as_needed_for || null
-                            }
-                            placeholder={t("select_prn_reason")}
-                            onSelect={(value) => {
-                              handleUpdateDosageInstruction({
-                                as_needed_for: value || undefined,
-                              });
-                            }}
-                          />
-
-                          <InstructionsPopover
-                            currentInstructions={currentInstructions}
-                            removeInstruction={removeInstruction}
-                            addInstruction={addInstruction}
-                            isReadOnly={false}
-                            disabled={false}
-                          />
-                        </div>
-                      ) : (
-                        <InstructionsPopover
-                          currentInstructions={currentInstructions}
-                          removeInstruction={removeInstruction}
-                          addInstruction={addInstruction}
-                          isReadOnly={false}
-                          disabled={false}
-                        />
-                      )}
-                    </div>
-
-                    {/* Route and Site Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Route */}
-                      <div>
-                        <Label className="mb-1.5 block text-sm">
-                          {t("route")}
-                        </Label>
-                        <ValueSetSelect
-                          system="system-route"
-                          value={localDosageInstruction?.route}
-                          onSelect={(route) => {
-                            handleUpdateDosageInstruction({ route });
-                          }}
-                          placeholder={t("select_route")}
-                        />
-                      </div>
-
-                      {/* Site */}
-                      <div>
-                        <Label className="mb-1.5 block text-sm">
-                          {t("site")}
-                        </Label>
-                        <ValueSetSelect
-                          system="system-body-site"
-                          value={localDosageInstruction?.site}
-                          onSelect={(site) => {
-                            handleUpdateDosageInstruction({ site });
-                          }}
-                          placeholder={t("select_site")}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-          <div className="sticky bottom-0 py-4 bg-white border-t flex justify-end px-20">
-            <Button
-              className="mr-1"
-              disabled={
-                !selectedProduct ||
-                !localDosageInstruction?.dose_and_rate ||
-                (!localDosageInstruction.as_needed_boolean &&
-                  !localDosageInstruction.timing)
-              }
-              onClick={handleSave}
-            >
-              {isEditing ? t("save") : t("add_medication")}
-            </Button>
-          </div>
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
-};
 
 export default function MedicationBillForm({
   patientId,
@@ -694,16 +39,8 @@ export default function MedicationBillForm({
 }: Props) {
   useShortcutSubContext("facility:general");
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const { facilityId } = useCurrentFacility();
-  const { locationId } = useCurrentLocation();
-  const [{ encounterId }] = useQueryParams();
-  const [productKnowledgeInventoriesMap, setProductKnowledgeInventoriesMap] =
-    useState<Record<string, InventoryRead[] | undefined>>({});
-  const [isInvoiceSheetOpen, setIsInvoiceSheetOpen] = useState(false);
-  const [extractedChargeItems, setExtractedChargeItems] = useState<
-    ChargeItemRead[]
-  >([]);
+
+  // UI state for sheets and dialogs
   const [selectedProduct, setSelectedProduct] = useState<
     ProductKnowledgeBase | undefined
   >();
@@ -716,6 +53,11 @@ export default function MedicationBillForm({
   >(null);
   const [originalProductForSubstitution, setOriginalProductForSubstitution] =
     useState<ProductKnowledgeBase | undefined>();
+  const [preSelectedSubstituteProduct, setPreSelectedSubstituteProduct] =
+    useState<ProductKnowledgeBase | undefined>();
+  const [originalMedicationName, setOriginalMedicationName] = useState<
+    string | undefined
+  >();
   const [viewingDispensedMedicationId, setViewingDispensedMedicationId] =
     useState<string | null>(null);
   const [medicationToMarkComplete, setMedicationToMarkComplete] = useState<{
@@ -728,538 +70,49 @@ export default function MedicationBillForm({
     index: number;
     isAdded: boolean;
   } | null>(null);
-  const [prescriptionCompletionMap, setPrescriptionCompletionMap] = useState<
-    Record<string, boolean>
-  >({});
-  const [alternateIdentifier, _setAlternateIdentifier] = useState<string>(
-    `${patientId}-${new Date().toISOString().replace(/[:.]/g, "-")}`,
-  );
-  const [dispenseOrderId, setDispenseOrderId] = useState<string | null>(null);
 
-  const { mutate: updateMedicationRequest } = useMutation({
-    mutationFn: (medication: MedicationRequestRead) => {
-      return mutate(medicationRequestApi.update, {
-        pathParams: { patientId, id: medication.id },
-      })(medication);
-    },
-    onSuccess: () => {
-      toast.success(t("medication_request_status_updated_successfully"));
-    },
-    onError: () => {
-      toast.error(t("something_went_wrong"));
-    },
-  });
-
-  const tableHeaderClass =
-    "px-4 py-3 border-r font-medium border-y-1 border-r-0 border-gray-200 rounded-b-none border-b-0";
-  const tableCellClass = "px-4 py-4 border-r";
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      items: [],
-    },
-  });
-
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "items",
-  });
-
-  const { data: account } = useQuery({
-    queryKey: ["accounts", patientId],
-    queryFn: query(accountApi.listAccount, {
-      pathParams: { facilityId },
-      queryParams: {
-        patient: patientId,
-        limit: 1,
-        offset: 0,
-        status: AccountStatus.active,
-        billing_status: AccountBillingStatus.open,
-      },
-    }),
-  });
-
-  const { data: prescription, isLoading } = useQuery({
-    queryKey: ["prescription", patientId, prescriptionId],
-    queryFn: async ({ signal }) => {
-      const prescriptionResponse = await query(prescriptionApi.get, {
-        pathParams: { patientId, id: prescriptionId },
-      })({ signal });
-
-      const productKnowledgeIds = prescriptionResponse.medications
-        .filter((medication) => medication.requested_product)
-        .reduce(
-          (acc, medication) => ({
-            ...acc,
-            [medication.requested_product!.id]: undefined,
-          }),
-          {},
+  // Use the unified hook
+  const {
+    form,
+    fields,
+    append,
+    remove,
+    groupedMedications,
+    productKnowledgeInventoriesMap,
+    setProductKnowledgeInventoriesMap,
+    prescription,
+    grandTotal,
+    isLoading,
+    isPending,
+    isCreatingInvoice,
+    prescriptionCompletionMap,
+    setPrescriptionCompletionMap,
+    handleDispense,
+    handleRemoveMedication,
+    calculatePrices,
+    updateMedicationRequest,
+    facilityId,
+    locationId,
+  } = useMedicationBill({
+    patientId,
+    prescriptionId,
+    onDispenseSuccess: (dispenseOrderId) => {
+      if (dispenseOrderId) {
+        navigate(
+          `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}`,
         );
-
-      setProductKnowledgeInventoriesMap((prev) => ({
-        ...productKnowledgeIds,
-        ...prev,
-      }));
-
-      return prescriptionResponse;
-    },
-    enabled: !!prescriptionId,
-  });
-
-  useEffect(() => {
-    const fetchMissingInventories = async () => {
-      for (const [productKnowledgeId, inventories] of Object.entries(
-        productKnowledgeInventoriesMap,
-      )) {
-        if (inventories) continue;
-
-        const inventoriesResponse = await query(inventoryApi.list, {
-          pathParams: { facilityId, locationId },
-          queryParams: {
-            limit: 100,
-            product_knowledge: productKnowledgeId,
-            net_content_gt: 0,
-            include_children: true,
-          },
-        })({ signal: new AbortController().signal });
-
-        setProductKnowledgeInventoriesMap((prev) => ({
-          ...prev,
-          [productKnowledgeId]: inventoriesResponse.results || [],
-        }));
-      }
-    };
-
-    fetchMissingInventories();
-  }, [productKnowledgeInventoriesMap, facilityId, locationId]);
-
-  const medications = useMemo(
-    () =>
-      prescription?.medications.filter((med) => med.requested_product) || [],
-    [prescription?.medications],
-  );
-
-  useEffect(() => {
-    form.reset({ items: [] }); // Reset form with empty items array
-
-    // Initialize prescription completion map with default checked state (always checked for single prescription)
-    if (prescriptionId) {
-      setPrescriptionCompletionMap({ [prescriptionId]: true });
-    }
-
-    // Process medications from the prescription
-    medications.forEach((medication) => {
-      append({
-        reference_id: crypto.randomUUID(),
-        productKnowledge: medication.requested_product,
-        medication,
-        isSelected: true,
-        daysSupply: round(
-          convertDurationToDays(
-            medication.dosage_instruction[0]?.timing?.repeat?.bounds_duration
-              ?.value || "0",
-            medication.dosage_instruction[0]?.timing?.repeat?.bounds_duration
-              ?.unit || "",
-          ),
-        ),
-        fully_dispensed: true,
-        dosageInstructions: medication.dosage_instruction,
-        lots: [
-          {
-            selectedInventoryId:
-              (medication.inventory_items_internal?.[0]?.id as string) || "",
-            quantity: computeInitialQuantity(medication),
-          },
-        ],
-        prescriptionId,
-      });
-    });
-  }, [medications.length, append, form, prescriptionId]);
-
-  function computeInitialQuantity(medication: MedicationRequestRead) {
-    const instruction = medication.dosage_instruction[0];
-    if (!instruction) {
-      return "0";
-    }
-
-    if (instruction.as_needed_boolean) {
-      return "0";
-    }
-
-    const doseValue = instruction.dose_and_rate?.dose_quantity?.value;
-    if (!doseValue) {
-      return "0";
-    }
-
-    const repeat = instruction.timing?.repeat;
-    if (!repeat?.bounds_duration || !repeat.period_unit) {
-      return doseValue;
-    }
-
-    const convertToHours = (value: string, unit: string) => {
-      switch (unit) {
-        case "h":
-          return new Decimal(value);
-        case "d":
-          return multiply(value, 24);
-        case "wk":
-          return multiply(value, 24 * 7);
-        case "mo":
-          return multiply(value, 24 * 30);
-        case "a":
-          return multiply(value, 24 * 365);
-        default:
-          return 0;
-      }
-    };
-
-    const {
-      frequency = 1,
-      period = "1",
-      period_unit,
-      bounds_duration,
-    } = repeat;
-
-    const totalDurationInHours = convertToHours(
-      bounds_duration.value,
-      bounds_duration.unit,
-    );
-    const periodInHours = convertToHours(period, period_unit);
-
-    if (periodInHours === 0) {
-      return doseValue;
-    }
-
-    const doseIntervalInHours = divide(periodInHours, frequency);
-
-    if (isZero(doseIntervalInHours)) {
-      return doseValue;
-    }
-
-    const numberOfDoses = divide(
-      totalDurationInHours,
-      doseIntervalInHours,
-    ).ceil();
-
-    if (instruction.dose_and_rate?.dose_range) {
-      const lowDose = instruction.dose_and_rate.dose_range.low.value || "0";
-      const highDose = instruction.dose_and_rate.dose_range.high.value || "0";
-      const avgDose = divide(add(lowDose, highDose), 2);
-      return round(multiply(avgDose, numberOfDoses));
-    }
-
-    return round(multiply(doseValue, numberOfDoses));
-  }
-
-  const { mutate: dispense, isPending } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest),
-    onSuccess: (response: any) => {
-      toast.success(t("medications_billed_and_prescriptions_completed"));
-      queryClient.invalidateQueries({
-        queryKey: ["prescription", patientId, prescriptionId],
-      });
-
-      let dispenseOrderId: string | null = null;
-
-      const dispenseOrder = extractDispenseOrderFromBatchResponse(
-        response as DispenseOrderBatchResponse,
-      );
-
-      if (dispenseOrder) {
-        dispenseOrderId = dispenseOrder.id;
-        setDispenseOrderId(dispenseOrderId);
-      }
-
-      if (!account?.results[0]) {
-        queryClient.invalidateQueries({
-          queryKey: ["accounts", patientId],
-        });
-      }
-
-      // Extract charge items and open invoice sheet
-      const chargeItems = extractChargeItemsFromBatchResponse(
-        response as unknown as ChargeItemBatchResponse,
-      );
-      if (chargeItems.length === 0) {
-        if (dispenseOrderId) {
-          navigate(
-            `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}?status=preparation&payment_status=unpaid`,
-          );
-        }
-      } else {
-        setIsInvoiceSheetOpen(true);
-        setExtractedChargeItems(chargeItems);
-      }
-    },
-    onError: (error) => {
-      try {
-        const errorData = error.cause as {
-          results?: {
-            data?: { detail?: string; errors?: { msg: string }[] };
-          }[];
-        };
-
-        const errorMessages = errorData?.results
-          ?.flatMap(
-            (result) =>
-              result?.data?.errors?.map((err) => err.msg) || // Extract from `errors[].msg`
-              (result?.data?.detail ? [result.data.detail] : []), // Extract from `data.detail`
-          )
-          .filter(Boolean); // Remove undefined/null values
-
-        if (errorMessages?.length) {
-          errorMessages.forEach((msg) => toast.error(msg));
-        } else {
-          toast.error(t("error_dispensing_medications"));
-        }
-      } catch {
-        toast.error(t("error_dispensing_medications"));
       }
     },
   });
-
-  const calculatePrices = (inventory: InventoryRead | undefined) => {
-    if (!inventory)
-      return {
-        basePrice: "0",
-      };
-
-    const priceComponents =
-      inventory.product.charge_item_definition?.price_components;
-
-    // Get base price
-    const baseComponent = priceComponents?.find(
-      (component) =>
-        component.monetary_component_type === MonetaryComponentType.base,
-    );
-    const basePrice = baseComponent?.amount || "0";
-
-    return {
-      basePrice,
-    };
-  };
-
-  const handleDispense = () => {
-    const selectedItems = form
-      .getValues("items")
-      .filter((item) => item.isSelected);
-
-    const medsWithZeroQuantity = selectedItems.filter((item) => {
-      return item.lots.every(
-        (lot) =>
-          !lot.quantity ||
-          isZero(lot.quantity) ||
-          !lot.selectedInventoryId ||
-          !lot.selectedInventoryId.length,
-      );
-    });
-
-    if (medsWithZeroQuantity.length > 0) {
-      toast.error(
-        t("please_select_quantity_for_medications", {
-          medications: medsWithZeroQuantity
-            .map((item) => item.productKnowledge.name)
-            .join(", "),
-        }),
-      );
-      return;
-    }
-
-    const medsWithInvalidDaysSupply = selectedItems.filter((item) =>
-      isLessThanOrEqual(item.daysSupply, 0),
-    );
-
-    if (medsWithInvalidDaysSupply.length > 0) {
-      toast.error(
-        t("please_enter_valid_days_supply_for_medications", {
-          medications: medsWithInvalidDaysSupply
-            .map((item) => item.productKnowledge.name)
-            .join(", "),
-        }),
-      );
-      return;
-    }
-
-    const medsWithoutInventory = selectedItems.filter((item) => {
-      return !item.lots.some((lot) => lot.selectedInventoryId);
-    });
-
-    if (medsWithoutInventory.length > 0) {
-      toast.error(
-        t("please_select_inventory_for_medications", {
-          medications: medsWithoutInventory
-            .map((item) => item.productKnowledge.name)
-            .join(", "),
-        }),
-      );
-      return;
-    }
-
-    const medsWithInsufficientStock: {
-      name: string;
-      lot: string;
-      requested: string;
-      available: string;
-    }[] = [];
-    selectedItems.forEach((item) => {
-      const productKnowledge = item.productKnowledge;
-      const effectiveProductKnowledge =
-        item.substitution?.substitutedProductKnowledge || productKnowledge;
-      const inventoryList =
-        productKnowledgeInventoriesMap[effectiveProductKnowledge.id] || [];
-
-      item.lots.forEach((lot) => {
-        const inventory = inventoryList.find(
-          (inv) => inv.id === lot.selectedInventoryId,
-        );
-        if (inventory && isGreaterThan(lot.quantity, inventory.net_content)) {
-          medsWithInsufficientStock.push({
-            name: effectiveProductKnowledge.name,
-            lot: inventory.product.batch?.lot_number || "N/A",
-            requested: lot.quantity,
-            available: round(inventory.net_content),
-          });
-        }
-      });
-    });
-
-    if (medsWithInsufficientStock.length > 0) {
-      medsWithInsufficientStock.forEach((med) => {
-        toast.error(
-          t("quantity_for_medication_selected_exceeds_available_stock", {
-            medication: med.name,
-            lot: med.lot,
-            requested: med.requested,
-            available: med.available,
-          }),
-        );
-      });
-      return;
-    }
-
-    const requests = [];
-    const defaultEncounterId = prescription?.encounter?.id;
-
-    // Add all dispense requests - now one per lot
-    selectedItems.forEach((item) => {
-      const medication = item.medication as MedicationRequestRead | undefined;
-      const productKnowledge = item.productKnowledge as ProductKnowledgeBase;
-      const effectiveProductKnowledge =
-        item.substitution?.substitutedProductKnowledge || productKnowledge;
-
-      item.lots.forEach((lot) => {
-        if (!lot.selectedInventoryId) {
-          return;
-        }
-
-        const inventoryListForEffectiveProduct =
-          productKnowledgeInventoriesMap[effectiveProductKnowledge.id];
-
-        const selectedInventory = inventoryListForEffectiveProduct?.find(
-          (inv: InventoryRead) => inv.id === lot.selectedInventoryId,
-        );
-
-        if (!selectedInventory) {
-          toast.error(
-            `Inventory for ${effectiveProductKnowledge.name} (Lot ID: ${lot.selectedInventoryId || "None"}) not found in local map. Cannot dispense this lot.`,
-          );
-          return;
-        }
-
-        const dispenseData: MedicationDispenseCreate = {
-          status: MedicationDispenseStatus.preparation,
-          category: MedicationDispenseCategory.outpatient,
-          when_prepared: new Date(),
-          dosage_instruction: item.dosageInstructions ?? [],
-          encounter:
-            medication?.encounter ?? defaultEncounterId! ?? encounterId,
-          location: locationId,
-          authorizing_request: medication?.id ?? null,
-          item: selectedInventory.id,
-          quantity: lot.quantity,
-          days_supply: item.daysSupply,
-          fully_dispensed: item.fully_dispensed,
-          create_dispense_order: {
-            alternate_identifier: alternateIdentifier,
-          },
-        };
-
-        if (
-          item.substitution &&
-          item.substitution.substitutedProductKnowledge
-        ) {
-          dispenseData.substitution = {
-            was_substituted: true,
-            substitution_type: item.substitution.type,
-            reason: item.substitution.reason,
-          };
-        }
-
-        requests.push({
-          url: `/api/v1/medication/dispense/`,
-          method: "POST",
-          reference_id: `dispense_${item.reference_id}_lot_${lot.selectedInventoryId}`,
-          body: dispenseData,
-        });
-      });
-    });
-
-    // Get unique prescription IDs from selected items and mark them as completed (only if checked)
-    const prescriptionIds = new Set(
-      selectedItems
-        .filter(
-          (item) =>
-            item.medication?.prescription?.id &&
-            item.prescriptionId !== "no-prescription" &&
-            prescriptionCompletionMap[item.prescriptionId || ""], // Only if prescription is checked for completion
-        )
-        .map((item) => item.medication.prescription!.id),
-    );
-
-    // Add prescription completion request using upsert
-    if (prescriptionIds.size > 0) {
-      requests.push({
-        url: `/api/v1/patient/${patientId}/medication/prescription/upsert/`,
-        method: "POST",
-        reference_id: "prescription_completion_upsert",
-        body: {
-          datapoints: Array.from(prescriptionIds).map((prescriptionId) => ({
-            id: prescriptionId,
-            status: "completed",
-          })),
-        },
-      });
-    }
-
-    dispense({ requests });
-  };
-
-  const handleRemoveMedication = (
-    medication: MedicationRequestRead,
-    isAdded: boolean,
-    index: number,
-  ) => {
-    if (!isAdded) {
-      updateMedicationRequest(
-        {
-          ...medication,
-          dispense_status: MedicationRequestDispenseStatus.incomplete,
-        },
-        {
-          onSuccess: () => {
-            remove(index);
-          },
-        },
-      );
-    } else {
-      remove(index);
-    }
-  };
 
   return (
     <Page title={t("bill_medications")} hideTitleOnPage={true} isInsidePage>
-      <div className="md:max-w-[75vw] mx-auto">
+      <NoActiveAccountWarningDialog
+        patientId={patientId}
+        facilityId={facilityId}
+      />
+      <div className="md:max-w-[88vw] mx-auto">
+        {/* Header */}
         <div className="mb-6 flex items-center justify-between flex-wrap gap-2">
           <h1 className="text-2xl font-bold whitespace-nowrap">
             {t("bill_medications")}
@@ -1272,763 +125,155 @@ export default function MedicationBillForm({
             <Button
               onClick={handleDispense}
               disabled={
-                !form.watch("items").some((q) => q.isSelected) || isPending
+                !form.watch("items").some((q) => q.isSelected) ||
+                isPending ||
+                isCreatingInvoice
               }
             >
-              <ShortcutBadge actionId="billing-action" />
-              {isPending ? t("billing") : t("bill_selected")}
+              {isPending || isCreatingInvoice
+                ? t("billing")
+                : t("bill_selected")}
+              <ShortcutBadge actionId="submit-action" />
             </Button>
           </div>
         </div>
 
+        {/* Patient Header */}
         {prescription?.encounter?.patient && (
-          <div className="mb-4 rounded-none shadow-none bg-gray-100">
+          <div className="mb-4 rounded-none shadow-none bg-gray-100 p-4">
             <PatientHeader
               patient={prescription.encounter.patient}
               facilityId={facilityId}
             />
+            <div className="flex flex-wrap gap-4 mt-2 text-sm">
+              {prescription.encounter.current_location && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-gray-500">{t("location")}:</span>
+                  <span className="font-medium">
+                    {prescription.encounter.current_location.name}
+                  </span>
+                </div>
+              )}
+              {prescription.encounter.organizations &&
+                prescription.encounter.organizations.length > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-gray-500">
+                      {t("departments", {
+                        count: prescription.encounter.organizations.length,
+                      })}
+                      :
+                    </span>
+                    <span className="font-medium">
+                      {prescription.encounter.organizations
+                        .map((org) => org.name)
+                        .join(", ")}
+                    </span>
+                  </div>
+                )}
+            </div>
           </div>
         )}
 
-        {isLoading ? (
-          <TableSkeleton count={5} />
-        ) : (
-          <Form {...form}>
-            <form>
-              <Table className="w-full border-separate border-spacing-y-2 px-1">
-                <TableHeader>
-                  <TableRow className="bg-white rounded-lg shadow-sm rounded-b-none">
-                    <TableHead
-                      className={cn(
-                        "w-12",
-                        tableHeaderClass,
-                        "rounded-l-lg border-y border-l border-gray-200 rounded-b-none border-b-0",
-                      )}
-                    >
-                      <FormField
-                        control={form.control}
-                        name="items"
-                        render={() => (
-                          <FormItem className="mr-1.5">
-                            <FormControl>
-                              <Checkbox
-                                checked={
-                                  form.watch("items").length > 0 &&
-                                  form.watch("items").every((q) => q.isSelected)
-                                }
-                                onCheckedChange={(checked) => {
-                                  const items = form.getValues("items");
-                                  items.forEach((_, index) => {
-                                    form.setValue(
-                                      `items.${index}.isSelected`,
-                                      !!checked,
-                                    );
-                                  });
-                                }}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </TableHead>
-                    <TableHead
-                      className={cn(
-                        tableHeaderClass,
-                        "border-y border-r-0 border-gray-200 rounded-b-none border-b-0",
-                      )}
-                    >
-                      {t("medicine")}
-                    </TableHead>
-                    <TableHead className={tableHeaderClass}>
-                      {t("select_lot")}
-                    </TableHead>
-                    <TableHead className={tableHeaderClass}>
-                      {t("quantity")}
-                    </TableHead>
-                    <TableHead className={cn(tableHeaderClass)}>
-                      {t("days_supply")}
-                    </TableHead>
-                    <TableHead className={tableHeaderClass}>
-                      {t("expiry")}
-                    </TableHead>
-                    <TableHead className={tableHeaderClass}>
-                      {t("unit_price")}
-                    </TableHead>
-                    <TableHead className={tableHeaderClass}>
-                      {t("discount")}
-                    </TableHead>
-                    <TableHead className={tableHeaderClass}>
-                      {t("all_given")}?
-                    </TableHead>
-                    <TableHead className={cn(tableHeaderClass, "rounded-r-lg")}>
-                      {t("actions")}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {/* Prescription Header Row */}
-                  {prescription && fields.length > 0 && (
-                    <TableRow className="bg-gray-50">
-                      <TableCell
-                        colSpan={10}
-                        className="py-2 px-4 font-semibold text-gray-800 border-b"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            {t("prescription")} -{" "}
-                            {prescription.created_date
-                              ? formatDate(
-                                  new Date(prescription.created_date),
-                                  "dd/MM/yyyy",
-                                )
-                              : prescriptionId}{" "}
-                            ({fields.length} {t("medications")})
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              checked={
-                                prescriptionCompletionMap[prescriptionId] ||
-                                false
-                              }
-                              onCheckedChange={(checked) => {
-                                setPrescriptionCompletionMap((prev) => ({
-                                  ...prev,
-                                  [prescriptionId]: !!checked,
-                                }));
-                              }}
-                            />
-                            <span className="text-sm text-gray-600">
-                              {t("mark_complete")}
-                            </span>
-                          </div>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                  {/* Medication Items */}
-                  {fields.map((field, index) => {
-                    const productKnowledge =
-                      field.productKnowledge as ProductKnowledgeBase;
-                    const substitution = form.watch(
-                      `items.${index}.substitution`,
-                    );
-                    const effectiveProductKnowledge =
-                      substitution?.substitutedProductKnowledge ||
-                      productKnowledge;
-
-                    return (
-                      <TableRow
-                        key={field.id}
-                        className="bg-white hover:bg-gray-50/50 shadow-sm rounded-lg"
-                      >
-                        <TableCell
-                          className={cn(tableCellClass, "rounded-l-lg")}
-                        >
-                          <FormField
-                            control={form.control}
-                            name={`items.${index}.isSelected`}
-                            render={({ field: formField }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Checkbox
-                                    checked={formField.value}
-                                    onCheckedChange={formField.onChange}
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </TableCell>
-                        <TableCell className={tableCellClass}>
-                          <div className="flex items-center justify-between gap-2">
-                            <div>
-                              <div className="font-medium text-gray-950 text-base flex items-center">
-                                <div>
-                                  <div className="flex items-center gap-2">
-                                    {effectiveProductKnowledge.name}
-                                    {substitution && (
-                                      <Popover>
-                                        <PopoverTrigger asChild>
-                                          <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="p-1 h-6 w-6 rounded-full hover:bg-blue-100"
-                                          >
-                                            <Info className="h-4 w-4" />
-                                            <span className="sr-only">
-                                              {t("substitution_details")}
-                                            </span>
-                                          </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent
-                                          className="p-4 w-auto"
-                                          align="start"
-                                          side="bottom"
-                                        >
-                                          <div className="space-y-3">
-                                            <div className="font-semibold text-sm text-gray-950 underline">
-                                              {t("substitution_details")} :
-                                            </div>
-                                            <div className="space-y-3 text-sm max-w-md">
-                                              <div>
-                                                <div className="flex items-center gap-1 mb-1">
-                                                  <span className="font-medium text-gray-600">
-                                                    {t("original_medication")}:
-                                                  </span>
-                                                  <div className="text-gray-950 font-medium">
-                                                    {productKnowledge.name}
-                                                  </div>
-                                                </div>
-                                              </div>
-                                              <div>
-                                                <div className="flex items-center gap-1 mb-1">
-                                                  <span className="font-medium text-gray-600">
-                                                    {t("substituted_with")}:
-                                                  </span>
-                                                  <div className="text-gray-950 font-medium">
-                                                    {
-                                                      effectiveProductKnowledge.name
-                                                    }
-                                                  </div>
-                                                </div>
-                                              </div>
-                                              <div>
-                                                <div className="flex items-center gap-1">
-                                                  <span className="font-medium text-gray-600">
-                                                    {t("substitution_type")}:
-                                                  </span>
-                                                  <div className="text-gray-950 font-medium">
-                                                    {getSubstitutionTypeDisplay(
-                                                      t,
-                                                      substitution.type,
-                                                    )}{" "}
-                                                    ({substitution.type})
-                                                  </div>
-                                                </div>
-                                                <div className="text-gray-700 text-xs italic leading-relaxed">
-                                                  {getSubstitutionTypeDescription(
-                                                    t,
-                                                    substitution.type,
-                                                  )}
-                                                </div>
-                                              </div>
-                                              <div>
-                                                <div className="flex items-center gap-1">
-                                                  <span className="font-medium text-gray-600">
-                                                    {t("substitution_reason")}:
-                                                  </span>
-                                                  <div className="text-gray-950 font-medium">
-                                                    {getSubstitutionReasonDisplay(
-                                                      t,
-                                                      substitution.reason,
-                                                    )}{" "}
-                                                    ({substitution.reason})
-                                                  </div>
-                                                </div>
-                                                <div className="text-gray-700 text-xs italic leading-relaxed">
-                                                  {getSubstitutionReasonDescription(
-                                                    t,
-                                                    substitution.reason,
-                                                  )}
-                                                </div>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </PopoverContent>
-                                      </Popover>
-                                    )}
-                                    {substitution && (
-                                      <Badge variant="orange">
-                                        {t("substituted")}
-                                      </Badge>
-                                    )}
-                                    {field.medication?.dispense_status ===
-                                      MedicationRequestDispenseStatus.partial && (
-                                      <Badge variant="yellow">
-                                        {t("partially_billed")}
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <Button
-                                              variant="outline"
-                                              size="icon"
-                                              className="p-0 h-auto text-yellow-900 underline font-normal rounded-md w-6"
-                                              type="button"
-                                              onClick={() => {
-                                                setViewingDispensedMedicationId(
-                                                  field.medication.id,
-                                                );
-                                              }}
-                                            >
-                                              <Eye className="size-5" />
-                                            </Button>
-                                          </TooltipTrigger>
-                                          <TooltipContent>
-                                            {t("view_dispensed")}
-                                          </TooltipContent>
-                                        </Tooltip>
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  {substitution && (
-                                    <div className="text-gray-500 font-normal italic line-through text-sm">
-                                      {productKnowledge.name}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                              {field.medication ? (
-                                <div>
-                                  <div className="text-sm text-gray-700 font-medium flex items-center gap-1">
-                                    {/* Existing medication - show read-only dosage instructions */}
-                                    {
-                                      field.dosageInstructions?.[0]
-                                        ?.dose_and_rate?.dose_quantity?.value
-                                    }{" "}
-                                    {
-                                      field.dosageInstructions?.[0]
-                                        ?.dose_and_rate?.dose_quantity?.unit
-                                        ?.display
-                                    }{" "}
-                                    ×{" "}
-                                    {
-                                      field.dosageInstructions?.[0]?.timing
-                                        ?.code?.code
-                                    }{" "}
-                                    ×{" "}
-                                    {field.dosageInstructions?.[0]?.timing
-                                      ?.repeat?.bounds_duration?.value || 0}
-                                    {
-                                      field.dosageInstructions?.[0]?.timing
-                                        ?.repeat?.bounds_duration?.unit
-                                    }{" "}
-                                    ={" "}
-                                    <div className="text-gray-700 font-semibold text-sm">
-                                      {formatTotalUnits(
-                                        field.dosageInstructions,
-                                        t("units"),
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div
-                                  className="text-sm text-gray-500 cursor-pointer hover:text-gray-900"
-                                  onClick={() => {
-                                    setSelectedProduct(productKnowledge);
-                                    setEditingItemIndex(index);
-                                    setIsAddMedicationSheetOpen(true);
-                                  }}
-                                >
-                                  {(() => {
-                                    const currentDosageInstructions =
-                                      form.watch(
-                                        `items.${index}.dosageInstructions`,
-                                      )?.[0];
-
-                                    if (
-                                      currentDosageInstructions?.dose_and_rate
-                                        ?.dose_quantity
-                                    ) {
-                                      return (
-                                        <div className="text-sm text-gray-700 font-medium flex items-center gap-1">
-                                          {
-                                            currentDosageInstructions
-                                              .dose_and_rate.dose_quantity.value
-                                          }{" "}
-                                          {
-                                            currentDosageInstructions
-                                              .dose_and_rate.dose_quantity.unit
-                                              ?.display
-                                          }{" "}
-                                          ×{" "}
-                                          {
-                                            currentDosageInstructions.timing
-                                              ?.code?.code
-                                          }{" "}
-                                          ×{" "}
-                                          {currentDosageInstructions.timing
-                                            ?.repeat?.bounds_duration?.value ||
-                                            0}
-                                          {
-                                            currentDosageInstructions.timing
-                                              ?.repeat?.bounds_duration?.unit
-                                          }{" "}
-                                          ={" "}
-                                          <div className="text-gray-700 font-semibold text-sm">
-                                            {formatTotalUnits(
-                                              [currentDosageInstructions],
-                                              t("units"),
-                                            )}
-                                          </div>
-                                        </div>
-                                      );
-                                    }
-
-                                    return t(
-                                      "click_to_add_dosage_instructions",
-                                    );
-                                  })()}
-                                </div>
-                              )}
-                            </div>
-                            {field.medication && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="border-gray-400 border text-gray-950 hover:bg-gray-50"
-                                type="button"
-                                onClick={() => {
-                                  setSubstitutingItemIndex(index);
-                                  setOriginalProductForSubstitution(
-                                    productKnowledge,
-                                  );
-                                  setIsSubstitutionSheetOpen(true);
-                                }}
-                              >
-                                <Shuffle className="size-5" />
-                                {t("substitute")}
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className={tableCellClass}>
-                          {productKnowledgeInventoriesMap[
-                            effectiveProductKnowledge.id
-                          ]?.length ? (
-                            <div className="space-y-2">
-                              <StockLotSelector
-                                selectedLots={form.watch(`items.${index}.lots`)}
-                                onLotSelectionChange={(lots) => {
-                                  const existingLotIds = form
-                                    .getValues(`items.${index}.lots`)
-                                    .map((lot) => lot.selectedInventoryId);
-                                  const newLots = lots.map((lot) => {
-                                    if (
-                                      !existingLotIds.includes(
-                                        lot.selectedInventoryId,
-                                      )
-                                    ) {
-                                      const medication = form.getValues(
-                                        `items.${index}.medication`,
-                                      );
-                                      return {
-                                        ...lot,
-                                        quantity: medication
-                                          ? computeInitialQuantity(medication)
-                                          : lot.quantity,
-                                      };
-                                    }
-                                    return lot;
-                                  });
-                                  form.setValue(`items.${index}.lots`, newLots);
-                                }}
-                                availableInventories={
-                                  productKnowledgeInventoriesMap[
-                                    effectiveProductKnowledge.id
-                                  ]
-                                }
-                                multiSelect
-                                showexpiry={false}
-                              />
-                            </div>
-                          ) : (
-                            <Badge variant="destructive">{t("no_stock")}</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className={tableCellClass}>
-                          <div className="space-y-2">
-                            {form
-                              .watch(`items.${index}.lots`)
-                              .filter((lot) => lot.selectedInventoryId)
-                              .map((lot) => {
-                                const actualLotIndex = form
-                                  .watch(`items.${index}.lots`)
-                                  .findIndex(
-                                    (l) =>
-                                      l.selectedInventoryId ===
-                                      lot.selectedInventoryId,
-                                  );
-
-                                return (
-                                  <div
-                                    key={lot.selectedInventoryId}
-                                    className="flex items-center gap-2"
-                                  >
-                                    <FormField
-                                      control={form.control}
-                                      name={`items.${index}.lots.${actualLotIndex}.quantity`}
-                                      render={({ field: formField }) => (
-                                        <FormItem>
-                                          <FormControl>
-                                            <Input
-                                              type="number"
-                                              min={0}
-                                              {...formField}
-                                              className="border-gray-300 border rounded-none w-24"
-                                              placeholder="0"
-                                            />
-                                          </FormControl>
-                                          <FormMessage />
-                                        </FormItem>
-                                      )}
-                                    />
-                                  </div>
-                                );
-                              })}
-                            {form
-                              .watch(`items.${index}.lots`)
-                              .filter((lot) => lot.selectedInventoryId)
-                              .length === 0 && (
-                              <div className="text-sm text-gray-500 py-2">
-                                {t("select_lots_first")}
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className={tableCellClass}>
-                          <FormField
-                            control={form.control}
-                            name={`items.${index}.daysSupply`}
-                            render={({ field: formField }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input
-                                    type="number"
-                                    min={1}
-                                    {...formField}
-                                    className="border-gray-300 border rounded-none w-24"
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </TableCell>
-                        <TableCell className={tableCellClass}>
-                          {form
-                            .watch(`items.${index}.lots`)
-                            .filter((lot) => lot.selectedInventoryId)
-                            .map((lot) => {
-                              const selectedInventory =
-                                productKnowledgeInventoriesMap[
-                                  effectiveProductKnowledge.id
-                                ]?.find(
-                                  (inv) => inv.id === lot.selectedInventoryId,
-                                );
-
-                              return (
-                                <div
-                                  key={lot.selectedInventoryId}
-                                  className="py-2.5 text-gray-950 font-normal text-base"
-                                >
-                                  {selectedInventory?.product.expiration_date
-                                    ? formatDate(
-                                        selectedInventory?.product
-                                          .expiration_date,
-                                        "MM/yyyy",
-                                      )
-                                    : "-"}
-                                </div>
-                              );
-                            })}
-                          {form
-                            .watch(`items.${index}.lots`)
-                            .filter((lot) => lot.selectedInventoryId).length ===
-                            0 && (
-                            <div className="text-sm text-gray-500 py-2">-</div>
-                          )}
-                        </TableCell>
-                        <TableCell className={tableCellClass}>
-                          {form
-                            .watch(`items.${index}.lots`)
-                            .filter((lot) => lot.selectedInventoryId)
-                            .map((lot) => {
-                              const selectedInventory =
-                                productKnowledgeInventoriesMap[
-                                  effectiveProductKnowledge.id
-                                ]?.find(
-                                  (inv) => inv.id === lot.selectedInventoryId,
-                                );
-                              const prices = calculatePrices(selectedInventory);
-
-                              return (
-                                <div
-                                  key={lot.selectedInventoryId}
-                                  className="py-2.5 text-gray-950 font-normal text-base"
-                                >
-                                  <MonetaryDisplay amount={prices.basePrice} />
-                                </div>
-                              );
-                            })}
-                          {form
-                            .watch(`items.${index}.lots`)
-                            .filter((lot) => lot.selectedInventoryId).length ===
-                            0 && <div className="text-sm py-2">-</div>}
-                        </TableCell>
-                        <TableCell className={tableCellClass}>
-                          {form
-                            .watch(`items.${index}.lots`)
-                            .filter((lot) => lot.selectedInventoryId)
-                            .map((lot) => {
-                              const selectedInventory =
-                                productKnowledgeInventoriesMap[
-                                  effectiveProductKnowledge.id
-                                ]?.find(
-                                  (inv) => inv.id === lot.selectedInventoryId,
-                                );
-
-                              return selectedInventory ? (
-                                <div
-                                  key={lot.selectedInventoryId}
-                                  className="py-2.5 text-gray-950 font-normal text-base"
-                                >
-                                  {selectedInventory.product.charge_item_definition?.price_components
-                                    .filter(
-                                      (c) =>
-                                        c.monetary_component_type ===
-                                        MonetaryComponentType.discount,
-                                    )
-                                    .map((component) =>
-                                      component.factor
-                                        ? `${round(component.factor)}%`
-                                        : "--",
-                                    )}
-                                </div>
-                              ) : (
-                                <div
-                                  key={lot.selectedInventoryId}
-                                  className="py-2.5"
-                                >
-                                  --
-                                </div>
-                              );
-                            })}
-                          {form
-                            .watch(`items.${index}.lots`)
-                            .filter((lot) => lot.selectedInventoryId).length ===
-                            0 && (
-                            <div className="text-sm text-gray-500 py-2">-</div>
-                          )}
-                        </TableCell>
-                        <TableCell className={tableCellClass}>
-                          {field.medication ? (
-                            <FormField
-                              control={form.control}
-                              name={`items.${index}.fully_dispensed`}
-                              render={({ field: formField }) => (
-                                <FormItem>
-                                  <FormControl>
-                                    <Switch
-                                      className="data-[state=checked]:bg-primary-600"
-                                      checked={formField.value}
-                                      onCheckedChange={formField.onChange}
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                          ) : (
-                            "-"
-                          )}
-                        </TableCell>
-                        <TableCell
-                          className={cn(tableCellClass, "rounded-r-lg")}
-                        >
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="outline" size="icon">
-                                <MoreVertical className="size-5" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              {field.medication?.dispense_status !==
-                              MedicationRequestDispenseStatus.partial ? (
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <div className="w-full">
-                                      <DropdownMenuItem
-                                        disabled
-                                        className="w-full"
-                                      >
-                                        {t("mark_as_already_given")}
-                                      </DropdownMenuItem>
-                                    </div>
-                                  </PopoverTrigger>
-                                  <PopoverContent>
-                                    {t("enabled_only_for_partially_dispensed")}
-                                  </PopoverContent>
-                                </Popover>
-                              ) : (
-                                <DropdownMenuItem
-                                  onSelect={() => {
-                                    setMedicationToMarkComplete({
-                                      medication:
-                                        field.medication as MedicationRequestRead,
-                                      index,
-                                    });
-                                  }}
-                                >
-                                  {t("mark_as_already_given")}
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuItem
-                                onSelect={() => {
-                                  setMedicationToRemove({
-                                    medication:
-                                      field.medication as MedicationRequestRead,
-                                    medicationName:
-                                      effectiveProductKnowledge.name,
-                                    index,
-                                    isAdded: !field.medication ? true : false,
-                                  });
-                                }}
-                              >
-                                {t("remove_medication")}
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                  <TableRow className="bg-white rounded-lg shadow-sm">
-                    <TableCell colSpan={12} className="p-0 rounded-lg">
-                      <ProductKnowledgeSelect
-                        value={undefined}
-                        onChange={(product) => {
-                          setSelectedProduct(product);
-                          setIsAddMedicationSheetOpen(true);
-                        }}
-                        placeholder={t("add_medication")}
-                        className="w-full"
-                      />
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </form>
-          </Form>
-        )}
-
-        {account?.results[0] && (
-          <CreateInvoiceSheet
-            facilityId={facilityId}
-            accountId={account?.results[0].id}
-            open={isInvoiceSheetOpen}
-            onOpenChange={setIsInvoiceSheetOpen}
-            preSelectedChargeItems={extractedChargeItems}
-            onSuccess={() => {
-              setIsInvoiceSheetOpen(false);
-              navigate(
-                `/facility/${facilityId}/locations/${locationId}/medication_dispense/${dispenseOrderId ? `order/${dispenseOrderId}?status=preparation` : ""}`,
+        {/* Medication Bill Table */}
+        <MedicationBillTable
+          form={form}
+          fields={fields}
+          groupedMedications={groupedMedications}
+          productKnowledgeInventoriesMap={productKnowledgeInventoriesMap}
+          prescriptionCompletionMap={prescriptionCompletionMap}
+          setPrescriptionCompletionMap={setPrescriptionCompletionMap}
+          grandTotal={grandTotal}
+          isLoading={isLoading}
+          prescription={prescription}
+          onEditDosage={(idx, productKnowledge) => {
+            setSelectedProduct(productKnowledge);
+            setEditingItemIndex(idx);
+            setIsAddMedicationSheetOpen(true);
+          }}
+          onSubstitute={(idx, productKnowledge, preSelectedProduct) => {
+            setSubstitutingItemIndex(idx);
+            setOriginalProductForSubstitution(productKnowledge);
+            setPreSelectedSubstituteProduct(preSelectedProduct);
+            // Get medication name for display when no product knowledge
+            if (!productKnowledge) {
+              const item = form.getValues(`items.${idx}`);
+              setOriginalMedicationName(
+                item.medication?.medication?.display || undefined,
               );
-            }}
-            sourceUrl={`/facility/${facilityId}/locations/${locationId}/medication_dispense/${dispenseOrderId ? `order/${dispenseOrderId}?status=preparation` : ""}`}
-            locationId={locationId}
-            dispenseOrderId={dispenseOrderId ?? undefined}
-          />
+            } else {
+              setOriginalMedicationName(undefined);
+            }
+            setIsSubstitutionSheetOpen(true);
+          }}
+          onViewDispensed={(medicationId) => {
+            setViewingDispensedMedicationId(medicationId);
+          }}
+          onMarkComplete={(medication, idx) => {
+            setMedicationToMarkComplete({ medication, index: idx });
+          }}
+          onRemove={(medication, effectiveProductName, idx, isAdded) => {
+            setMedicationToRemove({
+              medication: medication as MedicationRequestRead,
+              medicationName: effectiveProductName,
+              index: idx,
+              isAdded,
+            });
+          }}
+          calculatePrices={calculatePrices}
+        />
+
+        {/* Add Medication Row */}
+        {!isLoading && (
+          <div className="mt-2 bg-white rounded-lg shadow-sm">
+            <ProductKnowledgeSelect
+              value={undefined}
+              onChange={(product) => {
+                if (!product) return;
+
+                const defaultDosageInstructions: MedicationRequestDosageInstruction[] =
+                  [
+                    {
+                      dose_and_rate: product.base_unit
+                        ? {
+                            type: "ordered",
+                            dose_quantity: {
+                              value: "1",
+                              unit: product.base_unit,
+                            },
+                          }
+                        : undefined,
+                      timing: undefined,
+                      as_needed_boolean: true,
+                      route: undefined,
+                      site: undefined,
+                      method: undefined,
+                      additional_instruction: undefined,
+                      as_needed_for: undefined,
+                    },
+                  ];
+
+                append({
+                  reference_id: crypto.randomUUID(),
+                  productKnowledge: product,
+                  isSelected: true,
+                  fully_dispensed: true,
+                  dosageInstructions: defaultDosageInstructions,
+                  lots: [{ selectedInventoryId: "", quantity: "1" }],
+                  prescriptionId: "no-prescription",
+                });
+
+                setProductKnowledgeInventoriesMap((prev) => ({
+                  [product.id]: undefined,
+                  ...prev,
+                }));
+              }}
+              placeholder={t("add_medication")}
+              className="w-full"
+            />
+          </div>
         )}
 
+        {/* Add/Edit Medication Sheet */}
         <AddMedicationSheet
           open={isAddMedicationSheetOpen}
           onOpenChange={(isOpen) => {
@@ -2051,36 +296,15 @@ export default function MedicationBillForm({
                   form.setValue(
                     `items.${editingItemIndex}.dosageInstructions`,
                     dosageInstructions,
-                    {
-                      shouldDirty: true,
-                      shouldTouch: true,
-                    },
+                    { shouldDirty: true, shouldTouch: true },
                   );
 
                   if (dosageInstructions?.[0]) {
-                    const newDaysSupply = round(
-                      convertDurationToDays(
-                        dosageInstructions[0]?.timing?.repeat?.bounds_duration
-                          ?.value || "0",
-                        dosageInstructions[0]?.timing?.repeat?.bounds_duration
-                          ?.unit || "",
-                      ),
-                    );
-                    form.setValue(
-                      `items.${editingItemIndex}.daysSupply`,
-                      newDaysSupply,
-                      {
-                        shouldDirty: true,
-                        shouldTouch: true,
-                      },
-                    );
-
                     const medicationDataForQuantity =
                       form.getValues(`items.${editingItemIndex}.medication`) ||
                       ({
                         dosage_instruction: dosageInstructions,
                       } as MedicationRequestRead);
-                    // Ensure dosage_instruction is updated if medicationDataForQuantity was from form
                     if (
                       form.getValues(`items.${editingItemIndex}.medication`)
                     ) {
@@ -2088,10 +312,9 @@ export default function MedicationBillForm({
                         dosageInstructions;
                     }
 
-                    const newQuantity = computeInitialQuantity(
+                    const newQuantity = computeMedicationDispenseQuantity(
                       medicationDataForQuantity,
                     );
-
                     const currentLots = form.getValues(
                       `items.${editingItemIndex}.lots`,
                     );
@@ -2099,12 +322,9 @@ export default function MedicationBillForm({
                       `items.${editingItemIndex}.lots`,
                       currentLots.map((lot) => ({
                         ...lot,
-                        quantity: newQuantity, // Update quantity for existing selected lots
+                        quantity: newQuantity,
                       })),
-                      {
-                        shouldDirty: true,
-                        shouldTouch: true,
-                      },
+                      { shouldDirty: true, shouldTouch: true },
                     );
                   }
                   setEditingItemIndex(null);
@@ -2112,7 +332,7 @@ export default function MedicationBillForm({
               : undefined
           }
           onAdd={(product, dosageInstructions) => {
-            const newQuantity = computeInitialQuantity({
+            const newQuantity = computeMedicationDispenseQuantity({
               dosage_instruction: dosageInstructions,
             } as MedicationRequestRead);
 
@@ -2120,111 +340,102 @@ export default function MedicationBillForm({
               reference_id: crypto.randomUUID(),
               productKnowledge: product,
               isSelected: true,
-              daysSupply: round(
-                convertDurationToDays(
-                  dosageInstructions[0]?.timing?.repeat?.bounds_duration
-                    ?.value || "0",
-                  dosageInstructions[0]?.timing?.repeat?.bounds_duration
-                    ?.unit || "",
-                ),
-              ),
               fully_dispensed: true,
               dosageInstructions,
-              lots: [
-                {
-                  selectedInventoryId: "",
-                  quantity: newQuantity,
-                },
-              ],
-              prescriptionId: "no-prescription", // New medications without prescription
+              lots: [{ selectedInventoryId: "", quantity: newQuantity }],
+              prescriptionId: "no-prescription",
             });
 
             setProductKnowledgeInventoriesMap((prev) => ({
               [product.id]: undefined,
               ...prev,
             }));
-
             setSelectedProduct(undefined);
           }}
         />
 
-        {originalProductForSubstitution && (
-          <SubstitutionSheet
-            open={isSubstitutionSheetOpen}
-            onOpenChange={setIsSubstitutionSheetOpen}
-            originalProductKnowledge={originalProductForSubstitution}
-            currentSubstitution={
-              substitutingItemIndex !== null
-                ? form.watch(`items.${substitutingItemIndex}.substitution`)
-                : undefined
-            }
-            facilityId={facilityId}
-            onSave={(substitutionDetails) => {
-              if (substitutingItemIndex === null) return;
-
-              if (substitutionDetails) {
-                form.setValue(
-                  `items.${substitutingItemIndex}.substitution`,
-                  substitutionDetails,
-                  { shouldDirty: true, shouldTouch: true },
-                );
-                // Reset lots and quantity for the substituted item
-                form.setValue(
-                  `items.${substitutingItemIndex}.lots`,
-                  [{ selectedInventoryId: "", quantity: "0" }],
-                  { shouldDirty: true, shouldTouch: true },
-                );
-
-                // Ensure inventory for the new substituted product is fetched
-                setProductKnowledgeInventoriesMap((prev) => ({
-                  ...prev,
-                  [substitutionDetails.substitutedProductKnowledge.id]:
-                    prev[substitutionDetails.substitutedProductKnowledge.id] ||
-                    undefined,
-                }));
-              } else {
-                // Clearing substitution
-                form.setValue(
-                  `items.${substitutingItemIndex}.substitution`,
-                  undefined,
-                  { shouldDirty: true, shouldTouch: true },
-                );
-                // Reset lots based on original product's medication request or default to 0
-                const originalItem = form.getValues(
-                  `items.${substitutingItemIndex}`,
-                );
-                const originalMedication = originalItem.medication as
-                  | MedicationRequestRead
-                  | undefined;
-                const initialQuantity = originalMedication
-                  ? computeInitialQuantity(originalMedication)
-                  : "0";
-                form.setValue(
-                  `items.${substitutingItemIndex}.lots`,
-                  [{ selectedInventoryId: "", quantity: initialQuantity }],
-                  { shouldDirty: true, shouldTouch: true },
-                );
-              }
+        {/* Substitution Sheet */}
+        <SubstitutionSheet
+          open={isSubstitutionSheetOpen}
+          onOpenChange={(open) => {
+            setIsSubstitutionSheetOpen(open);
+            if (!open) {
               setSubstitutingItemIndex(null);
               setOriginalProductForSubstitution(undefined);
-              setIsSubstitutionSheetOpen(false);
-            }}
-          />
-        )}
+              setPreSelectedSubstituteProduct(undefined);
+              setOriginalMedicationName(undefined);
+            }
+          }}
+          originalProductKnowledge={originalProductForSubstitution}
+          originalMedicationName={originalMedicationName}
+          preSelectedProduct={preSelectedSubstituteProduct}
+          currentSubstitution={
+            substitutingItemIndex !== null
+              ? form.watch(`items.${substitutingItemIndex}.substitution`)
+              : undefined
+          }
+          facilityId={facilityId}
+          onSave={(substitutionDetails) => {
+            if (substitutingItemIndex === null) return;
 
+            if (substitutionDetails) {
+              form.setValue(
+                `items.${substitutingItemIndex}.substitution`,
+                substitutionDetails,
+                { shouldDirty: true, shouldTouch: true },
+              );
+              form.setValue(
+                `items.${substitutingItemIndex}.lots`,
+                [{ selectedInventoryId: "", quantity: "0" }],
+                { shouldDirty: true, shouldTouch: true },
+              );
+              setProductKnowledgeInventoriesMap((prev) => ({
+                ...prev,
+                [substitutionDetails.substitutedProductKnowledge.id]:
+                  prev[substitutionDetails.substitutedProductKnowledge.id] ||
+                  undefined,
+              }));
+            } else {
+              form.setValue(
+                `items.${substitutingItemIndex}.substitution`,
+                undefined,
+                { shouldDirty: true, shouldTouch: true },
+              );
+              const originalItem = form.getValues(
+                `items.${substitutingItemIndex}`,
+              );
+              const originalMedication = originalItem.medication as
+                | MedicationRequestRead
+                | undefined;
+              const initialQuantity = originalMedication
+                ? computeMedicationDispenseQuantity(originalMedication)
+                : "0";
+              form.setValue(
+                `items.${substitutingItemIndex}.lots`,
+                [{ selectedInventoryId: "", quantity: initialQuantity }],
+                { shouldDirty: true, shouldTouch: true },
+              );
+            }
+            setSubstitutingItemIndex(null);
+            setOriginalProductForSubstitution(undefined);
+            setPreSelectedSubstituteProduct(undefined);
+            setOriginalMedicationName(undefined);
+            setIsSubstitutionSheetOpen(false);
+          }}
+        />
+
+        {/* Dispensed Items Sheet */}
         {viewingDispensedMedicationId && (
           <DispensedItemsSheet
             open={!!viewingDispensedMedicationId}
             onOpenChange={(open) => {
-              if (!open) {
-                setViewingDispensedMedicationId(null);
-              }
+              if (!open) setViewingDispensedMedicationId(null);
             }}
             medicationRequestId={viewingDispensedMedicationId}
-            facilityId={facilityId}
           />
         )}
 
+        {/* Mark Complete Dialog */}
         <ConfirmActionDialog
           open={medicationToMarkComplete !== null}
           onOpenChange={(open) => {
@@ -2235,12 +446,8 @@ export default function MedicationBillForm({
             <>
               <Trans
                 i18nKey="confirm_action_description"
-                values={{
-                  action: t("mark_as_already_given").toLowerCase(),
-                }}
-                components={{
-                  1: <strong className="text-gray-900" />,
-                }}
+                values={{ action: t("mark_as_already_given").toLowerCase() }}
+                components={{ 1: <strong className="text-gray-900" /> }}
               />{" "}
               {t("you_cannot_change_once_submitted")}
               <p className="mt-2">
@@ -2272,6 +479,8 @@ export default function MedicationBillForm({
           }}
           confirmText={t("mark_as_already_given")}
         />
+
+        {/* Remove Medication Dialog */}
         <ConfirmActionDialog
           open={medicationToRemove !== null}
           onOpenChange={(open) => {
@@ -2282,12 +491,8 @@ export default function MedicationBillForm({
             <>
               <Trans
                 i18nKey="confirm_action_description"
-                values={{
-                  action: t("remove_medication").toLowerCase(),
-                }}
-                components={{
-                  1: <strong className="text-gray-900" />,
-                }}
+                values={{ action: t("remove_medication").toLowerCase() }}
+                components={{ 1: <strong className="text-gray-900" /> }}
               />{" "}
               {t("you_cannot_change_once_submitted")}
               <p className="mt-2">
@@ -2313,197 +518,3 @@ export default function MedicationBillForm({
     </Page>
   );
 }
-
-interface DosageDialogProps {
-  dosageRange: DoseRange;
-  onChange?: (
-    value?: MedicationRequestDosageInstruction["dose_and_rate"],
-  ) => void;
-}
-
-const DosageDialog: React.FC<DosageDialogProps> = ({
-  dosageRange,
-  onChange,
-}) => {
-  const { t } = useTranslation();
-
-  const [localDoseRange, setLocalDoseRange] = useState<DoseRange>(dosageRange);
-
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="font-medium text-base">{t("taper_titrate_dosage")}</div>
-      <div>
-        <Label className="mb-1.5">{t("start_dose")}</Label>
-        <ComboboxQuantityInput
-          quantity={localDoseRange.low}
-          onChange={(value) => {
-            if (value) {
-              setLocalDoseRange((prev) => ({
-                ...prev,
-                low: value,
-                high: {
-                  ...prev.high,
-                  unit: value.unit,
-                },
-              }));
-            }
-          }}
-        />
-      </div>
-      <div>
-        <Label className="mb-1.5">{t("end_dose")}</Label>
-        <ComboboxQuantityInput
-          quantity={localDoseRange.high}
-          onChange={(value) => {
-            if (value) {
-              setLocalDoseRange((prev) => ({
-                ...prev,
-                high: value,
-                low: {
-                  ...prev.low,
-                  unit: value.unit,
-                },
-              }));
-            }
-          }}
-        />
-      </div>
-      <div className="flex justify-end gap-2">
-        <Button
-          variant="outline"
-          onClick={() => {
-            onChange?.(undefined);
-          }}
-        >
-          {t("clear")}
-        </Button>
-        <Button
-          onClick={() => {
-            onChange?.({
-              type: "ordered",
-              dose_range: localDoseRange,
-            });
-          }}
-        >
-          {t("save")}
-        </Button>
-      </div>
-    </div>
-  );
-};
-
-interface DispensedItemsSheetProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  medicationRequestId: string;
-  facilityId: string;
-}
-
-export const DispensedItemsSheet = ({
-  open,
-  onOpenChange,
-  medicationRequestId,
-}: DispensedItemsSheetProps) => {
-  const { t } = useTranslation();
-  const { facilityId } = useCurrentFacility();
-  const { locationId } = useCurrentLocation();
-
-  const { qParams, Pagination, resultsPerPage } = useFilters({
-    limit: 10,
-    disableCache: true,
-  });
-
-  const { data: dispensedItems, isLoading } = useQuery({
-    queryKey: ["medication_dispense", medicationRequestId, qParams],
-    queryFn: query(medicationDispenseApi.list, {
-      queryParams: {
-        authorizing_request: medicationRequestId,
-        facility: facilityId,
-        location: locationId,
-        limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-      },
-    }),
-    enabled: open && !!medicationRequestId,
-  });
-
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-3xl">
-        <SheetHeader>
-          <SheetTitle>{t("dispensed_items")}</SheetTitle>
-        </SheetHeader>
-        <div className="mt-4">
-          {isLoading ? (
-            <TableSkeleton count={3} />
-          ) : dispensedItems?.results.length ? (
-            <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t("item")}</TableHead>
-                    <TableHead>{t("quantity")}</TableHead>
-                    <TableHead>{t("lot_number")}</TableHead>
-                    <TableHead>{t("dispensed_on")}</TableHead>
-                    <TableHead>{t("status")}</TableHead>
-                    <TableHead>{t("total_price")}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {dispensedItems?.results.map(
-                    (item: MedicationDispenseRead) => (
-                      <TableRow key={item.id}>
-                        <TableCell>
-                          {item.item.product.product_knowledge.name}
-                        </TableCell>
-                        <TableCell>
-                          {round(item.charge_item.quantity)}{" "}
-                          {
-                            item.dosage_instruction?.[0]?.dose_and_rate
-                              ?.dose_quantity?.unit?.display
-                          }
-                        </TableCell>
-                        <TableCell>
-                          {item.item.product.batch?.lot_number || "-"}
-                        </TableCell>
-                        <TableCell>
-                          {formatDate(
-                            new Date(item.when_prepared),
-                            "dd/MM/yyyy hh:mm a",
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              MEDICATION_DISPENSE_STATUS_COLORS[item.status]
-                            }
-                          >
-                            {t(item.status)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <MonetaryDisplay
-                            amount={item?.charge_item?.total_price}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ),
-                  )}
-                </TableBody>
-              </Table>
-              {dispensedItems.count > resultsPerPage && (
-                <div className="mt-4 flex justify-center">
-                  <Pagination totalCount={dispensedItems.count} />
-                </div>
-              )}
-            </>
-          ) : (
-            <p className="text-center text-gray-500">
-              {t("no_items_dispensed_yet")}
-            </p>
-          )}
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
-};

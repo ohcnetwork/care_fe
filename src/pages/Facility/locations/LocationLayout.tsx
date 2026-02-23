@@ -19,17 +19,22 @@ import { RequestOrderShow } from "@/pages/Facility/services/inventory/externalSu
 import DeliveryOrderForm from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderForm";
 import { DeliveryOrderList } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderList";
 import { DeliveryOrderShow } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderShow";
+import { PrintDeliveryOrder } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/PrintDeliveryOrder";
+import { PrintRequestOrder } from "@/pages/Facility/services/inventory/externalSupply/requestOrder/PrintRequestOrder";
 import { ToDispatch } from "@/pages/Facility/services/inventory/ToDispatch";
 import { ToReceive } from "@/pages/Facility/services/inventory/ToReceive";
+import AllMedicationBillForm from "@/pages/Facility/services/pharmacy/AllMedicationBillForm";
 import DispensesView from "@/pages/Facility/services/pharmacy/DispensesView";
 import MedicationBillForm from "@/pages/Facility/services/pharmacy/MedicationBillForm";
 import MedicationDispenseHistory from "@/pages/Facility/services/pharmacy/MedicationDispenseHistory";
 import MedicationRequestList from "@/pages/Facility/services/pharmacy/MedicationRequestList";
+import MedicationReturnList from "@/pages/Facility/services/pharmacy/MedicationReturnList";
+import MedicationReturnShow from "@/pages/Facility/services/pharmacy/MedicationReturnShow";
 import PrescriptionsView, {
   PharmacyMedicationTab,
 } from "@/pages/Facility/services/pharmacy/PrescriptionsView";
 import { PrintDispenseOrder } from "@/pages/Facility/services/pharmacy/PrintDispenseOrder";
-import { PrintPharmacyPrescription } from "@/pages/Facility/services/pharmacy/PrintPharmacyPrescription";
+import { PrintMedicationReturn } from "@/pages/Facility/services/pharmacy/PrintMedicationReturn";
 import ServiceRequestList from "@/pages/Facility/services/serviceRequests/ServiceRequestList";
 import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
@@ -60,13 +65,19 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       prescriptionId={prescriptionId}
     />
   ),
-  "/medication_requests/patient/:patientId/print": ({
+  // Todo: Re-check if this route is needed
+  // "/medication_requests/patient/:patientId/print": ({
+  //   patientId,
+  // }: {
+  //   patientId: string;
+  // }) => (
+  //   <PrintPharmacyPrescription facilityId={facilityId} patientId={patientId} />
+  // ),
+  "/medication_requests/patient/:patientId/bill": ({
     patientId,
   }: {
     patientId: string;
-  }) => (
-    <PrintPharmacyPrescription facilityId={facilityId} patientId={patientId} />
-  ),
+  }) => <AllMedicationBillForm patientId={patientId} />,
   "/medication_requests/patient/:patientId/prescription/:prescriptionId/bill":
     ({
       patientId,
@@ -103,6 +114,30 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     dispenseOrderId: string;
   }) => (
     <DispensesView facilityId={facilityId} dispenseOrderId={dispenseOrderId} />
+  ),
+  "/medication_return": () => (
+    <MedicationReturnList facilityId={facilityId} locationId={locationId} />
+  ),
+  "/medication_return/order/:deliveryOrderId": ({
+    deliveryOrderId,
+  }: {
+    deliveryOrderId: string;
+  }) => (
+    <MedicationReturnShow
+      facilityId={facilityId}
+      locationId={locationId}
+      deliveryOrderId={deliveryOrderId}
+    />
+  ),
+  "/medication_return/order/:deliveryOrderId/print": ({
+    deliveryOrderId,
+  }: {
+    deliveryOrderId: string;
+  }) => (
+    <PrintMedicationReturn
+      facilityId={facilityId}
+      deliveryOrderId={deliveryOrderId}
+    />
   ),
 
   // Laboratory
@@ -151,6 +186,15 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       internal={true}
     />
   ),
+  //Print Internal Order
+  "/inventory/internal/:type/orders/:id/print": ({ id }: { id: string }) => (
+    <PrintRequestOrder
+      facilityId={facilityId}
+      locationId={locationId}
+      requestOrderId={id}
+      internal={true}
+    />
+  ),
   // Create Delivery
   "/inventory/internal/:type/deliveries/new": () => (
     <DeliveryOrderForm
@@ -162,6 +206,19 @@ const getRoutes = (facilityId: string, locationId: string) => ({
   // View Delivery
   "/inventory/internal/:type/deliveries/:id": ({ id }: { id: string }) => (
     <DeliveryOrderShow
+      facilityId={facilityId}
+      locationId={locationId}
+      deliveryOrderId={id}
+      internal={true}
+    />
+  ),
+  // Print Delivery
+  "/inventory/internal/:type/deliveries/:id/print": ({
+    id,
+  }: {
+    id: string;
+  }) => (
+    <PrintDeliveryOrder
       facilityId={facilityId}
       locationId={locationId}
       deliveryOrderId={id}
@@ -243,6 +300,15 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       internal={false}
     />
   ),
+  // Print External Order
+  "/inventory/external/orders/:tab/:id/print": ({ id }: { id: string }) => (
+    <PrintRequestOrder
+      facilityId={facilityId}
+      locationId={locationId}
+      requestOrderId={id}
+      internal={false}
+    />
+  ),
 
   // List External Deliveries
   "/inventory/external/deliveries/:tab": ({ tab }: { tab: string }) => (
@@ -264,6 +330,15 @@ const getRoutes = (facilityId: string, locationId: string) => ({
   // View External Delivery
   "/inventory/external/deliveries/:tab/:id": ({ id }: { id: string }) => (
     <DeliveryOrderShow
+      facilityId={facilityId}
+      locationId={locationId}
+      deliveryOrderId={id}
+      internal={false}
+    />
+  ),
+  // Print External Delivery
+  "/inventory/external/deliveries/:tab/:id/print": ({ id }: { id: string }) => (
+    <PrintDeliveryOrder
       facilityId={facilityId}
       locationId={locationId}
       deliveryOrderId={id}

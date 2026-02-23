@@ -25,7 +25,7 @@ interface LocationNodeProps {
   children?: React.ReactNode;
 }
 
-function LocationNode({
+export function LocationNode({
   location,
   isLast,
   startTime,
