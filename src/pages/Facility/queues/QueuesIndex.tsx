@@ -308,9 +308,9 @@ export default function QueuesIndex({
     <Page title={t("token_queues")} hideTitleOnPage>
       <div className="container mx-auto px-4 py-6">
         {/* Header Section - Date, Practitioner, Create Queue */}
-        <div className="mb-8 flex flex-row flex-wrap gap-4 items-end bg-white p-4 rounded-lg border border-gray-200">
+        <div className="mb-8 flex flex-wrap gap-4 items-end bg-white p-4 rounded-lg border border-gray-200">
           {/* Date Filter */}
-          <div className="flex flex-col gap-2 flex-1 min-w-[200px]">
+          <div className="flex flex-col gap-2 flex-1 lg:flex-initial">
             <label className="text-sm font-medium text-gray-700">
               {t("date")}
             </label>
@@ -322,7 +322,7 @@ export default function QueuesIndex({
 
           {/* Resource Picker - Only show for Practitioner resource type */}
           {resourceType === SchedulableResourceType.Practitioner && (
-            <div className="flex flex-col gap-2 flex-1 min-w-[200px]">
+            <div className="flex flex-col gap-2 flex-1 lg:flex-initial">
               <label className="text-sm font-medium text-gray-700">
                 {t("selected_practitioner")}
               </label>
@@ -330,7 +330,7 @@ export default function QueuesIndex({
                 value={qParams.resource_id || effectiveResourceId}
                 onValueChange={handleResourceChange}
               >
-                <SelectTrigger className="w-64">
+                <SelectTrigger className="w-full lg:w-auto">
                   <SelectValue placeholder={t("select_practitioner")} />
                 </SelectTrigger>
                 <SelectContent>
