@@ -2367,6 +2367,7 @@
   "exception_deleted": "Exception deleted",
   "exception_for_non_schedulable_resource_warning": "Exceptions can be created only after creating a schedule",
   "exceptions": "Exceptions",
+  "excess_by": "excess by {{quantity}}",
   "exclude_if_all": "exclude if all",
   "exclude_if_any": "exclude if any",
   "exclude_rules": "Exclude rules",

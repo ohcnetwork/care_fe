@@ -58,7 +58,14 @@ import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { SUPPLY_REQUEST_STATUS_COLORS } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
-import { add, isPositive, round, subtract } from "@/Utils/decimal";
+import {
+  abs,
+  add,
+  isNegative,
+  isPositive,
+  round,
+  subtract,
+} from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -687,13 +694,28 @@ export function RequestOrderShow({
                                         className={cn(
                                           isPositive(
                                             supplyRequest.remaining_quantity,
-                                          )
-                                            ? "text-red-500"
-                                            : "text-green-500",
+                                          ) && "text-red-500",
                                         )}
                                       >
-                                        {round(
+                                        {isNegative(
                                           supplyRequest.remaining_quantity,
+                                        ) ? (
+                                          <div className="flex items-center gap-1">
+                                            <span>0</span>
+                                            <span className="text-sm text-gray-500">
+                                              (
+                                              {t("excess_by", {
+                                                quantity: abs(
+                                                  supplyRequest.remaining_quantity,
+                                                ),
+                                              })}
+                                              )
+                                            </span>
+                                          </div>
+                                        ) : (
+                                          round(
+                                            supplyRequest.remaining_quantity,
+                                          )
                                         )}
                                       </TableCell>
                                       <TableCell>
