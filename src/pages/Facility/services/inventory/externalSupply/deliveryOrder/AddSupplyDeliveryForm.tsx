@@ -262,6 +262,7 @@ export function AddSupplyDeliveryForm({
       inputPlaceholder={t("search_order")}
       noOptionsMessage={t("no_orders_found")}
       className="px-10"
+      popoverContentClassName="w-auto"
     />
   );
 

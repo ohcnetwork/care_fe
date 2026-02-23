@@ -22,13 +22,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -58,7 +51,8 @@ import { UserReadMinimal } from "@/types/user/user";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import mutate from "@/Utils/request/mutate";
 import queryClient from "@/Utils/request/queryClient";
-import { dateQueryString, formatName } from "@/Utils/utils";
+import { dateQueryString } from "@/Utils/utils";
+import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { startOfDay } from "date-fns";
 import dayjs from "dayjs";
 import { Link } from "raviger";
@@ -237,7 +231,7 @@ export default function QueuesIndex({
     qParams.resource_id ||
     resourceId ||
     (resourceType === SchedulableResourceType.Practitioner
-      ? currentUserId.toString()
+      ? currentUserId
       : undefined);
 
   // Fetch available users for practitioner resource type
@@ -250,6 +244,11 @@ export default function QueuesIndex({
   });
 
   const availableUsers = availableUsersData?.users || [];
+
+  // Find the selected practitioner
+  const selectedPractitioner = availableUsers.find(
+    (user) => user.id === effectiveResourceId,
+  );
 
   // Set default date to today if no date is specified
   useEffect(() => {
@@ -269,11 +268,11 @@ export default function QueuesIndex({
   };
 
   // Handle resource selection
-  const handleResourceChange = (selectedResourceId: string) => {
-    updateQuery({ resource_id: selectedResourceId });
+  const handleResourceChange = (users: UserReadMinimal[]) => {
+    updateQuery({ resource_id: users[0]?.id });
   };
 
-  // Fetch queues
+  // Fetch queues with all query parameters
   const { data: queuesResponse, isLoading: queuesLoading } = useQuery({
     queryKey: ["tokenQueues", facilityId, effectiveResourceId, qParams],
     queryFn: query(tokenQueueApi.list, {
@@ -326,21 +325,12 @@ export default function QueuesIndex({
               <label className="text-sm font-medium text-gray-700">
                 {t("selected_practitioner")}
               </label>
-              <Select
-                value={qParams.resource_id || effectiveResourceId}
-                onValueChange={handleResourceChange}
-              >
-                <SelectTrigger className="w-64">
-                  <SelectValue placeholder={t("select_practitioner")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableUsers.map((user: UserReadMinimal) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {formatName(user)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <PractitionerSelector
+                facilityId={facilityId}
+                selected={selectedPractitioner ? [selectedPractitioner] : []}
+                onSelect={handleResourceChange}
+                multiple={false}
+              />
             </div>
           )}
 

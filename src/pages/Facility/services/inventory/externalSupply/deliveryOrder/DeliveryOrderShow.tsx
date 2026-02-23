@@ -149,6 +149,8 @@ function AllSupplyDeliveriesComponent({
             <SupplyDeliveryTable
               deliveries={allSupplyDeliveries.results}
               internal={internal}
+              facilityId={facilityId}
+              linkToProduct
             />
           </>
         ) : (
