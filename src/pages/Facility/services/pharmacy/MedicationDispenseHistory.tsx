@@ -227,10 +227,8 @@ export default function MedicationDispenseHistory({
 
   useBarcodeScanner({
     onScan: (scannedValue: string) => {
-      if (!scanDialogOpen) {
-        handleScanSuccess(scannedValue);
-        toast.info(t("qr_code_scanned_successfully"));
-      }
+      handleScanSuccess(scannedValue);
+      toast.info(t("qr_code_scanned_successfully"));
     },
     enabled: showCheckboxes && !scanDialogOpen,
     preventDefault: false,

@@ -81,6 +81,8 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
     invoice?.charge_items,
   );
 
+  const dispenseOrderId = getDispenseOrderId(dispenseMap);
+
   const { facility, isFacilityLoading } = useCurrentFacility();
 
   if (isInvoiceLoading || isFacilityLoading || !invoice || !facility) {
@@ -409,14 +411,10 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                 ).length === 0 && "border-b rounded-b-md",
               )}
             >
-              <div
-                className={cn(
-                  getDispenseOrderId(dispenseMap) && "flex justify-between",
-                )}
-              >
-                {getDispenseOrderId(dispenseMap) && (
+              <div className={cn(dispenseOrderId && "flex justify-between")}>
+                {dispenseOrderId && (
                   <QRCodeSVG
-                    value={getDispenseOrderId(dispenseMap)!}
+                    value={dispenseOrderId}
                     size={40}
                     level="Q"
                     marginSize={0}
