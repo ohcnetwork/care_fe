@@ -8,7 +8,7 @@ import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import { UserReadMinimal } from "@/types/user/user";
 
 export enum ChargeItemStatus {
-  planned = "planned",
+  // planned = "planned",
   billable = "billable",
   not_billable = "not_billable",
   aborted = "aborted",
@@ -17,8 +17,14 @@ export enum ChargeItemStatus {
   entered_in_error = "entered_in_error",
 }
 
+export const EXCLUDED_CHARGE_ITEM_STATUSES = [
+  ChargeItemStatus.not_billable,
+  ChargeItemStatus.entered_in_error,
+  ChargeItemStatus.aborted,
+];
+
 export const CHARGE_ITEM_STATUS_COLORS = {
-  planned: "blue",
+  // planned: "blue",
   billable: "indigo",
   not_billable: "yellow",
   aborted: "destructive",
@@ -75,6 +81,7 @@ export interface ApplyChargeItemDefinitionRequest {
   service_resource?: ChargeItemServiceResource;
   service_resource_id?: string;
   performer_actor?: string;
+  account?: string;
 }
 
 export interface ApplyMultipleChargeItemDefinitionRequest {
@@ -91,13 +98,14 @@ export interface ChargeItemUpdate extends Omit<
 
 export interface ChargeItemRead extends ChargeItemBase {
   total_price_components: MonetaryComponent[];
-  total_price: string;
   charge_item_definition: ChargeItemDefinitionBase;
   service_resource: ChargeItemServiceResource;
   service_resource_id?: string;
   performer_actor?: UserReadMinimal;
   created_date: string;
   modified_date: string;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
 }
 
 export interface ChargeItemBatchResponse {

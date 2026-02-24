@@ -34,6 +34,7 @@ import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryCo
 import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -79,7 +80,7 @@ export default function AddChargeItemSheet({
 
   const handleChargeItemsAdded = () => {
     queryClient.invalidateQueries({
-      queryKey: ["charge-items", qParams],
+      queryKey: ["chargeItems", qParams],
     });
   };
 
@@ -90,7 +91,7 @@ export default function AddChargeItemSheet({
   };
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["charge-items", qParams],
+    queryKey: ["chargeItems", qParams],
     queryFn: query.debounced(chargeItemApi.listChargeItem, {
       pathParams: { facilityId },
       queryParams: {
@@ -235,7 +236,7 @@ export default function AddChargeItemSheet({
                             />
                           </TableCell>
                           <TableCell>{item.title}</TableCell>
-                          <TableCell>{item.quantity}</TableCell>
+                          <TableCell>{round(item.quantity)}</TableCell>
                           <TableCell>
                             <MonetaryDisplay
                               amount={getBaseComponent(item)?.amount || "0"}
@@ -287,6 +288,7 @@ export default function AddChargeItemSheet({
           onOpenChange={setIsAddChargeItemsOpen}
           facilityId={facilityId}
           patientId={account.patient.id}
+          accountId={accountId}
           onChargeItemsAdded={handleChargeItemsAdded}
         />
       )}

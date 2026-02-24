@@ -10,6 +10,7 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import { Account } from "./summary-panel-details-tab/account";
 import { DepartmentsAndTeams } from "./summary-panel-details-tab/department-and-team";
 import { DischargeDetails } from "./summary-panel-details-tab/discharge-summary";
+import { EncounterTags } from "./summary-panel-details-tab/encounter-tags";
 import { HospitalizationDetails } from "./summary-panel-details-tab/hospitalisation";
 import { Locations } from "./summary-panel-details-tab/locations";
 import { ManageCareTeam } from "./summary-panel-details-tab/manage-care-team";
@@ -95,6 +96,7 @@ export const SummaryPanelActionsTab = () => {
         </div>
         <div className="flex xl:hidden flex-col space-y-2 mt-3">
           <Account />
+          <EncounterTags />
           <Locations />
           <ManageCareTeam />
           <DepartmentsAndTeams />

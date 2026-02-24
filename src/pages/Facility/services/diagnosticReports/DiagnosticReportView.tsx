@@ -18,10 +18,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import BackButton from "@/components/Common/BackButton";
 import { FileListTable } from "@/components/Files/FileListTable";
 
-import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
-import { formatName } from "@/Utils/utils";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
 import { ObservationHistorySheet } from "@/pages/Facility/services/serviceRequests/components/ObservationHistorySheet";
 import { DIAGNOSTIC_REPORT_STATUS_COLORS } from "@/types/emr/diagnosticReport/diagnosticReport";
@@ -29,6 +27,10 @@ import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportAp
 import { ObservationStatus } from "@/types/emr/observation/observation";
 import { FileReadMinimal } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { formatName } from "@/Utils/utils";
 
 export default function DiagnosticReportView({
   facilityId,
@@ -40,6 +42,7 @@ export default function DiagnosticReportView({
   diagnosticReportId: string;
 }) {
   const { t } = useTranslation();
+  useShortcutSubContext("facility:service");
 
   const { data: report, isLoading } = useQuery({
     queryKey: ["diagnosticReport", diagnosticReportId],
@@ -96,6 +99,7 @@ export default function DiagnosticReportView({
         >
           <Printer className="h-4 w-4 mr-2" />
           {t("print")}
+          <ShortcutBadge actionId="print-report" />
         </Button>
       </div>
 
@@ -118,7 +122,8 @@ export default function DiagnosticReportView({
                   </span>
                 </p>
               ) : (
-                t("diagnostic_report")
+                report.service_request?.title ||
+                t("diagnostic_report", { count: 1 })
               )}
             </CardTitle>
           </CardHeader>

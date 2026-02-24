@@ -126,7 +126,7 @@ export default function DeliveryOrderForm({
     queryFn: query.debounced(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
-        search: searchDeliveryFrom,
+        name: searchDeliveryFrom,
         limit: 100,
         mode: "kind",
         ordering: "sort_index",
@@ -421,7 +421,7 @@ export default function DeliveryOrderForm({
                     name="tags"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("tags_other")}</FormLabel>
+                        <FormLabel>{t("tags_proper")}</FormLabel>
                         <FormControl>
                           <TagSelectorPopover
                             selected={selectedTags}

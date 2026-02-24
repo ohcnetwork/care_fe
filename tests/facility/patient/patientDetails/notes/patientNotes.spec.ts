@@ -82,7 +82,7 @@ test.describe("Patient Notes - Isolation from Encounter Notes", () => {
     await page.getByRole("tab", { name: "Notes" }).click();
 
     // Wait for notes to load by checking for the "New" button
-    await expect(page.getByRole("button", { name: /New/i })).toBeVisible({
+    await expect(page.getByRole("button", { name: /^New$/i })).toBeVisible({
       timeout: 10000,
     });
 
