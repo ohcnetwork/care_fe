@@ -21,6 +21,21 @@ interface InvoiceChargeItemTitleProps {
   isLoading: boolean;
 }
 
+/**
+ * Extracts the dispense order ID from a dispense map.
+ * Returns the first order ID found, or undefined if none exists.
+ */
+export function getDispenseOrderId(
+  dispenseMap: Record<string, MedicationDispenseRead | undefined>,
+): string | undefined {
+  for (const dispense of Object.values(dispenseMap)) {
+    if (dispense?.order?.id) {
+      return dispense.order.id;
+    }
+  }
+  return undefined;
+}
+
 export function InvoiceChargeItemTitle({
   item,
   dispenseMap,
