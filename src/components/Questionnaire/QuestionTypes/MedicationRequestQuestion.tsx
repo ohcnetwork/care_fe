@@ -220,11 +220,21 @@ const MEDICATION_REQUEST_FIELDS = {
     validate: (value: unknown) => {
       const dosageInstruction =
         value as MedicationRequestCreate["dosage_instruction"][0];
-      return !!(
-        isPositive(
-          dosageInstruction?.dose_and_rate?.dose_quantity?.value ?? "0",
-        ) || dosageInstruction?.dose_and_rate?.dose_range
-      );
+      const doseAndRate = dosageInstruction?.dose_and_rate;
+      const doseQuantityValue = doseAndRate?.dose_quantity?.value;
+      const doseRange = doseAndRate?.dose_range;
+
+      if (doseQuantityValue != null) {
+        return isPositive(doseQuantityValue);
+      }
+
+      if (doseRange) {
+        const low = doseRange.low?.value;
+        const high = doseRange.high?.value;
+        return isPositive(low ?? "0") && isPositive(high ?? "0");
+      }
+
+      return false;
     },
   },
   FREQUENCY: {
