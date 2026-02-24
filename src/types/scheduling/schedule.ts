@@ -8,6 +8,7 @@ import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/c
 import { EncounterListRead } from "@/types/emr/encounter/encounter";
 import {
   PatientListRead,
+  PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
@@ -251,6 +252,7 @@ export type PublicAppointment = AppointmentBase & {
 };
 
 export type AppointmentRead = Appointment & {
+  patient: PatientRead;
   tags: TagConfig[];
   updated_by: UserReadMinimal | null;
   created_by: UserReadMinimal;

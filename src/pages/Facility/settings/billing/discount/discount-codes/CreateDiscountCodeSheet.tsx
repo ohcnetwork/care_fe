@@ -29,7 +29,7 @@ export function CreateDiscountCodeSheet() {
       pathParams: { facilityId },
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["facility", facility?.id] });
+      queryClient.invalidateQueries({ queryKey: ["facility", facilityId] });
       toast.success(t("discount_code_created"));
     },
   });
