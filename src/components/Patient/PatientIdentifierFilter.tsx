@@ -319,7 +319,12 @@ export default function PatientIdentifierFilter({
         toast.info(t("patient_details_scanned_successfully"));
       }
     },
-    enabled: !open && !verificationOpen && !scanDialogOpen,
+    enabled:
+      !open &&
+      !verificationOpen &&
+      !scanDialogOpen &&
+      !hideScanButton &&
+      !selectedPatient,
     preventDefault: false,
     maxLength: 500,
     timeout: 500,
