@@ -113,6 +113,8 @@ export default function CreateEncounterForm({
     },
   });
 
+  const selectedStatus = form.watch("status");
+
   const tagIds = form.watch("tags");
   const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
   const selectedTags = tagQueries
@@ -136,6 +138,13 @@ export default function CreateEncounterForm({
   });
 
   function onSubmit(data: z.infer<typeof encounterFormSchema>) {
+    if (
+      data.status !== EncounterStatus.PLANNED &&
+      new Date(data.start_date) > new Date()
+    ) {
+      toast.error(t("encounter_future_date_restriction"));
+      return;
+    }
     const encounterRequest: EncounterCreate = {
       ...data,
       patient: patientId,
@@ -199,6 +208,10 @@ export default function CreateEncounterForm({
                       <div className="flex gap-2">
                         <DatePicker
                           date={date}
+                          disabled={(date) =>
+                            selectedStatus !== EncounterStatus.PLANNED &&
+                            date > new Date()
+                          }
                           onChange={(newDate) => {
                             if (!newDate) return;
                             const updatedDate = new Date(newDate);
