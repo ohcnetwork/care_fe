@@ -81,6 +81,7 @@ export interface ApplyChargeItemDefinitionRequest {
   service_resource?: ChargeItemServiceResource;
   service_resource_id?: string;
   performer_actor?: string;
+  account?: string;
 }
 
 export interface ApplyMultipleChargeItemDefinitionRequest {

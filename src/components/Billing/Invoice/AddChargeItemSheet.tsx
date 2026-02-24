@@ -288,6 +288,7 @@ export default function AddChargeItemSheet({
           onOpenChange={setIsAddChargeItemsOpen}
           facilityId={facilityId}
           patientId={account.patient.id}
+          accountId={accountId}
           onChargeItemsAdded={handleChargeItemsAdded}
         />
       )}

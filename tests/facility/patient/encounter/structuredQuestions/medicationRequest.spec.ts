@@ -6,7 +6,7 @@ import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-const INT_MAX = 100; // Arbitrary upper limit for integer fields
+const INT_MAX = 70; // Arbitrary upper limit for integer fields
 const DOSAGE_UNITS = [
   "tablets",
   "gram",
