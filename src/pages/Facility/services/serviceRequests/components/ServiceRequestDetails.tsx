@@ -125,6 +125,16 @@ export function ServiceRequestDetails({
                 {formatSpecimenRequirements(specimenRequirements)}
               </div>
             </div>
+            {request.body_site && (
+              <div>
+                <div className="text-sm text-gray-600 mb-1">
+                  {t("body_site")}
+                </div>
+                <div className="font-semibold text-gray-700">
+                  {request.body_site.display}
+                </div>
+              </div>
+            )}
           </div>
           <div className="border-l border-gray-200 mx-4" />
           <div className="flex flex-col gap-6">
@@ -159,7 +169,16 @@ export function ServiceRequestDetails({
             )}
           </div>
         </div>
-
+        {request.patient_instruction && (
+          <div className="mt-4">
+            <div className="text-sm text-gray-600 mb-1">
+              {t("patient_instruction")}:
+            </div>
+            <div className="text-sm text-gray-950 ">
+              {request.patient_instruction}
+            </div>
+          </div>
+        )}
         {request.note && (
           <div className="mt-4">
             <div className="text-sm text-gray-600 mb-1">{t("note")}:</div>
