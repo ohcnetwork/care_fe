@@ -27,6 +27,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { cn } from "@/lib/utils";
 import facilityApi from "@/types/facility/facilityApi";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 import { UserReadMinimal } from "@/types/user/user";
@@ -38,15 +39,20 @@ interface Props {
   placeholder?: string;
   noOptionsMessage?: string;
   popoverClassName?: string;
+  contentClassName?: string;
+  contentAlign?: React.ComponentProps<typeof PopoverContent>["align"];
   facilityId?: string;
   organizationId?: string;
   disabled?: boolean;
   isServiceAccount?: boolean;
+  trigger?: React.ReactNode;
+  onClear?: () => void;
 }
 
 const PAGE_LIMIT = 50;
 
 interface UserCommandContentProps {
+  search: string;
   setSearch: (value: string) => void;
   usersList?: UserReadMinimal[];
   isFetching: boolean;
@@ -56,9 +62,11 @@ interface UserCommandContentProps {
   onChange: (user: UserReadMinimal) => void;
   setOpen: (value: boolean) => void;
   ref: (node?: Element | null) => void;
+  onClear?: () => void;
 }
 
 function UserCommandContent({
+  search,
   setSearch,
   usersList,
   isFetching,
@@ -68,6 +76,7 @@ function UserCommandContent({
   onChange,
   setOpen,
   ref,
+  onClear,
 }: UserCommandContentProps) {
   const { t } = useTranslation();
 
@@ -75,6 +84,7 @@ function UserCommandContent({
     <Command>
       <CommandInput
         placeholder={t("search")}
+        value={search}
         onValueChange={setSearch}
         className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
       />
@@ -82,6 +92,19 @@ function UserCommandContent({
         <CommandEmpty>
           {isFetching ? t("searching") : noOptionsMessage || t("no_results")}
         </CommandEmpty>
+        {onClear && (
+          <CommandGroup>
+            <CommandItem
+              onSelect={() => {
+                onClear();
+                setOpen(false);
+              }}
+              className="cursor-pointer text-destructive"
+            >
+              {t("clear_all")}
+            </CommandItem>
+          </CommandGroup>
+        )}
         <CommandGroup>
           {usersList?.map((user: UserReadMinimal, i) => (
             <CommandItem
@@ -130,10 +153,14 @@ export default function UserSelector({
   placeholder,
   noOptionsMessage,
   popoverClassName,
+  contentClassName,
+  contentAlign,
   facilityId,
   organizationId,
   disabled,
   isServiceAccount = false,
+  trigger,
+  onClear,
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -192,32 +219,40 @@ export default function UserSelector({
     if (inView && hasNextPage) fetchNextPage();
   }, [inView, hasNextPage, fetchNextPage]);
 
-  const renderTriggerButton = () => (
-    <Button
-      variant="outline"
-      role="combobox"
-      className="min-w-60 w-full justify-start"
-      disabled={disabled}
-    >
-      {selected ? (
-        <div className="flex items-center gap-2">
-          <Avatar
-            imageUrl={selected.profile_picture_url}
-            name={formatName(selected, true)}
-            className="size-6 rounded-full"
-          />
-          <TooltipComponent content={formatName(selected)} side="bottom">
-            <p className="font-medium text-gray-900 truncate max-w-48 sm:max-w-56 md:max-w-64">
-              {formatName(selected)}
-            </p>
-          </TooltipComponent>
-        </div>
-      ) : (
-        <span>{placeholder || t("select_user")}</span>
-      )}
-      <CaretDownIcon className="ml-auto" />
-    </Button>
-  );
+  const renderTriggerButton = () =>
+    trigger || (
+      <Button
+        type="button"
+        variant="outline"
+        role="combobox"
+        className="min-w-60 w-full justify-start"
+        disabled={disabled}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            setOpen(true);
+          }
+        }}
+      >
+        {selected ? (
+          <div className="flex items-center gap-2">
+            <Avatar
+              imageUrl={selected.profile_picture_url}
+              name={formatName(selected, true)}
+              className="size-6 rounded-full"
+            />
+            <TooltipComponent content={formatName(selected)} side="bottom">
+              <p className="font-medium text-gray-900 truncate max-w-48 sm:max-w-56 md:max-w-64">
+                {formatName(selected)}
+              </p>
+            </TooltipComponent>
+          </div>
+        ) : (
+          <span>{placeholder || t("select_user")}</span>
+        )}
+        <CaretDownIcon className="ml-auto" />
+      </Button>
+    );
 
   if (isMobile) {
     return (
@@ -228,6 +263,7 @@ export default function UserSelector({
         <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
           <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
             <UserCommandContent
+              search={search}
               setSearch={setSearch}
               usersList={usersList}
               isFetching={isFetching}
@@ -237,6 +273,7 @@ export default function UserSelector({
               onChange={onChange}
               setOpen={setOpen}
               ref={ref}
+              onClear={onClear}
             />
           </div>
         </DrawerContent>
@@ -250,11 +287,15 @@ export default function UserSelector({
         {renderTriggerButton()}
       </PopoverTrigger>
       <PopoverContent
-        className="p-0 w-[var(--radix-popover-trigger-width)]"
-        align="start"
+        className={cn(
+          "p-0 w-(--radix-popover-trigger-width)",
+          contentClassName,
+        )}
+        align={contentAlign || "start"}
         sideOffset={4}
       >
         <UserCommandContent
+          search={search}
           setSearch={setSearch}
           usersList={usersList}
           isFetching={isFetching}
@@ -264,6 +305,7 @@ export default function UserSelector({
           onChange={onChange}
           setOpen={setOpen}
           ref={ref}
+          onClear={onClear}
         />
       </PopoverContent>
     </Popover>

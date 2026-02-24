@@ -42,12 +42,12 @@ import FiltersCache from "@/Utils/FiltersCache";
 import ViewCache from "@/Utils/ViewCache";
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
-import { invalidateAllLocationCaches } from "@/atoms/location-atom";
 import authApi from "@/types/auth/authApi";
 import { TokenData } from "@/types/otp/otp";
 import otpApi from "@/types/otp/otpApi";
 
 import { clearQueryPersistenceCache } from "@/Utils/request/queryClient";
+import { invalidateAllPaymentReconcilationLocationCaches } from "@/atoms/paymentReconcilationLocationAtom";
 import { AuthHero } from "./AuthHero";
 
 interface OtpLoginData {
@@ -245,7 +245,7 @@ const Login = (props: LoginProps) => {
     if (!validated) return;
 
     FiltersCache.invalidateAll();
-    invalidateAllLocationCaches();
+    invalidateAllPaymentReconcilationLocationCaches();
     clearQueryPersistenceCache();
     try {
       await signIn(validated);

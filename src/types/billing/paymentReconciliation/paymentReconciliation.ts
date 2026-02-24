@@ -1,6 +1,7 @@
 import { AccountRead } from "@/types/billing/account/Account";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import { LocationRead } from "@/types/location/location";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum PaymentReconciliationType {
   payment = "payment",
@@ -31,7 +32,7 @@ export enum PaymentReconciliationKind {
 
 export enum PaymentReconciliationIssuerType {
   patient = "patient",
-  insurance = "insurance",
+  insurer = "insurer",
 }
 
 export enum PaymentReconciliationOutcome {
@@ -97,6 +98,7 @@ export interface PaymentReconciliationCreate extends Omit<
   account: string;
   is_credit_note?: boolean;
   location?: string;
+  extensions?: Record<string, Record<string, unknown>>;
 }
 
 export type PaymentReconciliationUpdate = Omit<PaymentReconciliationBase, "id">;
@@ -106,6 +108,11 @@ export interface PaymentReconciliationRead extends PaymentReconciliationBase {
   account: AccountRead;
   is_credit_note: boolean;
   location: LocationRead | null;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
+  created_date: string;
+  modified_date: string;
+  extensions?: Record<string, Record<string, unknown>>;
 }
 
 export interface PaymentReconciliationCancel {

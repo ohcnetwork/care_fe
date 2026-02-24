@@ -58,6 +58,7 @@ interface AddMultipleChargeItemsSheetProps {
   patientId?: string;
   onChargeItemsAdded: () => void;
   disabled?: boolean;
+  resourceSubType?: ResourceCategorySubType;
 }
 
 interface ApplyChargeItemDefinitionRequestWithObject extends ApplyChargeItemDefinitionRequest {
@@ -75,6 +76,7 @@ export default function AddMultipleChargeItemsSheet({
   patientId,
   onChargeItemsAdded,
   disabled,
+  resourceSubType,
 }: AddMultipleChargeItemsSheetProps) {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
@@ -194,9 +196,7 @@ export default function AddMultipleChargeItemsSheet({
               }
               setSelectedDefinition(selectedDef as ChargeItemDefinitionBase);
             }}
-            resourceSubType={
-              ResourceCategorySubType.charge_item_definition_location_bed_charges
-            }
+            resourceSubType={resourceSubType}
             placeholder={t("select_charge_item_definitions")}
             className="w-full"
             disabled={disabled}

@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -25,6 +24,7 @@ interface CreateInvoiceSheetProps {
   locationId?: string;
   disableCreateChargeItems?: boolean;
   dispenseOrderId?: string;
+  skipNavigation?: boolean;
 }
 
 export function CreateInvoiceSheet({
@@ -39,6 +39,7 @@ export function CreateInvoiceSheet({
   locationId,
   disableCreateChargeItems = false,
   dispenseOrderId,
+  skipNavigation = false,
 }: CreateInvoiceSheetProps) {
   const { t } = useTranslation();
 
@@ -50,7 +51,7 @@ export function CreateInvoiceSheet({
           <SheetTitle>{t("create_invoice")}</SheetTitle>
           <SheetDescription>{t("create_invoice_description")}</SheetDescription>
         </SheetHeader>
-        <ScrollArea className="h-[calc(100vh-8rem)] mt-6 -mx-4">
+        <div className="h-[calc(100vh-8rem)] overflow-auto mt-6 -mx-4">
           <CreateInvoicePage
             facilityId={facilityId}
             accountId={accountId}
@@ -62,8 +63,9 @@ export function CreateInvoiceSheet({
             locationId={locationId}
             disableCreateChargeItems={disableCreateChargeItems}
             dispenseOrderId={dispenseOrderId}
+            skipNavigation={skipNavigation}
           />
-        </ScrollArea>
+        </div>
       </SheetContent>
     </Sheet>
   );

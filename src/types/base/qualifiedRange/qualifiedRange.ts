@@ -1,5 +1,5 @@
 import { Condition, conditionSchema } from "@/types/base/condition/condition";
-import { round } from "@/Utils/decimal";
+import { round, zodDecimal } from "@/Utils/decimal";
 import { t } from "i18next";
 import { z } from "zod";
 
@@ -28,7 +28,7 @@ export enum InterpretationType {
 export interface QualifiedRange {
   // used for local state management
   id?: number;
-  conditions: Condition[];
+  conditions?: Condition[];
   ranges: NumericRange[];
   normal_coded_value_set?: string;
   critical_coded_value_set?: string;
@@ -45,13 +45,13 @@ const interpretationSchema = z.object({
 export const qualifiedRangeSchema = z.array(
   z
     .object({
-      conditions: z.array(conditionSchema),
+      conditions: z.array(conditionSchema).optional(),
       ranges: z.array(
         z
           .object({
             interpretation: interpretationSchema,
-            min: z.number().optional(),
-            max: z.number().optional(),
+            min: zodDecimal().optional(),
+            max: zodDecimal().optional(),
           })
           .refine(
             (data) => {
@@ -67,7 +67,7 @@ export const qualifiedRangeSchema = z.array(
             (data) => {
               // Only validate if both min and max exist
               if (data.min === undefined || data.max === undefined) return true;
-              return data.min <= data.max;
+              return Number(data.min) <= Number(data.max);
             },
             {
               message: t("min_less_max_error"),

@@ -181,9 +181,6 @@ export function AddItemsForm({
                                       type="number"
                                       min={1}
                                       {...field}
-                                      onChange={(e) =>
-                                        field.onChange(parseInt(e.target.value))
-                                      }
                                       className="w-20"
                                     />
                                   </FormControl>

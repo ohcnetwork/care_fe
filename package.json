@@ -27,7 +27,7 @@
   "author": "Open Healthcare Network Contributors",
   "license": "MIT",
   "scripts": {
-    "dev": "test -f src/pluginMap.ts || npm run setup && npm run supported-browsers && vite",
+    "dev": "test -f src/pluginMap.ts || npm run setup && npm run build:meta && npm run supported-browsers && vite",
     "local": "npm run supported-browsers && vite --mode docker",
     "preview": "cross-env NODE_ENV=production vite preview",
     "preview:scan": "npm run preview & npx react-scan localhost:4000",
@@ -107,6 +107,7 @@
     "i18next-resources-to-backend": "^1.2.1",
     "input-otp": "^1.4.2",
     "jotai": "^2.12.3",
+    "jotai-family": "^1.0.1",
     "jspdf": "^3.0.2",
     "libphonenumber-js": "^1.11.18",
     "lucide-react": "^0.548.0",

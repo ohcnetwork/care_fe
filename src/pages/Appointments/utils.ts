@@ -19,6 +19,22 @@ import {
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
+export const getUniqueSchedulesFromSlots = (slots: TokenSlot[]) => {
+  const scheduleMap = new Map<string, TokenSlot["availability"]["schedule"]>();
+
+  for (const slot of slots) {
+    const schedule = slot.availability.schedule;
+    if (!scheduleMap.has(schedule.id)) {
+      scheduleMap.set(schedule.id, schedule);
+    }
+  }
+
+  // Sort by schedule name
+  return Array.from(scheduleMap.values()).sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
+};
+
 export const groupSlotsByAvailability = (slots: TokenSlot[]) => {
   const result: {
     availability: TokenSlot["availability"];
