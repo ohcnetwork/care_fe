@@ -888,7 +888,11 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
     if (!currentInstructions.some((item) => item.code === instruction.code)) {
       updateInstructions([...currentInstructions, instruction]);
     } else {
-      toast.warning(`${instruction.display} ${t("is_already_selected")}`);
+      toast.warning(
+        t("instruction_already_selected", {
+          instruction: instruction.display,
+        }),
+      );
     }
   };
 

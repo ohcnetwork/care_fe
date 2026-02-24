@@ -143,14 +143,20 @@ export function SpecimenWorkflowCard({
       })(payload);
     },
     onSuccess: () => {
-      toast.success(`Processing updated for ${collectedSpecimen?.id}`);
+      toast.success(
+        t("specimen_processing_updated", {
+          specimenId: collectedSpecimen?.id,
+        }),
+      );
       queryClient.invalidateQueries({
         queryKey: ["serviceRequest", facilityId, serviceRequestId],
       });
     },
     onError: (err: any) => {
       toast.error(
-        `Failed to update processing: ${err.message || "Unknown error"}`,
+        t("specimen_processing_update_failed", {
+          error: err.message || t("unknown"),
+        }),
       );
     },
   });
@@ -169,14 +175,20 @@ export function SpecimenWorkflowCard({
       });
     },
     onSuccess: () => {
-      toast.success(`Specimen ${collectedSpecimen?.id} marked as discarded.`);
+      toast.success(
+        t("specimen_marked_discarded", {
+          specimenId: collectedSpecimen?.id,
+        }),
+      );
       queryClient.invalidateQueries({
         queryKey: ["serviceRequest", facilityId, serviceRequestId],
       });
     },
     onError: (err: any) => {
       toast.error(
-        `Failed to discard specimen: ${err.message || "Unknown error"}`,
+        t("specimen_discard_failed", {
+          error: err.message || t("unknown"),
+        }),
       );
     },
   });
