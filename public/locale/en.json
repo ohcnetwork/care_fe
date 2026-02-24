@@ -4613,6 +4613,7 @@
   "regenerate_backup_codes": "Regenerate Backup Codes",
   "regenerate_backup_codes_warning": "You are going to generate new backup codes. Your old backup codes will no longer work.",
   "regenerate_discharge_summary": "Regenerate Discharge Summary",
+  "regenerate_report": "Regenerate report",
   "regenerating": "Regenerating",
   "regex": "Regex",
   "regex_help": "A regular expression pattern to validate the identifier format (e.g., ^[A-Z0-9]{8,12}$).",

@@ -10,7 +10,9 @@ import { ButtonGroup } from "@/components/ui/button-group";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { PERMISSION_LIST_TEMPLATE } from "@/common/Permissions";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { usePermissions } from "@/context/PermissionContext";
+import { cn } from "@/lib/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { ReportReadList } from "@/types/emr/report/report";
 import reportApi from "@/types/emr/report/reportApi";
@@ -41,7 +43,7 @@ export const SummaryPanelReportsTab = ({
 
   const canListTemplate = hasPermission(PERMISSION_LIST_TEMPLATE);
 
-  const { data: templatesData } = useQuery({
+  const { data: templatesData, isLoading: isLoadingTemplates } = useQuery({
     queryKey: ["templates", facilityId],
     queryFn: query(templateApi.listTemplates, {
       queryParams: {
@@ -58,7 +60,7 @@ export const SummaryPanelReportsTab = ({
     generatingTemplateId !== null &&
     previousReportCount !== null;
 
-  const { data: reportsData } = useQuery({
+  const { data: reportsData, isLoading: isLoadingReports } = useQuery({
     queryKey: ["reports", selectedEncounterId],
     queryFn: query(reportApi.listReports, {
       queryParams: {
@@ -83,11 +85,14 @@ export const SummaryPanelReportsTab = ({
   const fetchAndDownload = async (report: ReportReadList) => {
     const data = await queryClient.fetchQuery({
       queryKey: ["report", report.id],
-      queryFn: () =>
-        query(reportApi.retrieveReport, {
-          pathParams: { id: report.id },
-        })({} as never),
+      queryFn: query(reportApi.retrieveReport, {
+        pathParams: { id: report.id },
+      }),
     });
+
+    if (!data?.read_signed_url) {
+      throw new Error("Download URL not available");
+    }
 
     const response = await fetch(data?.read_signed_url || "");
 
@@ -95,7 +100,7 @@ export const SummaryPanelReportsTab = ({
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = report.name || "report";
+    link.download = report.name || report.report_type || "report";
     link.click();
     window.URL.revokeObjectURL(url);
   };
@@ -169,6 +174,11 @@ export const SummaryPanelReportsTab = ({
   };
 
   const templates = templatesData?.results || [];
+  const isLoading = isLoadingTemplates || isLoadingReports;
+
+  if (isLoading) {
+    return <CardListSkeleton count={1} />;
+  }
 
   return (
     <div className="flex flex-col gap-2 bg-gray-100 @sm:bg-white p-2 @sm:p-3 rounded-lg border border-gray-200 @sm:shadow @sm:overflow-x-auto">
@@ -213,8 +223,12 @@ export const SummaryPanelReportsTab = ({
                 className="shrink-0"
                 onClick={() => handleGenerateReport(template)}
                 disabled={isGenerating}
+                aria-label={t("regenerate_report")}
+                title={t("regenerate_report")}
               >
-                <RefreshCw className="size-4" />
+                <RefreshCw
+                  className={cn("size-4", isGenerating && "animate-spin")}
+                />
               </Button>
             </ButtonGroup>
           ) : (
