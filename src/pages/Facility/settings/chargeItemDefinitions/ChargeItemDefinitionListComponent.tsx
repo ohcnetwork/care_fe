@@ -136,7 +136,7 @@ function ChargeItemTableRow({
               <TagBadge key={tag.id} tag={tag} className="text-xs" />
             ))
           ) : (
-            <span className="text-gray-400">&mdash;</span>
+            <span className="text-gray-400">—</span>
           )}
         </div>
       </TableCell>
