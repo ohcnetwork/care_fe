@@ -13,7 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { buttonVariants } from "@/components/ui/button";
+import { ButtonVariant, buttonVariants } from "@/components/ui/button";
 
 interface ConfirmActionDialogProps {
   open: boolean;
@@ -23,7 +23,7 @@ interface ConfirmActionDialogProps {
   onConfirm: () => void;
   cancelText?: string;
   confirmText: string;
-  variant?: "primary" | "destructive" | "default" | "outline_primary";
+  variant?: ButtonVariant;
   disabled?: boolean;
   hideCancel?: boolean;
 }

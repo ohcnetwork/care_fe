@@ -45,9 +45,7 @@ export function ComboboxQuantityInput({
   className,
 }: Props) {
   const [open, setOpen] = React.useState(false);
-  const [inputValue, setInputValue] = React.useState(
-    quantity?.value?.toString() || "",
-  );
+  const [inputValue, setInputValue] = React.useState(quantity?.value || "");
   const { t } = useTranslation();
   const [selectedUnit, setSelectedUnit] = React.useState(quantity?.unit);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -66,10 +64,7 @@ export function ComboboxQuantityInput({
         onChange(null);
       }
       if (value && value !== ".") {
-        const parsedValue = parseFloat(value);
-        if (!isNaN(parsedValue)) {
-          onChange({ value: parsedValue, unit: selectedUnit || units[0] });
-        }
+        onChange({ value, unit: selectedUnit || units[0] });
       }
     }
   };
@@ -93,9 +88,8 @@ export function ComboboxQuantityInput({
         setSelectedUnit(unit);
         setOpen(false);
         setActiveIndex(-1);
-        const parsedValue = parseFloat(inputValue);
-        if (!isNaN(parsedValue) && inputValue.trim() !== "") {
-          onChange({ value: parsedValue, unit });
+        if (inputValue.trim() !== "") {
+          onChange({ value: inputValue, unit });
         }
       }
     }
@@ -162,9 +156,8 @@ export function ComboboxQuantityInput({
                       setOpen(false);
                       setActiveIndex(-1);
                       inputRef.current?.focus();
-                      const parsedValue = parseFloat(inputValue);
-                      if (!isNaN(parsedValue) && inputValue.trim() !== "") {
-                        onChange({ value: parsedValue, unit });
+                      if (inputValue.trim() !== "") {
+                        onChange({ value: inputValue, unit });
                       }
                     }}
                     className={cn(

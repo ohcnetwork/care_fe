@@ -37,7 +37,7 @@ export function FacilitiesPage() {
     } else {
       updateQuery({ organization: undefined });
     }
-  }, [selectedOrg]);
+  }, [selectedOrg, updateQuery]);
 
   const { data: facilitiesResponse, isLoading } = useQuery({
     queryKey: ["facilities", qParams],

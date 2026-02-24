@@ -156,8 +156,8 @@ export function AutocompleteField<TFieldValues extends FieldValues>({
           </FormLabel>
           <FormControl>
             <Autocomplete
-              value={field.value ?? ""}
-              onChange={field.onChange}
+              value={field.value || ""}
+              onChange={(value) => field.onChange(value === "" ? null : value)}
               onSearch={setSearchQuery}
               options={options}
               isLoading={hasUrlConfig && isLoading}

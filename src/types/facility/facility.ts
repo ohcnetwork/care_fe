@@ -9,7 +9,6 @@ import { MonetaryComponentRead } from "@/types/base/monetaryComponent/monetaryCo
 import { FacilityPermissions } from "@/types/emr/permission/permission";
 import { Organization } from "@/types/organization/organization";
 import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
-import { JSONSchema2020 } from "@/Utils/schema/types";
 
 export interface FacilityBareMinimum {
   id: string;
@@ -52,9 +51,6 @@ export interface FacilityRead extends FacilityBase, FacilityPermissions {
   patient_instance_identifier_configs: PatientIdentifierConfig[];
   patient_facility_identifier_configs: PatientIdentifierConfig[];
   features: number[];
-  extensions_schema_supply_delivery_order?: JSONSchema2020;
-  extensions_schema_supply_delivery?: JSONSchema2020;
-  extensions_schema_account?: JSONSchema2020;
 }
 
 export type FacilityListRead = Omit<

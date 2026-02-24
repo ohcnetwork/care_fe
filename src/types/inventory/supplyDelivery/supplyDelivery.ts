@@ -9,6 +9,11 @@ export enum SupplyDeliveryStatus {
   entered_in_error = "entered_in_error",
 }
 
+export const ACTIVE_SUPPLY_DELIVERY_STATUSES = [
+  SupplyDeliveryStatus.in_progress,
+  SupplyDeliveryStatus.completed,
+] as const;
+
 export const SUPPLY_DELIVERY_STATUS_COLORS = {
   in_progress: "blue",
   completed: "green",
@@ -36,19 +41,22 @@ export interface SupplyDeliveryBase {
   status: SupplyDeliveryStatus;
   supplied_item_condition?: SupplyDeliveryCondition;
   supplied_item_type: SupplyDeliveryType;
+  total_purchase_price?: number;
 }
 
 export interface SupplyDeliveryCreate extends Omit<SupplyDeliveryBase, "id"> {
-  supplied_item_quantity: number;
+  supplied_item_quantity: string;
   supplied_item?: string; // Product ID
   supplied_inventory_item?: string; // Inventory Item ID
   supply_request?: string; // Supply Request ID
   extensions: Record<string, unknown>;
+  supplied_item_pack_quantity?: number;
+  supplied_item_pack_size?: number;
 }
 
 export interface SupplyDeliveryUpsert extends Omit<SupplyDeliveryBase, "id"> {
   id?: string;
-  supplied_item_quantity: number;
+  supplied_item_quantity: string;
   supplied_item?: string; // Product ID
   supplied_inventory_item?: string; // Inventory Item ID
   supply_request?: string; // Supply Request ID
@@ -62,7 +70,9 @@ export interface SupplyDeliveryUpdate {
 }
 
 export interface SupplyDeliveryRead extends SupplyDeliveryBase {
-  supplied_item_quantity: number;
+  supplied_item_quantity: string;
+  supplied_item_pack_quantity?: number;
+  supplied_item_pack_size?: number;
   supplied_item: ProductRead;
   supplied_inventory_item?: InventoryRead;
   created_date?: string;

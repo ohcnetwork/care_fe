@@ -43,6 +43,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import {
+  getExtensionFieldsWithName,
+  processExtensions,
+} from "@/hooks/useExtensions";
+import useExtensionSchemas from "@/hooks/useExtensionSchemas";
 import { SmartExternalDeliveryRow } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/SmartExternalDeliveryRow";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
@@ -56,6 +61,7 @@ import {
   ChargeItemDefinitionStatus,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
+import { ExtensionEntityType } from "@/types/extensions/extensions";
 import {
   ProductCreate,
   ProductRead,
@@ -73,20 +79,16 @@ import {
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { SupplyRequestRead } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
+import { round, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { extractSchemaInfo } from "@/Utils/schema/extensionSchema";
-import { JSONSchema2020 } from "@/Utils/schema/types";
 
 const supplyDeliveryItemSchema = z.object({
   supplied_inventory_item: z.string().optional(),
-  supplied_item_quantity: z
-    .number()
-    .or(z.nan())
-    .refine((val) => !isNaN(val) && val > 0, {
-      message: "Quantity must be at least 1",
-    }),
+  supplied_item_quantity: zodDecimal({ min: 1 }),
+  supplied_item_pack_quantity: z.number().optional(),
+  supplied_item_pack_size: z.number().optional(),
   product_knowledge: z
     .custom<ProductKnowledgeBase>()
     .refine((data) => data?.slug, {
@@ -98,7 +100,9 @@ const supplyDeliveryItemSchema = z.object({
   batch_number: z.string().optional(),
   expiry_date: z.string().optional(),
   charge_item_definition: z.object({ slug: z.string() }).optional(),
-  unit_price: z.number().optional(),
+  unit_price: zodDecimal({ min: 0 }).optional(),
+  purchase_price: zodDecimal({ min: 0 }).optional(),
+  total_purchase_price: zodDecimal({ min: 0 }).optional(),
   is_manually_edited: z.boolean().optional(),
   is_tax_inclusive: z.boolean().optional(),
   charge_item_category: z.string().optional(),
@@ -145,17 +149,26 @@ export function AddSupplyDeliveryForm({
 
   // Get facility data from hook
   const { facility } = useCurrentFacility();
+  const { getExtensions } = useExtensionSchemas();
 
   const informationalCodes = facility?.instance_informational_codes || [];
 
-  // Get extensions schema from facility
-  const extensionsSchema: JSONSchema2020 | undefined =
-    facility?.extensions_schema_supply_delivery;
+  // Get extensions from API
+  const allExtensions = getExtensions(
+    ExtensionEntityType.supply_delivery,
+    "write",
+  );
 
-  // Extract extension field metadata for table headers
-  const { fieldMetadata: extensionFields } = useMemo(
-    () => extractSchemaInfo(extensionsSchema),
-    [extensionsSchema],
+  // Process extensions for form rendering (includes owner, defaults, fieldMetadata)
+  const processedExtensions = useMemo(
+    () => processExtensions(allExtensions),
+    [allExtensions],
+  );
+
+  // Get extension field metadata with extension name for table headers
+  const extensionFields = useMemo(
+    () => getExtensionFieldsWithName(allExtensions),
+    [allExtensions],
   );
 
   // Default values for a new empty item row
@@ -163,7 +176,9 @@ export function AddSupplyDeliveryForm({
     (): SupplyDeliveryItemValues => ({
       product_knowledge: {} as ProductKnowledgeBase,
       supplied_inventory_item: "",
-      supplied_item_quantity: 1,
+      supplied_item_quantity: "1",
+      supplied_item_pack_quantity: origin ? undefined : 1,
+      supplied_item_pack_size: origin ? undefined : 1,
       supplied_item: undefined,
       supply_request: undefined,
       _is_inward_stock: !origin,
@@ -247,6 +262,7 @@ export function AddSupplyDeliveryForm({
       inputPlaceholder={t("search_order")}
       noOptionsMessage={t("no_orders_found")}
       className="px-10"
+      popoverContentClassName="w-auto"
     />
   );
 
@@ -275,6 +291,8 @@ export function AddSupplyDeliveryForm({
     const itemsFromRequests = selectedRequests?.map((request) => ({
       supplied_inventory_item: undefined,
       supplied_item_quantity: request.quantity,
+      supplied_item_pack_quantity: origin ? undefined : 1,
+      supplied_item_pack_size: origin ? undefined : 1,
       product_knowledge: request.item,
       supplied_item: undefined,
       supply_request: request,
@@ -318,10 +336,10 @@ export function AddSupplyDeliveryForm({
     const components: MonetaryComponent[] = [];
 
     // Base price component
-    if (item.unit_price !== undefined) {
+    if (item.unit_price != null) {
       components.push({
         monetary_component_type: MonetaryComponentType.base,
-        amount: item.unit_price.toString(),
+        amount: item.unit_price,
       });
     }
 
@@ -384,8 +402,13 @@ export function AddSupplyDeliveryForm({
               hasErrors = true;
               break;
             }
+            if (!item.charge_item_category) {
+              toast.error(t("category_required_at_row", { row: index + 1 }));
+              hasErrors = true;
+              break;
+            }
           }
-          if (item.unit_price === undefined || item.unit_price < 0) {
+          if (item.unit_price === undefined) {
             toast.error(t("unit_price_required_at_row", { row: index + 1 }));
             hasErrors = true;
             break;
@@ -433,6 +456,7 @@ export function AddSupplyDeliveryForm({
           category,
           title: `${item.product_knowledge.name}${item.batch_number ? ` - ${item.batch_number}` : ""}`,
           status: ChargeItemDefinitionStatus.active,
+          can_edit_charge_item: false,
           price_components:
             priceComponents.length > 0
               ? priceComponents
@@ -466,6 +490,10 @@ export function AddSupplyDeliveryForm({
           expiration_date: item.expiry_date!,
           product_knowledge: item.product_knowledge.slug,
           charge_item_definition: chargeItemSlug,
+          standard_pack_size: item.supplied_item_pack_size,
+          purchase_price: item.purchase_price
+            ? parseFloat(item.purchase_price)
+            : undefined,
           extensions: {},
         };
 
@@ -488,7 +516,14 @@ export function AddSupplyDeliveryForm({
       supplied_item_quantity: item.supplied_item_quantity,
       ...(origin
         ? { supplied_inventory_item: item.supplied_inventory_item }
-        : { supplied_item: productId }),
+        : {
+            supplied_item: productId,
+            supplied_item_pack_quantity: item.supplied_item_pack_quantity,
+            supplied_item_pack_size: item.supplied_item_pack_size,
+            total_purchase_price: item.total_purchase_price
+              ? parseFloat(item.total_purchase_price)
+              : undefined,
+          }),
       supply_request: item.supply_request?.id,
       origin: origin,
       destination: destination,
@@ -603,50 +638,88 @@ export function AddSupplyDeliveryForm({
                     <div className="overflow-x-auto">
                       <Table>
                         <TableHeader className="bg-gray-100">
-                          <TableRow className="divide-x divide-gray-200">
-                            <TableHead className="min-w-[180px] text-xs font-semibold">
-                              {t("product")}
-                            </TableHead>
-                            {origin ? (
-                              <>
-                                <TableHead className="text-xs font-semibold">
-                                  {t("inventory_item")}
+                          {origin ? (
+                            <TableRow className="divide-x divide-gray-200">
+                              <TableHead className="min-w-[180px] text-xs font-semibold">
+                                {t("product")}
+                              </TableHead>
+                              <TableHead className="text-xs font-semibold">
+                                {t("inventory_item")}
+                              </TableHead>
+                              <TableHead className="text-xs font-semibold">
+                                {t("quantity")}
+                              </TableHead>
+                              <TableHead className="text-xs font-semibold">
+                                {t("actions")}
+                              </TableHead>
+                            </TableRow>
+                          ) : (
+                            <>
+                              <TableRow className="divide-x divide-gray-200">
+                                <TableHead
+                                  rowSpan={2}
+                                  className="min-w-[180px] text-xs font-semibold"
+                                >
+                                  {t("product")}
                                 </TableHead>
-                                <TableHead className="text-xs font-semibold">
-                                  {t("quantity")}
-                                </TableHead>
-                              </>
-                            ) : (
-                              <>
-                                <TableHead className="min-w-[140px] text-xs font-semibold">
+                                <TableHead
+                                  rowSpan={2}
+                                  className="min-w-[140px] text-xs font-semibold"
+                                >
                                   {t("batch")}
                                 </TableHead>
-                                <TableHead className="min-w-[130px] text-xs font-semibold">
+                                <TableHead
+                                  rowSpan={2}
+                                  className="min-w-[130px] text-xs font-semibold"
+                                >
                                   {t("expiry")}
                                 </TableHead>
-                                <TableHead className="min-w-[140px] text-xs font-semibold text-center">
+                                <TableHead
+                                  rowSpan={2}
+                                  className="min-w-[140px] text-xs font-semibold text-center"
+                                >
                                   {t("category")}
                                 </TableHead>
-                                <TableHead className="min-w-[100px] text-xs font-semibold">
-                                  {t("base_price")}
+                                <TableHead
+                                  rowSpan={2}
+                                  className="w-20 text-xs font-semibold"
+                                >
+                                  {t("pack_size")}
                                 </TableHead>
-                                {informationalCodes.map((code) => (
-                                  <TableHead
-                                    key={code.code}
-                                    className="min-w-[100px] text-xs font-semibold"
-                                  >
-                                    {code.display}
-                                  </TableHead>
-                                ))}
-                                <TableHead className="min-w-[70px] text-xs font-semibold">
+                                <TableHead
+                                  rowSpan={2}
+                                  className="w-28 text-xs font-semibold"
+                                >
+                                  {t("pack_qty")}
+                                </TableHead>
+                                <TableHead
+                                  rowSpan={2}
+                                  className="w-32 text-xs font-semibold"
+                                >
                                   {t("qty")}
                                 </TableHead>
-                                <TableHead className="min-w-[120px] text-xs font-semibold">
+                                <TableHead
+                                  colSpan={1 + informationalCodes.length}
+                                  className="text-xs font-semibold text-center border-b"
+                                >
+                                  {t("sale")}
+                                </TableHead>
+                                <TableHead
+                                  colSpan={2}
+                                  className="text-xs font-semibold text-center border-b"
+                                >
+                                  {t("purchase")}
+                                </TableHead>
+                                <TableHead
+                                  rowSpan={2}
+                                  className="min-w-[120px] text-xs font-semibold"
+                                >
                                   {t("tax")}
                                 </TableHead>
                                 {extensionFields.map((field) => (
                                   <TableHead
-                                    key={field.name}
+                                    rowSpan={2}
+                                    key={`${field.extensionName}-${field.name}`}
                                     className="min-w-[100px] text-xs font-semibold"
                                   >
                                     {field.label}
@@ -657,12 +730,34 @@ export function AddSupplyDeliveryForm({
                                     )}
                                   </TableHead>
                                 ))}
-                              </>
-                            )}
-                            <TableHead className="text-xs font-semibold">
-                              {t("actions")}
-                            </TableHead>
-                          </TableRow>
+                                <TableHead
+                                  rowSpan={2}
+                                  className="text-xs font-semibold"
+                                >
+                                  {t("actions")}
+                                </TableHead>
+                              </TableRow>
+                              <TableRow className="divide-x divide-gray-200">
+                                <TableHead className="min-w-[100px] text-xs font-semibold">
+                                  {t("item_price")}
+                                </TableHead>
+                                {informationalCodes.map((code) => (
+                                  <TableHead
+                                    key={code.code}
+                                    className="min-w-[100px] text-xs font-semibold"
+                                  >
+                                    {code.display}
+                                  </TableHead>
+                                ))}
+                                <TableHead className="min-w-[100px] text-xs font-semibold border-r">
+                                  {t("pr")}
+                                </TableHead>
+                                <TableHead className="min-w-[120px] text-xs font-semibold">
+                                  {t("tpr")}
+                                </TableHead>
+                              </TableRow>
+                            </>
+                          )}
                         </TableHeader>
                         <TableBody>
                           {fields.map((field, index) =>
@@ -717,7 +812,7 @@ export function AddSupplyDeliveryForm({
                                                     {
                                                       selectedInventoryId:
                                                         field.value,
-                                                      quantity: 1,
+                                                      quantity: "1",
                                                     },
                                                   ]
                                                 : []
@@ -736,6 +831,7 @@ export function AddSupplyDeliveryForm({
                                             enableSearch={true}
                                             multiSelect={false}
                                             className="w-full h-9"
+                                            dontRestrictExpired
                                           />
                                         </FormControl>
                                         <FormMessage />
@@ -754,11 +850,6 @@ export function AddSupplyDeliveryForm({
                                             type="number"
                                             min={1}
                                             {...field}
-                                            onChange={(e) =>
-                                              field.onChange(
-                                                parseInt(e.target.value),
-                                              )
-                                            }
                                           />
                                         </FormControl>
                                         <FormMessage />
@@ -790,7 +881,8 @@ export function AddSupplyDeliveryForm({
                                 onProductSelectOpened={() =>
                                   setNewlyAddedRowIndex(null)
                                 }
-                                extensionsSchema={extensionsSchema}
+                                processedExtensions={processedExtensions}
+                                locationId={destination}
                                 onRemove={() => remove(index)}
                               />
                             ),
@@ -933,7 +1025,7 @@ export function AddSupplyDeliveryForm({
                       </label>
                     </div>
                     <div className="text-sm font-medium">
-                      {request.quantity} {request.item.base_unit.display}
+                      {round(request.quantity)} {request.item.base_unit.display}
                     </div>
                   </div>
                 ))}

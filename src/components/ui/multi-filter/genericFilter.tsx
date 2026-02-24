@@ -68,34 +68,35 @@ export default function GenericFilter({
   return (
     <div className="p-0">
       {handleBack && <FilterHeader label={filter.label} onBack={handleBack} />}
-      <div className="p-3 max-h-[30vh] overflow-y-auto">
+      <div className="p-3 border-b">
         <Input
           placeholder={t("search_options")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-8 text-sm mb-3"
+          onKeyDown={(e) => e.stopPropagation()}
+          className="h-8 text-base sm:text-sm"
         />
-        <div className="">
-          {filteredOptions.length === 0 ? (
-            <div className="text-sm text-gray-500 text-center py-4">
-              {t("no_results_found")}
-            </div>
-          ) : (
-            <FilterOptionsList
-              options={filteredOptions}
-              selectedValues={selectedValues}
-              onOptionToggle={
-                filter.mode === "single"
-                  ? handleCheckboxToggle
-                  : handleOptionToggle
-              }
-              showColorIndicators={showColorIndicators}
-              focusItemIndex={focusItemIndex}
-              setFocusItemIndex={setFocusItemIndex}
-              mode={filter.mode}
-            />
-          )}
-        </div>
+      </div>
+      <div className="p-3 max-h-[30vh] overflow-y-auto">
+        {filteredOptions.length === 0 ? (
+          <div className="text-sm text-gray-500 text-center py-4">
+            {t("no_results_found")}
+          </div>
+        ) : (
+          <FilterOptionsList
+            options={filteredOptions}
+            selectedValues={selectedValues}
+            onOptionToggle={
+              filter.mode === "single"
+                ? handleCheckboxToggle
+                : handleOptionToggle
+            }
+            showColorIndicators={showColorIndicators}
+            focusItemIndex={focusItemIndex}
+            setFocusItemIndex={setFocusItemIndex}
+            mode={filter.mode}
+          />
+        )}
       </div>
     </div>
   );
@@ -170,7 +171,7 @@ function FilterOptionsList({
           {showColorIndicators && (
             <div
               className={cn(
-                "h-3 w-3 rounded-full flex-shrink-0 border",
+                "h-3 w-3 rounded-full shrink-0 border",
                 option.color || getColorForOption(index),
               )}
             />
@@ -195,7 +196,7 @@ export const GenericSelectedBadge = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div className="flex items-center gap-1 min-w-0 flex-shrink-0">
+    <div className="flex items-center gap-1 min-w-0 shrink-0">
       <Badge
         variant={variant || "outline"}
         className={cn("whitespace-nowrap rounded-sm", className)}

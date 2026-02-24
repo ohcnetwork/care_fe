@@ -14,10 +14,13 @@ import {
   MRP_CODE,
   getComponentsFromChargeItem,
 } from "@/types/billing/chargeItem/chargeItem";
+import { InventoryRead } from "@/types/inventory/product/inventory";
+import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductRead } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
 import query from "@/Utils/request/query";
 
+import { add, divide, multiply, round } from "@/Utils/decimal";
 import {
   SupplyDeliveryFormValues,
   SupplyDeliveryItemValues,
@@ -28,13 +31,19 @@ type ItemPath = `items.${number}.${keyof SupplyDeliveryItemValues}`;
 interface UseDeliveryRowItemProps {
   form: UseFormReturn<SupplyDeliveryFormValues>;
   index: number;
+  /** Location ID for fetching inventory (origin location for internal transfers) */
+  locationId?: string;
 }
 
 /**
  * Custom hook that manages all state and logic for a delivery row item.
  * Consolidates multiple useWatch calls and provides clean APIs for mutations.
  */
-export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
+export function useDeliveryRowItem({
+  form,
+  index,
+  locationId,
+}: UseDeliveryRowItemProps) {
   const { facilityId, facility: facilityData } = useCurrentFacility();
   const [isCreatingNew, setIsCreatingNew] = useState(false);
 
@@ -49,7 +58,11 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
     supplied_item: suppliedItem,
     batch_number: batchNumber,
     unit_price: unitPrice,
-    supplied_item_quantity: quantity = 1,
+    purchase_price: purchasePrice,
+    total_purchase_price: totalPurchasePrice,
+    supplied_item_quantity: quantity = "1",
+    supplied_item_pack_quantity: packQuantity,
+    supplied_item_pack_size: packSize,
     tax_components: taxComponents,
     discount_components: discountComponents,
     informational_components: informationalComponents,
@@ -75,12 +88,16 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
       batch_number: "",
       expiry_date: "",
       charge_item_definition: undefined,
-      unit_price: 0,
+      unit_price: "0",
+      purchase_price: undefined,
+      total_purchase_price: undefined,
       informational_components: [],
       tax_components: [],
       discount_components: [],
       charge_item_category: undefined,
       is_manually_edited: false,
+      supplied_item_pack_quantity: 1,
+      supplied_item_pack_size: 1,
     };
 
     Object.entries(fieldsToReset).forEach(([field, value]) => {
@@ -116,6 +133,28 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
     [productsResponse?.results],
   );
 
+  // Fetch inventory for location to get net_content (stock levels)
+  const { data: inventoryResponse, isLoading: isLoadingInventory } = useQuery({
+    queryKey: ["inventory", facilityId, locationId, productKnowledge?.slug],
+    queryFn: query(inventoryApi.list, {
+      pathParams: { facilityId, locationId: locationId! },
+      queryParams: {
+        product_knowledge: productKnowledge?.id,
+        limit: 100,
+      },
+    }),
+    enabled: !!facilityId && !!locationId && !!productKnowledge?.id,
+  });
+
+  // Map product IDs to their inventory net_content
+  const inventoryByProductId = useMemo(() => {
+    const map = new Map<string, InventoryRead>();
+    inventoryResponse?.results?.forEach((inv) => {
+      map.set(inv.product.id, inv);
+    });
+    return map;
+  }, [inventoryResponse?.results]);
+
   // Fill form from existing product
   const fillFromProduct = useCallback(
     (product: ProductRead) => {
@@ -128,6 +167,25 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
         setField(
           "expiry_date",
           format(new Date(product.expiration_date), "yyyy-MM-dd"),
+        );
+      }
+
+      if (product.standard_pack_size) {
+        setField("supplied_item_pack_size", product.standard_pack_size);
+      }
+
+      // Auto-populate tpr = purchase_price × quantity
+      if (product.purchase_price != null) {
+        const packQty =
+          form.getValues(`items.${index}.supplied_item_pack_quantity`) || 1;
+        const packSz =
+          product.standard_pack_size ||
+          form.getValues(`items.${index}.supplied_item_pack_size`) ||
+          1;
+        const qty = packQty * packSz;
+        setField(
+          "total_purchase_price",
+          round(multiply(product.purchase_price, qty)),
         );
       }
 
@@ -144,7 +202,7 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
           MonetaryComponentType.base,
         );
         if (baseComponents[0]?.amount) {
-          setField("unit_price", parseFloat(baseComponents[0].amount));
+          setField("unit_price", baseComponents[0].amount);
         }
 
         const informational = getComponentsFromChargeItem(
@@ -171,13 +229,13 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
           setField("discount_components", discounts);
         }
       } else {
-        setField("unit_price", 0);
+        setField("unit_price", "0");
       }
 
       setField("is_manually_edited", false);
       setIsCreatingNew(false);
     },
-    [setField],
+    [setField, form, index],
   );
 
   // Auto-fill from last product when product knowledge is selected
@@ -223,20 +281,64 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
     return mrpComponent?.amount ? parseFloat(mrpComponent.amount) : 0;
   }, [informationalComponents]);
 
-  // Total tax factor for tax-inclusive calculation
+  // Total tax factor for tax-inclusive calculation (as string to avoid referential equality issues)
   const totalTaxFactor = useMemo(() => {
-    if (!taxComponents?.length) return 0;
-    return taxComponents.reduce((sum, tax) => sum + (tax.factor || 0), 0);
+    if (!taxComponents?.length) return "0";
+    return add(...taxComponents.map((tax) => tax.factor || 0)).toString();
   }, [taxComponents]);
 
   // Calculate base price from MRP when tax inclusive is enabled
   useEffect(() => {
     if (isTaxInclusive && mrpValue > 0) {
-      const calculatedBasePrice = mrpValue / (1 + totalTaxFactor / 100);
-      const roundedBasePrice = Math.round(calculatedBasePrice * 100) / 100;
-      setField("unit_price", roundedBasePrice);
+      let calculatedBasePrice = divide(
+        mrpValue,
+        add(1, divide(totalTaxFactor, 100)),
+      );
+      if (packSize && packQuantity && packSize > 0)
+        calculatedBasePrice = divide(calculatedBasePrice, packSize);
+      const newUnitPrice = round(calculatedBasePrice);
+      // Only update if value actually changed to prevent infinite loops
+      if (newUnitPrice !== unitPrice) {
+        setField("unit_price", newUnitPrice);
+      }
     }
-  }, [isTaxInclusive, mrpValue, totalTaxFactor, setField]);
+  }, [
+    isTaxInclusive,
+    mrpValue,
+    totalTaxFactor,
+    packSize,
+    packQuantity,
+    unitPrice,
+    setField,
+  ]);
+
+  // Auto-calculate quantity when pack quantity or pack size changes
+  useEffect(() => {
+    if (packQuantity && packSize && packQuantity > 0 && packSize > 0) {
+      const calculatedQuantity = packQuantity * packSize;
+      setField("supplied_item_quantity", round(calculatedQuantity));
+    }
+  }, [packQuantity, packSize, setField]);
+
+  // Auto-calculate purchase_price = tpr / (pack_size × pack_quantity)
+  useEffect(() => {
+    if (
+      totalPurchasePrice &&
+      packSize &&
+      packSize > 0 &&
+      packQuantity &&
+      packQuantity > 0
+    ) {
+      const newPurchasePrice = round(divide(totalPurchasePrice, packSize));
+      if (newPurchasePrice !== purchasePrice) {
+        setField("purchase_price", newPurchasePrice);
+      }
+    } else {
+      if (purchasePrice) {
+        setField("purchase_price", undefined);
+      }
+    }
+  }, [totalPurchasePrice, packSize, packQuantity, purchasePrice, setField]);
 
   // Update informational component
   const updateInformationalComponent = useCallback(
@@ -264,7 +366,11 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
     suppliedItem,
     batchNumber,
     unitPrice,
+    purchasePrice,
+    totalPurchasePrice,
     quantity,
+    packQuantity,
+    packSize,
     taxComponents,
     discountComponents,
     informationalComponents,
@@ -275,7 +381,9 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
     needsCategorySelection,
     isCreatingNew,
     isLoadingProducts,
+    isLoadingInventory,
     products,
+    inventoryByProductId,
     availableTaxes,
     availableDiscounts,
 

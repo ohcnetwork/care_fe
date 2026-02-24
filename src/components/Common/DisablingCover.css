@@ -14,8 +14,8 @@
 .disabling-cover__loading-box-1,
 .disabling-cover__loading-box-2,
 .disabling-cover__loading-box-3 {
-  border: 2px solid #976ae2;
-  background-color: #f6e05e;
+  border: 2px solid var(--color-green-500);
+  background-color: var(--color-green-100);
   box-sizing: border-box;
   position: absolute;
   display: block;

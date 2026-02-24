@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import * as React from "react";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import TagBadge from "@/components/Tags/TagBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -12,19 +13,38 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { PrescriptionRead } from "@/types/emr/prescription/prescription";
+import { PrescritionList } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
+import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { ChevronDown, ReceiptTextIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
+
+function PrescriptionTags({ tags }: { tags?: TagConfig[] }) {
+  if (!tags || tags.length === 0) return null;
+
+  return (
+    <div className="flex flex-wrap gap-1 mt-1">
+      {tags.map((tag) => (
+        <TagBadge
+          key={tag.id}
+          tag={tag}
+          hierarchyDisplay
+          variant="teal"
+          className="text-xs pb-1 rounded-sm"
+        />
+      ))}
+    </div>
+  );
+}
 
 interface PrescriptionListSelectorProps {
   patientId: string;
   encounterId: string;
   facilityId?: string;
   selectedPrescriptionId?: string;
-  onSelectPrescription: (prescription: PrescriptionRead | undefined) => void;
+  onSelectPrescription: (prescription: PrescritionList | undefined) => void;
 }
 
 export default function PrescriptionListSelector({
@@ -45,23 +65,13 @@ export default function PrescriptionListSelector({
     enabled: !!patientId && !!encounterId,
   });
 
-  function handleSelectPrescription(
-    prescription: PrescriptionRead | undefined,
-  ) {
-    onSelectPrescription(prescription);
-    setOpenDrawer(false);
-  }
-
-  // Select first prescription by default
-  React.useEffect(() => {
-    if (prescriptions?.results?.length) {
-      if (!selectedPrescriptionId) {
-        onSelectPrescription(prescriptions.results[0] as PrescriptionRead);
-      }
-    } else {
-      onSelectPrescription(undefined);
-    }
-  }, [prescriptions, selectedPrescriptionId, onSelectPrescription]);
+  const handleSelectPrescription = React.useCallback(
+    (prescription: PrescritionList | undefined) => {
+      onSelectPrescription(prescription);
+      setOpenDrawer(false);
+    },
+    [onSelectPrescription],
+  );
 
   if (isLoading) {
     return (
@@ -71,19 +81,17 @@ export default function PrescriptionListSelector({
     );
   }
 
-  if (!prescriptions?.results?.length) {
-    return null;
-  }
-
   const selectedPrescription = selectedPrescriptionId
     ? prescriptions?.results.find((pres) => pres.id === selectedPrescriptionId)
     : undefined;
+
+  const isAllSelected = selectedPrescriptionId === undefined;
 
   return (
     <>
       <div className="hidden lg:block h-full overflow-y-auto pr-1">
         <PrescriptionList
-          prescriptions={prescriptions.results as PrescriptionRead[]}
+          prescriptions={prescriptions?.results ?? []}
           selectedPrescriptionId={selectedPrescriptionId}
           onSelectPrescription={onSelectPrescription}
         />
@@ -91,10 +99,28 @@ export default function PrescriptionListSelector({
       <div className="lg:hidden">
         <Drawer open={openDrawer} onOpenChange={setOpenDrawer}>
           <DrawerTrigger asChild>
-            {selectedPrescription ? (
+            {isAllSelected ? (
               <Button
                 variant="outline"
                 className="w-full flex justify-between items-center py-6"
+              >
+                <div className="flex gap-3">
+                  <ReceiptTextIcon className="size-5 text-primary-600" />
+                  <div className="flex flex-col -mt-1 text-left">
+                    <span className="text-sm font-medium whitespace-nowrap">
+                      {t("all_prescriptions")}
+                    </span>
+                    <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                      {t("view_all_medications")}
+                    </span>
+                  </div>
+                </div>
+                <ChevronDown className="size-5 text-gray-500 shrink-0 ml-2" />
+              </Button>
+            ) : selectedPrescription ? (
+              <Button
+                variant="outline"
+                className="w-full flex justify-between items-center py-2 h-auto"
               >
                 <div className="flex gap-3">
                   <ReceiptTextIcon className="size-5 text-primary-600" />
@@ -110,6 +136,7 @@ export default function PrescriptionListSelector({
                       {t("prescribed_by")}:{" "}
                       {formatName(selectedPrescription.prescribed_by)}
                     </span>
+                    <PrescriptionTags tags={selectedPrescription.tags} />
                   </div>
                 </div>
                 <ChevronDown className="size-5 text-gray-500 shrink-0 ml-2" />
@@ -127,7 +154,7 @@ export default function PrescriptionListSelector({
             </DrawerHeader>
             <div className="overflow-y-auto pr-2">
               <PrescriptionList
-                prescriptions={prescriptions.results as PrescriptionRead[]}
+                prescriptions={prescriptions?.results ?? []}
                 selectedPrescriptionId={selectedPrescriptionId}
                 onSelectPrescription={handleSelectPrescription}
               />
@@ -138,30 +165,55 @@ export default function PrescriptionListSelector({
     </>
   );
 }
+interface PrescriptionListItem {
+  id: string | undefined;
+  title: string;
+  subtitle: string;
+  tags?: TagConfig[];
+}
+
 function PrescriptionList({
   prescriptions,
   selectedPrescriptionId,
   onSelectPrescription,
 }: {
-  prescriptions: PrescriptionRead[];
+  prescriptions: PrescritionList[];
   selectedPrescriptionId: string | undefined;
-  onSelectPrescription: (prescription: PrescriptionRead | undefined) => void;
+  onSelectPrescription: (prescription: PrescritionList | undefined) => void;
 }) {
   const { t } = useTranslation();
+
+  const items: PrescriptionListItem[] = [
+    {
+      id: undefined,
+      title: t("all_prescriptions"),
+      subtitle: t("view_all_medications"),
+    },
+    ...prescriptions.map((p) => ({
+      id: p.id,
+      title: formatDateTime(p.created_date, "DD/MM/YYYY hh:mm A"),
+      subtitle: `${t("prescribed_by")}: ${formatName(p.prescribed_by)}`,
+      tags: p.tags,
+    })),
+  ];
+
   return (
     <div className="space-y-2 p-2">
-      {prescriptions.map((prescription) => {
-        const isSelected = selectedPrescriptionId === prescription.id;
+      {items.map((item) => {
+        const isSelected = selectedPrescriptionId === item.id;
+
         return (
           <Card
-            key={prescription.id}
+            key={item.id ?? "all"}
             className={cn(
               "rounded-md relative cursor-pointer transition-colors w-full",
               isSelected
                 ? "bg-white border-primary-600 shadow-md"
                 : "bg-gray-100 hover:bg-gray-100 shadow-none",
             )}
-            onClick={() => onSelectPrescription(prescription)}
+            onClick={() =>
+              onSelectPrescription(prescriptions.find((p) => p.id === item.id))
+            }
           >
             {isSelected && (
               <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
@@ -176,16 +228,12 @@ function PrescriptionList({
                 />
                 <div className="flex flex-col -mt-1">
                   <span className="text-sm font-medium whitespace-nowrap">
-                    {formatDateTime(
-                      prescription.created_date,
-                      "DD/MM/YYYY hh:mm A",
-                    )}
+                    {item.title}
                   </span>
-
                   <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                    {t("prescribed_by")}:{" "}
-                    {formatName(prescription.prescribed_by)}
+                    {item.subtitle}
                   </span>
+                  <PrescriptionTags tags={item.tags} />
                 </div>
               </div>
             </CardContent>

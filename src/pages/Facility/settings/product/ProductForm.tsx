@@ -45,6 +45,7 @@ import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/reso
 import {
   ChargeItemDefinitionBase,
   ChargeItemDefinitionRead,
+  ChargeItemDefinitionStatus,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import {
@@ -71,6 +72,8 @@ const formSchema = z.object({
     })
     .required(),
   expiration_date: z.date(),
+  standard_pack_size: z.coerce.number().min(0).optional(),
+  purchase_price: z.coerce.number().min(0).optional(),
 });
 export default function ProductForm({
   facilityId,
@@ -223,6 +226,8 @@ export function ProductFormContent({
             expiration_date: existingData.expiration_date
               ? new Date(existingData.expiration_date)
               : undefined,
+            standard_pack_size: existingData.standard_pack_size,
+            purchase_price: existingData.purchase_price,
           }
         : {
             status: ProductStatusOptions.active,
@@ -277,6 +282,8 @@ export function ProductFormContent({
         expiration_date: formattedData.expiration_date,
         charge_item_definition: formattedData.charge_item_definition,
         product_knowledge: formattedData.product_knowledge,
+        standard_pack_size: formattedData.standard_pack_size,
+        purchase_price: formattedData.purchase_price,
         extensions: {},
       };
       updateProduct(updatePayload);
@@ -287,6 +294,8 @@ export function ProductFormContent({
         expiration_date: formattedData.expiration_date,
         product_knowledge: formattedData.product_knowledge,
         charge_item_definition: formattedData.charge_item_definition,
+        standard_pack_size: formattedData.standard_pack_size,
+        purchase_price: formattedData.purchase_price,
         extensions: {},
       };
       createProduct(createPayload);
@@ -396,6 +405,55 @@ export function ProductFormContent({
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="standard_pack_size"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("standard_pack_size")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={0}
+                      placeholder={t("enter_standard_pack_size")}
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? Number(e.target.value) : undefined,
+                        )
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="purchase_price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("purchase_price")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      placeholder={t("enter_purchase_price")}
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? Number(e.target.value) : undefined,
+                        )
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
         </div>
         <div className="rounded-lg border border-gray-200 bg-white p-6">
@@ -439,7 +497,9 @@ export function ProductFormContent({
                             queryFn:
                               chargeItemDefinitionApi.listChargeItemDefinition,
                             pathParams: { facilityId },
-                            queryParams: { status: "active" },
+                            queryParams: {
+                              status: ChargeItemDefinitionStatus.active,
+                            },
                           }}
                           translationBaseKey="charge_item_definition"
                         />

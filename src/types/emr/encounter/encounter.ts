@@ -1,13 +1,14 @@
 import {
-  Ambulance,
   BadgeCheck,
   Ban,
   BedDouble,
   Calendar,
   CirclePause,
   CircleX,
+  DoorOpen,
   FileQuestion,
   Home,
+  HouseHeart,
   LoaderCircle,
   LucideIcon,
   MonitorSmartphone,
@@ -24,7 +25,7 @@ import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationAssociationRead } from "@/types/location/association";
-import { LocationRead } from "@/types/location/location";
+import { LocationMinSpec, LocationRead } from "@/types/location/location";
 import { AppointmentRead } from "@/types/scheduling/schedule";
 import { UserReadMinimal } from "@/types/user/user";
 
@@ -41,6 +42,9 @@ export const ENCOUNTER_ADMIT_SOURCE = [
   "other",
 ] as const;
 
+/**
+ * Do not use this constant directly. Use `careConfig.encounterClasses` instead.
+ */
 export const ENCOUNTER_CLASS = [
   "imp",
   "amb",
@@ -139,11 +143,11 @@ export const ENCOUNTER_STATUS_COLORS = {
 
 export const ENCOUNTER_CLASS_ICONS = {
   imp: BedDouble,
-  amb: Ambulance,
+  amb: DoorOpen,
   obsenc: Stethoscope,
   emer: Siren,
   vr: MonitorSmartphone,
-  hh: Home,
+  hh: HouseHeart,
 } as const satisfies Record<EncounterClass, LucideIcon>;
 
 export const ENCOUNTER_STATUS_ICONS = {
@@ -223,6 +227,8 @@ export interface EncounterListRead extends EncounterBase {
   created_date: string;
   modified_date: string;
   tags: TagConfig[];
+  current_location: LocationMinSpec | null;
+  care_team: CareTeamResponse[];
 }
 
 export interface EncounterRead
