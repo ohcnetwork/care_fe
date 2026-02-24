@@ -80,7 +80,7 @@ export function MedicationTimingSelect({
     // Find the key that matches the timing code
     const matchingEntry = Object.entries(
       MEDICATION_REQUEST_TIMING_OPTIONS,
-    ).find(([, option]) => option.timing.code.code === timing.code.code);
+    ).find(([, option]) => option.timing.code?.code === timing.code?.code);
 
     return matchingEntry?.[0] || "";
   }, [timing, asNeeded]);
@@ -126,7 +126,7 @@ export function reverseFrequencyOption(timing?: Timing): string {
   if (!timing?.code?.code) return "";
 
   const matchingEntry = Object.entries(MEDICATION_REQUEST_TIMING_OPTIONS).find(
-    ([, option]) => option.timing.code.code === timing.code.code,
+    ([, option]) => option.timing.code?.code === timing.code?.code,
   );
 
   return matchingEntry?.[0] || "";

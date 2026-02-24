@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+
 import { userChildProps } from "@/components/Common/UserColumns";
 import LinkUserToDepartmentSheet from "@/components/Users/LinkUserToDepartmentSheet";
 
@@ -125,8 +127,13 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
 
   if (isLoading) {
     return (
-      <div className="mt-8 flex justify-center">
-        <CareIcon icon="l-spinner" className="h-8 w-8 animate-spin" />
+      <div className="mt-8 space-y-4">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          {t("departments")}
+        </h3>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <CardGridSkeleton count={6} />
+        </div>
       </div>
     );
   }

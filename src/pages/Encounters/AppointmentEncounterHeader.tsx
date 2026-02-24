@@ -22,10 +22,39 @@ import {
 
 import { renderTokenNumber } from "@/types/tokens/token/token";
 import mutate from "@/Utils/request/mutate";
+import { dateQueryString } from "@/Utils/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ExternalLinkIcon } from "lucide-react";
+import {
+  CalendarCheck,
+  CalendarRange,
+  ChevronDown,
+  ExternalLinkIcon,
+  ListOrdered,
+} from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
+
+/**
+ * Get the appointments page link for an appointment based on resource type.
+ * - Practitioner: /facility/{facilityId}/appointments?practitioners={resourceId}&date_from={date}&date_to={date}
+ * - Location: /facility/{facilityId}/locations/{resourceId}/appointments?date_from={date}&date_to={date}
+ * - HealthcareService: /facility/{facilityId}/services/{resourceId}/appointments?date_from={date}&date_to={date}
+ */
+const getQueueLink = (appointment: AppointmentRead): string => {
+  const facilityId = appointment.facility.id;
+  const resourceId = appointment.resource.id;
+  const date = dateQueryString(new Date(appointment.token_slot.start_datetime));
+  const dateParams = `date_from=${date}&date_to=${date}`;
+
+  switch (appointment.resource_type) {
+    case SchedulableResourceType.Practitioner:
+      return `/facility/${facilityId}/appointments?practitioners=${resourceId}&${dateParams}`;
+    case SchedulableResourceType.Location:
+      return `/facility/${facilityId}/locations/${resourceId}/appointments?${dateParams}`;
+    case SchedulableResourceType.HealthcareService:
+      return `/facility/${facilityId}/services/${resourceId}/appointments?${dateParams}`;
+  }
+};
 
 const getOptions = (encounter: EncounterRead) => {
   const options: ("close_appointment" | "mark_as_complete")[] = [];
@@ -60,20 +89,20 @@ export const AppointmentEncounterHeader = ({
   return (
     <div className="flex gap-3 border border-gray-300 rounded-lg py-1.5 px-2 bg-white sm:w-fit w-full items-center justify-center shadow-sm">
       <TokenActions
-        patientId={appointment.patient.id}
+        patientId={encounter.patient.id}
         facilityId={encounter.facility.id}
         appointment={appointment}
         resourceType={appointment.resource_type}
         resourceId={appointment.resource.id}
       />
-      <div className="flex sm:flex-row flex-col gap-2 sm:items-center items-start">
-        {canWritePrimaryEncounter && (
+      {canWritePrimaryEncounter && (
+        <div className="flex sm:flex-row flex-col gap-2 sm:items-center items-start">
           <AppointmentEncounterHeaderActions
             encounter={encounter}
             appointment={appointment}
           />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -219,10 +248,25 @@ const TokenActions = ({
   const { token } = appointment;
 
   return (
-    <div className="flex gap-2">
+    <div className="flex divide-x gap-2">
       {appointment.id && (
-        <div className="flex items-center justify-center border-r border-gray-300">
+        <div className="flex items-center justify-center border-gray-300">
           <Button variant="ghost" className="rounded-r-none pl-2 " asChild>
+            <Link href={getQueueLink(appointment)}>
+              <div className="flex sm:flex-row flex-col items-center justify-center sm:gap-1">
+                <div className="flex gap-2 items-center underline">
+                  <CalendarRange className="size-4 text-black" />
+                  {t("list")}
+                  <ExternalLinkIcon className="size-4 text-black" />
+                </div>
+              </div>
+            </Link>
+          </Button>
+        </div>
+      )}
+      {appointment.id && (
+        <div className="flex items-center justify-center border-gray-300">
+          <Button variant="ghost" className="rounded-r-none" asChild>
             <Link
               href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointment.id}`}
             >
@@ -239,7 +283,8 @@ const TokenActions = ({
                   </>
                 ) : (
                   <div className="flex gap-2 items-center underline">
-                    {t("view_appointment")}
+                    <CalendarCheck className="size-4 text-black" />
+                    {t("view")}
                     <ExternalLinkIcon className="size-4 text-black" />
                   </div>
                 )}
@@ -256,6 +301,7 @@ const TokenActions = ({
               className="flex items-center gap-1"
               href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/queues/${token.queue.id}`}
             >
+              <ListOrdered className="size-4 text-black" />
               {t("queue")}
               <ExternalLinkIcon className="size-4 text-black" />
             </Link>

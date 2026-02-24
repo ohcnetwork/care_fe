@@ -40,6 +40,7 @@ import Decimal from "decimal.js";
 import { useMemo, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -86,6 +87,7 @@ import {
 } from "@/types/emr/dispenseOrder/dispenseOrder";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { PatientListRead } from "@/types/emr/patient/patient";
+
 import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
@@ -170,21 +172,10 @@ function MedicationTable({ medications }: MedicationTableProps) {
         </TableHeader>
         <TableBody>
           {medications.map((medication) => {
-            const instruction = medication.dosage_instruction[0] ?? {};
-            const frequency = instruction?.timing?.code;
-            const dosage = instruction?.dose_and_rate?.dose_quantity;
+            const instruction = medication.dosage_instruction?.[0];
 
-            const dosageText = dosage
-              ? `${round(dosage.value)} ${dosage.unit.display}`
-              : null;
-
-            const frequencyText = instruction?.as_needed_boolean
-              ? `${t("as_needed_prn")}${
-                  instruction?.as_needed_for?.display
-                    ? ` (${instruction.as_needed_for.display})`
-                    : ""
-                }`
-              : frequency?.display || null;
+            const dosageText = formatDosage(instruction) || null;
+            const frequencyText = formatFrequency(instruction);
 
             const batchNumber = medication.item.product.batch?.lot_number;
             const expiryDate = medication.item.product.expiration_date;
