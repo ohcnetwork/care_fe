@@ -359,7 +359,7 @@ test.describe("Schedule Template Management", () => {
     });
   });
 
-  test("should select and deselect all weekdays while creating a template", async ({
+  test("should select and clear all weekdays while creating a template", async ({
     page,
   }) => {
     // Open create template form
@@ -407,14 +407,14 @@ test.describe("Schedule Template Management", () => {
       );
     }
 
-    // Toggle switches to "Deselect All"
-    const deselectAllButton = page.getByRole("button", {
-      name: "Deselect All",
+    // Toggle switches to "Clear All"
+    const clearAllButton = page.getByRole("button", {
+      name: "Clear All",
     });
-    await expect(deselectAllButton).toBeVisible();
+    await expect(clearAllButton).toBeVisible();
 
-    // Click "Deselect All"
-    await deselectAllButton.click();
+    // Click "Clear All"
+    await clearAllButton.click();
 
     // All weekdays should now be unselected again
     for (const day of weekdayShortNames) {

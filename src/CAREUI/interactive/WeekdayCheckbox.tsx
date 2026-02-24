@@ -50,7 +50,7 @@ export default function WeekdayCheckbox({
 
   const label =
     selectedDays.length === dayOfWeekKeys.length
-      ? t("deselect_all")
+      ? t("clear_all")
       : t("select_all");
 
   return (

@@ -1725,7 +1725,6 @@
   "describe_why_the_asset_is_not_working": "Describe why the asset is not working",
   "description": "Description",
   "description_help": "A short description of this identifier type (e.g., National ID, Hospital MRN).",
-  "deselect_all": "Deselect All",
   "destination": "Destination",
   "destination_question": "Destination Question",
   "destination_required": "Destination is required",
