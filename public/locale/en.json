@@ -1877,6 +1877,7 @@
   "dispense_order_items_placeholder": "Dispense Order Items",
   "dispense_order_items_placeholder_description": "Items for this dispense order will appear here",
   "dispense_order_not_found": "Dispense Order Not Found",
+  "dispense_order_qr_code": "Dispense order QR Code",
   "dispense_order_status__abandoned": "Abandoned",
   "dispense_order_status__completed": "Completed",
   "dispense_order_status__draft": "Draft",

@@ -11,8 +11,8 @@ import Loading from "@/components/Common/Loading";
 import PrintFooter from "@/components/Common/PrintFooter";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import {
-  MonetaryDisplay,
   getCurrencySymbol,
+  MonetaryDisplay,
 } from "@/components/ui/monetary-display";
 import {
   Table,
@@ -25,6 +25,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import {
+  getDispenseOrderId,
   InvoiceChargeItemTitle,
   useMedicationDispenseData,
 } from "@/pages/Facility/billing/invoice/components/InvoiceChargeItemTitle";
@@ -408,106 +409,123 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                 ).length === 0 && "border-b rounded-b-md",
               )}
             >
-              <div className="flex flex-col items-end space-y-2 text-gray-950 font-normal text-sm mb-4">
-                {/* Base Amount */}
-                {invoice.total_price_components
-                  ?.filter(
-                    (c) =>
-                      c.monetary_component_type === MonetaryComponentType.base,
-                  )
-                  .map((component, index) => (
-                    <div
-                      key={`base-${index}`}
-                      className="flex w-64 justify-between"
-                    >
-                      <span>
-                        {component.code?.display || t("base_amount")}:
-                      </span>
-                      <span className="font-medium">
-                        <MonetaryDisplay amount={component.amount} />
-                      </span>
-                    </div>
-                  ))}
+              <div
+                className={cn(
+                  getDispenseOrderId(dispenseMap) && "flex justify-between",
+                )}
+              >
+                {getDispenseOrderId(dispenseMap) && (
+                  <QRCodeSVG
+                    value={getDispenseOrderId(dispenseMap)!}
+                    size={40}
+                    level="Q"
+                    marginSize={0}
+                    title={t("dispense_order_qr_code")}
+                  />
+                )}
 
-                {/* Surcharges */}
-                {invoice.total_price_components
-                  ?.filter(
-                    (c) =>
-                      c.monetary_component_type ===
-                      MonetaryComponentType.surcharge,
-                  )
-                  .map((component, index) => (
-                    <div
-                      key={`surcharge-${index}`}
-                      className="flex w-64 justify-between text-gray-500 text-sm"
-                    >
-                      <span>
-                        {component.code && `${component.code.display} `}(
-                        {t("surcharge")})
-                      </span>
-                      <span>
-                        + <MonetaryDisplay {...component} />
-                      </span>
-                    </div>
-                  ))}
+                <div className="flex flex-col items-end space-y-2 text-gray-950 font-normal text-sm mb-4">
+                  {/* Base Amount */}
+                  {invoice.total_price_components
+                    ?.filter(
+                      (c) =>
+                        c.monetary_component_type ===
+                        MonetaryComponentType.base,
+                    )
+                    .map((component, index) => (
+                      <div
+                        key={`base-${index}`}
+                        className="flex w-64 justify-between"
+                      >
+                        <span>
+                          {component.code?.display || t("base_amount")}:
+                        </span>
+                        <span className="font-medium">
+                          <MonetaryDisplay amount={component.amount} />
+                        </span>
+                      </div>
+                    ))}
 
-                {/* Discounts */}
-                {invoice.total_price_components
-                  ?.filter(
-                    (c) =>
-                      c.monetary_component_type ===
-                      MonetaryComponentType.discount,
-                  )
-                  .map((component, index) => (
-                    <div
-                      key={`discount-${index}`}
-                      className="flex w-64 justify-between text-gray-500 text-sm"
-                    >
-                      <span>
-                        {component.code && `${component.code.display} `}(
-                        {t("discount")})
-                      </span>
-                      <span>
-                        - <MonetaryDisplay {...component} />
-                      </span>
-                    </div>
-                  ))}
+                  {/* Surcharges */}
+                  {invoice.total_price_components
+                    ?.filter(
+                      (c) =>
+                        c.monetary_component_type ===
+                        MonetaryComponentType.surcharge,
+                    )
+                    .map((component, index) => (
+                      <div
+                        key={`surcharge-${index}`}
+                        className="flex w-64 justify-between text-gray-500 text-sm"
+                      >
+                        <span>
+                          {component.code && `${component.code.display} `}(
+                          {t("surcharge")})
+                        </span>
+                        <span>
+                          + <MonetaryDisplay {...component} />
+                        </span>
+                      </div>
+                    ))}
 
-                {/* Taxes */}
-                {invoice.total_price_components
-                  ?.filter(
-                    (c) =>
-                      c.monetary_component_type === MonetaryComponentType.tax,
-                  )
-                  .map((component, index) => (
-                    <div
-                      key={`tax-${index}`}
-                      className="flex w-64 justify-between text-gray-500 text-sm"
-                    >
-                      <span>
-                        {component.code && `${component.code.display} `}(
-                        {t("tax")})
-                      </span>
-                      <span>
-                        + <MonetaryDisplay {...component} />
-                      </span>
-                    </div>
-                  ))}
+                  {/* Discounts */}
+                  {invoice.total_price_components
+                    ?.filter(
+                      (c) =>
+                        c.monetary_component_type ===
+                        MonetaryComponentType.discount,
+                    )
+                    .map((component, index) => (
+                      <div
+                        key={`discount-${index}`}
+                        className="flex w-64 justify-between text-gray-500 text-sm"
+                      >
+                        <span>
+                          {component.code && `${component.code.display} `}(
+                          {t("discount")})
+                        </span>
+                        <span>
+                          - <MonetaryDisplay {...component} />
+                        </span>
+                      </div>
+                    ))}
 
-                {/* Net Amount */}
-                <div className="flex w-64 justify-between">
-                  <span className="text-gray-500">{t("net_amount")}</span>
-                  <MonetaryDisplay amount={invoice.total_net} />
+                  {/* Taxes */}
+                  {invoice.total_price_components
+                    ?.filter(
+                      (c) =>
+                        c.monetary_component_type === MonetaryComponentType.tax,
+                    )
+                    .map((component, index) => (
+                      <div
+                        key={`tax-${index}`}
+                        className="flex w-64 justify-between text-gray-500 text-sm"
+                      >
+                        <span>
+                          {component.code && `${component.code.display} `}(
+                          {t("tax")})
+                        </span>
+                        <span>
+                          + <MonetaryDisplay {...component} />
+                        </span>
+                      </div>
+                    ))}
+
+                  {/* Net Amount */}
+                  <div className="flex w-64 justify-between">
+                    <span className="text-gray-500">{t("net_amount")}</span>
+                    <MonetaryDisplay amount={invoice.total_net} />
+                  </div>
+
+                  <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
+
+                  {/* Total */}
+                  <div className="flex w-64 justify-between font-semibold">
+                    <span>{t("total")}</span>
+                    <MonetaryDisplay amount={invoice.total_gross} />
+                  </div>
+                  <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
                 </div>
-
-                <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
-
-                {/* Total */}
-                <div className="flex w-64 justify-between font-semibold">
-                  <span>{t("total")}</span>
-                  <MonetaryDisplay amount={invoice.total_gross} />
-                </div>
-                <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
               </div>
             </div>
 
