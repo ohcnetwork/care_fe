@@ -92,8 +92,9 @@ export const STATUS_OPTIONS = [
 export const CLASSIFICATION_OPTIONS = [
   "Laboratory",
   "Imaging",
-  "Surgical Procedure",
+  "Procedure",
   "Counselling",
+  "Education",
 ] as const;
 
 interface ActivityDefinitionData {

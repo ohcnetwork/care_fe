@@ -38,7 +38,6 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import {
   ENCOUNTER_STATUS_COLORS,
   EncounterRead,
-  inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { LocationTypeIcons } from "@/types/location/location";
@@ -96,12 +95,14 @@ export const EncounterShow = (props: Props) => {
 
   const canAccess = canReadClinicalData || canReadSelectedEncounter;
   const hasToken = primaryEncounter?.appointment?.token;
-  const isEncounterActive =
-    primaryEncounter?.appointment?.id &&
-    !inactiveEncounterStatus.includes(primaryEncounter?.status ?? "");
+  // const isEncounterActive =
+  //   primaryEncounter?.appointment?.id &&
+  //   !inactiveEncounterStatus.includes(primaryEncounter?.status ?? "");
+
+  const hasAppointmentId = primaryEncounter?.appointment?.id;
 
   // Header is shown either when token is present or encounter is active and has an appointment
-  const canViewAppointmentEncounterHeader = hasToken || isEncounterActive;
+  const canViewAppointmentEncounterHeader = hasToken || hasAppointmentId;
 
   useEffect(() => {
     if (!isPrimaryEncounterLoading && !isPatientLoading && !canAccess) {

@@ -801,9 +801,7 @@ const AdditionalDetailsContent = ({
         name="pincode"
         render={({ field }) => (
           <FormItem>
-            <FormLabel aria-required={!quickRegistration}>
-              {t("pincode")}
-            </FormLabel>
+            <FormLabel>{t("pincode")}</FormLabel>
             <FormControl>
               <Input
                 {...field}
@@ -1022,7 +1020,7 @@ const getFormSchema = (t: TFunction) => {
         : z.string().trim().nonempty(t("field_required")),
       permanent_address_same_as_address: z.boolean(),
       geo_organization: geoOrgValidator(t),
-      pincode: isQuick ? validators().pincode.optional() : validators().pincode,
+      pincode: validators().pincode.optional(),
 
       is_deceased: z.boolean(),
       deceased_datetime: tzAwareDateTime.optional().nullable(),
