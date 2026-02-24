@@ -22,18 +22,19 @@ interface InvoiceChargeItemTitleProps {
 }
 
 /**
- * Extracts the dispense order ID from a dispense map.
- * Returns the first order ID found, or undefined if none exists.
+ * Extracts the dispense order IDs from a dispense map.
+ * Returns comma-separated order IDs if multiple exist, or undefined if none exists.
  */
 export function getDispenseOrderId(
   dispenseMap: Record<string, MedicationDispenseRead | undefined>,
 ): string | undefined {
+  const orderIds = new Set<string>();
   for (const dispense of Object.values(dispenseMap)) {
     if (dispense?.order?.id) {
-      return dispense.order.id;
+      orderIds.add(dispense.order.id);
     }
   }
-  return undefined;
+  return orderIds.size > 0 ? Array.from(orderIds).join(",") : undefined;
 }
 
 export function InvoiceChargeItemTitle({

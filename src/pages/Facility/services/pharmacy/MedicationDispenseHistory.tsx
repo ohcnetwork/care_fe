@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRightSquare } from "lucide-react";
+import { ArrowUpRightSquare, QrCode } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -16,9 +17,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/Common/Table";
+import { GenericQRScanDialog } from "@/components/Scan/GenericQRScanDialog";
 import { CreateDispenseSheet } from "@/pages/Facility/services/pharmacy/CreateDispenseSheet";
 import { MedicationReturnSheet } from "@/pages/Facility/services/pharmacy/MedicationReturnSheet";
 
+import { useBarcodeScanner } from "@/hooks/useBarcodeScanner";
 import useFilters from "@/hooks/useFilters";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -62,6 +65,7 @@ export default function MedicationDispenseHistory({
     disableCache: true,
   });
   const [selectedDispenses, setSelectedDispenses] = useState<string[]>([]);
+  const [scanDialogOpen, setScanDialogOpen] = useState(false);
 
   // Clear selections when patient filter changes
   useEffect(() => {
@@ -185,6 +189,55 @@ export default function MedicationDispenseHistory({
     }
   };
 
+  const handleScanSuccess = (scannedValue: string) => {
+    const scannedIds = scannedValue
+      .split(",")
+      .map((id) => id.trim())
+      .filter((id) => id.length > 0);
+
+    if (scannedIds.length === 0) {
+      toast.error(t("invalid_qr_code"));
+      return;
+    }
+
+    const matchingDispenseIds = scannedIds.filter((scannedId) =>
+      completedDispenses.some((dispense) => dispense.id === scannedId),
+    );
+
+    if (matchingDispenseIds.length === 0) {
+      toast.error(t("no_results_found"));
+      return;
+    }
+
+    setSelectedDispenses((prev) => {
+      const newSelection = [...prev];
+      for (const id of matchingDispenseIds) {
+        if (!newSelection.includes(id)) {
+          newSelection.push(id);
+        }
+      }
+      return newSelection;
+    });
+
+    toast.success(
+      t("selected_items_count", { count: matchingDispenseIds.length }),
+    );
+    setScanDialogOpen(false);
+  };
+
+  useBarcodeScanner({
+    onScan: (scannedValue: string) => {
+      if (!scanDialogOpen) {
+        handleScanSuccess(scannedValue);
+        toast.info(t("qr_code_scanned_successfully"));
+      }
+    },
+    enabled: showCheckboxes && !scanDialogOpen,
+    preventDefault: false,
+    maxLength: 500,
+    timeout: 500,
+  });
+
   // Get patient info from the first selected dispense (all should be for same patient)
   const selectedPatient = dispenseOrderQueue?.results?.find((item) =>
     selectedDispenses.includes(item.id),
@@ -195,6 +248,16 @@ export default function MedicationDispenseHistory({
       title={t("dispense_orders")}
       options={
         <div className="flex items-center gap-2">
+          {showCheckboxes && (
+            <Button
+              variant="outline"
+              onClick={() => setScanDialogOpen(true)}
+              className="gap-2"
+            >
+              <QrCode className="size-4" />
+              {t("scan")}
+            </Button>
+          )}
           {selectedDispenses.length > 0 &&
             qParams.patientId &&
             selectedPatient && (
@@ -374,6 +437,14 @@ export default function MedicationDispenseHistory({
       <div className="mt-8 flex justify-center">
         <Pagination totalCount={dispenseOrderQueue?.count || 0} />
       </div>
+
+      <GenericQRScanDialog
+        open={scanDialogOpen}
+        onOpenChange={setScanDialogOpen}
+        onScanSuccess={handleScanSuccess}
+        title={t("scan_qr")}
+        autoStartScanning
+      />
     </Page>
   );
 }
