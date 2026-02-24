@@ -55,6 +55,7 @@ export type PatientRegistrationFormComponentType = React.FC<{
   form: UseFormReturn<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   facilityId?: string;
   patientId?: string;
+  submitForm?: () => void;
 }>;
 
 export type PatientDetailsTabDemographyGeneralInfoComponentType = React.FC<{

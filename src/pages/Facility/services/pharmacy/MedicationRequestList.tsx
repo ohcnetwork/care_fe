@@ -61,11 +61,7 @@ import {
   PrescriptionSummary,
 } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
-import {
-  getTagHierarchyDisplay,
-  TagConfig,
-  TagResource,
-} from "@/types/emr/tagConfig/tagConfig";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { getLocationPath } from "@/types/location/utils";
 import mutate from "@/Utils/request/mutate";
@@ -420,20 +416,6 @@ export default function MedicationRequestList({
                         }}
                         patientId={item.encounter.patient.id}
                       />
-                      {item.tags && item.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {item.tags.map((tag) => (
-                            <Badge
-                              key={tag.id}
-                              variant="outline"
-                              size="sm"
-                              className="text-xs"
-                            >
-                              {getTagHierarchyDisplay(tag)}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
                     </div>
                   </TableCell>
                   <TableCell>

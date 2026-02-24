@@ -8,8 +8,12 @@ import { Markdown } from "@/components/ui/markdown";
 
 import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
-import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
-import { formatDosage, formatSig } from "@/components/Medicine/utils";
+import {
+  formatDosage,
+  formatDuration,
+  formatFrequency,
+  formatSig,
+} from "@/components/Medicine/utils";
 
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -56,22 +60,18 @@ const PrescriptionContent = ({
             ]}
             rows={medications?.map((medication) => {
               const instruction = medication.dosage_instruction[0];
-              const frequency = getFrequencyDisplay(instruction?.timing);
-              const dosage = formatDosage(instruction);
-              const duration = instruction?.timing?.repeat?.bounds_duration;
               const remarks = formatSig(instruction);
               const notes = medication.note;
+              const freqText = formatFrequency(instruction);
+              const additionalInstr =
+                instruction?.additional_instruction?.[0]?.display;
               return {
                 medicine: displayMedicationName(medication),
                 status: t(`medication_status_${medication.status}`),
-                dosage: dosage,
-                frequency: instruction?.as_needed_boolean
-                  ? `${t("as_needed_prn")}`
-                  : (frequency?.meaning ?? "-") +
-                    (instruction?.additional_instruction?.[0]?.display
-                      ? `, ${instruction.additional_instruction[0].display}`
-                      : ""),
-                duration: duration ? `${duration.value} ${duration.unit}` : "-",
+                dosage: formatDosage(instruction),
+                frequency:
+                  [freqText, additionalInstr].filter(Boolean).join(", ") || "-",
+                duration: formatDuration(instruction) || "-",
                 instructions: [remarks, notes].filter(Boolean).join("\n"),
               };
             })}
