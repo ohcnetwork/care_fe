@@ -259,7 +259,11 @@ export function AccountShow({
 
   const canAddChargeItems =
     account?.status === AccountStatus.active &&
-    account?.billing_status === AccountBillingStatus.open;
+    [
+      AccountBillingStatus.open,
+      AccountBillingStatus.carecomplete_notbilled,
+      AccountBillingStatus.billing,
+    ].includes(account?.billing_status ?? AccountBillingStatus.open);
 
   if (isLoading) {
     return <TableSkeleton count={5} />;

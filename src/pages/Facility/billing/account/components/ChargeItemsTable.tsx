@@ -115,7 +115,7 @@ export function ChargeItemsTable({
   facilityId,
   accountId,
   patientId,
-  canAddChargeItems,
+  canAddChargeItems = true,
 }: ChargeItemsTableProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
