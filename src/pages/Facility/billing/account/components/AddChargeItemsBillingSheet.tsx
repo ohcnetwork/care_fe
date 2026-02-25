@@ -54,6 +54,7 @@ interface AddChargeItemsBillingSheetProps {
   patientId: string;
   onChargeItemsAdded: () => void;
   disabled?: boolean;
+  accountId: string;
 }
 
 interface ApplyChargeItemDefinitionRequestWithObject extends ApplyChargeItemDefinitionRequest {
@@ -67,6 +68,7 @@ export default function AddChargeItemsBillingSheet({
   facilityId,
   patientId,
   onChargeItemsAdded,
+  accountId,
   disabled,
 }: AddChargeItemsBillingSheetProps) {
   const { t } = useTranslation();
@@ -139,7 +141,6 @@ export default function AddChargeItemsBillingSheet({
       toast.error(t("please_select_at_least_one_item"));
       return;
     }
-
     setIsSubmitting(true);
     applyChargeItems({
       requests: selectedItems.map(
@@ -147,7 +148,7 @@ export default function AddChargeItemsBillingSheet({
           charge_item_definition_object: _discard,
           performer_actor_object: _discardPerformer,
           ...charge_item
-        }) => charge_item,
+        }) => ({ ...charge_item, account: accountId }),
       ),
     });
   };
