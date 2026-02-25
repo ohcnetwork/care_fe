@@ -32,21 +32,23 @@ const canCompleteEncounter = (
   return true;
 };
 
-const buildEncounterCompletionRequest = (
-  encounter: EncounterRead,
-): BatchRequestBody["requests"][number] => ({
-  url: encounterApi.update.path.replace("{id}", encounter.id),
-  method: encounterApi.update.method,
-  reference_id: "encounter-closed",
-  body: {
-    ...encounter,
-    status: EncounterStatus.COMPLETED,
-    period: {
-      start: encounter.period.start,
-      end: encounter.period.end || new Date().toISOString(),
+const buildEncounterCompletionRequest = (encounter: EncounterRead) => {
+  const request: BatchRequestBody["requests"] = [];
+  request.push({
+    url: encounterApi.update.path.replace("{id}", encounter.id),
+    method: encounterApi.update.method,
+    reference_id: "encounter-closed",
+    body: {
+      ...encounter,
+      status: EncounterStatus.COMPLETED,
+      period: {
+        start: encounter.period.start,
+        end: encounter.period.end || new Date().toISOString(),
+      },
     },
-  },
-});
+  });
+  return request;
+};
 
 const buildAppointmentRequests = (encounter: EncounterRead) => {
   const requests: BatchRequestBody["requests"] = [];
@@ -96,15 +98,14 @@ const useBatchRequest = (encounterId: string) => {
       mutate(batchApi.batchRequest)({ requests }),
 
     onSuccess: ({ results }) => {
-      queryClient.invalidateQueries({ queryKey: ["appointment"] });
-      queryClient.invalidateQueries({ queryKey: ["tokens"] });
-
       if (results.some((r) => r.reference_id === "encounter-closed")) {
         queryClient.invalidateQueries({ queryKey: ["encounter", encounterId] });
         toast.success(t("encounter_marked_as_complete"));
       }
 
       if (results.some((r) => r.reference_id === "appointment-closed")) {
+        queryClient.invalidateQueries({ queryKey: ["appointment"] });
+        queryClient.invalidateQueries({ queryKey: ["tokens"] });
         toast.success(t("appointment_closed_successfully"));
       }
     },
@@ -123,7 +124,7 @@ export function useCompleteEncounter({
   const completeEncounter = () => {
     if (!canCompleteEncounter(encounter, onDischargeRequired)) return;
 
-    batch.mutate([buildEncounterCompletionRequest(encounter)]);
+    batch.mutate(buildEncounterCompletionRequest(encounter));
   };
 
   return { completeEncounter, isPending: batch.isPending };
@@ -159,7 +160,7 @@ export function useCompleteEverything({
     const requests: BatchRequestBody["requests"] = [];
 
     if (encounter.status !== EncounterStatus.COMPLETED) {
-      requests.push(buildEncounterCompletionRequest(encounter));
+      requests.push(...buildEncounterCompletionRequest(encounter));
     }
 
     requests.push(...buildAppointmentRequests(encounter));
