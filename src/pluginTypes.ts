@@ -9,6 +9,7 @@ import {
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
+import { PlugConfigMeta } from "@/types/plugConfig";
 import { UserReadMinimal } from "@/types/user/user";
 import { LazyExoticComponent, ReactNode } from "react";
 import { UseFormReturn } from "react-hook-form";
@@ -54,6 +55,7 @@ export type PatientRegistrationFormComponentType = React.FC<{
   form: UseFormReturn<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   facilityId?: string;
   patientId?: string;
+  submitForm?: () => void;
 }>;
 
 export type PatientDetailsTabDemographyGeneralInfoComponentType = React.FC<{
@@ -138,6 +140,7 @@ export type PluginManifest = {
   routes?: AppRoutes;
   extends?: readonly SupportedPluginExtensions[];
   navItems?: NavigationLink[];
+  billingNavItems?: NavigationLink[];
   userNavItems?: NavigationLink[];
   adminNavItems?: NavigationLink[];
   organizationTabs?: PluginOrganizationTab[];
@@ -147,6 +150,10 @@ export type PluginManifest = {
     LazyComponent<React.FC<PluginEncounterTabProps>>
   >;
   devices?: readonly PluginDeviceManifest[];
+};
+
+export type PluginManifestWithMeta = PluginManifest & {
+  meta: PlugConfigMeta;
 };
 
 export { pluginMap };

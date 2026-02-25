@@ -26,6 +26,7 @@ export enum Classification {
   imaging = "imaging",
   surgical_procedure = "surgical_procedure",
   counselling = "counselling",
+  education = "education",
 }
 
 export enum Kind {

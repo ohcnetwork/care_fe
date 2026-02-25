@@ -68,11 +68,14 @@ test.describe("Observation Definition Form with Interpretation", () => {
       const conditionSelector = page.getByText(
         `Condition ${conditionNumber}Type`,
       );
-
+      const conditionSelectorExists = await conditionSelector.isVisible();
+      if (!conditionSelectorExists) {
+        await page.getByRole("button", { name: "Add Condition" }).click();
+      }
       // Select metric type
       await conditionSelector
         .getByRole("combobox")
-        .filter({ hasText: "Encounter Tags" })
+        .filter({ hasText: /^Encounter/ })
         .click();
 
       await page.getByRole("option", { name: "Patient Gender" }).click();
@@ -660,6 +663,20 @@ test.describe("Observation Definition Form with Interpretation", () => {
     await test.step("Test validation - no conditions", async () => {
       await page.getByRole("button", { name: "Add Interpretation" }).click();
       await addNumericRange(page, 1, false, "Normal", 0, 100);
+
+      const conditionSelector = page.getByText(`Condition 1Type`);
+      const conditionSelectorExists = await conditionSelector.isVisible();
+      if (!conditionSelectorExists) {
+        await page.getByRole("button", { name: "Add Condition" }).click();
+      }
+
+      // Select metric type
+      await conditionSelector
+        .getByRole("combobox")
+        .filter({ hasText: /^Encounter/ })
+        .click();
+
+      await page.getByRole("option", { name: "Encounter Tags" }).click();
 
       await page.getByRole("button", { name: "Save" }).click();
       // tag selector should show error message

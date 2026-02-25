@@ -1,9 +1,16 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -13,22 +20,32 @@ import {
 } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { formatDateTime, formatName, properCase } from "@/Utils/utils";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { cn } from "@/lib/utils";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
-import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
+import {
+  QuestionnaireResponse,
+  QuestionnaireResponseStatus,
+} from "@/types/questionnaire/questionnaireResponse";
 import questionnaireResponseApi from "@/types/questionnaire/questionnaireResponseApi";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { t } from "i18next";
-import { Printer } from "lucide-react";
+import { BanIcon, ChevronDown, MoreVertical, Printer } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
+import { toast } from "sonner";
 
 interface Props {
   encounterId?: string;
@@ -86,6 +103,7 @@ function QuestionGroup({
   parentTitle?: string;
   isSingleGroup?: boolean;
 }) {
+  const { t } = useTranslation();
   const hasResponses = group.questions?.some((q) => {
     if (q.type === "group") {
       return q.questions?.some((subQ) =>
@@ -189,13 +207,13 @@ function QuestionGroup({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-7 text-xs shrink-0"
+                    className="h-6 text-xs shrink-0 px-2"
                   >
                     {t("see_note")}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="max-w-[90vw] p-4">
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                <PopoverContent className="max-w-[90vw] p-3">
+                  <p className="text-xs text-gray-700 whitespace-pre-wrap">
                     {response.note}
                   </p>
                 </PopoverContent>
@@ -208,13 +226,13 @@ function QuestionGroup({
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg px-4 py-2">
-      <h3 className="text-base font-semibold text-gray-900 border-b border-gray-200 pb-1 mb-1">
+    <div className="border border-gray-200 rounded-md px-3 py-1.5">
+      <h3 className="text-sm font-semibold text-gray-900 border-b border-gray-200 pb-1 mb-1">
         {group.text}
       </h3>
       <div
         className={cn("w-full", {
-          "grid md:grid-cols-2 grid-cols-1 gap-8": shouldUseTwoColumns,
+          "grid md:grid-cols-2 grid-cols-1 gap-4": shouldUseTwoColumns,
         })}
       >
         {leftQuestions.length > 0 && (
@@ -252,37 +270,103 @@ function QuestionGroup({
   );
 }
 
-function PrintButton({ item }: { item: QuestionnaireResponse }) {
+function ResponseActionsMenu({
+  item,
+  patientId,
+}: {
+  item: QuestionnaireResponse;
+  patientId: string;
+}) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
+  const isUnstructured = !!item.questionnaire;
+  const isEnteredInError =
+    item.status === QuestionnaireResponseStatus.EnteredInError;
+
+  const { mutate: updateStatus, isPending } = useMutation({
+    mutationFn: mutate(questionnaireResponseApi.update, {
+      pathParams: { patientId, responseId: item.id },
+    }),
+    onSuccess: () => {
+      toast.success(t("questionnaire_response_marked_as_entered_in_error"));
+      queryClient.invalidateQueries({
+        queryKey: ["questionnaireResponses", patientId],
+      });
+      setShowConfirmDialog(false);
+    },
+  });
+
+  if (isEnteredInError) {
+    return null;
+  }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="hover:bg-transparent text-gray-500 hover:text-gray-500"
-        >
-          <Printer className="size-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <Link href={`questionnaire_response/${item.id}/print`}>
-          <DropdownMenuItem>{t("print_this_response")}</DropdownMenuItem>
-        </Link>
-        <Link href={`questionnaire/${item.questionnaire?.id}/responses/print`}>
-          <DropdownMenuItem>
-            {t("print_all_responses", {
-              title: item.questionnaire?.title,
-            })}
-          </DropdownMenuItem>
-        </Link>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7 text-gray-500"
+            aria-label={t("more_actions")}
+          >
+            <MoreVertical className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <Link href={`questionnaire_response/${item.id}/print`}>
+            <DropdownMenuItem>
+              <Printer className="size-4" />
+              {t("print_this_response")}
+            </DropdownMenuItem>
+          </Link>
+          {item.questionnaire && (
+            <Link
+              href={`questionnaire/${item.questionnaire.id}/responses/print`}
+            >
+              <DropdownMenuItem>
+                <Printer className="size-4" />
+                {t("print_all_responses", {
+                  title: item.questionnaire.title,
+                })}
+              </DropdownMenuItem>
+            </Link>
+          )}
+          {isUnstructured && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onSelect={() => setShowConfirmDialog(true)}
+                className="text-red-500 focus:text-red-700"
+              >
+                <BanIcon className="size-4" />
+                {t("mark_as_entered_in_error")}
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <ConfirmActionDialog
+        open={showConfirmDialog}
+        onOpenChange={setShowConfirmDialog}
+        title={t("mark_as_entered_in_error")}
+        description={t("questionnaire_response_entered_in_error_warning")}
+        onConfirm={() =>
+          updateStatus({ status: QuestionnaireResponseStatus.EnteredInError })
+        }
+        confirmText={t("confirm")}
+        variant="destructive"
+        disabled={isPending}
+      />
+    </>
   );
 }
 
 function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
+  const { t } = useTranslation();
   const groups =
     item.questionnaire?.questions.filter(
       (q) =>
@@ -308,7 +392,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
         result.push(
           <div
             key={`group-${result.length}`}
-            className="border border-gray-200 rounded-lg px-4 py-2"
+            className="border border-gray-200 rounded-md px-3 py-1.5"
           >
             <div className="w-full">
               <Table className="table-fixed w-full">
@@ -367,13 +451,13 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    className="h-7 text-xs shrink-0"
+                                    className="h-6 text-xs shrink-0 px-2"
                                   >
                                     {t("see_note")}
                                   </Button>
                                 </PopoverTrigger>
-                                <PopoverContent className="max-w-[90vw] p-4">
-                                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                                <PopoverContent className="max-w-[90vw] p-3">
+                                  <p className="text-xs text-gray-700 whitespace-pre-wrap">
                                     {response.note}
                                   </p>
                                 </PopoverContent>
@@ -417,23 +501,23 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
   };
 
   return (
-    <div className="w-full p-3">
+    <div className="w-full">
       <div
         className={cn(
-          "grid gap-6",
+          "grid gap-3",
           shouldUseTwoColumns ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1",
         )}
       >
         {/* Left Column */}
-        <div className="space-y-3">{renderColumn(leftGroups)}</div>
+        <div className="space-y-2">{renderColumn(leftGroups)}</div>
 
         {/* Right Column */}
         {shouldUseTwoColumns && (
-          <div className="space-y-3">{renderColumn(rightGroups)}</div>
+          <div className="space-y-2">{renderColumn(rightGroups)}</div>
         )}
       </div>
 
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between border-t border-gray-200 mt-8 pt-4 text-sm text-gray-500 gap-2">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between border-gray-200 pt-2 text-xs text-gray-500">
         <div>
           <span className="text-gray-600">{t("filed_by")}</span>{" "}
           <span className="font-medium text-gray-700">
@@ -453,49 +537,93 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
 
 export function ResponseCard({
   item,
+  patientId,
   onTitleClick,
   showTitle = true,
   isPrintPreview = false,
 }: {
   item: QuestionnaireResponse;
+  patientId: string;
   isPrintPreview?: boolean;
   onTitleClick?: (questionnaireSlug: string) => void;
   showTitle?: boolean;
 }) {
+  const { t } = useTranslation();
   const isStructured = !item.questionnaire;
   const structuredType = Object.keys(item.structured_responses || {})[0];
   const title =
     isStructured && structuredType
       ? properCase(structuredType.replace(/_/g, " "))
       : item.questionnaire?.title || "";
+  const isEnteredInError =
+    item.status === QuestionnaireResponseStatus.EnteredInError;
+  const [isExpanded, setIsExpanded] = useState(!isEnteredInError);
 
   return (
-    <Card className="shadow-none border rounded-lg">
-      <CardHeader className="flex flex-row items-center pb-2">
-        {showTitle && (
-          <CardTitle
+    <Card
+      className={cn(
+        "shadow-none border rounded-md",
+        isEnteredInError && "opacity-70",
+      )}
+    >
+      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+        <CollapsibleTrigger asChild className="cursor-pointer">
+          <CardHeader
             className={cn(
-              "text-lg font-medium",
-              onTitleClick && "cursor-pointer hover:bg-gray-100 rounded p-2",
+              "flex flex-row items-center py-2 px-3",
+              isEnteredInError && "hover:bg-gray-50",
             )}
-            onClick={() => {
-              if (item.questionnaire?.id && onTitleClick) {
-                onTitleClick(item.questionnaire.id);
-              }
-            }}
           >
-            {title}
-          </CardTitle>
-        )}
-        {!isPrintPreview && (
-          <div className="ml-auto">
-            <PrintButton item={item} />
-          </div>
-        )}
-      </CardHeader>
-      <CardContent>
-        <ResponseCardContent item={item} />
-      </CardContent>
+            {showTitle && (
+              <CardTitle
+                className={cn(
+                  "text-base font-medium",
+                  onTitleClick &&
+                    !isEnteredInError &&
+                    "cursor-pointer hover:bg-gray-100 rounded px-1.5 py-0.5",
+                )}
+                onClick={(e) => {
+                  if (
+                    item.questionnaire?.id &&
+                    onTitleClick &&
+                    !isEnteredInError
+                  ) {
+                    e.stopPropagation();
+                    onTitleClick(item.questionnaire.id);
+                  }
+                }}
+              >
+                {title}
+              </CardTitle>
+            )}
+            {isEnteredInError && (
+              <Badge variant="destructive" className="ml-2">
+                {t("entered_in_error")}
+              </Badge>
+            )}
+            <div className="ml-auto flex items-center gap-1">
+              {isEnteredInError && (
+                <ChevronDown
+                  className={cn(
+                    "size-4 transition-transform text-gray-500",
+                    isExpanded && "rotate-180",
+                  )}
+                />
+              )}
+              {!isPrintPreview && (
+                <div onClick={(e) => e.stopPropagation()}>
+                  <ResponseActionsMenu item={item} patientId={patientId} />
+                </div>
+              )}
+            </div>
+          </CardHeader>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <CardContent className="px-3 pb-3 pt-0">
+            <ResponseCardContent item={item} />
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   );
 }
@@ -556,25 +684,25 @@ export default function QuestionnaireResponsesList({
   }, [inView, hasNextPage, fetchNextPage]);
 
   return (
-    <div className="gap-4">
+    <div>
       <div className="max-w-full">
         {isLoading ? (
-          <div className="grid gap-5">
+          <div className="grid gap-3">
             <CardListSkeleton count={RESULTS_PER_PAGE_LIMIT} />
           </div>
         ) : responses.length === 0 ? (
           <Card
             className={cn(
-              "p-6",
+              "p-4",
               isPrintPreview && "shadow-none border-gray-200",
             )}
           >
-            <div className="text-lg font-medium text-gray-500">
+            <div className="text-sm font-medium text-gray-500">
               {t("no_responses_found")}
             </div>
           </Card>
         ) : (
-          <ul className="grid gap-4">
+          <ul className="grid gap-3">
             {responses.map((item: QuestionnaireResponse) => (
               <li key={item.id}>
                 {renderItem ? (
@@ -583,6 +711,7 @@ export default function QuestionnaireResponsesList({
                   <ResponseCard
                     key={item.id}
                     item={item}
+                    patientId={patientId}
                     isPrintPreview={isPrintPreview}
                   />
                 )}
@@ -590,7 +719,7 @@ export default function QuestionnaireResponsesList({
             ))}
 
             {!isPrintPreview && hasNextPage && (
-              <li ref={ref} className="flex justify-center py-4">
+              <li ref={ref} className="flex justify-center py-2">
                 {isFetchingNextPage && (
                   <CardListSkeleton count={RESULTS_PER_PAGE_LIMIT} />
                 )}
