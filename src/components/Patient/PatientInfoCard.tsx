@@ -1,4 +1,3 @@
-import { PatientTagsDisplay } from "@/components/Patient/PatientTagsDisplay";
 import TagAssignmentSheet, {
   TagEntityType,
 } from "@/components/Tags/TagAssignmentSheet";
@@ -40,8 +39,8 @@ export const PatientInfoCard = ({
   return (
     <>
       <Card className="bg-white shadow-sm rounded-md">
-        <CardHeader className="pb-4 flex sm:flex-row items-center justify-between px-2">
-          <div className="flex flex-col md:flex-row gap-4 xl:gap-8 xl:items-center">
+        <CardHeader>
+          <div className="flex flex-col md:flex-row gap-4">
             <PatientHoverCard patient={patient} facilityId={facilityId} />
             <div className="flex flex-wrap xl:gap-5 gap-2">
               {"instance_identifiers" in patient &&
@@ -60,10 +59,11 @@ export const PatientInfoCard = ({
                       </span>
                     </div>
                   ))}
-              <PatientTagsDisplay patient={patient} />
             </div>
           </div>
-          {children}
+          <div className="w-full flex items-center justify-center">
+            {children}
+          </div>
         </CardHeader>
       </Card>
       <Card className="bg-white shadow-sm mx-3 rounded-md rounded-t-none rounded-b-md">
