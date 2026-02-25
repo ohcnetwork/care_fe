@@ -864,7 +864,15 @@ export function QuestionnaireForm({
               q.id,
               q.required,
             );
-            errors.push(...validationErrors);
+
+            // Normalize error messages for i18n
+            const normalizedErrors = validationErrors.map((error) => ({
+              ...error,
+              error: error.error ? t(error.error) : t("validation_failed"),
+              msg: error.msg ? t(error.msg) : undefined,
+            }));
+
+            errors.push(...normalizedErrors);
             if (validationErrors.length > 0) {
               firstErrorId = firstErrorId ? firstErrorId : q.id;
             }
