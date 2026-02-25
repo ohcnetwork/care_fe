@@ -21,17 +21,6 @@ const encounterRequiresDischarge = (encounter: EncounterRead) =>
   encounter.encounter_class === "imp" &&
   encounter.status !== EncounterStatus.DISCHARGED;
 
-const canCompleteEncounter = (
-  encounter: EncounterRead,
-  onDischargeRequired?: () => void,
-) => {
-  if (encounterRequiresDischarge(encounter)) {
-    onDischargeRequired?.();
-    return false;
-  }
-  return true;
-};
-
 const buildEncounterCompletionRequest = (encounter: EncounterRead) => {
   const request: BatchRequestBody["requests"] = [];
   request.push({
@@ -122,7 +111,10 @@ export function useCompleteEncounter({
   const batch = useBatchRequest(encounter.id);
 
   const completeEncounter = () => {
-    if (!canCompleteEncounter(encounter, onDischargeRequired)) return;
+    if (encounterRequiresDischarge(encounter)) {
+      onDischargeRequired?.();
+      return;
+    }
 
     batch.mutate(buildEncounterCompletionRequest(encounter));
   };
@@ -155,7 +147,10 @@ export function useCompleteEverything({
   const batch = useBatchRequest(encounter.id);
 
   const completeEverything = () => {
-    if (!canCompleteEncounter(encounter, onDischargeRequired)) return;
+    if (encounterRequiresDischarge(encounter)) {
+      onDischargeRequired?.();
+      return;
+    }
 
     const requests: BatchRequestBody["requests"] = [];
 
