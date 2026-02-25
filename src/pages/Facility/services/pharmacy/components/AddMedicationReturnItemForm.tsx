@@ -539,6 +539,7 @@ export function AddMedicationReturnItemForm({
                 value={dispenseSearchQuery}
                 onChange={(e) => setDispenseSearchQuery(e.target.value)}
                 className="pl-9"
+                aria-label={t("search_items")}
               />
             </div>
 
