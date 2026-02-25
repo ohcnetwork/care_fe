@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp, PlusIcon } from "lucide-react";
-import { useQueryParams } from "raviger";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -186,14 +185,16 @@ function groupChargeItemsByLocation(
 export interface BedChargeItemsTableProps {
   facilityId: string;
   accountId: string;
+  encounterId?: string;
 }
 
 export function BedChargeItemsTable({
   facilityId,
   accountId,
+  encounterId,
 }: BedChargeItemsTableProps) {
   const { t } = useTranslation();
-  const [{ encounterId }] = useQueryParams();
+
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
     {},
   );
@@ -213,7 +214,7 @@ export function BedChargeItemsTable({
   const { data: encounter, isLoading: isEncounterLoading } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(encounterApi.get, {
-      pathParams: { id: encounterId },
+      pathParams: { id: encounterId || "" },
       queryParams: facilityId ? { facility: facilityId } : {},
     }),
     enabled: !!encounterId,
