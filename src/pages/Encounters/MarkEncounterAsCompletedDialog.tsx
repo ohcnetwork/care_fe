@@ -14,7 +14,7 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import { useCompleteEncounter } from "@/pages/Encounters/utils/useEncounterProgressController";
+import { useEncounterProgressController } from "@/pages/Encounters/utils/useEncounterProgressController";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { navigate } from "raviger";
 
@@ -23,7 +23,7 @@ export function MarkEncounterAsCompletedDialog({
   ...props
 }: { encounter: EncounterRead } & React.ComponentProps<typeof AlertDialog>) {
   const { t } = useTranslation();
-  const { completeEncounter } = useCompleteEncounter({
+  const { completeEncounter } = useEncounterProgressController({
     encounter: encounter,
     onDischargeRequired: () => {
       navigate(

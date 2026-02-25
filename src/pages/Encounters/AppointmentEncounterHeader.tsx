@@ -18,10 +18,7 @@ import {
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 
-import {
-  useCompleteAppointment,
-  useCompleteEverything,
-} from "@/pages/Encounters/utils/useEncounterProgressController";
+import { useEncounterProgressController } from "@/pages/Encounters/utils/useEncounterProgressController";
 import { renderTokenNumber } from "@/types/tokens/token/token";
 import mutate from "@/Utils/request/mutate";
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
@@ -96,7 +93,7 @@ const AppointmentEncounterHeaderActions = ({
   const queryClient = useQueryClient();
 
   const { completeEverything, isPending: isCompleteEverythingPending } =
-    useCompleteEverything({
+    useEncounterProgressController({
       encounter,
       onDischargeRequired: () => {
         navigate(
@@ -105,7 +102,7 @@ const AppointmentEncounterHeaderActions = ({
       },
     });
   const { completeAppointment, isPending: isCompleteAppointmentPending } =
-    useCompleteAppointment({ encounter });
+    useEncounterProgressController({ encounter });
   const isEndEncounterPending =
     isCompleteEverythingPending || isCompleteAppointmentPending;
 

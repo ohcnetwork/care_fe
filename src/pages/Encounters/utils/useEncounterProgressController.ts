@@ -22,54 +22,61 @@ const encounterRequiresDischarge = (encounter: EncounterRead) =>
   encounter.status !== EncounterStatus.DISCHARGED;
 
 const buildEncounterCompletionRequest = (encounter: EncounterRead) => {
-  const request: BatchRequestBody["requests"] = [];
-  request.push({
-    url: encounterApi.update.path.replace("{id}", encounter.id),
-    method: encounterApi.update.method,
-    reference_id: "encounter-closed",
-    body: {
-      ...encounter,
-      status: EncounterStatus.COMPLETED,
-      period: {
-        start: encounter.period.start,
-        end: encounter.period.end || new Date().toISOString(),
+  if (encounter.status === EncounterStatus.COMPLETED) return [];
+  return [
+    {
+      url: encounterApi.update.path.replace("{id}", encounter.id),
+      method: encounterApi.update.method,
+      reference_id: "encounter-closed",
+      body: {
+        ...encounter,
+        status: EncounterStatus.COMPLETED,
+        period: {
+          start: encounter.period.start,
+          end: encounter.period.end || new Date().toISOString(),
+        },
       },
     },
-  });
-  return request;
+  ];
 };
 
 const buildAppointmentRequests = (encounter: EncounterRead) => {
-  const requests: BatchRequestBody["requests"] = [];
+  const requests = [];
 
-  const appt = encounter.appointment;
+  const appointment = encounter.appointment;
 
-  if (appt?.id && !AppointmentFinalStatuses.includes(appt.status)) {
+  if (
+    appointment?.id &&
+    !AppointmentFinalStatuses.includes(appointment.status)
+  ) {
     requests.push({
       url: scheduleApi.appointments.update.path
         .replace("{facilityId}", encounter.facility.id)
-        .replace("{id}", appt.id),
+        .replace("{id}", appointment.id),
       method: scheduleApi.appointments.update.method,
       reference_id: "appointment-closed",
       body: {
         status: AppointmentStatus.FULFILLED,
-        note: appt.note,
+        note: appointment.note,
       },
     });
   }
 
-  if (appt?.token?.id && TokenActiveStatuses.includes(appt.token.status)) {
+  if (
+    appointment?.token?.id &&
+    TokenActiveStatuses.includes(appointment.token.status)
+  ) {
     requests.push({
       url: tokenApi.update.path
         .replace("{facility_id}", encounter.facility.id)
-        .replace("{queue_id}", appt.token.queue.id)
-        .replace("{id}", appt.token.id),
+        .replace("{queue_id}", appointment.token.queue.id)
+        .replace("{id}", appointment.token.id),
       method: tokenApi.update.method,
       reference_id: "token-closed",
       body: {
-        ...appt.token,
-        note: appt.token.note,
-        sub_queue: appt.token.sub_queue?.id || null,
+        ...appointment.token,
+        note: appointment.token.note,
+        sub_queue: appointment.token.sub_queue?.id || null,
         status: TokenStatus.FULFILLED,
       },
     });
@@ -78,17 +85,25 @@ const buildAppointmentRequests = (encounter: EncounterRead) => {
   return requests;
 };
 
-const useBatchRequest = (encounterId: string) => {
+export function useEncounterProgressController({
+  encounter,
+  onDischargeRequired,
+}: {
+  encounter: EncounterRead;
+  onDischargeRequired?: () => void;
+}) {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
-  return useMutation({
+  const { mutate: batch, isPending } = useMutation({
     mutationFn: (requests: BatchRequestBody["requests"]) =>
       mutate(batchApi.batchRequest)({ requests }),
 
     onSuccess: ({ results }) => {
       if (results.some((r) => r.reference_id === "encounter-closed")) {
-        queryClient.invalidateQueries({ queryKey: ["encounter", encounterId] });
+        queryClient.invalidateQueries({
+          queryKey: ["encounter", encounter.id],
+        });
         toast.success(t("encounter_marked_as_complete"));
       }
 
@@ -99,69 +114,34 @@ const useBatchRequest = (encounterId: string) => {
       }
     },
   });
-};
-
-export function useCompleteEncounter({
-  encounter,
-  onDischargeRequired,
-}: {
-  encounter: EncounterRead;
-  onDischargeRequired?: () => void;
-}) {
-  const batch = useBatchRequest(encounter.id);
-
-  const completeEncounter = () => {
-    if (encounterRequiresDischarge(encounter)) {
-      onDischargeRequired?.();
-      return;
-    }
-
-    batch.mutate(buildEncounterCompletionRequest(encounter));
-  };
-
-  return { completeEncounter, isPending: batch.isPending };
-}
-
-export function useCompleteAppointment({
-  encounter,
-}: {
-  encounter: EncounterRead;
-}) {
-  const batch = useBatchRequest(encounter.id);
-
-  const completeAppointment = () => {
-    const requests = buildAppointmentRequests(encounter);
-    if (requests.length) batch.mutate(requests);
-  };
-
-  return { completeAppointment, isPending: batch.isPending };
-}
-
-export function useCompleteEverything({
-  encounter,
-  onDischargeRequired,
-}: {
-  encounter: EncounterRead;
-  onDischargeRequired?: () => void;
-}) {
-  const batch = useBatchRequest(encounter.id);
 
   const completeEverything = () => {
-    if (encounterRequiresDischarge(encounter)) {
-      onDischargeRequired?.();
+    if (onDischargeRequired && encounterRequiresDischarge(encounter)) {
+      onDischargeRequired();
       return;
     }
-
-    const requests: BatchRequestBody["requests"] = [];
-
-    if (encounter.status !== EncounterStatus.COMPLETED) {
-      requests.push(...buildEncounterCompletionRequest(encounter));
-    }
-
-    requests.push(...buildAppointmentRequests(encounter));
-
-    if (requests.length) batch.mutate(requests);
+    batch([
+      ...buildEncounterCompletionRequest(encounter),
+      ...buildAppointmentRequests(encounter),
+    ]);
   };
 
-  return { completeEverything, isPending: batch.isPending };
+  const completeEncounter = () => {
+    if (onDischargeRequired && encounterRequiresDischarge(encounter)) {
+      onDischargeRequired();
+      return;
+    }
+    batch(buildEncounterCompletionRequest(encounter));
+  };
+
+  const completeAppointment = () => {
+    batch(buildAppointmentRequests(encounter));
+  };
+
+  return {
+    completeEverything,
+    completeAppointment,
+    completeEncounter,
+    isPending,
+  };
 }
