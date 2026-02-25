@@ -94,7 +94,7 @@ export default function AppointmentPrint(props: Props) {
         {/* Header with Facility Name and Logo */}
 
         {customPrintHeader ? (
-          <div className="mb-4 pb-2border-gray-200">
+          <div className="mb-4 pb-2">
             <img
               src={customPrintHeader}
               alt="Custom Header"
