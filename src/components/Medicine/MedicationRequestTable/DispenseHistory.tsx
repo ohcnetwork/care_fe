@@ -18,6 +18,9 @@ import Loading from "@/components/Common/Loading";
 import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { EmptyState } from "@/components/ui/empty-state";
 
+import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
+
+import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 import { InvoiceStatus } from "@/types/billing/invoice/invoice";
@@ -75,6 +78,7 @@ interface Props {
   canAccess: boolean;
   canWrite: boolean;
   facilityId?: string;
+  dispenseOrderId?: string;
 }
 
 export function DispenseHistory({
@@ -82,21 +86,23 @@ export function DispenseHistory({
   encounterId,
   facilityId,
   canAccess,
+  dispenseOrderId,
   canWrite,
 }: Props) {
   const { t } = useTranslation();
   const [isDispenseOpen, setIsDispenseOpen] = useState(false);
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["medication_dispense", patientId, encounterId],
+    queryKey: ["medication_dispense", dispenseOrderId, patientId, encounterId],
     queryFn: query(medicationDispenseApi.list, {
       queryParams: {
         encounter: encounterId,
         limit: 100,
         patient: patientId,
+        order: dispenseOrderId,
       },
     }),
-    enabled: !!patientId && canAccess,
+    enabled: !!patientId && canAccess && !!dispenseOrderId,
   });
 
   const medications = response?.results || [];
@@ -152,9 +158,7 @@ export function DispenseHistory({
           </TableHeader>
           <TableBody className="bg-white">
             {medications.map((medication: MedicationDispenseRead) => {
-              const instruction = medication.dosage_instruction[0] ?? {};
-              const frequency = instruction?.timing?.code;
-              const dosage = instruction?.dose_and_rate?.dose_quantity;
+              const instruction = medication.dosage_instruction?.[0];
 
               return (
                 <TableRow
@@ -165,19 +169,13 @@ export function DispenseHistory({
                     {medication.item.product.product_knowledge.name}
                   </TableCell>
                   <TableCell className="text-gray-950">
-                    {dosage ? `${dosage.value} ${dosage.unit.display}` : "-"}
+                    {formatDosage(instruction) || "-"}
                   </TableCell>
                   <TableCell className="text-gray-950">
-                    {instruction?.as_needed_boolean
-                      ? `${t("as_needed_prn")} ${
-                          instruction?.as_needed_for?.display
-                            ? `(${instruction.as_needed_for.display})`
-                            : ""
-                        }`
-                      : frequency?.display || "-"}
+                    {formatFrequency(instruction) || "-"}
                   </TableCell>
                   <TableCell className="text-gray-950 font-medium">
-                    {medication.quantity || "-"}
+                    {medication.quantity ? round(medication.quantity) : "-"}
                   </TableCell>
                   <TableCell className="text-gray-950 font-medium">
                     {medication.location.name}
@@ -209,7 +207,7 @@ export function DispenseHistory({
                         hidden={!facilityId}
                       >
                         <Link
-                          href={`/facility/${facilityId}/locations/${medication.location.id}/medication_dispense/patient/${patientId}/${medication.status}?payment_status=${medication.charge_item?.paid_invoice?.status === InvoiceStatus.balanced ? "paid" : "unpaid"}`}
+                          href={`/facility/${facilityId}/locations/${medication.location.id}/medication_dispense/${dispenseOrderId ? `order/${dispenseOrderId}/?status=${medication.status}&payment_status=${medication.charge_item?.paid_invoice?.status === InvoiceStatus.balanced ? "paid" : "unpaid"}` : ""}`}
                         >
                           {t("dispense")}
                         </Link>

@@ -30,10 +30,10 @@ import {
 
 import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPriceDisplay";
 import { ChargeItemDefinitionPicker } from "@/components/Common/ChargeItemDefinitionPicker";
+import UserSelector from "@/components/Common/UserSelector";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
-import mutate from "@/Utils/request/mutate";
 import { ResourceCategorySubType } from "@/types/base/resourceCategory/resourceCategory";
 import {
   ApplyChargeItemDefinitionRequest,
@@ -44,6 +44,9 @@ import {
   ChargeItemDefinitionBase,
   ChargeItemDefinitionRead,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
+import { UserReadMinimal } from "@/types/user/user";
+import { round } from "@/Utils/decimal";
+import mutate from "@/Utils/request/mutate";
 
 interface AddMultipleChargeItemsSheetProps {
   open: boolean;
@@ -55,10 +58,12 @@ interface AddMultipleChargeItemsSheetProps {
   patientId?: string;
   onChargeItemsAdded: () => void;
   disabled?: boolean;
+  resourceSubType?: ResourceCategorySubType;
 }
 
 interface ApplyChargeItemDefinitionRequestWithObject extends ApplyChargeItemDefinitionRequest {
   charge_item_definition_object: ChargeItemDefinitionRead;
+  performer_actor_object?: UserReadMinimal;
 }
 
 export default function AddMultipleChargeItemsSheet({
@@ -71,6 +76,7 @@ export default function AddMultipleChargeItemsSheet({
   patientId,
   onChargeItemsAdded,
   disabled,
+  resourceSubType,
 }: AddMultipleChargeItemsSheetProps) {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
@@ -140,6 +146,19 @@ export default function AddMultipleChargeItemsSheet({
     );
   };
 
+  const handleUpdatePerformer = (
+    index: number,
+    user: UserReadMinimal | undefined,
+  ) => {
+    setSelectedItems(
+      selectedItems.map((item, i) =>
+        i === index
+          ? { ...item, performer_actor: user?.id, performer_actor_object: user }
+          : item,
+      ),
+    );
+  };
+
   const handleSubmit = () => {
     if (selectedItems.length === 0) {
       toast.error(t("please_select_at_least_one_item"));
@@ -148,8 +167,11 @@ export default function AddMultipleChargeItemsSheet({
 
     applyChargeItems({
       requests: selectedItems.map(
-        ({ charge_item_definition_object: _discard, ...charge_item }) =>
-          charge_item,
+        ({
+          charge_item_definition_object: _discard,
+          performer_actor_object: _discardPerformer,
+          ...charge_item
+        }) => charge_item,
       ),
     });
   };
@@ -174,9 +196,7 @@ export default function AddMultipleChargeItemsSheet({
               }
               setSelectedDefinition(selectedDef as ChargeItemDefinitionBase);
             }}
-            resourceSubType={
-              ResourceCategorySubType.charge_item_definition_location_bed_charges
-            }
+            resourceSubType={resourceSubType}
             placeholder={t("select_charge_item_definitions")}
             className="w-full"
             disabled={disabled}
@@ -208,6 +228,18 @@ export default function AddMultipleChargeItemsSheet({
                       </Button>
                     </div>
 
+                    <div className="space-y-1">
+                      <label className="text-sm text-gray-500">
+                        {t("performer")}
+                      </label>
+                      <UserSelector
+                        selected={item.performer_actor_object}
+                        onChange={(user) => handleUpdatePerformer(index, user)}
+                        facilityId={facilityId}
+                        placeholder={t("select_performer")}
+                      />
+                    </div>
+
                     {/* Quantity and Price */}
                     <div className="flex flex-wrap gap-4 items-center">
                       <div className="space-y-1">
@@ -231,8 +263,10 @@ export default function AddMultipleChargeItemsSheet({
                         </label>
                         <div className="flex items-center gap-1">
                           <span>
-                            {item.charge_item_definition_object
-                              .price_components?.[0]?.amount || 0}{" "}
+                            {round(
+                              item.charge_item_definition_object
+                                .price_components?.[0]?.amount || 0,
+                            )}{" "}
                             {item.charge_item_definition_object
                               .price_components?.[0]?.code?.code || "INR"}
                           </span>
@@ -269,6 +303,7 @@ export default function AddMultipleChargeItemsSheet({
                     <TableHead>{t("name")}</TableHead>
                     <TableHead>{t("quantity")}</TableHead>
                     <TableHead>{t("price")}</TableHead>
+                    <TableHead>{t("performer")}</TableHead>
                     <TableHead className="w-[100px]"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -292,8 +327,10 @@ export default function AddMultipleChargeItemsSheet({
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <span>
-                            {item.charge_item_definition_object
-                              .price_components?.[0]?.amount || 0}{" "}
+                            {round(
+                              item.charge_item_definition_object
+                                .price_components?.[0]?.amount || 0,
+                            )}{" "}
                             {item.charge_item_definition_object
                               .price_components?.[0]?.code?.code || "INR"}
                           </span>
@@ -317,6 +354,16 @@ export default function AddMultipleChargeItemsSheet({
                             </Popover>
                           )}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <UserSelector
+                          selected={item.performer_actor_object}
+                          onChange={(user) =>
+                            handleUpdatePerformer(index, user)
+                          }
+                          facilityId={facilityId}
+                          placeholder={t("select_performer")}
+                        />
                       </TableCell>
                       <TableCell>
                         <Button

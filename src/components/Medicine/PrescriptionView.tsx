@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { PencilIcon, PlusIcon, ReceiptTextIcon } from "lucide-react";
+import { PencilIcon, PlusIcon } from "lucide-react";
 import { Link } from "raviger";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
@@ -10,13 +10,15 @@ import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+import { Markdown } from "@/components/ui/markdown";
+import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
 
 interface PrescriptionViewProps {
   patientId: string;
-  prescriptionId: string;
+  prescriptionId?: string;
   canWrite?: boolean;
   facilityId?: string;
   encounterId?: string;
@@ -41,7 +43,22 @@ export default function PrescriptionView({
     enabled: !!patientId && !!prescriptionId,
   });
 
-  if (isLoading) {
+  const { data: medicationRequests, isLoading: medicationRequestsLoading } =
+    useQuery({
+      queryKey: ["medication_requests", patientId, encounterId],
+      queryFn: query.paginated(medicationRequestApi.list, {
+        pathParams: { patientId },
+        queryParams: {
+          encounter: encounterId,
+          facility: facilityId,
+          product_type: "medication",
+        },
+        pageSize: 100,
+      }),
+      enabled: !!patientId && !!encounterId && !!facilityId && !prescriptionId,
+    });
+
+  if (isLoading || medicationRequestsLoading) {
     return (
       <div className="flex h-full items-center justify-center">
         <Loading />
@@ -49,30 +66,26 @@ export default function PrescriptionView({
     );
   }
 
-  if (!prescription) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center gap-4 p-8 text-center">
-        <div className="rounded-full bg-secondary/10 p-3">
-          <ReceiptTextIcon className="text-3xl text-gray-500" />
-        </div>
-        <div className="max-w-[200px] space-y-1">
-          <h3 className="font-medium">{t("select_prescription")}</h3>
-        </div>
-      </div>
-    );
-  }
+  const hasMedications = prescriptionId
+    ? (prescription?.medications?.length ?? 0) > 0
+    : (medicationRequests?.results?.length ?? 0) > 0;
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 flex-wrap justify-between px-2 my-2 w-full">
         <div className="hidden lg:block">
           <h3 className="font-semibold text-lg">
-            {formatDateTime(prescription.created_date, "DD/MM/YYYY hh:mm A")}
+            {prescription && prescriptionId
+              ? formatDateTime(prescription.created_date, "DD/MM/YYYY hh:mm A")
+              : t("all_prescriptions")}
           </h3>
           <p className="text-sm text-gray-500">
-            {t("prescribed_by")}: {formatName(prescription.prescribed_by)}
+            {prescription && prescriptionId
+              ? `${t("prescribed_by")}: ${formatName(prescription.prescribed_by)}`
+              : t("medications_from_all_prescriptions")}
           </p>
         </div>
-        <div className="flex items-center gap-2 flex-wrap ">
+        <div className="flex items-center gap-2 flex-wrap">
           {canWrite && (
             <Button
               asChild
@@ -80,25 +93,31 @@ export default function PrescriptionView({
               size="sm"
               className="text-gray-950 hover:text-gray-700 h-9"
             >
-              <Link href={`questionnaire/medication_request`}>
-                {!prescription.medications?.length ? (
-                  <>
-                    <PlusIcon className="mr-2 size-4" />
-                    {t("add")}
-                  </>
-                ) : (
+              <Link
+                href={
+                  prescriptionId
+                    ? `questionnaire/medication_request?prescription=${prescriptionId}`
+                    : `questionnaire/medication_request`
+                }
+              >
+                {prescriptionId ? (
                   <>
                     <PencilIcon className="mr-2 size-4" />
                     {t("edit")}
+                  </>
+                ) : (
+                  <>
+                    <PlusIcon className="mr-2 size-4" />
+                    {t("create")}
                   </>
                 )}
               </Link>
             </Button>
           )}
-          {!!facilityId && (
+          {!!facilityId && prescription && prescriptionId && (
             <Button
               variant="outline"
-              disabled={!prescription.medications?.length}
+              disabled={!hasMedications}
               size="sm"
               className="text-gray-950 hover:text-gray-700 h-9"
             >
@@ -111,7 +130,7 @@ export default function PrescriptionView({
           {!!facilityId && (
             <Button
               variant="outline"
-              disabled={!prescription.medications?.length}
+              disabled={!hasMedications}
               size="sm"
               className="text-gray-950 hover:text-gray-700 h-9"
             >
@@ -123,6 +142,7 @@ export default function PrescriptionView({
           )}
         </div>
       </div>
+
       <div className="flex flex-col gap-4 px-2">
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
@@ -148,9 +168,22 @@ export default function PrescriptionView({
             </Button>
           )}
         </div>
+        {prescription?.note && (
+          <div className="text-sm text-gray-600">
+            <p className="font-semibold mb-1">{t("note")}</p>
+            <Markdown
+              content={prescription?.note}
+              prose={false}
+              className="text-sm"
+            />
+          </div>
+        )}
         <MedicationsTable
           medications={
-            prescription.medications.filter((medication) =>
+            (prescriptionId && prescription
+              ? prescription.medications
+              : medicationRequests?.results || []
+            ).filter((medication) =>
               (
                 medication.medication.display ||
                 medication.requested_product?.name ||
