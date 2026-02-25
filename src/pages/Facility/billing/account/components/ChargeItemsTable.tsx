@@ -684,6 +684,7 @@ export function ChargeItemsTable({
         onOpenChange={setIsAddChargeItemsOpen}
         facilityId={facilityId}
         patientId={patientId}
+        accountId={accountId}
         onChargeItemsAdded={handleChargeItemsAdded}
       />
 
@@ -692,6 +693,7 @@ export function ChargeItemsTable({
         onOpenChange={setIsQuickAddOpen}
         facilityId={facilityId}
         patientId={patientId}
+        accountId={accountId}
         onChargeItemsAdded={handleChargeItemsAdded}
       />
 
