@@ -11,6 +11,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
+import BackButton from "@/components/Common/BackButton";
 import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
 
@@ -41,9 +42,11 @@ import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
-import BackButton from "@/components/Common/BackButton";
 import { validateEncounterQuestion } from "@/components/Questionnaire/QuestionTypes/EncounterQuestion";
+import { AllergyIntoleranceRequest } from "@/types/emr/allergyIntolerance/allergyIntolerance";
+import { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import { EncounterEdit } from "@/types/emr/encounter/encounter";
+import { SymptomRequest } from "@/types/emr/symptom/symptom";
 import { ArrowLeft } from "lucide-react";
 import { QuestionRenderer } from "./QuestionRenderer";
 import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion";
@@ -324,6 +327,69 @@ const STRUCTURED_TYPE_VALIDATORS = {
   files: (response: ResponseValue | undefined, quesitonId: string) => {
     const files = (response?.value as FileUploadQuestion[]) || [];
     return validateFileUploadQuestion(files, quesitonId);
+  },
+  allergy_intolerance: (
+    response: ResponseValue | undefined,
+    questionId: string,
+    required?: boolean,
+  ) => {
+    const allergies = (response?.value as AllergyIntoleranceRequest[]) || [];
+    const validAllergies = allergies.filter(
+      (a) => a.verification_status !== "entered_in_error",
+    );
+    if (required && validAllergies.length === 0) {
+      return [
+        {
+          question_id: questionId,
+          error: "field_required",
+          type: "validation_error",
+          msg: "field_required",
+        },
+      ];
+    }
+    return [];
+  },
+  condition: (
+    response: ResponseValue | undefined,
+    questionId: string,
+    required?: boolean,
+  ) => {
+    const diagnoses = (response?.value as DiagnosisRequest[]) || [];
+    const validDiagnoses = diagnoses.filter(
+      (d) => d.verification_status !== "entered_in_error",
+    );
+    if (required && validDiagnoses.length === 0) {
+      return [
+        {
+          question_id: questionId,
+          error: "field_required",
+          type: "validation_error",
+          msg: "field_required",
+        },
+      ];
+    }
+    return [];
+  },
+  symptom: (
+    response: ResponseValue | undefined,
+    questionId: string,
+    required?: boolean,
+  ) => {
+    const symptoms = (response?.value as SymptomRequest[]) || [];
+    const validSymptoms = symptoms.filter(
+      (s) => s.verification_status !== "entered_in_error",
+    );
+    if (required && validSymptoms.length === 0) {
+      return [
+        {
+          question_id: questionId,
+          error: "field_required",
+          type: "validation_error",
+          msg: "field_required",
+        },
+      ];
+    }
+    return [];
   },
 } as const;
 
