@@ -61,6 +61,7 @@ interface QuickAddChargeItemsSheetProps {
   facilityId: string;
   patientId: string;
   onChargeItemsAdded: () => void;
+  accountId: string;
   disabled?: boolean;
 }
 
@@ -75,6 +76,7 @@ export default function QuickAddChargeItemsSheet({
   facilityId,
   patientId,
   onChargeItemsAdded,
+  accountId,
   disabled,
 }: QuickAddChargeItemsSheetProps) {
   const { t } = useTranslation();
@@ -212,6 +214,7 @@ export default function QuickAddChargeItemsSheet({
         charge_item_definition: item.charge_item_definition,
         quantity: item.quantity,
         patient: item.patient,
+        account: accountId,
       })),
     });
   };
