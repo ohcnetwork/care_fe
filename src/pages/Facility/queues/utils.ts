@@ -5,7 +5,6 @@ import query from "@/Utils/request/query";
 import careConfig from "@careConfig";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
-
 export function getTokenQueueStatusCount(
   summary: TokenQueueSummary,
   ...statuses: TokenStatus[]
