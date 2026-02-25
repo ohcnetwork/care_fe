@@ -58,8 +58,9 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
         const firstCard = cards.first();
         const emptyState = page.getByText(emptyStateText);
 
-        try {
-          await expect(firstCard).toBeVisible();
+        await expect(firstCard.or(emptyState)).toBeVisible();
+        const hasCards = await firstCard.isVisible().catch(() => false);
+        if (hasCards) {
           await expect(
             firstCard.getByRole("heading", { level: 3 }),
           ).toBeVisible();
@@ -67,7 +68,7 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
           await expect(
             firstCard.getByRole("link", { name: /see details/i }),
           ).toBeVisible();
-        } catch {
+        } else {
           await expect(emptyState).toBeVisible();
         }
       });
@@ -122,12 +123,13 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
   test("should expand and collapse organization tree", async ({ page }) => {
     await navigateToOrganizationType(page, "govt");
 
-    const treePanel = page.locator('[data-slot="resizable-panel"]').first();
-    if (!(await treePanel.isVisible().catch(() => false))) {
-      test.skip(true, "Tree navigation not visible (possibly mobile viewport)");
+    const viewport = page.viewportSize();
+    if (!viewport || viewport.width < 768) {
+      test.skip(true, "Tree navigation hidden on viewport < md (768px)");
       return;
     }
 
+    const treePanel = page.locator('[data-slot="resizable-panel"]').first();
     await expect(treePanel).toBeVisible();
     await expect(treePanel.locator("div.space-y-1").first()).toBeVisible();
 
