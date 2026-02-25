@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
@@ -11,6 +12,8 @@ import { cn } from "@/lib/utils";
 import { CancelTokenDialog } from "@/pages/Facility/queues/CancelTokenDialog";
 import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePoints";
 import {
+  getQueueTokenStatus,
+  QUEUE_TOKEN_STATUS_COLORS,
   renderTokenNumber,
   TokenRead,
   TokenStatus,
@@ -35,7 +38,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
-import { getTokenStatus, useTokenListInfiniteQuery } from "./utils";
+import { useTokenListInfiniteQuery } from "./utils";
 
 export function OngoingQueueTokenCard({
   facilityId,
@@ -117,22 +120,15 @@ export function OngoingQueueTokenCard({
                   </Link>
                 </Button>
                 <div className="flex gap-2 items-center justify-center p-2 bg-gray-100 border border-gray-200 rounded-lg">
-                  <span
-                    className={cn(
-                      "w-2 h-2 rounded-full border",
-                      token.status === "IN_PROGRESS" &&
-                        "bg-green-200 border-green-500",
-                      token.status === "UNFULFILLED" &&
-                        "bg-orange-200 border-orange-500",
-                      token.status === "CREATED" &&
-                        (token.sub_queue
-                          ? "bg-indigo-200 border-indigo-500"
-                          : "bg-pink-200 border-pink-500"),
-                    )}
+                  <Badge
+                    variant={
+                      QUEUE_TOKEN_STATUS_COLORS[getQueueTokenStatus(token)]
+                    }
+                    className="h-2 w-2 rounded-full p-0 border"
                   />
 
                   <span className="text-base font-medium text-black">
-                    {t(`token_status__${getTokenStatus({ token })}`)}:
+                    {t(`token_status__${getQueueTokenStatus(token)}`)}:
                   </span>
 
                   <span className="text-lg font-bold text-black">
