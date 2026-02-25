@@ -1,9 +1,10 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ChevronRight } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
+import BackButton from "@/components/Common/BackButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -96,10 +97,10 @@ export default function TemplateBuilder({
       .string()
       .trim()
       .min(5, {
-        message: t("character_count_validation", { min: 5, max: 25 }),
+        message: t("character_count_validation", { min: 5, max: 36 }),
       })
       .max(25, {
-        message: t("character_count_validation", { min: 5, max: 25 }),
+        message: t("character_count_validation", { min: 5, max: 36 }),
       })
       .regex(/^[a-z0-9-]+$/, {
         message: t("slug_format_message"),
@@ -130,7 +131,10 @@ export default function TemplateBuilder({
     queryFn: query(templateApi.retrieveSchema),
   });
 
-  const availableContexts = schema?.contexts ?? {};
+  const availableContexts = useMemo(
+    () => schema?.contexts ?? {},
+    [schema?.contexts],
+  );
 
   const { data: template } = useQuery({
     queryKey: ["template", slug],
@@ -206,13 +210,14 @@ export default function TemplateBuilder({
         description: template.description,
       });
     }
-  }, [template]);
+  }, [form, template]);
 
   useEffect(() => {
     if (template && availableContexts) {
       setSelectedContext(availableContexts[template.context]);
     } else if (availableContexts) {
-      setSelectedContext(availableContexts[0]);
+      const firstContext = Object.values(availableContexts)[0] ?? null;
+      setSelectedContext(firstContext);
     }
   }, [template, availableContexts]);
 
@@ -220,7 +225,7 @@ export default function TemplateBuilder({
   const handleSaveTemplate = async () => {
     const formData = form.getValues();
     const templateData = {
-      template_type: template?.template_type || "discharge_summary",
+      template_type: formData.template_type,
       name: formData.name,
       slug_value: formData.slug_value,
       status: formData.status,
@@ -354,6 +359,12 @@ export default function TemplateBuilder({
   return (
     <div className="h-screen flex flex-col">
       <div className="border-b p-4">
+        <div className="mb-2">
+          <BackButton>
+            <ArrowLeft />
+            {t("back")}
+          </BackButton>
+        </div>
         <div className="flex flex-col sm:flex-row gap-2 items-center justify-between mb-4">
           <div>
             <h1 className="text-2xl font-bold">{t("template_builder")}</h1>
@@ -380,7 +391,7 @@ export default function TemplateBuilder({
               {t("preview_template")}
             </Button>
             <Button
-              type="submit"
+              type="button"
               onClick={() => {
                 form.handleSubmit(handleSaveTemplate)();
               }}
