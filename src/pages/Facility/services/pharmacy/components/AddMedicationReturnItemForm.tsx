@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { PlusCircle, Search, Trash2 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -95,6 +95,18 @@ export function AddMedicationReturnItemForm({
   const [selectedDispenses, setSelectedDispenses] = useState<string[]>([]);
   const [dispenseSearchQuery, setDispenseSearchQuery] = useState("");
 
+  const filteredDispenses = useMemo(() => {
+    if (!dispenseSearchQuery) return medicationDispenses;
+    const query = dispenseSearchQuery.toLowerCase();
+    return medicationDispenses.filter((dispense) => {
+      const productName =
+        dispense.item.product.product_knowledge.name?.toLowerCase() || "";
+      const batchNumber =
+        dispense.item.product.batch?.lot_number?.toLowerCase() || "";
+      return productName.includes(query) || batchNumber.includes(query);
+    });
+  }, [medicationDispenses, dispenseSearchQuery]);
+
   const createEmptyItem = useCallback(
     (): ReturnItemValues => ({
       product_knowledge: {} as ProductKnowledgeBase,
@@ -126,12 +138,15 @@ export function AddMedicationReturnItemForm({
 
   const loadFromMedicationDispenses = () => {
     setIsSelectDialogOpen(true);
-    handleSelectAll(false);
+    setSelectedDispenses([]);
   };
 
-  const handleSelectAll = (checked: boolean) => {
+  const handleSelectAll = (
+    checked: boolean,
+    dispenses: MedicationDispenseRead[] = filteredDispenses,
+  ) => {
     if (checked) {
-      setSelectedDispenses(medicationDispenses.map((dispense) => dispense.id));
+      setSelectedDispenses(dispenses.map((dispense) => dispense.id));
     } else {
       setSelectedDispenses([]);
     }
@@ -517,129 +532,105 @@ export function AddMedicationReturnItemForm({
             <DialogHeader>
               <DialogTitle>{t("select_items_to_add")}</DialogTitle>
             </DialogHeader>
-            <div className="sticky top-0 bg-white z-10 pb-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
-                <Input
-                  placeholder={t("search_items")}
-                  value={dispenseSearchQuery}
-                  onChange={(e) => setDispenseSearchQuery(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+              <Input
+                placeholder={t("search_items")}
+                value={dispenseSearchQuery}
+                onChange={(e) => setDispenseSearchQuery(e.target.value)}
+                className="pl-9"
+              />
             </div>
+
             <div className="flex-1 overflow-y-auto">
-              {(() => {
-                const filteredDispenses = medicationDispenses.filter(
-                  (dispense) => {
-                    if (!dispenseSearchQuery) return true;
-                    const query = dispenseSearchQuery.toLowerCase();
-                    const productName =
-                      dispense.item.product.product_knowledge.name?.toLowerCase() ||
-                      "";
-                    const batchNumber =
-                      dispense.item.product.batch?.lot_number?.toLowerCase() ||
-                      "";
-                    return (
-                      productName.includes(query) || batchNumber.includes(query)
-                    );
-                  },
-                );
-
-                if (filteredDispenses.length === 0) {
-                  return (
-                    <EmptyState
-                      icon={<Search className="size-4 text-gray-400" />}
-                      title={t("no_results_found")}
-                      description={t("try_different_search")}
-                      className="rounded-md shadow-none border-solid"
-                    />
-                  );
-                }
-
-                return (
-                  <div className="border rounded-md overflow-hidden">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-12 text-center">
-                            <Checkbox
-                              id="select-all"
-                              checked={
-                                selectedDispenses.length ===
-                                  medicationDispenses.length &&
-                                medicationDispenses.length > 0
-                              }
-                              onCheckedChange={(checked) =>
-                                handleSelectAll(checked as boolean)
-                              }
-                              data-shortcut-id="select-all"
-                            />
-                          </TableHead>
-                          <TableHead>{t("item")}</TableHead>
-                          <TableHead className="text-center">
-                            {t("qty")}
-                          </TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredDispenses.map((dispense) => (
-                          <TableRow
-                            key={dispense.id}
-                            className="hover:bg-gray-50 cursor-pointer select-none"
-                            onClick={() =>
-                              handleSelectDispense(
-                                dispense.id,
-                                !selectedDispenses.includes(dispense.id),
+              {filteredDispenses.length === 0 ? (
+                <EmptyState
+                  icon={<Search className="size-4 text-gray-400" />}
+                  title={t("no_results_found")}
+                  description={t("try_different_search")}
+                  className="rounded-md shadow-none border-solid"
+                />
+              ) : (
+                <div className="border rounded-md overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12 text-center">
+                          <Checkbox
+                            id="select-all"
+                            checked={
+                              filteredDispenses.length > 0 &&
+                              filteredDispenses.every((d) =>
+                                selectedDispenses.includes(d.id),
                               )
                             }
-                          >
-                            <TableCell className="text-center">
-                              <Checkbox
-                                id={dispense.id}
-                                checked={selectedDispenses.includes(
+                            onCheckedChange={(checked) =>
+                              handleSelectAll(checked as boolean)
+                            }
+                            data-shortcut-id="select-all"
+                          />
+                        </TableHead>
+                        <TableHead>{t("item")}</TableHead>
+                        <TableHead className="text-center">
+                          {t("qty")}
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredDispenses.map((dispense) => (
+                        <TableRow
+                          key={dispense.id}
+                          className="hover:bg-gray-50 cursor-pointer select-none"
+                          onClick={() =>
+                            handleSelectDispense(
+                              dispense.id,
+                              !selectedDispenses.includes(dispense.id),
+                            )
+                          }
+                        >
+                          <TableCell className="text-center">
+                            <Checkbox
+                              id={dispense.id}
+                              checked={selectedDispenses.includes(dispense.id)}
+                              onCheckedChange={(checked) =>
+                                handleSelectDispense(
                                   dispense.id,
-                                )}
-                                onCheckedChange={(checked) =>
-                                  handleSelectDispense(
-                                    dispense.id,
-                                    checked as boolean,
-                                  )
-                                }
-                                onClick={(e) => e.stopPropagation()}
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex flex-col">
-                                <span className="text-sm font-medium">
-                                  {dispense.item.product.product_knowledge.name}
+                                  checked as boolean,
+                                )
+                              }
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-medium">
+                                {dispense.item.product.product_knowledge.name}
+                              </span>
+                              {(dispense.item.product.batch?.lot_number ||
+                                dispense.item.product.expiration_date) && (
+                                <span className="text-xs text-gray-500">
+                                  {dispense.item.product.batch?.lot_number &&
+                                    `${t("lot")}: ${dispense.item.product.batch.lot_number}`}
+                                  {dispense.item.product.batch?.lot_number &&
+                                    dispense.item.product.expiration_date &&
+                                    " | "}
+                                  {dispense.item.product.expiration_date &&
+                                    `${t("expiry")}: ${formatDateTime(dispense.item.product.expiration_date)}`}
                                 </span>
-                                {(dispense.item.product.batch?.lot_number ||
-                                  dispense.item.product.expiration_date) && (
-                                  <span className="text-xs text-gray-500">
-                                    {dispense.item.product.batch?.lot_number &&
-                                      `${t("lot")}: ${dispense.item.product.batch.lot_number}`}
-                                    {dispense.item.product.batch?.lot_number &&
-                                      dispense.item.product.expiration_date &&
-                                      " | "}
-                                    {dispense.item.product.expiration_date &&
-                                      `${t("expiry")}: ${formatDateTime(dispense.item.product.expiration_date, "DD/MM/YYYY")}`}
-                                  </span>
-                                )}
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-center text-sm font-medium">
-                              {roundWhole(dispense.quantity)}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                );
-              })()}
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-center text-sm font-medium">
+                            {roundWhole(dispense.quantity)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </div>
-            <DialogFooter className="sticky bottom-0 bg-white pt-2 border-t">
+            <DialogFooter className="pt-2 border-t">
               <Button
                 variant="outline"
                 onClick={() => setIsSelectDialogOpen(false)}
