@@ -90,11 +90,13 @@ interface LocationGroupRowProps {
     locationId: string;
     status: boolean;
   }) => void;
+  canAddChargeItems: boolean;
 }
 
 function LocationGroupRow({
   location,
   setAddChargeItemState,
+  canAddChargeItems,
 }: LocationGroupRowProps) {
   const { t } = useTranslation();
   return (
@@ -145,21 +147,23 @@ function LocationGroupRow({
             </div>
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              setAddChargeItemState({
-                serviceRequestId: location.id,
-                locationId: location.id,
-                status: true,
-              })
-            }
-            className=""
-          >
-            <PlusIcon className="size-4 mr-2" />
-            {t("add_charge_items")}
-          </Button>
+          {canAddChargeItems && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setAddChargeItemState({
+                  serviceRequestId: location.id,
+                  locationId: location.id,
+                  status: true,
+                })
+              }
+              className=""
+            >
+              <PlusIcon className="size-4 mr-2" />
+              {t("add_charge_items")}
+            </Button>
+          )}
         </div>
       </TableCell>
     </TableRow>
@@ -186,11 +190,13 @@ function groupChargeItemsByLocation(
 export interface BedChargeItemsTableProps {
   facilityId: string;
   accountId: string;
+  canAddChargeItems?: boolean;
 }
 
 export function BedChargeItemsTable({
   facilityId,
   accountId,
+  canAddChargeItems = true,
 }: BedChargeItemsTableProps) {
   const { t } = useTranslation();
   const [{ encounterId }] = useQueryParams();
@@ -302,6 +308,7 @@ export function BedChargeItemsTable({
             queryKey: ["chargeItems", accountId],
           });
         }}
+        accountId={accountId}
       />
       <div className="mb-4">
         {/* Desktop Tabs */}
@@ -401,6 +408,7 @@ export function BedChargeItemsTable({
                       key={`location-${location.id}`}
                       location={location}
                       setAddChargeItemState={setAddChargeItemState}
+                      canAddChargeItems={canAddChargeItems}
                     />,
                     ...(items.length === 0
                       ? [

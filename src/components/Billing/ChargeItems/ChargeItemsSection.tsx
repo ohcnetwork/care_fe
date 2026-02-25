@@ -10,6 +10,7 @@ import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/
 import AddMultipleChargeItemsSheet from "@/pages/Facility/services/serviceRequests/components/AddMultipleChargeItemsSheet";
 import { ChargeItemCard } from "@/pages/Facility/services/serviceRequests/components/ChargeItemCard";
 
+import { canAddChargeItemsToAccount } from "@/pages/Facility/billing/account/utils";
 import { ResourceCategorySubType } from "@/types/base/resourceCategory/resourceCategory";
 import {
   AccountBillingStatus,
@@ -123,17 +124,19 @@ export function ChargeItemsSection({
                   <ShortcutBadge actionId="create-an-invoice" />
                 </Button>
               )}
-              {!disableCreateChargeItemsSection && !viewOnly && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsMultiAddOpen(true)}
-                >
-                  <PlusIcon className="size-4 mr-2" />
-                  {t("add_charge_items")}
-                  <ShortcutBadge actionId="add-a-charge-item" />
-                </Button>
-              )}
+              {!disableCreateChargeItemsSection &&
+                !viewOnly &&
+                canAddChargeItemsToAccount(account?.results[0]) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsMultiAddOpen(true)}
+                  >
+                    <PlusIcon className="size-4 mr-2" />
+                    {t("add_charge_items")}
+                    <ShortcutBadge actionId="add-a-charge-item" />
+                  </Button>
+                )}
             </div>
           </div>
         </CardHeader>
@@ -183,6 +186,7 @@ export function ChargeItemsSection({
           });
         }}
         resourceSubType={ResourceCategorySubType.other}
+        accountId={account?.results[0]?.id ?? ""}
       />
     </>
   );

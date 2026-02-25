@@ -359,24 +359,26 @@ export function ChargeItemsTable({
             {t("print_charge_items")}
             <ShortcutBadge actionId="print-button" />
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => setIsQuickAddOpen(true)}
-            className="w-full sm:w-auto bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 hover:border-amber-300 hover:from-amber-100 hover:to-orange-100"
-          >
-            <Zap className="size-4 mr-2 text-amber-500" />
-            {t("quick_add")}
-          </Button>
           {canAddChargeItems && (
-            <Button
-              variant="outline"
-              onClick={() => setIsAddChargeItemsOpen(true)}
-              className="w-full sm:w-auto"
-            >
-              <PlusIcon className="size-4 mr-2" />
-              {t("add_charge_items")}
-              <ShortcutBadge actionId="add-charge-item" />
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                onClick={() => setIsQuickAddOpen(true)}
+                className="w-full sm:w-auto bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 hover:border-amber-300 hover:from-amber-100 hover:to-orange-100"
+              >
+                <Zap className="size-4 mr-2 text-amber-500" />
+                {t("quick_add")}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setIsAddChargeItemsOpen(true)}
+                className="w-full sm:w-auto"
+              >
+                <PlusIcon className="size-4 mr-2" />
+                {t("add_charge_items")}
+                <ShortcutBadge actionId="add-charge-item" />
+              </Button>
+            </>
           )}
         </div>
       </div>
