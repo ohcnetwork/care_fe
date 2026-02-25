@@ -35,6 +35,7 @@ export default function AppointmentPrint(props: Props) {
   const { t } = useTranslation();
   const { facility, facilityId } = useCurrentFacility();
   const { hasPermission } = usePermissions();
+  const { customPrintHeader } = careConfig;
 
   const { canViewAppointments } = getPermissions(
     hasPermission,
@@ -91,26 +92,37 @@ export default function AppointmentPrint(props: Props) {
     >
       <div className="max-w-7xl mx-auto text-sm">
         {/* Header with Facility Name and Logo */}
-        <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
-          <div className="text-left">
-            <h1 className="text-2xl font-semibold">{facility.name}</h1>
-            {facility.address && (
-              <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-xs">
-                {facility.address}
-                {facility.phone_number && (
-                  <p className="text-gray-500 text-xs">
-                    {facility.phone_number}
-                  </p>
-                )}
-              </div>
-            )}
+
+        {customPrintHeader ? (
+          <div className="mb-4 pb-2border-gray-200">
+            <img
+              src={customPrintHeader}
+              alt="Custom Header"
+              className="w-full h-auto object-contain mb-2"
+            />
           </div>
-          <img
-            src={careConfig.mainLogo?.dark}
-            alt="Care Logo"
-            className="h-8 w-auto object-contain mb-2 sm:mb-0"
-          />
-        </div>
+        ) : (
+          <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
+            <div className="text-left">
+              <h1 className="text-2xl font-semibold">{facility.name}</h1>
+              {facility.address && (
+                <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-xs">
+                  {facility.address}
+                  {facility.phone_number && (
+                    <p className="text-gray-500 text-xs">
+                      {facility.phone_number}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+            <img
+              src={careConfig.mainLogo?.dark}
+              alt="Care Logo"
+              className="h-8 w-auto object-contain mb-2 sm:mb-0"
+            />
+          </div>
+        )}
 
         {/* Token and Charge Items Side by Side */}
         <div className="flex space-x-2">

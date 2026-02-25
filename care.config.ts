@@ -66,6 +66,7 @@ const careConfig = {
   customLogo: logo(env.REACT_CUSTOM_LOGO),
   customLogoAlt: logo(env.REACT_CUSTOM_LOGO_ALT),
   customDescription: env.REACT_CUSTOM_DESCRIPTION,
+  customPrintHeader: env.REACT_CUSTOM_PRINT_HEADER,
   availableLocales: (env.REACT_ALLOWED_LOCALES || "")
     .split(",")
     .map((l) => l.trim()),
