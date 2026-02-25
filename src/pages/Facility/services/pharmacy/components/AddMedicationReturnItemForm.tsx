@@ -139,6 +139,7 @@ export function AddMedicationReturnItemForm({
   const loadFromMedicationDispenses = () => {
     setIsSelectDialogOpen(true);
     setSelectedDispenses([]);
+    setDispenseSearchQuery("");
   };
 
   const handleSelectAll = (
