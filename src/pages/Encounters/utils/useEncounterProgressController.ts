@@ -17,7 +17,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-const encounterRequiresDischarge = (encounter: EncounterRead) =>
+export const encounterRequiresDischarge = (encounter: EncounterRead) =>
   encounter.encounter_class === "imp" &&
   encounter.status !== EncounterStatus.DISCHARGED;
 

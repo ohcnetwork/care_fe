@@ -16,7 +16,6 @@ import { buttonVariants } from "@/components/ui/button";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { useEncounterProgressController } from "@/pages/Encounters/utils/useEncounterProgressController";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { navigate } from "raviger";
 
 export function MarkEncounterAsCompletedDialog({
   encounter,
@@ -25,11 +24,6 @@ export function MarkEncounterAsCompletedDialog({
   const { t } = useTranslation();
   const { completeEncounter } = useEncounterProgressController({
     encounter: encounter,
-    onDischargeRequired: () => {
-      navigate(
-        `/facility/${encounter?.facility?.id}/patient/${encounter?.patient?.id}/encounter/${encounter?.id}/questionnaire/encounter?toDischarge=true`,
-      );
-    },
   });
 
   if (!encounter) return null;

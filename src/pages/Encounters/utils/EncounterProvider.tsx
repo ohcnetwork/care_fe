@@ -13,10 +13,10 @@ import { getPermissions, Permissions } from "@/common/Permissions";
 import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { usePermissions } from "@/context/PermissionContext";
 import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounterAsCompletedDialog";
+import { encounterRequiresDischarge } from "@/pages/Encounters/utils/useEncounterProgressController";
 import {
   completedEncounterStatus,
   EncounterRead,
-  EncounterStatus,
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
@@ -236,21 +236,18 @@ export function EncounterProvider({
         canReadClinicalData,
         canWriteClinicalData,
         actions: {
-          assignLocation: () => {
-            setActiveAction(EncounterAction.AssignLocation);
-          },
           markAsCompleted: () => {
             if (!selectedEncounter) return;
-            if (
-              selectedEncounter.encounter_class === "imp" &&
-              selectedEncounter.status !== EncounterStatus.DISCHARGED
-            ) {
+            if (encounterRequiresDischarge(selectedEncounter)) {
               navigate(
                 `/facility/${selectedEncounter.facility.id}/patient/${selectedEncounter.patient.id}/encounter/${selectedEncounter.id}/questionnaire/encounter?toDischarge=true`,
               );
               return;
             }
             setActiveAction(EncounterAction.MarkAsCompleted);
+          },
+          assignLocation: () => {
+            setActiveAction(EncounterAction.AssignLocation);
           },
           viewLocationHistory: () => {
             setActiveAction(EncounterAction.LocationHistory);
