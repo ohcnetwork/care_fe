@@ -14,18 +14,17 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { useCompleteEncounter } from "@/pages/Encounters/utils/useEncounterProgressController";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { navigate } from "raviger";
 
-export function MarkEncounterAsCompletedDialog(
-  props: React.ComponentProps<typeof AlertDialog>,
-) {
+export function MarkEncounterAsCompletedDialog({
+  encounter,
+  ...props
+}: { encounter: EncounterRead } & React.ComponentProps<typeof AlertDialog>) {
   const { t } = useTranslation();
-  const { selectedEncounter: encounter } = useEncounter();
   const { completeEncounter } = useCompleteEncounter({
-    encounter: encounter as EncounterRead,
+    encounter: encounter,
     onDischargeRequired: () => {
       navigate(
         `/facility/${encounter?.facility?.id}/patient/${encounter?.patient?.id}/encounter/${encounter?.id}/questionnaire/encounter?toDischarge=true`,

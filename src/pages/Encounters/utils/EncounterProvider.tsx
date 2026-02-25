@@ -274,13 +274,15 @@ export function EncounterProvider({
       }}
     >
       {children}
-
-      <MarkEncounterAsCompletedDialog
-        open={activeAction === EncounterAction.MarkAsCompleted}
-        onOpenChange={(open) => {
-          setActiveAction(open ? EncounterAction.MarkAsCompleted : null);
-        }}
-      />
+      {selectedEncounter && (
+        <MarkEncounterAsCompletedDialog
+          open={activeAction === EncounterAction.MarkAsCompleted}
+          onOpenChange={(open) => {
+            setActiveAction(open ? EncounterAction.MarkAsCompleted : null);
+          }}
+          encounter={selectedEncounter}
+        />
+      )}
 
       {selectedEncounter && (
         <LocationSheet
