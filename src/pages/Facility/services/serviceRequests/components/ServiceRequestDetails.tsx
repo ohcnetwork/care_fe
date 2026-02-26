@@ -138,16 +138,6 @@ export function ServiceRequestDetails({
           </div>
           <div className="border-l border-gray-200 mx-4" />
           <div className="flex flex-col gap-6">
-            {request.patient_instruction && (
-              <div className="mt-4">
-                <div className="text-sm text-gray-600 mb-1">
-                  {t("patient_instruction")}:
-                </div>
-                <div className="text-sm text-gray-950 ">
-                  {request.patient_instruction}
-                </div>
-              </div>
-            )}
             {activityDefinition.healthcare_service && (
               <div>
                 <div className="text-sm text-gray-600 mb-1">
@@ -175,6 +165,16 @@ export function ServiceRequestDetails({
                   location={request.encounter.current_location}
                   isLast={true}
                 />
+              </div>
+            )}
+            {request.patient_instruction && (
+              <div>
+                <div className="text-sm text-gray-600 mb-1">
+                  {t("patient_instruction")}
+                </div>
+                <div className="text-sm text-gray-950 ">
+                  {request.patient_instruction}
+                </div>
               </div>
             )}
           </div>
