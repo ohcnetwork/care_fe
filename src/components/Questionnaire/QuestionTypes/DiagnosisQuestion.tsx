@@ -340,6 +340,27 @@ function checkForDuplicateDiagnosis(
   return false;
 }
 
+export function validateDiagnosisQuestion(
+  response: ResponseValue | undefined,
+  questionId: string,
+  required?: boolean,
+) {
+  const diagnoses = (response?.value as DiagnosisRequest[]) || [];
+  const validDiagnoses = diagnoses.filter(
+    (d) => d.verification_status !== "entered_in_error",
+  );
+  if (required && validDiagnoses.length === 0) {
+    return [
+      {
+        question_id: questionId,
+        error: "field_required",
+        type: "validation_error" as const,
+      },
+    ];
+  }
+  return [];
+}
+
 export function DiagnosisQuestion({
   patientId,
   encounterId,

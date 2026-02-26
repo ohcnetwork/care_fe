@@ -550,6 +550,27 @@ const AllergyItem = ({
   );
 };
 
+export function validateAllergyIntoleranceQuestion(
+  response: ResponseValue | undefined,
+  questionId: string,
+  required?: boolean,
+) {
+  const allergies = (response?.value as AllergyIntoleranceRequest[]) || [];
+  const validAllergies = allergies.filter(
+    (a) => a.verification_status !== "entered_in_error",
+  );
+  if (required && validAllergies.length === 0) {
+    return [
+      {
+        question_id: questionId,
+        error: "field_required",
+        type: "validation_error" as const,
+      },
+    ];
+  }
+  return [];
+}
+
 export function AllergyQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,

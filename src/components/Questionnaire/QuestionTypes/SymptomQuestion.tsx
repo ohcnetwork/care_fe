@@ -644,6 +644,27 @@ function checkForDuplicateSymptom(
   return false;
 }
 
+export function validateSymptomQuestion(
+  response: ResponseValue | undefined,
+  questionId: string,
+  required?: boolean,
+) {
+  const symptoms = (response?.value as SymptomRequest[]) || [];
+  const validSymptoms = symptoms.filter(
+    (s) => s.verification_status !== "entered_in_error",
+  );
+  if (required && validSymptoms.length === 0) {
+    return [
+      {
+        question_id: questionId,
+        error: "field_required",
+        type: "validation_error" as const,
+      },
+    ];
+  }
+  return [];
+}
+
 export function SymptomQuestion({
   patientId,
   questionnaireResponse,

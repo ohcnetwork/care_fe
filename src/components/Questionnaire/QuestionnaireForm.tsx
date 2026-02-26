@@ -43,17 +43,17 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 import { validateEncounterQuestion } from "@/components/Questionnaire/QuestionTypes/EncounterQuestion";
-import { AllergyIntoleranceRequest } from "@/types/emr/allergyIntolerance/allergyIntolerance";
-import { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import { EncounterEdit } from "@/types/emr/encounter/encounter";
-import { SymptomRequest } from "@/types/emr/symptom/symptom";
 import { ArrowLeft } from "lucide-react";
 import { QuestionRenderer } from "./QuestionRenderer";
+import { validateAllergyIntoleranceQuestion } from "./QuestionTypes/AllergyQuestion";
 import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion";
+import { validateDiagnosisQuestion } from "./QuestionTypes/DiagnosisQuestion";
 import { validateFileUploadQuestion } from "./QuestionTypes/FileQuestion";
 import { validateMedicationRequestQuestion } from "./QuestionTypes/MedicationRequestQuestion";
 import { validateMedicationStatementQuestion } from "./QuestionTypes/MedicationStatementQuestion";
 import { isQuestionEnabled } from "./QuestionTypes/QuestionGroup";
+import { validateSymptomQuestion } from "./QuestionTypes/SymptomQuestion";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
@@ -328,69 +328,9 @@ const STRUCTURED_TYPE_VALIDATORS = {
     const files = (response?.value as FileUploadQuestion[]) || [];
     return validateFileUploadQuestion(files, quesitonId);
   },
-  allergy_intolerance: (
-    response: ResponseValue | undefined,
-    questionId: string,
-    required?: boolean,
-  ) => {
-    const allergies = (response?.value as AllergyIntoleranceRequest[]) || [];
-    const validAllergies = allergies.filter(
-      (a) => a.verification_status !== "entered_in_error",
-    );
-    if (required && validAllergies.length === 0) {
-      return [
-        {
-          question_id: questionId,
-          error: "field_required",
-          type: "validation_error",
-          msg: "field_required",
-        },
-      ];
-    }
-    return [];
-  },
-  diagnosis: (
-    response: ResponseValue | undefined,
-    questionId: string,
-    required?: boolean,
-  ) => {
-    const diagnoses = (response?.value as DiagnosisRequest[]) || [];
-    const validDiagnoses = diagnoses.filter(
-      (d) => d.verification_status !== "entered_in_error",
-    );
-    if (required && validDiagnoses.length === 0) {
-      return [
-        {
-          question_id: questionId,
-          error: "field_required",
-          type: "validation_error",
-          msg: "field_required",
-        },
-      ];
-    }
-    return [];
-  },
-  symptom: (
-    response: ResponseValue | undefined,
-    questionId: string,
-    required?: boolean,
-  ) => {
-    const symptoms = (response?.value as SymptomRequest[]) || [];
-    const validSymptoms = symptoms.filter(
-      (s) => s.verification_status !== "entered_in_error",
-    );
-    if (required && validSymptoms.length === 0) {
-      return [
-        {
-          question_id: questionId,
-          error: "field_required",
-          type: "validation_error",
-          msg: "field_required",
-        },
-      ];
-    }
-    return [];
-  },
+  allergy_intolerance: validateAllergyIntoleranceQuestion,
+  diagnosis: validateDiagnosisQuestion,
+  symptom: validateSymptomQuestion,
 } as const;
 
 const initializeResponses = (
@@ -868,8 +808,7 @@ export function QuestionnaireForm({
             // Normalize error messages for i18n
             const normalizedErrors = validationErrors.map((error) => ({
               ...error,
-              error: error.error ? t(error.error) : t("validation_failed"),
-              msg: error.msg ? t(error.msg) : undefined,
+              error: t(error.error),
             }));
 
             errors.push(...normalizedErrors);
