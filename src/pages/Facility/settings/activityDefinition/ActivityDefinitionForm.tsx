@@ -230,7 +230,7 @@ function ActivityDefinitionFormContent({
             facility: facilityId,
             limit: 100,
             title: observationSearch,
-            status: "active" as ObservationDefinitionStatus,
+            status: ObservationDefinitionStatus.active,
           },
         },
       ),
