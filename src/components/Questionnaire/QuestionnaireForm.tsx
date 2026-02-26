@@ -349,7 +349,7 @@ const STRUCTURED_TYPE_VALIDATORS = {
     }
     return [];
   },
-  condition: (
+  diagnosis: (
     response: ResponseValue | undefined,
     questionId: string,
     required?: boolean,
