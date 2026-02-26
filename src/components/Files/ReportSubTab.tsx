@@ -28,6 +28,7 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 
 import Loading from "@/components/Common/Loading";
 import { FilterBadges, FilterButton } from "@/components/Files/FileFilters";
+import { EmptyState } from "@/components/ui/empty-state";
 
 import useFilters from "@/hooks/useFilters";
 import useReportManager from "@/hooks/useReportManager";
@@ -210,9 +211,13 @@ export function ReportSubTab({ associatingId, reportType }: ReportTabProps) {
             );
           })
         : !reportsLoading && (
-            <div className="text-center py-8 text-gray-500">
-              {t("no_reports_found")}
-            </div>
+            <EmptyState
+              icon={
+                <CareIcon icon="l-file-alt" className="text-primary size-6" />
+              }
+              title={t("no_reports_found")}
+              description={t("no_reports_found_description")}
+            />
           )}
     </div>
   );
@@ -311,8 +316,17 @@ export function ReportSubTab({ associatingId, reportType }: ReportTabProps) {
               })
             : !reportsLoading && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8">
-                    {t("no_reports_found")}
+                  <TableCell colSpan={5} className="py-4">
+                    <EmptyState
+                      icon={
+                        <CareIcon
+                          icon="l-file-alt"
+                          className="text-primary size-6"
+                        />
+                      }
+                      title={t("no_reports_found")}
+                      description={t("no_reports_found_description")}
+                    />
                   </TableCell>
                 </TableRow>
               )}

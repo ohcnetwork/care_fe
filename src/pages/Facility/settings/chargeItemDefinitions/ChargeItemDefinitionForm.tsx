@@ -161,6 +161,7 @@ export function ChargeItemDefinitionForm({
           factor: zodDecimal({ min: 0, max: 100 }).optional().nullable(),
           amount: zodDecimal({ min: 0 }).optional().nullable(),
           conditions: z.array(conditionSchema),
+          global_component: z.boolean().optional(),
         }),
       ),
     });
@@ -503,6 +504,7 @@ export function ChargeItemDefinitionForm({
                         .replace(/[^a-z0-9_-]/g, "");
                       form.setValue("slug_value", sanitizedValue, {
                         shouldValidate: true,
+                        shouldDirty: true,
                       });
                     }}
                   />

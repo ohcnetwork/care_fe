@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { formatPatientAge } from "@/Utils/utils";
 import { resourceTypeToResourcePathSlug } from "@/components/Schedule/useScheduleResource";
+import TagBadge from "@/components/Tags/TagBadge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
@@ -16,21 +17,24 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import {
-  Appointment,
+  AppointmentRead,
   formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
 import { TokenRead, renderTokenNumber } from "@/types/tokens/token/token";
 import { formatDate } from "date-fns";
 import { PrinterIcon } from "lucide-react";
 import { Link } from "raviger";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 
-interface Props {
+interface BaseProps {
   id?: string;
-  token?: TokenRead;
-  facility: FacilityRead;
-  appointment?: Appointment;
+  facility?: FacilityRead;
   inPrintMode?: boolean;
 }
+
+type Props =
+  | (BaseProps & { token: TokenRead; appointment?: AppointmentRead })
+  | (BaseProps & { token?: TokenRead; appointment: AppointmentRead });
 
 const TokenCard = ({
   id,
@@ -43,12 +47,16 @@ const TokenCard = ({
   const isLargeScreen = useBreakpoints({ lg: true, default: false });
   useShortcutSubContext();
 
-  // Get patient from token or appointment
-  const patient = token?.patient || appointment?.patient;
+  // Get patient from token or appointment (one is always defined per Props type)
+  const patient = token?.patient ?? appointment?.patient;
   // Get patient with identifiers (appointment.patient has more data)
   const patientWithIdentifiers = appointment?.patient as
     | PatientRead
     | undefined;
+  const patientTags =
+    patientWithIdentifiers?.instance_tags ?? patient?.instance_tags;
+
+  const appointmentTags = appointment?.tags ?? [];
 
   return (
     <Card
@@ -71,34 +79,50 @@ const TokenCard = ({
       <div className="flex flex-col gap-2 bg-white rounded-md p-4 shadow-md mt-2 ">
         <div className="flex flex-row justify-between">
           <div className=" flex flex-col items-start justify-between">
-            <div>
-              <Label className="text-gray-600 text-sm">
-                {t("patient_name")}:
-              </Label>
-              <p className="font-semibold break-words text-sm">
-                {patient?.name || "--"}
-              </p>
-              {patient && (
-                <p className="text-sm text-gray-600 font-medium">
+            {patient && (
+              <div>
+                <Label className="text-gray-600 text-sm">
+                  {t("patient_name")}:
+                </Label>
+                <p className="font-semibold wrap-break-word text-sm">
+                  {patient.name || "--"}
+                </p>
+                <p className="pl-1 text-sm text-gray-600 font-medium">
                   {formatPatientAge(patient, true)},{" "}
                   {t(`GENDER__${patient.gender}`)}
                 </p>
-              )}
-              {patientWithIdentifiers?.instance_identifiers
-                ?.filter(
-                  (identifier) =>
-                    identifier.config.config.use ===
-                    PatientIdentifierUse.official,
-                )
-                .map((identifier) => (
-                  <div key={identifier.config.id}>
+                {patientWithIdentifiers?.instance_identifiers
+                  ?.filter(
+                    (identifier) =>
+                      identifier.config.config.use ===
+                      PatientIdentifierUse.official,
+                  )
+                  .map((identifier) => (
+                    <div key={identifier.config.id}>
+                      <Label className="text-gray-600 text-sm">
+                        {identifier.config.config.display}:
+                      </Label>
+                      <p className="font-semibold text-sm">
+                        {identifier.value}
+                      </p>
+                    </div>
+                  ))}
+                {inPrintMode && patient.address?.trim() && (
+                  <div>
                     <Label className="text-gray-600 text-sm">
-                      {identifier.config.config.display}:
+                      {t("address")}:
                     </Label>
-                    <p className="font-semibold text-sm">{identifier.value}</p>
+                    <p className="font-semibold text-sm whitespace-pre-wrap">
+                      {patient.address}
+                    </p>
+                    <p className="font-semibold text-sm">
+                      {formatPhoneNumberIntl(patient.phone_number) ||
+                        patient.phone_number}
+                    </p>
                   </div>
-                ))}
-            </div>
+                )}
+              </div>
+            )}
 
             <div className="flex justify-between items-start gap-4">
               <div className="flex-1 min-w-0">
@@ -112,7 +136,7 @@ const TokenCard = ({
                           )}
                           :
                         </Label>
-                        <p className="font-semibold break-words text-sm">
+                        <p className="font-semibold wrap-break-word text-sm">
                           {formatScheduleResourceName(appointment)}
                         </p>
                       </div>
@@ -129,20 +153,42 @@ const TokenCard = ({
                             {formatSlotTimeRange(appointment.token_slot)}
                           </span>
                         </p>
+                        <div className="flex flex-wrap gap-1 my-2">
+                          {patientTags?.map((tag) => (
+                            <TagBadge
+                              key={tag.id}
+                              tag={tag}
+                              hierarchyDisplay
+                              className="text-xs"
+                              variant="outline"
+                            />
+                          ))}
+                          {appointmentTags?.map((tag) => (
+                            <TagBadge
+                              key={tag.id}
+                              tag={tag}
+                              hierarchyDisplay
+                              className="text-xs"
+                              variant="outline"
+                            />
+                          ))}
+                        </div>
                       </div>
                     </>
                   )}
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-semibold tracking-tight break-words">
-                    {facility.name}
-                  </h3>
-                  <div className="text-sm text-gray-600">
-                    <span>{facility.pincode}</span>
-                    <div className="whitespace-normal">{`Ph.: ${facility.phone_number}`}</div>
+                {facility && (
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-semibold tracking-tight wrap-break-word">
+                      {facility.name}
+                    </h3>
+                    <div className="text-sm text-gray-600">
+                      <span>{facility.pincode}</span>
+                      <div className="whitespace-normal">{`Ph.: ${facility.phone_number}`}</div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -176,7 +222,7 @@ const TokenCard = ({
               >
                 <Link
                   basePath="/"
-                  href={`/facility/${facility.id}/${resourceTypeToResourcePathSlug[appointment.resource_type]}/${appointment.resource.id}/queues/${appointment.token?.queue.id}`}
+                  href={`/facility/${appointment.facility.id}/${resourceTypeToResourcePathSlug[appointment.resource_type]}/${appointment.resource.id}/queues/${appointment.token?.queue.id}`}
                 >
                   {t("queue_board")}
                 </Link>

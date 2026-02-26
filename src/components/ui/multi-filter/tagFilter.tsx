@@ -102,7 +102,7 @@ function TreeViewItem({
           )}
           <div
             className={cn(
-              "h-3 w-3 rounded-full flex-shrink-0 border",
+              "h-3 w-3 rounded-full shrink-0 border",
               getColorForTag(tag.id, 0),
             )}
           />
@@ -225,14 +225,17 @@ function TagFilterDropdown({
   );
 
   return (
-    <div className="p-3 max-h-[30vh] overflow-y-auto">
-      <Input
-        placeholder={t("search_tags")}
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="h-8 text-sm mb-3"
-      />
-      <div>
+    <div>
+      <div className="p-3 border-b">
+        <Input
+          placeholder={t("search_tags")}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => e.stopPropagation()}
+          className="h-8 text-base sm:text-sm"
+        />
+      </div>
+      <div className="p-3 max-h-[30vh] overflow-y-auto">
         {/* Selected Tags */}
         {selectedTags.length > 0 && (
           <>
@@ -261,16 +264,16 @@ function TagFilterDropdown({
                   )}
                   <span className="text-sm flex flex-row items-center gap-1 min-w-0">
                     {tag.parent && (
-                      <span className="flex gap-1 items-center flex-shrink-0">
+                      <span className="flex gap-1 items-center shrink-0">
                         <span className="text-gray-700 truncate">
                           {tag.parent.display}
                         </span>
-                        <ChevronRight className="h-3 w-3 flex-shrink-0" />
+                        <ChevronRight className="h-3 w-3 shrink-0" />
                       </span>
                     )}
                     <div
                       className={cn(
-                        "h-3 w-3 rounded-full flex-shrink-0 border",
+                        "h-3 w-3 rounded-full shrink-0 border",
                         getColorForTag(tag.id, index),
                       )}
                     />
@@ -340,7 +343,7 @@ function TagFilterDropdown({
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <div
                     className={cn(
-                      "h-3 w-3 rounded-full flex-shrink-0 border",
+                      "h-3 w-3 rounded-full shrink-0 border",
                       getColorForTag(tag.id, index),
                     )}
                   />
@@ -462,7 +465,7 @@ function GroupSubmenu({
                 <div className="flex items-center gap-2 flex-1">
                   <div
                     className={cn(
-                      "h-3 w-3 rounded-full flex-shrink-0 border",
+                      "h-3 w-3 rounded-full shrink-0 border",
                       getColorForTag(childTag.id, index),
                     )}
                   />
@@ -517,16 +520,13 @@ export const SelectedTagBadge = ({ selected }: { selected: TagConfig[] }) => {
   const firstColor = COLOR_PALETTE[0];
   const secondColor = COLOR_PALETTE[1];
   return (
-    <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+    <div className="flex items-center gap-2 min-w-0 shrink-0">
       {selected.length === 1 ? (
         <span
-          className={cn(
-            firstColor,
-            "rounded-full w-2 h-2 border flex-shrink-0",
-          )}
+          className={cn(firstColor, "rounded-full w-2 h-2 border shrink-0")}
         ></span>
       ) : (
-        <div className="relative w-4 h-2 flex-shrink-0">
+        <div className="relative w-4 h-2 shrink-0">
           <span
             className={cn(
               firstColor,
