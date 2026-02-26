@@ -21,6 +21,7 @@ import {
   EXCLUDED_CHARGE_ITEM_STATUSES,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { add, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
@@ -88,6 +89,7 @@ export default function AppointmentPrint(props: Props) {
       title={t("appointment_details")}
       autoPrint={{ enabled: true }}
       facility={facility}
+      templateSlug={PrintTemplateType.appointment}
     >
       <div className="max-w-7xl mx-auto text-sm">
         {/* Token and Charge Items Side by Side */}

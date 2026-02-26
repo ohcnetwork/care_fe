@@ -52,3 +52,9 @@ export interface PrintTemplate {
   branding?: BrandingConfig;
   watermark?: WatermarkConfig;
 }
+
+export enum PrintTemplateType {
+  default = "default",
+  invoice = "invoice",
+  appointment = "appointment",
+}

@@ -43,14 +43,15 @@ import { Switch } from "@/components/ui/switch";
 import mutate from "@/Utils/request/mutate";
 import { FacilityRead } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
-import type { PrintTemplate } from "@/types/facility/printTemplate";
+import {
+  PrintTemplateType,
+  type PrintTemplate,
+} from "@/types/facility/printTemplate";
 
 interface Props {
   facility: FacilityRead;
   trigger?: React.ReactNode;
 }
-
-const TEMPLATE_SLUGS = ["default", "invoice", "appointment"] as const;
 
 const EMPTY_TEMPLATE: PrintTemplate = {
   slug: "",
@@ -201,7 +202,7 @@ function TemplateEditor({
               <SelectValue placeholder={t("template_slug_placeholder")} />
             </SelectTrigger>
             <SelectContent>
-              {TEMPLATE_SLUGS.map((slug) => (
+              {Object.values(PrintTemplateType).map((slug) => (
                 <SelectItem key={slug} value={slug}>
                   {t(slug)}
                 </SelectItem>
