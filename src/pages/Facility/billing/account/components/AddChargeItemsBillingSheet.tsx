@@ -54,6 +54,7 @@ interface AddChargeItemsBillingSheetProps {
   patientId: string;
   onChargeItemsAdded: () => void;
   disabled?: boolean;
+  accountId: string;
 }
 
 interface ApplyChargeItemDefinitionRequestWithObject extends ApplyChargeItemDefinitionRequest {
@@ -67,6 +68,7 @@ export default function AddChargeItemsBillingSheet({
   facilityId,
   patientId,
   onChargeItemsAdded,
+  accountId,
   disabled,
 }: AddChargeItemsBillingSheetProps) {
   const { t } = useTranslation();
@@ -139,7 +141,6 @@ export default function AddChargeItemsBillingSheet({
       toast.error(t("please_select_at_least_one_item"));
       return;
     }
-
     setIsSubmitting(true);
     applyChargeItems({
       requests: selectedItems.map(
@@ -147,19 +148,19 @@ export default function AddChargeItemsBillingSheet({
           charge_item_definition_object: _discard,
           performer_actor_object: _discardPerformer,
           ...charge_item
-        }) => charge_item,
+        }) => ({ ...charge_item, account: accountId }),
       ),
     });
   };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-3xl p-2">
-        <ScrollArea className="h-full pb-12 pr-6 p-4">
-          <SheetHeader>
-            <SheetTitle>{t("add_charge_items")}</SheetTitle>
-          </SheetHeader>
-          <div className="mt-6 space-y-6">
+      <SheetContent className="w-full sm:max-w-3xl p-0 flex flex-col">
+        <SheetHeader className="px-4 py-4">
+          <SheetTitle>{t("add_charge_items")}</SheetTitle>
+        </SheetHeader>
+        <ScrollArea className="flex-1 pb-12 px-4 pt-0">
+          <div className="mt-4 space-y-4">
             {selectedItems.length > 0 && (
               <div className="space-y-2">
                 <h3 className="text-base font-medium">{t("selected_items")}</h3>

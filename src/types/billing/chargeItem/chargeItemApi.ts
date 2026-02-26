@@ -57,4 +57,10 @@ export default {
     TRes: Type<ChargeItemRead>(),
     TBody: Type<{ datapoints: ChargeItemUpdate[] }>(),
   },
+  changeAccount: {
+    path: "/api/v1/facility/{facilityId}/charge_item/change_account/",
+    method: HttpMethod.POST,
+    TBody: Type<{ target_account: string; charge_items: string[] }>(),
+    TRes: Type<void>(),
+  },
 } as const;
