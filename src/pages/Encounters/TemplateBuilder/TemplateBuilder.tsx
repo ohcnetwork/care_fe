@@ -357,56 +357,56 @@ export default function TemplateBuilder({
   }
 
   return (
-    <Form {...form}>
-      <div className="h-auto sm:h-screen flex flex-col">
-        <div className="border-b p-4">
-          <div className="flex flex-col sm:flex-row gap-2 items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <BackButton
-                size="icon"
-                to={`/facility/${facilityId}/template`}
-                aria-label={t("back")}
-              >
-                <ChevronLeft />
-              </BackButton>
-              <div>
-                <h1 className="text-2xl font-bold">{t("template_builder")}</h1>
-                <p className="text-sm text-muted-foreground">
-                  {t("template_builder_description")}
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center justify-end gap-2 w-full sm:w-auto">
-              <Button
-                type="button"
-                className="flex-1 sm:flex-none"
-                onClick={() =>
-                  setPreviewState({ isActive: false, data: null, format: null })
-                }
-                disabled={!previewState.isActive}
-              >
-                {t("clear_preview")}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1 sm:flex-none"
-                onClick={handlePreviewTemplate}
-                disabled={previewState.isActive}
-              >
-                {t("preview_template")}
-              </Button>
-              <Button
-                type="button"
-                className="flex-1 sm:flex-none"
-                onClick={handleSaveTemplate}
-              >
-                {t("save_template")}
-              </Button>
+    <div className="h-auto sm:h-screen flex flex-col">
+      <div className="border-b p-4">
+        <div className="flex flex-col sm:flex-row gap-2 items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <BackButton
+              size="icon"
+              to={`/facility/${facilityId}/template`}
+              aria-label={t("back")}
+            >
+              <ChevronLeft />
+            </BackButton>
+            <div>
+              <h1 className="text-2xl font-bold">{t("template_builder")}</h1>
+              <p className="text-sm text-muted-foreground">
+                {t("template_builder_description")}
+              </p>
             </div>
           </div>
+          <div className="flex flex-wrap items-center justify-end gap-2 w-full sm:w-auto">
+            <Button
+              type="button"
+              className="flex-1 sm:flex-none"
+              onClick={() =>
+                setPreviewState({ isActive: false, data: null, format: null })
+              }
+              disabled={!previewState.isActive}
+            >
+              {t("clear_preview")}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1 sm:flex-none"
+              onClick={handlePreviewTemplate}
+              disabled={previewState.isActive}
+            >
+              {t("preview_template")}
+            </Button>
+            <Button
+              type="button"
+              className="flex-1 sm:flex-none"
+              onClick={handleSaveTemplate}
+            >
+              {t("save_template")}
+            </Button>
+          </div>
+        </div>
 
-          {/* Template metadata fields */}
+        {/* Template metadata fields */}
+        <Form {...form}>
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-start">
             <FormField
               control={form.control}
@@ -530,8 +530,10 @@ export default function TemplateBuilder({
               )}
             />
           </div>
-        </div>
+        </Form>
+      </div>
 
+      <Form {...form}>
         <div className="flex-1 flex flex-col sm:overflow-y-auto sm:flex-row">
           {/* Main Editor - 3/4 of screen */}
           <div className="flex-2! p-4 overflow-auto">
@@ -631,8 +633,8 @@ export default function TemplateBuilder({
             )}
           </div>
         </div>
-      </div>
-    </Form>
+      </Form>
+    </div>
   );
 }
 
@@ -735,26 +737,24 @@ function TemplateEditor({
 }) {
   const { t } = useTranslation();
   return (
-    <Form {...form}>
-      <FormField
-        control={form.control}
-        name="template_data"
-        render={({ field: { ...field } }) => (
-          <FormItem className="h-96 sm:h-full flex flex-col">
-            <FormLabel>{t("template_html")}</FormLabel>
-            <FormControl>
-              <Textarea
-                {...field}
-                ref={textareaRef}
-                className="flex-1 font-mono text-sm resize-none"
-                placeholder={t("enter_template_html")}
-                spellCheck={false}
-              />
-            </FormControl>
-          </FormItem>
-        )}
-      />
-    </Form>
+    <FormField
+      control={form.control}
+      name="template_data"
+      render={({ field: { ...field } }) => (
+        <FormItem className="h-96 sm:h-full flex flex-col">
+          <FormLabel>{t("template_html")}</FormLabel>
+          <FormControl>
+            <Textarea
+              {...field}
+              ref={textareaRef}
+              className="flex-1 font-mono text-sm resize-none"
+              placeholder={t("enter_template_html")}
+              spellCheck={false}
+            />
+          </FormControl>
+        </FormItem>
+      )}
+    />
   );
 }
 
