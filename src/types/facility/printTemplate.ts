@@ -22,20 +22,15 @@ export interface LogoConfig {
   alignment: "left" | "center" | "right";
 }
 
-export interface HeaderImageConfig {
+export interface ImageConfig {
   url: string;
-  height?: number;
-}
-
-export interface FooterImageConfig {
-  url?: string;
   height?: number;
 }
 
 export interface BrandingConfig {
   logo?: LogoConfig;
-  header_image?: HeaderImageConfig;
-  footer_image?: FooterImageConfig;
+  header_image?: ImageConfig;
+  footer_image?: ImageConfig;
 }
 
 export interface WatermarkConfig {

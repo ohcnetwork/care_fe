@@ -733,6 +733,7 @@ function BrandingSection({ template, onUpdate }: SectionProps) {
                   branding: {
                     ...tpl.branding,
                     footer_image: {
+                      url: tpl.branding?.footer_image?.url ?? "",
                       ...tpl.branding?.footer_image,
                       height: val,
                     },
