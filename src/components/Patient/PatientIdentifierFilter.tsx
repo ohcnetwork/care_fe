@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { QrCode, Search, X } from "lucide-react";
+import { QrCode, Search, Usb, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
@@ -40,6 +40,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBarcodeScanner } from "@/hooks/useBarcodeScanner";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { useSerialBarcodeScanner } from "@/hooks/useSerialBarcodeScanner";
 
 import PatientIDScanDialog from "@/components/Scan/PatientIDScanDialog";
 import { Card } from "@/components/ui/card";
@@ -300,26 +301,63 @@ export default function PatientIdentifierFilter({
     setOpen(externalOpen);
   }, [externalOpen]);
 
-  // Enable external scanner detection when not in a dialog
-  useBarcodeScanner({
-    onScan: (scannedPatientId: string) => {
-      if (!open && !verificationOpen && !scanDialogOpen) {
-        let extractedId = scannedPatientId;
+  // Helper function to extract patient ID from scanned data
+  const extractPatientId = useCallback((scannedData: string): string => {
+    try {
+      const parsed = JSON.parse(scannedData);
+      if (parsed.uuid && typeof parsed.uuid === "string") {
+        return parsed.uuid.trim();
+      }
+    } catch {
+      // Not valid JSON, continue to other parsing methods
+    }
+    const firstPart = scannedData.split(/[,{]/)[0].trim();
+    return firstPart || scannedData.trim();
+  }, []);
 
-        try {
-          const parsed = JSON.parse(scannedPatientId);
-          if (parsed.uuid && typeof parsed.uuid === "string") {
-            extractedId = parsed.uuid;
-          }
-        } catch {
-          extractedId = scannedPatientId;
-        }
-
-        handleScanSuccess(extractedId);
+  // Handler for when a scan is successful (shared by both scanners)
+  const handleScanFromDevice = useCallback(
+    (scannedPatientId: string) => {
+      if (!open && !verificationOpen && !scanDialogOpen && !selectedPatient) {
+        const extractedId = extractPatientId(scannedPatientId);
+        onSelect(extractedId, t("scanned_patient"));
+        setSelectedPatient({
+          id: extractedId,
+          name: t("scanned_patient"),
+        } as PatientRead);
         toast.info(t("patient_details_scanned_successfully"));
       }
     },
-    enabled: !open && !verificationOpen && !scanDialogOpen,
+    [
+      open,
+      verificationOpen,
+      scanDialogOpen,
+      selectedPatient,
+      extractPatientId,
+      onSelect,
+      t,
+    ],
+  );
+
+  // Serial port scanner
+  const {
+    isSupported: isSerialSupported,
+    isConnected: isSerialConnected,
+    connect: connectSerial,
+  } = useSerialBarcodeScanner({
+    onScan: handleScanFromDevice,
+    enabled: !open && !verificationOpen && !scanDialogOpen && !hideScanButton,
+  });
+
+  // Keyboard wedge scanner
+  useBarcodeScanner({
+    onScan: handleScanFromDevice,
+    enabled:
+      !open &&
+      !verificationOpen &&
+      !scanDialogOpen &&
+      !hideScanButton &&
+      !selectedPatient,
     preventDefault: false,
     maxLength: 500,
     timeout: 500,
@@ -455,14 +493,6 @@ export default function PatientIdentifierFilter({
     onSelect(undefined);
   };
 
-  const handleScanSuccess = (scannedPatientId: string) => {
-    onSelect(scannedPatientId, t("scanned_patient"));
-    setSelectedPatient({
-      id: scannedPatientId,
-      name: t("scanned_patient"),
-    } as PatientRead);
-  };
-
   const selectedConfig = allIdentifierConfigs.find((c) => c.id === searchType);
 
   const triggerButton = (
@@ -492,16 +522,37 @@ export default function PatientIdentifierFilter({
         )}
       >
         {!hideScanButton && (
-          <Button
-            variant="ghost"
-            onClick={() => setScanDialogOpen(true)}
-            className="shrink-0 text-gray-950 px-2 border-r rounded-r-none bg-white"
-            aria-label={t("scan_patient_qr")}
-            data-shortcut-id="scan-patient"
-          >
-            <QrCode className="size-4" />
-            <span className="hidden md:block">{t("scan")}</span>
-          </Button>
+          <>
+            <Button
+              variant="ghost"
+              onClick={() => setScanDialogOpen(true)}
+              className="shrink-0 text-gray-950 px-2 border-r rounded-r-none bg-white"
+              aria-label={t("scan_patient_qr")}
+              data-shortcut-id="scan-patient"
+            >
+              <div className="relative">
+                <QrCode className="size-4" />
+                {isSerialConnected && (
+                  <div
+                    className="absolute -top-0.5 -right-0.5 size-1.5 rounded-full bg-green-600 animate-pulse"
+                    title={t("serial_scanner_connected")}
+                  />
+                )}
+              </div>
+              <span className="hidden md:block">{t("scan")}</span>
+            </Button>
+            {isSerialSupported && !isSerialConnected && (
+              <Button
+                variant="ghost"
+                onClick={() => connectSerial()}
+                className="shrink-0 px-2 border-r rounded-none bg-white text-gray-950"
+                aria-label={t("connect_serial_scanner")}
+                title={t("connect_serial_scanner")}
+              >
+                <Usb className="size-4" />
+              </Button>
+            )}
+          </>
         )}
         {isMobile ? (
           <Drawer open={open} onOpenChange={setOpen}>
@@ -558,7 +609,14 @@ export default function PatientIdentifierFilter({
       <PatientIDScanDialog
         open={scanDialogOpen}
         onOpenChange={setScanDialogOpen}
-        onScanSuccess={handleScanSuccess}
+        onScanSuccess={(scannedId) => {
+          const extractedId = extractPatientId(scannedId);
+          onSelect(extractedId, t("scanned_patient"));
+          setSelectedPatient({
+            id: extractedId,
+            name: t("scanned_patient"),
+          } as PatientRead);
+        }}
       />
 
       <Dialog open={verificationOpen} onOpenChange={setVerificationOpen}>
