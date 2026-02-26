@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp, PlusIcon } from "lucide-react";
-import { useQueryParams } from "raviger";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -50,7 +49,7 @@ import queryClient from "@/Utils/request/queryClient";
 import { formatName } from "@/Utils/utils";
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
 import AddMultipleChargeItemsSheet from "@/pages/Facility/services/serviceRequests/components/AddMultipleChargeItemsSheet";
-import encounterApi from "@/types/emr/encounter/encounterApi";
+import { AccountRead } from "@/types/billing/account/Account";
 import { LocationAssociationRead } from "@/types/location/association";
 import { differenceInDays, differenceInHours, format } from "date-fns";
 import ChargeItemActionsMenu from "./ChargeItemActions";
@@ -188,15 +187,17 @@ function groupChargeItemsByLocation(
 
 export interface BedChargeItemsTableProps {
   facilityId: string;
-  accountId: string;
+  account: AccountRead;
 }
 
 export function BedChargeItemsTable({
   facilityId,
-  accountId,
+  account,
 }: BedChargeItemsTableProps) {
   const { t } = useTranslation();
-  const [{ encounterId }] = useQueryParams();
+  const encounterId = account.primary_encounter?.id;
+  const accountId = account.id;
+
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
     {},
   );
@@ -213,16 +214,7 @@ export function BedChargeItemsTable({
   const [selectedChargeItem, setSelectedChargeItem] =
     useState<ChargeItemRead | null>(null);
 
-  const { data: encounter, isLoading: isEncounterLoading } = useQuery({
-    queryKey: ["encounter", encounterId],
-    queryFn: query(encounterApi.get, {
-      pathParams: { id: encounterId },
-      queryParams: facilityId ? { facility: facilityId } : {},
-    }),
-    enabled: !!encounterId,
-  });
-
-  const locationHistory = encounter?.location_history || [];
+  const locationHistory = account.primary_encounter?.location_history || [];
 
   const { data: chargeItems, isLoading } = useQuery({
     queryKey: [
@@ -348,12 +340,9 @@ export function BedChargeItemsTable({
           </SelectContent>
         </Select>
       </div>
-      {isLoading || isEncounterLoading ? (
+      {isLoading ? (
         <TableSkeleton count={3} />
-      ) : encounterId == undefined ||
-        !encounterId ||
-        !encounter ||
-        !locationHistory.length ? (
+      ) : !encounterId || !locationHistory.length ? (
         <EmptyState
           icon={<CareIcon icon="l-bed" className="text-primary size-6" />}
           title={
