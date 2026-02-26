@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
@@ -35,7 +34,6 @@ export default function AppointmentPrint(props: Props) {
   const { t } = useTranslation();
   const { facility, facilityId } = useCurrentFacility();
   const { hasPermission } = usePermissions();
-  const { customPrintHeader } = careConfig;
 
   const { canViewAppointments } = getPermissions(
     hasPermission,
@@ -89,41 +87,9 @@ export default function AppointmentPrint(props: Props) {
     <PrintPreview
       title={t("appointment_details")}
       autoPrint={{ enabled: true }}
+      facility={facility}
     >
       <div className="max-w-7xl mx-auto text-sm">
-        {/* Header with Facility Name and Logo */}
-
-        {customPrintHeader ? (
-          <div className="mb-4 pb-2">
-            <img
-              src={customPrintHeader}
-              alt="Custom Header"
-              className="w-full h-auto object-contain mb-2"
-            />
-          </div>
-        ) : (
-          <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
-            <div className="text-left">
-              <h1 className="text-2xl font-semibold">{facility.name}</h1>
-              {facility.address && (
-                <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-xs">
-                  {facility.address}
-                  {facility.phone_number && (
-                    <p className="text-gray-500 text-xs">
-                      {facility.phone_number}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-            <img
-              src={careConfig.mainLogo?.dark}
-              alt="Care Logo"
-              className="h-8 w-auto object-contain mb-2 sm:mb-0"
-            />
-          </div>
-        )}
-
         {/* Token and Charge Items Side by Side */}
         <div className="flex space-x-2">
           {/* Token Card */}
@@ -138,7 +104,7 @@ export default function AppointmentPrint(props: Props) {
           {/* Charge Items */}
           {hasChargeItems && (
             <div className="flex justify-center w-2/5">
-              <div className="p-2 border border-gray-200 bg-gray-100 w-full h-full rounded-md flex flex-col">
+              <div className="p-2 border border-gray-200 bg-gray-100 w-full h-full rounded-xl flex flex-col">
                 <div className="flex flex-row items-center justify-between px-1">
                   <p className="font-semibold text-sm">{t("charges")}</p>
                   {chargeItems.results.every(
@@ -159,7 +125,7 @@ export default function AppointmentPrint(props: Props) {
                   )}
                 </div>
 
-                <div className="bg-white rounded-md p-3 shadow-md mt-2 h-full">
+                <div className="bg-white rounded-md p-3 mt-2 h-full">
                   <div className="space-y-2 flex flex-col justify-between h-full">
                     <div className="space-y-4">
                       {chargeItems?.results?.map((item) => (

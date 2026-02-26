@@ -1,392 +1,290 @@
-[
-    {
-        "id": "primary-parameters",
-        "name": "Primary Parameters",
-        "groups": [
-            {
-                "title": "Blood Pressure",
-                "codes": [
-                    {
-                        "code": "8480-6",
-                        "system": "http://loinc.org",
-                        "display": "Systolic"
-                    },
-                    {
-                        "code": "8462-4",
-                        "system": "http://loinc.org",
-                        "display": "Diastolic"
-                    }
-                ]
-            },
-            {
-                "title": "Pulse",
-                "codes": [
-                    {
-                        "code": "8867-4",
-                        "system": "http://loinc.org",
-                        "display": "Pulse"
-                    }
-                ]
-            },
-            {
-                "title": "Temperature",
-                "codes": [
-                    {
-                        "code": "8310-5",
-                        "system": "http://loinc.org",
-                        "display": "Temperature"
-                    }
-                ]
-            },
-            {
-                "title": "Respiratory Rate",
-                "codes": [
-                    {
-                        "code": "9279-1",
-                        "system": "http://loinc.org",
-                        "display": "Respiratory Rate"
-                    }
-                ]
-            },
-            {
-                "title": "SpO2",
-                "codes": [
-                    {
-                        "code": "2708-6",
-                        "system": "http://loinc.org",
-                        "display": "SpO2"
-                    },
-                    {
-                        "code": "59408-5",
-                        "system": "http://loinc.org",
-                        "display": "SpO2 (pulse oximetry)"
-                    }
-                ]
-            },
-            {
-                "title": "FiO2",
-                "codes": [
-                    {
-                        "code": "3151-8",
-                        "system": "http://loinc.org",
-                        "display": "FiO2"
-                    }
-                ]
-            },
-            {
-                "title": "Girth",
-                "codes": [
-                    {
-                        "code": "8280-0",
-                        "system": "http://loinc.org",
-                        "display": "Girth"
-                    }
-                ]
-            },
-            {
-                "title": "Body weight",
-                "codes": [
-                    {
-                        "code": "29463-7",
-                        "system": "http://loinc.org",
-                        "display": "Weight"
-                    }
-                ]
-            }
-        ]
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Facility Print Configuration",
+  "description": "Configuration schema for print layouts across document types. The top-level 'default' profile applies to all documents unless overridden by a document-specific profile under 'documentTypes'.",
+  "type": "object",
+  "required": ["default"],
+  "additionalProperties": false,
+  "properties": {
+    "default": {
+      "$ref": "#/$defs/printProfile",
+      "description": "Default print profile applied to all document types unless overridden."
     },
-    {
-        "id": "abg-analysis",
-        "name": "ABG Analysis",
-        "groups": [
-            {
-                "title": "PH",
-                "codes": [
-                    {
-                        "code": "24336-0",
-                        "system": "http://loinc.org",
-                        "display": "PH"
-                    }
-                ]
-            },
-            {
-                "title": "PCO2",
-                "codes": [
-                    {
-                        "code": "2019-8",
-                        "system": "http://loinc.org",
-                        "display": "PCO2"
-                    }
-                ]
-            },
-            {
-                "title": "PO2",
-                "codes": [
-                    {
-                        "code": "2703-7",
-                        "system": "http://loinc.org",
-                        "display": "PO2"
-                    }
-                ]
-            },
-            {
-                "title": "HCO3",
-                "codes": [
-                    {
-                        "code": "1960-4",
-                        "system": "http://loinc.org",
-                        "display": "HCO3"
-                    }
-                ]
-            },
-            {
-                "title": "Base Excess",
-                "codes": [
-                    {
-                        "code": "1925-7",
-                        "system": "http://loinc.org",
-                        "display": "Base Excess"
-                    }
-                ]
-            },
-            {
-                "title": "Lactate",
-                "codes": [
-                    {
-                        "code": "30242-2",
-                        "system": "http://loinc.org",
-                        "display": "Lactate"
-                    }
-                ]
-            },
-            {
-                "title": "Sodium",
-                "codes": [
-                    {
-                        "code": "32717-1",
-                        "system": "http://loinc.org",
-                        "display": "Sodium"
-                    }
-                ]
-            },
-            {
-                "title": "Potassium",
-                "codes": [
-                    {
-                        "code": "32713-0",
-                        "system": "http://loinc.org",
-                        "display": "Potassium"
-                    }
-                ]
-            }
+    "documentTypes": {
+      "type": "object",
+      "description": "Per-document-type overrides. Each key is a document type identifier. Values are partial print profiles that are merged on top of the default.",
+      "additionalProperties": {
+        "$ref": "#/$defs/printProfile"
+      },
+      "propertyNames": {
+        "enum": [
+          "appointment",
+          "invoice",
+          "prescription",
+          "discharge_summary",
+          "lab_report",
+          "consent_form",
+          "dispense_order",
+          "request_order",
+          "delivery_order"
         ]
-    },
-    {
-        "id": "ventilation",
-        "name": "Respiratory Support",
-        "groups": [
-            {
-                "title": "PIP",
-                "codes": [
-                    {
-                        "code": "20102-0",
-                        "system": "http://loinc.org",
-                        "display": "PIP"
-                    }
-                ]
-            },
-            {
-                "title": "Mean Airway Pressure",
-                "codes": [
-                    {
-                        "code": "76530-5",
-                        "system": "http://loinc.org",
-                        "display": ""
-                    }
-                ]
-            },
-            {
-                "title": "Resp Rate",
-                "codes": [
-                    {
-                        "code": "19834-1",
-                        "system": "http://loinc.org",
-                        "display": "Resp Rate"
-                    }
-                ]
-            },
-            {
-                "title": "Pressure Support",
-                "codes": [
-                    {
-                        "code": "20079-0",
-                        "system": "http://loinc.org",
-                        "display": "Pressure Support"
-                    }
-                ]
-            },
-            {
-                "title": "Tidal Volume",
-                "codes": [
-                    {
-                        "code": "76222-9",
-                        "system": "http://loinc.org",
-                        "display": "Tidal Volume"
-                    }
-                ]
-            },
-            {
-                "title": "PEEP",
-                "codes": [
-                    {
-                        "code": "76248-4",
-                        "system": "http://loinc.org",
-                        "display": "PEEP"
-                    }
-                ]
-            },
-            {
-                "title": "FiO2",
-                "codes": [
-                    {
-                        "code": "19996-8",
-                        "system": "http://loinc.org",
-                        "display": "FiO2"
-                    }
-                ]
-            },
-            {
-                "title": "SpO2",
-                "codes": [
-                    {
-                        "code": "",
-                        "system": "http://loinc.org",
-                        "display": "SpO2 -- TODO"
-                    }
-                ]
-            },
-            {
-                "title": "Oxygen Modality Flow Rate",
-                "codes": [
-                    {
-                        "code": "",
-                        "system": "http://loinc.org",
-                        "display": "Oxygen Modality Flow Rate -- TODO"
-                    }
-                ]
-            },
-            {
-                "title": "Oxygen Modality Oxygen Rate",
-                "codes": [
-                    {
-                        "code": "",
-                        "system": "http://loinc.org",
-                        "display": "Oxygen Modality Oxygen Rate -- TODO"
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "id": "nutrition",
-        "name": "Nutrition",
-        "groups": [
-            {
-                "title": "Fluid Intake Intravascular Measured",
-                "codes": [
-                    {
-                        "code": "8975-5",
-                        "system": "http://loinc.org",
-                        "display": "Fluid intake IV Measured"
-                    }
-                ]
-            },
-            {
-                "title": "Fluid Intake Oral Measured",
-                "codes": [
-                    {
-                        "code": "9000-1",
-                        "system": "http://loinc.org",
-                        "display": "Fluid intake oral Measured"
-                    }
-                ]
-            },
-             {
-                "title": "Fluid Output Wound Drain",
-                "codes": [
-                    {
-                        "code": "9203-1",
-                        "system": "http://loinc.org",
-                        "display": "Fluid output wound drain"
-                    }
-                ]
-            },
-            {
-                "title": "Fluid Output Gastric tube",
-                "codes": [
-                    {
-                        "code": "9149-6",
-                        "system": "http://loinc.org",
-                        "display": "Fluid output gastric tube"
-                    }
-                ]
-            },
-            {
-                "title": "Urine Output",
-                "codes": [
-                    {
-                        "code": "9187-6",
-                        "system": "http://loinc.org",
-                        "display": "Urine output"
-                    }
-                ]
-            },
-            {
-                "title": "Fluid Intake Total Measured",
-                "codes": [
-                    {
-                        "code": "9103-3",
-                        "system": "http://loinc.org",
-                        "display": "Total Intake"
-                    }
-                ]
-            },
-            {
-                "title": "Fluid Output Total Measured",
-                "codes": [
-                    {
-                        "code": "9257-7",
-                        "system": "http://loinc.org",
-                        "display": "Total Output"
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "id": "dialysis",
-        "name": "Dialysis",
-        "groups": [
-            {
-                "title": "Dialysis Fluid Balance",
-                "codes": [
-                    {
-                        "code": "104103-7",
-                        "system": "http://loinc.org",
-                        "display": "Dialysis Fluid Balance"
-                    }
-                ]
-            },
-            {
-                "title": "Transfusion",
-                "codes": [
-                    {
-                        "code": "10415-8",
-                        "system": "http://loinc.org",
-                        "display": "Transfusion"
-                    }
-                ]
-            }
-        ]
+      }
     }
-]
+  },
+
+  "$defs": {
+    "printProfile": {
+      "type": "object",
+      "description": "A complete print profile defining page, branding, layout, and watermark settings.",
+      "additionalProperties": false,
+      "properties": {
+        "page": {
+          "type": "object",
+          "description": "Page dimensions, orientation, and margin configuration.",
+          "additionalProperties": false,
+          "properties": {
+            "size": {
+              "type": "string",
+              "enum": ["A4", "A5", "Letter", "Legal"],
+              "default": "A4",
+              "description": "Paper size for the printed document."
+            },
+            "orientation": {
+              "type": "string",
+              "enum": ["portrait", "landscape"],
+              "default": "portrait",
+              "description": "Page orientation."
+            },
+            "margin": {
+              "type": "object",
+              "description": "Page margins in millimeters.",
+              "additionalProperties": false,
+              "required": ["top", "bottom", "left", "right"],
+              "properties": {
+                "top": {
+                  "type": "number",
+                  "minimum": 0,
+                  "default": 10,
+                  "description": "Top margin in mm."
+                },
+                "bottom": {
+                  "type": "number",
+                  "minimum": 0,
+                  "default": 10,
+                  "description": "Bottom margin in mm."
+                },
+                "left": {
+                  "type": "number",
+                  "minimum": 0,
+                  "default": 10,
+                  "description": "Left margin in mm."
+                },
+                "right": {
+                  "type": "number",
+                  "minimum": 0,
+                  "default": 10,
+                  "description": "Right margin in mm."
+                }
+              }
+            }
+          }
+        },
+
+        "branding": {
+          "type": "object",
+          "description": "Branding assets for the printed document (logo, header/footer images, facility info).",
+          "additionalProperties": false,
+          "properties": {
+            "logo": {
+              "type": "object",
+              "description": "Facility logo displayed in the document header.",
+              "additionalProperties": false,
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "format": "uri",
+                  "description": "URL of the logo image."
+                },
+                "width": {
+                  "type": "number",
+                  "minimum": 1,
+                  "description": "Logo width in pixels."
+                },
+                "height": {
+                  "type": "number",
+                  "minimum": 1,
+                  "description": "Logo height in pixels."
+                },
+                "alignment": {
+                  "type": "string",
+                  "enum": ["left", "center", "right"],
+                  "default": "left",
+                  "description": "Horizontal alignment of the logo within the header."
+                }
+              },
+              "required": ["url"]
+            },
+            "headerImage": {
+              "type": "object",
+              "description": "Full-width header image replacing the default facility name + logo header.",
+              "additionalProperties": false,
+              "required": ["url"],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "format": "uri",
+                  "description": "URL of the header image."
+                },
+                "height": {
+                  "type": "number",
+                  "minimum": 1,
+                  "description": "Header image height in pixels."
+                }
+              }
+            },
+            "footerImage": {
+              "type": "object",
+              "description": "Full-width footer image rendered at the bottom of each page.",
+              "additionalProperties": false,
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "format": "uri",
+                  "description": "URL of the footer image."
+                },
+                "height": {
+                  "type": "number",
+                  "minimum": 1,
+                  "description": "Footer image height in pixels."
+                }
+              },
+              "required": ["url"]
+            },
+            "facilityInfo": {
+              "type": "object",
+              "description": "Facility name and address displayed in the default header when no headerImage is provided.",
+              "additionalProperties": false,
+              "properties": {
+                "showName": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Whether to display the facility name."
+                },
+                "showAddress": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Whether to display the facility address."
+                }
+              }
+            }
+          }
+        },
+
+        "layout": {
+          "type": "object",
+          "description": "Layout and typography settings for the printed document.",
+          "additionalProperties": false,
+          "properties": {
+            "fontSize": {
+              "type": "number",
+              "minimum": 6,
+              "maximum": 24,
+              "default": 12,
+              "description": "Base font size in points."
+            },
+            "fontFamily": {
+              "type": "string",
+              "default": "sans-serif",
+              "description": "CSS font-family for the printed document."
+            },
+            "lineHeight": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 3,
+              "default": 1.5,
+              "description": "Line height multiplier for body text."
+            },
+            "color": {
+              "type": "string",
+              "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+              "default": "#000000",
+              "description": "Primary text color as a hex value."
+            }
+          }
+        },
+
+        "watermark": {
+          "type": "object",
+          "description": "Watermark overlay rendered on each page (e.g. DRAFT, CANCELLED).",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to display the watermark."
+            },
+            "text": {
+              "type": "string",
+              "maxLength": 50,
+              "description": "Watermark text content."
+            },
+            "opacity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.1,
+              "description": "Watermark opacity (0 = transparent, 1 = opaque)."
+            },
+            "rotation": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90,
+              "default": -45,
+              "description": "Watermark rotation in degrees."
+            },
+            "color": {
+              "type": "string",
+              "enum": ["red", "gray", "yellow"],
+              "default": "gray",
+              "description": "Watermark color preset."
+            }
+          },
+          "if": {
+            "properties": { "enabled": { "const": true } }
+          },
+          "then": {
+            "required": ["text"]
+          }
+        },
+
+        "footer": {
+          "type": "object",
+          "description": "Footer content settings for printed pages.",
+          "additionalProperties": false,
+          "properties": {
+            "showPreparedBy": {
+              "type": "boolean",
+              "default": true,
+              "description": "Show the name of the user who prepared the document."
+            },
+            "showPrintedBy": {
+              "type": "boolean",
+              "default": true,
+              "description": "Show the name of the user who printed the document."
+            },
+            "showGeneratedAt": {
+              "type": "boolean",
+              "default": true,
+              "description": "Show the timestamp when the document was generated."
+            },
+            "dateFormat": {
+              "type": "string",
+              "default": "dd/MM/yyyy HH:mm",
+              "description": "Date format string (date-fns compatible) for timestamps."
+            }
+          }
+        }
+      }
+    }
+  }
+}
