@@ -338,7 +338,6 @@ function ObservationDefinitionFormContent({
     } else {
       const payload: ObservationDefinitionCreateSpec = {
         ...cleanData,
-        status: ObservationDefinitionStatus.active,
         facility: facilityId as string,
       };
       createObservationDefinition(payload);
