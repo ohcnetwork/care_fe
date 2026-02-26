@@ -344,7 +344,7 @@ export function validateDiagnosisQuestion(
   response: ResponseValue | undefined,
   questionId: string,
   required?: boolean,
-) {
+): QuestionValidationError[] {
   const diagnoses = (response?.value as DiagnosisRequest[]) || [];
   const validDiagnoses = diagnoses.filter(
     (d) => d.verification_status !== "entered_in_error",
@@ -354,7 +354,7 @@ export function validateDiagnosisQuestion(
       {
         question_id: questionId,
         error: "field_required",
-        type: "validation_error" as const,
+        type: "validation_error",
       },
     ];
   }

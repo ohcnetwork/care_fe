@@ -554,7 +554,7 @@ export function validateAllergyIntoleranceQuestion(
   response: ResponseValue | undefined,
   questionId: string,
   required?: boolean,
-) {
+): QuestionValidationError[] {
   const allergies = (response?.value as AllergyIntoleranceRequest[]) || [];
   const validAllergies = allergies.filter(
     (a) => a.verification_status !== "entered_in_error",
@@ -564,7 +564,7 @@ export function validateAllergyIntoleranceQuestion(
       {
         question_id: questionId,
         error: "field_required",
-        type: "validation_error" as const,
+        type: "validation_error",
       },
     ];
   }

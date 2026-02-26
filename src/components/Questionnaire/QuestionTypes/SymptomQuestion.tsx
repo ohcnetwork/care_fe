@@ -648,7 +648,7 @@ export function validateSymptomQuestion(
   response: ResponseValue | undefined,
   questionId: string,
   required?: boolean,
-) {
+): QuestionValidationError[] {
   const symptoms = (response?.value as SymptomRequest[]) || [];
   const validSymptoms = symptoms.filter(
     (s) => s.verification_status !== "entered_in_error",
@@ -658,7 +658,7 @@ export function validateSymptomQuestion(
       {
         question_id: questionId,
         error: "field_required",
-        type: "validation_error" as const,
+        type: "validation_error",
       },
     ];
   }

@@ -798,20 +798,13 @@ export function QuestionnaireForm({
             ];
 
           if (validator) {
-            let validationErrors: QuestionValidationError[] = [];
-            validationErrors = validator(
+            const validationErrors = validator(
               response?.values?.[0],
               q.id,
               q.required,
             );
 
-            // Normalize error messages for i18n
-            const normalizedErrors = validationErrors.map((error) => ({
-              ...error,
-              error: error.error ? t(error.error) : t("validation_failed"),
-            }));
-
-            errors.push(...normalizedErrors);
+            errors.push(...validationErrors);
             if (validationErrors.length > 0) {
               firstErrorId = firstErrorId ? firstErrorId : q.id;
             }
