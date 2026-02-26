@@ -35,7 +35,7 @@ import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paym
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatPatientAge } from "@/Utils/utils";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 
 // Helper for friendly display of enum values
 function humanize(str: string): string {
@@ -225,7 +225,7 @@ export function PaymentReconciliationShow({
                   </div>
                   <div className="font-medium">
                     {payment.payment_datetime
-                      ? format(new Date(payment.payment_datetime), "PPP")
+                      ? format(new Date(payment.payment_datetime), "PPP p")
                       : "-"}
                   </div>
                 </div>
@@ -409,8 +409,8 @@ export function PaymentReconciliationShow({
                   <p className="font-medium">{t("payment_recorded")}</p>
                   <p className="text-sm text-gray-500">
                     {payment.payment_datetime
-                      ? format(new Date(payment.payment_datetime), "PPP")
-                      : format(new Date(), "PPP")}
+                      ? format(new Date(payment.payment_datetime), "PPP p")
+                      : format(new Date(), "PPP p")}
                   </p>
                 </div>
                 {payment.status === "cancelled" && (
@@ -418,7 +418,7 @@ export function PaymentReconciliationShow({
                     <div className="absolute left-0 top-2 size-2 rounded-full bg-destructive" />
                     <p className="font-medium">{t("payment_cancelled")}</p>
                     <p className="text-sm text-gray-500">
-                      {format(new Date(), "PPP")}
+                      {format(new Date(), "PPP p")}
                     </p>
                   </div>
                 )}
@@ -545,6 +545,31 @@ export function PaymentReconciliationShow({
               </div>
             </CardContent>
           </Card>
+
+          <div className="space-y-6 p-2">
+            <div>
+              <div className="text-xs text-gray-500 mb-1">
+                {t("created_by")}
+              </div>
+              <div className="text-sm font-medium">
+                {formatName(payment.created_by)}
+              </div>
+              <div className="text-xs text-gray-500">
+                {format(new Date(payment.created_date), "PPP p")}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-gray-500 mb-1">
+                {t("last_modified_by")}
+              </div>
+              <div className="text-sm font-medium">
+                {formatName(payment.updated_by)}
+              </div>
+              <div className="text-xs text-gray-500">
+                {format(new Date(payment.modified_date), "PPP p")}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

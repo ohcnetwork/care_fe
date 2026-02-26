@@ -36,7 +36,7 @@ export function EncounterAccordionLayout({
   return (
     <Card className={cn("border-none rounded-md", className)}>
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-        <CollapsibleTrigger className="w-full flex items-center gap-2 px-2 py-1 hover:no-underline">
+        <div className="w-full flex items-center gap-2 px-2 py-1">
           <CardHeader className="w-full flex flex-row items-center justify-between p-0 pl-2">
             <CardTitle className="text-base mt-1">{t(title)}:</CardTitle>
             <div
@@ -61,21 +61,25 @@ export function EncounterAccordionLayout({
               )}
               <div className="flex">{actionButton && actionButton}</div>
               <div className="flex">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="hover:bg-transparent text-gray-500 hover:text-gray-500"
-                >
-                  {isExpanded ? (
-                    <ChevronsDownUp className="size-4 text-gray-500" />
-                  ) : (
-                    <ChevronsUpDown className="size-4 text-gray-500" />
-                  )}
-                </Button>
+                <CollapsibleTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="hover:bg-transparent text-gray-500 hover:text-gray-500"
+                    aria-label={isExpanded ? t("collapse") : t("expand")}
+                  >
+                    {isExpanded ? (
+                      <ChevronsDownUp className="size-4 text-gray-500" />
+                    ) : (
+                      <ChevronsUpDown className="size-4 text-gray-500" />
+                    )}
+                  </Button>
+                </CollapsibleTrigger>
               </div>
             </div>
           </CardHeader>
-        </CollapsibleTrigger>
+        </div>
 
         <CollapsibleContent>
           <CardContent className="p-2">{children}</CardContent>

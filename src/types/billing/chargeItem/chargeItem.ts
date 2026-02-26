@@ -17,6 +17,12 @@ export enum ChargeItemStatus {
   entered_in_error = "entered_in_error",
 }
 
+export const EXCLUDED_CHARGE_ITEM_STATUSES = [
+  ChargeItemStatus.not_billable,
+  ChargeItemStatus.entered_in_error,
+  ChargeItemStatus.aborted,
+];
+
 export const CHARGE_ITEM_STATUS_COLORS = {
   // planned: "blue",
   billable: "indigo",
@@ -75,6 +81,7 @@ export interface ApplyChargeItemDefinitionRequest {
   service_resource?: ChargeItemServiceResource;
   service_resource_id?: string;
   performer_actor?: string;
+  account?: string;
 }
 
 export interface ApplyMultipleChargeItemDefinitionRequest {
@@ -97,6 +104,8 @@ export interface ChargeItemRead extends ChargeItemBase {
   performer_actor?: UserReadMinimal;
   created_date: string;
   modified_date: string;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
 }
 
 export interface ChargeItemBatchResponse {

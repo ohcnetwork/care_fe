@@ -1,8 +1,14 @@
 import React from "react";
 
-import { GenericSelectedBadge } from "@/components/ui/multi-filter/genericFilter";
-import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { addDays, subDays, subMonths, subWeeks, subYears } from "date-fns";
+
+import { ActivityDefinitionFilterValue } from "@/components/ui/multi-filter/activityDefinitionFilter";
+import { GenericSelectedBadge } from "@/components/ui/multi-filter/genericFilter";
+
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
+import { LocationRead } from "@/types/location/location";
+import { UserReadMinimal } from "@/types/user/user";
 
 // Generic color palette for cycling through options
 export const COLOR_PALETTE = [
@@ -30,7 +36,14 @@ export interface FilterOption {
   icon?: string;
 }
 
-export type FilterValues = string[] | TagConfig[] | FilterDateRange;
+export type FilterValues =
+  | string[]
+  | TagConfig[]
+  | FilterDateRange
+  | FacilityOrganizationRead[]
+  | LocationRead[]
+  | ActivityDefinitionFilterValue[]
+  | UserReadMinimal[];
 
 export type FilterMode = "single" | "multi";
 
@@ -39,6 +52,20 @@ export type DateFilterMeta = {
 };
 export type TagFilterMeta = {
   resource: TagResource;
+};
+export type DepartmentFilterMeta = {
+  facilityId?: string;
+};
+
+export type LocationFilterMeta = {
+  facilityId?: string;
+};
+export type ActivityDefinitionFilterMeta = {
+  facilityId?: string;
+};
+
+export type FacilityUserFilterMeta = {
+  facilityId?: string;
 };
 
 export interface BaseFilterConfig {
@@ -74,10 +101,39 @@ export interface DateFilterConfig extends BaseFilterConfig {
   meta: DateFilterMeta;
 }
 
+export interface DepartmentFilterConfig extends BaseFilterConfig {
+  type: "department";
+  meta: DepartmentFilterMeta;
+}
+
+export interface LocationFilterConfig extends BaseFilterConfig {
+  type: "location";
+  meta: LocationFilterMeta;
+}
+export interface ActivityDefinitionFilterConfig extends BaseFilterConfig {
+  type: "activity_definition";
+  meta: ActivityDefinitionFilterMeta;
+}
+
+export interface CareTeamFilterConfig extends BaseFilterConfig {
+  type: "care_team";
+  meta: FacilityUserFilterMeta;
+}
+
+export interface FacilityUserFilterConfig extends BaseFilterConfig {
+  type: "facility_user";
+  meta: FacilityUserFilterMeta;
+}
+
 export type FilterConfig =
   | CommandFilterConfig
   | TagFilterConfig
-  | DateFilterConfig;
+  | DateFilterConfig
+  | DepartmentFilterConfig
+  | LocationFilterConfig
+  | ActivityDefinitionFilterConfig
+  | CareTeamFilterConfig
+  | FacilityUserFilterConfig;
 
 export interface OperationConfig {
   selectedOperation: Operation | null;
@@ -127,7 +183,15 @@ function defaultGetOperations(_selected: FilterValues) {
 export function createFilterConfig(
   key: string,
   label: string,
-  type: "command" | "tag" | "date",
+  type:
+    | "command"
+    | "tag"
+    | "date"
+    | "department"
+    | "location"
+    | "activity_definition"
+    | "care_team"
+    | "facility_user",
   options: FilterOption[],
   meta?: {
     resource?: TagResource;
@@ -143,6 +207,7 @@ export function createFilterConfig(
     operationKey?: string;
     disableClear?: boolean;
     showColorIndicators?: boolean;
+    facilityId?: string;
   },
 ): FilterConfig {
   const {
@@ -155,6 +220,7 @@ export function createFilterConfig(
     operationKey,
     disableClear,
     showColorIndicators,
+    facilityId,
   } = meta || {};
   const baseConfig: BaseFilterConfig = {
     key,
@@ -184,6 +250,36 @@ export function createFilterConfig(
         type: "tag",
         meta: { resource },
       } as TagFilterConfig;
+    case "department":
+      return {
+        ...baseConfig,
+        type: "department",
+        meta: {},
+      } as DepartmentFilterConfig;
+    case "location":
+      return {
+        ...baseConfig,
+        type: "location",
+        meta: {},
+      } as LocationFilterConfig;
+    case "activity_definition":
+      return {
+        ...baseConfig,
+        type: "activity_definition",
+        meta: { facilityId },
+      } as ActivityDefinitionFilterConfig;
+    case "facility_user":
+      return {
+        ...baseConfig,
+        type: "facility_user",
+        meta: { facilityId },
+      } as FacilityUserFilterConfig;
+    case "care_team":
+      return {
+        ...baseConfig,
+        type: "care_team",
+        meta: { facilityId },
+      } as CareTeamFilterConfig;
     case "command":
       return {
         ...baseConfig,

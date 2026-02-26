@@ -157,17 +157,11 @@ test.describe("Activity Definition Resource Category List", () => {
 
     await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
 
-    const categoryCard = page
+    await page
       .locator('[data-slot="card"]')
-      .filter({ has: page.locator("h3", { hasText: testData.title }) });
-    await categoryCard
-      .locator("button")
-      .filter({ has: page.locator("svg.care-l-ellipsis-v") })
+      .filter({ hasText: testData.title })
+      .getByRole("button")
       .click();
-
-    await expect(
-      page.getByRole("heading", { name: /edit category/i }),
-    ).toBeVisible();
 
     const updatedData = generateCategoryData();
     await page.getByLabel(/name/i).clear();

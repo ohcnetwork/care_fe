@@ -26,76 +26,87 @@ interface DiagnosticReportResultsTableProps {
 export function DiagnosticReportResultsTable({
   observations,
 }: DiagnosticReportResultsTableProps) {
+  const hasReferenceRange = observations.some(
+    (observation) =>
+      observation.reference_range && observation.reference_range.length > 0,
+  );
+  const hasInterpretation = observations.some(
+    (observation) => observation.interpretation?.display,
+  );
+  const hasComponentReferenceRange = observations.some(
+    (observation) =>
+      observation.component &&
+      observation.component.some(
+        (component) =>
+          component.reference_range && component.reference_range.length > 0,
+      ),
+  );
+  const hasComponentInterpretation = observations.some(
+    (observation) =>
+      observation.component &&
+      observation.component.some(
+        (component) => component.interpretation?.display,
+      ),
+  );
+  const showReferenceRange = hasReferenceRange || hasComponentReferenceRange;
+  const showInterpretation = hasInterpretation || hasComponentInterpretation;
+
   const renderReferenceRange = (
     referenceRange: ObservationReferenceRange[],
     value: QuestionnaireSubmitResultValue,
   ) => {
     if (!referenceRange || !referenceRange[0]) return "-";
-    let range = null;
-    if (value.value) {
-      for (const r of referenceRange) {
-        if (r.min && Number(value.value) < r.min) {
-          continue;
-        }
-        if (r.max && Number(value.value) > r.max) {
-          continue;
-        }
-        range = r;
-        break;
+
+    const numericValue = value.value != null ? Number(value.value) : null;
+
+    const isApplicable = (r: ObservationReferenceRange) => {
+      if (numericValue === null || isNaN(numericValue)) return false;
+      if (r.min != null && numericValue < r.min) return false;
+      if (r.max != null && numericValue > r.max) return false;
+      return true;
+    };
+
+    const rows = referenceRange.map((r, i) => {
+      let rangeText = "";
+      if (r.min != null && r.max != null) {
+        rangeText = `${r.min} - ${r.max}`;
+      } else if (r.min != null) {
+        rangeText = `> ${r.min}`;
+      } else if (r.max != null) {
+        rangeText = `< ${r.max}`;
       }
-    }
-    if (!range) return "-";
-    let innerContent = "";
-    if (range.min && range.max) {
-      innerContent = `${range.min} - ${range.max}`;
-    } else if (range.min) {
-      innerContent = `> ${range.min}`;
-    } else if (range.max) {
-      innerContent = `< ${range.max}`;
-    }
+      if (!rangeText && !r.interpretation?.display) return null;
+
+      const label = r.interpretation?.display;
+      const applicable = isApplicable(r);
+
+      return (
+        <span key={i} className={applicable ? "font-bold text-gray-900" : ""}>
+          {label ? `${label}: ` : ""}
+          {rangeText}
+        </span>
+      );
+    });
+
+    const validRows = rows.filter(Boolean);
+    if (!validRows.length) return "-";
+
     return (
-      <div className="flex items-center gap-1 text-gray-500">
-        <span>{innerContent}</span>
+      <div className="flex flex-col items-start gap-0.5 text-gray-500">
+        {validRows}
       </div>
     );
   };
 
-  const parseInterpretationValue = (value: string): Interpretation | string => {
-    if (typeof value === "object") {
-      return value as Interpretation;
-    }
-
-    if (typeof value === "string" && value.startsWith("{")) {
-      try {
-        const jsonString = value.replace(/'/g, '"');
-        return JSON.parse(jsonString) as Interpretation;
-      } catch {
-        return value;
-      }
-    }
-
-    return value;
-  };
-
-  const renderInterpretation = (interpretationValue: string) => {
+  const renderInterpretation = (interpretationValue: Interpretation) => {
     if (!interpretationValue) return "-";
 
-    const parsedInterpretation = parseInterpretationValue(interpretationValue);
-
-    if (typeof parsedInterpretation === "object") {
-      const { display, color = "#000000" } = parsedInterpretation;
-      return (
-        <div className="flex items-center gap-1">
-          <span className="capitalize" style={{ color }}>
-            {display}
-          </span>
-        </div>
-      );
-    }
-
+    const { display, color = "#000000" } = interpretationValue;
     return (
-      <div className="flex items-center gap-1 text-gray-500">
-        <span className="capitalize">{parsedInterpretation}</span>
+      <div className="flex items-center gap-1">
+        <span className="capitalize" style={{ color }}>
+          {display}
+        </span>
       </div>
     );
   };
@@ -124,13 +135,18 @@ export function DiagnosticReportResultsTable({
             )}
           </div>
         </TableCell>
-        <TableCell className="border-r border-b border-gray-300 whitespace-normal wrap-break-word">
-          {component.reference_range &&
-            renderReferenceRange(component.reference_range, component.value)}
-        </TableCell>
-        <TableCell className="border-b border-gray-300 whitespace-normal wrap-break-word">
-          {renderInterpretation(component.interpretation || "")}
-        </TableCell>
+        {showReferenceRange && (
+          <TableCell className="border-r border-b border-gray-300 whitespace-normal wrap-break-word">
+            {component.reference_range &&
+              renderReferenceRange(component.reference_range, component.value)}
+          </TableCell>
+        )}
+        {showInterpretation && (
+          <TableCell className="border-b border-gray-300 whitespace-normal wrap-break-word">
+            {component.interpretation &&
+              renderInterpretation(component.interpretation)}
+          </TableCell>
+        )}
       </TableRow>
     ));
   };
@@ -166,18 +182,23 @@ export function DiagnosticReportResultsTable({
               </div>
             )}
           </TableCell>
-          <TableCell className="whitespace-normal wrap-break-word">
-            {!hasComponents &&
-              renderReferenceRange(
-                observation.reference_range || [],
-                observation.value,
-              )}
-          </TableCell>
-          <TableCell className="whitespace-normal wrap-break-word">
-            {!hasComponents &&
-              observation.interpretation &&
-              renderInterpretation(observation.interpretation)}
-          </TableCell>
+          {showReferenceRange && (
+            <TableCell className="whitespace-normal wrap-break-word">
+              {!hasComponents &&
+                observation.reference_range &&
+                renderReferenceRange(
+                  observation.reference_range,
+                  observation.value,
+                )}
+            </TableCell>
+          )}
+          {showInterpretation && (
+            <TableCell className="whitespace-normal wrap-break-word">
+              {!hasComponents &&
+                observation.interpretation &&
+                renderInterpretation(observation.interpretation)}
+            </TableCell>
+          )}
         </TableRow>
         {hasComponents &&
           observation.component &&
@@ -201,12 +222,16 @@ export function DiagnosticReportResultsTable({
             <TableHead className="font-medium text-sm text-gray-700 w-[25%]">
               {t("result")}
             </TableHead>
-            <TableHead className="font-medium text-sm text-gray-700 w-[25%] whitespace-normal wrap-break-word">
-              {t("reference_range")}
-            </TableHead>
-            <TableHead className="font-medium text-sm text-gray-700 w-[25%] whitespace-normal wrap-break-word">
-              {t("interpretation")}
-            </TableHead>
+            {showReferenceRange && (
+              <TableHead className="font-medium text-sm text-gray-700 w-[25%] whitespace-normal wrap-break-word">
+                {t("reference_range")}
+              </TableHead>
+            )}
+            {showInterpretation && (
+              <TableHead className="font-medium text-sm text-gray-700 w-[25%] whitespace-normal wrap-break-word">
+                {t("interpretation")}
+              </TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>

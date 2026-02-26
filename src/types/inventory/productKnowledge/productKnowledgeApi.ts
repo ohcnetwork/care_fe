@@ -11,7 +11,6 @@ export default {
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<ProductKnowledgeBase>>(),
     defaultQueryParams: {
-      ordering: "-created_date",
       include_instance: true,
     },
   },

@@ -3,22 +3,24 @@ import * as React from "react";
 
 import { Input } from "@/components/ui/input";
 
-function toISOWithTimezone(localVal: string): string {
-  if (!localVal) return "";
+function toISOWithTimezone(localVal: string): string | undefined {
+  if (!localVal) return undefined;
   const localDate = new Date(localVal);
-  if (isNaN(localDate.getTime())) return "";
+  if (isNaN(localDate.getTime())) return undefined;
   return localDate.toISOString();
 }
 
-function toLocalDateTimeString(isoString: string | undefined): string {
-  if (!isoString) return "";
+function toLocalDateTimeString(
+  isoString: string | undefined,
+): string | undefined {
+  if (!isoString) return undefined;
   const date = new Date(isoString);
-  if (isNaN(date.getTime())) return "";
+  if (isNaN(date.getTime())) return undefined;
   return format(date, "yyyy-MM-dd'T'HH:mm");
 }
 
 type DateTimeInputProps = React.ComponentProps<typeof Input> & {
-  onDateChange?: (val: string) => void;
+  onDateChange: (val: string | undefined) => void;
 } & React.InputHTMLAttributes<HTMLInputElement>;
 
 export function DateTimeInput({
@@ -27,7 +29,9 @@ export function DateTimeInput({
   ...props
 }: DateTimeInputProps & React.ComponentProps<"input">) {
   const localValue =
-    !value || typeof value !== "string" ? "" : toLocalDateTimeString(value);
+    !value || typeof value !== "string"
+      ? undefined
+      : toLocalDateTimeString(value);
 
   return (
     <Input
@@ -35,7 +39,7 @@ export function DateTimeInput({
       type="datetime-local"
       value={localValue}
       onChange={(e) => {
-        onDateChange?.(toISOWithTimezone(e.target.value) || "");
+        onDateChange(toISOWithTimezone(e.target.value));
       }}
     />
   );

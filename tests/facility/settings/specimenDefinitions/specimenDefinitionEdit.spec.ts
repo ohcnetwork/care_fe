@@ -174,13 +174,15 @@ test.describe("Specimen Definitions Edit", () => {
     ).toBeVisible();
     await expect(page.getByText(requirement)).toBeVisible();
     await expect(
-      page.getByText(new RegExp(`${retentionTime}\\s+(hours|days)`)),
+      page.getByText(new RegExp(`${retentionTime.toFixed(2)}\\s+(hours|days)`)),
     ).toBeVisible();
     await expect(page.getByText(containerDescription)).toBeVisible();
     await expect(page.getByText(preparationDescription)).toBeVisible();
     await expect(
       page.getByText(
-        new RegExp(`${capacity}\\s+(milligram|gram|milliliter|drop|microgram)`),
+        new RegExp(
+          `${capacity.toFixed(2)}\\s+(milligram|gram|milliliter|drop|microgram)`,
+        ),
       ),
     ).toBeVisible();
     await expect(page.getByText(capOption)).toBeVisible();
