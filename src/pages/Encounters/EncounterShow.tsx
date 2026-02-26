@@ -202,182 +202,177 @@ export const EncounterShow = (props: Props) => {
   }
 
   return (
-    <PLUGIN_Component
-      __name="NurseAssistantProvider"
-      encounter={selectedEncounter}
-      patient={patient}
-      patientId={patientId}
-      selectedEncounterId={selectedEncounterId}
-      facilityId={facilityId}
+    <Page
+      title={t("encounter")}
+      className="block md:px-1 -mt-4"
+      hideTitleOnPage
+      style={
+        {
+          "--encounter-header-offset": canViewAppointmentEncounterHeader
+            ? "3rem"
+            : "0rem",
+        } as React.CSSProperties
+      }
     >
-      <Page
-        title={t("encounter")}
-        className="block md:px-1 -mt-4"
-        hideTitleOnPage
-        style={
-          {
-            "--encounter-header-offset": canViewAppointmentEncounterHeader
-              ? "3rem"
-              : "0rem",
-          } as React.CSSProperties
-        }
-      >
-        {primaryEncounter.appointment && canViewAppointmentEncounterHeader && (
-          <div className="flex items-center justify-center -mt-2 mb-2">
-            <AppointmentEncounterHeader
-              canWritePrimaryEncounter={canWritePrimaryEncounter}
-              appointment={primaryEncounter.appointment}
-              encounter={primaryEncounter}
-            />
-          </div>
-        )}
-
-        <div className="flex flex-col gap-2">
-          <Card className="bg-white shadow-sm border-none rounded-sm p-2 md:p-4 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-            <PatientHeader
-              patient={patient}
-              facilityId={facilityId}
-              className="flex-1 p-0 bg-transparent shadow-none"
-            />
-            {selectedEncounter && (
-              <div className="flex max-md:flex-col items-end justify-center gap-4">
-                <PLUGIN_Component
-                  __name="PatientInfoCardQuickActions"
-                  encounter={selectedEncounter}
-                  className={cn(
-                    buttonVariants({ variant: "primary_gradient" }),
-                    "text-base font-semibold rounded-md w-full",
-                  )}
-                />
-                <PLUGIN_Component
-                  __name="NurseAssistantToggle"
-                  className={cn(
-                    buttonVariants({ variant: "primary_gradient" }),
-                    "text-base font-semibold rounded-md w-full",
-                  )}
-                />
-                <EncounterCommandDialog
-                  encounter={selectedEncounter}
-                  open={actionsOpen}
-                  onOpenChange={setActionsOpen}
-                  trigger={
-                    <Button
-                      variant="primary_gradient"
-                      onClick={() => setActionsOpen(true)}
-                      className="text-base font-semibold rounded-md w-full"
-                    >
-                      {t("encounter_actions")}
-                      <CommandShortcut className="text-white hidden md:inline">
-                        {getShortcutDisplay("open-command-dialog")}
-                      </CommandShortcut>
-                    </Button>
-                  }
-                />
-              </div>
-            )}
-          </Card>
-          <PatientDeceasedInfo patient={patient} />
+      {primaryEncounter.appointment && canViewAppointmentEncounterHeader && (
+        <div className="flex items-center justify-center -mt-2 mb-2">
+          <AppointmentEncounterHeader
+            canWritePrimaryEncounter={canWritePrimaryEncounter}
+            appointment={primaryEncounter.appointment}
+            encounter={primaryEncounter}
+          />
         </div>
-        <div className="flex flex-col gap-4 lg:gap-0 lg:flex-row mt-4">
-          <EncounterHistorySelector />
-          <div className="w-full">
-            <div className="hidden lg:block">
-              {isSelectedEncounterLoading ? (
-                <Skeleton className="h-10 w-md" />
-              ) : (
-                selectedEncounter && (
-                  <div className="flex gap-2 items-center">
-                    <h4 className="font-bold">
-                      {t(
-                        `encounter_class__${selectedEncounter?.encounter_class}`,
-                      )}
-                    </h4>
-                    <div className="text-sm text-gray-700 space-x-2">
-                      {primaryEncounterId !== selectedEncounterId && (
-                        <>
-                          <span>{selectedEncounter?.facility.name}</span>
-                          <span>|</span>
-                        </>
-                      )}
+      )}
 
-                      {selectedEncounter.current_location && (
-                        <>
-                          <span className="inline-flex items-center gap-1">
-                            {(() => {
-                              const LocationIcon =
-                                LocationTypeIcons[
-                                  selectedEncounter.current_location.form
-                                ];
-                              return <LocationIcon className="size-3" />;
-                            })()}
-                            {selectedEncounter.current_location.name}
-                          </span>
-                          <span>|</span>
-                        </>
-                      )}
-
-                      <span className="whitespace-nowrap">
-                        {selectedEncounter.period.start && (
-                          <span>
-                            {format(
-                              new Date(selectedEncounter.period.start!),
-                              "dd MMM",
-                            )}
-                          </span>
-                        )}
-                        {selectedEncounter.period.end &&
-                          selectedEncounter.period.start && (
-                            <span>{" - "}</span>
-                          )}
-                        {selectedEncounter.period.end ? (
-                          <span>
-                            {format(
-                              new Date(selectedEncounter.period.end),
-                              "dd MMM",
-                            )}
-                          </span>
-                        ) : (
-                          <span>
-                            {" - "}
-                            {t("ongoing")}
-                          </span>
-                        )}
-                      </span>
-                    </div>
-
-                    <Badge
-                      variant={
-                        ENCOUNTER_STATUS_COLORS[selectedEncounter.status]
-                      }
-                      size="sm"
-                      className="whitespace-nowrap"
-                    >
-                      {t(`encounter_status__${selectedEncounter.status}`)}
-                    </Badge>
-                  </div>
-                )
-              )}
+      <div className="flex flex-col gap-2">
+        <Card className="bg-white shadow-sm border-none rounded-sm p-2 md:p-4 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+          <PatientHeader
+            patient={patient}
+            facilityId={facilityId}
+            className="flex-1 p-0 bg-transparent shadow-none"
+          />
+          {selectedEncounter && (
+            <div className="flex max-md:flex-col items-end justify-center gap-4">
+              <PLUGIN_Component
+                __name="PatientInfoCardQuickActions"
+                encounter={selectedEncounter}
+                className={cn(
+                  buttonVariants({ variant: "primary_gradient" }),
+                  "text-base font-semibold rounded-md w-full",
+                )}
+              />
+              <PLUGIN_Component
+                __name="NurseAssistantToggle"
+                className={cn(
+                  buttonVariants({ variant: "primary_gradient" }),
+                  "text-base font-semibold rounded-md w-full",
+                )}
+              />
+              <EncounterCommandDialog
+                encounter={selectedEncounter}
+                open={actionsOpen}
+                onOpenChange={setActionsOpen}
+                trigger={
+                  <Button
+                    variant="primary_gradient"
+                    onClick={() => setActionsOpen(true)}
+                    className="text-base font-semibold rounded-md w-full"
+                  >
+                    {t("encounter_actions")}
+                    <CommandShortcut className="text-white hidden md:inline">
+                      {getShortcutDisplay("open-command-dialog")}
+                    </CommandShortcut>
+                  </Button>
+                }
+              />
             </div>
+          )}
+        </Card>
+        <PatientDeceasedInfo patient={patient} />
+      </div>
+      <div className="flex flex-col gap-4 lg:gap-0 lg:flex-row mt-4">
+        <EncounterHistorySelector />
+        <div className="w-full">
+          <div className="hidden lg:block">
+            {isSelectedEncounterLoading ? (
+              <Skeleton className="h-10 w-md" />
+            ) : (
+              selectedEncounter && (
+                <div className="flex gap-2 items-center">
+                  <h4 className="font-bold">
+                    {t(
+                      `encounter_class__${selectedEncounter?.encounter_class}`,
+                    )}
+                  </h4>
+                  <div className="text-sm text-gray-700 space-x-2">
+                    {primaryEncounterId !== selectedEncounterId && (
+                      <>
+                        <span>{selectedEncounter?.facility.name}</span>
+                        <span>|</span>
+                      </>
+                    )}
 
-            <NavTabs
-              showMoreAfterIndex={showMoreAfterIndex}
-              className="@container w-full"
-              tabContentClassName="flex-none overflow-x-auto overflow-y-hidden lg:overflow-y-auto lg:h-[calc(100vh-14rem-var(--encounter-header-offset))]"
-              tabs={tabs}
-              currentTab={props.tab}
-              tabTriggerClassName="max-w-36"
-              onTabChange={(tab) =>
-                navigate(tab, {
-                  query:
-                    primaryEncounterId !== selectedEncounterId
-                      ? { selectedEncounter: selectedEncounterId }
-                      : undefined,
-                })
-              }
-            />
+                    {selectedEncounter.current_location && (
+                      <>
+                        <span className="inline-flex items-center gap-1">
+                          {(() => {
+                            const LocationIcon =
+                              LocationTypeIcons[
+                                selectedEncounter.current_location.form
+                              ];
+                            return <LocationIcon className="size-3" />;
+                          })()}
+                          {selectedEncounter.current_location.name}
+                        </span>
+                        <span>|</span>
+                      </>
+                    )}
+
+                    <span className="whitespace-nowrap">
+                      {selectedEncounter.period.start && (
+                        <span>
+                          {format(
+                            new Date(selectedEncounter.period.start!),
+                            "dd MMM",
+                          )}
+                        </span>
+                      )}
+                      {selectedEncounter.period.end &&
+                        selectedEncounter.period.start && <span>{" - "}</span>}
+                      {selectedEncounter.period.end ? (
+                        <span>
+                          {format(
+                            new Date(selectedEncounter.period.end),
+                            "dd MMM",
+                          )}
+                        </span>
+                      ) : (
+                        <span>
+                          {" - "}
+                          {t("ongoing")}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+
+                  <Badge
+                    variant={ENCOUNTER_STATUS_COLORS[selectedEncounter.status]}
+                    size="sm"
+                    className="whitespace-nowrap"
+                  >
+                    {t(`encounter_status__${selectedEncounter.status}`)}
+                  </Badge>
+                </div>
+              )
+            )}
           </div>
+
+          <NavTabs
+            showMoreAfterIndex={showMoreAfterIndex}
+            className="@container w-full"
+            tabContentClassName="flex-none overflow-x-auto overflow-y-hidden lg:overflow-y-auto lg:h-[calc(100vh-14rem-var(--encounter-header-offset))]"
+            tabs={tabs}
+            currentTab={props.tab}
+            tabTriggerClassName="max-w-36"
+            onTabChange={(tab) =>
+              navigate(tab, {
+                query:
+                  primaryEncounterId !== selectedEncounterId
+                    ? { selectedEncounter: selectedEncounterId }
+                    : undefined,
+              })
+            }
+          />
         </div>
-      </Page>
-    </PLUGIN_Component>
+      </div>
+      <PLUGIN_Component
+        __name="NurseAssistant"
+        encounter={selectedEncounter}
+        patient={patient}
+        patientId={patientId}
+        selectedEncounterId={selectedEncounterId}
+        facilityId={facilityId}
+      />
+    </Page>
   );
 };

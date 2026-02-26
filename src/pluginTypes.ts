@@ -88,20 +88,19 @@ export type NurseAssistantToggleComponentType = React.FC<{
   className?: string;
 }>;
 
-export type NurseAssistantProviderType = React.FC<{
+export type NurseAssistantType = React.FC<{
   encounter?: EncounterRead;
   patient?: PatientRead;
   patientId?: string;
   selectedEncounterId?: string;
   facilityId?: string;
-  children: React.ReactNode;
 }>;
 
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
   Scribe: ScribeComponentType;
-  NurseAssistantProvider: NurseAssistantProviderType;
+  NurseAssistant: NurseAssistantType;
   NurseAssistantToggle: NurseAssistantToggleComponentType;
   PatientHomeActions: PatientHomeActionsComponentType;
   PatientInfoCardQuickActions: PatientInfoCardQuickActionsComponentType;
