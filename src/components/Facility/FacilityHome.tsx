@@ -223,7 +223,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
             <div className="flex justify-end max-sm:flex-col-reverse flex-wrap sm:gap-2">
               {canUpdateFacility && (
-                <div className="flex max-sm:flex-col mt-10 sm:mt-4">
+                <div className="flex gap-1 max-sm:flex-col mt-10 sm:mt-4">
                   <PLUGIN_Component
                     __name="FacilityHomeActions"
                     facility={facilityData}
