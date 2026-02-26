@@ -189,11 +189,8 @@ export function MedicationBillTable({
               >
                 {t("medicine")}
               </TableHead>
-              <TableHead className={TABLE_HEADER_CLASS}>
-                {t("select_lot")}
-              </TableHead>
-              <TableHead className={TABLE_HEADER_CLASS}>
-                {t("quantity")}
+              <TableHead className={TABLE_HEADER_CLASS} colSpan={2}>
+                {t("select_lot")} & {t("quantity")}
               </TableHead>
               <TableHead className={TABLE_HEADER_CLASS}>{t("price")}</TableHead>
               <TableHead className={TABLE_HEADER_CLASS}>

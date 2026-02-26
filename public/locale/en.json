@@ -626,7 +626,7 @@
   "all_discounts_cleared": "All discounts cleared",
   "all_encounters": "All Encounters",
   "all_existing_data_will_be_replaced": "All existing data will be replaced",
-  "all_given": "All Given",
+  "all_given_question": "All Given?",
   "all_items_dispatched_successfully": "All items dispatched successfully",
   "all_organizations": "All Organizations",
   "all_patients": "All Patients",
@@ -848,6 +848,7 @@
   "available_locations": "Available Locations",
   "available_reports": "Available Reports",
   "available_selected": "Available Selected",
+  "available_stock": "Available Stock",
   "available_tags": "Available Tags",
   "available_templates": "Available Templates",
   "available_time_slots": "Available Time Slots",
@@ -3100,6 +3101,7 @@
   "longitude": "Longitude",
   "longitude_invalid": "Longitude must be between -180 and 180",
   "lot": "Lot",
+  "lot_batch": "Lot/Batch",
   "lot_batch_no": "Lot/Batch No.",
   "lot_batch_number": "Lot/Batch Number",
   "lot_number": "Lot Number",
@@ -5017,6 +5019,7 @@
   "search_location": "Search location",
   "search_locations": "Search locations...",
   "search_locations_placeholder": "Search locations...",
+  "search_lot_batch": "Search lot/batch",
   "search_medication": "Search Medication",
   "search_medications": "Search Medications",
   "search_medicine": "Search Medicine",
@@ -6350,5 +6353,8 @@
   "zoom_out": "Zoom Out",
   "℞": "℞",
   "encounter_status_location": "Encounter / Status  / Location",
-  "view_prescription": "View Rx"
+  "view_prescription": "View Rx",
+  "include_all": "Include all",
+  "patient_has_unbilled_prescriptions_count": "This patient has {{ count }} other unbilled prescriptions",
+  "final_amount_is_calculated_after_invoice_generation": "Final amount is calculated after invoice generation"
 }

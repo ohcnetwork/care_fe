@@ -10,7 +10,6 @@ import BedsList from "@/pages/Facility/locations/BedsList";
 import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
 import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
 import { InventoryList } from "@/pages/Facility/services/inventory/InventoryList";
-// import { ReceiveStock } from "@/pages/Facility/services/inventory/ReceiveStock";
 
 import { ExternalPurchasesList } from "@/pages/Facility/services/inventory/externalSupply/requestOrder/ExternalPurchasesList";
 import RequestOrderForm from "@/pages/Facility/services/inventory/externalSupply/requestOrder/RequestOrderForm";
@@ -23,9 +22,8 @@ import { PrintDeliveryOrder } from "@/pages/Facility/services/inventory/external
 import { PrintRequestOrder } from "@/pages/Facility/services/inventory/externalSupply/requestOrder/PrintRequestOrder";
 import { ToDispatch } from "@/pages/Facility/services/inventory/ToDispatch";
 import { ToReceive } from "@/pages/Facility/services/inventory/ToReceive";
-import AllMedicationBillForm from "@/pages/Facility/services/pharmacy/AllMedicationBillForm";
+import BillMedicationsByPrescriptions from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsByPrescriptions";
 import DispensesView from "@/pages/Facility/services/pharmacy/DispensesView";
-import MedicationBillForm from "@/pages/Facility/services/pharmacy/MedicationBillForm";
 import MedicationDispenseHistory from "@/pages/Facility/services/pharmacy/MedicationDispenseHistory";
 import MedicationReturnList from "@/pages/Facility/services/pharmacy/MedicationReturnList";
 import MedicationReturnShow from "@/pages/Facility/services/pharmacy/MedicationReturnShow";
@@ -73,22 +71,19 @@ const getRoutes = (facilityId: string, locationId: string) => ({
   // }) => (
   //   <PrintPharmacyPrescription facilityId={facilityId} patientId={patientId} />
   // ),
-  "/medication_requests/patient/:patientId/bill": ({
-    patientId,
-  }: {
-    patientId: string;
-  }) => <AllMedicationBillForm patientId={patientId} />,
-  "/medication_requests/patient/:patientId/prescription/:prescriptionId/bill":
+  "/medication_requests/patient/:patientId/bill/prescriptions/:prescriptionIds":
     ({
       patientId,
-      prescriptionId,
+      prescriptionIds,
     }: {
       patientId: string;
-      prescriptionId: string;
+      prescriptionIds: string;
     }) => (
-      <MedicationBillForm
+      <BillMedicationsByPrescriptions
+        facilityId={facilityId}
+        locationId={locationId}
         patientId={patientId}
-        prescriptionId={prescriptionId}
+        prescriptionIds={prescriptionIds.split(",")}
       />
     ),
   "/medication_dispense": () => (

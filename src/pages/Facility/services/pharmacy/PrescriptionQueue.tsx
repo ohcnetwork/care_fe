@@ -342,7 +342,7 @@ export default function PrescriptionQueue({
               </Button>
               <Button variant="outline_primary" asChild>
                 <Link
-                  href={`/medication_requests/patient/${qParams.patient_external_id}/bill?prescriptions=${selectedPrescriptionIds.join(",")}`}
+                  href={`/medication_requests/patient/${qParams.patient_external_id}/bill/prescriptions/${selectedPrescriptionIds.join(",")}`}
                   className={
                     selectedPrescriptionIds.length === 0
                       ? "pointer-events-none opacity-50"
@@ -418,7 +418,7 @@ export default function PrescriptionQueue({
                     <span className="underline decoration-1 underline-offset-2 font-semibold">
                       {item.encounter.patient.name}
                     </span>
-                    <div className="text-sm font-medium text-gray-700">
+                    <div className="text-sm font-medium text-gray-700 whitespace-pre-wrap">
                       <span>{formatName(item.prescribed_by)}</span>
                       <span> · </span>
                       <span>{formatDateTime(item.created_date)}</span>

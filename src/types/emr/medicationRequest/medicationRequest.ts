@@ -3,7 +3,6 @@ import {
   PrescriptionCreate,
   PrescriptionRead,
 } from "@/types/emr/prescription/prescription";
-import { InventoryRead } from "@/types/inventory/product/inventory";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { UserReadMinimal } from "@/types/user/user";
 import { add, divide, isZero, multiply, round, roundUp } from "@/Utils/decimal";
@@ -279,7 +278,6 @@ export interface MedicationRequestRead {
   updated_by: UserReadMinimal;
   authored_on: string;
   requested_product?: ProductKnowledgeBase;
-  inventory_items_internal?: InventoryRead[];
   dispense_status?: MedicationRequestDispenseStatus;
   requester?: UserReadMinimal;
   prescription?: PrescriptionRead;
