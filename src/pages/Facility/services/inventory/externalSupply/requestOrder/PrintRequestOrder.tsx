@@ -81,15 +81,12 @@ const RequestOrderContent = ({
             rows={supplyRequests.map((request) => {
               const dispatched =
                 dispatchedQuantities[request.item.id] || new Decimal(0);
-              const substractedQuantity = subtract(
-                request.quantity,
-                dispatched,
-              );
-              const remaining = round(max(0, substractedQuantity));
+              const subtractedQuantity = subtract(request.quantity, dispatched);
+              const remaining = round(max(0, subtractedQuantity));
 
-              const remainingText = isNegative(substractedQuantity)
+              const remainingText = isNegative(subtractedQuantity)
                 ? `${remaining} (${t("extra_supplied_quantity", {
-                    quantity: round(abs(substractedQuantity)),
+                    quantity: round(abs(subtractedQuantity)),
                   })})`
                 : remaining;
 
