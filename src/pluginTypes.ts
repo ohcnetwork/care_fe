@@ -90,6 +90,10 @@ export type NurseAssistantToggleComponentType = React.FC<{
 
 export type NurseAssistantProviderType = React.FC<{
   encounter?: EncounterRead;
+  patient?: PatientRead;
+  patientId?: string;
+  selectedEncounterId?: string;
+  facilityId?: string;
   children: React.ReactNode;
 }>;
 

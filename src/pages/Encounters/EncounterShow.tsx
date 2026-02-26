@@ -205,6 +205,10 @@ export const EncounterShow = (props: Props) => {
     <PLUGIN_Component
       __name="NurseAssistantProvider"
       encounter={selectedEncounter}
+      patient={patient}
+      patientId={patientId}
+      selectedEncounterId={selectedEncounterId}
+      facilityId={facilityId}
     >
       <Page
         title={t("encounter")}
