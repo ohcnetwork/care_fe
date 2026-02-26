@@ -123,9 +123,8 @@ export default function TemplateBuilder({
 
   const availableContexts = schema?.contexts ?? {};
   const reportTypes = schema?.report_types ?? {};
-  const supportedContexts = selectedTemplateType
-    ? (reportTypes[selectedTemplateType]?.supported_contexts ?? null)
-    : null;
+  const supportedContexts =
+    reportTypes[selectedTemplateType]?.supported_contexts ?? null;
 
   const { data: template } = useQuery({
     queryKey: ["template", slug],
@@ -415,7 +414,7 @@ export default function TemplateBuilder({
                 <FormItem>
                   <FormLabel>
                     {t("template_name")}
-                    <span className="text-destructive ml-1">*</span>
+                    <span className="text-danger-500 ml-1">*</span>
                   </FormLabel>
                   <FormControl>
                     <Input {...field} placeholder={t("enter_template_name")} />
@@ -432,7 +431,7 @@ export default function TemplateBuilder({
                 <FormItem>
                   <FormLabel>
                     {t("slug")}
-                    <span className="text-destructive ml-1">*</span>
+                    <span className="text-danger-500 ml-1">*</span>
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -453,7 +452,7 @@ export default function TemplateBuilder({
                 <FormItem>
                   <FormLabel>
                     {t("status")}
-                    <span className="text-destructive ml-1">*</span>
+                    <span className="text-danger-500 ml-1">*</span>
                   </FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
@@ -481,7 +480,7 @@ export default function TemplateBuilder({
                 <FormItem>
                   <FormLabel>
                     {t("default_format")}
-                    <span className="text-destructive ml-1">*</span>
+                    <span className="text-danger-500 ml-1">*</span>
                   </FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
@@ -509,7 +508,7 @@ export default function TemplateBuilder({
                 <FormItem>
                   <FormLabel>
                     {t("report_type")}
-                    <span className="text-destructive ml-1">*</span>
+                    <span className="text-danger-500 ml-1">*</span>
                   </FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
@@ -554,7 +553,7 @@ export default function TemplateBuilder({
               <CardHeader>
                 <CardTitle className="text-lg">
                   {t("select_context")}
-                  <span className="text-destructive ml-1">*</span>
+                  <span className="text-danger-500 ml-1">*</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
