@@ -47,7 +47,6 @@ import { formatName } from "@/Utils/utils";
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
 import AddMultipleChargeItemsSheet from "@/pages/Facility/services/serviceRequests/components/AddMultipleChargeItemsSheet";
 import { AccountRead } from "@/types/billing/account/Account";
-import encounterApi from "@/types/emr/encounter/encounterApi";
 import { LocationAssociationRead } from "@/types/location/association";
 import { differenceInDays, differenceInHours, format } from "date-fns";
 import ChargeItemActionsMenu from "./ChargeItemActions";
@@ -212,16 +211,7 @@ export function BedChargeItemsTable({
   const [selectedChargeItem, setSelectedChargeItem] =
     useState<ChargeItemRead | null>(null);
 
-  const { data: encounter, isLoading: isEncounterLoading } = useQuery({
-    queryKey: ["encounter", encounterId],
-    queryFn: query(encounterApi.get, {
-      pathParams: { id: encounterId || "" },
-      queryParams: facilityId ? { facility: facilityId } : {},
-    }),
-    enabled: !!encounterId,
-  });
-
-  const locationHistory = encounter?.location_history || [];
+  const locationHistory = account.primary_encounter?.location_history || [];
 
   const { data: chargeItems, isLoading } = useQuery({
     queryKey: [
@@ -347,9 +337,9 @@ export function BedChargeItemsTable({
           </SelectContent>
         </Select>
       </div>
-      {isLoading || isEncounterLoading ? (
+      {isLoading ? (
         <TableSkeleton count={3} />
-      ) : encounterId == undefined || !encounterId || !encounter ? (
+      ) : !encounterId ? (
         <div className="rounded-md overflow-x-auto border-2 border-white shadow-md">
           <div className="text-center text-gray-500 py-4">
             {t("no_encounter_associated")}
