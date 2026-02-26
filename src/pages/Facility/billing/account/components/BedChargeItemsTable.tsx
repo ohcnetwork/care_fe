@@ -193,7 +193,7 @@ export function BedChargeItemsTable({
   account,
 }: BedChargeItemsTableProps) {
   const { t } = useTranslation();
-  const encounterId = account.primary_encounter.id;
+  const encounterId = account.primary_encounter?.id;
   const accountId = account.id;
 
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
