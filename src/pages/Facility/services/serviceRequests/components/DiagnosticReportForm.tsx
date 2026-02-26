@@ -45,6 +45,11 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
+import {
+  BatchRequestBody,
+  BatchRequestResponse,
+} from "@/types/base/batch/batch";
+import batchApi from "@/types/base/batch/batchApi";
 import { Code } from "@/types/base/code/code";
 import {
   DIAGNOSTIC_REPORT_STATUS_COLORS,
@@ -213,48 +218,23 @@ export function DiagnosticReportForm({
     }
   }, [fullReport]);
 
-  // Upserting observations for a diagnostic report
-  const { mutate: upsertObservations, isPending: isUpsertingObservations } =
+  // Atomic batch mutation for saving observations and diagnostic report together
+  const { mutate: saveDiagnosticResults, isPending: isSavingResults } =
     useMutation({
-      mutationFn: mutate(observationApi.upsertObservations, {
-        pathParams: {
-          patient_external_id: patientId,
-          external_id: latestReport?.id || "",
-        },
-      }),
-      onSuccess: () => {
-        toast.success("Test results saved successfully");
+      mutationFn: mutate(batchApi.batchRequest),
+      onSuccess: (data: BatchRequestResponse) => {
+        const hasFailure = data.results.some((r) => r.status_code >= 400);
+        if (hasFailure) {
+          toast.error(t("failed_to_save_diagnostic_report"));
+        } else {
+          toast.success(t("diagnostic_report_updated_successfully"));
+        }
         queryClient.invalidateQueries({
           queryKey: ["serviceRequest", serviceRequestId],
         });
         queryClient.invalidateQueries({
           queryKey: ["diagnosticReport", latestReport?.id],
         });
-      },
-      onError: (err: any) => {
-        toast.error(
-          `Failed to save test results: ${err.message || "Unknown error"}`,
-        );
-      },
-    });
-
-  const { mutate: updateDiagnosticReport, isPending: isUpdatingReport } =
-    useMutation({
-      mutationFn: mutate(diagnosticReportApi.updateDiagnosticReport, {
-        pathParams: {
-          patient_external_id: patientId,
-          external_id: latestReport?.id || "",
-        },
-      }),
-      onSuccess: () => {
-        toast.success(t("conclusion_updated_successfully"));
-        queryClient.invalidateQueries({
-          queryKey: ["diagnosticReport", latestReport?.id],
-        });
-        setIsExpanded(false);
-      },
-      onError: () => {
-        toast.success(t("failed_to_update_conclusion"));
       },
     });
 
@@ -645,21 +625,40 @@ export function DiagnosticReportForm({
         .filter((obs): obs is ObservationUpsertRequest => obs !== null);
 
       if (fullReport) {
-        // Upsert observations
+        const requests: BatchRequestBody["requests"] = [];
+
+        // Request 1: Upsert observations (if any)
         if (formattedObservations.length > 0) {
-          upsertObservations({
-            observations: formattedObservations,
+          const observationUrl = observationApi.upsertObservations.path
+            .replace("{patient_external_id}", patientId)
+            .replace("{external_id}", fullReport.id);
+          requests.push({
+            url: observationUrl,
+            method: observationApi.upsertObservations.method,
+            reference_id: "upsert-observations",
+            body: { observations: formattedObservations },
           });
         }
 
-        updateDiagnosticReport({
-          id: fullReport.id,
-          status: fullReport.status,
-          category: fullReport.category,
-          code: fullReport.code,
-          note: fullReport.note,
-          conclusion,
+        // Request 2: Update diagnostic report (conclusion, status, etc.)
+        const reportUrl = diagnosticReportApi.updateDiagnosticReport.path
+          .replace("{patient_external_id}", patientId)
+          .replace("{external_id}", fullReport.id);
+        requests.push({
+          url: reportUrl,
+          method: diagnosticReportApi.updateDiagnosticReport.method,
+          reference_id: "update-diagnostic-report",
+          body: {
+            id: fullReport.id,
+            status: fullReport.status,
+            category: fullReport.category,
+            code: fullReport.code,
+            note: fullReport.note,
+            conclusion,
+          },
         });
+
+        saveDiagnosticResults({ requests });
       }
     } catch (_error) {
       toast.error(t("error_validating_form"));
@@ -807,8 +806,7 @@ export function DiagnosticReportForm({
     );
   }
 
-  const isSubmitting =
-    isCreatingReport || isUpsertingObservations || isUpdatingReport;
+  const isSubmitting = isCreatingReport || isSavingResults;
 
   // Show loading state while fetching the report
   if (hasReport && isLoadingReport) {
