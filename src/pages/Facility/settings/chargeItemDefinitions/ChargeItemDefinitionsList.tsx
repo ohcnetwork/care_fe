@@ -48,6 +48,8 @@ export function ChargeItemDefinitionsList({
         createItemLabel={t("add_definition")}
         createItemIcon="l-plus"
         showMonetaryComponentsOption
+        emptyStateTitle={t("no_charge_item_definition_categories_found")}
+        emptyStateDescription={t("create_your_first_category")}
         itemSearchConfig={{
           listItems: {
             queryFn: chargeItemDefinitionApi.listChargeItemDefinition,

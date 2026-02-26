@@ -286,6 +286,8 @@ interface ResourceCategoryListProps<
   showMonetaryComponentsOption?: boolean;
   children?: React.ReactNode;
   itemSearchConfig?: ItemSearchConfig<T>;
+  emptyStateTitle?: string;
+  emptyStateDescription?: string;
 }
 
 export function ResourceCategoryList<
@@ -304,6 +306,8 @@ export function ResourceCategoryList<
   showMonetaryComponentsOption = false,
   children,
   itemSearchConfig,
+  emptyStateTitle,
+  emptyStateDescription,
 }: ResourceCategoryListProps<T>) {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
@@ -474,12 +478,14 @@ export function ResourceCategoryList<
             <CareIcon icon="l-folder-open" className="text-primary size-6" />
           }
           title={
-            qParams.searchCategory ? t("no_results") : t("no_categories_found")
+            qParams.searchCategory
+              ? t("no_results")
+              : (emptyStateTitle ?? t("no_categories_found"))
           }
           description={
             qParams.searchCategory
               ? t("try_different_search_terms")
-              : t("create_your_first_category")
+              : (emptyStateDescription ?? t("create_your_first_category"))
           }
         />
       ) : (
