@@ -69,6 +69,7 @@ import {
   Onset,
 } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
+import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,
   ResponseValue,

@@ -62,6 +62,7 @@ import {
   type AllergyVerificationStatus,
 } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
+import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import type {
   QuestionnaireResponse,
   ResponseValue,

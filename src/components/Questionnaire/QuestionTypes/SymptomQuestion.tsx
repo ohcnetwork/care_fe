@@ -67,6 +67,7 @@ import {
   SymptomRequest,
 } from "@/types/emr/symptom/symptom";
 import symptomApi from "@/types/emr/symptom/symptomApi";
+import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,
   ResponseValue,
