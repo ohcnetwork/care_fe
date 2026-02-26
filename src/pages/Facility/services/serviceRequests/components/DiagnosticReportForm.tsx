@@ -228,6 +228,7 @@ export function DiagnosticReportForm({
           toast.error(t("failed_to_save_diagnostic_report"));
         } else {
           toast.success(t("diagnostic_report_updated_successfully"));
+          setIsExpanded(false);
         }
         queryClient.invalidateQueries({
           queryKey: ["serviceRequest", serviceRequestId],
