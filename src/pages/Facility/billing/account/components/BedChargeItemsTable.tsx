@@ -46,6 +46,7 @@ import queryClient from "@/Utils/request/queryClient";
 import { formatName } from "@/Utils/utils";
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
 import AddMultipleChargeItemsSheet from "@/pages/Facility/services/serviceRequests/components/AddMultipleChargeItemsSheet";
+import { AccountRead } from "@/types/billing/account/Account";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { LocationAssociationRead } from "@/types/location/association";
 import { differenceInDays, differenceInHours, format } from "date-fns";
@@ -184,16 +185,16 @@ function groupChargeItemsByLocation(
 
 export interface BedChargeItemsTableProps {
   facilityId: string;
-  accountId: string;
-  encounterId?: string;
+  account: AccountRead;
 }
 
 export function BedChargeItemsTable({
   facilityId,
-  accountId,
-  encounterId,
+  account,
 }: BedChargeItemsTableProps) {
   const { t } = useTranslation();
+  const encounterId = account.primary_encounter.id;
+  const accountId = account.id;
 
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
     {},

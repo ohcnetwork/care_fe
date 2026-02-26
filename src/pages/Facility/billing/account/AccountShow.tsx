@@ -318,11 +318,7 @@ export function AccountShow({
     bed_charge_items: {
       label: t("bed_charge_items"),
       component: (
-        <BedChargeItemsTable
-          facilityId={facilityId}
-          accountId={accountId}
-          encounterId={account?.primary_encounter?.id}
-        />
+        <BedChargeItemsTable facilityId={facilityId} account={account} />
       ),
       shortcutId: "switch-to-bed-charge-items-tab",
     },
