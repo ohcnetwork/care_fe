@@ -172,7 +172,7 @@ export function ServiceRequestDetails({
                 <div className="text-sm text-gray-600 mb-1">
                   {t("patient_instruction")}
                 </div>
-                <div className="text-sm text-gray-950 ">
+                <div className="text-sm text-gray-950">
                   {request.patient_instruction}
                 </div>
               </div>
