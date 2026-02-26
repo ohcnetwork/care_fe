@@ -808,7 +808,7 @@ export function QuestionnaireForm({
             // Normalize error messages for i18n
             const normalizedErrors = validationErrors.map((error) => ({
               ...error,
-              error: t(error.error),
+              error: error.error ? t(error.error) : t("validation_failed"),
             }));
 
             errors.push(...normalizedErrors);
