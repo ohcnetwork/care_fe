@@ -45,10 +45,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
-import {
-  BatchRequestBody,
-  BatchRequestResponse,
-} from "@/types/base/batch/batch";
+import { BatchRequestBody } from "@/types/base/batch/batch";
 import batchApi from "@/types/base/batch/batchApi";
 import { Code } from "@/types/base/code/code";
 import {
@@ -222,14 +219,9 @@ export function DiagnosticReportForm({
   const { mutate: saveDiagnosticResults, isPending: isSavingResults } =
     useMutation({
       mutationFn: mutate(batchApi.batchRequest),
-      onSuccess: (data: BatchRequestResponse) => {
-        const hasFailure = data.results.some((r) => r.status_code >= 400);
-        if (hasFailure) {
-          toast.error(t("failed_to_save_diagnostic_report"));
-        } else {
-          toast.success(t("diagnostic_report_updated_successfully"));
-          setIsExpanded(false);
-        }
+      onSuccess: () => {
+        toast.success(t("diagnostic_report_updated_successfully"));
+        setIsExpanded(false);
         queryClient.invalidateQueries({
           queryKey: ["serviceRequest", serviceRequestId],
         });
