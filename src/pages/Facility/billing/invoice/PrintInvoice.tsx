@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { QRCodeSVG } from "qrcode.react";
@@ -124,9 +123,10 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
   const getWatermark = () => {
     if (invoice.status === InvoiceStatus.cancelled) {
       return { text: t("cancelled"), color: "red" as const };
-    }
-    if (invoice.status === InvoiceStatus.entered_in_error) {
+    } else if (invoice.status === InvoiceStatus.entered_in_error) {
       return { text: t("entered_in_error"), color: "red" as const };
+    } else if (invoice.status === InvoiceStatus.draft) {
+      return { text: t("draft"), color: "gray" as const };
     }
     return undefined;
   };
@@ -138,42 +138,13 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
       autoPrint={{
         enabled: !isLoadingDispenses,
       }}
+      facility={facility}
     >
       <DisablingCover
         disabled={isLoadingDispenses}
         message={t("loading_medication_details")}
       >
-        <div className="max-w-5xl mx-auto">
-          {/* Header with Facility Name and Logo */}
-          <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
-            <div className="flex items-start gap-4">
-              <div className="text-left">
-                <h1 className="text-2xl font-medium">{facility.name}</h1>
-                {facility.address && (
-                  <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
-                    {facility.address}
-                    {facility.phone_number && (
-                      <p className="text-gray-500 text-sm">
-                        {t("phone")}: {facility.phone_number}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-              <QRCodeSVG
-                value={invoice.account.patient.id}
-                size={50}
-                level="Q"
-                marginSize={0}
-              />
-            </div>
-            <img
-              src={careConfig.mainLogo?.dark}
-              alt="Logo"
-              className="h-10 w-auto object-contain mb-2 sm:mb-0 text-end"
-            />
-          </div>
-
+        <div>
           {/* Invoice Title */}
           <div className="mb-4 flex justify-between items-center">
             <div className="flex items-start gap-2">
@@ -182,33 +153,31 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                 {invoice.number}
               </div>
             </div>
-            <div className="text-right flex">
-              <div className="font-medium text-gray-700 text-sm">
+            <div className="flex items-center gap-1 text-sm">
+              <span className="font-medium text-gray-700">
                 {t("issue_date")}:
-              </div>
-              <p className="font-medium text-gray-950 text-sm">
+              </span>
+              <span className="font-medium text-gray-950">
                 {invoice.issue_date
                   ? format(new Date(invoice.issue_date), "dd MMM, yyyy h:mm a")
                   : "-"}
-              </p>
+              </span>
             </div>
           </div>
 
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-start">
               <div>
                 <div className="font-medium text-gray-700 text-sm">
                   {t("bill_to")}:
                 </div>
-                <div>
-                  <p className="font-semibold text-base">
-                    {invoice.account.patient.name}
-                    <span className="text-gray-600 ml-2 font-normal">
-                      ({t(`GENDER__${invoice.account.patient.gender}`)},{" "}
-                      {formatPatientAge(invoice.account.patient, true)})
-                    </span>
-                  </p>
-                </div>
+                <p className="font-semibold text-base">
+                  {invoice.account.patient.name}
+                  <span className="text-gray-600 ml-2 font-normal">
+                    ({t(`GENDER__${invoice.account.patient.gender}`)},{" "}
+                    {formatPatientAge(invoice.account.patient, true)})
+                  </span>
+                </p>
                 {verifiedPatient &&
                   "instance_identifiers" in verifiedPatient &&
                   verifiedPatient.instance_identifiers
@@ -228,19 +197,23 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                         </span>
                       </div>
                     ))}
-              </div>
-              <div>
-                <div className="flex gap-1 font-medium text-gray-700 text-sm ml-2">
-                  {t("address")}:{" "}
-                  <p className="font-medium text-gray-700 text-sm whitespace-pre-wrap ml-2">
+                <div className="flex gap-1 font-medium text-gray-700 text-sm mt-1">
+                  <span>{t("address")}:</span>
+                  <span className="whitespace-pre-wrap">
                     {formatPatientAddress(invoice.account.patient.address) || (
                       <span className="text-gray-500">
                         {t("no_address_provided")}
                       </span>
                     )}
-                  </p>
+                  </span>
                 </div>
               </div>
+              <QRCodeSVG
+                value={invoice.account.patient.id}
+                size={50}
+                level="Q"
+                marginSize={0}
+              />
             </div>
 
             {/* Items Table */}
@@ -593,6 +566,95 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                   <div className="flex w-64 justify-between font-semibold">
                     <span>{t("total_received")}</span>
                     <MonetaryDisplay amount={invoice.total_payments} />
+                  </div>
+                  <div className="p-1 border-b-2 border-dashed border-gray-200 w-full" />
+                </div>
+              </>
+            )}
+
+            {/* Credit Notes Section */}
+            {invoice.credit_notes?.filter(
+              (p) => p.status === PaymentReconciliationStatus.active,
+            ).length > 0 && (
+              <>
+                <div className="border border-gray-300 rounded-md space-y-2">
+                  <div className="mt-2 px-3 font-medium">
+                    {t("credit_notes_issued_against_this_invoice")}
+                  </div>
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-b border-gray-200">
+                        <TableHead className={tableHeadClass}>#</TableHead>
+                        <TableHead className={cn(tableHeadClass, "text-left")}>
+                          {t("date_and_time")}
+                        </TableHead>
+                        <TableHead className={cn(tableHeadClass, "text-left")}>
+                          {t("payment_method")}
+                        </TableHead>
+                        <TableHead className={cn(tableHeadClass, "text-left")}>
+                          {t("reference")}
+                        </TableHead>
+                        <TableHead className="font-medium text-right">
+                          {t("amount")} ({getCurrencySymbol()})
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {invoice.credit_notes
+                        .filter(
+                          (p) =>
+                            p.status === PaymentReconciliationStatus.active,
+                        )
+                        .map((creditNote, index) => (
+                          <TableRow
+                            key={creditNote.id}
+                            className="border-b border-gray-200"
+                          >
+                            <TableCell
+                              className={cn(tableCellClass, "text-center")}
+                            >
+                              {index + 1}
+                            </TableCell>
+                            <TableCell
+                              className={cn(tableCellClass, "font-medium")}
+                            >
+                              {creditNote.payment_datetime
+                                ? format(
+                                    new Date(creditNote.payment_datetime),
+                                    "d MMM yyyy, hh:mm a",
+                                  )
+                                : "-"}
+                            </TableCell>
+                            <TableCell
+                              className={cn(tableCellClass, "text-left")}
+                            >
+                              {
+                                PAYMENT_RECONCILIATION_METHOD_MAP[
+                                  creditNote.method
+                                ]
+                              }
+                            </TableCell>
+                            <TableCell className={tableCellClass}>
+                              {creditNote.reference_number}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <MonetaryDisplay
+                                amount={creditNote.amount}
+                                hideCurrency
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                <div className="flex flex-col items-end space-y-2 text-gray-950 font-normal text-sm mb-4">
+                  <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
+
+                  {/* Total Credit Notes */}
+                  <div className="flex w-64 justify-between font-semibold">
+                    <span>{t("total_credit_notes")}</span>
+                    <MonetaryDisplay amount={invoice.total_credit_notes} />
                   </div>
                   <div className="p-1 border-b-2 border-dashed border-gray-200 w-full" />
                 </div>

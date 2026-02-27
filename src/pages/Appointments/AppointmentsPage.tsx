@@ -104,6 +104,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAuthUser from "@/hooks/useAuthUser";
+import { renderTokenNumber } from "@/types/tokens/token/token";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import careConfig from "@careConfig";
 import { PractitionerSelector } from "./components/PractitionerSelector";
@@ -740,17 +741,23 @@ function AppointmentCard({
             )}
           </p>
         </div>
-
-        {appointment.token && (
-          <div className="flex">
-            <div className="bg-gray-100 px-2 py-1 ml-px text-center rounded-md">
-              <p className="text-[10px] uppercase">{t("token")}</p>
-              <p className="font-bold text-2xl uppercase">
-                {appointment.token?.number ?? "--"}
-              </p>
+        <div className="flex flex-col gap-2">
+          {patient.deceased_datetime && (
+            <Badge variant="destructive" className="h-5 justify-center text-xs">
+              {t("deceased")}
+            </Badge>
+          )}
+          {appointment.token && (
+            <div className="flex">
+              <div className="bg-gray-100 px-2 py-1 ml-px text-center rounded-md">
+                <p className="text-[10px] uppercase">{t("token")}</p>
+                <p className="font-bold text-lg uppercase">
+                  {renderTokenNumber(appointment.token)}
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       <div className="flex flex-wrap gap-1">
         {appointment.tags.map((tag) => (
@@ -943,7 +950,7 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
 
   return (
     <>
-      <TableCell className="py-6 group-hover:bg-gray-100 bg-white rounded-l-lg">
+      <TableCell className="flex flex-row gap-2 py-6 group-hover:bg-gray-100 bg-white rounded-l-lg">
         <span className="flex flex-row items-center gap-2">
           <CareIcon
             icon="l-draggabledots"
@@ -957,6 +964,14 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
             </span>
           </span>
         </span>
+        {patient.deceased_datetime && (
+          <Badge
+            variant="destructive"
+            className="h-6 justify-center text-xs mt-1"
+          >
+            {t("deceased")}
+          </Badge>
+        )}
       </TableCell>
       {/* TODO: Replace with relevant information */}
       {appointment.resource_type === SchedulableResourceType.Practitioner && (
@@ -968,7 +983,7 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
         {t(appointment.status)}
       </TableCell>
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white rounded-r-lg">
-        {appointment.token?.number ?? "--"}
+        {appointment.token ? renderTokenNumber(appointment.token) : "--"}
       </TableCell>
     </>
   );

@@ -29,7 +29,7 @@ export const Account = () => {
   } = useEncounter();
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["defaultAccount", facilityId, patientId],
+    queryKey: ["defaultAccount", facilityId, patientId, encounter?.id],
     queryFn: query(accountApi.defaultAccount, {
       pathParams: { facilityId: facilityId || "" },
       body: {
@@ -37,6 +37,7 @@ export const Account = () => {
         facility: facilityId || "",
         encounter: encounter?.id || "",
       },
+      silent: true,
     }),
     enabled: !!facilityId && !!encounter?.id,
   });
@@ -102,9 +103,7 @@ export const Account = () => {
         {!account ? (
           <EmptyState message={t("no_account_found")} />
         ) : (
-          <Link
-            href={`/facility/${facilityId}/billing/account/${account.id}?encounterId=${encounter.id}`}
-          >
+          <Link href={`/facility/${facilityId}/billing/account/${account.id}`}>
             <div
               className={cn(
                 "flex flex-row bg-gray-100 rounded-md p-2 border border-gray-200 justify-between",
