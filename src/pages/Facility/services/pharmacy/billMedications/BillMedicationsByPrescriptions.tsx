@@ -82,8 +82,6 @@ export default function BillMedicationsByPrescriptions({
     return <Loading />;
   }
 
-  console.log(form.getValues());
-
   return (
     <Page title={t("bill_medications")} hideTitleOnPage={true}>
       <Form {...form}>
