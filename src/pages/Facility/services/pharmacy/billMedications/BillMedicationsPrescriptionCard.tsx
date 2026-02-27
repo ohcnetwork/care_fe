@@ -16,13 +16,19 @@ import {
   InventoryItemsSelector,
   LotSelection,
 } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
-import { billMedicationsByPrescriptionsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
+import {
+  BillMedicationLineItemSchemaType,
+  billMedicationsByPrescriptionsFormSchema,
+} from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   getBasePrice,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
-import { displayMedicationName } from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  displayMedicationName,
+  MedicationRequestDispenseStatus,
+} from "@/types/emr/medicationRequest/medicationRequest";
 import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import { getLocationPath } from "@/types/location/utils";
 import { round } from "@/Utils/decimal";
@@ -233,13 +239,12 @@ interface MedicineLineItemProps {
 const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
   const { facilityId } = useCurrentFacility();
   const { locationId } = useCurrentLocation();
-  const { t } = useTranslation();
 
+  const item = form.watch(name);
   const isSelected = form.watch(`${name}.isSelected`);
   const medication = form.watch(`${name}.medication`);
   const productKnowledge = form.watch(`${name}.productKnowledge`);
   const substitution = form.watch(`${name}.substitution`);
-  const hasNoProductKnowledge = !productKnowledge;
   const lots = form.watch(`${name}.lots`);
 
   const disabled = !isSelected;
@@ -268,63 +273,7 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
 
       {/* Medicine */}
       <div className="bg-white py-2 px-3 flex justify-between items-center">
-        <div className="flex flex-col gap-1">
-          <span className="font-semibold text-gray-950">
-            {medication ? displayMedicationName(medication) : "-"}
-          </span>
-          {(substitution || hasNoProductKnowledge) && (
-            <div className="text-gray-700 font-semibold italic line-through text-sm">
-              {hasNoProductKnowledge
-                ? medication?.medication?.display
-                : productKnowledge?.name}
-            </div>
-          )}
-          <div className="whitespace-nowrap">
-            <div className="text-sm text-gray-700 font-medium flex items-center gap-1">
-              {formatDosage(medication?.dosage_instruction?.[0])} × (
-              {formatFrequencyShort(medication?.dosage_instruction?.[0])}) ×{" "}
-              {formatDuration(medication?.dosage_instruction?.[0], {
-                short: true,
-              }) || "-"}{" "}
-              ={" "}
-              <span className="capitalize">
-                {formatTotalUnits(medication?.dosage_instruction, t("units"))}
-              </span>
-            </div>
-          </div>
-          <div className="flex gap-1">
-            {medication?.status && (
-              <Badge variant="yellow" className="text-xs">
-                {t(`medication_status__${medication?.status}`)}
-              </Badge>
-            )}
-            {medication?.dispense_status && (
-              <Badge variant="cyan" className="text-xs">
-                {t(
-                  `medication_dispense_status__${medication?.dispense_status}`,
-                )}
-              </Badge>
-            )}
-            {(substitution || hasNoProductKnowledge) && (
-              <Badge variant="orange">{t("substituted")}</Badge>
-            )}
-          </div>
-          {medication?.note && (
-            <span className="text-sm text-gray-700">{`${t("note")}: ${medication?.note}`}</span>
-          )}
-        </div>
-        <div className="flex gap-3">
-          <Button variant="outline" size="icon">
-            <BadgeInfo />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="text-sm font-semibold text-gray-950 px-6"
-          >
-            {t("sub")}
-          </Button>
-        </div>
+        <MedicineLineItemMedication item={item} />
       </div>
 
       {/* Select Lot */}
@@ -439,6 +388,86 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
           }}
         >
           <DotsVerticalIcon />
+        </Button>
+      </div>
+    </>
+  );
+};
+
+const MedicineLineItemMedication = ({
+  item,
+}: {
+  item: BillMedicationLineItemSchemaType;
+}) => {
+  const { t } = useTranslation();
+
+  const medication = item.medication;
+  const productKnowledge = item.productKnowledge;
+  const substitution = item.substitution;
+
+  const effectiveProductKnowledge =
+    substitution?.substitutedProductKnowledge || productKnowledge;
+
+  return (
+    <>
+      <div className="flex flex-col gap-1">
+        <div className="flex flex-col">
+          <span className="font-semibold text-gray-950">
+            {effectiveProductKnowledge?.name ||
+              (medication && displayMedicationName(medication)) ||
+              t("unknown_medication")}
+          </span>
+          {(substitution || !productKnowledge) && (
+            <span className="text-gray-700 font-semibold italic line-through">
+              {!productKnowledge
+                ? medication?.medication?.display
+                : productKnowledge?.name}
+            </span>
+          )}
+
+          <div className="text-sm text-gray-700 font-medium flex items-center gap-1 whitespace-nowrap capitalize">
+            {formatDosage(medication?.dosage_instruction?.[0])} × (
+            {formatFrequencyShort(medication?.dosage_instruction?.[0])}) ×{" "}
+            {formatDuration(medication?.dosage_instruction?.[0], {
+              abbreviated: true,
+            }) || "-"}{" "}
+            = {formatTotalUnits(medication?.dosage_instruction, t("units"))}
+          </div>
+        </div>
+        <div className="flex gap-1">
+          {medication?.status && (
+            <Badge variant="yellow" className="text-xs">
+              {t(`medication_status__${medication?.status}`)}
+            </Badge>
+          )}
+          {medication?.dispense_status ===
+            MedicationRequestDispenseStatus.partial && (
+            <Badge variant="yellow" className="text-xs">
+              {t("partially_billed")}
+            </Badge>
+          )}
+          {(substitution || !productKnowledge) && (
+            <Badge variant="orange">{t("substituted")}</Badge>
+          )}
+        </div>
+        {medication?.note && (
+          <span className="text-sm text-gray-700">{`${t("note")}: ${medication?.note}`}</span>
+        )}
+      </div>
+      <div className="flex gap-3">
+        {/* TODO: wire this detail info button (sub. plus more...) */}
+        <Button variant="outline" size="icon" className="text-gray-950">
+          <BadgeInfo />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          className="text-sm font-semibold text-gray-950 px-6"
+          onClick={() => {
+            // TODO: wire this
+          }}
+        >
+          {t("sub")}
         </Button>
       </div>
     </>

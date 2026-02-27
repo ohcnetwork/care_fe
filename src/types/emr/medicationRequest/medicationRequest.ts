@@ -1407,13 +1407,13 @@ export function encodeDurationValue(duration?: BoundsDuration): string {
  */
 export function formatDurationLabel(
   duration?: BoundsDuration,
-  { short = false }: { short?: boolean } = {},
+  { abbreviated = false }: { abbreviated?: boolean } = {},
 ): string {
   if (!duration?.value || duration.value === "0") return "";
   const info = DURATION_UNIT_LABELS[duration.unit];
   if (!info) return `${duration.value} ${duration.unit}`;
   const numVal = parseFloat(duration.value);
-  return short
+  return abbreviated
     ? `${duration.value} ${info.shorthand.toUpperCase()}`
     : `${duration.value} ${numVal === 1 ? info.singular : info.plural}`;
 }
