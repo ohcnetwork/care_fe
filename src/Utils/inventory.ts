@@ -1,5 +1,6 @@
 import { addMonths, endOfMonth, isBefore, startOfMonth } from "date-fns";
 
+import { Badge } from "@/components/ui/badge";
 import careConfig from "@careConfig";
 
 export type ExpiryStatus = "expired" | "expiring_soon" | "valid";
@@ -59,13 +60,13 @@ export function isLotAllowedForDispensing(
 /**
  * Gets the badge variant for displaying expiry status
  * @param expirationDate - The expiration date string
- * @returns Badge variant - "destructive" for expired, "yellow" for expiring soon, "primary" for valid
+ * @returns Badge variant - "destructive" for expired, "yellow" for expiring soon, "green" for valid
  */
 export function getExpiryBadgeVariant(
   expirationDate: string | undefined,
-): "destructive" | "yellow" | "primary" {
+): React.ComponentProps<typeof Badge>["variant"] {
   const status = getExpiryStatus(expirationDate);
   if (status === "expired") return "destructive";
   if (status === "expiring_soon") return "yellow";
-  return "primary";
+  return "green";
 }

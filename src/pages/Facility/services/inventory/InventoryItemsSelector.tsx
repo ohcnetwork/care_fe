@@ -20,13 +20,7 @@ import { cn } from "@/lib/utils";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
-import {
-  decimal,
-  isPositive,
-  round,
-  roundWhole,
-  zodDecimal,
-} from "@/Utils/decimal";
+import { isPositive, roundWhole, zodDecimal } from "@/Utils/decimal";
 import {
   getExpiryBadgeVariant,
   isProductRestrictedFromDispensing,
@@ -34,7 +28,6 @@ import {
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { useQuery } from "@tanstack/react-query";
-import Decimal from "decimal.js";
 import { z } from "zod";
 
 export const LotSelectionSchema = z.object({
@@ -45,10 +38,10 @@ export const LotSelectionSchema = z.object({
 
 export type LotSelection = z.infer<typeof LotSelectionSchema>;
 
-interface AutoSelectOptions {
-  quantity: Decimal;
-  canSelect: (item: InventoryRead) => boolean;
-}
+// interface AutoSelectOptions {
+//   quantity: Decimal;
+//   canSelect: (item: InventoryRead) => boolean;
+// }
 
 interface Props {
   facilityId: string;
@@ -162,69 +155,41 @@ export const InventoryItemsSelector = ({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className="w-auto min-w-48 h-auto justify-between p-1.5 border-gray-300 border"
+          className="py-1 px-2 border-gray-300 shadow-none"
           type="button"
         >
           <div className="flex flex-col min-w-40 items-start gap-1 w-full">
             {!value ? (
               <span className="text-gray-500">{t("select_stock")}</span>
             ) : (
-              <div className="flex justify-between p-1">
-                <div className="flex items-center justify-between gap-2">
-                  <span
-                    className={cn(
-                      "font-medium text-sm truncate max-w-28",
-                      !value.item.product.batch?.lot_number && "text-gray-500",
-                    )}
-                    title={value.item.product.batch?.lot_number || t("unknown")}
-                  >
-                    {value.autoSelected ? (
-                      <FadeInText
-                        text={
-                          value.item.product.batch?.lot_number || t("unknown")
-                        }
-                        delay={15}
-                      />
-                    ) : (
-                      value.item.product.batch?.lot_number || t("unknown")
-                    )}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <Badge className="text-xs px-1 py-0">
-                      <MonetaryDisplay
-                        amount={
-                          value.item.product.charge_item_definition?.price_components?.find(
-                            (c) =>
-                              c.monetary_component_type ===
-                              MonetaryComponentType.base,
-                          )?.amount
-                        }
-                      />
-                    </Badge>
-                    <Badge
-                      variant={
-                        value.item.status === "active" &&
-                        isPositive(value.item.net_content)
-                          ? "primary"
-                          : "destructive"
+              <div className="flex justify-between p-1 w-full">
+                <span
+                  className={cn(
+                    "font-medium text-sm truncate max-w-28",
+                    !value.item.product.batch?.lot_number && "text-gray-500",
+                  )}
+                  title={value.item.product.batch?.lot_number || t("unknown")}
+                >
+                  {value.autoSelected ? (
+                    <FadeInText
+                      text={
+                        value.item.product.batch?.lot_number || t("unknown")
                       }
-                      className="border-none rounded-sm text-xs px-1 py-0"
-                    >
-                      {round(value.item.net_content)}{" "}
-                      {value.item.product.product_knowledge.base_unit.display ||
-                        t("units")}
-                    </Badge>
-                  </div>
-                </div>
+                      delay={15}
+                    />
+                  ) : (
+                    value.item.product.batch?.lot_number || t("unknown")
+                  )}
+                </span>
+
                 {value.item.product.expiration_date && (
                   <div className="flex items-center">
                     <Badge
                       variant={getExpiryBadgeVariant(
                         value.item.product.expiration_date,
                       )}
-                      className="border-none rounded-sm text-xs px-1 py-0"
+                      className="rounded-sm text-xs px-1.5 py-0"
                     >
-                      {t("expiry_short")}:{" "}
                       {formatDate(
                         value.item.product.expiration_date,
                         "dd/MM/yyyy",
@@ -238,11 +203,14 @@ export const InventoryItemsSelector = ({
           <ChevronDownIcon className="size-4 shrink-0" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto max-w-[90vw] p-0" align="start">
+      <PopoverContent
+        className="w-auto min-w-(--radix-popover-trigger-width) max-w-[90vw] p-0"
+        align="start"
+      >
         {/* Search input */}
         <div className="p-2 border-b">
-          <div className="relative">
-            <SearchIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 size-4" />
+          <div className="relative ring-4 ring-gray-100 rounded-md">
+            <SearchIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 size-4" />
             <Input
               placeholder={t("search_lot_batch")}
               value={searchQuery}
@@ -267,7 +235,7 @@ export const InventoryItemsSelector = ({
         <div className="max-h-60 overflow-auto">
           {filteredItems.length > 0 ? (
             <table className="w-full">
-              <thead className="sticky top-0 bg-gray-50 border-b">
+              <thead className="sticky top-0 bg-gray-100 border-b border-gray-200">
                 <tr>
                   <th className="p-2 text-left w-10"></th>
                   <th className="p-2 text-left text-sm font-medium text-gray-600">
@@ -297,14 +265,14 @@ export const InventoryItemsSelector = ({
                     <tr
                       key={inv.id}
                       className={cn(
-                        "border-b last:border-b-0",
+                        "border-b last:border-b-0 transition-all duration-100 ease-in-out",
                         isRestricted
                           ? "cursor-not-allowed opacity-50 bg-gray-50"
-                          : "cursor-pointer hover:bg-accent",
+                          : "cursor-pointer hover:bg-gray-50",
                       )}
                       onClick={() => toggleLotSelection(inv, isRestricted)}
                     >
-                      <td className="p-2">
+                      <td className="p-2 pb-0.5 text-center">
                         <Checkbox
                           checked={isSelected}
                           disabled={isRestricted}
@@ -313,7 +281,7 @@ export const InventoryItemsSelector = ({
                       <td className="p-2">
                         <span
                           className={cn(
-                            "font-medium",
+                            "text-sm font-medium",
                             !inv.product.batch?.lot_number && "text-gray-500",
                           )}
                         >
@@ -329,18 +297,21 @@ export const InventoryItemsSelector = ({
                                 MonetaryComponentType.base,
                             )?.amount
                           }
+                          className="text-sm font-medium"
                         />
                       </td>
-                      <td className="p-2">
+                      <td className="p-2 text-end">
                         <Badge
                           variant={
                             inv.status === "active" &&
                             isPositive(inv.net_content)
-                              ? "primary"
+                              ? "green"
                               : "destructive"
                           }
+                          size="sm"
+                          className="text-sm font-medium py-0 px-1.5"
                         >
-                          {round(inv.net_content)}{" "}
+                          {roundWhole(inv.net_content)}{" "}
                           {inv.product.product_knowledge.base_unit.display ||
                             t("units")}
                         </Badge>
@@ -351,6 +322,8 @@ export const InventoryItemsSelector = ({
                             variant={getExpiryBadgeVariant(
                               inv.product.expiration_date,
                             )}
+                            size="sm"
+                            className="text-sm font-medium py-0 px-1.5"
                           >
                             {formatDate(inv.product.expiration_date, "MM/yyyy")}
                           </Badge>
@@ -374,6 +347,8 @@ export const InventoryItemsSelector = ({
   );
 };
 
+// TODO: auto close popover when quantity matches the required quantity only
+
 /**
  * Auto-select inventory items based on the provided options.
  * It iterates through the items and selects them until the desired quantity is
@@ -385,87 +360,87 @@ export const InventoryItemsSelector = ({
  * 1.5, it will be rounded down to 1.
  * If required quantity is 1.5, it will be rounded up to 2.
  */
-const autoSelectItems = (
-  items: InventoryRead[],
-  options: AutoSelectOptions,
-) => {
-  const selected: LotSelection[] = [];
+// const autoSelectItems = (
+//   items: InventoryRead[],
+//   options: AutoSelectOptions,
+// ) => {
+//   const selected: LotSelection[] = [];
 
-  // Start with the full required quantity, and reduce it as we select items
-  let remainingQuantity = options.quantity.ceil();
+//   // Start with the full required quantity, and reduce it as we select items
+//   let remainingQuantity = options.quantity.ceil();
 
-  for (const item of items) {
-    // Escape hatch to prevent unnecessary iterations once we've met the required quantity
-    if (remainingQuantity.lte(0)) {
-      break;
-    }
+//   for (const item of items) {
+//     // Escape hatch to prevent unnecessary iterations once we've met the required quantity
+//     if (remainingQuantity.lte(0)) {
+//       break;
+//     }
 
-    const availableQuantity = decimal(item.net_content).floor();
+//     const availableQuantity = decimal(item.net_content).floor();
 
-    // Skip items that don't meet the canSelect criteria
-    if (options.canSelect(item) == false || availableQuantity.lte(0)) {
-      continue;
-    }
+//     // Skip items that don't meet the canSelect criteria
+//     if (options.canSelect(item) == false || availableQuantity.lte(0)) {
+//       continue;
+//     }
 
-    if (availableQuantity.lte(remainingQuantity)) {
-      // If the entire available quantity of the item can be used, select it all
-      selected.push({
-        item,
-        quantity: roundWhole(availableQuantity),
-        autoSelected: true,
-      });
-      remainingQuantity = remainingQuantity.minus(availableQuantity);
-    } else {
-      // Otherwise, select only the remaining quantity needed and stop
-      selected.push({
-        item,
-        quantity: roundWhole(remainingQuantity),
-        autoSelected: true,
-      });
-      remainingQuantity = new Decimal(0);
-    }
-  }
+//     if (availableQuantity.lte(remainingQuantity)) {
+//       // If the entire available quantity of the item can be used, select it all
+//       selected.push({
+//         item,
+//         quantity: roundWhole(availableQuantity),
+//         autoSelected: true,
+//       });
+//       remainingQuantity = remainingQuantity.minus(availableQuantity);
+//     } else {
+//       // Otherwise, select only the remaining quantity needed and stop
+//       selected.push({
+//         item,
+//         quantity: roundWhole(remainingQuantity),
+//         autoSelected: true,
+//       });
+//       remainingQuantity = new Decimal(0);
+//     }
+//   }
 
-  return selected;
-};
+//   return selected;
+// };
 
-/**
- * Convert SelectedLot[] to form-compatible format with string quantities
- */
-export const toFormLotItems = (
-  selectedItems: LotSelection[],
-): { selectedInventoryId: string; quantity: string }[] => {
-  return selectedItems.map((item) => ({
-    selectedInventoryId: item.item.id,
-    quantity: item.quantity.toString(),
-  }));
-};
+// /**
+//  * Convert SelectedLot[] to form-compatible format with string quantities
+//  */
+// export const toFormLotItems = (
+//   selectedItems: LotSelection[],
+// ): { selectedInventoryId: string; quantity: string }[] => {
+//   return selectedItems.map((item) => ({
+//     selectedInventoryId: item.item.id,
+//     quantity: item.quantity.toString(),
+//   }));
+// };
 
-/**
- * Convert form lot items back to SelectedLot[] with Decimal quantities
- */
-export const fromFormLotItems = (
-  lots: { selectedInventoryId: string; quantity: string }[],
-  inventories: InventoryRead[],
-  previousItems?: LotSelection[],
-): LotSelection[] => {
-  return lots
-    .map((lot): LotSelection | null => {
-      const inventory = inventories.find(
-        (inv) => inv.id === lot.selectedInventoryId,
-      );
-      if (!inventory) return null;
+// /**
+//  * Convert form lot items back to SelectedLot[] with Decimal quantities
+//  */
+// export const fromFormLotItems = (
+//   lots: { selectedInventoryId: string; quantity: string }[],
+//   inventories: InventoryRead[],
+//   previousItems?: LotSelection[],
+// ): LotSelection[] => {
+//   return lots
+//     .map((lot): LotSelection | null => {
+//       const inventory = inventories.find(
+//         (inv) => inv.id === lot.selectedInventoryId,
+//       );
+//       if (!inventory) return null;
 
-      // Preserve autoSelected flag from previous items if it exists
-      const previousItem = previousItems?.find(
-        (item) => item.item.id === lot.selectedInventoryId,
-      );
+//       // Preserve autoSelected flag from previous items if it exists
+//       const previousItem = previousItems?.find(
+//         (item) => item.item.id === lot.selectedInventoryId,
+//       );
 
-      return {
-        item: inventory,
-        quantity: lot.quantity || "0",
-        autoSelected: previousItem?.autoSelected,
-      };
-    })
-    .filter((item): item is LotSelection => item !== null);
-};
+//       return {
+//         item: inventory,
+//         quantity: lot.quantity || "0",
+//         autoSelected: previousItem?.autoSelected,
+//       };
+//     })
+//     .filter((item): item is LotSelection => item !== null);
+// };

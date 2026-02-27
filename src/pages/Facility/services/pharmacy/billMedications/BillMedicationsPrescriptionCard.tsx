@@ -172,7 +172,7 @@ const HeaderRow = () => {
           {t("quantity")}
         </span>
       </div>
-      <div className="bg-gray-100 py-1 px-3 flex items-center">
+      <div className="bg-gray-100 py-1 px-3 flex items-center justify-end">
         <span className="text-sm font-medium text-gray-700">{t("price")}</span>
       </div>
       <div className="bg-gray-100 py-1 px-3 flex items-center">
