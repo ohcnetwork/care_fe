@@ -71,6 +71,7 @@ export default function FacilityForm({
       .coordinates.longitude.transform((val) => (val ? Number(val) : undefined))
       .optional(),
     is_public: z.boolean().default(false),
+    print_templates: z.array(z.any()).default([]),
   });
 
   type FacilityFormValues = z.infer<typeof facilityFormSchema>;
@@ -89,6 +90,7 @@ export default function FacilityForm({
       latitude: undefined,
       longitude: undefined,
       is_public: true,
+      print_templates: [],
     },
   });
 
@@ -146,18 +148,15 @@ export default function FacilityForm({
   const onSubmit: (data: FacilityFormValues) => void = (
     data: FacilityFormValues,
   ) => {
+    const payload = {
+      ...data,
+      latitude: data.latitude ? String(data.latitude) : undefined,
+      longitude: data.longitude ? String(data.longitude) : undefined,
+    };
     if (facilityId) {
-      updateFacility({
-        ...data,
-        latitude: data.latitude ? String(data.latitude) : undefined,
-        longitude: data.longitude ? String(data.longitude) : undefined,
-      });
+      updateFacility(payload);
     } else {
-      createFacility({
-        ...data,
-        latitude: data.latitude ? String(data.latitude) : undefined,
-        longitude: data.longitude ? String(data.longitude) : undefined,
-      });
+      createFacility(payload);
     }
   };
 
@@ -211,9 +210,10 @@ export default function FacilityForm({
           ? Number(facilityData.longitude)
           : undefined,
         is_public: facilityData.is_public,
+        print_templates: facilityData.print_templates,
       });
     }
-  }, [facilityData]);
+  }, [facilityData, form]);
 
   return (
     <Form {...form}>

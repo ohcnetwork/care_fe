@@ -342,11 +342,17 @@ export function BedChargeItemsTable({
       </div>
       {isLoading ? (
         <TableSkeleton count={3} />
-      ) : !encounterId ? (
+      ) : !encounterId || !locationHistory.length ? (
         <EmptyState
           icon={<CareIcon icon="l-bed" className="text-primary size-6" />}
-          title={t("no_encounter_associated")}
-          description={t("no_encounter_associated_description")}
+          title={
+            !encounterId ? t("no_encounter_associated") : t("no_locations")
+          }
+          description={
+            !encounterId
+              ? t("no_encounter_associated_description")
+              : t("no_locations_description")
+          }
         />
       ) : (
         <div className="rounded-md overflow-x-auto border-2 border-white shadow-md">
@@ -381,22 +387,7 @@ export function BedChargeItemsTable({
               </TableRow>
             </TableHeader>
             <TableBody className="bg-white">
-              {!locationHistory.length ? (
-                <TableRow>
-                  <TableCell colSpan={9} className="py-4">
-                    <EmptyState
-                      icon={
-                        <CareIcon
-                          icon="l-map-pin"
-                          className="text-primary size-6"
-                        />
-                      }
-                      title={t("no_locations")}
-                      description={t("no_locations_description")}
-                    />
-                  </TableCell>
-                </TableRow>
-              ) : (
+              {locationHistory.length > 0 &&
                 locationHistory.flatMap((location) => {
                   const items = groupedChargeItems[location.id] || [];
 
@@ -560,8 +551,7 @@ export function BedChargeItemsTable({
                           ].filter(Boolean);
                         })),
                   ];
-                })
-              )}
+                })}
             </TableBody>
           </Table>
         </div>
