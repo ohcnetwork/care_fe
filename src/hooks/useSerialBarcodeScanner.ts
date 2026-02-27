@@ -13,8 +13,6 @@ interface SerialScannerOptions {
   parity?: "none" | "even" | "odd";
   /** Whether the hook is enabled (default: true) */
   enabled?: boolean;
-  /** Line ending character(s) to detect end of barcode (default: "\r" or "\n") */
-  lineEnding?: "cr" | "lf" | "crlf";
   /** Auto-reconnect to previously connected port on mount (default: true) */
   autoReconnect?: boolean;
 }
@@ -73,7 +71,6 @@ export function useSerialBarcodeScanner({
   stopBits = 1,
   parity = "none",
   enabled = true,
-  lineEnding = "cr",
   autoReconnect = true,
 }: SerialScannerOptions): SerialScannerReturn {
   const portRef = useRef<SerialPort | null>(null);
@@ -97,39 +94,21 @@ export function useSerialBarcodeScanner({
     onScanRef.current = onScan;
   }, [onScan]);
 
-  // Determine line ending characters
-  const getLineEndingChars = useCallback(() => {
-    switch (lineEnding) {
-      case "lf":
-        return ["\n"];
-      case "crlf":
-        return ["\r\n"];
-      case "cr":
-      default:
-        return ["\r", "\n"];
-    }
-  }, [lineEnding]);
-
   // Process incoming data
-  const processData = useCallback(
-    (text: string) => {
-      const lineEndingChars = getLineEndingChars();
-
-      for (const char of text) {
-        if (lineEndingChars.includes(char)) {
-          const barcode = bufferRef.current.trim();
-          if (barcode.length > 0) {
-            onScanRef.current(barcode);
-          }
-          bufferRef.current = "";
-        } else if (char !== "\r" && char !== "\n") {
-          // Skip any line ending chars not in our expected set
-          bufferRef.current += char;
+  const processData = useCallback((text: string) => {
+    for (const char of text) {
+      // Line endings signal end of barcode
+      if (char === "\r" || char === "\n") {
+        const barcode = bufferRef.current.trim();
+        if (barcode.length > 0) {
+          onScanRef.current(barcode);
         }
+        bufferRef.current = "";
+      } else {
+        bufferRef.current += char;
       }
-    },
-    [getLineEndingChars],
-  );
+    }
+  }, []);
 
   // Read loop for incoming serial data
   const startReading = useCallback(
@@ -167,7 +146,19 @@ export function useSerialBarcodeScanner({
         }
       } finally {
         isReadingRef.current = false;
-        readerRef.current = null;
+        if (readerRef.current) {
+          try {
+            await readerRef.current.cancel();
+          } catch {
+            // Ignore cancel errors
+          }
+          try {
+            readerRef.current.releaseLock();
+          } catch {
+            // Ignore release errors
+          }
+          readerRef.current = null;
+        }
       }
     },
     [processData],
@@ -182,6 +173,11 @@ export function useSerialBarcodeScanner({
         await readerRef.current.cancel();
       } catch {
         // Ignore cancel errors
+      }
+      try {
+        readerRef.current.releaseLock();
+      } catch {
+        // Ignore release errors
       }
       readerRef.current = null;
     }
@@ -378,6 +374,7 @@ export function useSerialBarcodeScanner({
         }
       } else {
         if (!state.isConnected && !state.isConnecting && enabled) {
+          setState((s) => ({ ...s, isConnecting: true }));
           setTimeout(() => {
             reconnect();
           }, 200);

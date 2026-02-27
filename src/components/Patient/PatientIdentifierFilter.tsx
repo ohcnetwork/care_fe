@@ -315,17 +315,25 @@ export default function PatientIdentifierFilter({
     return firstPart || scannedData.trim();
   }, []);
 
+  // Shared helper to process scanned patient data
+  const processScannedPatient = useCallback(
+    (scannedData: string) => {
+      const extractedId = extractPatientId(scannedData);
+      onSelect(extractedId, t("scanned_patient"));
+      setSelectedPatient({
+        id: extractedId,
+        name: t("scanned_patient"),
+      } as PatientRead);
+      toast.info(t("patient_details_scanned_successfully"));
+    },
+    [extractPatientId, onSelect, t],
+  );
+
   // Handler for when a scan is successful (shared by both scanners)
   const handleScanFromDevice = useCallback(
     (scannedPatientId: string) => {
       if (!open && !verificationOpen && !scanDialogOpen && !selectedPatient) {
-        const extractedId = extractPatientId(scannedPatientId);
-        onSelect(extractedId, t("scanned_patient"));
-        setSelectedPatient({
-          id: extractedId,
-          name: t("scanned_patient"),
-        } as PatientRead);
-        toast.info(t("patient_details_scanned_successfully"));
+        processScannedPatient(scannedPatientId);
       }
     },
     [
@@ -333,9 +341,7 @@ export default function PatientIdentifierFilter({
       verificationOpen,
       scanDialogOpen,
       selectedPatient,
-      extractPatientId,
-      onSelect,
-      t,
+      processScannedPatient,
     ],
   );
 
@@ -343,10 +349,11 @@ export default function PatientIdentifierFilter({
   const {
     isSupported: isSerialSupported,
     isConnected: isSerialConnected,
+    isConnecting: isSerialConnecting,
     connect: connectSerial,
   } = useSerialBarcodeScanner({
     onScan: handleScanFromDevice,
-    enabled: !open && !verificationOpen && !scanDialogOpen && !hideScanButton,
+    enabled: !hideScanButton,
   });
 
   // Keyboard wedge scanner
@@ -541,7 +548,7 @@ export default function PatientIdentifierFilter({
               </div>
               <span className="hidden md:block">{t("scan")}</span>
             </Button>
-            {isSerialSupported && !isSerialConnected && (
+            {isSerialSupported && !isSerialConnected && !isSerialConnecting && (
               <Button
                 variant="ghost"
                 onClick={() => connectSerial()}
@@ -609,14 +616,7 @@ export default function PatientIdentifierFilter({
       <PatientIDScanDialog
         open={scanDialogOpen}
         onOpenChange={setScanDialogOpen}
-        onScanSuccess={(scannedId) => {
-          const extractedId = extractPatientId(scannedId);
-          onSelect(extractedId, t("scanned_patient"));
-          setSelectedPatient({
-            id: extractedId,
-            name: t("scanned_patient"),
-          } as PatientRead);
-        }}
+        onScanSuccess={processScannedPatient}
       />
 
       <Dialog open={verificationOpen} onOpenChange={setVerificationOpen}>
