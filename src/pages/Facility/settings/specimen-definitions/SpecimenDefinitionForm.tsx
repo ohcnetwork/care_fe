@@ -156,8 +156,15 @@ function SpecimenDefinitionFormContent({
   facilityId,
   specimenSlug,
   initialData,
-  onSuccess = () =>
-    navigate(`/facility/${facilityId}/settings/specimen_definitions`),
+  onSuccess = () => {
+    if (specimenSlug) {
+      navigate(
+        `/facility/${facilityId}/settings/specimen_definitions/${specimenSlug}`,
+      );
+    } else {
+      navigate(`/facility/${facilityId}/settings/specimen_definitions`);
+    }
+  },
   onCancel = () => {
     if (specimenSlug) {
       navigate(
