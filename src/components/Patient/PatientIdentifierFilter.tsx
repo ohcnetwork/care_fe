@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { QrCode, Search, Usb, X } from "lucide-react";
+import { QrCode, Search, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
@@ -40,11 +40,11 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBarcodeScanner } from "@/hooks/useBarcodeScanner";
 import useBreakpoints from "@/hooks/useBreakpoints";
-import { useSerialBarcodeScanner } from "@/hooks/useSerialBarcodeScanner";
 
 import PatientIDScanDialog from "@/components/Scan/PatientIDScanDialog";
 import { Card } from "@/components/ui/card";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { PLUGIN_Component } from "@/PluginEngine";
 import {
   getPartialId,
   PartialPatientModel,
@@ -329,7 +329,7 @@ export default function PatientIdentifierFilter({
     [extractPatientId, onSelect, t],
   );
 
-  // Handler for when a scan is successful (shared by both scanners)
+  // Handler for when a scan is successful (shared by scanners)
   const handleScanFromDevice = useCallback(
     (scannedPatientId: string) => {
       if (!open && !verificationOpen && !scanDialogOpen && !selectedPatient) {
@@ -345,18 +345,7 @@ export default function PatientIdentifierFilter({
     ],
   );
 
-  // Serial port scanner
-  const {
-    isSupported: isSerialSupported,
-    isConnected: isSerialConnected,
-    isConnecting: isSerialConnecting,
-    connect: connectSerial,
-  } = useSerialBarcodeScanner({
-    onScan: handleScanFromDevice,
-    enabled: !hideScanButton,
-  });
-
-  // Keyboard wedge scanner
+  // Keyboard wedge scanner (built-in, no extra hardware needed)
   useBarcodeScanner({
     onScan: handleScanFromDevice,
     enabled:
@@ -537,28 +526,17 @@ export default function PatientIdentifierFilter({
               aria-label={t("scan_patient_qr")}
               data-shortcut-id="scan-patient"
             >
-              <div className="relative">
-                <QrCode className="size-4" />
-                {isSerialConnected && (
-                  <div
-                    className="absolute -top-0.5 -right-0.5 size-1.5 rounded-full bg-green-600 animate-pulse"
-                    title={t("serial_scanner_connected")}
-                  />
-                )}
-              </div>
+              <QrCode className="size-4" />
               <span className="hidden md:block">{t("scan")}</span>
             </Button>
-            {isSerialSupported && !isSerialConnected && !isSerialConnecting && (
-              <Button
-                variant="ghost"
-                onClick={() => connectSerial()}
-                className="shrink-0 px-2 border-r rounded-none bg-white text-gray-950"
-                aria-label={t("connect_serial_scanner")}
-                title={t("connect_serial_scanner")}
-              >
-                <Usb className="size-4" />
-              </Button>
-            )}
+            {/* Plugin extension point for USB/Serial scanner buttons */}
+            <PLUGIN_Component
+              __name="PatientIdentifierFilterActions"
+              facilityId={facilityId}
+              onScan={handleScanFromDevice}
+              disabled={!!selectedPatient}
+              className="shrink-0 px-2 border-r rounded-none bg-white text-gray-950"
+            />
           </>
         )}
         {isMobile ? (
