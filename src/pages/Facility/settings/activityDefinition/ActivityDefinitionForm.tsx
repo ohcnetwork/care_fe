@@ -41,7 +41,7 @@ import { CodeSchema } from "@/types/base/code/code";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 
 import ObservationDefinitionForm from "@/pages/Facility/settings/observationDefinition/ObservationDefinitionForm";
-import { CreateSpecimenDefinition } from "@/pages/Facility/settings/specimen-definitions/CreateSpecimenDefinition";
+import SpecimenDefinitionForm from "@/pages/Facility/settings/specimen-definitions/SpecimenDefinitionForm";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import {
   ChargeItemDefinitionBase,
@@ -795,7 +795,7 @@ function ActivityDefinitionFormContent({
                         onSearch={setSpecimenSearch}
                         canCreate={true}
                         createForm={(onSuccess) => (
-                          <CreateSpecimenDefinition
+                          <SpecimenDefinitionForm
                             facilityId={facilityId}
                             onSuccess={onSuccess}
                           />
