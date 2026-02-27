@@ -69,10 +69,11 @@ export function formatFrequency(
  */
 export function formatDuration(
   instruction?: MedicationRequestDosageInstruction,
+  { short = false }: { short?: boolean } = {},
 ): string {
   const duration = instruction?.timing?.repeat?.bounds_duration;
   if (!duration?.value || duration.value === "0") return "";
-  return formatDurationLabel(duration);
+  return formatDurationLabel(duration, { short });
 }
 
 /**
@@ -143,4 +144,11 @@ export function formatTotalUnits(
   }
 
   return `${round(doseValue)} ${doseUnit}`;
+}
+
+export function formatFrequencyShort(
+  instruction?: MedicationRequestDosageInstruction,
+): string {
+  if (!instruction) return "";
+  return instruction.text || "";
 }
