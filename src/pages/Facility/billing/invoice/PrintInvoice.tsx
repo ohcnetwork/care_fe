@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { QRCodeSVG } from "qrcode.react";
@@ -139,42 +138,13 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
       autoPrint={{
         enabled: !isLoadingDispenses,
       }}
+      facility={facility}
     >
       <DisablingCover
         disabled={isLoadingDispenses}
         message={t("loading_medication_details")}
       >
-        <div className="max-w-5xl mx-auto">
-          {/* Header with Facility Name and Logo */}
-          <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
-            <div className="flex items-start gap-4">
-              <div className="text-left">
-                <h1 className="text-2xl font-medium">{facility.name}</h1>
-                {facility.address && (
-                  <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
-                    {facility.address}
-                    {facility.phone_number && (
-                      <p className="text-gray-500 text-sm">
-                        {t("phone")}: {facility.phone_number}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-              <QRCodeSVG
-                value={invoice.account.patient.id}
-                size={50}
-                level="Q"
-                marginSize={0}
-              />
-            </div>
-            <img
-              src={careConfig.mainLogo?.dark}
-              alt="Logo"
-              className="h-10 w-auto object-contain mb-2 sm:mb-0 text-end"
-            />
-          </div>
-
+        <div>
           {/* Invoice Title */}
           <div className="mb-4 flex justify-between items-center">
             <div className="flex items-start gap-2">
@@ -183,33 +153,31 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                 {invoice.number}
               </div>
             </div>
-            <div className="text-right flex">
-              <div className="font-medium text-gray-700 text-sm">
+            <div className="flex items-center gap-1 text-sm">
+              <span className="font-medium text-gray-700">
                 {t("issue_date")}:
-              </div>
-              <p className="font-medium text-gray-950 text-sm">
+              </span>
+              <span className="font-medium text-gray-950">
                 {invoice.issue_date
                   ? format(new Date(invoice.issue_date), "dd MMM, yyyy h:mm a")
                   : "-"}
-              </p>
+              </span>
             </div>
           </div>
 
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-start">
               <div>
                 <div className="font-medium text-gray-700 text-sm">
                   {t("bill_to")}:
                 </div>
-                <div>
-                  <p className="font-semibold text-base">
-                    {invoice.account.patient.name}
-                    <span className="text-gray-600 ml-2 font-normal">
-                      ({t(`GENDER__${invoice.account.patient.gender}`)},{" "}
-                      {formatPatientAge(invoice.account.patient, true)})
-                    </span>
-                  </p>
-                </div>
+                <p className="font-semibold text-base">
+                  {invoice.account.patient.name}
+                  <span className="text-gray-600 ml-2 font-normal">
+                    ({t(`GENDER__${invoice.account.patient.gender}`)},{" "}
+                    {formatPatientAge(invoice.account.patient, true)})
+                  </span>
+                </p>
                 {verifiedPatient &&
                   "instance_identifiers" in verifiedPatient &&
                   verifiedPatient.instance_identifiers
@@ -229,19 +197,23 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                         </span>
                       </div>
                     ))}
-              </div>
-              <div>
-                <div className="flex gap-1 font-medium text-gray-700 text-sm ml-2">
-                  {t("address")}:{" "}
-                  <p className="font-medium text-gray-700 text-sm whitespace-pre-wrap ml-2">
+                <div className="flex gap-1 font-medium text-gray-700 text-sm mt-1">
+                  <span>{t("address")}:</span>
+                  <span className="whitespace-pre-wrap">
                     {formatPatientAddress(invoice.account.patient.address) || (
                       <span className="text-gray-500">
                         {t("no_address_provided")}
                       </span>
                     )}
-                  </p>
+                  </span>
                 </div>
               </div>
+              <QRCodeSVG
+                value={invoice.account.patient.id}
+                size={50}
+                level="Q"
+                marginSize={0}
+              />
             </div>
 
             {/* Items Table */}
