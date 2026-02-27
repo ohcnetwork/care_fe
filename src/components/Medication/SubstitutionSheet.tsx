@@ -55,7 +55,6 @@ interface SubstitutionSheetProps {
     reason?: SubstitutionReason;
   };
   /** Pre-selected substitute product (optional) */
-  preSelectedProduct?: ProductKnowledgeBase;
   onSave: (
     substitutionDetails?: {
       substitutedProductKnowledge: ProductKnowledgeBase;
@@ -63,7 +62,6 @@ interface SubstitutionSheetProps {
       reason: SubstitutionReason;
     } | null, // null to clear substitution
   ) => void;
-  facilityId: string;
 }
 
 const substitutionSchema = z.object({
@@ -82,22 +80,18 @@ export function SubstitutionSheet({
   originalProductKnowledge,
   originalMedicationName,
   currentSubstitution,
-  preSelectedProduct,
   onSave,
-  facilityId: _facilityId,
 }: SubstitutionSheetProps) {
   const { t } = useTranslation();
   const [selectedSubstitute, setSelectedSubstitute] = useState<
     ProductKnowledgeBase | undefined
-  >(currentSubstitution?.substitutedProductKnowledge || preSelectedProduct);
+  >(currentSubstitution?.substitutedProductKnowledge);
 
   const form = useForm<SubstitutionFormValues>({
     resolver: zodResolver(substitutionSchema),
     defaultValues: {
       substitutedProductKnowledge:
-        currentSubstitution?.substitutedProductKnowledge ||
-        preSelectedProduct ||
-        undefined,
+        currentSubstitution?.substitutedProductKnowledge || undefined,
       type: currentSubstitution?.type || SubstitutionType.E,
       reason: currentSubstitution?.reason || SubstitutionReason.OS,
     },
@@ -105,8 +99,7 @@ export function SubstitutionSheet({
 
   useEffect(() => {
     if (open) {
-      const initialProduct =
-        currentSubstitution?.substitutedProductKnowledge || preSelectedProduct;
+      const initialProduct = currentSubstitution?.substitutedProductKnowledge;
       form.reset({
         substitutedProductKnowledge: initialProduct || undefined,
         type: currentSubstitution?.type || SubstitutionType.E,
@@ -114,7 +107,7 @@ export function SubstitutionSheet({
       });
       setSelectedSubstitute(initialProduct);
     }
-  }, [open, currentSubstitution, preSelectedProduct, form]);
+  }, [open, currentSubstitution, form]);
 
   useEffect(() => {
     form.setValue("substitutedProductKnowledge", selectedSubstitute, {

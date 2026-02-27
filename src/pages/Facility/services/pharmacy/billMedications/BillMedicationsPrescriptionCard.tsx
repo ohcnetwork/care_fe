@@ -1,3 +1,4 @@
+import { SubstitutionSheet } from "@/components/Medication/SubstitutionSheet";
 import {
   formatDosage,
   formatDuration,
@@ -16,10 +17,7 @@ import {
   InventoryItemsSelector,
   LotSelection,
 } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
-import {
-  BillMedicationLineItemSchemaType,
-  billMedicationsByPrescriptionsFormSchema,
-} from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
+import { billMedicationsByPrescriptionsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   getBasePrice,
@@ -36,6 +34,7 @@ import { formatName } from "@/Utils/utils";
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { BadgeInfo, PrinterIcon } from "lucide-react";
+import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -240,7 +239,6 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
   const { facilityId } = useCurrentFacility();
   const { locationId } = useCurrentLocation();
 
-  const item = form.watch(name);
   const isSelected = form.watch(`${name}.isSelected`);
   const medication = form.watch(`${name}.medication`);
   const productKnowledge = form.watch(`${name}.productKnowledge`);
@@ -273,7 +271,7 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
 
       {/* Medicine */}
       <div className="bg-white py-2 px-3 flex justify-between items-center">
-        <MedicineLineItemMedication item={item} />
+        <MedicineLineItemMedication form={form} name={name} />
       </div>
 
       {/* Select Lot */}
@@ -395,15 +393,18 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
 };
 
 const MedicineLineItemMedication = ({
-  item,
+  form,
+  name,
 }: {
-  item: BillMedicationLineItemSchemaType;
+  form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
+  name: `prescriptions.${number}.items.${number}`;
 }) => {
   const { t } = useTranslation();
+  const [isSubstitutionSheetOpen, setIsSubstitutionSheetOpen] = useState(false);
 
-  const medication = item.medication;
-  const productKnowledge = item.productKnowledge;
-  const substitution = item.substitution;
+  const medication = form.watch(`${name}.medication`);
+  const productKnowledge = form.watch(`${name}.productKnowledge`);
+  const substitution = form.watch(`${name}.substitution`);
 
   const effectiveProductKnowledge =
     substitution?.substitutedProductKnowledge || productKnowledge;
@@ -464,12 +465,32 @@ const MedicineLineItemMedication = ({
           size="icon"
           className="text-sm font-semibold text-gray-950 px-6"
           onClick={() => {
-            // TODO: wire this
+            setIsSubstitutionSheetOpen(true);
           }}
         >
           {t("sub")}
         </Button>
       </div>
+      <SubstitutionSheet
+        open={isSubstitutionSheetOpen}
+        onOpenChange={setIsSubstitutionSheetOpen}
+        originalProductKnowledge={productKnowledge || undefined}
+        originalMedicationName={medication?.medication.display}
+        currentSubstitution={substitution || undefined}
+        onSave={(substitutionDetails) => {
+          if (substitutionDetails) {
+            form.setValue(`${name}.substitution`, substitutionDetails, {
+              shouldDirty: true,
+              shouldTouch: true,
+            });
+          } else {
+            form.setValue(`${name}.substitution`, null, {
+              shouldDirty: true,
+              shouldTouch: true,
+            });
+          }
+        }}
+      />
     </>
   );
 };
