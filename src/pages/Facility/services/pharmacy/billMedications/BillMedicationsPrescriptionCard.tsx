@@ -35,7 +35,7 @@ import { round } from "@/Utils/decimal";
 import { formatName } from "@/Utils/utils";
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
-import { BadgeInfo, PrinterIcon } from "lucide-react";
+import { BadgeInfo, Check, PrinterIcon } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -424,31 +424,32 @@ const MedicineLineItemMedication = ({
                 : productKnowledge?.name}
             </span>
           )}
-
-          <div className="text-sm text-gray-700 font-medium flex items-center gap-1 whitespace-nowrap capitalize">
+          <span className="text-sm text-gray-700 font-medium flex items-center gap-1 whitespace-nowrap capitalize">
             {formatDosage(medication?.dosage_instruction?.[0])} × (
             {formatFrequencyShort(medication?.dosage_instruction?.[0])}) ×{" "}
             {formatDuration(medication?.dosage_instruction?.[0], {
               abbreviated: true,
             }) || "-"}{" "}
             = {formatTotalUnits(medication?.dosage_instruction, t("units"))}
-          </div>
+          </span>
         </div>
         <div className="flex gap-1">
-          {medication?.status && (
-            <Badge variant="yellow" className="text-xs">
-              {t(`medication_status__${medication?.status}`)}
-            </Badge>
-          )}
           {medication?.dispense_status ===
             MedicationRequestDispenseStatus.partial && (
-            <Badge variant="yellow" className="text-xs">
-              {t("partially_billed")}
+            <Badge variant="yellow" className="text-xs px-1.5 py-0">
+              {t("partially_dispensed")}
             </Badge>
           )}
-          {(substitution || !productKnowledge) && (
-            <Badge variant="orange">{t("substituted")}</Badge>
+
+          {medication?.dispense_status ===
+            MedicationRequestDispenseStatus.complete && (
+            <Badge variant="blue" className="text-xs px-1.5 py-0">
+              <Check />
+              {t("dispensed")}
+            </Badge>
           )}
+
+          {substitution && <Badge variant="orange">{t("substituted")}</Badge>}
         </div>
         {medication?.note && (
           <span className="text-sm text-gray-700">{`${t("note")}: ${medication?.note}`}</span>
