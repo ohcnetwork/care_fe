@@ -1405,12 +1405,17 @@ export function encodeDurationValue(duration?: BoundsDuration): string {
 /**
  * Format a BoundsDuration as a human-readable label.
  */
-export function formatDurationLabel(duration?: BoundsDuration): string {
+export function formatDurationLabel(
+  duration?: BoundsDuration,
+  { short = false }: { short?: boolean } = {},
+): string {
   if (!duration?.value || duration.value === "0") return "";
   const info = DURATION_UNIT_LABELS[duration.unit];
   if (!info) return `${duration.value} ${duration.unit}`;
   const numVal = parseFloat(duration.value);
-  return `${duration.value} ${numVal === 1 ? info.singular : info.plural}`;
+  return short
+    ? `${duration.value} ${info.shorthand.toUpperCase()}`
+    : `${duration.value} ${numVal === 1 ? info.singular : info.plural}`;
 }
 
 // ─── Shared dose-quantity computation helpers ───────────────────────

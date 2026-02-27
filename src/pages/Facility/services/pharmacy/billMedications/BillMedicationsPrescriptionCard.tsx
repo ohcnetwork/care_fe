@@ -1,3 +1,10 @@
+import {
+  formatDosage,
+  formatDuration,
+  formatFrequencyShort,
+  formatTotalUnits,
+} from "@/components/Medicine/utils";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormControl, FormField, FormItem } from "@/components/ui/form";
@@ -22,7 +29,7 @@ import { round } from "@/Utils/decimal";
 import { formatName } from "@/Utils/utils";
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
-import { PrinterIcon } from "lucide-react";
+import { BadgeInfo, PrinterIcon } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -197,17 +204,21 @@ interface MedicineLineItemProps {
 const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
   const { facilityId } = useCurrentFacility();
   const { locationId } = useCurrentLocation();
+  const { t } = useTranslation();
 
   const isSelected = form.watch(`${name}.isSelected`);
   const medication = form.watch(`${name}.medication`);
   const productKnowledge = form.watch(`${name}.productKnowledge`);
   const substitution = form.watch(`${name}.substitution`);
+  const hasNoProductKnowledge = !productKnowledge;
   const lots = form.watch(`${name}.lots`);
 
   const disabled = !isSelected;
 
   const effectiveProductKnowledge =
     substitution?.substitutedProductKnowledge || productKnowledge;
+
+  console.log(medication);
 
   return (
     <>
@@ -229,10 +240,64 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
       </div>
 
       {/* Medicine */}
-      <div className="bg-white py-2 px-3 flex items-center">
-        <span className="text-sm font-medium text-gray-700">
-          {medication ? displayMedicationName(medication) : "-"}
-        </span>
+      <div className="bg-white py-2 px-3 flex justify-between items-center">
+        <div className="flex flex-col gap-1">
+          <span className="font-semibold text-gray-950">
+            {medication ? displayMedicationName(medication) : "-"}
+          </span>
+          {(substitution || hasNoProductKnowledge) && (
+            <div className="text-gray-700 font-semibold italic line-through text-sm">
+              {hasNoProductKnowledge
+                ? medication?.medication?.display
+                : productKnowledge?.name}
+            </div>
+          )}
+          <div className="whitespace-nowrap">
+            <div className="text-sm text-gray-700 font-medium flex items-center gap-1">
+              {formatDosage(medication?.dosage_instruction?.[0])} × (
+              {formatFrequencyShort(medication?.dosage_instruction?.[0])}) ×{" "}
+              {formatDuration(medication?.dosage_instruction?.[0], {
+                short: true,
+              }) || "-"}{" "}
+              ={" "}
+              <span className="capitalize">
+                {formatTotalUnits(medication?.dosage_instruction, t("units"))}
+              </span>
+            </div>
+          </div>
+          <div className="flex gap-1">
+            {medication?.status && (
+              <Badge variant="yellow" className="text-xs">
+                {t(`medication_status__${medication?.status}`)}
+              </Badge>
+            )}
+            {medication?.dispense_status && (
+              <Badge variant="cyan" className="text-xs">
+                {t(
+                  `medication_dispense_status__${medication?.dispense_status}`,
+                )}
+              </Badge>
+            )}
+            {(substitution || hasNoProductKnowledge) && (
+              <Badge variant="orange">{t("substituted")}</Badge>
+            )}
+          </div>
+          {medication?.note && (
+            <span className="text-sm text-gray-700">{`${t("note")}: ${medication?.note}`}</span>
+          )}
+        </div>
+        <div className="flex gap-3">
+          <Button variant="outline" size="icon">
+            <BadgeInfo />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="text-sm font-semibold text-gray-950 px-6"
+          >
+            {t("sub")}
+          </Button>
+        </div>
       </div>
 
       {/* Select Lot */}
