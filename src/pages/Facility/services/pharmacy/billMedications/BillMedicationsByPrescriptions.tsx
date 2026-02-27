@@ -1,10 +1,8 @@
-import BackButton from "@/components/Common/BackButton";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
-import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import { BillMedicationsFooter } from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsFooter";
 import { BillMedicationsPrescriptionCard } from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsPrescriptionCard";
 import { billMedicationsByPrescriptionsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import UnbilledPrescriptionsCard from "@/pages/Facility/services/pharmacy/billMedications/UnbilledPrescriptionsCard";
@@ -12,7 +10,6 @@ import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import query from "@/Utils/request/query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueries } from "@tanstack/react-query";
-import { ArrowRightIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -132,33 +129,12 @@ export default function BillMedicationsByPrescriptions({
             </div>
           </div>
           <div className="h-20" />
-          {/* Fixed estimated total and actions bar */}
-          <div className="flex justify-between items-center bg-white px-6 py-4 fixed bottom-0 left-0 right-0 z-10 border-t border-gray-200 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
-            <div className="w-full max-w-2xl">
-              <div className="flex flex-col gap-0.5">
-                <div className="text-gray-700">
-                  <span>{t("estimated_total")}</span>
-                </div>
-                <div className="flex gap-2 items-center">
-                  <span className="text-xl font-semibold text-black tabular-nums">
-                    <MonetaryDisplay amount={450} />
-                  </span>
-                  <span className="text-base font-medium text-red-600 italic">
-                    ({t("final_amount_is_calculated_after_invoice_generation")})
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="flex gap-6">
-              <BackButton variant="outline" size="lg">
-                {t("cancel")}
-              </BackButton>
-              <Button variant="primary" size="lg" onClick={handleBillSelected}>
-                {t("bill_selected")}
-                <ArrowRightIcon className="size-4" />
-              </Button>
-            </div>
-          </div>
+          <BillMedicationsFooter
+            items={form
+              .watch("prescriptions")
+              .flatMap((prescription) => prescription.items)}
+            handleBillSelected={handleBillSelected}
+          />
         </form>
       </Form>
     </Page>

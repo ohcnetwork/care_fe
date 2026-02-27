@@ -92,6 +92,9 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           },
         },
         enableBuild: false,
+        overlay: {
+          position: "br",
+        },
       }),
       treeShakeCareIcons({
         iconWhitelist: ["default"],
