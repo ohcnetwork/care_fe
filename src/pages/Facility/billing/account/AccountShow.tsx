@@ -2,7 +2,7 @@ import { DialogDescription } from "@radix-ui/react-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { Hash, MoreVertical } from "lucide-react";
-import { Link, navigate, useQueryParams } from "raviger";
+import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -115,7 +115,6 @@ export function AccountShow({
     reason: AccountBillingStatus;
   }>({ sheetOpen: false, reason: AccountBillingStatus.closed_baddebt });
 
-  const [{ encounterId }] = useQueryParams();
   const { facility } = useCurrentFacility();
   const { hasPermission } = usePermissions();
 
@@ -231,13 +230,6 @@ export function AccountShow({
     });
   };
 
-  const navigatePath = (key: string) => {
-    return (
-      `/facility/${facilityId}/billing/account/${accountId}/${key}` +
-      (encounterId !== undefined ? `?encounterId=${encounterId}` : "")
-    );
-  };
-
   const handleCloseAccount = () => {
     closeAccount({
       id: accountId,
@@ -327,19 +319,17 @@ export function AccountShow({
       ),
       shortcutId: "switch-to-reports-tab",
     },
-    ...(encounterId && {
-      bed_charge_items: {
-        label: t("bed_charge_items"),
-        component: (
-          <BedChargeItemsTable
-            facilityId={facilityId}
-            accountId={accountId}
-            canAddChargeItems={canAddChargeItems}
-          />
-        ),
-        shortcutId: "switch-to-bed-charge-items-tab",
-      },
-    }),
+    bed_charge_items: {
+      label: t("bed_charge_items"),
+      component: (
+        <BedChargeItemsTable
+          facilityId={facilityId}
+          account={account}
+          canAddChargeItems={canAddChargeItems}
+        />
+      ),
+      shortcutId: "switch-to-bed-charge-items-tab",
+    },
   };
 
   return (
@@ -743,7 +733,11 @@ export function AccountShow({
         tabContentClassName="mt-6"
         tabs={tabs}
         currentTab={tab}
-        onTabChange={(value) => navigate(navigatePath(value))}
+        onTabChange={(value) =>
+          navigate(
+            `/facility/${facilityId}/billing/account/${accountId}/${value}`,
+          )
+        }
         setPageTitle={false}
         showMoreAfterIndex={showMoreAfterIndex}
       />
