@@ -210,7 +210,9 @@ export default function FacilityForm({
           ? Number(facilityData.longitude)
           : undefined,
         is_public: facilityData.is_public,
-        print_templates: facilityData.print_templates,
+        print_templates: Array.isArray(facilityData.print_templates)
+          ? facilityData.print_templates
+          : [],
       });
     }
   }, [facilityData, form]);
