@@ -51,7 +51,7 @@ export const BillMedicationsPrescriptionCard = ({
   return (
     <>
       <Summary prescription={prescription} form={form} name={name} />
-      <HeaderRow />
+      <HeaderRow form={form} name={name} />
 
       {/* TODO: we may need to exclude medications based on their status (enterred in errors?) */}
       {items.map((_, index) => (
@@ -154,14 +154,43 @@ const Summary = ({
   );
 };
 
-const HeaderRow = () => {
+const HeaderRow = ({
+  form,
+  name,
+}: {
+  form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
+  name: `prescriptions.${number}`;
+}) => {
   const { t } = useTranslation();
 
   return (
     <>
       <div className="col-start-1 bg-gray-100 py-1 px-3 flex items-center">
-        {/* TODO: wire this? */}
-        <Checkbox />
+        <FormField
+          control={form.control}
+          name={`${name}.items`}
+          render={() => (
+            <FormItem>
+              <FormControl>
+                <Checkbox
+                  checked={
+                    form.watch(`${name}.items`).length > 0 &&
+                    form.watch(`${name}.items`).every((q) => q.isSelected)
+                  }
+                  onCheckedChange={(checked) => {
+                    const items = form.getValues(`${name}.items`);
+                    items.forEach((_, index) => {
+                      form.setValue(
+                        `${name}.items.${index}.isSelected`,
+                        !!checked,
+                      );
+                    });
+                  }}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
       </div>
       <div className="bg-gray-100 py-1 px-3 flex items-center">
         <span className="text-sm font-medium text-gray-700">
@@ -217,8 +246,6 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
 
   const effectiveProductKnowledge =
     substitution?.substitutedProductKnowledge || productKnowledge;
-
-  console.log(medication);
 
   return (
     <>
