@@ -68,6 +68,7 @@ import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenD
 import {
   BACKEND_ALLOWED_EXTENSIONS,
   FileReadMinimal,
+  FileType,
 } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
 
@@ -260,7 +261,7 @@ export function DiagnosticReportForm({
 
   // Initialize file upload hook
   const fileUpload = useFileUpload({
-    type: "diagnostic_report" as const,
+    type: FileType.DIAGNOSTIC_REPORT,
     multiple: true,
     allowedExtensions: BACKEND_ALLOWED_EXTENSIONS,
     allowNameFallback: false,

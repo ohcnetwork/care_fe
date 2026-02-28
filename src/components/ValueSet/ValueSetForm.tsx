@@ -1,6 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
-import { useFieldArray, useForm } from "react-hook-form";
+import {
+  FieldValues,
+  UseFormReturn,
+  useFieldArray,
+  useForm,
+} from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
 
@@ -86,7 +91,7 @@ function ConceptFields({
           <CodingField
             system={parentForm.watch(`compose.${type}.${nestIndex}.system`)}
             name={`compose.${type}.${nestIndex}.concept.${index}`}
-            form={parentForm}
+            form={parentForm as unknown as UseFormReturn<FieldValues>}
             className="flex-1"
             onRemove={() => remove(index)}
             removeDisabled={disabled}

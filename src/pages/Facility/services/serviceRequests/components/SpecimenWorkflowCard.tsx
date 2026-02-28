@@ -90,7 +90,7 @@ import { formatName } from "@/Utils/utils";
 // --- Helper function (keep or move to utils) ---
 function formatQuantity(quantity: {
   string?: string;
-  quantity?: { value: string | number; unit: { display: string } };
+  quantity?: { value: string | number; unit: { display: string } } | null;
 }): string {
   if (!quantity) return "N/A";
   if (quantity.string) return quantity.string;
