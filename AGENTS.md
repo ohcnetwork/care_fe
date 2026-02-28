@@ -36,6 +36,5 @@ This is a **React 19 + TypeScript + Vite** frontend (port 4000) that connects to
 ### Gotchas
 - Docker requires `fuse-overlayfs` storage driver and `iptables-legacy` in this cloud VM. These are configured in `/etc/docker/daemon.json` and via `update-alternatives`.
 - The Vite dev server does **not** auto-restart when `.env.local` changes; you must manually restart it.
-- `npm run lint` should pass cleanly (exit 0). If it reports warnings, verify they are not caused by your changes with `npx eslint <file>`.
-- The Vite dev server shows TypeScript error overlays from `vite-plugin-checker` for pre-existing type errors. Click "Close" to dismiss them; they don't block functionality.
+- `npm run lint` and `npx tsc --noEmit` should both pass cleanly with 0 errors and 0 warnings. If either reports issues, verify they are not caused by your changes.
 - Playwright E2E tests require both frontend and backend running. Install browsers first with `npm run playwright:install`.
