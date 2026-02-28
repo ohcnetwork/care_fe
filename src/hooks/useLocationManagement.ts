@@ -8,6 +8,7 @@ import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 
 interface UseLocationManagementProps {
   facilityId: string;
@@ -67,8 +68,8 @@ export function useLocationManagement({
 
   const { mutate: updateLocationOrder } = useMutation({
     mutationFn: (params: {
-      locations: { locationId: string; data: any }[];
-      previousData?: any;
+      locations: { locationId: string; data: LocationRead }[];
+      previousData?: PaginatedResponse<LocationRead>;
       onSuccess?: () => void;
     }) => {
       const batchRequests = params.locations.map(

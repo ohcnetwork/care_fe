@@ -66,7 +66,7 @@ interface LeftPanelProps {
   responseId?: string;
   questionnaireTitle: string;
   questionnaireSlug?: string;
-  setQueryParams: (params: any) => void;
+  setQueryParams: (params: Record<string, string | undefined>) => void;
   onResponseClick: (response: QuestionnaireResponse) => void;
 }
 

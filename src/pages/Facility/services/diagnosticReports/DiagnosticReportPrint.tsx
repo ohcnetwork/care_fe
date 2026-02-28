@@ -3,7 +3,7 @@ import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Loader } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Document, Page, pdfjs } from "react-pdf";
 
@@ -125,24 +125,27 @@ export default function DiagnosticReportPrint({
   });
 
   // Function to get signed URL for a file
-  const getFileUrl = async (file: FileReadMinimal) => {
-    if (!file.id || !report?.id) return null;
+  const getFileUrl = useCallback(
+    async (file: FileReadMinimal) => {
+      if (!file.id || !report?.id) return null;
 
-    try {
-      const data = await query(fileApi.get, {
-        queryParams: {
-          file_type: "diagnostic_report",
-          associating_id: report.id,
-        },
-        pathParams: { fileId: file.id },
-      })({} as any);
+      try {
+        const data = await query(fileApi.get, {
+          queryParams: {
+            file_type: "diagnostic_report",
+            associating_id: report.id,
+          },
+          pathParams: { fileId: file.id },
+        })({ signal: new AbortController().signal });
 
-      return data?.read_signed_url as string;
-    } catch (error) {
-      console.error("Error fetching signed URL:", error);
-      return null;
-    }
-  };
+        return data?.read_signed_url as string;
+      } catch (error) {
+        console.error("Error fetching signed URL:", error);
+        return null;
+      }
+    },
+    [report?.id],
+  );
 
   // Store file URLs
   const [fileUrls, setFileUrls] = useState<Record<string, string>>({});
@@ -166,7 +169,7 @@ export default function DiagnosticReportPrint({
     };
 
     fetchAllUrls();
-  }, [files.results, report?.id]);
+  }, [files.results, report?.id, getFileUrl]);
 
   if (isLoading) {
     return (

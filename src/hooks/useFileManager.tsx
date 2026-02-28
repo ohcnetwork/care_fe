@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
+import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -105,7 +105,7 @@ export default function useFileManager(
             associating_id,
           },
           pathParams: { fileId: file.id || "" },
-        })({} as any),
+        })({ signal: new AbortController().signal }),
     });
   };
 
@@ -135,7 +135,7 @@ export default function useFileManager(
     setFileUrl(signedUrl);
   };
 
-  const validateArchiveReason = (name: any) => {
+  const validateArchiveReason = (name: string) => {
     if (name.trim() === "") {
       setArchiveReasonError(t("please_enter_a_valid_reason"));
       return false;
@@ -150,7 +150,7 @@ export default function useFileManager(
       query(fileApi.archive, {
         body: { archive_reason: body.archive_reason },
         pathParams: { fileId: body.id },
-      })({} as any),
+      })({ signal: new AbortController().signal }),
     onSuccess: () => {
       toast.success(t("file_archived_successfully"));
       queryClient.invalidateQueries({
@@ -289,7 +289,7 @@ export default function useFileManager(
           </DialogHeader>
 
           <form
-            onSubmit={(event: any) => {
+            onSubmit={(event: React.FormEvent<HTMLFormElement>) => {
               event.preventDefault();
               handleFileArchive(archiveDialogueOpen);
             }}
@@ -391,7 +391,7 @@ export default function useFileManager(
               <div key={index} className="flex gap-2">
                 <div className="flex aspect-square h-10 items-center justify-center rounded-full bg-primary-100">
                   <CareIcon
-                    icon={item.icon as any}
+                    icon={item.icon as IconName}
                     className="text-lg text-primary-500"
                   />
                 </div>
@@ -441,7 +441,7 @@ export default function useFileManager(
             </DialogTitle>
           </DialogHeader>
           <form
-            onSubmit={(event: any) => {
+            onSubmit={(event: React.FormEvent<HTMLFormElement>) => {
               event.preventDefault();
               setEditing(true);
               if (editDialogueOpen) partialupdateFileName(editDialogueOpen);
