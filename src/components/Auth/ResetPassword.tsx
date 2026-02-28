@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -21,18 +21,23 @@ interface ResetPasswordProps {
 }
 
 const ResetPassword = (props: ResetPasswordProps) => {
-  const initForm: any = {
+  const initForm: {
+    password: string;
+    confirm: string;
+    token?: string;
+    [key: string]: string | undefined;
+  } = {
     password: "",
     confirm: "",
   };
 
-  const initErr: any = {};
+  const initErr: Record<string, string | null> = {};
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
   const [isPasswordFieldFocused, setIsPasswordFieldFocused] = useState(false);
 
   const { t } = useTranslation();
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name } = e.target;
     const fieldValue = Object.assign({}, form);
     const errorField = Object.assign({}, errors);
@@ -85,7 +90,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
     },
   });
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     const valid = validateData();
     if (valid) {

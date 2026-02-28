@@ -72,7 +72,9 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
   const setupAudioAnalyser = () => {
     let animationFrameId: number;
     audioContext = new (
-      window.AudioContext || (window as any).webkitAudioContext
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext!
     )();
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 32;
