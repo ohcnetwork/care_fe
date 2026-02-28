@@ -84,7 +84,13 @@ export function validateEncounterQuestion(
     ["imp", "obsenc", "emer"].includes(value.encounter_class) &&
     !value?.hospitalization?.discharge_disposition
   ) {
-    errors.push(...validateFields(value, questionId, ENCOUNTER_FIELDS));
+    errors.push(
+      ...validateFields(
+        value as unknown as Record<string, unknown>,
+        questionId,
+        ENCOUNTER_FIELDS,
+      ),
+    );
   }
 
   return errors;

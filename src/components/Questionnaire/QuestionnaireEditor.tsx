@@ -12,7 +12,13 @@ import {
 } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { UseFormReturn, useForm, useWatch } from "react-hook-form";
+import {
+  FieldValues,
+  Resolver,
+  UseFormReturn,
+  useForm,
+  useWatch,
+} from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -102,6 +108,8 @@ import {
 } from "@/types/questionnaire/question";
 import {
   QuestionStatus,
+  QuestionnaireBase,
+  QuestionnaireCreate,
   QuestionnaireRead,
   SubjectType,
 } from "@/types/questionnaire/questionnaire";
@@ -117,7 +125,7 @@ import { SelectOrCreateValueset } from "./SelectOrCreateValueset";
 import ValueSetSelect from "./ValueSetSelect";
 import { scrollToQuestion } from "./utils";
 
-interface QuestionnaireFormValues {
+interface _QuestionnaireFormValues {
   title: string;
   slug: string;
   description?: string;
@@ -503,8 +511,10 @@ export default function QuestionnaireEditor({
     },
   );
 
-  const form = useForm<QuestionnaireFormValues>({
-    resolver: zodResolver(QuestionnaireFormPartialSchema),
+  const form = useForm<FieldValues>({
+    resolver: zodResolver(
+      QuestionnaireFormPartialSchema,
+    ) as unknown as Resolver<FieldValues>,
     defaultValues: {
       title: questionnaire?.title ?? "",
       slug: questionnaire?.slug ?? "",
@@ -744,7 +754,9 @@ export default function QuestionnaireEditor({
               break;
             }
           } else {
-            const errorPath = findFirstErrorPath(error);
+            const errorPath = findFirstErrorPath(
+              error as unknown as QuestionFormError[],
+            );
             if (errorPath) {
               // Expand parent groups
               for (let i = 0; i < errorPath.length; i++) {
@@ -784,14 +796,14 @@ export default function QuestionnaireEditor({
         ...form.getValues(),
         version: String(questionnaire.version), //TODO: remove when backend is fixed
         questions: rootQuestions,
-      });
+      } as QuestionnaireBase);
     } else {
       createQuestionnaire({
         ...form.getValues(),
         questions: rootQuestions,
         organizations: selectedOrgs.map((o) => o.id),
         tags: selectedTags.map((t) => t.id),
-      });
+      } as QuestionnaireCreate);
     }
   };
 
@@ -851,7 +863,7 @@ export default function QuestionnaireEditor({
     setQuestionnaire({
       ...form.getValues(),
       ...mappedData,
-    });
+    } as QuestionnaireRead);
 
     form.reset({
       title: mappedData.title || "",
@@ -1077,7 +1089,7 @@ export default function QuestionnaireEditor({
             {isMobile && (
               <div className="space-y-4">
                 <QuestionnaireProperties
-                  form={form}
+                  form={form as unknown as UseFormReturn<QuestionnaireRead>}
                   updateQuestionnaireField={updateQuestionnaireField}
                   slug={slug}
                   organizations={organizations}
@@ -1329,7 +1341,7 @@ export default function QuestionnaireEditor({
             </div>
             <div className="space-y-4 w-60 hidden md:block sticky top-4 self-start h-fit">
               <QuestionnaireProperties
-                form={form}
+                form={form as unknown as UseFormReturn<QuestionnaireRead>}
                 updateQuestionnaireField={updateQuestionnaireField}
                 slug={slug}
                 organizations={organizations}
@@ -1772,7 +1784,7 @@ const OptionFields = ({
 
 interface QuestionEditorProps {
   name: string;
-  form: UseFormReturn<QuestionnaireFormValues>;
+  form: UseFormReturn<FieldValues>;
   index: number;
   question: Question;
   onChange: (updated: Question) => void;

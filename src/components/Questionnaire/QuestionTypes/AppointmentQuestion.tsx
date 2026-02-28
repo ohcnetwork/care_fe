@@ -66,12 +66,16 @@ export function validateAppointmentQuestion(
   questionId: string,
   required: boolean,
 ): QuestionValidationError[] {
-  return validateFields(value, questionId, {
-    SLOT: {
-      ...APPOINTMENT_FIELDS.SLOT,
-      required: required,
+  return validateFields(
+    value as unknown as Record<string, unknown>,
+    questionId,
+    {
+      SLOT: {
+        ...APPOINTMENT_FIELDS.SLOT,
+        required: required,
+      },
     },
-  });
+  );
 }
 
 function getInitialResourceState(

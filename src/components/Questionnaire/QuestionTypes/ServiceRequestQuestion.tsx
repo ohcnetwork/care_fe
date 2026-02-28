@@ -596,7 +596,12 @@ export function ServiceRequestQuestion({
 
     setServiceRequests(newServiceRequests);
     updateQuestionnaireResponseCB(
-      [{ type: "service_request", value: newServiceRequests }],
+      [
+        {
+          type: "service_request",
+          value: newServiceRequests,
+        } as unknown as ResponseValue,
+      ],
       questionnaireResponse.question_id,
     );
   };
@@ -612,7 +617,12 @@ export function ServiceRequestQuestion({
 
     setServiceRequests(newServiceRequests);
     updateQuestionnaireResponseCB(
-      [{ type: "service_request", value: newServiceRequests }],
+      [
+        {
+          type: "service_request",
+          value: newServiceRequests,
+        } as unknown as ResponseValue,
+      ],
       questionnaireResponse.question_id,
     );
   };
@@ -663,7 +673,7 @@ export function ServiceRequestQuestion({
           {
             type: "service_request",
             value: updated,
-          },
+          } as unknown as ResponseValue,
         ],
         questionnaireResponse.question_id,
       );
@@ -688,7 +698,12 @@ export function ServiceRequestQuestion({
     );
     setServiceRequests(newServiceRequests);
     updateQuestionnaireResponseCB(
-      [{ type: "service_request", value: newServiceRequests }],
+      [
+        {
+          type: "service_request",
+          value: newServiceRequests,
+        } as unknown as ResponseValue,
+      ],
       questionnaireResponse.question_id,
     );
   };
@@ -716,7 +731,12 @@ export function ServiceRequestQuestion({
     setServiceRequests(newServiceRequests);
 
     updateQuestionnaireResponseCB(
-      [{ type: "service_request", value: newServiceRequests }],
+      [
+        {
+          type: "service_request",
+          value: newServiceRequests,
+        } as unknown as ResponseValue,
+      ],
       questionnaireResponse.question_id,
     );
   };
@@ -798,7 +818,12 @@ export function ServiceRequestQuestion({
       const newServiceRequests = [...serviceRequests, newServiceRequest];
       setServiceRequests(newServiceRequests);
       updateQuestionnaireResponseCB(
-        [{ type: "service_request", value: newServiceRequests }],
+        [
+          {
+            type: "service_request",
+            value: newServiceRequests,
+          } as unknown as ResponseValue,
+        ],
         questionnaireResponse.question_id,
       );
     } catch {
@@ -895,7 +920,12 @@ export function ServiceRequestQuestion({
       const newServiceRequests = [...serviceRequests, ...validServiceRequests];
       setServiceRequests(newServiceRequests);
       updateQuestionnaireResponseCB(
-        [{ type: "service_request", value: newServiceRequests }],
+        [
+          {
+            type: "service_request",
+            value: newServiceRequests,
+          } as unknown as ResponseValue,
+        ],
         questionnaireResponse.question_id,
       );
 
