@@ -34,7 +34,6 @@ import { formatName } from "@/Utils/utils";
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { BadgeInfo, Check, PrinterIcon } from "lucide-react";
-import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -307,7 +306,7 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
               facilityId={facilityId}
               locationId={locationId}
               // TODO: handle this?
-              productKnowledgeId={productKnowledge?.id || ""}
+              productKnowledgeId={effectiveProductKnowledge?.id || ""}
               showOnlyAvailable
             />
           </div>
@@ -400,7 +399,6 @@ const MedicineLineItemMedication = ({
   name: `prescriptions.${number}.items.${number}`;
 }) => {
   const { t } = useTranslation();
-  const [isSubstitutionSheetOpen, setIsSubstitutionSheetOpen] = useState(false);
 
   const medication = form.watch(`${name}.medication`);
   const productKnowledge = form.watch(`${name}.productKnowledge`);
@@ -461,37 +459,46 @@ const MedicineLineItemMedication = ({
         <Button variant="outline" size="icon" className="text-gray-950">
           <BadgeInfo />
         </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          className="text-sm font-semibold text-gray-950 px-6"
-          onClick={() => {
-            setIsSubstitutionSheetOpen(true);
-          }}
-        >
-          {t("sub")}
-        </Button>
+
+        <FormField
+          control={form.control}
+          name={`${name}.substitution`}
+          render={({ field }) => (
+            <FormItem>
+              <SubstitutionSheet
+                original={{
+                  productKnowledge: productKnowledge,
+                  medicationName: medication?.medication.display,
+                }}
+                initialValue={field.value}
+                onSave={(value) => {
+                  field.onChange(value);
+                  form.setValue(`${name}.lots`, [], {
+                    shouldDirty: true,
+                    shouldTouch: true,
+                  });
+                }}
+                onClear={() => {
+                  field.onChange(null);
+                  form.setValue(`${name}.lots`, [], {
+                    shouldDirty: true,
+                    shouldTouch: true,
+                  });
+                }}
+                trigger={
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="text-sm font-semibold text-gray-950 px-6"
+                  >
+                    {t("sub")}
+                  </Button>
+                }
+              />
+            </FormItem>
+          )}
+        />
       </div>
-      <SubstitutionSheet
-        open={isSubstitutionSheetOpen}
-        onOpenChange={setIsSubstitutionSheetOpen}
-        originalProductKnowledge={productKnowledge || undefined}
-        originalMedicationName={medication?.medication.display}
-        currentSubstitution={substitution || undefined}
-        onSave={(substitutionDetails) => {
-          if (substitutionDetails) {
-            form.setValue(`${name}.substitution`, substitutionDetails, {
-              shouldDirty: true,
-              shouldTouch: true,
-            });
-          } else {
-            form.setValue(`${name}.substitution`, null, {
-              shouldDirty: true,
-              shouldTouch: true,
-            });
-          }
-        }}
-      />
     </>
   );
 };

@@ -1,4 +1,4 @@
-import { LotSelectionSchema } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
+import { lotSelectionSchema } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
 import {
   SubstitutionReason,
   SubstitutionType,
@@ -39,7 +39,7 @@ const billMedicationLineItemSchema = z.object({
       reason: z.nativeEnum(SubstitutionReason),
     })
     .nullable(),
-  lots: z.array(LotSelectionSchema),
+  lots: z.array(lotSelectionSchema),
   allGiven: z.boolean(),
 });
 
