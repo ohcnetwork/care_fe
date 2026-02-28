@@ -19,7 +19,6 @@ const supportedBrowsersPath = path.resolve(
 );
 fs.writeFileSync(
   supportedBrowsersPath,
-  `/* eslint-disable */
-export default ${regex};
+  `export default ${regex};
 `,
 );
