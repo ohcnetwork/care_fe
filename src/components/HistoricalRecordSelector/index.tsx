@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 import { ChevronsDownUp, ChevronsUpDown, Clock, Files } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -196,6 +196,9 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
 
   // Update state when data changes
   const currentActiveOffset = state.currentOffset[activeType];
+  const dateGroupedRecordsRef = useRef(state.dateGroupedRecords);
+  dateGroupedRecordsRef.current = state.dateGroupedRecords;
+
   useEffect(() => {
     if (!isOpen || !recordsData?.results) return;
 
@@ -225,7 +228,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
 
     // Merge with existing records
     updateState({
-      dateGroupedRecords: [...state.dateGroupedRecords, ...sortedGroups]
+      dateGroupedRecords: [...dateGroupedRecordsRef.current, ...sortedGroups]
         .reduce((acc: DateGroupedRecords<T>[], group) => {
           const existingGroupIndex = acc.findIndex(
             (g) => g.date === group.date,
@@ -264,14 +267,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
       );
       updateState({ expandedDates: top5Dates });
     }
-  }, [
-    isOpen,
-    recordsData,
-    currentActiveOffset,
-    state.dateGroupedRecords,
-    activeType,
-    updateState,
-  ]);
+  }, [isOpen, recordsData, currentActiveOffset, activeType, updateState]);
 
   const handleLoadMore = useCallback(() => {
     updateState({

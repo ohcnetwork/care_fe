@@ -149,7 +149,7 @@ export default function DiagnosticReportPrint({
           })({ signal: controller.signal });
 
           if (data?.read_signed_url) {
-            urls[file.id] = data.read_signed_url as string;
+            urls[file.id] = data.read_signed_url;
           }
         } catch (error) {
           if (!controller.signal.aborted) {

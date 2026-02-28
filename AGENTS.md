@@ -20,7 +20,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Components**: Organized by feature, maintain separation of concerns
 - **Error Handling**: Use dedicated error handlers, TypeScript strict null checks
 
-## Cursor Cloud specific instructions
+## Cursor Cloud-specific instructions
 
 ### Architecture
 

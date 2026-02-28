@@ -809,6 +809,7 @@ export function ServiceRequestQuestion({
         ...serviceRequestsRef.current,
         newServiceRequest,
       ];
+      serviceRequestsRef.current = newServiceRequests;
       setServiceRequests(newServiceRequests);
       updateQuestionnaireResponseCB(
         [
@@ -914,6 +915,7 @@ export function ServiceRequestQuestion({
         ...serviceRequestsRef.current,
         ...validServiceRequests,
       ];
+      serviceRequestsRef.current = newServiceRequests;
       setServiceRequests(newServiceRequests);
       updateQuestionnaireResponseCB(
         [

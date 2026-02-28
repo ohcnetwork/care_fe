@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -98,14 +98,14 @@ export default function useFileManager(
   ) => {
     return queryClient.fetchQuery({
       queryKey: ["file", fileType, associating_id, file.id],
-      queryFn: () =>
+      queryFn: ({ signal }) =>
         query(fileApi.get, {
           queryParams: {
             file_type: fileType,
             associating_id,
           },
           pathParams: { fileId: file.id || "" },
-        })({ signal: new AbortController().signal }),
+        })({ signal }),
     });
   };
 
@@ -145,12 +145,13 @@ export default function useFileManager(
     }
   };
 
+  const archiveController = useRef(new AbortController());
   const { mutateAsync: archiveUpload } = useMutation({
     mutationFn: (body: { id: string; archive_reason: string }) =>
       query(fileApi.archive, {
         body: { archive_reason: body.archive_reason },
         pathParams: { fileId: body.id },
-      })({ signal: new AbortController().signal }),
+      })({ signal: archiveController.current.signal }),
     onSuccess: () => {
       toast.success(t("file_archived_successfully"));
       queryClient.invalidateQueries({
