@@ -9,9 +9,7 @@ test.describe("Healthcare Service Create & Edit", () => {
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
-    await page.goto(
-      `/facility/${facilityId}/settings/healthcare_services`,
-    );
+    await page.goto(`/facility/${facilityId}/settings/healthcare_services`);
   });
 
   test("should create a new healthcare service", async ({ page }) => {
@@ -37,9 +35,7 @@ test.describe("Healthcare Service Create & Edit", () => {
       await locationTrigger.first().click();
 
       // Wait for the location picker to open and select the first location
-      const plusButton = page
-        .locator("button:has(svg.lucide-plus)")
-        .first();
+      const plusButton = page.locator("button:has(svg.lucide-plus)").first();
       await expect(plusButton).toBeVisible({ timeout: 5000 });
       await plusButton.click();
 
@@ -65,9 +61,9 @@ test.describe("Healthcare Service Create & Edit", () => {
         .fill(serviceName);
 
       // Verify the service link is visible
-      await expect(
-        page.getByRole("link", { name: serviceName }),
-      ).toBeVisible({ timeout: 10000 });
+      await expect(page.getByRole("link", { name: serviceName })).toBeVisible({
+        timeout: 10000,
+      });
     });
   });
 
@@ -91,9 +87,7 @@ test.describe("Healthcare Service Create & Edit", () => {
         .or(page.getByText(/select locations/i));
       await locationTrigger.first().click();
 
-      const plusButton = page
-        .locator("button:has(svg.lucide-plus)")
-        .first();
+      const plusButton = page.locator("button:has(svg.lucide-plus)").first();
       await expect(plusButton).toBeVisible({ timeout: 5000 });
       await plusButton.click();
       await page.keyboard.press("Escape");
@@ -134,17 +128,15 @@ test.describe("Healthcare Service Create & Edit", () => {
   });
 
   test("should show validation error when name is empty", async ({ page }) => {
-    await page
-      .getByRole("button", { name: /add healthcare service/i })
-      .click();
+    await page.getByRole("button", { name: /add healthcare service/i }).click();
     await page.waitForURL(/\/healthcare_services\/new/);
 
     // Try to submit without filling name
     await page.getByRole("button", { name: /create/i }).click();
 
     // Should show validation error
-    await expect(
-      page.getByText(/name is required/i),
-    ).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/name is required/i)).toBeVisible({
+      timeout: 5000,
+    });
   });
 });

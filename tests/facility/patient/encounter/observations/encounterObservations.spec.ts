@@ -79,31 +79,28 @@ test.describe("Encounter Observations Tab", () => {
       ).toBeVisible({ timeout: 10000 });
     });
 
-    await test.step(
-      "Navigate to observations tab and verify data",
-      async () => {
-        // Navigate to the Observations tab
-        await page.getByRole("tab", { name: "Observations" }).click();
+    await test.step("Navigate to observations tab and verify data", async () => {
+      // Navigate to the Observations tab
+      await page.getByRole("tab", { name: "Observations" }).click();
 
-        // Wait for observations to load
-        await page.waitForLoadState("networkidle");
+      // Wait for observations to load
+      await page.waitForLoadState("networkidle");
 
-        // The observations tab should show observation entries
-        const tabContent = page.locator('[role="tabpanel"]');
-        await expect(tabContent).toBeVisible();
+      // The observations tab should show observation entries
+      const tabContent = page.locator('[role="tabpanel"]');
+      await expect(tabContent).toBeVisible();
 
-        // Look for observation content (date grouping headers, observation values)
-        // The tab shows grouped observations by date
-        const observationContent = page
-          .getByText(/today|yesterday/i)
-          .or(page.locator('[data-slot="card"]').first());
+      // Look for observation content (date grouping headers, observation values)
+      // The tab shows grouped observations by date
+      const observationContent = page
+        .getByText(/today|yesterday/i)
+        .or(page.locator('[data-slot="card"]').first());
 
-        // If observations exist, they should be visible with date grouping
-        if (await observationContent.isVisible().catch(() => false)) {
-          await expect(observationContent).toBeVisible();
-        }
-      },
-    );
+      // If observations exist, they should be visible with date grouping
+      if (await observationContent.isVisible().catch(() => false)) {
+        await expect(observationContent).toBeVisible();
+      }
+    });
   });
 
   test("should navigate between encounter tabs without errors", async ({

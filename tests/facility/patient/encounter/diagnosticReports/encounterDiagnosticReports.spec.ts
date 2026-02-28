@@ -42,20 +42,11 @@ test.describe("Encounter Diagnostic Reports Tab", () => {
     // Wait for content to load
     await page.waitForLoadState("networkidle");
 
-    // Should show either diagnostic report cards or empty state or a card list
-    const content = page
-      .locator('[data-slot="card"]')
-      .first()
-      .or(page.getByText(/no diagnostic reports/i))
-      .or(page.getByText(/no.*report/i));
-
     // Wait a moment for content to fully render
     await page.waitForTimeout(1000);
 
     // The tab should render without errors
-    await expect(
-      page.getByText(/something went wrong/i),
-    ).not.toBeVisible();
+    await expect(page.getByText(/something went wrong/i)).not.toBeVisible();
   });
 
   test("should have activity definition filter dropdown", async ({ page }) => {
@@ -70,7 +61,12 @@ test.describe("Encounter Diagnostic Reports Tab", () => {
       .or(page.getByPlaceholder(/filter|activity|all/i));
 
     // If the filter is visible, verify it exists
-    if (await filterDropdown.first().isVisible().catch(() => false)) {
+    if (
+      await filterDropdown
+        .first()
+        .isVisible()
+        .catch(() => false)
+    ) {
       await expect(filterDropdown.first()).toBeVisible();
     }
   });
@@ -97,9 +93,7 @@ test.describe("Encounter Diagnostic Reports Tab", () => {
 
       // Verify tab loads without errors
       await page.waitForTimeout(1000);
-      await expect(
-        page.getByText(/something went wrong/i),
-      ).not.toBeVisible();
+      await expect(page.getByText(/something went wrong/i)).not.toBeVisible();
     }
   });
 });

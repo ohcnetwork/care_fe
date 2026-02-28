@@ -70,13 +70,14 @@ test.describe("Encounter Consents Tab", () => {
 
     // Verify form fields are present
     // Category select should be visible
-    await expect(
-      sheet.getByText(/category/i).first(),
-    ).toBeVisible();
+    await expect(sheet.getByText(/category/i).first()).toBeVisible();
 
     // Decision (Permit/Deny) should be visible
     await expect(
-      sheet.getByText(/decision/i).or(sheet.getByText(/permit/i)).first(),
+      sheet
+        .getByText(/decision/i)
+        .or(sheet.getByText(/permit/i))
+        .first(),
     ).toBeVisible();
   });
 
@@ -100,7 +101,10 @@ test.describe("Encounter Consents Tab", () => {
       const categorySelect = sheet.getByRole("combobox").first();
       if (await categorySelect.isVisible().catch(() => false)) {
         await categorySelect.click();
-        await page.getByRole("option", { name: /treatment/i }).first().click();
+        await page
+          .getByRole("option", { name: /treatment/i })
+          .first()
+          .click();
       }
     });
 

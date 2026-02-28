@@ -22,9 +22,9 @@ test.describe("Patient Demography View", () => {
 
     // Verify patient name is visible (fixture patients have faker-generated names)
     // The page should have a heading or prominent text with the patient name
-    const patientHeader = page.locator(
-      '[data-slot="patient-info-hover-card-trigger"]',
-    ).or(page.locator("h1, h2, h3").first());
+    const patientHeader = page
+      .locator('[data-slot="patient-info-hover-card-trigger"]')
+      .or(page.locator("h1, h2, h3").first());
     await expect(patientHeader.first()).toBeVisible({ timeout: 10000 });
   });
 
@@ -55,15 +55,15 @@ test.describe("Patient Demography View", () => {
     await expect(page.getByText(/emergency contact/i).first()).toBeVisible();
   });
 
-  test("should have edit button for general info section", async ({
-    page,
-  }) => {
+  test("should have edit button for general info section", async ({ page }) => {
     await page.waitForLoadState("networkidle");
 
     // Look for the edit button in the general info section
-    const editButton = page
-      .getByRole("button", { name: /edit/i })
-      .or(page.locator("button").filter({ has: page.locator("svg.lucide-pencil, svg.lucide-square-pen") }));
+    const editButton = page.getByRole("button", { name: /edit/i }).or(
+      page.locator("button").filter({
+        has: page.locator("svg.lucide-pencil, svg.lucide-square-pen"),
+      }),
+    );
 
     await expect(editButton.first()).toBeVisible({ timeout: 10000 });
   });
@@ -74,9 +74,11 @@ test.describe("Patient Demography View", () => {
     await page.waitForLoadState("networkidle");
 
     // Click the edit button
-    const editButton = page
-      .getByRole("button", { name: /edit/i })
-      .or(page.locator("button").filter({ has: page.locator("svg.lucide-pencil, svg.lucide-square-pen") }));
+    const editButton = page.getByRole("button", { name: /edit/i }).or(
+      page.locator("button").filter({
+        has: page.locator("svg.lucide-pencil, svg.lucide-square-pen"),
+      }),
+    );
 
     await editButton.first().click();
 

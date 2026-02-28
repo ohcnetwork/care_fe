@@ -9,7 +9,7 @@ test.describe("Patient Update/Edit", () => {
   let facilityId: string;
   let patientId: string;
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async () => {
     facilityId = getFacilityId();
     patientId = getPatientId();
   });
@@ -18,9 +18,7 @@ test.describe("Patient Update/Edit", () => {
     page,
   }) => {
     // Navigate to patient update page
-    await page.goto(
-      `/facility/${facilityId}/patient/${patientId}/update`,
-    );
+    await page.goto(`/facility/${facilityId}/patient/${patientId}/update`);
 
     await page.waitForLoadState("networkidle");
 
@@ -36,9 +34,7 @@ test.describe("Patient Update/Edit", () => {
 
   test("should update patient address", async ({ page }) => {
     // Navigate to patient update page
-    await page.goto(
-      `/facility/${facilityId}/patient/${patientId}/update`,
-    );
+    await page.goto(`/facility/${facilityId}/patient/${patientId}/update`);
 
     await page.waitForLoadState("networkidle");
 
@@ -78,9 +74,7 @@ test.describe("Patient Update/Edit", () => {
   });
 
   test("should display phone number field pre-filled", async ({ page }) => {
-    await page.goto(
-      `/facility/${facilityId}/patient/${patientId}/update`,
-    );
+    await page.goto(`/facility/${facilityId}/patient/${patientId}/update`);
 
     await page.waitForLoadState("networkidle");
 
@@ -95,16 +89,14 @@ test.describe("Patient Update/Edit", () => {
   });
 
   test("should display gender selection pre-selected", async ({ page }) => {
-    await page.goto(
-      `/facility/${facilityId}/patient/${patientId}/update`,
-    );
+    await page.goto(`/facility/${facilityId}/patient/${patientId}/update`);
 
     await page.waitForLoadState("networkidle");
 
     // Wait for form to load
-    await expect(
-      page.getByRole("textbox", { name: /name.*\*/i }),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole("textbox", { name: /name.*\*/i })).toBeVisible({
+      timeout: 10000,
+    });
 
     // One of the gender radio buttons should be checked
     const genderRadios = page.getByRole("radio");
@@ -125,16 +117,14 @@ test.describe("Patient Update/Edit", () => {
   test("should show validation error for invalid phone number", async ({
     page,
   }) => {
-    await page.goto(
-      `/facility/${facilityId}/patient/${patientId}/update`,
-    );
+    await page.goto(`/facility/${facilityId}/patient/${patientId}/update`);
 
     await page.waitForLoadState("networkidle");
 
     // Wait for form to load
-    await expect(
-      page.getByRole("textbox", { name: /name.*\*/i }),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole("textbox", { name: /name.*\*/i })).toBeVisible({
+      timeout: 10000,
+    });
 
     // Set an invalid phone number
     const phoneField = page.getByRole("textbox", {

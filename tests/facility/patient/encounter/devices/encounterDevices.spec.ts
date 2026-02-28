@@ -27,9 +27,7 @@ test.describe("Encounter Devices Tab", () => {
     await page.getByRole("tab", { name: "Devices" }).click();
   });
 
-  test("should display devices tab with associate button", async ({
-    page,
-  }) => {
+  test("should display devices tab with associate button", async ({ page }) => {
     // Verify the devices tab content is visible
     const tabContent = page.locator('[role="tabpanel"]');
     await expect(tabContent).toBeVisible();

@@ -8,9 +8,7 @@ test.describe("Healthcare Service View", () => {
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
-    await page.goto(
-      `/facility/${facilityId}/settings/healthcare_services`,
-    );
+    await page.goto(`/facility/${facilityId}/settings/healthcare_services`);
   });
 
   test("should display healthcare services list page", async ({ page }) => {
@@ -25,9 +23,7 @@ test.describe("Healthcare Service View", () => {
     ).toBeVisible();
   });
 
-  test("should search for an existing healthcare service", async ({
-    page,
-  }) => {
+  test("should search for an existing healthcare service", async ({ page }) => {
     // Fixtures create "Pathology Lab" and "Main Pharmacy" healthcare services
     await page
       .getByRole("textbox", { name: /search healthcare services/i })
@@ -59,12 +55,8 @@ test.describe("Healthcare Service View", () => {
     await expect(page.getByText(/pathology lab/i).first()).toBeVisible();
 
     // Verify action buttons are present (Edit, Delete)
-    await expect(
-      page.getByRole("link", { name: /edit/i }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /delete/i }),
-    ).toBeVisible();
+    await expect(page.getByRole("link", { name: /edit/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /delete/i })).toBeVisible();
   });
 
   test("should view pharmacy healthcare service", async ({ page }) => {

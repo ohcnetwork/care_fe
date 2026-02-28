@@ -47,9 +47,7 @@ test.describe("Service Request Creation", () => {
     await page.getByRole("tab", { name: "Service Requests" }).click();
 
     // Click "Create Service Request" button
-    await page
-      .getByRole("link", { name: /create service request/i })
-      .click();
+    await page.getByRole("link", { name: /create service request/i }).click();
 
     // Wait for the questionnaire form page to load
     await page.waitForURL(/\/questionnaire\/service_request/);

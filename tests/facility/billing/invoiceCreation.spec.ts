@@ -8,7 +8,7 @@ test.describe("Invoice Creation", () => {
   let facilityId: string;
   let accountId: string;
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async () => {
     facilityId = getFacilityId();
     accountId = getAccountId();
   });
@@ -17,9 +17,7 @@ test.describe("Invoice Creation", () => {
     page,
   }) => {
     // Navigate to the account page
-    await page.goto(
-      `/facility/${facilityId}/billing/account/${accountId}`,
-    );
+    await page.goto(`/facility/${facilityId}/billing/account/${accountId}`);
 
     // Wait for the page to load
     await page.waitForLoadState("networkidle");
@@ -29,7 +27,12 @@ test.describe("Invoice Creation", () => {
       .getByRole("link", { name: /create invoice/i })
       .or(page.getByRole("button", { name: /create invoice/i }));
 
-    if (await createInvoiceButton.first().isVisible().catch(() => false)) {
+    if (
+      await createInvoiceButton
+        .first()
+        .isVisible()
+        .catch(() => false)
+    ) {
       await createInvoiceButton.first().click();
       await page.waitForURL(/\/invoices\/create/);
 

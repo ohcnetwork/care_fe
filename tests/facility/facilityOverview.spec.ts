@@ -14,9 +14,9 @@ test.describe("Facility Overview Page", () => {
   test("should display facility name and overview page", async ({ page }) => {
     // Verify the facility overview page loads
     // The facility name should be visible (fixture creates "FACILITY WITH PATIENTS")
-    await expect(
-      page.getByText(/facility with patient/i).first(),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/facility with patient/i).first()).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test("should show navigation cards for key sections", async ({ page }) => {
@@ -30,9 +30,7 @@ test.describe("Facility Overview Page", () => {
     await expect(encountersLink.first()).toBeVisible({ timeout: 10000 });
   });
 
-  test("should navigate to encounters page from overview", async ({
-    page,
-  }) => {
+  test("should navigate to encounters page from overview", async ({ page }) => {
     // Click on Encounters link
     const encountersLink = page.getByRole("link", {
       name: /encounter/i,
@@ -50,7 +48,12 @@ test.describe("Facility Overview Page", () => {
       name: /setting/i,
     });
 
-    if (await settingsLink.first().isVisible().catch(() => false)) {
+    if (
+      await settingsLink
+        .first()
+        .isVisible()
+        .catch(() => false)
+    ) {
       await settingsLink.first().click();
       await page.waitForURL(/\/settings/);
       await expect(page).toHaveURL(/\/settings/);
@@ -63,7 +66,12 @@ test.describe("Facility Overview Page", () => {
       name: /patient/i,
     });
 
-    if (await patientsLink.first().isVisible().catch(() => false)) {
+    if (
+      await patientsLink
+        .first()
+        .isVisible()
+        .catch(() => false)
+    ) {
       await patientsLink.first().click();
       await page.waitForURL(/\/patient/);
       await expect(page).toHaveURL(/\/patient/);

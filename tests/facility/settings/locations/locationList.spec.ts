@@ -20,11 +20,10 @@ test.describe("Location List & Hierarchy", () => {
 
     // There should be location entries visible
     // Locations are shown in a tree/list structure
-    const locationContent = page.locator('[role="treeitem"]').or(
-      page.locator('[data-slot="card"]'),
-    ).or(
-      page.getByRole("link").filter({ hasText: /bed|ward|lab|pharmacy/i }),
-    );
+    const locationContent = page
+      .locator('[role="treeitem"]')
+      .or(page.locator('[data-slot="card"]'))
+      .or(page.getByRole("link").filter({ hasText: /bed|ward|lab|pharmacy/i }));
 
     await expect(locationContent.first()).toBeVisible({ timeout: 10000 });
   });
@@ -37,7 +36,12 @@ test.describe("Location List & Hierarchy", () => {
       hasText: /bed|ward|lab|pharmacy|bio-chemistry/i,
     });
 
-    if (await locationLinks.first().isVisible().catch(() => false)) {
+    if (
+      await locationLinks
+        .first()
+        .isVisible()
+        .catch(() => false)
+    ) {
       await locationLinks.first().click();
 
       // Wait for the location details to load
@@ -51,9 +55,9 @@ test.describe("Location List & Hierarchy", () => {
 
   test("should have add location button", async ({ page }) => {
     // Verify the "Add Location" button exists
-    const addButton = page.getByRole("button", { name: /add location/i }).or(
-      page.getByRole("link", { name: /add location/i }),
-    );
+    const addButton = page
+      .getByRole("button", { name: /add location/i })
+      .or(page.getByRole("link", { name: /add location/i }));
 
     await expect(addButton.first()).toBeVisible({ timeout: 10000 });
   });
@@ -75,9 +79,7 @@ test.describe("Location List & Hierarchy", () => {
     }
   });
 
-  test("should display bed locations as children of ward", async ({
-    page,
-  }) => {
+  test("should display bed locations as children of ward", async ({ page }) => {
     // Fixtures create Bed 1 through Bed 5 as children of a ward location
     // Look for any bed entries in the location list
     const bedLocations = page.getByText(/bed \d/i);
@@ -86,7 +88,12 @@ test.describe("Location List & Hierarchy", () => {
     await page.waitForTimeout(1000);
 
     // If beds are directly visible (expanded tree), verify them
-    if (await bedLocations.first().isVisible().catch(() => false)) {
+    if (
+      await bedLocations
+        .first()
+        .isVisible()
+        .catch(() => false)
+    ) {
       const bedCount = await bedLocations.count();
       // Fixtures create 5 beds
       expect(bedCount).toBeGreaterThanOrEqual(1);

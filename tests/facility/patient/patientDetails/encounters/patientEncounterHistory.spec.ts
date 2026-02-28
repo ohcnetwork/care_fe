@@ -11,9 +11,7 @@ test.describe("Patient Encounter History Tab", () => {
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
     patientId = getPatientId();
-    await page.goto(
-      `/facility/${facilityId}/patient/${patientId}/encounters`,
-    );
+    await page.goto(`/facility/${facilityId}/patient/${patientId}/encounters`);
   });
 
   test("should display the encounters tab with encounter history", async ({
@@ -42,7 +40,12 @@ test.describe("Patient Encounter History Tab", () => {
       .locator('[data-slot="badge"]')
       .filter({ hasText: /in progress|planned|completed|on hold/i });
 
-    if (await statusBadge.first().isVisible().catch(() => false)) {
+    if (
+      await statusBadge
+        .first()
+        .isVisible()
+        .catch(() => false)
+    ) {
       await expect(statusBadge.first()).toBeVisible();
     }
   });
@@ -91,7 +94,12 @@ test.describe("Patient Encounter History Tab", () => {
       /inpatient|ambulatory|observation|emergency|virtual|home health/i,
     );
 
-    if (await classInfo.first().isVisible().catch(() => false)) {
+    if (
+      await classInfo
+        .first()
+        .isVisible()
+        .catch(() => false)
+    ) {
       await expect(classInfo.first()).toBeVisible();
     }
   });
