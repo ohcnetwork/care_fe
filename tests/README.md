@@ -25,7 +25,7 @@ npm run playwright:test:ui
 npm run playwright:test:headed
 
 # Run specific test file
-npx playwright test tests/login.spec.ts
+npx playwright test tests/auth/login.spec.ts
 
 # Run tests in a specific browser
 npx playwright test --project=chromium
@@ -49,11 +49,17 @@ Before running tests, ensure:
 
 ```
 tests/
-├── auth.setup.ts           # Authentication setup
-├── login.spec.ts          # Login functionality tests
-├── homepage.spec.ts       # Homepage tests
-├── authenticated.spec.ts  # Tests requiring authentication
-└── .auth/                 # Stored authentication state (gitignored)
+├── setup/
+│   ├── auth.setup.ts       # Authentication setup
+│   ├── facilityAdmin.setup.ts
+│   ├── nurse.setup.ts
+│   ├── facility.setup.ts
+│   └── patient.setup.ts
+├── auth/
+│   ├── login.spec.ts       # Login functionality tests
+│   ├── homepage.spec.ts    # Homepage tests
+│   └── authenticated.spec.ts
+└── .auth/                  # Stored authentication state (gitignored)
 ```
 
 ## Writing Tests
@@ -120,7 +126,7 @@ test("authenticated test", async ({ page }) => {
 npx playwright test --debug
 
 # Debug specific test
-npx playwright test tests/login.spec.ts --debug
+npx playwright test tests/auth/login.spec.ts --debug
 ```
 
 ### VS Code Integration
