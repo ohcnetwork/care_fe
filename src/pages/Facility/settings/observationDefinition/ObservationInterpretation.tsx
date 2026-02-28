@@ -68,7 +68,12 @@ import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, Edit, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { FieldValues, UseFormReturn } from "react-hook-form";
+import {
+  FieldPath,
+  FieldValues,
+  PathValue,
+  UseFormReturn,
+} from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 export function ObservationInterpretation<
@@ -190,9 +195,13 @@ export function ObservationInterpretation<
       });
       setQualifiedRanges(updatedRanges);
 
-      form.setValue(name as any, updatedRanges as any, {
-        shouldValidate: true,
-      });
+      form.setValue(
+        name as FieldPath<TFieldValues>,
+        updatedRanges as PathValue<TFieldValues, FieldPath<TFieldValues>>,
+        {
+          shouldValidate: true,
+        },
+      );
 
       setRecentlyChangedRanges(changedIndices);
 
@@ -249,7 +258,10 @@ export function ObservationInterpretation<
     const updatedRanges = [...(qualifiedRanges || []), newRange];
     setQualifiedRanges(updatedRanges);
 
-    form.setValue(name as any, updatedRanges as any);
+    form.setValue(
+      name as FieldPath<TFieldValues>,
+      updatedRanges as PathValue<TFieldValues, FieldPath<TFieldValues>>,
+    );
 
     setEditedRange(newRange);
     handleSheetState(true);
@@ -273,7 +285,10 @@ export function ObservationInterpretation<
     const updatedRanges = qualifiedRanges.filter((_, i) => i !== index);
     setQualifiedRanges(updatedRanges);
 
-    form.setValue(name as any, updatedRanges as any);
+    form.setValue(
+      name as FieldPath<TFieldValues>,
+      updatedRanges as PathValue<TFieldValues, FieldPath<TFieldValues>>,
+    );
 
     const newRecentlyChanged = new Set<number>();
     recentlyChangedRanges.forEach((changedIndex) => {
@@ -305,7 +320,10 @@ export function ObservationInterpretation<
       ];
       setQualifiedRanges(newRanges);
 
-      form.setValue(name as any, newRanges as any);
+      form.setValue(
+        name as FieldPath<TFieldValues>,
+        newRanges as PathValue<TFieldValues, FieldPath<TFieldValues>>,
+      );
       const isValid = await form.trigger();
 
       if (!isValid) {
@@ -327,7 +345,9 @@ export function ObservationInterpretation<
     onCancel?.();
     handleSheetState(false);
     setEditedRange(null);
-    form.clearErrors(`${name}.${editedRange?.id || 0}` as any);
+    form.clearErrors(
+      `${name}.${editedRange?.id || 0}` as FieldPath<TFieldValues>,
+    );
   };
 
   const getInterpretationSummary = (range: QualifiedRange, index: number) => {
@@ -401,7 +421,7 @@ export function ObservationInterpretation<
   const handleEditRange = (
     range: QualifiedRange,
     field: keyof QualifiedRange | undefined,
-    value: any,
+    value: QualifiedRange[keyof QualifiedRange],
   ) => {
     if (field && value !== undefined) {
       const updatedRange = {
@@ -413,7 +433,10 @@ export function ObservationInterpretation<
       // Update form state if we have a field name
       if (editedRange && editedRange.id !== undefined) {
         const fieldPath = `${name}.${editedRange.id}.${field}`;
-        form.setValue(fieldPath as any, value as any);
+        form.setValue(
+          fieldPath as FieldPath<TFieldValues>,
+          value as PathValue<TFieldValues, FieldPath<TFieldValues>>,
+        );
       }
     } else {
       // Full range update
@@ -472,7 +495,7 @@ export function ObservationInterpretation<
         <div className="space-y-4">
           {qualifiedRanges?.map((range, index) => {
             const errors = form.getFieldState(
-              `${name}.${index}` as any,
+              `${name}.${index}` as FieldPath<TFieldValues>,
               form.formState,
             ).error;
             return (
@@ -584,7 +607,7 @@ function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
   setEditedRange: (
     range: QualifiedRange,
     field?: keyof QualifiedRange,
-    value?: any,
+    value?: QualifiedRange[keyof QualifiedRange],
   ) => void;
   onSave: () => void;
   onCancel: () => void;
@@ -692,7 +715,9 @@ function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
   );
 }
 
-export function RenderConditionInput({
+export function RenderConditionInput<
+  TFieldValues extends FieldValues = FieldValues,
+>({
   condition,
   index,
   handleSetValue,
@@ -711,7 +736,7 @@ export function RenderConditionInput({
     index: number,
   ) => void;
   handleSetValueType: (value: string, index: number) => void;
-  form: UseFormReturn<any>;
+  form: UseFormReturn<TFieldValues>;
   fieldName: string;
 }) {
   const { t } = useTranslation();
@@ -732,7 +757,7 @@ export function RenderConditionInput({
         return (
           <FormField
             control={form.control}
-            name={`${fieldName}.value` as any}
+            name={`${fieldName}.value` as FieldPath<TFieldValues>}
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -771,7 +796,7 @@ export function RenderConditionInput({
         return (
           <FormField
             control={form.control}
-            name={`${fieldName}.value.value_type` as any}
+            name={`${fieldName}.value.value_type` as FieldPath<TFieldValues>}
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormControl>
@@ -812,7 +837,7 @@ export function RenderConditionInput({
           <div className="flex flex-col sm:flex-row gap-2">
             <FormField
               control={form.control}
-              name={`${fieldName}.value.value` as any}
+              name={`${fieldName}.value.value` as FieldPath<TFieldValues>}
               render={() => (
                 <FormItem>
                   <FormControl>
@@ -845,7 +870,7 @@ export function RenderConditionInput({
       } else if (operation === ConditionOperation.in_range) {
         const currentRange =
           typeof value === "object" && value !== null && "min" in value
-            ? (value as any)
+            ? (value as AgeOperationInRangeValue)
             : { min: undefined, max: undefined, value_type: "years" };
         const min = currentRange.min;
         const max = currentRange.max;
@@ -853,7 +878,7 @@ export function RenderConditionInput({
           <div className="flex flex-col sm:flex-row gap-2">
             <FormField
               control={form.control}
-              name={`${fieldName}.value.min` as any}
+              name={`${fieldName}.value.min` as FieldPath<TFieldValues>}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -872,7 +897,7 @@ export function RenderConditionInput({
                                 : Number(e.target.value),
                             max: currentRange.max,
                             value_type: currentRange.value_type || "years",
-                          } as any,
+                          } as AgeOperationInRangeValue,
                           index,
                         );
                       }}
@@ -884,7 +909,7 @@ export function RenderConditionInput({
             />
             <FormField
               control={form.control}
-              name={`${fieldName}.value.max` as any}
+              name={`${fieldName}.value.max` as FieldPath<TFieldValues>}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -903,7 +928,7 @@ export function RenderConditionInput({
                                 ? undefined
                                 : Number(e.target.value),
                             value_type: currentRange.value_type || "years",
-                          } as any,
+                          } as AgeOperationInRangeValue,
                           index,
                         );
                       }}
@@ -924,7 +949,7 @@ export function RenderConditionInput({
         return (
           <FormField
             control={form.control}
-            name={`${fieldName}.value` as any}
+            name={`${fieldName}.value` as FieldPath<TFieldValues>}
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -960,7 +985,7 @@ export function RenderConditionInput({
         return (
           <FormField
             control={form.control}
-            name={`${fieldName}.value` as any}
+            name={`${fieldName}.value` as FieldPath<TFieldValues>}
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -991,7 +1016,7 @@ export function RenderConditionInput({
           <div className="flex flex-col sm:flex-row gap-2">
             <FormField
               control={form.control}
-              name={`${fieldName}.value.min` as any}
+              name={`${fieldName}.value.min` as FieldPath<TFieldValues>}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -1021,7 +1046,7 @@ export function RenderConditionInput({
             />
             <FormField
               control={form.control}
-              name={`${fieldName}.value.max` as any}
+              name={`${fieldName}.value.max` as FieldPath<TFieldValues>}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -1068,10 +1093,10 @@ export function RenderConditionInput({
           <>
             <FormField
               control={form.control}
-              name={`${fieldName}.value.value` as any}
+              name={`${fieldName}.value.value` as FieldPath<TFieldValues>}
               render={() => {
                 const errorMessage = form.getFieldState(
-                  `${fieldName}.value.value`,
+                  `${fieldName}.value.value` as FieldPath<TFieldValues>,
                   form.formState,
                 ).error?.message;
                 return (
@@ -1239,7 +1264,9 @@ export function ConditionComponent<
                     <FormLabel className="text-sm">{t("type")}</FormLabel>
                     <FormField
                       control={form.control}
-                      name={`${fieldName}.${index}.metric` as any}
+                      name={
+                        `${fieldName}.${index}.metric` as FieldPath<TFieldValues>
+                      }
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
@@ -1276,7 +1303,9 @@ export function ConditionComponent<
                     <FormLabel className="text-sm">{t("comperator")}</FormLabel>
                     <FormField
                       control={form.control}
-                      name={`${fieldName}.${index}.operation` as any}
+                      name={
+                        `${fieldName}.${index}.operation` as FieldPath<TFieldValues>
+                      }
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
@@ -1376,7 +1405,7 @@ function InterpretationComponent<
         <FormLabel className="text-sm">{t("display")}</FormLabel>
         <FormField
           control={form.control}
-          name={`${fieldName}.display` as any}
+          name={`${fieldName}.display` as FieldPath<TFieldValues>}
           render={({ field }) => (
             <FormItem>
               <FormControl>
@@ -1404,7 +1433,7 @@ function InterpretationComponent<
         <FormLabel className="text-sm">{t("color")}</FormLabel>
         <FormField
           control={form.control}
-          name={`${fieldName}.color` as any}
+          name={`${fieldName}.color` as FieldPath<TFieldValues>}
           render={({ field }) => (
             <FormItem>
               <FormControl>
@@ -1536,7 +1565,9 @@ function NumericRangeComponent<TFieldValues extends FieldValues = FieldValues>({
                   <FormLabel className="text-sm">{t("min")}</FormLabel>
                   <FormField
                     control={form.control}
-                    name={`${fieldName}.ranges.${index}.min` as any}
+                    name={
+                      `${fieldName}.ranges.${index}.min` as FieldPath<TFieldValues>
+                    }
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
@@ -1559,7 +1590,9 @@ function NumericRangeComponent<TFieldValues extends FieldValues = FieldValues>({
                   <FormLabel className="text-sm">{t("max")}</FormLabel>
                   <FormField
                     control={form.control}
-                    name={`${fieldName}.ranges.${index}.max` as any}
+                    name={
+                      `${fieldName}.ranges.${index}.max` as FieldPath<TFieldValues>
+                    }
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
