@@ -9,7 +9,7 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -286,11 +286,14 @@ export function DiagnosticReportForm({
     }
   }, [fileUpload.files, fileUpload.previewing]);
 
+  const clearFilesRef = useRef(fileUpload.clearFiles);
+  clearFilesRef.current = fileUpload.clearFiles;
+
   useEffect(() => {
     if (!openUploadDialog) {
-      fileUpload.clearFiles();
+      clearFilesRef.current();
     }
-  }, [openUploadDialog, fileUpload]);
+  }, [openUploadDialog]);
 
   // Initialize form with existing observations from the full report
   useEffect(() => {

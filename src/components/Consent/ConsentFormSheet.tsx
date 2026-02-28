@@ -247,14 +247,17 @@ export default function ConsentFormSheet({
     }
   }, [existingConsent, form, isEdit]);
 
+  const clearFilesRef = useRef(fileUpload.clearFiles);
+  clearFilesRef.current = fileUpload.clearFiles;
+
   useEffect(() => {
     if (!isOpen) {
-      fileUpload.clearFiles();
+      clearFilesRef.current();
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
     }
-  }, [isOpen, fileUpload]);
+  }, [isOpen]);
 
   const onSubmit = (values: ConsentFormValues) => {
     const consentData: CreateConsentRequest = {
