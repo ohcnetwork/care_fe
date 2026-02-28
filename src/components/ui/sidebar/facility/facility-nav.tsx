@@ -19,34 +19,36 @@ interface FacilityNavProps {
   selectedFacility: FacilityBareMinimum | null;
 }
 
+interface FacilityPermissions {
+  canViewAppointments: boolean;
+  canListEncounters: boolean;
+  canWriteAppointment: boolean;
+  canCreateEncounter: boolean;
+  canReadEncounter: boolean;
+  canListTokenCategories: boolean;
+  canListTemplate: boolean;
+  canReadHealthcareService: boolean;
+  canReadResourceCategory: boolean;
+  canReadAccount: boolean;
+  canReadInvoice: boolean;
+  canReadPaymentReconciliation: boolean;
+  canViewFacilityOrganizations: boolean;
+  canListFacilityLocations: boolean;
+  canListDevices: boolean;
+  canReadSpecimenDefinition: boolean;
+  canReadObservationDefinition: boolean;
+  canReadActivityDefinition: boolean;
+  canReadChargeItemDefinition: boolean;
+  canReadProductKnowledge: boolean;
+  canReadProduct: boolean;
+  canReadTagConfig: boolean;
+  canUpdateFacility: boolean;
+}
+
 function generateFacilityLinks(
   selectedFacility: FacilityBareMinimum | null,
   t: TFunction,
-  permissions: {
-    canViewAppointments: boolean;
-    canListEncounters: boolean;
-    canWriteAppointment: boolean;
-    canCreateEncounter: boolean;
-    canReadEncounter: boolean;
-    canListTokenCategories: boolean;
-    canListTemplate: boolean;
-    canReadHealthcareService: boolean;
-    canReadResourceCategory: boolean;
-    canReadAccount: boolean;
-    canReadInvoice: boolean;
-    canReadPaymentReconciliation: boolean;
-    canViewFacilityOrganizations: boolean;
-    canListFacilityLocations: boolean;
-    canListDevices: boolean;
-    canReadSpecimenDefinition: boolean;
-    canReadObservationDefinition: boolean;
-    canReadActivityDefinition: boolean;
-    canReadChargeItemDefinition: boolean;
-    canReadProductKnowledge: boolean;
-    canReadProduct: boolean;
-    canReadTagConfig: boolean;
-    canUpdateFacility: boolean;
-  },
+  permissions: FacilityPermissions,
   pluginLinks: NavigationLink[],
   pluginBillingLinks: NavigationLink[],
 ) {
@@ -125,6 +127,11 @@ function generateFacilityLinks(
       name: t("billing"),
       url: `${baseUrl}/billing`,
       icon: <CareIcon icon="d-notice-board" />,
+      visibility:
+        permissions.canReadAccount ||
+        permissions.canReadInvoice ||
+        permissions.canReadPaymentReconciliation ||
+        pluginBillingLinks.some((l) => l.visibility !== false && l.visibility),
       children: [
         {
           name: t("accounts"),
@@ -258,55 +265,34 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
 
   const { facility } = useCurrentFacility();
 
-  const {
-    canViewAppointments,
-    canListEncounters,
-    canWriteAppointment,
-    canCreateEncounter,
-    canReadEncounter,
-    canListTokenCategories,
-    canListTemplate,
-    canReadHealthcareService,
-    canReadResourceCategory,
-    canReadAccount,
-    canReadInvoice,
-    canReadPaymentReconciliation,
-    canViewFacilityOrganizations,
-    canListFacilityLocations,
-    canListDevices,
-    canReadSpecimenDefinition,
-    canReadObservationDefinition,
-    canReadActivityDefinition,
-    canReadChargeItemDefinition,
-    canReadProductKnowledge,
-    canReadProduct,
-    canReadTagConfig,
-    canUpdateFacility,
-  } = getPermissions(hasPermission, facility?.permissions ?? []);
+  const allPermissions = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
+  );
   const permissions = {
-    canViewAppointments,
-    canListEncounters,
-    canWriteAppointment,
-    canCreateEncounter,
-    canReadEncounter,
-    canListTokenCategories,
-    canListTemplate,
-    canReadHealthcareService,
-    canReadResourceCategory,
-    canReadAccount,
-    canReadInvoice,
-    canReadPaymentReconciliation,
-    canViewFacilityOrganizations,
-    canListFacilityLocations,
-    canListDevices,
-    canReadSpecimenDefinition,
-    canReadObservationDefinition,
-    canReadActivityDefinition,
-    canReadChargeItemDefinition,
-    canReadProductKnowledge,
-    canReadProduct,
-    canReadTagConfig,
-    canUpdateFacility,
+    canViewAppointments: allPermissions.canViewAppointments,
+    canListEncounters: allPermissions.canListEncounters,
+    canWriteAppointment: allPermissions.canWriteAppointment,
+    canCreateEncounter: allPermissions.canCreateEncounter,
+    canReadEncounter: allPermissions.canReadEncounter,
+    canListTokenCategories: allPermissions.canListTokenCategories,
+    canListTemplate: allPermissions.canListTemplate,
+    canReadHealthcareService: allPermissions.canReadHealthcareService,
+    canReadResourceCategory: allPermissions.canReadResourceCategory,
+    canReadAccount: allPermissions.canReadAccount,
+    canReadInvoice: allPermissions.canReadInvoice,
+    canReadPaymentReconciliation: allPermissions.canReadPaymentReconciliation,
+    canViewFacilityOrganizations: allPermissions.canViewFacilityOrganizations,
+    canListFacilityLocations: allPermissions.canListFacilityLocations,
+    canListDevices: allPermissions.canListDevices,
+    canReadSpecimenDefinition: allPermissions.canReadSpecimenDefinition,
+    canReadObservationDefinition: allPermissions.canReadObservationDefinition,
+    canReadActivityDefinition: allPermissions.canReadActivityDefinition,
+    canReadChargeItemDefinition: allPermissions.canReadChargeItemDefinition,
+    canReadProductKnowledge: allPermissions.canReadProductKnowledge,
+    canReadProduct: allPermissions.canReadProduct,
+    canReadTagConfig: allPermissions.canReadTagConfig,
+    canUpdateFacility: allPermissions.canUpdateFacility,
   };
   return (
     <NavMain
