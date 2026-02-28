@@ -127,7 +127,7 @@ export default function HealthcareServiceShow({
 }) {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
-  const { facility } = useCurrentFacility();
+  const { facility, isFacilityLoading } = useCurrentFacility();
 
   const {
     canViewSchedule,
@@ -135,7 +135,10 @@ export default function HealthcareServiceShow({
     canListTokens,
     isPharmacist,
     canReadServiceRequest,
-  } = getPermissions(hasPermission, facility?.permissions ?? []);
+  } = getPermissions(
+    hasPermission,
+    isFacilityLoading ? [] : (facility?.permissions ?? []),
+  );
 
   const { data: service, isLoading } = useQuery({
     queryKey: ["healthcareService", serviceId],

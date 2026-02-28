@@ -15,7 +15,7 @@ export function LocationNav() {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
 
-  const { facilityId, facility } = useCurrentFacility();
+  const { facilityId, facility, isFacilityLoading } = useCurrentFacility();
   const { locationId } = useCurrentLocation();
 
   const {
@@ -27,6 +27,8 @@ export function LocationNav() {
     canViewAppointments,
     canListTokens,
   } = getPermissions(hasPermission, facility?.permissions ?? []);
+
+  if (isFacilityLoading) return null;
 
   const baseUrl = `/facility/${facilityId}/locations/${locationId}`;
 
