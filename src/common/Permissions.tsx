@@ -161,6 +161,10 @@ export const PERMISSION_READ_PRODUCT_KNOWLEDGE = "can_read_product_knowledge";
 // Tag Config Permissions
 export const PERMISSION_READ_TAG_CONFIG = "can_read_tag_config";
 
+// Supply Chain Permissions
+export const PERMISSION_READ_SUPPLY_REQUEST = "can_read_supply_request";
+export const PERMISSION_READ_SUPPLY_DELIVERY = "can_read_supply_delivery";
+
 export interface Permissions {
   // Patient Permissions
   /** Permission slug: "can_create_patient" */
@@ -367,6 +371,12 @@ export interface Permissions {
   // Tag Config
   /** Permission slug: "can_read_tag_config" */
   canReadTagConfig: boolean;
+
+  // Supply Chain
+  /** Permission slug: "can_read_supply_request" */
+  canReadSupplyRequest: boolean;
+  /** Permission slug: "can_read_supply_delivery" */
+  canReadSupplyDelivery: boolean;
 }
 
 export type HasPermissionFn = (
@@ -657,5 +667,15 @@ export function getPermissions(
 
     // Tag Config
     canReadTagConfig: hasPermission(PERMISSION_READ_TAG_CONFIG, permissions),
+
+    // Supply Chain
+    canReadSupplyRequest: hasPermission(
+      PERMISSION_READ_SUPPLY_REQUEST,
+      permissions,
+    ),
+    canReadSupplyDelivery: hasPermission(
+      PERMISSION_READ_SUPPLY_DELIVERY,
+      permissions,
+    ),
   };
 }

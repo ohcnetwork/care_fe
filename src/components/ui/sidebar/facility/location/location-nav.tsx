@@ -23,6 +23,8 @@ export function LocationNav() {
     canReadServiceRequest,
     isPharmacist,
     canReadInventoryItem,
+    canReadSupplyRequest,
+    canReadSupplyDelivery,
     canViewSchedule,
     canViewAppointments,
     canListTokens,
@@ -77,29 +79,33 @@ export function LocationNav() {
           name: t("inventory"),
           url: `${baseUrl}/inventory/summary`,
           icon: <CareIcon icon="l-shop" />,
-          visibility: canReadInventoryItem,
           children: [
             {
               name: t("items"),
               url: `${baseUrl}/inventory/summary`,
+              visibility: canReadInventoryItem,
             },
             {
               header: t("internal_transfers"),
               name: t("to_receive"),
               url: `${baseUrl}/inventory/internal/receive/`,
+              visibility: canReadSupplyRequest,
             },
             {
               name: t("to_dispatch"),
               url: `${baseUrl}/inventory/internal/dispatch/`,
+              visibility: canReadSupplyRequest,
             },
             {
               header: t("external_supply"),
               name: t("purchase_orders"),
               url: `${baseUrl}/inventory/external/orders/outgoing`,
+              visibility: canReadSupplyRequest,
             },
             {
               name: t("purchase_deliveries"),
               url: `${baseUrl}/inventory/external/deliveries/incoming`,
+              visibility: canReadSupplyDelivery,
             },
           ],
         },
