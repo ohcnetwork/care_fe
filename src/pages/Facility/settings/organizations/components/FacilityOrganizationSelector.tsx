@@ -147,7 +147,7 @@ export default function FacilityOrganizationSelector(
       setNavigationLevels([]);
       setOpen(false);
     },
-    [selectedOrganizations, onChange],
+    [selectedOrganizations, onChange, singleSelection],
   );
 
   const getCurrentLevelOrganizations = useCallback(() => {
@@ -195,6 +195,8 @@ export default function FacilityOrganizationSelector(
     facilityOrgSearch,
     selectedOrganizations,
     isLoadingRoot,
+    isLoadingPreferred,
+    preferredOrgIds.length,
     currentOrganizations,
     props.optional,
   ]);

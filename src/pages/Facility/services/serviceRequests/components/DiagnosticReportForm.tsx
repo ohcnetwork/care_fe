@@ -188,7 +188,7 @@ export function DiagnosticReportForm({
           queryKey: ["diagnosticReport"],
         });
       },
-      onError: (err: any) => {
+      onError: (err: Error) => {
         toast.error(
           `Failed to create diagnostic report: ${err.message || "Unknown error"}`,
         );
@@ -231,7 +231,7 @@ export function DiagnosticReportForm({
           queryKey: ["diagnosticReport", latestReport?.id],
         });
       },
-      onError: (err: any) => {
+      onError: (err: Error) => {
         toast.error(
           `Failed to save test results: ${err.message || "Unknown error"}`,
         );
@@ -260,7 +260,7 @@ export function DiagnosticReportForm({
 
   // Initialize file upload hook
   const fileUpload = useFileUpload({
-    type: "diagnostic_report" as any,
+    type: "diagnostic_report" as const,
     multiple: true,
     allowedExtensions: BACKEND_ALLOWED_EXTENSIONS,
     allowNameFallback: false,
@@ -289,7 +289,7 @@ export function DiagnosticReportForm({
     if (!openUploadDialog) {
       fileUpload.clearFiles();
     }
-  }, [openUploadDialog]);
+  }, [openUploadDialog, fileUpload]);
 
   // Initialize form with existing observations from the full report
   useEffect(() => {

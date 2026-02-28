@@ -403,7 +403,11 @@ export function DiagnosisQuestion({
         questionnaireResponse.question_id,
       );
     }
-  }, [patientDiagnoses]);
+  }, [
+    patientDiagnoses,
+    questionnaireResponse.question_id,
+    updateQuestionnaireResponseCB,
+  ]);
 
   const handleCodeSelect = (code: Code) => {
     if (checkForDuplicateDiagnosis(sortedDiagnoses, code, t)) {

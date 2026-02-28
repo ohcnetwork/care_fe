@@ -691,7 +691,11 @@ export function SymptomQuestion({
         questionnaireResponse.question_id,
       );
     }
-  }, [patientSymptoms]);
+  }, [
+    patientSymptoms,
+    questionnaireResponse.question_id,
+    updateQuestionnaireResponseCB,
+  ]);
 
   const handleCodeSelect = (code: Code) => {
     if (checkForDuplicateSymptom(symptoms, code, t)) {

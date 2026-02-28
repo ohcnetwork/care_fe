@@ -59,18 +59,21 @@ export default function OrganizationUsers({
     },
   ];
 
-  const handleSearch = useCallback((key: string, value: string) => {
-    const searchParams = {
-      name: key === "username" ? value : "",
-      phone_number:
-        key === "phone_number"
-          ? isValidPhoneNumber(value)
-            ? value
-            : undefined
-          : undefined,
-    };
-    updateQuery(searchParams);
-  }, []);
+  const handleSearch = useCallback(
+    (key: string, value: string) => {
+      const searchParams = {
+        name: key === "username" ? value : "",
+        phone_number:
+          key === "phone_number"
+            ? isValidPhoneNumber(value)
+              ? value
+              : undefined
+            : undefined,
+      };
+      updateQuery(searchParams);
+    },
+    [updateQuery],
+  );
 
   const handleFieldChange = () => {
     updateQuery({

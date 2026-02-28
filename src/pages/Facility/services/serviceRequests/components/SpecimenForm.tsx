@@ -134,7 +134,10 @@ export function SpecimenForm({
     setIsScanDialogOpen(false);
   };
 
-  const handleCollectionChange = (field: keyof CollectionSpec, value: any) => {
+  const handleCollectionChange = (
+    field: keyof CollectionSpec,
+    value: CollectionSpec[keyof CollectionSpec],
+  ) => {
     setSpecimenData((prev) => ({
       ...prev,
       specimen: {
@@ -160,7 +163,7 @@ export function SpecimenForm({
 
   const handleSpecimenChange = (
     field: keyof SpecimenFromDefinitionCreate["specimen"],
-    value: any,
+    value: SpecimenFromDefinitionCreate["specimen"][keyof SpecimenFromDefinitionCreate["specimen"]],
   ) => {
     setSpecimenData((prev) => ({
       ...prev,

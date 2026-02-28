@@ -84,7 +84,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
         setSelectedLevels([]);
       }
     }
-  }, [isOrgDetailLoading, selected]);
+  }, [isOrgDetailLoading, selected, orgDetail]);
 
   useEffect(() => {
     if (rootOrgs) {

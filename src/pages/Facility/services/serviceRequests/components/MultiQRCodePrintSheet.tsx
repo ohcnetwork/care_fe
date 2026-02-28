@@ -62,7 +62,7 @@ export function MultiQRCodePrintSheet({
     if (specimens.length > 0 && selectedSpecimens.size === 0) {
       setSelectedSpecimens(new Set(specimens.map((s) => s.id)));
     }
-  }, [specimens]);
+  }, [specimens, selectedSpecimens.size]);
 
   useEffect(() => {
     if (open !== undefined) {

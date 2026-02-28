@@ -75,7 +75,7 @@ export function LocationCardWrapper({
         },
       }));
     }
-  }, [isEditing, editingState.timeConfig.status]);
+  }, [isEditing, editingState.timeConfig.status, setEditingState]);
 
   const validateDates = () => {
     if (!editingState.timeConfig.end) return true;

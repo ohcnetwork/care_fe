@@ -88,7 +88,10 @@ import mutate from "@/Utils/request/mutate";
 import { formatName } from "@/Utils/utils";
 
 // --- Helper function (keep or move to utils) ---
-function formatQuantity(quantity: any): string {
+function formatQuantity(quantity: {
+  string?: string;
+  quantity?: { value: string | number; unit: { display: string } };
+}): string {
   if (!quantity) return "N/A";
   if (quantity.string) return quantity.string;
   if (quantity.quantity?.value && quantity.quantity?.unit?.display) {
@@ -149,7 +152,7 @@ export function SpecimenWorkflowCard({
         queryKey: ["serviceRequest", facilityId, serviceRequestId],
       });
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       toast.error(
         `Failed to update processing: ${err.message || "Unknown error"}`,
       );
@@ -175,7 +178,7 @@ export function SpecimenWorkflowCard({
         queryKey: ["serviceRequest", facilityId, serviceRequestId],
       });
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       toast.error(
         `Failed to discard specimen: ${err.message || "Unknown error"}`,
       );

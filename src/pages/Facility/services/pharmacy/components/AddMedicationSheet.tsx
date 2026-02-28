@@ -185,7 +185,7 @@ export const AddMedicationSheet = ({
     } else {
       resetForm();
     }
-  }, [open, existingDosageInstructions, selectedProduct]);
+  }, [open, existingDosageInstructions, selectedProduct, isConsumable]);
 
   const handleUpdateDosageInstruction = (
     updates: Partial<MedicationRequestDosageInstruction>,

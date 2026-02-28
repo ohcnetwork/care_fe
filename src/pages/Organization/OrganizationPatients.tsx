@@ -53,18 +53,21 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
     },
   ];
 
-  const handleSearch = useCallback((key: string, value: string) => {
-    const searchParams = {
-      name: key === "name" ? value : "",
-      phone_number:
-        key === "phone_number"
-          ? value.length >= 13 || value === ""
-            ? value
-            : undefined
-          : undefined,
-    };
-    updateQuery(searchParams);
-  }, []);
+  const handleSearch = useCallback(
+    (key: string, value: string) => {
+      const searchParams = {
+        name: key === "name" ? value : "",
+        phone_number:
+          key === "phone_number"
+            ? value.length >= 13 || value === ""
+              ? value
+              : undefined
+            : undefined,
+      };
+      updateQuery(searchParams);
+    },
+    [updateQuery],
+  );
 
   const handleFieldChange = () => {
     updateQuery({
