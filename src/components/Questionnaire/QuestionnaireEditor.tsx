@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { UseFormReturn, useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -100,7 +100,11 @@ import {
   SUPPORTED_QUESTION_TYPES,
   TemplateConfig,
 } from "@/types/questionnaire/question";
-import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
+import {
+  QuestionStatus,
+  QuestionnaireRead,
+  SubjectType,
+} from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagRead } from "@/types/questionnaire/tags";
 
@@ -112,6 +116,17 @@ import { QuestionnaireProperties } from "./QuestionnaireProperties";
 import { SelectOrCreateValueset } from "./SelectOrCreateValueset";
 import ValueSetSelect from "./ValueSetSelect";
 import { scrollToQuestion } from "./utils";
+
+interface QuestionnaireFormValues {
+  title: string;
+  slug: string;
+  description?: string;
+  questions: Question[];
+  status?: QuestionStatus;
+  subject_type?: SubjectType;
+  version?: string;
+  tags?: QuestionnaireTagRead[];
+}
 
 interface QuestionnaireEditorProps {
   slug?: string;
@@ -217,7 +232,15 @@ const HIDE_REPEATABLE_QUESTION_TYPES = [
   "structured",
 ];
 
-function findFirstErrorPath(errors: any, path: number[] = []): number[] | null {
+interface QuestionFormError {
+  questions?: QuestionFormError[];
+  [key: string]: unknown;
+}
+
+function findFirstErrorPath(
+  errors: QuestionFormError[],
+  path: number[] = [],
+): number[] | null {
   for (let i = 0; i < errors.length; i++) {
     const current = errors[i];
     const currentPath = [...path, i];
@@ -480,7 +503,7 @@ export default function QuestionnaireEditor({
     },
   );
 
-  const form = useForm<any>({
+  const form = useForm<QuestionnaireFormValues>({
     resolver: zodResolver(QuestionnaireFormPartialSchema),
     defaultValues: {
       title: questionnaire?.title ?? "",
@@ -1749,7 +1772,7 @@ const OptionFields = ({
 
 interface QuestionEditorProps {
   name: string;
-  form: ReturnType<typeof useForm<any>>;
+  form: UseFormReturn<QuestionnaireFormValues>;
   index: number;
   question: Question;
   onChange: (updated: Question) => void;
@@ -1822,7 +1845,7 @@ function QuestionEditor({
 
   const annotatedAnswerOptions = useMemo(() => {
     return (
-      answer_option?.map((option: any) => ({
+      answer_option?.map((option: AnswerOption & { _id?: string }) => ({
         ...option,
         _id: option._id || crypto.randomUUID(),
       })) || []
@@ -1844,11 +1867,14 @@ function QuestionEditor({
     onChange({ ...question, [field]: value, ...additionalFields });
   };
 
+  const updateFieldRef = useRef(updateField);
+  updateFieldRef.current = updateField;
+
   // Clear structured type if not structured, voluntarily doing this way, so that
   // form is made dirty and user's can simply open and save the form to clear the error.
   useEffect(() => {
     if (question.structured_type && question.type !== "structured") {
-      updateField("structured_type", undefined);
+      updateFieldRef.current("structured_type", undefined);
     }
   }, [question.structured_type, question.type]);
 
@@ -3276,8 +3302,11 @@ function QuestionEditor({
   );
 }
 
-function getQuestionByPath(questions: any, path: number[]) {
-  let q = questions[path[0]];
+function getQuestionByPath(
+  questions: Question[],
+  path: number[],
+): Question | undefined {
+  let q: Question | undefined = questions[path[0]];
   for (let i = 1; i < path.length; i++) {
     q = q?.questions?.[path[i]];
   }

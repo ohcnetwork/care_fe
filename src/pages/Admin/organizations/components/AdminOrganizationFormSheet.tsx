@@ -86,7 +86,7 @@ export default function AdminOrganizationFormSheet({
         org_type: organizationType as OrgType,
       });
     }
-  }, [isEditMode, org, open, organizationType]);
+  }, [isEditMode, org, open, organizationType, form]);
 
   const { mutate: createOrganization, isPending: isCreating } = useMutation({
     mutationFn: (body: OrganizationCreate) =>

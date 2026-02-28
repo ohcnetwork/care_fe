@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, MoreVerticalIcon, Pencil } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -49,7 +49,10 @@ import {
   Status,
 } from "@/types/emr/serviceRequest/serviceRequest";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
-import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import {
   ActivityDefinitionTemplateSpec,
@@ -102,7 +105,7 @@ interface ServiceRequestQuestionProps {
   facilityId: string;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (
-    values: any[],
+    values: ResponseValue[],
     questionId: string,
     note?: string,
   ) => void;
@@ -419,6 +422,9 @@ export function ServiceRequestQuestion({
     (questionnaireResponse.values?.[0]
       ?.value as unknown as ServiceRequestApplyActivityDefinitionSpec[]) || [],
   );
+  const serviceRequestsRef = useRef(serviceRequests);
+  serviceRequestsRef.current = serviceRequests;
+
   const [activityDefinitionsMap, setActivityDefinitionsMap] = useState<
     Record<string, ActivityDefinitionReadSpec>
   >({});
@@ -650,12 +656,13 @@ export function ServiceRequestQuestion({
         encounter: encounterId,
       };
 
-      setServiceRequests([...serviceRequests, newServiceRequest]);
+      const updated = [...serviceRequestsRef.current, newServiceRequest];
+      setServiceRequests(updated);
       updateQuestionnaireResponseCB(
         [
           {
             type: "service_request",
-            value: [...serviceRequests, newServiceRequest],
+            value: updated,
           },
         ],
         questionnaireResponse.question_id,
@@ -671,6 +678,8 @@ export function ServiceRequestQuestion({
     selectedActivityDefinitionData,
     encounterId,
     currentUser,
+    updateQuestionnaireResponseCB,
+    questionnaireResponse.question_id,
   ]);
 
   const handleRemoveServiceRequest = (index: number) => {

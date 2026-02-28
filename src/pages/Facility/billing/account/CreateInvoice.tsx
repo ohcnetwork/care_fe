@@ -303,10 +303,13 @@ export function CreateInvoicePage({
     fetchNextPage();
   };
 
-  const chargeItems =
-    preSelectedChargeItems ??
-    chargeItemsData?.pages.flatMap((page) => page.results) ??
-    [];
+  const chargeItems = useMemo(
+    () =>
+      preSelectedChargeItems ??
+      chargeItemsData?.pages.flatMap((page) => page.results) ??
+      [],
+    [preSelectedChargeItems, chargeItemsData?.pages],
+  );
 
   // Calculate total of selected items
   const selectedItemsTotal = useMemo(() => {
@@ -385,7 +388,7 @@ export function CreateInvoicePage({
         },
       ],
     });
-  }, [pendingItem, account?.patient, applyInlineChargeItem, t]);
+  }, [pendingItem, account?.patient, account?.id, applyInlineChargeItem, t]);
 
   const handlePendingKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.defaultPrevented) return;

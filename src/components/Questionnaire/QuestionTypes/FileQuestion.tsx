@@ -1,5 +1,5 @@
 import { t } from "i18next";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -111,6 +111,9 @@ export function FilesQuestion(props: FilesQuestionProps) {
   const values =
     (questionnaireResponse.values?.[0]?.value as FileUploadQuestion[]) || [];
 
+  const valuesRef = useRef(values);
+  valuesRef.current = values;
+
   const handleUpdate = (
     updates: Partial<FileUploadQuestion>,
     index: number,
@@ -139,26 +142,30 @@ export function FilesQuestion(props: FilesQuestionProps) {
     if (fileUpload.files.length > 0) {
       setDropdownOpen(false);
     }
-    (async () => {
-      updateQuestionnaireResponseCB(
-        [
-          {
-            type: "files",
-            value: fileUpload.files.map((file, i) => ({
-              name: values[i]?.name || "",
-              file_data: file,
-              original_name: file.name,
-              file_type: FileType.ENCOUNTER,
-              file_category: FileCategory.UNSPECIFIED,
-              associating_id: encounterId,
-            })),
-          },
-        ],
-        questionnaireResponse.question_id,
-        questionnaireResponse.note,
-      );
-    })();
-  }, [fileUpload.files]);
+    updateQuestionnaireResponseCB(
+      [
+        {
+          type: "files",
+          value: fileUpload.files.map((file, i) => ({
+            name: valuesRef.current[i]?.name || "",
+            file_data: file,
+            original_name: file.name,
+            file_type: FileType.ENCOUNTER,
+            file_category: FileCategory.UNSPECIFIED,
+            associating_id: encounterId,
+          })),
+        },
+      ],
+      questionnaireResponse.question_id,
+      questionnaireResponse.note,
+    );
+  }, [
+    fileUpload.files,
+    encounterId,
+    questionnaireResponse.note,
+    questionnaireResponse.question_id,
+    updateQuestionnaireResponseCB,
+  ]);
 
   return (
     <div className="flex flex-col gap-2">

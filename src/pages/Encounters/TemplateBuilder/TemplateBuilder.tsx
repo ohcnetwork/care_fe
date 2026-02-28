@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -120,7 +120,10 @@ export default function TemplateBuilder({
     queryFn: query(templateApi.retrieveSchema),
   });
 
-  const availableContexts = schema?.contexts ?? {};
+  const availableContexts = useMemo(
+    () => schema?.contexts ?? {},
+    [schema?.contexts],
+  );
 
   const { data: template } = useQuery({
     queryKey: ["template", slug],
@@ -196,7 +199,7 @@ export default function TemplateBuilder({
         description: template.description,
       });
     }
-  }, [template]);
+  }, [template, form]);
 
   useEffect(() => {
     if (template && availableContexts) {
