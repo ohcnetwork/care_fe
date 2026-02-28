@@ -42,9 +42,9 @@ import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { getBasePrice } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import {
-  ServiceRequestApplyActivityDefinitionSpec as BaseServiceRequestApplyActivityDefinitionSpec,
   Intent,
   Priority,
+  ServiceRequestApplyActivityDefinitionForm,
   ServiceRequestReadSpec,
   Status,
 } from "@/types/emr/serviceRequest/serviceRequest";
@@ -87,18 +87,8 @@ export function buildServiceRequestForTemplate(
   };
 }
 
-// Extend the base type to use UserReadMinimal for requester
-interface ServiceRequestApplyActivityDefinitionSpec extends Omit<
-  BaseServiceRequestApplyActivityDefinitionSpec,
-  "service_request"
-> {
-  service_request: Omit<
-    BaseServiceRequestApplyActivityDefinitionSpec["service_request"],
-    "requester"
-  > & {
-    requester: UserReadMinimal;
-  };
-}
+type ServiceRequestApplyActivityDefinitionSpec =
+  ServiceRequestApplyActivityDefinitionForm;
 
 interface ServiceRequestQuestionProps {
   encounterId: string;
@@ -600,7 +590,7 @@ export function ServiceRequestQuestion({
         {
           type: "service_request",
           value: newServiceRequests,
-        } as unknown as ResponseValue,
+        },
       ],
       questionnaireResponse.question_id,
     );
@@ -621,7 +611,7 @@ export function ServiceRequestQuestion({
         {
           type: "service_request",
           value: newServiceRequests,
-        } as unknown as ResponseValue,
+        },
       ],
       questionnaireResponse.question_id,
     );
@@ -673,7 +663,7 @@ export function ServiceRequestQuestion({
           {
             type: "service_request",
             value: updated,
-          } as unknown as ResponseValue,
+          },
         ],
         questionnaireResponse.question_id,
       );
@@ -702,7 +692,7 @@ export function ServiceRequestQuestion({
         {
           type: "service_request",
           value: newServiceRequests,
-        } as unknown as ResponseValue,
+        },
       ],
       questionnaireResponse.question_id,
     );
@@ -735,7 +725,7 @@ export function ServiceRequestQuestion({
         {
           type: "service_request",
           value: newServiceRequests,
-        } as unknown as ResponseValue,
+        },
       ],
       questionnaireResponse.question_id,
     );
@@ -822,7 +812,7 @@ export function ServiceRequestQuestion({
           {
             type: "service_request",
             value: newServiceRequests,
-          } as unknown as ResponseValue,
+          },
         ],
         questionnaireResponse.question_id,
       );
@@ -924,7 +914,7 @@ export function ServiceRequestQuestion({
           {
             type: "service_request",
             value: newServiceRequests,
-          } as unknown as ResponseValue,
+          },
         ],
         questionnaireResponse.question_id,
       );

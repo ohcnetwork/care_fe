@@ -147,7 +147,7 @@ export default function LocationForm({
       watchedNumberOfBeds &&
       watchedName
     ) {
-      if (!watchedCustomizeNames || bedFields.length === 0 || watchedName) {
+      if (!watchedCustomizeNames || bedFields.length === 0) {
         resetToDefaultNames();
       } else {
         const newCount = Number.parseInt(watchedNumberOfBeds ?? "0", 10);

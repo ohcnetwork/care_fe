@@ -3,7 +3,7 @@ import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Loader } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Document, Page, pdfjs } from "react-pdf";
 
@@ -124,52 +124,48 @@ export default function DiagnosticReportPrint({
     enabled: !!report?.id,
   });
 
-  // Function to get signed URL for a file
-  const getFileUrl = useCallback(
-    async (file: FileReadMinimal) => {
-      if (!file.id || !report?.id) return null;
-
-      try {
-        const data = await query(fileApi.get, {
-          queryParams: {
-            file_type: "diagnostic_report",
-            associating_id: report.id,
-          },
-          pathParams: { fileId: file.id },
-        })({ signal: new AbortController().signal });
-
-        return data?.read_signed_url as string;
-      } catch (error) {
-        console.error("Error fetching signed URL:", error);
-        return null;
-      }
-    },
-    [report?.id],
-  );
-
   // Store file URLs
   const [fileUrls, setFileUrls] = useState<Record<string, string>>({});
 
   // Fetch signed URLs for all files
   useEffect(() => {
-    if (!files.results.length) return;
+    if (!files.results.length || !report?.id) return;
+
+    const controller = new AbortController();
 
     const fetchAllUrls = async () => {
       const urls: Record<string, string> = {};
 
       for (const file of files.results) {
-        if (!file.id) continue;
-        const url = await getFileUrl(file);
-        if (url) {
-          urls[file.id] = url;
+        if (!file.id || controller.signal.aborted) break;
+        try {
+          const data = await query(fileApi.get, {
+            queryParams: {
+              file_type: "diagnostic_report",
+              associating_id: report.id,
+            },
+            pathParams: { fileId: file.id },
+          })({ signal: controller.signal });
+
+          if (data?.read_signed_url) {
+            urls[file.id] = data.read_signed_url as string;
+          }
+        } catch (error) {
+          if (!controller.signal.aborted) {
+            console.error("Error fetching signed URL:", error);
+          }
         }
       }
 
-      setFileUrls(urls);
+      if (!controller.signal.aborted) {
+        setFileUrls(urls);
+      }
     };
 
     fetchAllUrls();
-  }, [files.results, report?.id, getFileUrl]);
+
+    return () => controller.abort();
+  }, [files.results, report?.id]);
 
   if (isLoading) {
     return (

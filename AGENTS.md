@@ -30,8 +30,8 @@ This is a **React 19 + TypeScript + Vite** frontend (port 4000) that connects to
 2. **Frontend**: `cd /workspace && npm run dev` (serves on http://localhost:4000). Requires `.env.local` with `REACT_CARE_API_URL` (use `http://localhost:9000` for local backend or `https://careapi.ohc.network` for staging).
 
 ### Credentials (seeded by `make load-fixtures`)
-- Superuser: `admin` / `admin`
-- Staff roles: `care-doctor`, `care-staff`, `care-nurse`, `care-admin`, `care-volunteer`, `care-fac-admin` — all password `Ohcn@123`
+- Superuser username: `admin` (password is defined by the backend fixture configuration)
+- Staff role usernames: `care-doctor`, `care-staff`, `care-nurse`, `care-admin`, `care-volunteer`, `care-fac-admin` (passwords are defined by the backend fixture configuration; see the care-backend fixture docs or `make load-fixtures` output)
 
 ### Gotchas
 - Docker requires `fuse-overlayfs` storage driver and `iptables-legacy` in this cloud VM. These are configured in `/etc/docker/daemon.json` and via `update-alternatives`.
