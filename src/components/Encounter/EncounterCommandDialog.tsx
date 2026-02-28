@@ -368,9 +368,10 @@ export function EncounterCommandDialog({
     questionnaires,
     search,
     getShortcutDisplay,
-    isLoading,
     canWriteSelectedEncounter,
     canRestartSelectedEncounter,
+    encounter.encounter_class,
+    encounter.status,
   ]);
 
   const findRecentActions = useCallback(

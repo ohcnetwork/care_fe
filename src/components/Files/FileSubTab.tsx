@@ -151,7 +151,7 @@ export const FilesPage = ({
     if (!openUploadDialog) {
       fileUpload.clearFiles();
     }
-  }, [openUploadDialog]);
+  }, [openUploadDialog, fileUpload]);
 
   const getFileType = (file: FileReadMinimal) => {
     return fileManager.getFileType(file);

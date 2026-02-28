@@ -35,7 +35,6 @@ import { DisplayField, RecordItem } from "./RecordItem";
 
 interface BaseRecord {
   created_date?: string;
-  [key: string]: any;
 }
 
 interface StructuredTypeConfig<T extends BaseRecord> {
@@ -46,8 +45,8 @@ interface StructuredTypeConfig<T extends BaseRecord> {
     limit: number,
     offset: number,
     signal: AbortSignal,
-  ) => Promise<PaginatedResponse<any>>;
-  converter?: (item: any) => T;
+  ) => Promise<PaginatedResponse<unknown>>;
+  converter?(item: unknown): T;
   expandableFields?: DisplayField<T>[];
 }
 
@@ -196,6 +195,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
   });
 
   // Update state when data changes
+  const currentActiveOffset = state.currentOffset[activeType];
   useEffect(() => {
     if (!isOpen || !recordsData?.results) return;
 
@@ -258,10 +258,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
         }),
     });
     // Expand the first 5 date groups on initial load
-    if (
-      !state.currentOffset[activeType] ||
-      state.currentOffset[activeType] === 0
-    ) {
+    if (!currentActiveOffset || currentActiveOffset === 0) {
       const top5Dates = new Set(
         sortedGroups.slice(0, 5).map((group) => group.date),
       );
@@ -270,7 +267,8 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
   }, [
     isOpen,
     recordsData,
-    state.currentOffset[activeType],
+    currentActiveOffset,
+    state.dateGroupedRecords,
     activeType,
     updateState,
   ]);

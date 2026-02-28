@@ -106,7 +106,7 @@ const ExcalidrawPreview = memo(
         isMounted = false;
         clearTimeout(timeoutId);
       };
-    }, [elements, files, svgKey]);
+    }, [elements, files, svgKey, t]);
 
     return (
       <div className="h-60 md:h-40 w-full overflow-hidden rounded-md border border-gray-200 bg-white flex items-center justify-center">

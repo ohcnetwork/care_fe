@@ -245,7 +245,7 @@ export default function ConsentFormSheet({
         fileEntries: [],
       });
     }
-  }, [existingConsent]);
+  }, [existingConsent, form, isEdit]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -254,7 +254,7 @@ export default function ConsentFormSheet({
         fileInputRef.current.value = "";
       }
     }
-  }, [isOpen]);
+  }, [isOpen, fileUpload]);
 
   const onSubmit = (values: ConsentFormValues) => {
     const consentData: CreateConsentRequest = {

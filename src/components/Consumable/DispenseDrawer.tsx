@@ -490,7 +490,12 @@ export default function DispenseDrawer({
 
       return requests;
     },
-    [productKnowledgeInventoriesMap, encounterId, currentLocation.id],
+    [
+      productKnowledgeInventoriesMap,
+      encounterId,
+      currentLocation.id,
+      alternateIdentifier,
+    ],
   );
 
   const handleDispense = useCallback(() => {

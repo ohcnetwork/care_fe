@@ -577,16 +577,17 @@ export function CompactConditionEditor({
                     if (typeof error.message === "string") {
                       errorMessage[key] = error.message;
                     } else if (typeof error === "object") {
-                      Object.entries(error).forEach(
-                        ([k, v]: [
-                          string,
-                          { message?: string } | undefined,
-                        ]) => {
-                          if (v && typeof v.message === "string") {
-                            errorMessage[k] = v.message;
-                          }
-                        },
-                      );
+                      Object.entries(error).forEach(([k, v]) => {
+                        const fieldError = v as
+                          | { message?: string }
+                          | undefined;
+                        if (
+                          fieldError &&
+                          typeof fieldError.message === "string"
+                        ) {
+                          errorMessage[k] = fieldError.message;
+                        }
+                      });
                     }
 
                     return errorMessage ? (
