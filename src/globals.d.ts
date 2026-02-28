@@ -4,7 +4,7 @@ declare module "__federation__" {
   export const __federation_method_getRemote: (
     name: string,
     path: string,
-  ) => Promise<any>;
+  ) => Promise<unknown>;
   export const __federation_method_setRemote: (
     name: string,
     config: {

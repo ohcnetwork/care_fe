@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
+import { FieldValues, UseFormReturn } from "react-hook-form";
+
 import { ValueSetLookupResponse } from "@/types/valueSet/valueSet";
 import valueSetApi from "@/types/valueSet/valueSetApi";
 import mutate from "@/Utils/request/mutate";
@@ -21,7 +23,7 @@ import mutate from "@/Utils/request/mutate";
 type CodingFieldProps = {
   system: string;
   name: string;
-  form: any;
+  form: UseFormReturn<FieldValues>;
   className?: string;
   onRemove?: () => void;
   removeDisabled?: boolean;

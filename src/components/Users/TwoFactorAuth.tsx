@@ -149,12 +149,13 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
   // Update local state when MFA status changes
   useEffect(() => {
     if (!userData.mfa_enabled) {
-      // Close all dialogs if MFA is not enabled
-      closePasswordDialog();
-      closeSetupDialog();
-      closeRegenerateConfirm();
-      closeBackupCodes();
-      closeDisableDialog();
+      setDialogState({
+        password: false,
+        setup: false,
+        backupCodes: false,
+        disable: false,
+        regenerateConfirm: false,
+      });
     }
   }, [userData.mfa_enabled]);
 

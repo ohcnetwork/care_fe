@@ -216,7 +216,7 @@ export function MultiSelect({
   }, [value, open]);
   React.useEffect(() => {
     if (open == false) onValueChange(selectedValues);
-  }, [open]);
+  }, [open, onValueChange, selectedValues]);
 
   const { t } = useTranslation();
 
