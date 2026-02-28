@@ -100,6 +100,18 @@ export const PERMISSION_LIST_TOKEN_CATEGORIES = "can_list_token_category";
 export const PERMISSION_WRITE_TOKEN = "can_write_token";
 export const PERMISSION_LIST_TOKENS = "can_list_token";
 
+// Service Request Permissions
+export const PERMISSION_READ_SERVICE_REQUEST = "can_read_service_request";
+
+// Medication Permissions
+export const PERMISSION_IS_PHARMACIST = "is_pharmacist";
+// NOTE: Backend MedicationPermissions.read_medication_dispense omits the "can_" prefix
+// unlike most other permissions. Slug must match the backend enum member name exactly.
+export const PERMISSION_READ_MEDICATION_DISPENSE = "read_medication_dispense";
+
+// Inventory Permissions
+export const PERMISSION_READ_INVENTORY_ITEM = "can_read_inventory_item";
+
 // Healthcare Permissions
 export const PERMISSION_WRITE_HEALTHCARE_SERVICE =
   "can_write_healthcare_service";
@@ -115,8 +127,39 @@ export const PERMISSION_UPDATE_ACCOUNT = "can_update_account";
 export const PERMISSION_READ_ACCOUNT = "can_read_account";
 
 // Invoice Permissions
+export const PERMISSION_READ_INVOICE = "can_read_invoice";
 export const PERMISSION_MANAGE_LOCKED_INVOICE =
   "can_manage_locked_invoice_in_facility";
+
+// Payment Reconciliation Permissions
+export const PERMISSION_READ_PAYMENT_RECONCILIATION =
+  "can_read_payment_reconciliation";
+
+// Device Permissions
+export const PERMISSION_LIST_DEVICES = "can_list_devices";
+
+// Specimen Definition Permissions
+export const PERMISSION_READ_SPECIMEN_DEFINITION =
+  "can_read_specimen_definition";
+
+// Observation Definition Permissions
+export const PERMISSION_READ_OBSERVATION_DEFINITION =
+  "can_read_observation_definition";
+
+// Activity Definition Permissions
+export const PERMISSION_READ_ACTIVITY_DEFINITION =
+  "can_read_activity_definition";
+
+// Charge Item Definition Permissions
+export const PERMISSION_READ_CHARGE_ITEM_DEFINITION =
+  "can_read_charge_item_definition";
+
+// Product Permissions
+export const PERMISSION_READ_PRODUCT = "can_read_product";
+export const PERMISSION_READ_PRODUCT_KNOWLEDGE = "can_read_product_knowledge";
+
+// Tag Config Permissions
+export const PERMISSION_READ_TAG_CONFIG = "can_read_tag_config";
 
 export interface Permissions {
   // Patient Permissions
@@ -260,6 +303,15 @@ export interface Permissions {
   /** Permission slug: "can_list_token" */
   canListTokens: boolean;
 
+  /** Permission slug: "can_read_service_request" */
+  canReadServiceRequest: boolean;
+  /** Permission slug: "is_pharmacist" */
+  isPharmacist: boolean;
+  /** Permission slug: "read_medication_dispense" */
+  canReadMedicationDispense: boolean;
+  /** Permission slug: "can_read_inventory_item" */
+  canReadInventoryItem: boolean;
+
   /** Permission slug: "can_write_healthcare_service" */
   canWriteHealthcareService: boolean;
   /** Permission slug: "can_read_healthcare_service" */
@@ -277,8 +329,44 @@ export interface Permissions {
   /** Permission slug: "can_read_account" */
   canReadAccount: boolean;
 
+  /** Permission slug: "can_read_invoice" */
+  canReadInvoice: boolean;
   /** Permission slug: "can_manage_locked_invoice_in_facility" */
   canManageLockedInvoice: boolean;
+
+  // Payment Reconciliation
+  /** Permission slug: "can_read_payment_reconciliation" */
+  canReadPaymentReconciliation: boolean;
+
+  // Device
+  /** Permission slug: "can_list_devices" */
+  canListDevices: boolean;
+
+  // Specimen Definition
+  /** Permission slug: "can_read_specimen_definition" */
+  canReadSpecimenDefinition: boolean;
+
+  // Observation Definition
+  /** Permission slug: "can_read_observation_definition" */
+  canReadObservationDefinition: boolean;
+
+  // Activity Definition
+  /** Permission slug: "can_read_activity_definition" */
+  canReadActivityDefinition: boolean;
+
+  // Charge Item Definition
+  /** Permission slug: "can_read_charge_item_definition" */
+  canReadChargeItemDefinition: boolean;
+
+  // Product
+  /** Permission slug: "can_read_product" */
+  canReadProduct: boolean;
+  /** Permission slug: "can_read_product_knowledge" */
+  canReadProductKnowledge: boolean;
+
+  // Tag Config
+  /** Permission slug: "can_read_tag_config" */
+  canReadTagConfig: boolean;
 }
 
 export type HasPermissionFn = (
@@ -478,6 +566,23 @@ export function getPermissions(
     canWriteToken: hasPermission(PERMISSION_WRITE_TOKEN, permissions),
     canListTokens: hasPermission(PERMISSION_LIST_TOKENS, permissions),
 
+    // Service Requests
+    canReadServiceRequest: hasPermission(
+      PERMISSION_READ_SERVICE_REQUEST,
+      permissions,
+    ),
+    // Medication
+    isPharmacist: hasPermission(PERMISSION_IS_PHARMACIST, permissions),
+    canReadMedicationDispense: hasPermission(
+      PERMISSION_READ_MEDICATION_DISPENSE,
+      permissions,
+    ),
+    // Inventory
+    canReadInventoryItem: hasPermission(
+      PERMISSION_READ_INVENTORY_ITEM,
+      permissions,
+    ),
+
     //Healthcare Services
     canWriteHealthcareService: hasPermission(
       PERMISSION_WRITE_HEALTHCARE_SERVICE,
@@ -504,9 +609,53 @@ export function getPermissions(
     canReadAccount: hasPermission(PERMISSION_READ_ACCOUNT, permissions),
 
     // Invoice
+    canReadInvoice: hasPermission(PERMISSION_READ_INVOICE, permissions),
     canManageLockedInvoice: hasPermission(
       PERMISSION_MANAGE_LOCKED_INVOICE,
       permissions,
     ),
+
+    // Payment Reconciliation
+    canReadPaymentReconciliation: hasPermission(
+      PERMISSION_READ_PAYMENT_RECONCILIATION,
+      permissions,
+    ),
+
+    // Device
+    canListDevices: hasPermission(PERMISSION_LIST_DEVICES, permissions),
+
+    // Specimen Definition
+    canReadSpecimenDefinition: hasPermission(
+      PERMISSION_READ_SPECIMEN_DEFINITION,
+      permissions,
+    ),
+
+    // Observation Definition
+    canReadObservationDefinition: hasPermission(
+      PERMISSION_READ_OBSERVATION_DEFINITION,
+      permissions,
+    ),
+
+    // Activity Definition
+    canReadActivityDefinition: hasPermission(
+      PERMISSION_READ_ACTIVITY_DEFINITION,
+      permissions,
+    ),
+
+    // Charge Item Definition
+    canReadChargeItemDefinition: hasPermission(
+      PERMISSION_READ_CHARGE_ITEM_DEFINITION,
+      permissions,
+    ),
+
+    // Product
+    canReadProduct: hasPermission(PERMISSION_READ_PRODUCT, permissions),
+    canReadProductKnowledge: hasPermission(
+      PERMISSION_READ_PRODUCT_KNOWLEDGE,
+      permissions,
+    ),
+
+    // Tag Config
+    canReadTagConfig: hasPermission(PERMISSION_READ_TAG_CONFIG, permissions),
   };
 }

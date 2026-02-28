@@ -59,10 +59,8 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     }),
   });
 
-  const { canViewSchedule, canListEncounters } = getPermissions(
-    hasPermission,
-    facilityData?.permissions ?? [],
-  );
+  const { canViewSchedule, canListEncounters, canReadHealthcareService } =
+    getPermissions(hasPermission, facilityData?.permissions ?? []);
 
   // Default shortcuts
   const defaultShortcuts = [
@@ -85,7 +83,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
       description: t("view_services"),
       icon: Box,
       href: `/facility/${facilityId}/services`,
-      visible: true,
+      visible: canReadHealthcareService,
     },
   ];
 

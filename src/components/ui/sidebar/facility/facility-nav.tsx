@@ -30,6 +30,22 @@ function generateFacilityLinks(
     canReadEncounter: boolean;
     canListTokenCategories: boolean;
     canListTemplate: boolean;
+    canReadHealthcareService: boolean;
+    canReadResourceCategory: boolean;
+    canReadAccount: boolean;
+    canReadInvoice: boolean;
+    canReadPaymentReconciliation: boolean;
+    canViewFacilityOrganizations: boolean;
+    canListFacilityLocations: boolean;
+    canListDevices: boolean;
+    canReadSpecimenDefinition: boolean;
+    canReadObservationDefinition: boolean;
+    canReadActivityDefinition: boolean;
+    canReadChargeItemDefinition: boolean;
+    canReadProductKnowledge: boolean;
+    canReadProduct: boolean;
+    canReadTagConfig: boolean;
+    canUpdateFacility: boolean;
   },
   pluginLinks: NavigationLink[],
   pluginBillingLinks: NavigationLink[],
@@ -92,11 +108,13 @@ function generateFacilityLinks(
       name: t("services"),
       url: `${baseUrl}/services`,
       icon: <CareIcon icon="d-microscope" />,
+      visibility: permissions.canReadHealthcareService,
     },
     {
       name: t("resource"),
       url: `${baseUrl}/resource`,
       icon: <CareIcon icon="d-book-open" />,
+      visibility: permissions.canReadResourceCategory,
     },
     {
       name: t("users"),
@@ -111,14 +129,17 @@ function generateFacilityLinks(
         {
           name: t("accounts"),
           url: `${baseUrl}/billing/account`,
+          visibility: permissions.canReadAccount,
         },
         {
           name: t("invoices"),
           url: `${baseUrl}/billing/invoices`,
+          visibility: permissions.canReadInvoice,
         },
         {
           name: t("payments"),
           url: `${baseUrl}/billing/payments`,
+          visibility: permissions.canReadPaymentReconciliation,
         },
         ...pluginBillingLinks.map((l) => ({
           ...l,
@@ -134,50 +155,62 @@ function generateFacilityLinks(
         {
           name: t("general"),
           url: `${baseUrl}/settings/general`,
+          visibility: permissions.canUpdateFacility,
         },
         {
           name: t("departments"),
           url: `${baseUrl}/settings/departments`,
+          visibility: permissions.canViewFacilityOrganizations,
         },
         {
           name: t("locations"),
           url: `${baseUrl}/settings/locations`,
+          visibility: permissions.canListFacilityLocations,
         },
         {
           name: t("devices"),
           url: `${baseUrl}/settings/devices`,
+          visibility: permissions.canListDevices,
         },
         {
           name: t("specimen_definitions"),
           url: `${baseUrl}/settings/specimen_definitions`,
+          visibility: permissions.canReadSpecimenDefinition,
         },
         {
           name: t("observation_definitions"),
           url: `${baseUrl}/settings/observation_definitions`,
+          visibility: permissions.canReadObservationDefinition,
         },
         {
           name: t("activity_definitions"),
           url: `${baseUrl}/settings/activity_definitions`,
+          visibility: permissions.canReadActivityDefinition,
         },
         {
           name: t("billing"),
           url: `${baseUrl}/settings/billing`,
+          visibility: permissions.canReadChargeItemDefinition,
         },
         {
           name: t("charge_item_definitions"),
           url: `${baseUrl}/settings/charge_item_definitions`,
+          visibility: permissions.canReadChargeItemDefinition,
         },
         {
           name: t("healthcare_services"),
           url: `${baseUrl}/settings/healthcare_services`,
+          visibility: permissions.canReadHealthcareService,
         },
         {
           name: t("product_knowledge"),
           url: `${baseUrl}/settings/product_knowledge`,
+          visibility: permissions.canReadProductKnowledge,
         },
         {
           name: t("product"),
           url: `${baseUrl}/settings/product`,
+          visibility: permissions.canReadProduct,
         },
         {
           name: t("token_category"),
@@ -191,6 +224,7 @@ function generateFacilityLinks(
         {
           name: t("tag_config"),
           url: `${baseUrl}/settings/tag_config`,
+          visibility: permissions.canReadTagConfig,
         },
         {
           name: t("templates"),
@@ -232,6 +266,22 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     canReadEncounter,
     canListTokenCategories,
     canListTemplate,
+    canReadHealthcareService,
+    canReadResourceCategory,
+    canReadAccount,
+    canReadInvoice,
+    canReadPaymentReconciliation,
+    canViewFacilityOrganizations,
+    canListFacilityLocations,
+    canListDevices,
+    canReadSpecimenDefinition,
+    canReadObservationDefinition,
+    canReadActivityDefinition,
+    canReadChargeItemDefinition,
+    canReadProductKnowledge,
+    canReadProduct,
+    canReadTagConfig,
+    canUpdateFacility,
   } = getPermissions(hasPermission, facility?.permissions ?? []);
   const permissions = {
     canViewAppointments,
@@ -241,6 +291,22 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     canReadEncounter,
     canListTokenCategories,
     canListTemplate,
+    canReadHealthcareService,
+    canReadResourceCategory,
+    canReadAccount,
+    canReadInvoice,
+    canReadPaymentReconciliation,
+    canViewFacilityOrganizations,
+    canListFacilityLocations,
+    canListDevices,
+    canReadSpecimenDefinition,
+    canReadObservationDefinition,
+    canReadActivityDefinition,
+    canReadChargeItemDefinition,
+    canReadProductKnowledge,
+    canReadProduct,
+    canReadTagConfig,
+    canUpdateFacility,
   };
   return (
     <NavMain

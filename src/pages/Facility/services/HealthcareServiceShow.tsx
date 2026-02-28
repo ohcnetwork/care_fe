@@ -16,7 +16,10 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
 import { pharmacyDispenseServiceAtom } from "@/atoms/pharmacy";
+import { getPermissions } from "@/common/Permissions";
 import BackButton from "@/components/Common/BackButton";
+import { usePermissions } from "@/context/PermissionContext";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { InternalType } from "@/types/healthcareService/healthcareService";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 import { useAtom } from "jotai";
@@ -27,11 +30,15 @@ function LocationCard({
   facilityId,
   serviceType,
   serviceId,
+  isPharmacist,
+  canReadServiceRequest,
 }: {
   location: { id: string; name: string; description?: string };
   facilityId: string;
   serviceType: InternalType | undefined;
   serviceId: string;
+  isPharmacist: boolean;
+  canReadServiceRequest: boolean;
 }) {
   const { t } = useTranslation();
   const [, setPharmacyDispenseService] = useAtom(
@@ -42,8 +49,13 @@ function LocationCard({
     locationId: string,
     service_type: InternalType | undefined,
   ) => {
+    const bedsLink = {
+      text: t("view_location"),
+      link: `/facility/${facilityId}/locations/${locationId}/beds`,
+    };
     switch (service_type) {
       case InternalType.pharmacy:
+        if (!isPharmacist) return bedsLink;
         return {
           text: t("view_prescriptions"),
           link: `/facility/${facilityId}/locations/${locationId}/medication_requests`,
@@ -52,6 +64,7 @@ function LocationCard({
           },
         };
       case InternalType.lab:
+        if (!canReadServiceRequest) return bedsLink;
         return {
           text: t("view_requests"),
           link: `/facility/${facilityId}/locations/${locationId}/service_requests`,
@@ -64,11 +77,14 @@ function LocationCard({
     }
   };
 
-  const { text, link, onClick } = getButtonTextAndLink(
+  const buttonDetails = getButtonTextAndLink(
     facilityId,
     location.id,
     serviceType,
   );
+  const { text, link } = buttonDetails;
+  const onClick =
+    "onClick" in buttonDetails ? buttonDetails.onClick : undefined;
 
   return (
     <Link href={link} basePath="/" className="block" onClick={onClick}>
@@ -110,6 +126,16 @@ export default function HealthcareServiceShow({
   serviceId: string;
 }) {
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
+  const { facility } = useCurrentFacility();
+
+  const {
+    canViewSchedule,
+    canViewAppointments,
+    canListTokens,
+    isPharmacist,
+    canReadServiceRequest,
+  } = getPermissions(hasPermission, facility?.permissions ?? []);
 
   const { data: service, isLoading } = useQuery({
     queryKey: ["healthcareService", serviceId],
@@ -121,6 +147,30 @@ export default function HealthcareServiceShow({
     }),
   });
 
+  const shortcuts = [
+    {
+      title: t("schedule"),
+      description: t("schedule_information"),
+      icon: Calendar,
+      href: `/schedule`,
+      visibility: canViewSchedule,
+    },
+    {
+      title: t("appointments"),
+      description: t("view_appointments"),
+      icon: CalendarDays,
+      href: `/appointments`,
+      visibility: canViewAppointments,
+    },
+    {
+      title: t("queues"),
+      description: t("manage_token_queues_for_facility"),
+      icon: Logs,
+      href: `/queues`,
+      visibility: canListTokens,
+    },
+  ].filter((s) => s.visibility !== false);
+
   return (
     <div className="container px-4 mx-auto max-w-4xl space-y-6">
       <BackButton to={`/facility/${facilityId}/services`}>
@@ -128,52 +178,35 @@ export default function HealthcareServiceShow({
         <span>{t("back_to_services")}</span>
       </BackButton>
 
-      <div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {[
-            {
-              title: t("schedule"),
-              description: t("schedule_information"),
-              icon: Calendar,
-              href: `/schedule`,
-            },
-            {
-              title: t("appointments"),
-              description: t("view_appointments"),
-              icon: CalendarDays,
-              href: `/appointments`,
-            },
-            {
-              title: t("queues"),
-              description: t("manage_token_queues_for_facility"),
-              icon: Logs,
-              href: `/queues`,
-            },
-          ].map((shortcut) => (
-            <Link
-              key={shortcut.href}
-              href={shortcut.href}
-              className="block h-full transition-all duration-200 hover:ring-2 ring-primary-400 rounded-lg ring-offset-2"
-            >
-              <Card className="h-full border-0 shadow rounded-lg p-3">
-                <CardContent className="p-0 flex flex-row items-center h-full gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <shortcut.icon className="size-5 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base">
-                      {shortcut.title}
-                    </CardTitle>
-                    <CardDescription className="text-gray-500 text-xs">
-                      {shortcut.description}
-                    </CardDescription>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+      {shortcuts.length > 0 && (
+        <div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {shortcuts.map((shortcut) => (
+              <Link
+                key={shortcut.href}
+                href={shortcut.href}
+                className="block h-full transition-all duration-200 hover:ring-2 ring-primary-400 rounded-lg ring-offset-2"
+              >
+                <Card className="h-full border-0 shadow rounded-lg p-3">
+                  <CardContent className="p-0 flex flex-row items-center h-full gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <shortcut.icon className="size-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">
+                        {shortcut.title}
+                      </CardTitle>
+                      <CardDescription className="text-gray-500 text-xs">
+                        {shortcut.description}
+                      </CardDescription>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
@@ -224,6 +257,8 @@ export default function HealthcareServiceShow({
                 facilityId={facilityId}
                 serviceType={service.internal_type}
                 serviceId={serviceId}
+                isPharmacist={isPharmacist}
+                canReadServiceRequest={canReadServiceRequest}
               />
             ))
           )}

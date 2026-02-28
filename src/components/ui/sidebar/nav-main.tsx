@@ -75,7 +75,16 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
     <SidebarGroup>
       <SidebarMenu>
         {links
-          .filter((link) => link.visibility !== false)
+          .filter((link) => {
+            if (link.visibility === false) return false;
+            if (link.children) {
+              const visibleChildren = link.children.filter(
+                (child) => child.visibility !== false,
+              );
+              if (visibleChildren.length === 0) return false;
+            }
+            return true;
+          })
           .map((link) => (
             <Fragment key={link.name}>
               {link.children ? (
