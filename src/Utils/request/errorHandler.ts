@@ -58,7 +58,9 @@ export function handleHttpError(error: Error) {
       return;
     }
 
-    Notifications.handleBadRequestErrors(errs);
+    Notifications.handleBadRequestErrors(
+      errs as Parameters<typeof Notifications.handleBadRequestErrors>[0],
+    );
     return;
   }
 

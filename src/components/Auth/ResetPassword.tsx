@@ -14,6 +14,7 @@ import { validatePassword } from "@/common/validation";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { ResetPasswordRequest } from "@/types/auth/auth";
 import authApi from "@/types/auth/authApi";
 
 interface ResetPasswordProps {
@@ -85,7 +86,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
     },
     onError: (error) => {
       if (error.cause) {
-        setErrors(error.cause);
+        setErrors(error.cause as Record<string, string | null>);
       }
     },
   });
@@ -95,7 +96,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
     const valid = validateData();
     if (valid) {
       valid.token = props.token;
-      resetPassword(valid);
+      resetPassword(valid as ResetPasswordRequest);
     }
   };
 
