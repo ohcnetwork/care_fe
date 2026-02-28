@@ -4163,6 +4163,7 @@
   "permanent_address_is_different_from_current_address": "Permanent address is different from current address",
   "permission": "Permission",
   "permission_denied": "You do not have permission to perform this action",
+  "permission_denied_create_delivery": "You do not have permission to create a delivery",
   "permission_denied_encounter": "You do not have permission to view this encounter",
   "permissions": "Permissions",
   "permitted": "Permitted",

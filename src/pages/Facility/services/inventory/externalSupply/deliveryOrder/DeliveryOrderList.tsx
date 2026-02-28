@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import { toast } from "sonner";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
@@ -14,8 +16,12 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 
+import { getPermissions } from "@/common/Permissions";
+
+import { usePermissions } from "@/context/PermissionContext";
 import DeliveryOrderTable from "@/pages/Facility/services/inventory/externalSupply/components/DeliveryOrderTable";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
@@ -33,6 +39,13 @@ export function DeliveryOrderList({
   isRequester,
 }: Props) {
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
+  const { facility } = useCurrentFacility();
+
+  const { canWriteSupplyDelivery } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
+  );
 
   const [qParams, setQueryParams] = useQueryParams();
 
@@ -136,7 +149,11 @@ export function DeliveryOrderList({
             <div className="flex items-center gap-2">
               <Button
                 variant="primary"
-                onClick={() =>
+                onClick={() => {
+                  if (!canWriteSupplyDelivery) {
+                    toast.error(t("permission_denied_create_delivery"));
+                    return;
+                  }
                   navigate(
                     getInventoryBasePath(
                       facilityId,
@@ -146,8 +163,8 @@ export function DeliveryOrderList({
                       isRequester,
                       "new",
                     ),
-                  )
-                }
+                  );
+                }}
               >
                 <CareIcon icon="l-plus" />
                 {t("create_delivery")}

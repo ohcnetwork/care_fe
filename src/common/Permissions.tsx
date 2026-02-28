@@ -164,6 +164,7 @@ export const PERMISSION_READ_TAG_CONFIG = "can_read_tag_config";
 // Supply Chain Permissions
 export const PERMISSION_READ_SUPPLY_REQUEST = "can_read_supply_request";
 export const PERMISSION_READ_SUPPLY_DELIVERY = "can_read_supply_delivery";
+export const PERMISSION_WRITE_SUPPLY_DELIVERY = "can_write_supply_delivery";
 
 export interface Permissions {
   // Patient Permissions
@@ -377,6 +378,8 @@ export interface Permissions {
   canReadSupplyRequest: boolean;
   /** Permission slug: "can_read_supply_delivery" */
   canReadSupplyDelivery: boolean;
+  /** Permission slug: "can_write_supply_delivery" */
+  canWriteSupplyDelivery: boolean;
 }
 
 export type HasPermissionFn = (
@@ -675,6 +678,10 @@ export function getPermissions(
     ),
     canReadSupplyDelivery: hasPermission(
       PERMISSION_READ_SUPPLY_DELIVERY,
+      permissions,
+    ),
+    canWriteSupplyDelivery: hasPermission(
+      PERMISSION_WRITE_SUPPLY_DELIVERY,
       permissions,
     ),
   };

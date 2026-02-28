@@ -94,7 +94,7 @@ export function LocationNav() {
             {
               name: t("to_dispatch"),
               url: `${baseUrl}/inventory/internal/dispatch/`,
-              visibility: canReadSupplyRequest,
+              visibility: canReadSupplyRequest || canReadSupplyDelivery,
             },
             {
               header: t("external_supply"),
