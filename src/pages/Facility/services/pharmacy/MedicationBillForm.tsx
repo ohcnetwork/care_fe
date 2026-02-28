@@ -53,8 +53,6 @@ export default function MedicationBillForm({
   >(null);
   const [originalProductForSubstitution, setOriginalProductForSubstitution] =
     useState<ProductKnowledgeBase | undefined>();
-  const [preSelectedSubstituteProduct, setPreSelectedSubstituteProduct] =
-    useState<ProductKnowledgeBase | undefined>();
   const [originalMedicationName, setOriginalMedicationName] = useState<
     string | undefined
   >();
@@ -190,10 +188,9 @@ export default function MedicationBillForm({
             setEditingItemIndex(idx);
             setIsAddMedicationSheetOpen(true);
           }}
-          onSubstitute={(idx, productKnowledge, preSelectedProduct) => {
+          onSubstitute={(idx, productKnowledge) => {
             setSubstitutingItemIndex(idx);
             setOriginalProductForSubstitution(productKnowledge);
-            setPreSelectedSubstituteProduct(preSelectedProduct);
             // Get medication name for display when no product knowledge
             if (!productKnowledge) {
               const item = form.getValues(`items.${idx}`);
@@ -362,19 +359,16 @@ export default function MedicationBillForm({
             if (!open) {
               setSubstitutingItemIndex(null);
               setOriginalProductForSubstitution(undefined);
-              setPreSelectedSubstituteProduct(undefined);
               setOriginalMedicationName(undefined);
             }
           }}
           originalProductKnowledge={originalProductForSubstitution}
           originalMedicationName={originalMedicationName}
-          preSelectedProduct={preSelectedSubstituteProduct}
           currentSubstitution={
             substitutingItemIndex !== null
               ? form.watch(`items.${substitutingItemIndex}.substitution`)
               : undefined
           }
-          facilityId={facilityId}
           onSave={(substitutionDetails) => {
             if (substitutingItemIndex === null) return;
 
@@ -418,7 +412,6 @@ export default function MedicationBillForm({
             }
             setSubstitutingItemIndex(null);
             setOriginalProductForSubstitution(undefined);
-            setPreSelectedSubstituteProduct(undefined);
             setOriginalMedicationName(undefined);
             setIsSubstitutionSheetOpen(false);
           }}

@@ -1,3 +1,4 @@
+import { SubstitutionSheet } from "@/components/Medication/SubstitutionSheet";
 import {
   formatDosage,
   formatDuration,
@@ -16,10 +17,7 @@ import {
   InventoryItemsSelector,
   LotSelection,
 } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
-import {
-  BillMedicationLineItemSchemaType,
-  billMedicationsByPrescriptionsFormSchema,
-} from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
+import { billMedicationsByPrescriptionsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   getBasePrice,
@@ -240,7 +238,6 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
   const { facilityId } = useCurrentFacility();
   const { locationId } = useCurrentLocation();
 
-  const item = form.watch(name);
   const isSelected = form.watch(`${name}.isSelected`);
   const medication = form.watch(`${name}.medication`);
   const productKnowledge = form.watch(`${name}.productKnowledge`);
@@ -273,7 +270,7 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
 
       {/* Medicine */}
       <div className="bg-white py-2 px-3 flex justify-between items-center">
-        <MedicineLineItemMedication item={item} />
+        <MedicineLineItemMedication form={form} name={name} />
       </div>
 
       {/* Select Lot */}
@@ -309,7 +306,7 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
               facilityId={facilityId}
               locationId={locationId}
               // TODO: handle this?
-              productKnowledgeId={productKnowledge?.id || ""}
+              productKnowledgeId={effectiveProductKnowledge?.id || ""}
               showOnlyAvailable
             />
           </div>
@@ -395,15 +392,17 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
 };
 
 const MedicineLineItemMedication = ({
-  item,
+  form,
+  name,
 }: {
-  item: BillMedicationLineItemSchemaType;
+  form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
+  name: `prescriptions.${number}.items.${number}`;
 }) => {
   const { t } = useTranslation();
 
-  const medication = item.medication;
-  const productKnowledge = item.productKnowledge;
-  const substitution = item.substitution;
+  const medication = form.watch(`${name}.medication`);
+  const productKnowledge = form.watch(`${name}.productKnowledge`);
+  const substitution = form.watch(`${name}.substitution`);
 
   const effectiveProductKnowledge =
     substitution?.substitutedProductKnowledge || productKnowledge;
@@ -460,16 +459,45 @@ const MedicineLineItemMedication = ({
         <Button variant="outline" size="icon" className="text-gray-950">
           <BadgeInfo />
         </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          className="text-sm font-semibold text-gray-950 px-6"
-          onClick={() => {
-            // TODO: wire this
-          }}
-        >
-          {t("sub")}
-        </Button>
+
+        <FormField
+          control={form.control}
+          name={`${name}.substitution`}
+          render={({ field }) => (
+            <FormItem>
+              <SubstitutionSheet
+                original={{
+                  productKnowledge: productKnowledge,
+                  medicationName: medication?.medication.display,
+                }}
+                initialValue={field.value}
+                onSave={(value) => {
+                  field.onChange(value);
+                  form.setValue(`${name}.lots`, [], {
+                    shouldDirty: true,
+                    shouldTouch: true,
+                  });
+                }}
+                onClear={() => {
+                  field.onChange(null);
+                  form.setValue(`${name}.lots`, [], {
+                    shouldDirty: true,
+                    shouldTouch: true,
+                  });
+                }}
+                trigger={
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="text-sm font-semibold text-gray-950 px-6"
+                  >
+                    {t("sub")}
+                  </Button>
+                }
+              />
+            </FormItem>
+          )}
+        />
       </div>
     </>
   );

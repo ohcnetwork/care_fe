@@ -30,13 +30,13 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 
-export const LotSelectionSchema = z.object({
+export const lotSelectionSchema = z.object({
   item: z.custom<InventoryRead>(),
   quantity: zodDecimal({ min: 0 }),
   autoSelected: z.boolean().optional(),
 });
 
-export type LotSelection = z.infer<typeof LotSelectionSchema>;
+export type LotSelection = z.infer<typeof lotSelectionSchema>;
 
 // interface AutoSelectOptions {
 //   quantity: Decimal;
@@ -140,14 +140,7 @@ export const InventoryItemsSelector = ({
 
   // No stock state
   if (!items || items.length === 0) {
-    return (
-      <Badge
-        variant="destructive"
-        // className={cn(disabled && "opacity-50")}
-      >
-        {t("no_stock")}
-      </Badge>
-    );
+    return <Badge variant="destructive">{t("no_stock")}</Badge>;
   }
 
   return (
