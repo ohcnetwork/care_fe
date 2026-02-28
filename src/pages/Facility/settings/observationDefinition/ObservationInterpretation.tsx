@@ -345,9 +345,9 @@ export function ObservationInterpretation<
     onCancel?.();
     handleSheetState(false);
     setEditedRange(null);
-    form.clearErrors(
-      `${name}.${editedRange?.id || 0}` as FieldPath<TFieldValues>,
-    );
+    if (editedRange?.id !== undefined) {
+      form.clearErrors(`${name}.${editedRange.id}` as FieldPath<TFieldValues>);
+    }
   };
 
   const getInterpretationSummary = (range: QualifiedRange, index: number) => {

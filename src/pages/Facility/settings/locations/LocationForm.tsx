@@ -129,11 +129,12 @@ export default function LocationForm({
   const watchedCustomizeNames = form.watch("customizeNames");
 
   const resetToDefaultNames = useCallback(() => {
-    if (watchedName && watchedNumberOfBeds) {
+    const normalizedName = watchedName?.trim();
+    if (normalizedName && watchedNumberOfBeds) {
       const defaultNames = Array.from(
         { length: Number.parseInt(watchedNumberOfBeds ?? "0") },
         (_, index) => ({
-          name: `${watchedName} ${index + 1}`,
+          name: `${normalizedName} ${index + 1}`,
         }),
       );
       replaceBedFields(defaultNames);
@@ -141,11 +142,12 @@ export default function LocationForm({
   }, [watchedName, watchedNumberOfBeds, replaceBedFields]);
 
   useEffect(() => {
+    const normalizedName = watchedName?.trim();
     if (
       watchedFormType === "bd" &&
       watchedBulkCreation &&
       watchedNumberOfBeds &&
-      watchedName
+      normalizedName
     ) {
       if (!watchedCustomizeNames || bedFields.length === 0) {
         resetToDefaultNames();
@@ -156,7 +158,7 @@ export default function LocationForm({
 
         while (updatedFields.length < newCount) {
           updatedFields.push({
-            name: `${watchedName} ${updatedFields.length + 1}`,
+            name: `${normalizedName} ${updatedFields.length + 1}`,
           });
         }
 

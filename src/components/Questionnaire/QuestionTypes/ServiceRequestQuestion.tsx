@@ -805,7 +805,10 @@ export function ServiceRequestQuestion({
         encounter: encounterId,
       };
 
-      const newServiceRequests = [...serviceRequests, newServiceRequest];
+      const newServiceRequests = [
+        ...serviceRequestsRef.current,
+        newServiceRequest,
+      ];
       setServiceRequests(newServiceRequests);
       updateQuestionnaireResponseCB(
         [
@@ -907,7 +910,10 @@ export function ServiceRequestQuestion({
         throw new Error("Failed to apply template - no valid service requests");
       }
 
-      const newServiceRequests = [...serviceRequests, ...validServiceRequests];
+      const newServiceRequests = [
+        ...serviceRequestsRef.current,
+        ...validServiceRequests,
+      ];
       setServiceRequests(newServiceRequests);
       updateQuestionnaireResponseCB(
         [

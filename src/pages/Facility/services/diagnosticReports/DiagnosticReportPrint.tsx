@@ -137,7 +137,8 @@ export default function DiagnosticReportPrint({
       const urls: Record<string, string> = {};
 
       for (const file of files.results) {
-        if (!file.id || controller.signal.aborted) break;
+        if (controller.signal.aborted) break;
+        if (!file.id) continue;
         try {
           const data = await query(fileApi.get, {
             queryParams: {
