@@ -38,20 +38,15 @@ export const lotSelectionSchema = z.object({
 
 export type LotSelection = z.infer<typeof lotSelectionSchema>;
 
-// interface AutoSelectOptions {
-//   quantity: Decimal;
-//   canSelect: (item: InventoryRead) => boolean;
-// }
-
 interface Props {
   facilityId: string;
   locationId: string;
   productKnowledgeId: string;
   showOnlyAvailable?: boolean;
-  // autoSelect?: AutoSelectOptions;
   value?: LotSelection;
   selected: LotSelection[];
   onChange: (selectedItems: LotSelection[]) => void;
+  disabled?: boolean;
 }
 
 export const InventoryItemsSelector = ({
@@ -59,10 +54,10 @@ export const InventoryItemsSelector = ({
   locationId,
   productKnowledgeId,
   showOnlyAvailable = false,
-  // autoSelect,
   value,
   selected,
   onChange,
+  disabled = false,
 }: Props) => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -78,17 +73,7 @@ export const InventoryItemsSelector = ({
         ...(showOnlyAvailable ? { net_content_gt: 0 } : {}),
       },
     }),
-    select: (data: PaginatedResponse<InventoryRead>) => {
-      // Auto-select trigger kept here so that if the inventory items are
-      // refetched (e.g. after creating a new batch), or item is invalidated,
-      // the auto-selection logic can be re-applied if needed.
-      const items = data.results;
-      // if (autoSelect) {
-      //   const selected = autoSelectItems(items, autoSelect);
-      //   onChange(selected);
-      // }
-      return items;
-    },
+    select: (data: PaginatedResponse<InventoryRead>) => data.results,
   });
 
   // Filter items by lot/batch number search
@@ -150,6 +135,7 @@ export const InventoryItemsSelector = ({
           variant="outline"
           className="py-1 px-2 border-gray-300 shadow-none"
           type="button"
+          disabled={disabled}
         >
           <div className="flex flex-col min-w-40 items-start gap-1 w-full">
             {!value ? (
@@ -168,7 +154,7 @@ export const InventoryItemsSelector = ({
                       text={
                         value.item.product.batch?.lot_number || t("unknown")
                       }
-                      delay={15}
+                      delay={20}
                     />
                   ) : (
                     value.item.product.batch?.lot_number || t("unknown")
@@ -341,99 +327,3 @@ export const InventoryItemsSelector = ({
 };
 
 // TODO: auto close popover when quantity matches the required quantity only
-
-/**
- * Auto-select inventory items based on the provided options.
- * It iterates through the items and selects them until the desired quantity is
- * met or there are no more items to select.
- * The canSelect function is used to determine if an item is eligible for
- * selection.
- *
- * Quantity is always dealt in whole numbers. If item's available content is
- * 1.5, it will be rounded down to 1.
- * If required quantity is 1.5, it will be rounded up to 2.
- */
-// const autoSelectItems = (
-//   items: InventoryRead[],
-//   options: AutoSelectOptions,
-// ) => {
-//   const selected: LotSelection[] = [];
-
-//   // Start with the full required quantity, and reduce it as we select items
-//   let remainingQuantity = options.quantity.ceil();
-
-//   for (const item of items) {
-//     // Escape hatch to prevent unnecessary iterations once we've met the required quantity
-//     if (remainingQuantity.lte(0)) {
-//       break;
-//     }
-
-//     const availableQuantity = decimal(item.net_content).floor();
-
-//     // Skip items that don't meet the canSelect criteria
-//     if (options.canSelect(item) == false || availableQuantity.lte(0)) {
-//       continue;
-//     }
-
-//     if (availableQuantity.lte(remainingQuantity)) {
-//       // If the entire available quantity of the item can be used, select it all
-//       selected.push({
-//         item,
-//         quantity: roundWhole(availableQuantity),
-//         autoSelected: true,
-//       });
-//       remainingQuantity = remainingQuantity.minus(availableQuantity);
-//     } else {
-//       // Otherwise, select only the remaining quantity needed and stop
-//       selected.push({
-//         item,
-//         quantity: roundWhole(remainingQuantity),
-//         autoSelected: true,
-//       });
-//       remainingQuantity = new Decimal(0);
-//     }
-//   }
-
-//   return selected;
-// };
-
-// /**
-//  * Convert SelectedLot[] to form-compatible format with string quantities
-//  */
-// export const toFormLotItems = (
-//   selectedItems: LotSelection[],
-// ): { selectedInventoryId: string; quantity: string }[] => {
-//   return selectedItems.map((item) => ({
-//     selectedInventoryId: item.item.id,
-//     quantity: item.quantity.toString(),
-//   }));
-// };
-
-// /**
-//  * Convert form lot items back to SelectedLot[] with Decimal quantities
-//  */
-// export const fromFormLotItems = (
-//   lots: { selectedInventoryId: string; quantity: string }[],
-//   inventories: InventoryRead[],
-//   previousItems?: LotSelection[],
-// ): LotSelection[] => {
-//   return lots
-//     .map((lot): LotSelection | null => {
-//       const inventory = inventories.find(
-//         (inv) => inv.id === lot.selectedInventoryId,
-//       );
-//       if (!inventory) return null;
-
-//       // Preserve autoSelected flag from previous items if it exists
-//       const previousItem = previousItems?.find(
-//         (item) => item.item.id === lot.selectedInventoryId,
-//       );
-
-//       return {
-//         item: inventory,
-//         quantity: lot.quantity || "0",
-//         autoSelected: previousItem?.autoSelected,
-//       };
-//     })
-//     .filter((item): item is LotSelection => item !== null);
-// };

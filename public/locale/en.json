@@ -6357,5 +6357,6 @@
   "include_all": "Include all",
   "patient_has_unbilled_prescriptions_count": "This patient has {{ count }} other unbilled prescriptions",
   "final_amount_is_calculated_after_invoice_generation": "Final amount is calculated after invoice generation",
-  "sub": "Sub."
+  "sub": "Sub.",
+  "auto_select_lots": "Auto-select lots based on dosage instructions"
 }

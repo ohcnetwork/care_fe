@@ -1,6 +1,7 @@
 import { addMonths, endOfMonth, isBefore, startOfMonth } from "date-fns";
 
 import { Badge } from "@/components/ui/badge";
+import { InventoryRead } from "@/types/inventory/product/inventory";
 import careConfig from "@careConfig";
 
 export type ExpiryStatus = "expired" | "expiring_soon" | "valid";
@@ -51,10 +52,8 @@ export function isProductRestrictedFromDispensing(
  * @param expirationDate - The expiration date string
  * @returns boolean - true if the lot is valid for selection
  */
-export function isLotAllowedForDispensing(
-  expirationDate: string | undefined,
-): boolean {
-  return !isProductRestrictedFromDispensing(expirationDate);
+export function isLotAllowedForDispensing(inventory: InventoryRead): boolean {
+  return !isProductRestrictedFromDispensing(inventory.product.expiration_date);
 }
 
 /**

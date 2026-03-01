@@ -243,9 +243,7 @@ export default function DispenseDrawer({
         inventories?.length &&
         !currentLots.some((lot) => lot.selectedInventoryId)
       ) {
-        const validLot = inventories.find((inv) =>
-          isLotAllowedForDispensing(inv.product.expiration_date),
-        );
+        const validLot = inventories.find(isLotAllowedForDispensing);
 
         if (validLot) {
           form.setValue(`items.${index}.lots`, [

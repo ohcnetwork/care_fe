@@ -12,28 +12,38 @@ import { FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import {
   InventoryItemsSelector,
   LotSelection,
 } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
 import { billMedicationsByPrescriptionsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
+import { selectEligibleInventoryItems } from "@/pages/Facility/services/pharmacy/billMedications/utils/itemsAutoSelect";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   getBasePrice,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
+  computeMedicationDispenseQuantity,
   displayMedicationName,
   MedicationRequestDispenseStatus,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import { PrescriptionRead } from "@/types/emr/prescription/prescription";
+import { InventoryRead } from "@/types/inventory/product/inventory";
+import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { getLocationPath } from "@/types/location/utils";
-import { round } from "@/Utils/decimal";
+import { decimal, round } from "@/Utils/decimal";
+import { isLotAllowedForDispensing } from "@/Utils/inventory";
+import mutate from "@/Utils/request/mutate";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
+import { useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { BadgeInfo, Check, PrinterIcon } from "lucide-react";
+import { BadgeInfo, Check, PrinterIcon, RefreshCcwIcon } from "lucide-react";
+import { useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -237,6 +247,7 @@ interface MedicineLineItemProps {
 const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
   const { facilityId } = useCurrentFacility();
   const { locationId } = useCurrentLocation();
+  const { t } = useTranslation();
 
   const isSelected = form.watch(`${name}.isSelected`);
   const medication = form.watch(`${name}.medication`);
@@ -249,9 +260,43 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
   const effectiveProductKnowledge =
     substitution?.substitutedProductKnowledge || productKnowledge;
 
+  const {
+    mutate: autoSelectInventoryItems,
+    isPending: isAutoSelectingInventoryItems,
+  } = useMutation({
+    mutationFn: mutate(inventoryApi.list, {
+      pathParams: { facilityId, locationId },
+      queryParams: {
+        product_knowledge: effectiveProductKnowledge?.id || "",
+        status: "active",
+        limit: 100,
+        net_content_gt: 0,
+      },
+    }),
+    onSuccess: (data: PaginatedResponse<InventoryRead>) => {
+      if (!medication) {
+        return;
+      }
+
+      const quantity = computeMedicationDispenseQuantity(medication);
+      const autoSelectedLots = selectEligibleInventoryItems(data.results, {
+        quantity: decimal(quantity),
+        canSelect: isLotAllowedForDispensing,
+      });
+
+      form.setValue(`${name}.lots`, autoSelectedLots);
+    },
+  });
+
+  useEffect(() => {
+    if (medication && effectiveProductKnowledge?.id) {
+      autoSelectInventoryItems(undefined);
+    }
+  }, [medication, effectiveProductKnowledge?.id, autoSelectInventoryItems]);
+
   return (
-    <>
-      <div className="col-start-1 bg-white py-1 px-3 flex items-center">
+    <div className="contents group divide-y divide-x divide-gray-200">
+      <div className="col-start-1 bg-white group-hover:bg-gray-100 group-focus-within:bg-gray-100 py-1 px-3 flex items-center transition-all duration-200 ease-in-out">
         <FormField
           control={form.control}
           name={`${name}.isSelected`}
@@ -274,69 +319,89 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
       </div>
 
       {/* Select Lot */}
-      <div className="bg-white flex flex-col divide-y divide-gray-200">
-        {lots.map((_, index) => (
-          <FormField
-            key={`${name}.lots.${index}`}
-            control={form.control}
-            name={`${name}.lots.${index}`}
-            render={({ field }) => (
-              <FormItem className="w-full flex-1 flex flex-col justify-center px-3 py-2">
-                <FormControl>
-                  <InventoryItemsSelector
-                    {...field}
-                    selected={lots}
-                    onChange={(lots) => form.setValue(`${name}.lots`, lots)}
-                    facilityId={facilityId}
-                    locationId={locationId}
-                    // TODO: handle this?
-                    productKnowledgeId={effectiveProductKnowledge?.id || ""}
-                    showOnlyAvailable
-                  />
-                </FormControl>
-              </FormItem>
-            )}
+      <div className="relative bg-white">
+        <Button
+          variant="white"
+          onClick={() => {
+            autoSelectInventoryItems(undefined);
+          }}
+          disabled={disabled || isAutoSelectingInventoryItems}
+          className="absolute top-1/2 -translate-y-1/2 -right-2.25 size-4.5 [&_svg]:size-3 z-10 text-gray-500"
+          size="xs"
+          title={t("auto_select_lots")}
+        >
+          <RefreshCcwIcon
+            className={cn(isAutoSelectingInventoryItems && "animate-spin")}
           />
-        ))}
-        {lots.length === 0 && (
-          <div className="w-full flex-1 flex flex-col justify-center px-3 py-2">
-            <InventoryItemsSelector
-              selected={lots}
-              onChange={(lots) => form.setValue(`${name}.lots`, lots)}
-              facilityId={facilityId}
-              locationId={locationId}
-              // TODO: handle this?
-              productKnowledgeId={effectiveProductKnowledge?.id || ""}
-              showOnlyAvailable
+        </Button>
+
+        <div className="flex flex-col divide-y divide-gray-200 h-full w-full">
+          {lots.map((_, index) => (
+            <FormField
+              key={`${name}.lots.${index}`}
+              control={form.control}
+              name={`${name}.lots.${index}`}
+              render={({ field }) => (
+                <FormItem className="w-full flex-1 flex flex-col justify-center px-3 py-2">
+                  <FormControl>
+                    <InventoryItemsSelector
+                      {...field}
+                      selected={lots}
+                      onChange={(lots) => form.setValue(`${name}.lots`, lots)}
+                      facilityId={facilityId}
+                      locationId={locationId}
+                      // TODO: handle this?
+                      productKnowledgeId={effectiveProductKnowledge?.id || ""}
+                      showOnlyAvailable
+                      disabled={disabled || isAutoSelectingInventoryItems}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
             />
-          </div>
-        )}
+          ))}
+          {lots.length === 0 && (
+            <div className="w-full flex-1 flex flex-col justify-center px-3 py-2">
+              <InventoryItemsSelector
+                selected={lots}
+                onChange={(lots) => form.setValue(`${name}.lots`, lots)}
+                facilityId={facilityId}
+                locationId={locationId}
+                // TODO: handle this?
+                productKnowledgeId={effectiveProductKnowledge?.id || ""}
+                showOnlyAvailable
+                disabled={disabled || isAutoSelectingInventoryItems}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Quantity */}
-      <div className="bg-white flex flex-col divide-y divide-gray-200">
-        {lots.map((_, index) => (
-          <FormField
-            key={`${name}.lots.${index}.quantity`}
-            control={form.control}
-            name={`${name}.lots.${index}.quantity`}
-            render={({ field }) => (
-              <FormItem className="w-full flex-1 flex flex-col justify-center px-3">
-                <FormControl>
-                  <Input
-                    type="number"
-                    min={0}
-                    {...field}
-                    className="border-gray-300 border rounded-md w-24"
-                    placeholder="0"
-                    disabled={disabled}
-                    autoFocus
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        ))}
+      <div className="relative bg-white">
+        <div className="flex flex-col divide-y divide-gray-200 h-full w-full">
+          {lots.map((_, index) => (
+            <FormField
+              key={`${name}.lots.${index}.quantity`}
+              control={form.control}
+              name={`${name}.lots.${index}.quantity`}
+              render={({ field }) => (
+                <FormItem className="w-full flex-1 flex flex-col justify-center px-3">
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={0}
+                      {...field}
+                      className="border-gray-300 border rounded-md w-24"
+                      placeholder="0"
+                      disabled={disabled || isAutoSelectingInventoryItems}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Price */}
@@ -387,7 +452,7 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
           <DotsVerticalIcon />
         </Button>
       </div>
-    </>
+    </div>
   );
 };
 
