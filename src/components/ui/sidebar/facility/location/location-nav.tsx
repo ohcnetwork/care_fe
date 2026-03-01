@@ -22,6 +22,7 @@ export function LocationNav() {
     canListFacilityLocations,
     canReadServiceRequest,
     isPharmacist,
+    canReadMedicationDispense,
     canReadInventoryItem,
     canReadSupplyRequest,
     canReadSupplyDelivery,
@@ -59,7 +60,7 @@ export function LocationNav() {
           name: t("pharmacy"),
           url: `${baseUrl}/pharmacy`,
           icon: <CareIcon icon="l-medical-drip" />,
-          visibility: isPharmacist,
+          visibility: isPharmacist || canReadMedicationDispense,
           children: [
             {
               name: t("prescription_queue"),

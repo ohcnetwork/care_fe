@@ -21,12 +21,14 @@ interface FacilityNavProps {
 
 interface FacilityPermissions {
   canViewAppointments: boolean;
+  canViewPatients: boolean;
   canListEncounters: boolean;
   canWriteAppointment: boolean;
   canCreateEncounter: boolean;
   canReadEncounter: boolean;
   canListTokenCategories: boolean;
   canListTemplate: boolean;
+  canListUsers: boolean;
   canReadHealthcareService: boolean;
   canReadResourceCategory: boolean;
   canReadAccount: boolean;
@@ -81,6 +83,7 @@ function generateFacilityLinks(
       url: `${baseUrl}/patients`,
       icon: <CareIcon icon="d-patient" />,
       visibility:
+        permissions.canViewPatients ||
         permissions.canWriteAppointment ||
         permissions.canListEncounters ||
         permissions.canCreateEncounter,
@@ -122,6 +125,7 @@ function generateFacilityLinks(
       name: t("users"),
       url: `${baseUrl}/users`,
       icon: <CareIcon icon="d-people" />,
+      visibility: permissions.canListUsers,
     },
     {
       name: t("billing"),
@@ -197,7 +201,7 @@ function generateFacilityLinks(
         {
           name: t("billing"),
           url: `${baseUrl}/settings/billing`,
-          visibility: permissions.canReadChargeItemDefinition,
+          visibility: permissions.canUpdateFacility,
         },
         {
           name: t("charge_item_definitions"),
@@ -271,12 +275,14 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
   );
   const permissions = {
     canViewAppointments: allPermissions.canViewAppointments,
+    canViewPatients: allPermissions.canViewPatients,
     canListEncounters: allPermissions.canListEncounters,
     canWriteAppointment: allPermissions.canWriteAppointment,
     canCreateEncounter: allPermissions.canCreateEncounter,
     canReadEncounter: allPermissions.canReadEncounter,
     canListTokenCategories: allPermissions.canListTokenCategories,
     canListTemplate: allPermissions.canListTemplate,
+    canListUsers: allPermissions.canListUsers,
     canReadHealthcareService: allPermissions.canReadHealthcareService,
     canReadResourceCategory: allPermissions.canReadResourceCategory,
     canReadAccount: allPermissions.canReadAccount,

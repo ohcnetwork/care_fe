@@ -31,6 +31,7 @@ function LocationCard({
   serviceType,
   serviceId,
   isPharmacist,
+  canReadMedicationDispense,
   canReadServiceRequest,
 }: {
   location: { id: string; name: string; description?: string };
@@ -38,6 +39,7 @@ function LocationCard({
   serviceType: InternalType | undefined;
   serviceId: string;
   isPharmacist: boolean;
+  canReadMedicationDispense: boolean;
   canReadServiceRequest: boolean;
 }) {
   const { t } = useTranslation();
@@ -55,7 +57,7 @@ function LocationCard({
     };
     switch (service_type) {
       case InternalType.pharmacy:
-        if (!isPharmacist) return bedsLink;
+        if (!isPharmacist && !canReadMedicationDispense) return bedsLink;
         return {
           text: t("view_prescriptions"),
           link: `/facility/${facilityId}/locations/${locationId}/medication_requests`,
@@ -134,6 +136,7 @@ export default function HealthcareServiceShow({
     canViewAppointments,
     canListTokens,
     isPharmacist,
+    canReadMedicationDispense,
     canReadServiceRequest,
   } = getPermissions(
     hasPermission,
@@ -261,6 +264,7 @@ export default function HealthcareServiceShow({
                 serviceType={service.internal_type}
                 serviceId={serviceId}
                 isPharmacist={isPharmacist}
+                canReadMedicationDispense={canReadMedicationDispense}
                 canReadServiceRequest={canReadServiceRequest}
               />
             ))
