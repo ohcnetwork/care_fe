@@ -153,6 +153,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>{t("product")}</TableHead>
+                <TableHead>{t("pack_size")}</TableHead>
                 <TableHead>{t("net_content")}</TableHead>
                 <TableHead>{t("status")}</TableHead>
                 <TableHead>{t("expiration_date")}</TableHead>
@@ -175,6 +176,9 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                         className="size-4 text-gray-500"
                       />
                     </Link>
+                  </TableCell>
+                  <TableCell>
+                    {inventory.product.standard_pack_size ?? "-"}
                   </TableCell>
                   <TableCell
                     className={cn(
