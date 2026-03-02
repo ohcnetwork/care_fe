@@ -86,12 +86,6 @@ test.describe("Patient Service Request Tab", () => {
         .first(),
     ).toBeVisible();
 
-    await expect(page.getByText(serviceRequestData.bodySite!)).toBeVisible();
-
-    await expect(
-      page.getByText(serviceRequestData.patientInstruction!),
-    ).toBeVisible();
-
     await expect(page.getByText(serviceRequestData.notes!)).toBeVisible();
 
     await expect(

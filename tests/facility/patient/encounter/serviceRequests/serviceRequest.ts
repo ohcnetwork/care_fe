@@ -87,20 +87,22 @@ export async function createServiceRequest(
     search: data.activityDefinition,
   });
 
-  await page
-    .locator('button[role="combobox"][data-slot="select-trigger"]')
-    .filter({ hasText: /routine|urgent|asap|stat/i })
-    .first()
-    .click();
+  const serviceRequestCard = page
+    .locator('[data-slot="collapsible"]')
+    .filter({ hasText: data.activityDefinition })
+    .first();
+  await serviceRequestCard.waitFor({ state: "visible" });
 
-  await page
-    .getByRole("option")
-    .filter({ hasText: data.priority })
-    .first()
-    .click();
+  await serviceRequestCard.locator('[data-slot="collapsible-trigger"]').click();
+
+  await serviceRequestCard
+    .getByRole("radio", { name: /routine/i })
+    .waitFor({ state: "visible" });
+
+  await serviceRequestCard.getByRole("radio", { name: data.priority }).check();
 
   if (allFields) {
-    const bodySiteSelector = page
+    const bodySiteSelector = serviceRequestCard
       .locator('button[role="combobox"]')
       .filter({ hasText: /body site/i });
     await bodySiteSelector.waitFor({ state: "visible" });
@@ -109,13 +111,13 @@ export async function createServiceRequest(
       search: data.bodySite!,
     });
 
-    await page
+    await serviceRequestCard
       .getByPlaceholder(/enter patient instruction/i)
       .fill(data.patientInstruction!);
 
-    const requestorSelector = page
-      .locator('button[data-slot="popover-trigger"][role="combobox"]')
-      .filter({ has: page.locator("p", { hasText: /admin/i }) })
+    const requestorSelector = serviceRequestCard
+      .locator('button[role="combobox"]')
+      .filter({ has: page.locator("p") })
       .first();
     await requestorSelector.waitFor({ state: "visible" });
 
@@ -124,17 +126,16 @@ export async function createServiceRequest(
     });
 
     // Capture the selected requestor's display name after selection
-    const selectedRequestorName = await page
-      .locator('button[data-slot="popover-trigger"][role="combobox"]')
+    const selectedRequestorName = await serviceRequestCard
+      .locator('button[role="combobox"]')
       .locator("p.font-medium.text-gray-900")
       .first()
       .textContent();
     data.requestor = selectedRequestorName?.trim() || data.requestor!;
 
-    await page.getByPlaceholder(/add note/i).fill(data.notes!);
+    await serviceRequestCard.getByPlaceholder(/add note/i).fill(data.notes!);
   }
 
-  await page.getByRole("button", { name: /add/i }).click();
   await page.getByRole("button", { name: /submit/i }).click();
 
   await expectToast(page, /questionnaire submitted successfully/i);
