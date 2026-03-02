@@ -136,7 +136,7 @@ export const PatientHome = (props: {
           </div>
         </div>
         <div className="lg:flex">
-          <div className="h-full lg:mr-7 lg:basis-5/6">
+          <div className="h-full min-w-0 lg:mr-7 lg:basis-5/6">
             {Tab?.component && (
               <Tab.component
                 facilityId={
