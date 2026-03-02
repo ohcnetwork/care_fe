@@ -1,12 +1,7 @@
-import {
-  formatDosage,
-  formatDuration,
-  formatFrequencyShort,
-  formatTotalUnits,
-} from "@/components/Medicine/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import DosageInstructionSummaryLine from "@/pages/Facility/services/pharmacy/billMedications/DosageInstructionSummary";
 import { DispensedItemsSheet } from "@/pages/Facility/services/pharmacy/components/DispensedItemsSheet";
 import { MedicationBillSubstitution } from "@/pages/Facility/services/pharmacy/types";
 import {
@@ -35,7 +30,7 @@ export const MedicineInfoCard = ({
   productKnowledge,
 }: MedicineInfoCardProps) => {
   const { t } = useTranslation();
-  const [openPopover, setOpenPopover] = useState(true);
+  const [openPopover, setOpenPopover] = useState(false);
   const [viewingDispensedMedicationId, setViewingDispensedMedicationId] =
     useState<string | null>(null);
 
@@ -43,7 +38,6 @@ export const MedicineInfoCard = ({
     medication?.dispense_status === MedicationRequestDispenseStatus.partial ||
     substitution;
 
-  console.log(isDispensedOrSubstituted);
   return (
     <Popover open={openPopover} onOpenChange={setOpenPopover}>
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
@@ -62,13 +56,9 @@ export const MedicineInfoCard = ({
                     t("unknown_medication")}
                 </h4>
                 <span className="text-xs text-gray-600">
-                  {formatDosage(medication?.dosage_instruction?.[0])} × (
-                  {formatFrequencyShort(medication?.dosage_instruction?.[0])}) ×{" "}
-                  {formatDuration(medication?.dosage_instruction?.[0], {
-                    abbreviated: true,
-                  }) || "-"}{" "}
-                  ={" "}
-                  {formatTotalUnits(medication?.dosage_instruction, t("units"))}
+                  <DosageInstructionSummaryLine
+                    dosageInstruction={medication?.dosage_instruction?.[0]}
+                  />
                 </span>
               </div>
               <Button

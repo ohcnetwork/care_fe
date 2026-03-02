@@ -1,10 +1,4 @@
 import { SubstitutionSheet } from "@/components/Medication/SubstitutionSheet";
-import {
-  formatDosage,
-  formatDuration,
-  formatFrequencyShort,
-  formatTotalUnits,
-} from "@/components/Medicine/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -18,6 +12,7 @@ import {
   InventoryItemsSelector,
   LotSelection,
 } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
+import DosageInstructionSummaryLine from "@/pages/Facility/services/pharmacy/billMedications/DosageInstructionSummary";
 import { billMedicationsByPrescriptionsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { selectEligibleInventoryItems } from "@/pages/Facility/services/pharmacy/billMedications/utils/itemsAutoSelect";
 import { MedicineInfoCard } from "@/pages/Facility/services/pharmacy/components/MedicineInfoCard";
@@ -499,7 +494,7 @@ const MedicineLineItemMedication = ({
   name,
 }: {
   form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
-  name: `prescriptions.${number}.items.${number}`;
+  name: `prescriptions.${number}.items.${number}` | `otherItems.${number}`;
 }) => {
   const { t } = useTranslation();
 
@@ -527,12 +522,9 @@ const MedicineLineItemMedication = ({
             </span>
           )}
           <span className="text-sm text-gray-700 font-medium flex items-center gap-1 whitespace-nowrap capitalize">
-            {formatDosage(medication?.dosage_instruction?.[0])} × (
-            {formatFrequencyShort(medication?.dosage_instruction?.[0])}) ×{" "}
-            {formatDuration(medication?.dosage_instruction?.[0], {
-              abbreviated: true,
-            }) || "-"}{" "}
-            = {formatTotalUnits(medication?.dosage_instruction, t("units"))}
+            <DosageInstructionSummaryLine
+              dosageInstruction={medication?.dosage_instruction?.[0]}
+            />
           </span>
         </div>
         <div className="flex gap-1">
