@@ -28,7 +28,7 @@ interface FacilityPermissions {
   canReadEncounter: boolean;
   canListTokenCategories: boolean;
   canListTemplate: boolean;
-  canListUsers: boolean;
+  canListFacilityOrganizationUsers: boolean;
   canReadHealthcareService: boolean;
   canReadResourceCategory: boolean;
   canReadAccount: boolean;
@@ -125,7 +125,7 @@ function generateFacilityLinks(
       name: t("users"),
       url: `${baseUrl}/users`,
       icon: <CareIcon icon="d-people" />,
-      visibility: permissions.canListUsers,
+      visibility: permissions.canListFacilityOrganizationUsers,
     },
     {
       name: t("billing"),
@@ -282,7 +282,8 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     canReadEncounter: allPermissions.canReadEncounter,
     canListTokenCategories: allPermissions.canListTokenCategories,
     canListTemplate: allPermissions.canListTemplate,
-    canListUsers: allPermissions.canListUsers,
+    canListFacilityOrganizationUsers:
+      allPermissions.canListFacilityOrganizationUsers,
     canReadHealthcareService: allPermissions.canReadHealthcareService,
     canReadResourceCategory: allPermissions.canReadResourceCategory,
     canReadAccount: allPermissions.canReadAccount,

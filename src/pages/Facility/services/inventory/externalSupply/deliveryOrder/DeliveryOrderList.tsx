@@ -2,12 +2,15 @@ import { useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { toast } from "sonner";
-
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { OrgSelect } from "@/components/Common/OrgSelect";
 import Page from "@/components/Common/Page";
@@ -147,29 +150,43 @@ export function DeliveryOrderList({
           </div>
           {(!isRequester || !internal) && (
             <div className="flex items-center gap-2">
-              <Button
-                variant="primary"
-                onClick={() => {
-                  if (!canWriteSupplyDelivery) {
-                    toast.error(t("permission_denied_create_delivery"));
-                    return;
-                  }
-                  navigate(
-                    getInventoryBasePath(
-                      facilityId,
-                      locationId,
-                      internal,
-                      false,
-                      isRequester,
-                      "new",
-                    ),
-                  );
-                }}
-              >
-                <CareIcon icon="l-plus" />
-                {t("create_delivery")}
-                <ShortcutBadge actionId="create-order" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    tabIndex={!canWriteSupplyDelivery ? 0 : undefined}
+                    className={
+                      !canWriteSupplyDelivery ? "cursor-not-allowed" : undefined
+                    }
+                  >
+                    <Button
+                      variant="primary"
+                      disabled={!canWriteSupplyDelivery}
+                      aria-disabled={!canWriteSupplyDelivery}
+                      onClick={() =>
+                        navigate(
+                          getInventoryBasePath(
+                            facilityId,
+                            locationId,
+                            internal,
+                            false,
+                            isRequester,
+                            "new",
+                          ),
+                        )
+                      }
+                    >
+                      <CareIcon icon="l-plus" />
+                      {t("create_delivery")}
+                      <ShortcutBadge actionId="create-order" />
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                {!canWriteSupplyDelivery && (
+                  <TooltipContent>
+                    {t("permission_denied_create_delivery")}
+                  </TooltipContent>
+                )}
+              </Tooltip>
             </div>
           )}
         </div>

@@ -28,6 +28,12 @@ import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
+import {
+  PERMISSION_LIST_ORGANIZATION_USERS,
+  PERMISSION_LIST_PATIENTS,
+  PERMISSION_READ_FACILITY,
+  PERMISSION_VIEW_ORGANIZATION,
+} from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
 import { useCareApps } from "@/hooks/useCareApps";
 import OrganizationLayoutSkeleton from "@/pages/Organization/components/OrganizationLayoutSkeleton";
@@ -94,19 +100,22 @@ export default function OrganizationLayout({
       url: `${baseUrl}/${id}`,
       name: t("organizations"),
       icon: <CareIcon icon="d-hospital" />,
-      visibility: hasPermission("can_view_organization", org.permissions),
+      visibility: hasPermission(PERMISSION_VIEW_ORGANIZATION, org.permissions),
     },
     {
       url: `${baseUrl}/${id}/users`,
       name: t("users"),
       icon: <CareIcon icon="d-people" />,
-      visibility: hasPermission("can_list_organization_users", org.permissions),
+      visibility: hasPermission(
+        PERMISSION_LIST_ORGANIZATION_USERS,
+        org.permissions,
+      ),
     },
     {
       url: `${baseUrl}/${id}/patients`,
       name: t("patients"),
       icon: <CareIcon icon="d-people" />,
-      visibility: hasPermission("can_list_patients", org.permissions),
+      visibility: hasPermission(PERMISSION_LIST_PATIENTS, org.permissions),
     },
     {
       url: `${baseUrl}/${id}/facilities`,
@@ -114,13 +123,16 @@ export default function OrganizationLayout({
       icon: <CareIcon icon="d-hospital" />,
       visibility:
         org.org_type === OrgType.GOVT &&
-        hasPermission("can_read_facility", org.permissions),
+        hasPermission(PERMISSION_READ_FACILITY, org.permissions),
     },
     {
       url: `${baseUrl}/${id}/service_accounts`,
       name: t("service_accounts"),
       icon: <Bot className="size-4" />,
-      visibility: hasPermission("can_list_organization_users", org.permissions),
+      visibility: hasPermission(
+        PERMISSION_LIST_ORGANIZATION_USERS,
+        org.permissions,
+      ),
     },
     ...organizationTabs.map((tab) => ({
       url: `${baseUrl}/${id}/${tab.slug}`,
@@ -128,7 +140,7 @@ export default function OrganizationLayout({
       icon: tab.icon,
       visibility:
         org.org_type === OrgType.GOVT &&
-        hasPermission("can_read_facility", org.permissions),
+        hasPermission(PERMISSION_READ_FACILITY, org.permissions),
     })),
   ];
 

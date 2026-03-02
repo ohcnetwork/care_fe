@@ -88,9 +88,6 @@ export const PERMISSION_PREVIEW_TEMPLATE = "can_preview_template";
 export const PERMISSION_VIEW_TEMPLATE_SCHEMA = "can_view_template_schema";
 export const PERMISSION_GENERATE_REPORT_FROM_TEMPLATE =
   "can_generate_report_from_template";
-export const PERMISSION_MANAGE_TEMPLATE = "can_manage_template";
-export const PERMISSION_CREATE_CHARGE_ITEM_DEFINITION =
-  "can_create_charge_item_definition";
 export const PERMISSION_SET_CHARGE_ITEM_DEFINITION =
   "can_set_charge_item_definition";
 
@@ -128,8 +125,7 @@ export const PERMISSION_READ_ACCOUNT = "can_read_account";
 
 // Invoice Permissions
 export const PERMISSION_READ_INVOICE = "can_read_invoice";
-export const PERMISSION_MANAGE_LOCKED_INVOICE =
-  "can_manage_locked_invoice_in_facility";
+export const PERMISSION_MANAGE_LOCKED_INVOICE = "can_manage_locked_invoice";
 
 // Payment Reconciliation Permissions
 export const PERMISSION_READ_PAYMENT_RECONCILIATION =
@@ -264,9 +260,9 @@ export interface Permissions {
   canWriteAppointment: boolean;
 
   // Schedule Permissions
-  /** Permission slug: "can_write_user_schedule" */
+  /** Permission slug: "can_write_schedule" */
   canWriteSchedule: boolean;
-  /** Permission slug: "can_list_user_schedule" */
+  /** Permission slug: "can_list_schedule" */
   canViewSchedule: boolean;
   /** Permission slug: "can_reschedule_booking" */
   canRescheduleAppointment: boolean;
@@ -282,7 +278,7 @@ export interface Permissions {
   canCreateServiceAccount: boolean;
 
   // Template Permissions
-  /** Permission slug: "can_list_template" */
+  /** Permission slug: "can_read_template" */
   canListTemplate: boolean;
   /** Permission slug: "can_write_template" */
   canWriteTemplate: boolean;
@@ -292,10 +288,7 @@ export interface Permissions {
   canViewTemplateSchema: boolean;
   /** Permission slug: "can_generate_report_from_template" */
   canGenerateReportFromTemplate: boolean;
-  // @deprecated Use canWriteTemplate instead
-  /** Permission slug: "can_manage_template" */
-  canManageTemplate: boolean;
-  /** Permission slug: "can_create_charge_item_definition" */
+  /** Permission slug: "can_set_charge_item_definition" */
   canSetChargeItemDefinition: boolean;
 
   // Token Permissions
@@ -336,7 +329,7 @@ export interface Permissions {
 
   /** Permission slug: "can_read_invoice" */
   canReadInvoice: boolean;
-  /** Permission slug: "can_manage_locked_invoice_in_facility" */
+  /** Permission slug: "can_manage_locked_invoice" */
   canManageLockedInvoice: boolean;
 
   // Payment Reconciliation
@@ -560,8 +553,6 @@ export function getPermissions(
       PERMISSION_GENERATE_REPORT_FROM_TEMPLATE,
       permissions,
     ),
-    // @deprecated Use canWriteTemplate instead
-    canManageTemplate: hasPermission(PERMISSION_MANAGE_TEMPLATE, permissions),
     canSetChargeItemDefinition: hasPermission(
       PERMISSION_SET_CHARGE_ITEM_DEFINITION,
       permissions,

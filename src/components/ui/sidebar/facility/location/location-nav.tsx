@@ -80,6 +80,10 @@ export function LocationNav() {
           name: t("inventory"),
           url: `${baseUrl}/inventory/summary`,
           icon: <CareIcon icon="l-shop" />,
+          visibility:
+            canReadInventoryItem ||
+            canReadSupplyRequest ||
+            canReadSupplyDelivery,
           children: [
             {
               name: t("items"),
