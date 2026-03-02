@@ -71,6 +71,11 @@ function ProductCard({
                 {format(new Date(product.expiration_date), "PPP")}
               </p>
             )}
+            {product.standard_pack_size != null && (
+              <p className="mt-1 text-xs text-gray-400">
+                {t("pack_size")}: {product.standard_pack_size}
+              </p>
+            )}
           </div>
           <div className="ml-auto flex flex-wrap gap-2">
             <ProductActions product={product} facilityId={facilityId} />
