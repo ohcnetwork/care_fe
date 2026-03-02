@@ -229,7 +229,7 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
                             {product.batch?.lot_number || "-"}
                           </TableCell>
                           <TableCell>
-                            {product.standard_pack_size || "-"}
+                            {product.standard_pack_size ?? "-"}
                           </TableCell>
                           <TableCell>
                             {product.expiration_date
