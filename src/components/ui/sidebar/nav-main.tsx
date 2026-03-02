@@ -29,6 +29,33 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
+function getVisibleChildrenWithHeaders(
+  children: NavigationLink[],
+): NavigationLink[] {
+  const result: NavigationLink[] = [];
+  let pendingHeader: string | undefined;
+  let pendingHeaderIcon: ReactNode | undefined;
+
+  for (const child of children) {
+    if (child.header) {
+      pendingHeader = child.header;
+      pendingHeaderIcon = child.headerIcon;
+    }
+
+    if (child.visibility !== false) {
+      result.push({
+        ...child,
+        header: pendingHeader,
+        headerIcon: pendingHeaderIcon,
+      });
+      pendingHeader = undefined;
+      pendingHeaderIcon = undefined;
+    }
+  }
+
+  return result;
+}
+
 const isChildActive = (link: NavigationLink) => {
   if (!link.children) return false;
   const currentPath = window.location.pathname;
@@ -165,9 +192,8 @@ function CollapsibleNavItem({
         </CollapsibleTrigger>
         <CollapsibleContent>
           <SidebarMenuSub className="border-l border-gray-300">
-            {link.children
-              ?.filter((link) => link.visibility !== false)
-              .map((subItem) => (
+            {getVisibleChildrenWithHeaders(link.children ?? []).map(
+              (subItem) => (
                 <Fragment key={subItem.name}>
                   {subItem.header && (
                     <div className="flex items-center gap-2 mt-2">
@@ -200,7 +226,8 @@ function CollapsibleNavItem({
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
                 </Fragment>
-              ))}
+              ),
+            )}
           </SidebarMenuSub>
         </CollapsibleContent>
       </SidebarMenuItem>
@@ -237,20 +264,18 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
         onCloseAutoFocus={(e) => e.preventDefault()}
       >
         <div className="flex flex-col gap-1">
-          {link.children
-            ?.filter((subItem) => subItem.visibility !== false)
-            .map((subItem) => (
-              <ActiveLink
-                key={subItem.name}
-                href={subItem.url}
-                onClick={() => setOpen(false)}
-                className="w-full rounded-md px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100"
-                activeClass="bg-gray-100 text-green-700"
-                exactActiveClass="bg-gray-100 text-green-700"
-              >
-                {subItem.name}
-              </ActiveLink>
-            ))}
+          {getVisibleChildrenWithHeaders(link.children ?? []).map((subItem) => (
+            <ActiveLink
+              key={subItem.name}
+              href={subItem.url}
+              onClick={() => setOpen(false)}
+              className="w-full rounded-md px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100"
+              activeClass="bg-gray-100 text-green-700"
+              exactActiveClass="bg-gray-100 text-green-700"
+            >
+              {subItem.name}
+            </ActiveLink>
+          ))}
         </div>
       </PopoverContent>
     </Popover>

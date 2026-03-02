@@ -135,7 +135,7 @@ function generateFacilityLinks(
         permissions.canReadAccount ||
         permissions.canReadInvoice ||
         permissions.canReadPaymentReconciliation ||
-        pluginBillingLinks.some((l) => l.visibility !== false && l.visibility),
+        pluginBillingLinks.some((l) => l.visibility !== false),
       children: [
         {
           name: t("accounts"),
