@@ -125,7 +125,11 @@ export const InventoryItemsSelector = ({
 
   // No stock state
   if (!items || items.length === 0) {
-    return <Badge variant="destructive">{t("no_stock")}</Badge>;
+    return (
+      <span className="text-sm italic text-gray-700 font-medium">
+        {t("product_not_available")}
+      </span>
+    );
   }
 
   return (
