@@ -331,33 +331,35 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
 
               {/* Latest prescription dosage and frequency */}
               {latestActiveRequest && (
-                <DosageInstructionList
-                  instructions={latestActiveRequest.dosage_instruction}
-                  className="mt-0.5"
-                  itemClassName="text-sm text-gray-600"
-                  gap="sm"
-                  renderItem={(di) => {
-                    const freq = formatFrequency(di);
-                    return (
-                      <>
-                        {formatDosage(di)}
-                        {freq && <span className="text-gray-400"> · </span>}
-                        {freq}
-                        {di.method?.display && (
-                          <>
-                            <span className="text-gray-400"> · </span>
-                            {di.method.display}
-                          </>
-                        )}
-                      </>
-                    );
-                  }}
-                />
-              )}
-              {latestActiveRequest.note && (
-                <div className="text-xs text-gray-500 mt-0.5 italic whitespace-pre-wrap">
-                  {latestActiveRequest.note}
-                </div>
+                <>
+                  <DosageInstructionList
+                    instructions={latestActiveRequest.dosage_instruction}
+                    className="mt-0.5"
+                    itemClassName="text-sm text-gray-600"
+                    gap="sm"
+                    renderItem={(di) => {
+                      const freq = formatFrequency(di);
+                      return (
+                        <>
+                          {formatDosage(di)}
+                          {freq && <span className="text-gray-400"> · </span>}
+                          {freq}
+                          {di.method?.display && (
+                            <>
+                              <span className="text-gray-400"> · </span>
+                              {di.method.display}
+                            </>
+                          )}
+                        </>
+                      );
+                    }}
+                  />
+                  {latestActiveRequest.note && (
+                    <div className="text-xs text-gray-500 mt-0.5 italic whitespace-pre-wrap">
+                      {latestActiveRequest.note}
+                    </div>
+                  )}
+                </>
               )}
               {/* Status and route badges */}
               <div className="flex flex-wrap gap-1 mt-1">

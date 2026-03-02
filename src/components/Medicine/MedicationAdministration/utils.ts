@@ -71,18 +71,7 @@ export function createMedicationAdministrationRequest(
     note: "",
     status: "completed",
     // Default administration dosage from the first instruction
-    dosage: (() => {
-      const primaryInstruction = medication.dosage_instruction[0];
-      return {
-        site: primaryInstruction?.site,
-        route: primaryInstruction?.route,
-        method: primaryInstruction?.method,
-        dose: primaryInstruction?.dose_and_rate?.dose_quantity && {
-          value: primaryInstruction.dose_and_rate.dose_quantity.value,
-          unit: primaryInstruction.dose_and_rate.dose_quantity.unit,
-        },
-      };
-    })(),
+    dosage: getDosageFromInstruction(medication.dosage_instruction[0]),
   };
 }
 
