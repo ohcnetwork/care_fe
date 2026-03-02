@@ -32,6 +32,8 @@ import {
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
+import { ArrowUpRightSquare } from "lucide-react";
+import { Link } from "raviger";
 
 interface DispensedItemsSheetProps {
   open: boolean;
@@ -87,6 +89,7 @@ export function DispensedItemsSheet({
                     <TableHead>{t("dispensed_on")}</TableHead>
                     <TableHead>{t("status")}</TableHead>
                     <TableHead>{t("total_price")}</TableHead>
+                    <TableHead>{t("actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -125,6 +128,18 @@ export function DispensedItemsSheet({
                           <MonetaryDisplay
                             amount={item?.charge_item?.total_price}
                           />
+                        </TableCell>
+                        <TableCell>
+                          <Link
+                            href={`/medication_dispense/order/${item.order.id}`}
+                            className="flex items-center gap-2 whitespace-nowrap"
+                          >
+                            {t("view_order")}
+                            <ArrowUpRightSquare
+                              strokeWidth={1.5}
+                              className="size-4"
+                            />
+                          </Link>
                         </TableCell>
                       </TableRow>
                     ),

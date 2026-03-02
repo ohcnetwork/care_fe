@@ -20,6 +20,7 @@ import {
 } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
 import { billMedicationsByPrescriptionsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { selectEligibleInventoryItems } from "@/pages/Facility/services/pharmacy/billMedications/utils/itemsAutoSelect";
+import { MedicineInfoCard } from "@/pages/Facility/services/pharmacy/components/MedicineInfoCard";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   getBasePrice,
@@ -500,14 +501,12 @@ const MedicineLineItemMedication = ({
         <div className="flex gap-1">
           {medication?.dispense_status ===
             MedicationRequestDispenseStatus.partial && (
-            <Badge variant="yellow" className="text-xs px-1.5 py-0">
-              {t("partially_dispensed")}
-            </Badge>
+            <Badge variant="yellow">{t("partially_dispensed")}</Badge>
           )}
 
           {medication?.dispense_status ===
             MedicationRequestDispenseStatus.complete && (
-            <Badge variant="blue" className="text-xs px-1.5 py-0">
+            <Badge variant="blue">
               <Check />
               {t("dispensed")}
             </Badge>
@@ -520,10 +519,17 @@ const MedicineLineItemMedication = ({
         )}
       </div>
       <div className="flex gap-3">
-        {/* TODO: wire this detail info button (sub. plus more...) */}
-        <Button variant="outline" size="icon" className="text-gray-950">
-          <BadgeInfo />
-        </Button>
+        <MedicineInfoCard
+          trigger={
+            <Button variant="outline" size="icon" className="text-gray-950">
+              <BadgeInfo />
+            </Button>
+          }
+          medication={medication}
+          effectiveProductKnowledge={effectiveProductKnowledge}
+          substitution={substitution}
+          productKnowledge={productKnowledge}
+        />
 
         <FormField
           control={form.control}

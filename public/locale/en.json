@@ -5831,6 +5831,7 @@
   "to": "to",
   "to_be_conducted": "To be conducted",
   "to_bottom": "To Bottom",
+  "substituted_with_product": "Substituted with <strong>{{substituted_with}}</strong>",
   "to_date_equal_or_after_from_date": "To date must be equal to or after from date",
   "to_dispatch": "To Dispatch",
   "to_dispatch_description": "All requests below are to be dispatched from <strong>{{location}}</strong> to other locations.",
@@ -6358,5 +6359,7 @@
   "patient_has_unbilled_prescriptions_count": "This patient has {{ count }} other unbilled prescriptions",
   "final_amount_is_calculated_after_invoice_generation": "Final amount is calculated after invoice generation",
   "sub": "Sub.",
-  "auto_select_lots": "Auto-select lots based on dosage instructions"
+  "auto_select_lots": "Auto-select lots based on dosage instructions",
+  "substitution": "Substitution",
+  "not_dispensed_yet": "Not dispensed or substituted yet"
 }
