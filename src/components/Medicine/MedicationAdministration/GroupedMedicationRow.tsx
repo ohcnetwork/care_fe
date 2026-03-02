@@ -96,7 +96,7 @@ const IndividualMedicationRow: React.FC<{
       {/* Medication details - indented */}
       <div
         className={cn(
-          "p-3 pl-12 border-t border-r border-gray-100 bg-gray-50",
+          "p-3 pl-12 border-t border-r border-gray-100 bg-gray-50 min-w-0",
           isInactive && "opacity-50",
         )}
       >
@@ -109,7 +109,11 @@ const IndividualMedicationRow: React.FC<{
             )}
             gap="sm"
             renderItem={(di) => {
-              const text = [formatDosage(di), formatFrequency(di)]
+              const text = [
+                formatDosage(di),
+                formatFrequency(di),
+                di.method?.display,
+              ]
                 .filter(Boolean)
                 .join(", ");
               return text || null;
@@ -122,6 +126,11 @@ const IndividualMedicationRow: React.FC<{
             {t(medication.status)}
           </Badge>
         </div>
+        {medication.note && (
+          <div className="text-xs text-gray-500 mt-0.5 italic wrap-break-word">
+            {medication.note}
+          </div>
+        )}
         <div className="text-xs text-gray-500 mt-0.5">
           {t("added_on")}:{" "}
           {format(
@@ -334,12 +343,22 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                         {formatDosage(di)}
                         {freq && <span className="text-gray-400"> · </span>}
                         {freq}
+                        {di.method?.display && (
+                          <>
+                            <span className="text-gray-400"> · </span>
+                            {di.method.display}
+                          </>
+                        )}
                       </>
                     );
                   }}
                 />
               )}
-
+              {latestActiveRequest.note && (
+                <div className="text-xs text-gray-500 mt-0.5 italic whitespace-pre-wrap">
+                  {latestActiveRequest.note}
+                </div>
+              )}
               {/* Status and route badges */}
               <div className="flex flex-wrap gap-1 mt-1">
                 <Badge

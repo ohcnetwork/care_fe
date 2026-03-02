@@ -95,14 +95,14 @@ export const AppointmentEncounterHeader = ({
         resourceType={appointment.resource_type}
         resourceId={appointment.resource.id}
       />
-      <div className="flex sm:flex-row flex-col gap-2 sm:items-center items-start">
-        {canWritePrimaryEncounter && (
+      {canWritePrimaryEncounter && (
+        <div className="flex sm:flex-row flex-col gap-2 sm:items-center items-start">
           <AppointmentEncounterHeaderActions
             encounter={encounter}
             appointment={appointment}
           />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -248,9 +248,9 @@ const TokenActions = ({
   const { token } = appointment;
 
   return (
-    <div className="flex gap-2">
+    <div className="flex divide-x gap-2">
       {appointment.id && (
-        <div className="flex items-center justify-center border-r border-gray-300">
+        <div className="flex items-center justify-center border-gray-300">
           <Button variant="ghost" className="rounded-r-none pl-2 " asChild>
             <Link href={getQueueLink(appointment)}>
               <div className="flex sm:flex-row flex-col items-center justify-center sm:gap-1">
@@ -265,8 +265,8 @@ const TokenActions = ({
         </div>
       )}
       {appointment.id && (
-        <div className="flex items-center justify-center border-r border-gray-300">
-          <Button variant="ghost" className="rounded-r-none pl-2 " asChild>
+        <div className="flex items-center justify-center border-gray-300">
+          <Button variant="ghost" className="rounded-r-none" asChild>
             <Link
               href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointment.id}`}
             >

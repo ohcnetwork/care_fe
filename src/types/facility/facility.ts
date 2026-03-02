@@ -7,6 +7,7 @@ import { badgeVariants } from "@/components/ui/badge";
 import { Code } from "@/types/base/code/code";
 import { MonetaryComponentRead } from "@/types/base/monetaryComponent/monetaryComponent";
 import { FacilityPermissions } from "@/types/emr/permission/permission";
+import { PrintTemplate } from "@/types/facility/printTemplate";
 import { Organization } from "@/types/organization/organization";
 import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
@@ -51,16 +52,21 @@ export interface FacilityRead extends FacilityBase, FacilityPermissions {
   patient_instance_identifier_configs: PatientIdentifierConfig[];
   patient_facility_identifier_configs: PatientIdentifierConfig[];
   features: number[];
+  print_templates: PrintTemplate[];
 }
 
 export type FacilityListRead = Omit<
   FacilityRead,
-  "permissions" | "root_org_permissions" | "child_org_permissions"
+  | "permissions"
+  | "root_org_permissions"
+  | "child_org_permissions"
+  | "print_templates"
 >;
 
 export interface FacilityCreate extends Omit<FacilityBase, "id"> {
   geo_organization: string;
   features: number[];
+  print_templates?: PrintTemplate[];
 }
 
 export const FACILITY_FEATURE_TYPES: {

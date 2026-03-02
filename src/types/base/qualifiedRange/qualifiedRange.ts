@@ -28,7 +28,7 @@ export enum InterpretationType {
 export interface QualifiedRange {
   // used for local state management
   id?: number;
-  conditions: Condition[];
+  conditions?: Condition[];
   ranges: NumericRange[];
   normal_coded_value_set?: string;
   critical_coded_value_set?: string;
@@ -45,7 +45,7 @@ const interpretationSchema = z.object({
 export const qualifiedRangeSchema = z.array(
   z
     .object({
-      conditions: z.array(conditionSchema),
+      conditions: z.array(conditionSchema).optional(),
       ranges: z.array(
         z
           .object({

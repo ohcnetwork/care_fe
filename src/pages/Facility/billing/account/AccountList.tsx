@@ -203,8 +203,8 @@ export function AccountList({
               isEdit={!!editingAccount}
             />
           )}
-          <div className="flex flex-col md:flex-row items-start gap-2">
-            <div className="w-full md:w-auto">
+          <div className="flex flex-wrap items-start gap-2">
+            <div className="w-full sm:w-auto sm:shrink-0">
               <PatientIdentifierFilter
                 onSelect={(patientId, patientName) =>
                   updateQuery({
@@ -218,21 +218,21 @@ export function AccountList({
                 patientName={qParams.patient_name}
               />
             </div>
-            <div className="flex flex-col sm:flex-row">
+            <div className="w-full sm:w-auto">
               <MultiFilter
                 selectedFilters={selectedFilters}
                 onFilterChange={handleFilterChange}
                 onOperationChange={handleOperationChange}
                 onClearAll={handleClearAll}
                 onClearFilter={handleClearFilter}
-                className="flex sm:flex-row flex-wrap sm:items-center"
+                className="w-full items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
                 triggerButtonClassName="self-start sm:self-center"
                 clearAllButtonClassName="self-center"
                 facilityId={facilityId}
               />
             </div>
           </div>
-          <div className="justify-end flex">
+          <div className="flex justify-end w-full">
             {patientId && canCreateAccount && (
               <Button
                 className="w-full sm:w-auto mt-2"
