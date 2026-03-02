@@ -2,8 +2,12 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import { Form } from "@/components/ui/form";
+import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { BillMedicationsFooter } from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsFooter";
-import { BillMedicationsPrescriptionCard } from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsPrescriptionCard";
+import {
+  BillMedicationsOtherItemsCard,
+  BillMedicationsPrescriptionCard,
+} from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsPrescriptionCard";
 import { billMedicationsByPrescriptionsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import UnbilledPrescriptionsCard from "@/pages/Facility/services/pharmacy/billMedications/UnbilledPrescriptionsCard";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
@@ -12,9 +16,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueries } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Fragment } from "react/jsx-runtime";
+import { z } from "zod";
 
 interface Props {
   facilityId: string;
@@ -51,6 +56,7 @@ export default function BillMedicationsByPrescriptions({
     resolver: zodResolver(billMedicationsByPrescriptionsFormSchema),
     defaultValues: {
       prescriptions: [],
+      otherItems: [],
     },
   });
 
@@ -71,6 +77,7 @@ export default function BillMedicationsByPrescriptions({
           allGiven: true,
         })),
       })),
+      otherItems: [],
     });
   }, [form, prescriptions, isLoading]);
 
@@ -109,11 +116,11 @@ export default function BillMedicationsByPrescriptions({
 
             <div className="flex flex-col gap-2">
               <div>{/* TODO: select all / print all / etc... */}</div>
-              <div className="grid grid-cols-[auto_1fr_1fr_auto_6rem_auto_auto] divide-y divide-x divide-gray-200 rounded-md border border-gray-200 overflow-hidden">
+              <div className="grid grid-cols-[auto_1fr_1fr_auto_6rem_auto_auto] divide-y divide-gray-200 rounded-md border border-gray-200 overflow-auto">
                 {form.watch("prescriptions").map((prescription, index) => (
                   <Fragment key={index}>
                     {index !== 0 && (
-                      <div className="col-span-7 h-8 bg-gray-50" />
+                      <div className="col-span-7 h-8 bg-gray-50 border-t border-gray-200" />
                     )}
                     {prescription && (
                       <BillMedicationsPrescriptionCard
@@ -123,8 +130,17 @@ export default function BillMedicationsByPrescriptions({
                     )}
                   </Fragment>
                 ))}
+
+                {form.watch("otherItems").length > 0 && (
+                  <Fragment key="otherItems">
+                    <div className="col-span-7 h-8 bg-gray-50 border-t border-gray-200" />
+                    <BillMedicationsOtherItemsCard form={form} />
+                  </Fragment>
+                )}
               </div>
             </div>
+
+            <AddMedicationTrigger form={form} />
           </div>
           <div className="h-20" />
           <BillMedicationsFooter
@@ -138,3 +154,58 @@ export default function BillMedicationsByPrescriptions({
     </Page>
   );
 }
+
+interface AddMedicationTriggerProps {
+  form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
+}
+
+const AddMedicationTrigger = ({ form }: AddMedicationTriggerProps) => {
+  const { t } = useTranslation();
+
+  const { append } = useFieldArray({
+    control: form.control,
+    name: "otherItems",
+  });
+
+  // TODO: switch to using AddMedicationSheet once it's cleaned up to use the new form schema approach
+
+  return (
+    <ProductKnowledgeSelect
+      onChange={(productKnowledge) => {
+        if (!productKnowledge) return;
+
+        append({
+          reference_id: crypto.randomUUID(),
+          isSelected: true,
+          medication: null,
+          dosageInstructions: [
+            {
+              dose_and_rate: productKnowledge.base_unit
+                ? {
+                    type: "ordered",
+                    dose_quantity: {
+                      value: "1",
+                      unit: productKnowledge.base_unit,
+                    },
+                  }
+                : undefined,
+              timing: undefined,
+              as_needed_boolean: true,
+              route: undefined,
+              site: undefined,
+              method: undefined,
+              additional_instruction: undefined,
+              as_needed_for: undefined,
+            },
+          ],
+          productKnowledge,
+          substitution: null,
+          lots: [],
+          allGiven: true,
+        });
+      }}
+      placeholder={t("add_medication")}
+      className="w-full"
+    />
+  );
+};

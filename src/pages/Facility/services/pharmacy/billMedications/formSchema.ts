@@ -3,7 +3,10 @@ import {
   SubstitutionReason,
   SubstitutionType,
 } from "@/types/emr/medicationDispense/medicationDispense";
-import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  MedicationRequestDosageInstruction,
+  MedicationRequestRead,
+} from "@/types/emr/medicationRequest/medicationRequest";
 import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { z } from "zod";
@@ -29,9 +32,24 @@ import { z } from "zod";
 // });
 
 const billMedicationLineItemSchema = z.object({
+  /** The reference id for the dispense line item */
+  reference_id: z.string().uuid(),
+
+  /** Whether the item is selected for billing */
   isSelected: z.boolean(),
+
+  /** The medication request */
   medication: z.custom<MedicationRequestRead>().nullable(),
+
+  /** The dosage instructions, when medicines are added without medication request / prescription. */
+  dosageInstructions: z
+    .custom<MedicationRequestDosageInstruction[]>()
+    .optional(),
+
+  /** The product knowledge (either from medication request or product knowledge select from add medication flow) */
   productKnowledge: z.custom<ProductKnowledgeBase>().nullable(),
+
+  /** The substitution details, when the medication is substituted with another product. */
   substitution: z
     .object({
       substitutedProductKnowledge: z.custom<ProductKnowledgeBase>(),
@@ -39,7 +57,11 @@ const billMedicationLineItemSchema = z.object({
       reason: z.nativeEnum(SubstitutionReason),
     })
     .nullable(),
+
+  /** The selected inventory items for the dispense line item */
   lots: z.array(lotSelectionSchema),
+
+  /** Whether the medication is fully dispensed */
   allGiven: z.boolean(),
 });
 
@@ -48,11 +70,15 @@ export type BillMedicationLineItemSchemaType = z.infer<
 >;
 
 export const billMedicationsByPrescriptionsFormSchema = z.object({
+  /** Medicines added from prescriptions */
   prescriptions: z.array(
     z.object({
-      prescription: z.custom<PrescriptionRead>().optional(),
+      prescription: z.custom<PrescriptionRead>(),
       markComplete: z.boolean(),
       items: z.array(billMedicationLineItemSchema),
     }),
   ),
+
+  /** The other items (medicines added without prescription) */
+  otherItems: z.array(billMedicationLineItemSchema),
 });

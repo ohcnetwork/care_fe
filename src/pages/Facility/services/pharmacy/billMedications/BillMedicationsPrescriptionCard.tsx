@@ -30,7 +30,6 @@ import {
   displayMedicationName,
   MedicationRequestDispenseStatus,
 } from "@/types/emr/medicationRequest/medicationRequest";
-import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { getLocationPath } from "@/types/location/utils";
@@ -55,16 +54,11 @@ export const BillMedicationsPrescriptionCard = ({
   form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
   name: `prescriptions.${number}`;
 }) => {
-  const prescription = form.watch(`${name}.prescription`);
   const items = form.watch(`${name}.items`);
-
-  if (!prescription) {
-    return null;
-  }
 
   return (
     <>
-      <Summary prescription={prescription} form={form} name={name} />
+      <PrescriptionSummary form={form} name={name} />
       <HeaderRow form={form} name={name} />
 
       {/* TODO: we may need to exclude medications based on their status (enterred in errors?) */}
@@ -79,16 +73,55 @@ export const BillMedicationsPrescriptionCard = ({
   );
 };
 
-const Summary = ({
-  prescription,
+export const BillMedicationsOtherItemsCard = ({
+  form,
+}: {
+  form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
+}) => {
+  const { t } = useTranslation();
+  const items = form.watch("otherItems");
+
+  return (
+    <>
+      <div className="relative flex justify-between col-start-1 col-span-7 bg-white pt-4 pr-2 pb-2 pl-4">
+        <div className="absolute top-5 left-0 h-4 w-1 bg-amber-500 rounded-r-md" />
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-0.5">
+            <div className="text-base text-gray-950">
+              <span className="font-semibold">{t("other_items")} </span>
+            </div>
+            <div className="flex gap-2.5">
+              <span className="text-sm font-medium text-gray-700">
+                ({t("items_count", { count: items.length })})
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <HeaderRow />
+
+      {items.map((_, index) => (
+        <MedicineLineItem
+          key={`otherItems.${index}`}
+          name={`otherItems.${index}`}
+          form={form}
+        />
+      ))}
+    </>
+  );
+};
+
+const PrescriptionSummary = ({
   form,
   name,
 }: {
-  prescription: PrescriptionRead;
   form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
   name: `prescriptions.${number}`;
 }) => {
   const { t } = useTranslation();
+
+  const prescription = form.watch(`${name}.prescription`);
 
   return (
     <div className="relative flex justify-between col-start-1 col-span-7 bg-white pt-4 pr-2 pb-2 pl-4">
@@ -172,39 +205,43 @@ const HeaderRow = ({
   form,
   name,
 }: {
-  form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
-  name: `prescriptions.${number}`;
+  form?: UseFormReturn<
+    z.infer<typeof billMedicationsByPrescriptionsFormSchema>
+  >;
+  name?: `prescriptions.${number}`;
 }) => {
   const { t } = useTranslation();
 
   return (
     <>
       <div className="col-start-1 bg-gray-100 py-1 px-3 flex items-center">
-        <FormField
-          control={form.control}
-          name={`${name}.items`}
-          render={() => (
-            <FormItem>
-              <FormControl>
-                <Checkbox
-                  checked={
-                    form.watch(`${name}.items`).length > 0 &&
-                    form.watch(`${name}.items`).every((q) => q.isSelected)
-                  }
-                  onCheckedChange={(checked) => {
-                    const items = form.getValues(`${name}.items`);
-                    items.forEach((_, index) => {
-                      form.setValue(
-                        `${name}.items.${index}.isSelected`,
-                        !!checked,
-                      );
-                    });
-                  }}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+        {form && name && (
+          <FormField
+            control={form.control}
+            name={`${name}.items`}
+            render={() => (
+              <FormItem>
+                <FormControl>
+                  <Checkbox
+                    checked={
+                      form.watch(`${name}.items`).length > 0 &&
+                      form.watch(`${name}.items`).every((q) => q.isSelected)
+                    }
+                    onCheckedChange={(checked) => {
+                      const items = form.getValues(`${name}.items`);
+                      items.forEach((_, index) => {
+                        form.setValue(
+                          `${name}.items.${index}.isSelected`,
+                          !!checked,
+                        );
+                      });
+                    }}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        )}
       </div>
       <div className="bg-gray-100 py-1 px-3 flex items-center">
         <span className="text-sm font-medium text-gray-700">
@@ -241,7 +278,7 @@ const HeaderRow = ({
 
 interface MedicineLineItemProps {
   form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
-  name: `prescriptions.${number}.items.${number}`;
+  name: `prescriptions.${number}.items.${number}` | `otherItems.${number}`;
 }
 
 const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
@@ -295,7 +332,7 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
   }, [medication, effectiveProductKnowledge?.id, autoSelectInventoryItems]);
 
   return (
-    <div className="contents group divide-y divide-x divide-gray-200">
+    <div className="contents group divide-x divide-gray-200">
       <div className="col-start-1 bg-white group-hover:bg-gray-100 group-focus-within:bg-gray-100 py-1 px-3 flex items-center transition-all duration-200 ease-in-out">
         <FormField
           control={form.control}
@@ -392,7 +429,7 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
                       type="number"
                       min={0}
                       {...field}
-                      className="border-gray-300 border rounded-md w-24"
+                      className="w-20"
                       placeholder="0"
                       disabled={disabled || isAutoSelectingInventoryItems}
                     />
