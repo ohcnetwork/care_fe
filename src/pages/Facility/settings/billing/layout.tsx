@@ -34,6 +34,7 @@ export function BillingSettingsLayout() {
     "/": () => <Redirect to={`${basePath}/discount_codes`} />,
     "/discount_components": () => <DiscountComponentSettings />,
     "/discount_codes": () => <DiscountCodeSettings />,
+    "/discount_configuration": () => <DiscountConfigurationSettings />,
     "/tax_codes": () => <TaxCodeSettings />,
     "/tax_components": () => <TaxComponentSettings />,
     "/informational_codes": () => <InformationalCodeSettings />,
