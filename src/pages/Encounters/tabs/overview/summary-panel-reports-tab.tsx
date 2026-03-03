@@ -177,6 +177,10 @@ export const SummaryPanelReportsTab = ({
   };
 
   const startPolling = (template: TemplateBaseRead) => {
+    if (pollingIntervalRef.current || pollingTimeoutRef.current) {
+      return;
+    }
+
     pollingIntervalRef.current = setInterval(
       () => pollGenerationStatus(template),
       2000,
@@ -195,6 +199,7 @@ export const SummaryPanelReportsTab = ({
     mutationFn: mutate(reportApi.createReport),
     onError: (error) => {
       toast.error(error.message || t("report_generation_failed"));
+      stopPolling();
       setGeneratingTemplateId(null);
     },
   });
@@ -212,6 +217,10 @@ export const SummaryPanelReportsTab = ({
   };
 
   const handleGenerate = (template: TemplateBaseRead) => {
+    if (generatingTemplateId || pollingIntervalRef.current) {
+      return;
+    }
+
     setGeneratingTemplateId(template.id);
     generateReport(
       {
