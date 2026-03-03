@@ -1,9 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Download, NotebookPen, RefreshCw } from "lucide-react";
 import { Link } from "raviger";
-import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
@@ -12,14 +10,13 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 import { PERMISSION_LIST_TEMPLATE } from "@/common/Permissions";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { usePermissions } from "@/context/PermissionContext";
+import useReportGeneration from "@/hooks/useReportGeneration";
+import { cn } from "@/lib/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
-import { ReportReadList } from "@/types/emr/report/report";
 import reportApi from "@/types/emr/report/reportApi";
-import { TemplateBaseRead } from "@/types/emr/template/template";
 import templateApi from "@/types/emr/template/templateApi";
-import mutate from "@/Utils/request/mutate";
-import query, { callApi } from "@/Utils/request/query";
+import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 
 export const SummaryPanelReportsTab = ({
@@ -31,21 +28,13 @@ export const SummaryPanelReportsTab = ({
   const { facility } = useCurrentFacilitySilently();
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
-  const queryClient = useQueryClient();
-  const [downloadingTemplateId, setDownloadingTemplateId] = useState<
-    string | null
-  >(null);
-  const [generatingTemplateId, setGeneratingTemplateId] = useState<
-    string | null
-  >(null);
-  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const generationStartTimeRef = useRef<Date | null>(null);
 
   const canListTemplate = hasPermission(
     PERMISSION_LIST_TEMPLATE,
     facility?.permissions,
   );
+
+  const isActive = activeTab === "reports";
 
   const { data: templatesData, isLoading: isLoadingTemplates } = useQuery({
     queryKey: ["templates", facilityId],
@@ -56,7 +45,7 @@ export const SummaryPanelReportsTab = ({
         status: "active",
       },
     }),
-    enabled: activeTab === "reports" && canListTemplate,
+    enabled: isActive && canListTemplate,
   });
 
   const { data: reportsData, isLoading: isLoadingReports } = useQuery({
@@ -70,186 +59,19 @@ export const SummaryPanelReportsTab = ({
         limit: 50,
       },
     }),
-    enabled: activeTab === "reports" && !!selectedEncounterId,
+    enabled: isActive && !!selectedEncounterId,
   });
 
-  const templates = templatesData?.results || [];
-  const generatedReports = reportsData?.results || [];
-  const isLoading = isLoadingTemplates || isLoadingReports;
+  const { generatingTemplateId, downloadingTemplateId, generate, download } =
+    useReportGeneration({ encounterId: selectedEncounterId });
+
+  const templates = templatesData?.results ?? [];
+  const reports = reportsData?.results ?? [];
 
   const getReportForTemplate = (templateId: string) =>
-    generatedReports.find((report) => report.template?.id === templateId);
+    reports.find((report) => report.template?.id === templateId);
 
-  const stopPolling = () => {
-    if (pollingIntervalRef.current) {
-      clearInterval(pollingIntervalRef.current);
-      pollingIntervalRef.current = null;
-    }
-    if (pollingTimeoutRef.current) {
-      clearTimeout(pollingTimeoutRef.current);
-      pollingTimeoutRef.current = null;
-    }
-    generationStartTimeRef.current = null;
-  };
-
-  const downloadFile = async (report: ReportReadList) => {
-    const data = await queryClient.fetchQuery({
-      queryKey: ["report", report.id],
-      queryFn: query(reportApi.retrieveReport, {
-        pathParams: { id: report.id },
-      }),
-    });
-
-    if (!data?.read_signed_url) {
-      throw new Error("Download URL not available");
-    }
-
-    const response = await fetch(data.read_signed_url);
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = report.name || report.report_type || "report";
-    link.click();
-    window.URL.revokeObjectURL(url);
-  };
-
-  const fetchFreshReportForTemplate = async (templateSlug: string) => {
-    await queryClient.invalidateQueries({
-      queryKey: ["reports", selectedEncounterId],
-    });
-
-    const data = await queryClient.fetchQuery({
-      queryKey: [
-        "reports",
-        selectedEncounterId,
-        "template",
-        templateSlug,
-        "fresh",
-        Date.now(),
-      ],
-      queryFn: query(reportApi.listReports, {
-        queryParams: {
-          associating_id: selectedEncounterId,
-          upload_completed: "true",
-          report_type: "discharge_summary",
-          is_archived: "false",
-          template: templateSlug,
-          limit: 1,
-        },
-      }),
-    });
-
-    return data?.results?.[0];
-  };
-
-  const pollGenerationStatus = async (template: TemplateBaseRead) => {
-    try {
-      const response = await callApi(reportApi.createReport, {
-        body: {
-          template_id: template.id,
-          associating_id: selectedEncounterId,
-          output_format: template.default_format,
-          options: JSON.stringify({}),
-          force: false,
-          status_check: true,
-        },
-      });
-
-      if (!response || Object.keys(response).length === 0) {
-        const generationStartTime = generationStartTimeRef.current;
-        stopPolling();
-
-        const newReport = await fetchFreshReportForTemplate(template.slug);
-
-        const isNewReport =
-          newReport &&
-          generationStartTime &&
-          new Date(newReport.created_date) > generationStartTime;
-
-        if (isNewReport) {
-          await downloadFile(newReport);
-          toast.success(t("file_download_completed"));
-        } else {
-          toast.error(t("report_generation_failed"));
-        }
-
-        await queryClient.invalidateQueries({
-          queryKey: ["reports", selectedEncounterId],
-        });
-        setGeneratingTemplateId(null);
-      }
-    } catch {
-      // Continue polling on error
-    }
-  };
-
-  const startPolling = (template: TemplateBaseRead) => {
-    if (pollingIntervalRef.current || pollingTimeoutRef.current) {
-      return;
-    }
-
-    pollingIntervalRef.current = setInterval(
-      () => pollGenerationStatus(template),
-      2000,
-    );
-
-    pollingTimeoutRef.current = setTimeout(() => {
-      stopPolling();
-      setGeneratingTemplateId(null);
-      toast.error(t("report_generation_taking_longer"));
-    }, 10000);
-  };
-
-  useEffect(() => stopPolling, []);
-
-  const { mutate: generateReport } = useMutation({
-    mutationFn: mutate(reportApi.createReport),
-    onError: (error) => {
-      toast.error(error.message || t("report_generation_failed"));
-      stopPolling();
-      setGeneratingTemplateId(null);
-    },
-  });
-
-  const handleDownload = async (report: ReportReadList, templateId: string) => {
-    setDownloadingTemplateId(templateId);
-    try {
-      await downloadFile(report);
-      toast.success(t("file_download_completed"));
-    } catch {
-      toast.error(t("file_download_failed"));
-    } finally {
-      setDownloadingTemplateId(null);
-    }
-  };
-
-  const handleGenerate = (template: TemplateBaseRead) => {
-    if (generatingTemplateId || pollingIntervalRef.current) {
-      toast.info(t("report_generation_in_progress"));
-      return;
-    }
-
-    setGeneratingTemplateId(template.id);
-    generationStartTimeRef.current = new Date();
-    generateReport(
-      {
-        template_id: template.id,
-        associating_id: selectedEncounterId,
-        output_format: template.default_format,
-        options: JSON.stringify({}),
-        force: false,
-      },
-      {
-        onSuccess: () => {
-          toast.success(t("report_generation_started"));
-          startPolling(template);
-        },
-      },
-    );
-  };
-
-  if (isLoading) {
+  if (isLoadingTemplates || isLoadingReports) {
     return <CardListSkeleton count={1} />;
   }
 
@@ -258,12 +80,8 @@ export const SummaryPanelReportsTab = ({
       <div className="flex pl-1 @xs:hidden">
         <h6 className="text-gray-950 font-semibold">{t("reports")}</h6>
       </div>
-      <div className="flex flex-col sm:@sm:flex-row gap-3 sm:@sm:gap-4">
-        <Button
-          variant="outline"
-          className="justify-start sm:@sm:justify-center w-full"
-          asChild
-        >
+      <div className="flex flex-col @md:grid @md:grid-cols-2 gap-3">
+        <Button variant="outline" className="justify-start w-full" asChild>
           <Link href={`../${selectedEncounterId}/treatment_summary`}>
             <NotebookPen />
             {t("treatment_summary")}
@@ -279,15 +97,18 @@ export const SummaryPanelReportsTab = ({
             <ButtonGroup key={template.id} className="w-full">
               <Button
                 variant="outline"
-                className="justify-start sm:@sm:justify-center min-w-0 flex-1"
-                onClick={() => handleGenerate(template)}
+                className="justify-start min-w-0 flex-1"
+                onClick={() => generate(template)}
                 disabled={isGenerating}
               >
-                <NotebookPen className="shrink-0" />
+                <RefreshCw
+                  className={cn(
+                    "size-4 shrink-0",
+                    isGenerating && "animate-spin",
+                  )}
+                />
+
                 <span className="truncate">{template.name}</span>
-                {isGenerating && (
-                  <RefreshCw className="size-4 animate-spin shrink-0 ml-auto" />
-                )}
               </Button>
               {latestReport && !isGenerating && (
                 <TooltipComponent
@@ -295,9 +116,8 @@ export const SummaryPanelReportsTab = ({
                 >
                   <Button
                     variant="outline"
-                    size="icon"
                     className="shrink-0"
-                    onClick={() => handleDownload(latestReport, template.id)}
+                    onClick={() => download(latestReport, template.id)}
                     disabled={isDownloading}
                     aria-label={t("download_latest_report")}
                   >
