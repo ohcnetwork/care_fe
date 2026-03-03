@@ -490,14 +490,26 @@ export default function PrescriptionQueue({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-2 self-center">
-                      <Button variant="outline" className="font-semibold">
+                    <div className="flex gap-4 items-center">
+                      <span className="font-semibold underline">
                         <Link
                           href={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}/prescription/${item.id}`}
                         >
                           {t("view_prescription")}
                         </Link>
-                      </Button>
+                      </span>
+                      {!isFilteredByPatient && (
+                        <Button
+                          variant="outline"
+                          className="font-semibold text-sm text-gray-950"
+                        >
+                          <Link
+                            href={`/medication_requests/patient/${item.encounter.patient.id}/bill/prescriptions/${item.id}`}
+                          >
+                            {t("bill_now")}
+                          </Link>
+                        </Button>
+                      )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon">
