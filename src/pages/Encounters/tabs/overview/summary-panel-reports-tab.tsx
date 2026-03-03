@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Download, NotebookPen, RefreshCw } from "lucide-react";
 import { Link } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -19,7 +19,7 @@ import reportApi from "@/types/emr/report/reportApi";
 import { TemplateBaseRead } from "@/types/emr/template/template";
 import templateApi from "@/types/emr/template/templateApi";
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
+import query, { callApi } from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 
 export const SummaryPanelReportsTab = ({
@@ -37,9 +37,8 @@ export const SummaryPanelReportsTab = ({
   const [generatingTemplateId, setGeneratingTemplateId] = useState<
     string | null
   >(null);
-  const [previousReportCount, setPreviousReportCount] = useState<number | null>(
-    null,
-  );
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const canListTemplate = hasPermission(PERMISSION_LIST_TEMPLATE);
 
@@ -55,11 +54,6 @@ export const SummaryPanelReportsTab = ({
     enabled: activeTab === "reports" && canListTemplate,
   });
 
-  const isPolling =
-    activeTab === "reports" &&
-    generatingTemplateId !== null &&
-    previousReportCount !== null;
-
   const { data: reportsData, isLoading: isLoadingReports } = useQuery({
     queryKey: ["reports", selectedEncounterId],
     queryFn: query(reportApi.listReports, {
@@ -71,18 +65,27 @@ export const SummaryPanelReportsTab = ({
       },
     }),
     enabled: activeTab === "reports" && !!selectedEncounterId,
-    refetchInterval: isPolling ? 2000 : false,
   });
 
+  const templates = templatesData?.results || [];
   const generatedReports = reportsData?.results || [];
+  const isLoading = isLoadingTemplates || isLoadingReports;
 
-  const getLatestReportForTemplate = (templateId: string) => {
-    return generatedReports.find(
-      (report) => report.template?.id === templateId,
-    );
+  const getReportForTemplate = (templateId: string) =>
+    generatedReports.find((report) => report.template?.id === templateId);
+
+  const stopPolling = () => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+    if (pollingTimeoutRef.current) {
+      clearTimeout(pollingTimeoutRef.current);
+      pollingTimeoutRef.current = null;
+    }
   };
 
-  const fetchAndDownload = async (report: ReportReadList) => {
+  const downloadFile = async (report: ReportReadList) => {
     const data = await queryClient.fetchQuery({
       queryKey: ["report", report.id],
       queryFn: query(reportApi.retrieveReport, {
@@ -94,8 +97,7 @@ export const SummaryPanelReportsTab = ({
       throw new Error("Download URL not available");
     }
 
-    const response = await fetch(data?.read_signed_url || "");
-
+    const response = await fetch(data.read_signed_url);
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -105,43 +107,89 @@ export const SummaryPanelReportsTab = ({
     window.URL.revokeObjectURL(url);
   };
 
-  useEffect(() => {
-    if (
-      isPolling &&
-      reportsData?.count !== undefined &&
-      reportsData.count > previousReportCount
-    ) {
-      const newReport = reportsData.results?.find(
-        (r) => r.template?.id === generatingTemplateId,
-      );
-      if (newReport) {
-        fetchAndDownload(newReport).then(
-          () => toast.success(t("file_download_completed")),
-          () => toast.error(t("file_download_failed")),
-        );
+  const fetchFreshReportForTemplate = async (templateId: string) => {
+    await queryClient.invalidateQueries({
+      queryKey: ["reports", selectedEncounterId],
+    });
+
+    const data = await queryClient.fetchQuery({
+      queryKey: ["reports", selectedEncounterId, "fresh", Date.now()],
+      queryFn: query(reportApi.listReports, {
+        queryParams: {
+          associating_id: selectedEncounterId,
+          upload_completed: "true",
+          report_type: "discharge_summary",
+          is_archived: "false",
+        },
+      }),
+    });
+
+    return data?.results?.find(
+      (r: ReportReadList) => r.template?.id === templateId,
+    );
+  };
+
+  const pollGenerationStatus = async (template: TemplateBaseRead) => {
+    try {
+      const response = await callApi(reportApi.createReport, {
+        body: {
+          template_id: template.id,
+          associating_id: selectedEncounterId,
+          output_format: template.default_format,
+          options: JSON.stringify({}),
+          force: false,
+          status_check: true,
+        },
+      });
+
+      if (!response || Object.keys(response).length === 0) {
+        stopPolling();
+
+        const newReport = await fetchFreshReportForTemplate(template.id);
+        if (newReport) {
+          await downloadFile(newReport);
+          toast.success(t("file_download_completed"));
+        } else {
+          toast.error(t("report_generation_failed"));
+        }
+
+        await queryClient.invalidateQueries({
+          queryKey: ["reports", selectedEncounterId],
+        });
+        setGeneratingTemplateId(null);
       }
-      setGeneratingTemplateId(null);
-      setPreviousReportCount(null);
+    } catch {
+      // Continue polling on error
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reportsData?.count]);
+  };
 
-  useEffect(() => {
-    if (!isPolling) return;
+  const startPolling = (template: TemplateBaseRead) => {
+    pollingIntervalRef.current = setInterval(
+      () => pollGenerationStatus(template),
+      2000,
+    );
 
-    const timeoutId = setTimeout(() => {
+    pollingTimeoutRef.current = setTimeout(() => {
+      stopPolling();
       setGeneratingTemplateId(null);
-      setPreviousReportCount(null);
       toast.error(t("report_generation_taking_longer"));
     }, 10000);
+  };
 
-    return () => clearTimeout(timeoutId);
-  }, [isPolling, t]);
+  useEffect(() => stopPolling, []);
 
-  const downloadReport = async (report: ReportReadList, templateId: string) => {
+  const { mutate: generateReport } = useMutation({
+    mutationFn: mutate(reportApi.createReport),
+    onError: (error) => {
+      toast.error(error.message || t("report_generation_failed"));
+      setGeneratingTemplateId(null);
+    },
+  });
+
+  const handleDownload = async (report: ReportReadList, templateId: string) => {
     setDownloadingTemplateId(templateId);
     try {
-      await fetchAndDownload(report);
+      await downloadFile(report);
       toast.success(t("file_download_completed"));
     } catch {
       toast.error(t("file_download_failed"));
@@ -150,31 +198,24 @@ export const SummaryPanelReportsTab = ({
     }
   };
 
-  const { mutate: generateReport } = useMutation({
-    mutationFn: mutate(reportApi.createReport),
-    onSuccess: () => {
-      toast.success(t("report_generation_started"));
-      setPreviousReportCount(reportsData?.count ?? 0);
-    },
-    onError: (error) => {
-      toast.error(error.message || t("report_generation_failed"));
-      setGeneratingTemplateId(null);
-    },
-  });
-
-  const handleGenerateReport = (template: TemplateBaseRead) => {
+  const handleGenerate = (template: TemplateBaseRead) => {
     setGeneratingTemplateId(template.id);
-    generateReport({
-      template_id: template.id,
-      associating_id: selectedEncounterId,
-      output_format: template.default_format,
-      options: JSON.stringify({}),
-      force: false,
-    });
+    generateReport(
+      {
+        template_id: template.id,
+        associating_id: selectedEncounterId,
+        output_format: template.default_format,
+        options: JSON.stringify({}),
+        force: false,
+      },
+      {
+        onSuccess: () => {
+          toast.success(t("report_generation_started"));
+          startPolling(template);
+        },
+      },
+    );
   };
-
-  const templates = templatesData?.results || [];
-  const isLoading = isLoadingTemplates || isLoadingReports;
 
   if (isLoading) {
     return <CardListSkeleton count={1} />;
@@ -198,8 +239,10 @@ export const SummaryPanelReportsTab = ({
         </Button>
 
         {templates.map((template) => {
-          const latestReport = getLatestReportForTemplate(template.id);
+          const latestReport = getReportForTemplate(template.id);
           const isGenerating = generatingTemplateId === template.id;
+          const isDownloading = downloadingTemplateId === template.id;
+
           return latestReport ? (
             <ButtonGroup key={template.id} className="w-full">
               <TooltipComponent
@@ -208,10 +251,8 @@ export const SummaryPanelReportsTab = ({
                 <Button
                   variant="outline"
                   className="justify-start sm:@sm:justify-center min-w-0 flex-1"
-                  onClick={() => downloadReport(latestReport, template.id)}
-                  disabled={
-                    downloadingTemplateId === template.id || isGenerating
-                  }
+                  onClick={() => handleDownload(latestReport, template.id)}
+                  disabled={isDownloading || isGenerating}
                 >
                   <Download className="shrink-0" />
                   <span className="truncate">{template.name}</span>
@@ -221,7 +262,7 @@ export const SummaryPanelReportsTab = ({
                 variant="outline"
                 size="icon"
                 className="shrink-0"
-                onClick={() => handleGenerateReport(template)}
+                onClick={() => handleGenerate(template)}
                 disabled={isGenerating}
                 aria-label={t("regenerate_report")}
                 title={t("regenerate_report")}
@@ -236,7 +277,7 @@ export const SummaryPanelReportsTab = ({
               key={template.id}
               variant="outline"
               className="justify-start sm:@sm:justify-center w-full"
-              onClick={() => handleGenerateReport(template)}
+              onClick={() => handleGenerate(template)}
               disabled={isGenerating}
             >
               <NotebookPen className="shrink-0" />
