@@ -41,6 +41,7 @@ export const SummaryPanelReportsTab = ({
   >(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const generationStartTimeRef = useRef<Date | null>(null);
 
   const canListTemplate = hasPermission(
     PERMISSION_LIST_TEMPLATE,
@@ -89,6 +90,7 @@ export const SummaryPanelReportsTab = ({
       clearTimeout(pollingTimeoutRef.current);
       pollingTimeoutRef.current = null;
     }
+    generationStartTimeRef.current = null;
   };
 
   const downloadFile = async (report: ReportReadList) => {
@@ -159,7 +161,13 @@ export const SummaryPanelReportsTab = ({
         stopPolling();
 
         const newReport = await fetchFreshReportForTemplate(template.slug);
-        if (newReport) {
+
+        const isNewReport =
+          newReport &&
+          generationStartTimeRef.current &&
+          new Date(newReport.created_date) > generationStartTimeRef.current;
+
+        if (isNewReport) {
           await downloadFile(newReport);
           toast.success(t("file_download_completed"));
         } else {
@@ -223,6 +231,7 @@ export const SummaryPanelReportsTab = ({
     }
 
     setGeneratingTemplateId(template.id);
+    generationStartTimeRef.current = new Date();
     generateReport(
       {
         template_id: template.id,
