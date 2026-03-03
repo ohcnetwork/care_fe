@@ -75,6 +75,7 @@ export function ChargeItemDefinitionDetail({
       status: ChargeItemDefinitionStatus.retired,
       category: chargeItemDefinition.category.slug,
       slug_value: chargeItemDefinition.slug_config.slug_value,
+      discount_configuration: null,
     });
   };
 
