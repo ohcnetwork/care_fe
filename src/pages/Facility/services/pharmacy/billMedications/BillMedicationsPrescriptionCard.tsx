@@ -540,13 +540,14 @@ const MedicineLineItemMedication = ({
 
   const effectiveProductKnowledge =
     substitution?.substitutedProductKnowledge || productKnowledge;
-  const isDispensed =
+
+  const dispenseCompleted =
     medication?.dispense_status === MedicationRequestDispenseStatus.complete;
 
   return (
     <>
       <div className="flex flex-col gap-1">
-        <div className={cn("flex flex-col", isDispensed && "italic")}>
+        <div className={cn("flex flex-col", dispenseCompleted && "italic")}>
           <span className="font-semibold text-gray-950">
             {effectiveProductKnowledge?.name ||
               (medication && displayMedicationName(medication)) ||
@@ -585,7 +586,7 @@ const MedicineLineItemMedication = ({
           <span className="text-sm text-gray-700">{`${t("note")}: ${medication?.note}`}</span>
         )}
       </div>
-      {!isDispensed && (
+      {!dispenseCompleted && (
         <div className="flex gap-3">
           {effectiveProductKnowledge && (
             <MedicineInfoCard
