@@ -12,7 +12,6 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 import { PERMISSION_LIST_TEMPLATE } from "@/common/Permissions";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { usePermissions } from "@/context/PermissionContext";
-import { cn } from "@/lib/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { ReportReadList } from "@/types/emr/report/report";
@@ -276,46 +275,37 @@ export const SummaryPanelReportsTab = ({
           const isGenerating = generatingTemplateId === template.id;
           const isDownloading = downloadingTemplateId === template.id;
 
-          return latestReport ? (
+          return (
             <ButtonGroup key={template.id} className="w-full">
-              <TooltipComponent
-                content={`${t("download_latest_report")} (${formatDateTime(latestReport.created_date)})`}
-              >
-                <Button
-                  variant="outline"
-                  className="justify-start sm:@sm:justify-center min-w-0 flex-1"
-                  onClick={() => handleDownload(latestReport, template.id)}
-                  disabled={isDownloading || isGenerating}
-                >
-                  <Download className="shrink-0" />
-                  <span className="truncate">{template.name}</span>
-                </Button>
-              </TooltipComponent>
               <Button
                 variant="outline"
-                size="icon"
-                className="shrink-0"
+                className="justify-start sm:@sm:justify-center min-w-0 flex-1"
                 onClick={() => handleGenerate(template)}
                 disabled={isGenerating}
-                aria-label={t("regenerate_report")}
-                title={t("regenerate_report")}
               >
-                <RefreshCw
-                  className={cn("size-4", isGenerating && "animate-spin")}
-                />
+                <NotebookPen className="shrink-0" />
+                <span className="truncate">{template.name}</span>
+                {isGenerating && (
+                  <RefreshCw className="size-4 animate-spin shrink-0 ml-auto" />
+                )}
               </Button>
+              {latestReport && !isGenerating && (
+                <TooltipComponent
+                  content={`${t("download_latest_report")} (${formatDateTime(latestReport.created_date)})`}
+                >
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="shrink-0"
+                    onClick={() => handleDownload(latestReport, template.id)}
+                    disabled={isDownloading}
+                    aria-label={t("download_latest_report")}
+                  >
+                    <Download className="size-4" />
+                  </Button>
+                </TooltipComponent>
+              )}
             </ButtonGroup>
-          ) : (
-            <Button
-              key={template.id}
-              variant="outline"
-              className="justify-start sm:@sm:justify-center w-full"
-              onClick={() => handleGenerate(template)}
-              disabled={isGenerating}
-            >
-              <NotebookPen className="shrink-0" />
-              <span className="truncate">{template.name}</span>
-            </Button>
           );
         })}
       </div>
