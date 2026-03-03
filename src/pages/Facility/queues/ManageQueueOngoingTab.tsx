@@ -62,7 +62,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-between items-end gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start mt-2 gap-4">
         <div className="flex flex-col gap-2">
           <Label className="text-gray-950 text-sm font-medium">
             {t("search_patients")}
