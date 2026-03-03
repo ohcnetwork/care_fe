@@ -167,21 +167,12 @@ export default function PatientIdentifierConfigForm({
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const newValues = {
-      ...values,
-      config: {
-        ...values.config,
-        default_value: values.config.default_value || undefined,
-      },
-    };
     if (config) {
-      updateConfig(newValues as PatientIdentifierConfigUpdate);
+      updateConfig(values as PatientIdentifierConfigUpdate);
     } else {
-      createConfig(newValues as PatientIdentifierConfigCreate);
+      createConfig(values as PatientIdentifierConfigCreate);
     }
   }
-
-  // Check if default_value exists to determine mode
 
   return (
     <Form {...form}>
@@ -455,7 +446,7 @@ export default function PatientIdentifierConfigForm({
                     value={form.watch("config.default_value") ? "auto" : "user"}
                     onValueChange={(v) => {
                       if (v === "user") {
-                        form.setValue("config.default_value", "", {
+                        form.setValue("config.default_value", null, {
                           shouldDirty: true,
                         });
                       } else if (v === "auto") {

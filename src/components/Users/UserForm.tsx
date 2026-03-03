@@ -54,12 +54,14 @@ interface Props {
   onSubmitSuccess?: (user: UserReadMinimal) => void;
   existingUsername?: string;
   organizationId?: string;
+  isServiceAccount?: boolean;
 }
 
 export default function UserForm({
   onSubmitSuccess,
   existingUsername,
   organizationId,
+  isServiceAccount = false,
 }: Props) {
   const { t } = useTranslation();
   const isEditMode = !!existingUsername;
@@ -110,7 +112,11 @@ export default function UserForm({
     })
     .refine(
       (data) => {
-        if (!isEditMode && data.password_setup_method === "immediate") {
+        if (
+          !isEditMode &&
+          data.password_setup_method === "immediate" &&
+          !isServiceAccount
+        ) {
           return !!data.password;
         }
         return true;
@@ -254,7 +260,11 @@ export default function UserForm({
     mutationKey: ["create_user"],
     mutationFn: mutate(userApi.create),
     onSuccess: (resp: UserReadMinimal) => {
-      toast.success(t("user_added_successfully"));
+      toast.success(
+        isServiceAccount
+          ? t("service_account_added_successfully")
+          : t("user_added_successfully"),
+      );
       queryClient.invalidateQueries({
         queryKey: ["facilityUsers"],
       });
@@ -265,9 +275,6 @@ export default function UserForm({
         queryKey: ["facilityOrganizationUsers"],
       });
       onSubmitSuccess?.(resp);
-    },
-    onError: (error) => {
-      toast.error(error?.message ?? t("user_add_error"));
     },
   });
 
@@ -308,7 +315,7 @@ export default function UserForm({
         user_type: data.user_type!,
         username: data.username!,
         password:
-          data.password_setup_method === "immediate"
+          data.password_setup_method === "immediate" && !isServiceAccount
             ? data.password!
             : undefined,
         first_name: data.first_name,
@@ -319,6 +326,7 @@ export default function UserForm({
         suffix: data.suffix || "",
         gender: data.gender,
         geo_organization: data.geo_organization || undefined,
+        is_service_account: isServiceAccount,
       };
       createUser(createPayload);
     }
@@ -355,14 +363,24 @@ export default function UserForm({
             name="user_type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel aria-required>{t("user_type")}</FormLabel>
+                <FormLabel aria-required>
+                  {isServiceAccount
+                    ? t("service_account_type")
+                    : t("user_type")}
+                </FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger ref={field.ref}>
-                      <SelectValue placeholder={t("select_user_type")} />
+                      <SelectValue
+                        placeholder={
+                          isServiceAccount
+                            ? t("select_service_account_type")
+                            : t("select_user_type")
+                        }
+                      />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -532,157 +550,160 @@ export default function UserForm({
               />
             )}
 
-            <FormField
-              control={form.control}
-              name="password_setup_method"
-              render={({ field }) => (
-                <FormItem className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                  <FormLabel className="text-base font-medium mb-3 block">
-                    {t("password_setup_method")}
-                  </FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="space-y-3"
-                    >
-                      <div
-                        className={cn(
-                          "flex items-start space-x-3 rounded-md border p-3",
-                          field.value === "immediate"
-                            ? "bg-white border-primary"
-                            : "bg-transparent  border-gray-200",
-                        )}
+            {!isServiceAccount && (
+              <FormField
+                control={form.control}
+                name="password_setup_method"
+                render={({ field }) => (
+                  <FormItem className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <FormLabel className="text-base font-medium mb-3 block">
+                      {t("password_setup_method")}
+                    </FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="space-y-3"
                       >
-                        <RadioGroupItem
-                          value="immediate"
-                          id="immediate"
-                          className="mt-1"
-                        />
-                        <div className="space-y-1.5">
-                          <Label
-                            htmlFor="immediate"
-                            className="text-base font-medium cursor-pointer flex items-center"
-                          >
-                            <Lock className="size-4" />
-                            {t("set_password_now")}
-                          </Label>
-                          <p className="text-sm text-gray-500">
-                            {t("set_password_now_description")}
-                          </p>
+                        <div
+                          className={cn(
+                            "flex items-start space-x-3 rounded-md border p-3",
+                            field.value === "immediate"
+                              ? "bg-white border-primary"
+                              : "bg-transparent  border-gray-200",
+                          )}
+                        >
+                          <RadioGroupItem
+                            value="immediate"
+                            id="immediate"
+                            className="mt-1"
+                          />
+                          <div className="space-y-1.5">
+                            <Label
+                              htmlFor="immediate"
+                              className="text-base font-medium cursor-pointer flex items-center"
+                            >
+                              <Lock className="size-4" />
+                              {t("set_password_now")}
+                            </Label>
+                            <p className="text-sm text-gray-500">
+                              {t("set_password_now_description")}
+                            </p>
+                          </div>
                         </div>
-                      </div>
 
-                      <div
-                        className={cn(
-                          "flex items-start space-x-3 rounded-md border p-3",
-                          field.value === "email"
-                            ? "bg-white border-primary"
-                            : "bg-transparent  border-gray-200",
-                        )}
-                      >
-                        <RadioGroupItem
-                          value="email"
-                          id="email"
-                          className="mt-1"
-                        />
-                        <div className="space-y-1.5">
-                          <Label
-                            htmlFor="email"
-                            className="text-base font-medium cursor-pointer flex items-center"
-                          >
-                            <Mail className="size-4" />
-                            {t("send_email_invitation")}
-                          </Label>
-                          <p className="text-sm text-gray-500">
-                            {t("send_email_invitation_description")}
-                          </p>
+                        <div
+                          className={cn(
+                            "flex items-start space-x-3 rounded-md border p-3",
+                            field.value === "email"
+                              ? "bg-white border-primary"
+                              : "bg-transparent  border-gray-200",
+                          )}
+                        >
+                          <RadioGroupItem
+                            value="email"
+                            id="email"
+                            className="mt-1"
+                          />
+                          <div className="space-y-1.5">
+                            <Label
+                              htmlFor="email"
+                              className="text-base font-medium cursor-pointer flex items-center"
+                            >
+                              <Mail className="size-4" />
+                              {t("send_email_invitation")}
+                            </Label>
+                            <p className="text-sm text-gray-500">
+                              {t("send_email_invitation_description")}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
-            {form.watch("password_setup_method") === "immediate" && (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel aria-required>{t("password")}</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <PasswordInput
-                            placeholder={t("password")}
-                            {...field}
-                            onFocus={() => setIsPasswordFieldFocused(true)}
-                            onBlur={() => setIsPasswordFieldFocused(false)}
+            {form.watch("password_setup_method") === "immediate" &&
+              !isServiceAccount && (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel aria-required>{t("password")}</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <PasswordInput
+                              placeholder={t("password")}
+                              {...field}
+                              onFocus={() => setIsPasswordFieldFocused(true)}
+                              onBlur={() => setIsPasswordFieldFocused(false)}
+                            />
+                          </div>
+                        </FormControl>
+
+                        <div
+                          className={cn(
+                            "text-small pl-2 text-secondary-500",
+                            !isPasswordFieldFocused && "hidden",
+                          )}
+                          aria-live="polite"
+                        >
+                          <ValidationHelper
+                            isInputEmpty={!field.value}
+                            successMessage={t("password_success_message")}
+                            validations={[
+                              {
+                                description: "password_length_validation",
+                                fulfilled: (field.value || "").length >= 8,
+                              },
+                              {
+                                description: "password_lowercase_validation",
+                                fulfilled: /[a-z]/.test(field.value || ""),
+                              },
+                              {
+                                description: "password_uppercase_validation",
+                                fulfilled: /[A-Z]/.test(field.value || ""),
+                              },
+                              {
+                                description: "password_number_validation",
+                                fulfilled: /\d/.test(field.value || ""),
+                              },
+                            ]}
                           />
                         </div>
-                      </FormControl>
 
-                      <div
-                        className={cn(
-                          "text-small pl-2 text-secondary-500",
-                          !isPasswordFieldFocused && "hidden",
-                        )}
-                        aria-live="polite"
-                      >
-                        <ValidationHelper
-                          isInputEmpty={!field.value}
-                          successMessage={t("password_success_message")}
-                          validations={[
-                            {
-                              description: "password_length_validation",
-                              fulfilled: (field.value || "").length >= 8,
-                            },
-                            {
-                              description: "password_lowercase_validation",
-                              fulfilled: /[a-z]/.test(field.value || ""),
-                            },
-                            {
-                              description: "password_uppercase_validation",
-                              fulfilled: /[A-Z]/.test(field.value || ""),
-                            },
-                            {
-                              description: "password_number_validation",
-                              fulfilled: /\d/.test(field.value || ""),
-                            },
-                          ]}
-                        />
-                      </div>
+                        <div className={cn(isPasswordFieldFocused && "hidden")}>
+                          <FormMessage />
+                        </div>
+                      </FormItem>
+                    )}
+                  />
 
-                      <div className={cn(isPasswordFieldFocused && "hidden")}>
+                  <FormField
+                    control={form.control}
+                    name="c_password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel aria-required>
+                          {t("confirm_password")}
+                        </FormLabel>
+                        <FormControl>
+                          <PasswordInput
+                            placeholder={t("confirm_password")}
+                            {...field}
+                          />
+                        </FormControl>
                         <FormMessage />
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="c_password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel aria-required>
-                        {t("confirm_password")}
-                      </FormLabel>
-                      <FormControl>
-                        <PasswordInput
-                          placeholder={t("confirm_password")}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            )}
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
           </>
         )}
 
@@ -835,7 +856,9 @@ export default function UserForm({
               : t("creating")
             : isEditMode
               ? t("update_user")
-              : t("create_user")}
+              : isServiceAccount
+                ? t("create_service_account")
+                : t("create_user")}
         </Button>
       </form>
     </Form>

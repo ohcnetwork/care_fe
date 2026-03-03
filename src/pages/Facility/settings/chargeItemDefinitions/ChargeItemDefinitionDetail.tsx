@@ -15,7 +15,9 @@ import { Separator } from "@/components/ui/separator";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
+import { round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import BackButton from "@/components/Common/BackButton";
@@ -73,6 +75,7 @@ export function ChargeItemDefinitionDetail({
       status: ChargeItemDefinitionStatus.retired,
       category: chargeItemDefinition.category.slug,
       slug_value: chargeItemDefinition.slug_config.slug_value,
+      discount_configuration: null,
     });
   };
 
@@ -98,10 +101,10 @@ export function ChargeItemDefinitionDetail({
           {component.amount ? (
             <p className="font-medium">
               {getCurrencySymbol()}
-              {component.amount}
+              {round(component.amount)}
             </p>
           ) : component.factor ? (
-            <p className="font-medium">{component.factor}%</p>
+            <p className="font-medium">{round(component.factor)}%</p>
           ) : (
             <p className="text-sm text-gray-500">{t("not_specified")}</p>
           )}
@@ -150,7 +153,7 @@ export function ChargeItemDefinitionDetail({
     <Page title={chargeItemDefinition.title} hideTitleOnPage={true}>
       <div className="container mx-auto max-w-3xl space-y-6">
         <BackButton
-          to={`/facility/${facilityId}/settings/charge_item_definitions/categories/${chargeItemDefinition.category.slug}`}
+          fallbackUrl={`/facility/${facilityId}/settings/charge_item_definitions/categories/${chargeItemDefinition.category.slug}`}
         >
           <ArrowLeft />
           {t("back")}
@@ -222,10 +225,25 @@ export function ChargeItemDefinitionDetail({
             disabled={isDeleting}
           />
 
+          {/* Tags Section */}
+          <TagAssignmentSheet
+            entityType="charge_item_definition"
+            entityId={chargeItemDefinition.slug}
+            pathParamKey="slug"
+            facilityId={facilityId}
+            currentTags={chargeItemDefinition.tags}
+            onUpdate={() => {
+              queryClient.invalidateQueries({
+                queryKey: ["chargeItemDefinitions", slug],
+              });
+            }}
+          />
+
           {(chargeItemDefinition.description ||
             chargeItemDefinition.purpose ||
-            chargeItemDefinition.derived_from_uri) && (
-            <Card className="mb-4">
+            chargeItemDefinition.derived_from_uri ||
+            chargeItemDefinition.can_edit_charge_item !== undefined) && (
+            <Card className="my-4">
               <CardHeader>
                 <CardTitle>{t("details")}</CardTitle>
               </CardHeader>
@@ -257,6 +275,18 @@ export function ChargeItemDefinitionDetail({
                     </h3>
                     <p className="font-mono text-sm">
                       {chargeItemDefinition.derived_from_uri}
+                    </p>
+                  </div>
+                )}
+                {chargeItemDefinition.can_edit_charge_item !== undefined && (
+                  <div className="mb-4">
+                    <h3 className="text-sm font-medium text-gray-500">
+                      {t("can_edit_charge_item")}
+                    </h3>
+                    <p>
+                      {chargeItemDefinition.can_edit_charge_item
+                        ? t("yes")
+                        : t("no")}
                     </p>
                   </div>
                 )}

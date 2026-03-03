@@ -12,8 +12,8 @@ export function ClinicalHistory({
 }: ClinicalHistoryProps) {
   useEffect(() => {
     const historyUrl = facilityId
-      ? `/facility/${facilityId}/patient/${patientId}/history/symptoms`
-      : `/patient/${patientId}/history/symptoms`;
+      ? `/facility/${facilityId}/patient/${patientId}/history/responses`
+      : `/patient/${patientId}/history/responses`;
 
     navigate(historyUrl);
   }, [patientId, facilityId]);

@@ -1,3 +1,4 @@
+import { useAtom } from "jotai";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -5,9 +6,14 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+
+import { developerModeAtom } from "@/atoms/developerMode";
 
 import LanguageSelector from "@/components/Common/LanguageSelector";
 import UserColumns, { userChildProps } from "@/components/Common/UserColumns";
+import ServiceTokenSection from "@/components/Users/ServiceTokenSection";
 import { TwoFactorAuth } from "@/components/Users/TwoFactorAuth";
 import UserAvatar from "@/components/Users/UserAvatar";
 import UserDeleteDialog from "@/components/Users/UserDeleteDialog";
@@ -86,6 +92,17 @@ export default function UserSummaryTab({
             {t("edit_user")}
           </Button>
         )}
+        {userData.is_service_account &&
+          userData.created_by?.username === authUser.username && (
+            <UserColumns
+              heading={t("manage_token")}
+              note={t("manage_service_account_token_for", {
+                username: userData.username,
+              })}
+              Child={() => <ServiceTokenSection userData={userData} />}
+              childProps={userColumnsData}
+            />
+          )}
         {canEditUser && (
           <UserColumns
             heading={t("edit_avatar")}
@@ -186,7 +203,43 @@ export default function UserSummaryTab({
             </CardContent>
           </Card>
         )}
+        {authUser.username === userData.username && <DeveloperModeSection />}
       </div>
     </>
+  );
+}
+
+function DeveloperModeSection() {
+  const { t } = useTranslation();
+  const [developerMode, setDeveloperMode] = useAtom(developerModeAtom);
+
+  return (
+    <Card className="border-amber-500">
+      <CardHeader className="px-4 sm:px-6">
+        <CardTitle className="text-amber-600">{t("developer_mode")}</CardTitle>
+      </CardHeader>
+      <CardContent className="gap-4 px-4 sm:px-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-md border p-3 sm:p-4">
+          <div className="space-y-1">
+            <h3 className="text-sm font-medium">
+              {t("production_environment_warning")}
+            </h3>
+            <p className="text-sm text-gray-700">
+              {t("production_environment_warning_description")}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch
+              id="developer-mode"
+              checked={developerMode}
+              onCheckedChange={setDeveloperMode}
+            />
+            <Label htmlFor="developer-mode" className="sr-only">
+              {t("developer_mode")}
+            </Label>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

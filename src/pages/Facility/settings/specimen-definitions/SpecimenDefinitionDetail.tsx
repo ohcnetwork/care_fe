@@ -12,8 +12,6 @@ import { Card } from "@/components/ui/card";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading";
 import { Code } from "@/types/base/code/code";
 import {
@@ -22,6 +20,9 @@ import {
   SpecimenDefinitionStatus,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
+import { round } from "@/Utils/decimal";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 
 interface SpecimenDefinitionDetailProps {
   facilityId: string;
@@ -76,10 +77,10 @@ export function SpecimenDefinitionDetail({
   }
 
   const formatQuantity = (
-    quantity: { value: number | null; unit: Code | null } | null,
+    quantity: { value: string | null; unit: Code | null } | null,
   ) => {
     if (!quantity?.value || !quantity?.unit?.display) return "-";
-    return `${quantity.value} ${quantity.unit.display}`;
+    return `${round(quantity.value)} ${quantity.unit.display}`;
   };
 
   const formatDuration = (duration: DurationSpec | null | undefined) => {

@@ -28,7 +28,8 @@ export type XUIInputControl =
   | "checkbox"
   | "switch"
   | "date"
-  | "datetime";
+  | "datetime"
+  | "autocomplete";
 
 export type XUIControl = XUILayoutControl | XUIInputControl;
 
@@ -40,6 +41,8 @@ export interface XUI {
   control?: XUIControl;
   /** Variant/style modifier for the control */
   variant?: string;
+  /** Generic metadata for dynamic/complex controls (e.g., autocomplete config, API endpoints) */
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -129,6 +132,7 @@ export type UIFieldType =
   | "uri"
   | "object"
   | "array"
+  | "autocomplete"
   | "hidden";
 
 /**
@@ -179,6 +183,8 @@ export interface ExtensionFieldMetadata {
   uiControl?: XUIControl;
   /** x-ui variant hint from schema */
   uiVariant?: string;
+  /** Generic metadata from x-ui for dynamic controls (e.g., autocomplete, custom widgets) */
+  uiMetadata?: Record<string, unknown>;
 }
 
 /**

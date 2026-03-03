@@ -4,6 +4,7 @@ import React from "react";
 import { Badge } from "@/components/ui/badge";
 
 import { formatName } from "@/Utils/utils";
+import { LocationNode } from "@/components/Location/LocationTree";
 import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
 import { ObservationDefinitionReadSpec } from "@/types/emr/observationDefinition/observationDefinition";
 import {
@@ -118,15 +119,25 @@ export function ServiceRequestDetails({
                 )}
               </div>
             </div>
-          </div>
-          <div className="border-l border-gray-200 mx-4" />
-          <div className="flex flex-col gap-6">
             <div>
               <div className="text-sm text-gray-600 mb-1">{t("specimen")}</div>
               <div className="font-sm font-normal flex flex-wrap gap-1">
                 {formatSpecimenRequirements(specimenRequirements)}
               </div>
             </div>
+          </div>
+          <div className="border-l border-gray-200 mx-4" />
+          <div className="flex flex-col gap-6">
+            {activityDefinition.healthcare_service && (
+              <div>
+                <div className="text-sm text-gray-600 mb-1">
+                  {t("healthcare_service")}
+                </div>
+                <div className="font-semibold text-gray-700">
+                  {activityDefinition.healthcare_service.name}
+                </div>
+              </div>
+            )}
             <div>
               <div className="text-sm text-gray-600 mb-1">
                 {t("requested by")}
@@ -135,6 +146,17 @@ export function ServiceRequestDetails({
                 {request.requester && formatName(request.requester)}
               </div>
             </div>
+            {request.encounter.current_location && (
+              <div>
+                <div className="text-sm text-gray-600 mb-1">
+                  {t("patient_location")}
+                </div>
+                <LocationNode
+                  location={request.encounter.current_location}
+                  isLast={true}
+                />
+              </div>
+            )}
           </div>
         </div>
 

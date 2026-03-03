@@ -26,7 +26,6 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import { RoleBase } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
 import query from "@/Utils/request/query";
-import { isAppleDevice } from "@/Utils/utils";
 
 interface RoleSelectProps {
   value?: RoleBase;
@@ -66,7 +65,7 @@ function RoleCommandContent({
         placeholder={t("search_roles")}
         onValueChange={setSearchTerm}
         className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
-        autoFocus={!isAppleDevice}
+        autoFocus
       />
       <CommandList>
         <CommandEmpty>

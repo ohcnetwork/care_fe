@@ -23,7 +23,7 @@ export function useLocationNavigation({
     null,
   );
   const [locationHistory, setLocationHistory] = useState<LocationRead[]>([]);
-  const [selectedBed, setSelectedBed] = useState<string | null>(null);
+  const [selectedBed, setSelectedBed] = useState<LocationRead | null>(null);
   const [selectedLinkedBed, setSelectedLinkedBed] = useState<
     LocationAssociationRead | undefined
   >();
@@ -142,8 +142,8 @@ export function useLocationNavigation({
     setSelectedBed(null);
   };
 
-  const handleBedSelect = (bedId: string) => {
-    setSelectedBed(bedId);
+  const handleBedSelect = (bed: LocationRead) => {
+    setSelectedBed(bed);
     setSelectedLinkedBed(undefined);
   };
 
