@@ -212,7 +212,7 @@ function ObservationDefinitionFormContent({
                   c.qualified_ranges?.map((range, index) => ({
                     ...range,
                     id: index,
-                    conditions: range?.conditions.map((condition) => ({
+                    conditions: range?.conditions?.map((condition) => ({
                       ...condition,
                       _conditionType: getConditionDiscriminatorValue(
                         condition.metric,
@@ -229,7 +229,7 @@ function ObservationDefinitionFormContent({
               existingData.qualified_ranges?.map((range, index) => ({
                 ...range,
                 id: index,
-                conditions: range?.conditions.map((condition) => ({
+                conditions: range?.conditions?.map((condition) => ({
                   ...condition,
                   _conditionType: getConditionDiscriminatorValue(
                     condition.metric,

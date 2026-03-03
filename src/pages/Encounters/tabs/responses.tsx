@@ -246,6 +246,7 @@ export const EncounterResponsesTab = ({
                     >
                       <ResponseCard
                         item={response}
+                        patientId={patientId}
                         showTitle={!questionnaireSlug}
                         onTitleClick={() => {
                           setQueryParams({

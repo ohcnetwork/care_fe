@@ -161,6 +161,7 @@ export function ChargeItemDefinitionForm({
           factor: zodDecimal({ min: 0, max: 100 }).optional().nullable(),
           amount: zodDecimal({ min: 0 }).optional().nullable(),
           conditions: z.array(conditionSchema),
+          global_component: z.boolean().optional(),
         }),
       ),
     });
@@ -353,7 +354,12 @@ export function ChargeItemDefinitionForm({
       ...finalData
     } = submissionData;
 
-    upsert(finalData as ChargeItemDefinitionCreate);
+    const submissionDataWithDiscountConfiguration = {
+      ...finalData,
+      discount_configuration: null,
+    } as ChargeItemDefinitionCreate;
+
+    upsert(submissionDataWithDiscountConfiguration);
   };
 
   if (isLoading || !facilityData) {
@@ -503,6 +509,7 @@ export function ChargeItemDefinitionForm({
                         .replace(/[^a-z0-9_-]/g, "");
                       form.setValue("slug_value", sanitizedValue, {
                         shouldValidate: true,
+                        shouldDirty: true,
                       });
                     }}
                   />

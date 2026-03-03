@@ -255,10 +255,7 @@ export default function TagAssignmentSheet({
   const isLoadingTags = isSettingTags || isRemovingTags;
 
   return (
-    <div className="flex flex-wrap gap-3">
-      {/* Current Tags Display */}
-
-      {/* Tag Selector */}
+    <>
       {canWrite && (
         <MultiFilterStyleTagSelector
           selected={selectedTags}
@@ -270,6 +267,6 @@ export default function TagAssignmentSheet({
           trigger={trigger}
         />
       )}
-    </div>
+    </>
   );
 }

@@ -12,6 +12,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import RadioInput from "@/components/ui/RadioInput";
+import { Switch } from "@/components/ui/switch";
 
 import { CompactConditionEditor } from "@/components/Billing/CompactConditionEditor";
 
@@ -76,6 +77,7 @@ function toMonetaryComponent(
     factor: isPercentageBased(component) ? component.factor : null,
     amount: !isPercentageBased(component) ? component.amount : null,
     conditions: [],
+    global_component: true,
   };
 }
 
@@ -215,6 +217,22 @@ export function MonetaryComponentSelector({
   const handleRemoveComponent = (component: MonetaryComponent) => {
     onSelectionChange(
       selectedComponents.filter((c) => !isSameComponentCode(c, component)),
+    );
+  };
+
+  const handleToggleGlobal = (component: MonetaryComponent) => {
+    const isCurrentlyGlobal = component.global_component === true;
+    onSelectionChange(
+      selectedComponents.map((c) =>
+        isSameComponentCode(c, component)
+          ? {
+              ...c,
+              global_component: !isCurrentlyGlobal,
+              // Clear conditions when switching to global
+              ...(!isCurrentlyGlobal ? { conditions: [] } : {}),
+            }
+          : c,
+      ),
     );
   };
 
@@ -409,11 +427,11 @@ export function MonetaryComponentSelector({
             <p className="text-sm font-medium text-gray-700">
               {t("selected")} {title?.toLowerCase()}
             </p>
-
             {selectedComponents.map((component, idx) => {
               const componentRead = components.find((c) =>
                 isSameComponentCode(c, component),
               );
+              const isGlobal = component.global_component === true;
 
               return (
                 <div
@@ -438,7 +456,27 @@ export function MonetaryComponentSelector({
                     </Button>
                   </div>
 
-                  {onConditionsChange && (
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={isGlobal}
+                        onCheckedChange={() => handleToggleGlobal(component)}
+                        aria-label={t("use_facility_global_value")}
+                      />
+                      <span className="text-sm text-gray-600">
+                        {isGlobal
+                          ? t("use_facility_global_value")
+                          : t("override_with_local_value")}
+                      </span>
+                    </div>
+                    {isGlobal && (
+                      <Badge variant="secondary" className="text-xs">
+                        {t("global")}
+                      </Badge>
+                    )}
+                  </div>
+
+                  {!isGlobal && onConditionsChange && (
                     <CompactConditionEditor
                       conditions={
                         component.conditions?.map((condition) => ({

@@ -2,7 +2,7 @@ import { DialogDescription } from "@radix-ui/react-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { Hash, MoreVertical } from "lucide-react";
-import { Link, navigate, useQueryParams } from "raviger";
+import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -49,6 +49,7 @@ import PaymentsData from "@/pages/Facility/billing/paymentReconciliation/Payment
 import {
   ACCOUNT_STATUS_COLORS,
   AccountBillingStatus,
+  AccountRead,
   AccountStatus,
   closeBillingStatusColorMap,
 } from "@/types/billing/account/Account";
@@ -112,7 +113,7 @@ export function AccountShow({
     sheetOpen: boolean;
     reason: AccountBillingStatus;
   }>({ sheetOpen: false, reason: AccountBillingStatus.closed_baddebt });
-  const [{ encounterId }] = useQueryParams();
+
   const { facility } = useCurrentFacility();
   const { hasPermission } = usePermissions();
 
@@ -197,11 +198,35 @@ export function AccountShow({
     },
   });
 
-  const navigatePath = (key: string) => {
-    return (
-      `/facility/${facilityId}/billing/account/${accountId}/${key}` +
-      (encounterId !== undefined ? `?encounterId=${encounterId}` : "")
-    );
+  const { mutate: updateBillingStatus } = useMutation({
+    mutationFn: mutate(accountApi.updateAccount, {
+      pathParams: { facilityId, accountId },
+    }),
+    onSuccess: () => {
+      toast.success(t("billing_status_updated_successfully"));
+      queryClient.invalidateQueries({
+        queryKey: ["account", accountId],
+      });
+    },
+  });
+
+  const advanceBillingStatus = (targetStatus: AccountBillingStatus) => {
+    updateBillingStatus({
+      id: accountId,
+      name: account?.name || "",
+      description: account?.description,
+      status: account?.status || AccountStatus.active,
+      billing_status: targetStatus,
+      service_period: {
+        start: account?.service_period?.start || new Date().toISOString(),
+        ...(account?.service_period?.end && {
+          end: account.service_period.end,
+        }),
+      },
+      patient: account?.patient?.id || "",
+      extensions: account?.extensions || {},
+      primary_encounter: account?.primary_encounter?.id,
+    });
   };
 
   const handleCloseAccount = () => {
@@ -274,6 +299,7 @@ export function AccountShow({
         <PaymentsData
           facilityId={facilityId}
           accountId={accountId}
+          patientId={account.patient.id}
           hideAccountColumn
         />
       ),
@@ -289,15 +315,13 @@ export function AccountShow({
       ),
       shortcutId: "switch-to-reports-tab",
     },
-    ...(encounterId && {
-      bed_charge_items: {
-        label: t("bed_charge_items"),
-        component: (
-          <BedChargeItemsTable facilityId={facilityId} accountId={accountId} />
-        ),
-        shortcutId: "switch-to-bed-charge-items-tab",
-      },
-    }),
+    bed_charge_items: {
+      label: t("bed_charge_items"),
+      component: (
+        <BedChargeItemsTable facilityId={facilityId} account={account} />
+      ),
+      shortcutId: "switch-to-bed-charge-items-tab",
+    },
   };
 
   return (
@@ -637,44 +661,65 @@ export function AccountShow({
           </div>
         </div>
 
-        <div className="flex gap-2 items-center">
-          <Button
-            variant="outline"
-            className="gap-2 border-gray-400 text-gray-950 hidden"
-          >
-            <CareIcon icon="l-eye" className="size-4" />
-            {t("view_statement")}
-          </Button>
-          {canUpdateAccount && (
+        <div className="flex gap-2 items-center justify-between">
+          <div className="flex gap-2 items-center">
             <Button
-              variant="link"
-              className="gap-2 underline"
-              disabled={rebalanceMutation.isPending}
-              onClick={() => rebalanceMutation.mutate({})}
+              variant="outline"
+              className="gap-2 border-gray-400 text-gray-950 hidden"
             >
-              <CareIcon icon="l-refresh" className="size-4" />
-              {rebalanceMutation.isPending ? t("rebalancing") : t("rebalance")}
+              <CareIcon icon="l-eye" className="size-4" />
+              {t("view_statement")}
             </Button>
-          )}
-          {account.calculated_at && (
-            <span
-              className="text-xs text-gray-500 cursor-default"
-              title={new Date(account.calculated_at).toLocaleString("en-IN", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-                second: "2-digit",
-              })}
-            >
-              {t("last_calculated_at", {
-                time: formatDistanceToNow(new Date(account.calculated_at), {
-                  addSuffix: true,
-                }),
-              })}
+            {canUpdateAccount && (
+              <Button
+                variant="link"
+                className="gap-2 underline"
+                disabled={rebalanceMutation.isPending}
+                onClick={() => rebalanceMutation.mutate({})}
+              >
+                <CareIcon icon="l-refresh" className="size-4" />
+                {rebalanceMutation.isPending
+                  ? t("rebalancing")
+                  : t("rebalance")}
+              </Button>
+            )}
+            {account.calculated_at && (
+              <span
+                className="text-xs text-gray-500 cursor-default"
+                title={new Date(account.calculated_at).toLocaleString("en-IN", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                  second: "2-digit",
+                })}
+              >
+                {t("last_calculated_at", {
+                  time: formatDistanceToNow(new Date(account.calculated_at), {
+                    addSuffix: true,
+                  }),
+                })}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-gray-500">
+              {t("billing_status")}
             </span>
-          )}
+            <BillingLifecycleStepper
+              account={account}
+              isAccountBillingClosed={isAccountBillingClosed}
+              canUpdateAccount={canUpdateAccount}
+              onAdvance={advanceBillingStatus}
+              onSettleClose={() =>
+                setCloseAccountStatus((prev) => ({
+                  ...prev,
+                  sheetOpen: true,
+                }))
+              }
+            />
+          </div>
         </div>
       </div>
 
@@ -684,7 +729,11 @@ export function AccountShow({
         tabContentClassName="mt-6"
         tabs={tabs}
         currentTab={tab}
-        onTabChange={(value) => navigate(navigatePath(value))}
+        onTabChange={(value) =>
+          navigate(
+            `/facility/${facilityId}/billing/account/${accountId}/${value}`,
+          )
+        }
         setPageTitle={false}
         showMoreAfterIndex={showMoreAfterIndex}
       />
@@ -768,5 +817,127 @@ const ClosedCallout = ({ balance }: { balance: string }) => {
     </span>
   );
 };
+
+const BILLING_STEPS = [
+  AccountBillingStatus.open,
+  AccountBillingStatus.carecomplete_notbilled,
+  AccountBillingStatus.billing,
+  "closed",
+] as const;
+
+function BillingLifecycleStepper({
+  account,
+  isAccountBillingClosed,
+  canUpdateAccount,
+  onAdvance,
+  onSettleClose,
+}: {
+  account: AccountRead;
+  isAccountBillingClosed: boolean;
+  canUpdateAccount: boolean;
+  onAdvance: (status: AccountBillingStatus) => void;
+  onSettleClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const isActive = account.status === AccountStatus.active;
+  const canAdvance = canUpdateAccount && isActive && !isAccountBillingClosed;
+
+  const currentStepIndex = (() => {
+    if (isAccountBillingClosed) return 3;
+    const idx = (BILLING_STEPS as readonly string[]).indexOf(
+      account.billing_status,
+    );
+    return idx >= 0 ? idx : 0;
+  })();
+
+  const stepLabels: Record<string, string> = {
+    [AccountBillingStatus.open]: t("open"),
+    [AccountBillingStatus.carecomplete_notbilled]: t("carecomplete_notbilled"),
+    [AccountBillingStatus.billing]: t("billing"),
+    closed: t("closed"),
+  };
+
+  const handleStepClick = (index: number) => {
+    if (!canAdvance) return;
+    if (index <= currentStepIndex) return;
+
+    const step = BILLING_STEPS[index];
+    if (step === "closed") {
+      onSettleClose();
+    } else {
+      onAdvance(step);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-0.5 mt-0.5">
+      {BILLING_STEPS.map((step, index) => {
+        const isCompleted = index < currentStepIndex;
+        const isCurrent = index === currentStepIndex;
+        const isNext = index === currentStepIndex + 1 && canAdvance;
+        const isClickable = canAdvance && index > currentStepIndex;
+
+        return (
+          <div key={step} className="flex items-center">
+            {index > 0 && (
+              <div
+                className={cn(
+                  "h-px w-3",
+                  index <= currentStepIndex ? "bg-green-400" : "bg-gray-300",
+                )}
+              />
+            )}
+            <button
+              type="button"
+              disabled={!isClickable}
+              onClick={() => handleStepClick(index)}
+              title={stepLabels[step]}
+              className={cn(
+                "flex items-center gap-1 group transition-all rounded-full px-1.5 py-0.5 text-xs",
+                isClickable
+                  ? "cursor-pointer hover:bg-gray-100"
+                  : "cursor-default",
+                isNext && "hover:ring-1 hover:ring-primary-300",
+              )}
+            >
+              <div
+                className={cn(
+                  "flex items-center justify-center rounded-full size-5 text-[10px] font-bold transition-all flex-shrink-0",
+                  isCompleted && "bg-green-500 text-white",
+                  isCurrent && "bg-primary-500 text-white",
+                  isNext &&
+                    "border-[1.5px] border-dashed border-primary-400 text-primary-600 group-hover:border-solid group-hover:bg-primary-50",
+                  !isCompleted &&
+                    !isCurrent &&
+                    !isNext &&
+                    "bg-gray-200 text-gray-400",
+                )}
+              >
+                {isCompleted ? (
+                  <CareIcon icon="l-check" className="size-3" />
+                ) : isNext ? (
+                  <CareIcon icon="l-arrow-right" className="size-3" />
+                ) : (
+                  index + 1
+                )}
+              </div>
+              {(isCurrent || isNext) && (
+                <span
+                  className={cn(
+                    "whitespace-nowrap",
+                    isCurrent && "font-semibold text-gray-900",
+                    isNext && "font-medium text-primary-600",
+                  )}
+                >
+                  {stepLabels[step]}
+                </span>
+              )}
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export default AccountShow;
