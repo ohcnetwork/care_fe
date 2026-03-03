@@ -354,7 +354,12 @@ export function ChargeItemDefinitionForm({
       ...finalData
     } = submissionData;
 
-    upsert(finalData as ChargeItemDefinitionCreate);
+    const submissionDataWithDiscountConfiguration = {
+      ...finalData,
+      discount_configuration: null,
+    } as ChargeItemDefinitionCreate;
+
+    upsert(submissionDataWithDiscountConfiguration);
   };
 
   if (isLoading || !facilityData) {
