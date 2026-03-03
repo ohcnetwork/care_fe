@@ -347,7 +347,7 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
       </div>
 
       {/* Medicine */}
-      <div className="bg-white py-2 px-3 flex justify-between items-center">
+      <div className="bg-white py-2 px-3 flex justify-between items-center gap-4">
         <MedicineLineItemMedication form={form} name={name} />
       </div>
 
