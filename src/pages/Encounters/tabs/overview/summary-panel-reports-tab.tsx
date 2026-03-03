@@ -1,26 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { Download, NotebookPen, RefreshCw } from "lucide-react";
+import { FileText, NotebookPen } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
-import { TooltipComponent } from "@/components/ui/tooltip";
 
-import {
-  PERMISSION_GENERATE_REPORT_FROM_TEMPLATE,
-  PERMISSION_LIST_TEMPLATE,
-} from "@/common/Permissions";
+import { PERMISSION_LIST_TEMPLATE } from "@/common/Permissions";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { usePermissions } from "@/context/PermissionContext";
-import useReportGeneration from "@/hooks/useReportGeneration";
-import { cn } from "@/lib/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
-import reportApi from "@/types/emr/report/reportApi";
 import templateApi from "@/types/emr/template/templateApi";
 import query from "@/Utils/request/query";
-import { formatDateTime } from "@/Utils/utils";
 
 export const SummaryPanelReportsTab = ({
   activeTab,
@@ -34,11 +25,6 @@ export const SummaryPanelReportsTab = ({
 
   const canListTemplate = hasPermission(
     PERMISSION_LIST_TEMPLATE,
-    facility?.permissions,
-  );
-
-  const canGenerateReport = hasPermission(
-    PERMISSION_GENERATE_REPORT_FROM_TEMPLATE,
     facility?.permissions,
   );
 
@@ -56,30 +42,9 @@ export const SummaryPanelReportsTab = ({
     enabled: isActive && canListTemplate,
   });
 
-  const { data: reportsData, isLoading: isLoadingReports } = useQuery({
-    queryKey: ["reports", selectedEncounterId],
-    queryFn: query(reportApi.listReports, {
-      queryParams: {
-        associating_id: selectedEncounterId,
-        upload_completed: "true",
-        report_type: "discharge_summary",
-        is_archived: "false",
-        limit: 50,
-      },
-    }),
-    enabled: isActive && !!selectedEncounterId,
-  });
-
-  const { generatingTemplateId, downloadingTemplateId, generate, download } =
-    useReportGeneration({ encounterId: selectedEncounterId });
-
   const templates = templatesData?.results ?? [];
-  const reports = reportsData?.results ?? [];
 
-  const getReportForTemplate = (templateId: string) =>
-    reports.find((report) => report.template?.id === templateId);
-
-  if (isLoadingTemplates || isLoadingReports) {
+  if (isLoadingTemplates) {
     return <CardListSkeleton count={1} />;
   }
 
@@ -96,46 +61,19 @@ export const SummaryPanelReportsTab = ({
           </Link>
         </Button>
 
-        {templates.map((template) => {
-          const latestReport = getReportForTemplate(template.id);
-          const isGenerating = generatingTemplateId === template.id;
-          const isDownloading = downloadingTemplateId === template.id;
-
-          return (
-            <ButtonGroup key={template.id} className="w-full">
-              <Button
-                variant="outline"
-                className="justify-start min-w-0 flex-1"
-                onClick={() => generate(template)}
-                disabled={isGenerating || !canGenerateReport}
-              >
-                <RefreshCw
-                  className={cn(
-                    "size-4 shrink-0",
-                    isGenerating && "animate-spin",
-                  )}
-                />
-
-                <span className="truncate">{template.name}</span>
-              </Button>
-              {latestReport && !isGenerating && (
-                <TooltipComponent
-                  content={`${t("download_latest_report")} (${formatDateTime(latestReport.created_date)})`}
-                >
-                  <Button
-                    variant="outline"
-                    className="shrink-0"
-                    onClick={() => download(latestReport, template.id)}
-                    disabled={isDownloading}
-                    aria-label={t("download_latest_report")}
-                  >
-                    <Download className="size-4" />
-                  </Button>
-                </TooltipComponent>
-              )}
-            </ButtonGroup>
-          );
-        })}
+        {templates.map((template) => (
+          <Button
+            key={template.id}
+            variant="outline"
+            className="justify-start w-full"
+            asChild
+          >
+            <Link href={`../${selectedEncounterId}/report/${template.slug}`}>
+              <FileText className="size-4 shrink-0" />
+              <span className="truncate">{template.name}</span>
+            </Link>
+          </Button>
+        ))}
       </div>
     </div>
   );
