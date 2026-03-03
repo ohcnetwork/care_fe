@@ -288,7 +288,7 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
   const substitution = form.watch(`${name}.substitution`);
   const lots = form.watch(`${name}.lots`);
 
-  const isDispensed =
+  const dispenseCompleted =
     medication?.dispense_status === MedicationRequestDispenseStatus.complete;
 
   const disabled = !isSelected;
@@ -330,178 +330,195 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
     }
   }, [medication, effectiveProductKnowledge?.id, autoSelectInventoryItems]);
 
-  if (isDispensed) {
-    return (
-      <div className="contents group divide-x divide-gray-200">
-        <div className="col-start-1 bg-gray-100"></div>
-
-        {/* Medicine */}
-        <div className="bg-gray-100 py-2 px-3 flex justify-between items-center">
-          <MedicineLineItemMedication form={form} name={name} />
-        </div>
-        <div className="bg-gray-100 col-span-5"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="contents group divide-x divide-gray-200">
-      <div className="col-start-1 bg-white group-hover:bg-gray-100 group-focus-within:bg-gray-100 py-1 px-3 flex items-center transition-all duration-200 ease-in-out">
-        <FormField
-          control={form.control}
-          name={`${name}.isSelected`}
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-      </div>
-
-      {/* Medicine */}
-      <div className="bg-white py-2 px-3 flex justify-between items-center gap-4">
-        <MedicineLineItemMedication form={form} name={name} />
-      </div>
-      {/* Select Lot */}
-
-      <div className="relative bg-white">
-        <Button
-          variant="white"
-          onClick={() => {
-            autoSelectInventoryItems(undefined);
-          }}
-          disabled={disabled || isAutoSelectingInventoryItems}
-          className="absolute top-1/2 -translate-y-1/2 -right-2.25 size-4.5 [&_svg]:size-3 z-10 text-gray-500"
-          size="xs"
-          title={t("auto_select_lots")}
-        >
-          <RefreshCcwIcon
-            className={cn(isAutoSelectingInventoryItems && "animate-spin")}
-          />
-        </Button>
-
-        <div className="flex flex-col divide-y divide-gray-200 h-full w-full">
-          {lots.map((_, index) => (
-            <FormField
-              key={`${name}.lots.${index}`}
-              control={form.control}
-              name={`${name}.lots.${index}`}
-              render={({ field }) => (
-                <FormItem className="w-full flex-1 flex flex-col justify-center px-3 py-2">
-                  <FormControl>
-                    <InventoryItemsSelector
-                      {...field}
-                      selected={lots}
-                      onChange={(lots) => form.setValue(`${name}.lots`, lots)}
-                      facilityId={facilityId}
-                      locationId={locationId}
-                      // TODO: handle this?
-                      productKnowledgeId={effectiveProductKnowledge?.id || ""}
-                      showOnlyAvailable
-                      disabled={disabled || isAutoSelectingInventoryItems}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          ))}
-          {lots.length === 0 && (
-            <div className="w-full flex-1 flex flex-col justify-center px-3 py-2">
-              <InventoryItemsSelector
-                selected={lots}
-                onChange={(lots) => form.setValue(`${name}.lots`, lots)}
-                facilityId={facilityId}
-                locationId={locationId}
-                // TODO: handle this?
-                productKnowledgeId={effectiveProductKnowledge?.id || ""}
-                showOnlyAvailable
-                disabled={disabled || isAutoSelectingInventoryItems}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Quantity */}
-      <div className="relative bg-white">
-        <div className="flex flex-col divide-y divide-gray-200 h-full w-full">
-          {lots.map((_, index) => (
-            <FormField
-              key={`${name}.lots.${index}.quantity`}
-              control={form.control}
-              name={`${name}.lots.${index}.quantity`}
-              render={({ field }) => (
-                <FormItem className="w-full flex-1 flex flex-col justify-center px-3">
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={0}
-                      {...field}
-                      className="w-20"
-                      placeholder="0"
-                      disabled={disabled || isAutoSelectingInventoryItems}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Price */}
-      <div className="bg-white flex flex-col divide-y divide-gray-200">
-        {lots.map((lot, index) => (
-          <div
-            key={`${name}.lots.${index}`}
-            className="w-full flex-1 text-end flex flex-col justify-center px-3"
-          >
-            <MedicineLineItemSelectedLotPrice lot={lot} />
-          </div>
-        ))}
-      </div>
-
-      {/* All Given */}
-      <div className="bg-white py-2 px-3 flex items-center justify-center">
-        {medication ? (
+      <div
+        className={cn(
+          "col-start-1 bg-white group-hover:bg-gray-100 group-focus-within:bg-gray-100 py-1 px-3 flex items-center transition-all duration-200 ease-in-out",
+          dispenseCompleted && "bg-gray-100",
+        )}
+      >
+        {!dispenseCompleted && (
           <FormField
             control={form.control}
-            name={`${name}.allGiven`}
+            name={`${name}.isSelected`}
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Switch
-                    className="data-[state=checked]:bg-primary-600"
+                  <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    disabled={disabled}
                   />
                 </FormControl>
               </FormItem>
             )}
           />
-        ) : (
-          "-"
         )}
       </div>
 
-      {/* Actions */}
-      <div className="bg-white py-1 px-2 flex items-center justify-center">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => {
-            // TODO: wire this
-          }}
-        >
-          <DotsVerticalIcon />
-        </Button>
+      {/* Medicine */}
+      <div
+        className={cn(
+          "bg-white py-2 px-3 flex justify-between items-center",
+          dispenseCompleted && "bg-gray-100",
+        )}
+      >
+        <MedicineLineItemMedication form={form} name={name} />
       </div>
+
+      {dispenseCompleted ? (
+        <>
+          <div className="col-span-5 bg-gray-100 py-2 px-3 flex justify-between items-center">
+            <span className="text-sm italic font-medium text-gray-700">
+              {t("fully_dispensed_in_this_prescription")}
+            </span>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Select Lot */}
+          <div className="relative bg-white">
+            <Button
+              variant="white"
+              onClick={() => {
+                autoSelectInventoryItems(undefined);
+              }}
+              disabled={disabled || isAutoSelectingInventoryItems}
+              className="absolute top-1/2 -translate-y-1/2 -right-2.25 size-4.5 [&_svg]:size-3 z-10 text-gray-500"
+              size="xs"
+              title={t("auto_select_lots")}
+            >
+              <RefreshCcwIcon
+                className={cn(isAutoSelectingInventoryItems && "animate-spin")}
+              />
+            </Button>
+
+            <div className="flex flex-col divide-y divide-gray-200 h-full w-full">
+              {effectiveProductKnowledge &&
+                lots.map((_, index) => (
+                  <FormField
+                    key={`${name}.lots.${index}`}
+                    control={form.control}
+                    name={`${name}.lots.${index}`}
+                    render={({ field }) => (
+                      <FormItem className="w-full flex-1 flex flex-col justify-center px-3 py-2">
+                        <FormControl>
+                          <InventoryItemsSelector
+                            {...field}
+                            selected={lots}
+                            onChange={(lots) =>
+                              form.setValue(`${name}.lots`, lots)
+                            }
+                            facilityId={facilityId}
+                            locationId={locationId}
+                            productKnowledgeId={effectiveProductKnowledge.id}
+                            showOnlyAvailable
+                            disabled={disabled || isAutoSelectingInventoryItems}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                ))}
+              {lots.length === 0 && (
+                <div className="w-full flex-1 flex flex-col justify-center px-3 py-2">
+                  {effectiveProductKnowledge ? (
+                    <InventoryItemsSelector
+                      selected={lots}
+                      onChange={(lots) => form.setValue(`${name}.lots`, lots)}
+                      facilityId={facilityId}
+                      locationId={locationId}
+                      productKnowledgeId={effectiveProductKnowledge.id}
+                      showOnlyAvailable
+                      disabled={disabled || isAutoSelectingInventoryItems}
+                    />
+                  ) : (
+                    <span className="text-sm italic text-gray-700 font-medium">
+                      {t("product_not_available")}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Quantity */}
+          <div className="relative bg-white">
+            <div className="flex flex-col divide-y divide-gray-200 h-full w-full">
+              {lots.map((_, index) => (
+                <FormField
+                  key={`${name}.lots.${index}.quantity`}
+                  control={form.control}
+                  name={`${name}.lots.${index}.quantity`}
+                  render={({ field }) => (
+                    <FormItem className="w-full flex-1 flex flex-col justify-center px-3">
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={0}
+                          {...field}
+                          className="w-20"
+                          placeholder="0"
+                          disabled={disabled || isAutoSelectingInventoryItems}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Price */}
+          <div className="bg-white flex flex-col divide-y divide-gray-200">
+            {lots.map((lot, index) => (
+              <div
+                key={`${name}.lots.${index}`}
+                className="w-full flex-1 text-end flex flex-col justify-center px-3"
+              >
+                <MedicineLineItemSelectedLotPrice lot={lot} />
+              </div>
+            ))}
+          </div>
+
+          {/* All Given */}
+          <div className="bg-white py-2 px-3 flex items-center justify-center">
+            {medication ? (
+              <FormField
+                control={form.control}
+                name={`${name}.allGiven`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Switch
+                        className="data-[state=checked]:bg-primary-600"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={disabled}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            ) : (
+              "-"
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="bg-white py-1 px-2 flex items-center justify-center">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                // TODO: wire this
+              }}
+            >
+              <DotsVerticalIcon />
+            </Button>
+          </div>
+        </>
+      )}
 
       {/* Select Lot */}
     </div>
