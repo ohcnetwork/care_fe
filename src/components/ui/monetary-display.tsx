@@ -36,12 +36,6 @@ function MonetaryDisplay({
   fallback?: React.ReactNode;
   hideCurrency?: boolean;
 } & React.ComponentProps<"data">) {
-  // Guard against non-numeric intermediate values (e.g. "-", ".", "-.")
-  // that are valid while typing but would crash Decimal.js
-  if (amount != null && (amount === "-" || amount === "." || amount === "-.")) {
-    return fallback ?? "-";
-  }
-
   amount &&= round(amount);
 
   if ((amount ?? factor) == null) {
