@@ -138,11 +138,15 @@ export const MedicationsTable = ({
                   <TableCell className="py-2 px-3 break-words whitespace-normal">
                     <DosageInstructionList
                       instructions={instructions}
-                      renderItem={(di) => formatSig(di) || "-"}
+                      renderItem={(di) => (
+                        <>
+                          {formatSig(di) || "-"}
+                          {notes && (
+                            <div className="text-sm text-gray-600">{notes}</div>
+                          )}
+                        </>
+                      )}
                     />
-                    {notes && (
-                      <div className="text-sm text-gray-600 mt-1">{notes}</div>
-                    )}
                   </TableCell>
                 </TableRow>
               );

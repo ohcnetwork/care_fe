@@ -109,13 +109,18 @@ export function formatMedicationLine(
 }
 
 /**
+ * Separator used between dosage instruction texts in print/preview contexts.
+ */
+export const DOSAGE_INSTRUCTION_SEPARATOR = "\n┄┄┄┄┄┄┄┄┄\n";
+
+/**
  * Join formatted values from all dosage instructions into a single string.
  * Used in print/preview components where JSX rendering is not available.
  */
 export function joinInstructionTexts(
   instructions: MedicationRequestDosageInstruction[],
   formatter: (di: MedicationRequestDosageInstruction) => string,
-  separator = "\n",
+  separator = DOSAGE_INSTRUCTION_SEPARATOR,
   fallback = "-",
 ): string {
   const text = instructions.map(formatter).filter(Boolean).join(separator);

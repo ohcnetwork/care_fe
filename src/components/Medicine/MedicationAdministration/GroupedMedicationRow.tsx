@@ -116,7 +116,21 @@ const IndividualMedicationRow: React.FC<{
               ]
                 .filter(Boolean)
                 .join(", ");
-              return text || null;
+              return (
+                <div>
+                  {text && <div>{text}</div>}
+                  {di.route?.display && (
+                    <Badge variant="blue" className="text-xs mt-0.5">
+                      {di.route.display}
+                    </Badge>
+                  )}
+                  {medication.note && (
+                    <div className="text-xs text-gray-500 mt-0.5 italic wrap-break-word">
+                      {medication.note}
+                    </div>
+                  )}
+                </div>
+              );
             }}
           />
           <Badge
@@ -126,11 +140,6 @@ const IndividualMedicationRow: React.FC<{
             {t(medication.status)}
           </Badge>
         </div>
-        {medication.note && (
-          <div className="text-xs text-gray-500 mt-0.5 italic wrap-break-word">
-            {medication.note}
-          </div>
-        )}
         <div className="text-xs text-gray-500 mt-0.5">
           {t("added_on")}:{" "}
           {format(
@@ -339,25 +348,32 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                   renderItem={(di) => {
                     const freq = formatFrequency(di);
                     return (
-                      <>
-                        {formatDosage(di)}
-                        {freq && <span className="text-gray-400"> · </span>}
-                        {freq}
-                        {di.method?.display && (
-                          <>
-                            <span className="text-gray-400"> · </span>
-                            {di.method.display}
-                          </>
+                      <div>
+                        <div>
+                          {formatDosage(di)}
+                          {freq && <span className="text-gray-400"> · </span>}
+                          {freq}
+                          {di.method?.display && (
+                            <>
+                              <span className="text-gray-400"> · </span>
+                              {di.method.display}
+                            </>
+                          )}
+                        </div>
+                        {di.route?.display && (
+                          <Badge variant="blue" className="text-xs mt-0.5">
+                            {di.route.display}
+                          </Badge>
                         )}
-                      </>
+                        {latestActiveRequest.note && (
+                          <div className="text-xs text-gray-500 mt-0.5 italic whitespace-pre-wrap">
+                            {latestActiveRequest.note}
+                          </div>
+                        )}
+                      </div>
                     );
                   }}
                 />
-              )}
-              {latestActiveRequest.note && (
-                <div className="text-xs text-gray-500 mt-0.5 italic whitespace-pre-wrap">
-                  {latestActiveRequest.note}
-                </div>
               )}
               {/* Status and route badges */}
               <div className="flex flex-wrap gap-1 mt-1">
@@ -367,26 +383,6 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                 >
                   {group.hasActiveRequests ? t("active") : t("stopped")}
                 </Badge>
-                {group.routes.slice(0, 2).map((route) => (
-                  <Badge key={route} variant="blue" className="text-xs">
-                    {route}
-                  </Badge>
-                ))}
-                {group.routes.length > 2 && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Badge
-                        variant="secondary"
-                        className="text-xs cursor-help"
-                      >
-                        +{group.routes.length - 2}
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {group.routes.slice(2).join(", ")}
-                    </TooltipContent>
-                  </Tooltip>
-                )}
                 {group.hasPRN && (
                   <Badge variant="pink" className="text-xs">
                     PRN

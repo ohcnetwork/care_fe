@@ -548,12 +548,6 @@ export default function TreatmentSummary({
                     classNameCell="whitespace-pre-line"
                     rows={medications?.results.map((medication) => {
                       const instructions = medication.dosage_instruction;
-                      const remarks = joinInstructionTexts(
-                        instructions,
-                        formatSig,
-                        "\n",
-                        "",
-                      );
                       return {
                         medicine: displayMedicationName(medication),
                         status: t(`medication_status__${medication.status}`),
@@ -569,7 +563,16 @@ export default function TreatmentSummary({
                           instructions,
                           formatDuration,
                         ),
-                        instructions: `${remarks || "-"}${medication.note ? ` (${t("note")}: ${medication.note})` : ""}`,
+                        instructions: joinInstructionTexts(instructions, (di) =>
+                          [
+                            formatSig(di) || "-",
+                            medication.note
+                              ? `(${t("note")}: ${medication.note})`
+                              : "",
+                          ]
+                            .filter(Boolean)
+                            .join(" "),
+                        ),
                       };
                     })}
                   />

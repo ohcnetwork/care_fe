@@ -61,12 +61,6 @@ const PrescriptionContent = ({
             ]}
             rows={medications?.map((medication) => {
               const instructions = medication.dosage_instruction;
-              const remarks = joinInstructionTexts(
-                instructions,
-                formatSig,
-                "\n",
-                "",
-              );
               return {
                 medicine: displayMedicationName(medication),
                 status: t(`medication_status_${medication.status}`),
@@ -76,9 +70,9 @@ const PrescriptionContent = ({
                   formatFrequencyWithInstructions,
                 ),
                 duration: joinInstructionTexts(instructions, formatDuration),
-                instructions: [remarks, medication.note]
-                  .filter(Boolean)
-                  .join("\n"),
+                instructions: joinInstructionTexts(instructions, (di) =>
+                  [formatSig(di), medication.note].filter(Boolean).join("\n"),
+                ),
               };
             })}
             classNameCell="whitespace-pre-line"
