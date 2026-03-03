@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
 
-import { handleHttpError } from "@/Utils/request/errorHandler";
 import mutate from "@/Utils/request/mutate";
 import {
   BatchRequestBody,
@@ -509,8 +508,7 @@ export function useSaveLocations(facilityId: string) {
         return [...rest, ...children];
       });
     },
-    onError: (error) => {
-      handleHttpError(error);
+    onError: () => {
       setQueue(([, ...rest]) => rest);
     },
   });
