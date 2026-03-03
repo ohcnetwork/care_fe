@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Download, NotebookPen, RefreshCw } from "lucide-react";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -54,14 +54,10 @@ export const SummaryPanelReportsTab = ({
   const [generationStartTime, setGenerationStartTime] = useState<number | null>(
     null,
   );
-  const [downloadedReportId, setDownloadedReportId] = useState<string | null>(
-    null,
-  );
 
   const resetGenerationState = () => {
     setGeneratingTemplateId(null);
     setGenerationStartTime(null);
-    setDownloadedReportId(null);
   };
 
   const canListTemplate = hasPermission(
@@ -139,48 +135,61 @@ export const SummaryPanelReportsTab = ({
     },
   });
 
-  useQuery({
-    queryKey: ["auto-download", generatingTemplateId, generationStatusData],
-    queryFn: async () => {
-      const latestReport = generationStatusData?.results?.[0];
+  useEffect(() => {
+    const latestReport = generationStatusData?.results?.[0];
+    const latestReportId = latestReport?.id;
 
-      const shouldSkipDownload =
-        !latestReport ||
-        latestReport.template?.id !== generatingTemplateId ||
-        !generationStartTime ||
-        new Date(latestReport.created_date).getTime() <= generationStartTime ||
-        downloadedReportId === latestReport.id;
+    if (
+      !latestReportId ||
+      !latestReport ||
+      !generatingTemplateId ||
+      !generationStartTime
+    ) {
+      return;
+    }
 
-      if (shouldSkipDownload) {
-        return null;
+    if (
+      latestReport.template?.id !== generatingTemplateId ||
+      new Date(latestReport.created_date).getTime() <= generationStartTime
+    ) {
+      return;
+    }
+
+    const downloadNewReport = async () => {
+      try {
+        const reportData = await queryClient.fetchQuery({
+          queryKey: ["report", latestReportId],
+          queryFn: query(reportApi.retrieveReport, {
+            pathParams: { id: latestReportId },
+          }),
+        });
+
+        if (reportData?.read_signed_url) {
+          const filename =
+            latestReport.name || latestReport.report_type || "report";
+          await downloadFileFromUrl(reportData.read_signed_url, filename);
+          toast.success(t("file_download_completed"));
+        }
+
+        await queryClient.invalidateQueries({
+          queryKey: ["reports", selectedEncounterId],
+        });
+        resetGenerationState();
+      } catch (error) {
+        console.error("Error downloading report:", error);
+        toast.error(t("file_download_failed"));
       }
+    };
 
-      setDownloadedReportId(latestReport.id);
-
-      const reportData = await queryClient.fetchQuery({
-        queryKey: ["report", latestReport.id],
-        queryFn: query(reportApi.retrieveReport, {
-          pathParams: { id: latestReport.id },
-        }),
-      });
-
-      if (reportData?.read_signed_url) {
-        const filename =
-          latestReport.name || latestReport.report_type || "report";
-        await downloadFileFromUrl(reportData.read_signed_url, filename);
-        toast.success(t("file_download_completed"));
-      }
-
-      await queryClient.invalidateQueries({
-        queryKey: ["reports", selectedEncounterId],
-      });
-      resetGenerationState();
-
-      return latestReport;
-    },
-    enabled: !!generatingTemplateId && !!generationStatusData?.results?.[0],
-    retry: false,
-  });
+    downloadNewReport();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    generatingTemplateId,
+    generationStartTime,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    generationStatusData?.results?.[0]?.id,
+    selectedEncounterId,
+  ]);
 
   const { mutate: generateReport } = useMutation({
     mutationFn: mutate(reportApi.createReport),
@@ -215,6 +224,7 @@ export const SummaryPanelReportsTab = ({
 
   const handleGenerate = (template: TemplateBaseRead) => {
     if (generatingTemplateId) {
+      toast.info(t("report_generation_in_progress"));
       return;
     }
 
