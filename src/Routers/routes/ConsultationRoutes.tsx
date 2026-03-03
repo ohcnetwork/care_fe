@@ -103,15 +103,6 @@ const consultationRoutes: AppRoutes = {
         templateSlug={templateSlug}
       />
     ),
-  "/organization/:organizationId/patient/:patientId/encounter/:encounterId/report/:templateSlug":
-    ({ organizationId, encounterId, patientId, templateSlug }) => (
-      <ReportViewer
-        facilityId={organizationId}
-        patientId={patientId}
-        encounterId={encounterId}
-        templateSlug={templateSlug}
-      />
-    ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire":
     ({ facilityId, encounterId, patientId }) => (
       <EncounterQuestionnaire
