@@ -142,11 +142,13 @@ export const getDaysOfWeekFromAvailabilities = (
 
 export const filterAvailabilitiesByDayOfWeek = (
   availabilities: ScheduleAvailability[],
-  date?: Date,
+  date: Date = new Date(),
 ) => {
-  // Doing this weird things because backend uses python's 0-6.
-  // TODO: change to strings at seriazlier level...? or bitwise operations?
-  const dayOfWeek = ((date ?? new Date()).getDay() + 6) % 7;
+  // day_of_week is a number 0–6 (mon=0 in backend). JavaScript's getDay()
+  // returns 0 for Sunday, 1 for Monday etc.  The backend currently uses
+  // a Monday‑first convention, so shift the value accordingly.
+  const jsDow = date.getDay();
+  const dayOfWeek = jsDow === 0 ? 6 : jsDow - 1; // convert Sunday to 6
 
   return availabilities.filter(({ availability }) =>
     availability.some((a) => a.day_of_week === dayOfWeek),

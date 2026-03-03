@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -161,12 +162,23 @@ export function PatientRegistration(props: PatientRegistrationProps) {
     createPatient(formattedData);
   });
 
-  // TODO: Use useBlocker hook after switching to tanstack router
-  // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
+  // warn when user tries to navigate away or close tab with unsaved changes
   useNavigationPrompt(
     form.formState.isDirty && !isCreatingAppointment,
     t("unsaved_changes"),
   );
+
+  useEffect(() => {
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (form.formState.isDirty && !isCreatingAppointment) {
+        e.preventDefault();
+        // Chrome requires returnValue to be set
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [form.formState.isDirty, isCreatingAppointment]);
 
   // const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
 

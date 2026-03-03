@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { isWithinInterval } from "date-fns";
+import { addDays, isBefore, isWithinInterval, subDays } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -26,7 +26,10 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString, formatName } from "@/Utils/utils";
 import { TokenSlotButton } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
-import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
+import {
+  groupSlotsByAvailability,
+  useAvailabilityHeatmap,
+} from "@/pages/Appointments/utils";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
@@ -47,10 +50,35 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   const { goBack } = useAppHistory();
   const { facilityId, staffId, appointmentId } = props;
   const [selectedMonth, setSelectedMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    new Date(),
+  );
+
+  // whenever month changes, reset selectedDate to the first day of that month
+  useEffect(() => {
+    if (
+      !selectedDate ||
+      selectedDate.getMonth() !== selectedMonth.getMonth() ||
+      selectedDate.getFullYear() !== selectedMonth.getFullYear()
+    ) {
+      setSelectedDate(
+        new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1),
+      );
+    }
+  }, [selectedMonth]);
   const [selectedSlot, setSelectedSlot] = useState<TokenSlot>();
   const [reason, setReason] = useState("");
   const queryClient = useQueryClient();
+
+  // refs to each day button so we can move focus with arrow keys
+  const dayRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+
+  const focusDate = (date: Date) => {
+    const btn = dayRefs.current[date.toDateString()];
+    if (btn) {
+      btn.focus();
+    }
+  };
 
   const patientUserContext = usePatientContext();
   const tokenData = patientUserContext?.tokenData;
@@ -108,6 +136,13 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     toast.error(t("error_fetching_user_data"));
   }
 
+  const heatmapQuery = useAvailabilityHeatmap({
+    facilityId,
+    resourceId: staffId,
+    month: selectedMonth,
+    resourceType: SchedulableResourceType.Practitioner,
+  });
+
   const slotsQuery = useQuery({
     queryKey: ["slots", facilityId, staffId, selectedDate],
     queryFn: query(PublicAppointmentApi.getSlotsForDay, {
@@ -115,7 +150,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
         facility: facilityId,
         resource_type: SchedulableResourceType.Practitioner,
         resource_id: staffId,
-        day: dateQueryString(selectedDate),
+        day: dateQueryString(selectedDate as Date),
       },
       headers: {
         Authorization: `Bearer ${tokenData.token}`,
@@ -140,6 +175,16 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     enabled: !!selectedDate && !!tokenData.token,
   });
 
+  // debug: log what we get from the API; helps understand why "no slots" is shown
+  useEffect(() => {
+    if (slotsQuery.data) {
+      console.debug("slot list for", selectedDate, slotsQuery.data);
+    }
+    if (slotsQuery.error) {
+      console.debug("slot fetch error", slotsQuery.error);
+    }
+  }, [slotsQuery.data, slotsQuery.error]);
+
   if (slotsQuery.error) {
     if (
       slotsQuery.error.cause?.errors &&
@@ -151,6 +196,10 @@ export function ScheduleAppointment(props: AppointmentsProps) {
       toast.error(t("error_fetching_slots_data"));
     }
   }
+
+  const noAvailability =
+    heatmapQuery.data &&
+    Object.values(heatmapQuery.data).every((v) => v.total_slots === 0);
 
   const { mutate: createAppointment, isPending: isCreatingAppointment } =
     useMutation({
@@ -204,24 +253,105 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     setSelectedSlot(undefined);
   }, [selectedDate]);
 
+  const hasAvailability = (date: Date) => {
+    const stats = heatmapQuery.data?.[dateQueryString(date)];
+    return !!stats && stats.total_slots - stats.booked_slots > 0;
+  };
+
+  const slotsLeftFor = (date: Date) => {
+    const stats = heatmapQuery.data?.[dateQueryString(date)];
+    if (!stats || stats.total_slots === Infinity) return null;
+    return stats.total_slots - stats.booked_slots;
+  };
+
+  const tooltipFor = (date: Date) => {
+    const left = slotsLeftFor(date);
+    if (left === null) return undefined;
+    if (left > 0) return t("slots_left_tooltip", { count: left });
+    return t("no_slots_for_date_tooltip");
+  };
   const renderDay = (date: Date) => {
-    const isSelected = date.toDateString() === selectedDate?.toDateString();
+    const isSelected =
+      selectedDate && date.toDateString() === selectedDate.toDateString();
+    const available = hasAvailability(date);
+    const isPastDate = isBefore(date, new Date());
+
+    const baseClass =
+      "h-full w-full hover:bg-gray-50 rounded-lg relative group";
+    let dayClass = "bg-gray-100";
+    if (isSelected) dayClass = "bg-white ring-2 ring-primary-500";
+    else if (available) dayClass = "bg-white";
+
+    const tooltipText = tooltipFor(date);
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+      switch (e.key) {
+        case "ArrowRight":
+          e.preventDefault();
+          focusDate(addDays(date, 1));
+          break;
+        case "ArrowLeft":
+          e.preventDefault();
+          focusDate(subDays(date, 1));
+          break;
+        case "ArrowDown":
+          e.preventDefault();
+          focusDate(addDays(date, 7));
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          focusDate(subDays(date, 7));
+          break;
+        case "Enter":
+        case " ":
+          e.preventDefault();
+          if (!isPastDate) setSelectedDate(date);
+          break;
+      }
+    };
 
     return (
       <button
-        onClick={() => setSelectedDate(date)}
+        role="gridcell"
+        aria-selected={isSelected}
+        title={tooltipText}
+        onClick={() => !isPastDate && setSelectedDate(date)}
+        onKeyDown={handleKeyDown}
+        aria-disabled={isPastDate}
+        ref={(el) => {
+          dayRefs.current[date.toDateString()] = el;
+        }}
         className={cn(
-          "h-full w-full hover:bg-gray-50 rounded-lg",
-          isSelected ? "bg-white ring-2 ring-primary-500" : "bg-gray-100",
+          baseClass,
+          dayClass,
+          isPastDate && "opacity-50 cursor-not-allowed",
         )}
       >
         <span>{date.getDate()}</span>
+        {!isSelected && available && (
+          <span className="absolute bottom-1 left-1/2 w-1 h-1 bg-primary-600 rounded-full" />
+        )}
+        {tooltipText && (
+          <div className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">
+            {tooltipText}
+          </div>
+        )}
       </button>
     );
   };
 
   if (!userData) {
     return <Loading />;
+  }
+
+  if (noAvailability && !heatmapQuery.isFetching) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h3 className="text-lg font-semibold">
+          {t("no_availability_for_provider")}
+        </h3>
+      </div>
+    );
   }
 
   return (
@@ -295,8 +425,17 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 setSelectedDate={setSelectedDate}
                 highlightToday={false}
               />
+              {heatmapQuery.isFetching && (
+                <div className="text-xs text-gray-500 mt-1">
+                  {t("loading_availability")}
+                </div>
+              )}
               <div className="space-y-6">
-                {slotsQuery.data && slotsQuery.data.length > 0 ? (
+                {slotsQuery.isFetching ? (
+                  <div className="text-sm text-gray-500">
+                    {t("loading_availability")}
+                  </div>
+                ) : slotsQuery.data && slotsQuery.data.length > 0 ? (
                   groupSlotsByAvailability(slotsQuery.data).map(
                     ({ availability, slots }) => (
                       <div key={availability.name}>
@@ -320,7 +459,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                     ),
                   )
                 ) : (
-                  <div>{t("no_slots_available")}</div>
+                  <div>{t("no_slots_available_for_this_date")}</div>
                 )}
               </div>
             </div>
