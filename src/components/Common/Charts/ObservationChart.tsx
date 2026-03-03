@@ -46,7 +46,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import { cn } from "@/lib/utils";
 import { Code } from "@/types/base/code/code";
 import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 
 import observationApi from "@/types/emr/observation/observationApi";
 
@@ -131,12 +131,12 @@ const formatXAxisTick = (value: number, timeRange: TimeRange): string => {
   const date = new Date(value);
 
   if (["1H", "6H", "12H"].includes(timeRange)) {
-    return format(date, "HH:mm");
+    return format(date, "h:mm a");
   }
   if (["24H", "48H", "72H"].includes(timeRange)) {
-    return `${format(date, "HH:mm")}\n${format(date, "dd/MM")}`;
+    return `${format(date, "h:mm a")}\n${format(date, "dd/MM")}`;
   }
-  return format(date, "dd/MM");
+  return format(date, "dd/MM/yy");
 };
 
 const roundToNearestMinute = (dateString: string): string =>
@@ -147,7 +147,7 @@ const formatChartDate = (
 ): { display: string; time: number } => {
   const date = new Date(dateString);
   return {
-    display: format(date, "HH:mm dd/MM/yyyy"),
+    display: formatDateTime(date, "hh:mm A; DD/MM/YYYY"),
     time: date.getTime(),
   };
 };
