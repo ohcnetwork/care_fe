@@ -158,14 +158,15 @@ export const SummaryPanelReportsTab = ({
       });
 
       if (!response || Object.keys(response).length === 0) {
+        const generationStartTime = generationStartTimeRef.current;
         stopPolling();
 
         const newReport = await fetchFreshReportForTemplate(template.slug);
 
         const isNewReport =
           newReport &&
-          generationStartTimeRef.current &&
-          new Date(newReport.created_date) > generationStartTimeRef.current;
+          generationStartTime &&
+          new Date(newReport.created_date) > generationStartTime;
 
         if (isNewReport) {
           await downloadFile(newReport);
