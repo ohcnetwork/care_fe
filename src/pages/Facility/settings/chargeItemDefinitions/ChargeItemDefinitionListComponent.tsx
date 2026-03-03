@@ -20,6 +20,8 @@ import {
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
+import TagBadge from "@/components/Tags/TagBadge";
+
 import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
 
 import useFilters from "@/hooks/useFilters";
@@ -65,6 +67,13 @@ function ChargeItemCard({
                 <p className="mt-1 text-sm text-gray-500 line-clamp-2">
                   {definition.description}
                 </p>
+              )}
+              {definition.tags.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {definition.tags.map((tag) => (
+                    <TagBadge key={tag.id} tag={tag} className="text-xs" />
+                  ))}
+                </div>
               )}
             </div>
           </div>
@@ -119,6 +128,17 @@ function ChargeItemTableRow({
         {definition.price_components.length > 0
           ? `${definition.price_components.length} ${t("price_components")}`
           : t("no_price_components")}
+      </TableCell>
+      <TableCell>
+        <div className="flex flex-wrap gap-1">
+          {definition.tags.length > 0 ? (
+            definition.tags.map((tag) => (
+              <TagBadge key={tag.id} tag={tag} className="text-xs" />
+            ))
+          ) : (
+            <span className="text-gray-400">—</span>
+          )}
+        </div>
       </TableCell>
       <TableCell>
         <div className="flex justify-center gap-2">
@@ -236,13 +256,14 @@ export function ChargeItemList({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[35%]">{t("title")}</TableHead>
-                    <TableHead className="w-[15%]">{t("status")}</TableHead>
-                    <TableHead className="w-[20%]">{t("category")}</TableHead>
-                    <TableHead className="w-[15%]">
+                    <TableHead className="w-[25%]">{t("title")}</TableHead>
+                    <TableHead className="w-[10%]">{t("status")}</TableHead>
+                    <TableHead className="w-[15%]">{t("category")}</TableHead>
+                    <TableHead className="w-[12%]">
                       {t("price_components")}
                     </TableHead>
-                    <TableHead className="w-[15%] text-center">
+                    <TableHead className="w-[20%]">{t("tags")}</TableHead>
+                    <TableHead className="w-[10%] text-center">
                       {t("actions")}
                     </TableHead>
                   </TableRow>

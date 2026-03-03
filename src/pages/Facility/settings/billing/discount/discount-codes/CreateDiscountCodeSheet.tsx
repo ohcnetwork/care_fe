@@ -58,6 +58,7 @@ export function CreateDiscountCodeSheet() {
                 discount_codes: [...(facility.discount_codes ?? []), data],
                 discount_monetary_components:
                   facility.discount_monetary_components,
+                discount_configuration: facility.discount_configuration,
               });
             }}
           />
