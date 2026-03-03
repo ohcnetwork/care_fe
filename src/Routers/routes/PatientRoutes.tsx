@@ -103,6 +103,7 @@ const PatientRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:id/update": ({ id }) => (
     <PatientRegistration patientId={id} />
   ),
+  "/patient/:id/update": ({ id }) => <PatientRegistration patientId={id} />,
   "/facility/:facilityId/patient/:patientId/drawings/new": ({ patientId }) => {
     return (
       <Suspense fallback={<Loading />}>
