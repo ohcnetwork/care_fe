@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { addDays, isBefore, isWithinInterval, subDays } from "date-fns";
+import { addDays, isBefore, isWithinInterval, startOfDay, subDays } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useRef, useState } from "react";
@@ -175,16 +175,6 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     enabled: !!selectedDate && !!tokenData.token,
   });
 
-  // debug: log what we get from the API; helps understand why "no slots" is shown
-  useEffect(() => {
-    if (slotsQuery.data) {
-      console.debug("slot list for", selectedDate, slotsQuery.data);
-    }
-    if (slotsQuery.error) {
-      console.debug("slot fetch error", slotsQuery.error);
-    }
-  }, [slotsQuery.data, slotsQuery.error]);
-
   if (slotsQuery.error) {
     if (
       slotsQuery.error.cause?.errors &&
@@ -274,7 +264,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     const isSelected =
       selectedDate && date.toDateString() === selectedDate.toDateString();
     const available = hasAvailability(date);
-    const isPastDate = isBefore(date, new Date());
+    const isPastDate = isBefore(startOfDay(date), startOfDay(new Date()));
 
     const baseClass =
       "h-full w-full hover:bg-gray-50 rounded-lg relative group";
@@ -344,15 +334,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     return <Loading />;
   }
 
-  if (noAvailability && !heatmapQuery.isFetching) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <h3 className="text-lg font-semibold">
-          {t("no_availability_for_provider")}
-        </h3>
-      </div>
-    );
-  }
+  const showNoAvailabilityBanner = noAvailability && !heatmapQuery.isFetching;
 
   return (
     <div className="flex flex-col">
@@ -428,6 +410,11 @@ export function ScheduleAppointment(props: AppointmentsProps) {
               {heatmapQuery.isFetching && (
                 <div className="text-xs text-gray-500 mt-1">
                   {t("loading_availability")}
+                </div>
+              )}
+              {showNoAvailabilityBanner && (
+                <div className="text-sm font-medium text-gray-600 mt-2">
+                  {t("no_availability_for_provider")}
                 </div>
               )}
               <div className="space-y-6">
