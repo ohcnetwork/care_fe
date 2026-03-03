@@ -117,7 +117,7 @@ export default function BillMedicationsByPrescriptions({
 
             <div className="flex flex-col gap-2">
               <div>{/* TODO: select all / print all / etc... */}</div>
-              <div className="grid grid-cols-[auto_1fr_1fr_auto_6rem_auto_auto] divide-y divide-gray-200 rounded-md border border-gray-200 overflow-auto">
+              <div className="grid grid-cols-[auto_1fr_1fr_auto_6rem_auto_auto] divide-x divide-y divide-gray-200 rounded-md border border-gray-200 overflow-auto">
                 {isLoading ? (
                   <BillMedicationsLoadingCard />
                 ) : (
@@ -125,7 +125,7 @@ export default function BillMedicationsByPrescriptions({
                     {form.watch("prescriptions").map((prescription, index) => (
                       <Fragment key={index}>
                         {index !== 0 && (
-                          <div className="col-span-7 h-8 bg-gray-50 border-t border-gray-200" />
+                          <div className="col-span-7 h-8 bg-gray-50" />
                         )}
                         {prescription && (
                           <BillMedicationsPrescriptionCard

@@ -59,11 +59,14 @@ export const BillMedicationsPrescriptionCard = ({
 
       {/* TODO: we may need to exclude medications based on their status (enterred in errors?) */}
       {items.map((_, index) => (
-        <MedicineLineItem
-          key={`${name}.items.${index}`}
-          name={`${name}.items.${index}`}
-          form={form}
-        />
+        <>
+          <MedicineLineItem
+            key={`${name}.items.${index}`}
+            name={`${name}.items.${index}`}
+            form={form}
+          />
+          <div className="col-span-7 h-px bg-gray-200" />
+        </>
       ))}
     </>
   );
@@ -98,11 +101,14 @@ export const BillMedicationsOtherItemsCard = ({
       <HeaderRow />
 
       {items.map((_, index) => (
-        <MedicineLineItem
-          key={`otherItems.${index}`}
-          name={`otherItems.${index}`}
-          form={form}
-        />
+        <>
+          <MedicineLineItem
+            key={`otherItems.${index}`}
+            name={`otherItems.${index}`}
+            form={form}
+          />
+          <div className="col-span-7 h-px bg-gray-200" />
+        </>
       ))}
     </>
   );
