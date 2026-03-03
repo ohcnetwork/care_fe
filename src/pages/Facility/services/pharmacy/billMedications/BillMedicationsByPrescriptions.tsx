@@ -4,6 +4,7 @@ import { PatientHeader } from "@/components/Patient/PatientHeader";
 import { Form } from "@/components/ui/form";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { BillMedicationsFooter } from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsFooter";
+import { BillMedicationsLoadingCard } from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsLoadingCard";
 import {
   BillMedicationsOtherItemsCard,
   BillMedicationsPrescriptionCard,
@@ -117,25 +118,31 @@ export default function BillMedicationsByPrescriptions({
             <div className="flex flex-col gap-2">
               <div>{/* TODO: select all / print all / etc... */}</div>
               <div className="grid grid-cols-[auto_1fr_1fr_auto_6rem_auto_auto] divide-y divide-gray-200 rounded-md border border-gray-200 overflow-auto">
-                {form.watch("prescriptions").map((prescription, index) => (
-                  <Fragment key={index}>
-                    {index !== 0 && (
-                      <div className="col-span-7 h-8 bg-gray-50 border-t border-gray-200" />
-                    )}
-                    {prescription && (
-                      <BillMedicationsPrescriptionCard
-                        form={form}
-                        name={`prescriptions.${index}`}
-                      />
-                    )}
-                  </Fragment>
-                ))}
+                {isLoading ? (
+                  <BillMedicationsLoadingCard />
+                ) : (
+                  <>
+                    {form.watch("prescriptions").map((prescription, index) => (
+                      <Fragment key={index}>
+                        {index !== 0 && (
+                          <div className="col-span-7 h-8 bg-gray-50 border-t border-gray-200" />
+                        )}
+                        {prescription && (
+                          <BillMedicationsPrescriptionCard
+                            form={form}
+                            name={`prescriptions.${index}`}
+                          />
+                        )}
+                      </Fragment>
+                    ))}
 
-                {form.watch("otherItems").length > 0 && (
-                  <Fragment key="otherItems">
-                    <div className="col-span-7 h-8 bg-gray-50 border-t border-gray-200" />
-                    <BillMedicationsOtherItemsCard form={form} />
-                  </Fragment>
+                    {form.watch("otherItems").length > 0 && (
+                      <Fragment key="otherItems">
+                        <div className="col-span-7 h-8 bg-gray-50 border-t border-gray-200" />
+                        <BillMedicationsOtherItemsCard form={form} />
+                      </Fragment>
+                    )}
+                  </>
                 )}
               </div>
             </div>
