@@ -1939,6 +1939,7 @@
   "download": "Download",
   "download_discharge_summary": "Download Discharge Summary",
   "download_failed": "Failed to download",
+  "download_latest_report": "Download latest Report",
   "download_started": "Download started",
   "download_to_play": "Download to play locally",
   "download_type": "Download Type",
