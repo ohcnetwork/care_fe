@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
-import { PERMISSION_LIST_TEMPLATE } from "@/common/Permissions";
+import {
+  PERMISSION_GENERATE_REPORT_FROM_TEMPLATE,
+  PERMISSION_LIST_TEMPLATE,
+} from "@/common/Permissions";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { usePermissions } from "@/context/PermissionContext";
 import useReportGeneration from "@/hooks/useReportGeneration";
@@ -31,6 +34,11 @@ export const SummaryPanelReportsTab = ({
 
   const canListTemplate = hasPermission(
     PERMISSION_LIST_TEMPLATE,
+    facility?.permissions,
+  );
+
+  const canGenerateReport = hasPermission(
+    PERMISSION_GENERATE_REPORT_FROM_TEMPLATE,
     facility?.permissions,
   );
 
@@ -99,7 +107,7 @@ export const SummaryPanelReportsTab = ({
                 variant="outline"
                 className="justify-start min-w-0 flex-1"
                 onClick={() => generate(template)}
-                disabled={isGenerating}
+                disabled={isGenerating || !canGenerateReport}
               >
                 <RefreshCw
                   className={cn(
