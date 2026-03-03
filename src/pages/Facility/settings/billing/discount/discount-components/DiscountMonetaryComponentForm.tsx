@@ -313,6 +313,10 @@ export function DiscountMonetaryComponentForm({
                     condition.metric,
                     condition.operation,
                   ),
+<<<<<<< HEAD
+=======
+                  // _conditionType: `${condition.metric}_${condition.operation}`,
+>>>>>>> 92ad74464 (fix: implemented the  suggested changes)
                 })) || []
               }
               availableMetrics={availableMetrics}
