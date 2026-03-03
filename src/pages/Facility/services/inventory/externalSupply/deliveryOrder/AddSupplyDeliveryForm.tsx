@@ -466,6 +466,7 @@ export function AddSupplyDeliveryForm({
                     amount: "0",
                   },
                 ],
+          discount_configuration: null,
         };
 
         const newChargeItem =

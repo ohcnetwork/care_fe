@@ -179,7 +179,7 @@ export function DeliveryOrderShow({
 
   const allExtensions = getExtensions(
     ExtensionEntityType.supply_delivery_order,
-    "read",
+    "retrieve",
   );
 
   const extensionFields = useMemo(
