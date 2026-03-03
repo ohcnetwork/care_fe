@@ -210,8 +210,8 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
               </div>
               <QRCodeSVG
                 value={invoice.account.patient.id}
-                size={50}
-                level="Q"
+                size={100}
+                level="M"
                 marginSize={0}
               />
             </div>
