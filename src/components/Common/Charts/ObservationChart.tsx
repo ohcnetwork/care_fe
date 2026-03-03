@@ -463,7 +463,7 @@ export const ObservationVisualizer = ({
                       }
                       angle={-45}
                       textAnchor="end"
-                      height={60}
+                      height={70}
                       tick={{ fontSize: 11 }}
                     />
                     <YAxis
