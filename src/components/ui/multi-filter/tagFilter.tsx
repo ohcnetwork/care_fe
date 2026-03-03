@@ -59,7 +59,8 @@ function TreeViewItem({
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
-  const { data: children } = useQuery({
+  const isRootLevel = tag.has_children;
+  const { data: children, isLoading: loadingChildren } = useQuery({
     queryKey: ["tags", resource, "parent", tag.id],
     queryFn: query(tagConfigApi.list, {
       queryParams: {
@@ -69,15 +70,19 @@ function TreeViewItem({
         facility: facilityId,
       },
     }),
-    enabled: tag.has_children && expanded,
+    enabled: tag.has_children && (level === 0 || expanded),
   });
 
   const isSelected = selectedTags.some((t) => t.id === tag.id);
-  const isRootLevel = tag.has_children;
+  const hasActiveChildren = (children?.results?.length ?? 0) > 0;
   const allChildrenSelected =
     children?.results?.every((childTag: TagConfig) =>
       selectedTags.some((t) => t.id === childTag.id),
     ) ?? false;
+
+  if (isRootLevel && !loadingChildren && !hasActiveChildren) {
+    return null;
+  }
 
   return (
     <div>
