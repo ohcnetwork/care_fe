@@ -1,7 +1,7 @@
-/* eslint-disable i18next/no-literal-string */
 import { useMutation } from "@tanstack/react-query";
 import { AlertCircle, ChevronDown, ChevronRight, Upload } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -58,7 +58,6 @@ const LocationFormLabels = {
 
 const mapLabelToForm = (label: string): LocationForm | undefined => {
   const formKey = LocationFormLabels[label as keyof typeof LocationFormLabels];
-  console.log("Mapping label", label, "to form", formKey);
   return formKey as LocationForm | undefined;
 };
 
@@ -68,14 +67,12 @@ const processRowLocations = (data: string[][]) => {
     locationData: string[],
     locations: LocationImportT[],
   ): LocationImportT[] => {
-    console.log("Processing location:", locationData);
     const [location, location_type, description] = locationData.slice(0, 3);
     const tail = locationData.slice(3);
 
     const existingLocation = locations.find((l) => l.name === location);
 
     if (existingLocation && tail.length > 0 && tail[0] !== "") {
-      console.log("Processing new children for location:", location);
       return [
         ...locations.filter((l) => l.name !== location),
         {
@@ -95,9 +92,7 @@ const processRowLocations = (data: string[][]) => {
         children: [],
       };
       let children: LocationImportT[] = [];
-      console.log("Adding new location:", newLocation);
       if (tail.length > 0 && tail[0] != "") {
-        console.log("Processing children for location:", location);
         children = processAtLocation(tail, newLocation.children);
       }
       return [
@@ -114,11 +109,11 @@ const processRowLocations = (data: string[][]) => {
     locations = processAtLocation(locationRow, locations);
   }
 
-  console.log(locations);
   return locations;
 };
 
 export default function LocationImport({ facilityId }: LocationImportProps) {
+  const { t } = useTranslation();
   const [processedLocations, setProcessedLocations] = useState<
     LocationImportT[]
   >([]);
@@ -133,7 +128,7 @@ export default function LocationImport({ facilityId }: LocationImportProps) {
     if (!file) return;
 
     if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
-      setUploadError("Please upload a valid CSV file");
+      setUploadError(t("LOCATION_IMPORT__UPLOAD_VALID_CSV"));
       return;
     }
 
@@ -148,13 +143,7 @@ export default function LocationImport({ facilityId }: LocationImportProps) {
 
         // Validate headers - must have groups of 3 columns (location, type, description)
         if (headers.length < 3 || headers.length % 3 !== 0) {
-          console.error(
-            `CSV validation failed: ${headers.length} columns found, expected multiple of 3`,
-          );
-          console.error("Headers:", headers);
-          setUploadError(
-            "CSV format is invalid. Expected groups of 3 columns: location, type, description",
-          );
+          setUploadError(t("LOCATION_IMPORT__CSV_FORMAT_INVALID"));
           return;
         }
 
@@ -175,11 +164,8 @@ export default function LocationImport({ facilityId }: LocationImportProps) {
         setUploadError("");
         setProcessedLocations(processRowLocations(data));
         setCurrentStep("review");
-      } catch (error) {
-        console.error("=== CSV PROCESSING ERROR ===");
-        console.error("Error details:", error);
-        console.error("=== END ERROR LOG ===");
-        setUploadError("Error processing CSV file");
+      } catch {
+        setUploadError(t("LOCATION_IMPORT__ERROR_PROCESSING_CSV"));
       }
     };
     reader.readAsText(file);
@@ -192,11 +178,10 @@ export default function LocationImport({ facilityId }: LocationImportProps) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Upload className="h-5 w-5" />
-              Import Locations from CSV
+              {t("LOCATION_IMPORT__TITLE")}
             </CardTitle>
             <CardDescription>
-              Upload a CSV file to import floor, room, and sub-room locations
-              with their hierarchy preserved.
+              {t("LOCATION_IMPORT__DESCRIPTION")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -213,17 +198,17 @@ export default function LocationImport({ facilityId }: LocationImportProps) {
                   <Upload className="h-12 w-12 text-gray-400" />
                   <div>
                     <p className="text-lg font-medium">
-                      Click to upload CSV file
+                      {t("LOCATION_IMPORT__CLICK_TO_UPLOAD")}
                     </p>
-                    <p className="text-sm text-gray-500">or drag and drop</p>
+                    <p className="text-sm text-gray-500">
+                      {t("LOCATION_IMPORT__DRAG_AND_DROP")}
+                    </p>
                   </div>
                   <p className="text-xs text-gray-400">
-                    Expected columns: location, type, description (repeated for
-                    each hierarchy level)
+                    {t("LOCATION_IMPORT__EXPECTED_COLUMNS")}
                   </p>
                   <p className="text-xs text-gray-500 mt-2">
-                    Location types can use labels like "bed", "room", "ward",
-                    etc. The last description column is optional.
+                    {t("LOCATION_IMPORT__LOCATION_TYPES_INFO")}
                   </p>
                   <Button
                     variant="outline"
@@ -242,7 +227,7 @@ Main Building,building,Main hospital building,Reception,room,Main reception area
                       window.URL.revokeObjectURL(url);
                     }}
                   >
-                    Download Sample CSV
+                    {t("LOCATION_IMPORT__DOWNLOAD_SAMPLE_CSV")}
                   </Button>
                 </div>
               </label>
@@ -257,7 +242,7 @@ Main Building,building,Main hospital building,Reception,room,Main reception area
 
             <div className="mt-4 p-4 bg-gray-50 rounded-lg">
               <h4 className="font-medium text-sm mb-2">
-                Valid Location Types:
+                {t("LOCATION_IMPORT__VALID_LOCATION_TYPES")}
               </h4>
               <div className="flex flex-wrap gap-2">
                 {Object.entries(LocationFormLabels).map(([key, label]) => (
@@ -277,9 +262,9 @@ Main Building,building,Main hospital building,Reception,room,Main reception area
     <div className="max-w-7xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle>Location Import Wizard</CardTitle>
+          <CardTitle>{t("LOCATION_IMPORT__WIZARD_TITLE")}</CardTitle>
           <CardDescription>
-            Review and validate locations before importing
+            {t("LOCATION_IMPORT__WIZARD_DESCRIPTION")}
           </CardDescription>
           <div className="mt-4">
             <Progress value={100} className="h-2" />
@@ -287,7 +272,9 @@ Main Building,building,Main hospital building,Reception,room,Main reception area
         </CardHeader>
         <CardContent>
           <div>
-            <h3 className="text-lg font-semibold mb-4">Review All Locations</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              {t("LOCATION_IMPORT__REVIEW_ALL_LOCATIONS")}
+            </h3>
             <HierarchicalLocationPreview locations={processedLocations} />
           </div>
           <div className="flex justify-end">
@@ -295,7 +282,7 @@ Main Building,building,Main hospital building,Reception,room,Main reception area
               className="mt-4"
               onClick={() => saveLocations(processedLocations)}
             >
-              Save
+              {t("save")}
             </Button>
           </div>
         </CardContent>
@@ -309,6 +296,7 @@ const HierarchicalLocationPreview = ({
 }: {
   locations: LocationImportT[];
 }) => {
+  const { t } = useTranslation();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const toggleExpanded = (locationId: string) => {
     const newExpanded = new Set(expandedItems);
@@ -394,8 +382,8 @@ const HierarchicalLocationPreview = ({
                   </Badge>
                   {hasChildren && (
                     <Badge variant="outline" className="text-xs">
-                      {location.children.length} child
-                      {location.children.length !== 1 ? "ren" : ""}
+                      {location.children.length}{" "}
+                      {t(location.children.length === 1 ? "child" : "children")}
                     </Badge>
                   )}
                 </div>
@@ -420,7 +408,7 @@ const HierarchicalLocationPreview = ({
   if (locations.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        <p>No locations to preview</p>
+        <p>{t("LOCATION_IMPORT__NO_LOCATIONS_TO_PREVIEW")}</p>
       </div>
     );
   }
@@ -428,14 +416,16 @@ const HierarchicalLocationPreview = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-lg font-medium">Location Hierarchy Preview</h4>
+        <h4 className="text-lg font-medium">
+          {t("LOCATION_IMPORT__HIERARCHY_PREVIEW")}
+        </h4>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setExpandedItems(new Set())}
           >
-            Collapse All
+            {t("collapse_all")}
           </Button>
           <Button
             variant="outline"
@@ -454,7 +444,7 @@ const HierarchicalLocationPreview = ({
               setExpandedItems(allNames);
             }}
           >
-            Expand All
+            {t("expand_all")}
           </Button>
         </div>
       </div>
@@ -464,7 +454,11 @@ const HierarchicalLocationPreview = ({
       </div>
 
       <div className="text-sm text-gray-500">
-        <p>Total locations: {countTotalLocations(locations)}</p>
+        <p>
+          {t("LOCATION_IMPORT__TOTAL_LOCATIONS", {
+            count: countTotalLocations(locations),
+          })}
+        </p>
       </div>
     </div>
   );
@@ -512,14 +506,13 @@ export function useSaveLocations(facilityId: string) {
         return [...rest, ...children];
       });
     },
-    onError: (error) => {
-      console.error("Batch submission failed:", error);
+    onError: () => {
+      // Intentionally omitting console.error for batch submission failure
     },
   });
 
   // Effect: process the next batch whenever the queue changes
   useEffect(() => {
-    console.log("Processing queue:", queue);
     if (queue.length === 0) return;
 
     const { parentId, nodes: allNodes } = queue[0];
@@ -550,8 +543,6 @@ export function useSaveLocations(facilityId: string) {
         mode: n.mode,
       }));
 
-    console.log("Saving locations:", toSave);
-
     if (toSave.length === 0) {
       // dequeue empty and let effect run again
       setQueue((prev) => prev.slice(1));
@@ -575,7 +566,6 @@ export function useSaveLocations(facilityId: string) {
 
   // Entry point: start the saving process
   const saveLocations = useCallback((roots: LocationImportT[]) => {
-    console.log("Saving locations:", roots);
     setQueue([{ parentId: undefined, nodes: roots }]);
   }, []);
 
