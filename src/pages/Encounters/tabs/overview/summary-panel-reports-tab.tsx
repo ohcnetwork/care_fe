@@ -14,6 +14,7 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { usePermissions } from "@/context/PermissionContext";
 import { cn } from "@/lib/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { ReportReadList } from "@/types/emr/report/report";
 import reportApi from "@/types/emr/report/reportApi";
 import { TemplateBaseRead } from "@/types/emr/template/template";
@@ -28,6 +29,7 @@ export const SummaryPanelReportsTab = ({
   activeTab: string;
 }) => {
   const { selectedEncounterId, facilityId } = useEncounter();
+  const { facility } = useCurrentFacilitySilently();
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const queryClient = useQueryClient();
@@ -40,7 +42,10 @@ export const SummaryPanelReportsTab = ({
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const canListTemplate = hasPermission(PERMISSION_LIST_TEMPLATE);
+  const canListTemplate = hasPermission(
+    PERMISSION_LIST_TEMPLATE,
+    facility?.permissions,
+  );
 
   const { data: templatesData, isLoading: isLoadingTemplates } = useQuery({
     queryKey: ["templates", facilityId],
@@ -62,6 +67,7 @@ export const SummaryPanelReportsTab = ({
         upload_completed: "true",
         report_type: "discharge_summary",
         is_archived: "false",
+        limit: 50,
       },
     }),
     enabled: activeTab === "reports" && !!selectedEncounterId,
@@ -107,26 +113,33 @@ export const SummaryPanelReportsTab = ({
     window.URL.revokeObjectURL(url);
   };
 
-  const fetchFreshReportForTemplate = async (templateId: string) => {
+  const fetchFreshReportForTemplate = async (templateSlug: string) => {
     await queryClient.invalidateQueries({
       queryKey: ["reports", selectedEncounterId],
     });
 
     const data = await queryClient.fetchQuery({
-      queryKey: ["reports", selectedEncounterId, "fresh", Date.now()],
+      queryKey: [
+        "reports",
+        selectedEncounterId,
+        "template",
+        templateSlug,
+        "fresh",
+        Date.now(),
+      ],
       queryFn: query(reportApi.listReports, {
         queryParams: {
           associating_id: selectedEncounterId,
           upload_completed: "true",
           report_type: "discharge_summary",
           is_archived: "false",
+          template: templateSlug,
+          limit: 1,
         },
       }),
     });
 
-    return data?.results?.find(
-      (r: ReportReadList) => r.template?.id === templateId,
-    );
+    return data?.results?.[0];
   };
 
   const pollGenerationStatus = async (template: TemplateBaseRead) => {
@@ -145,7 +158,7 @@ export const SummaryPanelReportsTab = ({
       if (!response || Object.keys(response).length === 0) {
         stopPolling();
 
-        const newReport = await fetchFreshReportForTemplate(template.id);
+        const newReport = await fetchFreshReportForTemplate(template.slug);
         if (newReport) {
           await downloadFile(newReport);
           toast.success(t("file_download_completed"));
