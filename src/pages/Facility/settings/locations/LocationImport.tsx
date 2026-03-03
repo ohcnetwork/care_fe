@@ -383,7 +383,9 @@ const HierarchicalLocationPreview = ({
                   {hasChildren && (
                     <Badge variant="outline" className="text-xs">
                       {location.children.length}{" "}
-                      {t(location.children.length === 1 ? "child" : "children")}
+                      {location.children.length === 1
+                        ? t("child")
+                        : t("children")}
                     </Badge>
                   )}
                 </div>
@@ -507,7 +509,7 @@ export function useSaveLocations(facilityId: string) {
       });
     },
     onError: () => {
-      // Intentionally omitting console.error for batch submission failure
+      setQueue(([, ...rest]) => rest);
     },
   });
 
