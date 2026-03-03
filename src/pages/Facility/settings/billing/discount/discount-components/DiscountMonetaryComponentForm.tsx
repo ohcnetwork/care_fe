@@ -89,8 +89,14 @@ export function DiscountMonetaryComponentForm({
   const handleSubmitForm = (data: DiscountFormValues) => {
     const payload: MonetaryComponentRead = {
       ...data,
-      factor: typeof data.factor === "number" ? data.factor.toString() : null,
-      amount: data.amount ? data.amount : null,
+      factor:
+        typeof data.factor === "string" && data.factor.trim() !== ""
+          ? data.factor
+          : undefined,
+      amount:
+        typeof data.amount === "string" && data.amount.trim() !== ""
+          ? data.amount
+          : undefined,
     };
 
     onSubmit(payload);
@@ -133,7 +139,7 @@ export function DiscountMonetaryComponentForm({
     if (value === "factor") {
       form.setValue("amount", null);
     } else {
-      form.setValue("factor", null);
+      form.setValue("factor", "");
     }
   };
 
