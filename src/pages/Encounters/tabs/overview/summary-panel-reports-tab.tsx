@@ -218,6 +218,7 @@ export const SummaryPanelReportsTab = ({
 
   const handleGenerate = (template: TemplateBaseRead) => {
     if (generatingTemplateId || pollingIntervalRef.current) {
+      toast.info(t("report_generation_in_progress"));
       return;
     }
 

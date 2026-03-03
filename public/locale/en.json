@@ -4730,6 +4730,7 @@
   "report_date": "Report Date",
   "report_details": "Report Details",
   "report_generation_failed": "Failed to generate report",
+  "report_generation_in_progress": "There is a report generation in progress.",
   "report_generation_started": "Report generation started successfully",
   "report_generation_taking_longer": "Report generation is taking longer than expected.",
   "report_name": "Report Name",
