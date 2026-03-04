@@ -487,20 +487,24 @@ const MedicineLineItem = ({
         <>
           {/* Select Lot */}
           <div className="relative bg-white">
-            <Button
-              variant="white"
-              onClick={() => {
-                autoSelectInventoryItems(undefined);
-              }}
-              disabled={disabled || isAutoSelectingInventoryItems}
-              className="absolute top-1/2 -translate-y-1/2 -right-2.25 size-4.5 [&_svg]:size-3 z-10 text-gray-500"
-              size="xs"
-              title={t("auto_select_lots")}
-            >
-              <RefreshCcwIcon
-                className={cn(isAutoSelectingInventoryItems && "animate-spin")}
-              />
-            </Button>
+            {medication && effectiveProductKnowledge && (
+              <Button
+                variant="white"
+                onClick={() => {
+                  autoSelectInventoryItems(undefined);
+                }}
+                disabled={disabled || isAutoSelectingInventoryItems}
+                className="absolute top-1/2 -translate-y-1/2 -right-2.25 size-4.5 [&_svg]:size-3 z-10 text-gray-500"
+                size="xs"
+                title={t("auto_select_lots")}
+              >
+                <RefreshCcwIcon
+                  className={cn(
+                    isAutoSelectingInventoryItems && "animate-spin",
+                  )}
+                />
+              </Button>
+            )}
 
             <div className="flex flex-col divide-y divide-gray-200 h-full w-full">
               {effectiveProductKnowledge &&
@@ -727,7 +731,7 @@ const MedicineLineItemMedication = ({
               (medication && displayMedicationName(medication)) ||
               t("unknown_medication")}
           </span>
-          {(substitution || !productKnowledge) && (
+          {substitution && (
             <span className="text-gray-700 font-semibold italic line-through">
               {!productKnowledge
                 ? medication?.medication?.display
@@ -755,6 +759,10 @@ const MedicineLineItemMedication = ({
           )}
 
           {substitution && <Badge variant="orange">{t("substituted")}</Badge>}
+
+          {!effectiveProductKnowledge && (
+            <Badge variant="secondary">{t("no_product_linked")}</Badge>
+          )}
         </div>
         {medication?.note && (
           <span className="text-sm text-gray-700">{`${t("note")}: ${medication?.note}`}</span>
