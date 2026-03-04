@@ -23,12 +23,17 @@ import { renderTokenNumber } from "@/types/tokens/token/token";
 import mutate from "@/Utils/request/mutate";
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle, ExternalLinkIcon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { dateQueryString } from "@/Utils/utils";
-import { CalendarCheck, CalendarRange, ListOrdered } from "lucide-react";
+import {
+  CalendarCheck,
+  CalendarRange,
+  CheckCircle,
+  ExternalLinkIcon,
+  ListOrdered,
+} from "lucide-react";
 
 /**
  * Get the appointments page link for an appointment based on resource type.
@@ -179,6 +184,7 @@ const AppointmentEncounterHeaderActions = ({
             <DropdownMenuItem
               className="p-2.5"
               onClick={() => completeAppointment()}
+              disabled={isCompleteAppointmentPending}
             >
               <div className="flex flex-col items-start">
                 <span className="text-sm font-medium text-black">
