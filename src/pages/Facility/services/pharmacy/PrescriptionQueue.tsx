@@ -50,6 +50,7 @@ import {
   longDateRangeOptions,
 } from "@/components/ui/multi-filter/utils/Utils";
 import { CreateDispenseSheet } from "@/pages/Facility/services/pharmacy/CreateDispenseSheet";
+import { PrescriptionDialog } from "@/pages/Facility/services/pharmacy/PrescriptionDialog";
 import {
   ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_CLASSES_COLORS,
@@ -83,6 +84,8 @@ export default function PrescriptionQueue({
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [selectedPrescription, setSelectedPrescription] =
+    useState<PrescriptionSummary | null>(null);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
     cacheBlacklist: ["patient_external_id", "patient_name"],
@@ -490,14 +493,14 @@ export default function PrescriptionQueue({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-4 items-center">
-                      <span className="font-semibold underline">
-                        <Link
-                          href={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}/prescription/${item.id}`}
-                        >
-                          {t("view_prescription")}
-                        </Link>
-                      </span>
+                    <div className="flex gap-2 self-center">
+                      <Button
+                        variant="outline"
+                        className="font-semibold"
+                        onClick={() => setSelectedPrescription(item)}
+                      >
+                        {t("view_prescription")}
+                      </Button>
                       {!isFilteredByPatient && (
                         <Button
                           variant="outline"
@@ -542,6 +545,16 @@ export default function PrescriptionQueue({
       <div className="mt-8 flex justify-center">
         <Pagination totalCount={prescriptionQueue?.count || 0} />
       </div>
+      {selectedPrescription && (
+        <PrescriptionDialog
+          prescriptionId={selectedPrescription.id}
+          open={!!selectedPrescription}
+          patientId={selectedPrescription.encounter.patient.id}
+          onOpenChange={(open) => {
+            if (!open) setSelectedPrescription(null);
+          }}
+        />
+      )}
     </Page>
   );
 }

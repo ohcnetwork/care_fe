@@ -24,6 +24,7 @@ import DosageInstructionSummaryLine from "@/pages/Facility/services/pharmacy/bil
 import { billMedicationsByPrescriptionsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { selectEligibleInventoryItems } from "@/pages/Facility/services/pharmacy/billMedications/utils/itemsAutoSelect";
 import { MedicineInfoCard } from "@/pages/Facility/services/pharmacy/components/MedicineInfoCard";
+import { PrescriptionDialog } from "@/pages/Facility/services/pharmacy/PrescriptionDialog";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   getBasePrice,
@@ -36,6 +37,7 @@ import {
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { getLocationPath } from "@/types/location/utils";
@@ -51,10 +53,12 @@ import {
   BadgeInfo,
   Check,
   CheckIcon,
+  Link,
   Pill,
   PrinterIcon,
   RefreshCcwIcon,
 } from "lucide-react";
+import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -217,6 +221,9 @@ const PrescriptionSummary = ({
 
   const prescription = form.watch(`${name}.prescription`);
 
+  const [selectedPrescription, setSelectedPrescription] =
+    useState<PrescriptionRead | null>(null);
+
   return (
     <div className="relative flex justify-between col-start-1 col-span-7 bg-white pt-4 pr-2 pb-2 pl-4">
       <div className="absolute top-5 left-0 h-4 w-1 bg-indigo-500 rounded-r-md" />
@@ -276,20 +283,49 @@ const PrescriptionSummary = ({
           variant="outline"
           size="icon"
           onClick={() => {
-            // TODO: wire this
+            navigate(
+              `/facility/${prescription.encounter.facility.id}/patient/${prescription.encounter.patient.id}/prescription/${prescription.id}/print?autoPrintParam=true`,
+            );
           }}
         >
           <PrinterIcon />
         </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => {
-            // TODO: wire this
-          }}
-        >
-          <DotsVerticalIcon />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon">
+              <DotsVerticalIcon />
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() => setSelectedPrescription(prescription)}
+            >
+              <Link size={4} />
+              {t("preview_prescription")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() =>
+                navigate(
+                  `/facility/${prescription.encounter.facility.id}/patient/${prescription.encounter.patient.id}/prescription/${prescription.id}/print?autoPrintParam=false`,
+                )
+              }
+            >
+              <PrinterIcon size={4} />
+              {t("print_prescription")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        {selectedPrescription && (
+          <PrescriptionDialog
+            prescriptionId={selectedPrescription.id}
+            open={!!selectedPrescription}
+            patientId={selectedPrescription.encounter.patient.id}
+            onOpenChange={(open) => {
+              if (!open) setSelectedPrescription(null);
+            }}
+          />
+        )}
       </div>
     </div>
   );
@@ -383,6 +419,8 @@ const MedicineLineItem = ({
   onRemove,
   onMarkAsGiven,
 }: MedicineLineItemProps) => {
+  const [selectedPrescription, setSelectedPrescription] =
+    useState<PrescriptionRead | null>(null);
   const { facilityId } = useCurrentFacility();
   const { locationId } = useCurrentLocation();
   const { t } = useTranslation();
@@ -695,6 +733,16 @@ const MedicineLineItem = ({
         confirmText={t("remove_medication")}
         variant="destructive"
       />
+      {selectedPrescription && (
+        <PrescriptionDialog
+          prescriptionId={selectedPrescription.id}
+          open={!!selectedPrescription}
+          patientId={selectedPrescription.encounter.patient.id}
+          onOpenChange={(open) => {
+            if (!open) setSelectedPrescription(null);
+          }}
+        />
+      )}
     </div>
   );
 };

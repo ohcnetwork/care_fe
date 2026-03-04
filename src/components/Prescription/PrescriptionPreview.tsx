@@ -21,6 +21,7 @@ import { displayMedicationName } from "@/types/emr/medicationRequest/medicationR
 import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { QRCodeSVG } from "qrcode.react";
+import { useQueryParams } from "raviger";
 
 interface DetailRowProps {
   label: string;
@@ -125,7 +126,7 @@ export const PrescriptionPreview = ({
   const { t } = useTranslation();
   const { facility } = useCurrentFacility();
   const patient = prescription.encounter.patient;
-
+  const [{ autoPrintParam }] = useQueryParams();
   if (!prescription.medications?.length) {
     return (
       <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
@@ -137,7 +138,10 @@ export const PrescriptionPreview = ({
   return (
     <PrintPreview
       title={`${t("prescriptions")} - ${patient.name}`}
-      autoPrint={{ enabled: !!prescription.medications?.length }}
+      autoPrint={{
+        enabled:
+          !!prescription.medications?.length && autoPrintParam === "true",
+      }}
       disabled={!prescription.medications?.length}
     >
       <div className="max-w-5xl mx-auto">
