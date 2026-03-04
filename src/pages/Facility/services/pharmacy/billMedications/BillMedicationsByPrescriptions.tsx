@@ -250,9 +250,12 @@ const getPrescriptionFormValues = (
       prescription,
       markComplete: true,
       items: medications.map((medication) => ({
+        reference_id: crypto.randomUUID(),
         isSelected: true,
         medication,
         productKnowledge: medication.requested_product,
+        substitution: null,
+        dosageInstructions: null,
         lots: [],
         allGiven: true,
       })),

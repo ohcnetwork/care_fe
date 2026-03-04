@@ -31,39 +31,57 @@ import { z } from "zod";
 //   ),
 // });
 
-const billMedicationLineItemSchema = z.object({
-  /** The reference id for the dispense line item */
-  reference_id: z.string().uuid(),
+const billMedicationLineItemSchema = z
+  .object({
+    /** The reference id for the dispense line item */
+    reference_id: z.string().uuid(),
 
-  /** Whether the item is selected for billing */
-  isSelected: z.boolean(),
+    /** Whether the item is selected for billing */
+    isSelected: z.boolean(),
 
-  /** The medication request */
-  medication: z.custom<MedicationRequestRead>().nullable(),
+    /** The medication request */
+    medication: z.custom<MedicationRequestRead>().nullable(),
 
-  /** The dosage instructions, when medicines are added without medication request / prescription. */
-  dosageInstructions: z
-    .custom<MedicationRequestDosageInstruction[]>()
-    .optional(),
+    /** The dosage instructions, when medicines are added without medication request / prescription. */
+    dosageInstructions: z
+      .custom<MedicationRequestDosageInstruction[]>()
+      .nullable(),
 
-  /** The product knowledge (either from medication request or product knowledge select from add medication flow) */
-  productKnowledge: z.custom<ProductKnowledgeBase>().nullable(),
+    /** The product knowledge (either from medication request or product knowledge select from add medication flow) */
+    productKnowledge: z.custom<ProductKnowledgeBase>().nullable(),
 
-  /** The substitution details, when the medication is substituted with another product. */
-  substitution: z
-    .object({
-      substitutedProductKnowledge: z.custom<ProductKnowledgeBase>(),
-      type: z.nativeEnum(SubstitutionType),
-      reason: z.nativeEnum(SubstitutionReason),
-    })
-    .nullable(),
+    /** The substitution details, when the medication is substituted with another product. */
+    substitution: z
+      .object({
+        substitutedProductKnowledge: z.custom<ProductKnowledgeBase>(),
+        type: z.nativeEnum(SubstitutionType),
+        reason: z.nativeEnum(SubstitutionReason),
+      })
+      .nullable(),
 
-  /** The selected inventory items for the dispense line item */
-  lots: z.array(lotSelectionSchema),
+    /** The selected inventory items for the dispense line item */
+    lots: z.array(lotSelectionSchema),
 
-  /** Whether the medication is fully dispensed */
-  allGiven: z.boolean(),
-});
+    /** Whether the medication is fully dispensed */
+    allGiven: z.boolean(),
+  })
+  .refine(
+    (data) => {
+      return (
+        data.isSelected === false ||
+        data.substitution?.substitutedProductKnowledge ||
+        data.productKnowledge
+      );
+    },
+    {
+      path: [""],
+      message: "Select a product or substitute the medication",
+    },
+  )
+  .refine((data) => data.isSelected === false || data.lots.length > 0, {
+    path: ["lots"],
+    message: "At least one lot is required",
+  });
 
 export type BillMedicationLineItemSchemaType = z.infer<
   typeof billMedicationLineItemSchema

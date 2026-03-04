@@ -10,7 +10,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
-import { FormControl, FormField, FormItem } from "@/components/ui/form";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { Switch } from "@/components/ui/switch";
@@ -644,6 +649,20 @@ const MedicineLineItem = ({
           </div>
         </>
       )}
+
+      <FormField
+        control={form.control}
+        name={name}
+        render={({ fieldState }) => (
+          <>
+            {fieldState.error && (
+              <FormItem className="col-start-1 col-span-7 bg-red-50 py-1 px-13 border-y border-b-red-300 border-t-gray-200">
+                <FormMessage />
+              </FormItem>
+            )}
+          </>
+        )}
+      />
 
       <ConfirmActionDialog
         open={showDialog === "markAsGiven"}
