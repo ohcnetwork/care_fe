@@ -39,6 +39,8 @@ export type EncounterActionsComponentType = React.FC<{
 
 export type PatientInfoCardQuickActionsComponentType = React.FC<{
   encounter: EncounterRead;
+  patientId?: string;
+  facilityId?: string;
   className?: string;
 }>;
 
@@ -84,11 +86,7 @@ export type ServiceRequestComponentType = React.FC<{
   serviceRequestId: string;
 }>;
 
-export type NurseAssistantToggleComponentType = React.FC<{
-  className?: string;
-}>;
-
-export type NurseAssistantType = React.FC<{
+export type EncounterWidgetComponentType = React.FC<{
   encounter?: EncounterRead;
   patient?: PatientRead;
   patientId?: string;
@@ -100,8 +98,7 @@ export type NurseAssistantType = React.FC<{
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
   Scribe: ScribeComponentType;
-  NurseAssistant: NurseAssistantType;
-  NurseAssistantToggle: NurseAssistantToggleComponentType;
+  EncounterWidget: EncounterWidgetComponentType;
   PatientHomeActions: PatientHomeActionsComponentType;
   PatientInfoCardQuickActions: PatientInfoCardQuickActionsComponentType;
   EncounterActions: EncounterActionsComponentType;

@@ -236,13 +236,8 @@ export const EncounterShow = (props: Props) => {
               <PLUGIN_Component
                 __name="PatientInfoCardQuickActions"
                 encounter={selectedEncounter}
-                className={cn(
-                  buttonVariants({ variant: "primary_gradient" }),
-                  "text-base font-semibold rounded-md w-full",
-                )}
-              />
-              <PLUGIN_Component
-                __name="NurseAssistantToggle"
+                patientId={patientId}
+                facilityId={facilityId}
                 className={cn(
                   buttonVariants({ variant: "primary_gradient" }),
                   "text-base font-semibold rounded-md w-full",
@@ -366,7 +361,7 @@ export const EncounterShow = (props: Props) => {
         </div>
       </div>
       <PLUGIN_Component
-        __name="NurseAssistant"
+        __name="EncounterWidget"
         encounter={selectedEncounter}
         patient={patient}
         patientId={patientId}
