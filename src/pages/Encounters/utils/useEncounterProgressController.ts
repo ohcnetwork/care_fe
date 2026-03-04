@@ -1,5 +1,3 @@
-import { BatchRequestBody } from "@/types/base/batch/batch";
-import batchApi from "@/types/base/batch/batchApi";
 import {
   EncounterRead,
   EncounterStatus,
@@ -12,8 +10,8 @@ import {
 import scheduleApi from "@/types/scheduling/scheduleApi";
 import { TokenActiveStatuses, TokenStatus } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
-import mutate from "@/Utils/request/mutate";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -21,13 +19,15 @@ export const encounterRequiresDischarge = (encounter: EncounterRead) =>
   encounter.encounter_class === "imp" &&
   encounter.status !== EncounterStatus.DISCHARGED;
 
-const buildEncounterCompletionRequest = (encounter: EncounterRead) => {
+const buildEncounterCompletionRequest = (
+  encounter: EncounterRead,
+): BatchRequestObject[] => {
   if (encounter.status === EncounterStatus.COMPLETED) return [];
   return [
     {
-      url: encounterApi.update.path.replace("{id}", encounter.id),
-      method: encounterApi.update.method,
-      reference_id: "encounter-closed",
+      api: encounterApi.update,
+      referenceId: "encounter-closed",
+      pathParams: { id: encounter.id },
       body: {
         ...encounter,
         status: EncounterStatus.COMPLETED,
@@ -40,21 +40,24 @@ const buildEncounterCompletionRequest = (encounter: EncounterRead) => {
   ];
 };
 
-const buildAppointmentRequests = (encounter: EncounterRead) => {
-  const requests = [];
-
+const buildAppointmentRequests = (
+  encounter: EncounterRead,
+): BatchRequestObject[] => {
   const appointment = encounter.appointment;
+
+  const appointmentTokenObj = [];
 
   if (
     appointment?.id &&
     !AppointmentFinalStatuses.includes(appointment.status)
   ) {
-    requests.push({
-      url: scheduleApi.appointments.update.path
-        .replace("{facilityId}", encounter.facility.id)
-        .replace("{id}", appointment.id),
-      method: scheduleApi.appointments.update.method,
-      reference_id: "appointment-closed",
+    appointmentTokenObj.push({
+      api: scheduleApi.appointments.update,
+      referenceId: "appointment-closed",
+      pathParams: {
+        facilityId: encounter.facility.id,
+        id: appointment.id,
+      },
       body: {
         status: AppointmentStatus.FULFILLED,
         note: appointment.note,
@@ -66,13 +69,14 @@ const buildAppointmentRequests = (encounter: EncounterRead) => {
     appointment?.token?.id &&
     TokenActiveStatuses.includes(appointment.token.status)
   ) {
-    requests.push({
-      url: tokenApi.update.path
-        .replace("{facility_id}", encounter.facility.id)
-        .replace("{queue_id}", appointment.token.queue.id)
-        .replace("{id}", appointment.token.id),
-      method: tokenApi.update.method,
-      reference_id: "token-closed",
+    appointmentTokenObj.push({
+      api: tokenApi.update,
+      referenceId: "token-closed",
+      pathParams: {
+        facility_id: encounter.facility.id,
+        queue_id: appointment.token.queue.id,
+        id: appointment.token.id,
+      },
       body: {
         ...appointment.token,
         note: appointment.token.note,
@@ -82,7 +86,7 @@ const buildAppointmentRequests = (encounter: EncounterRead) => {
     });
   }
 
-  return requests;
+  return appointmentTokenObj;
 };
 
 export function useEncounterProgressController({
@@ -95,10 +99,7 @@ export function useEncounterProgressController({
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
-  const { mutate: batch, isPending } = useMutation({
-    mutationFn: (requests: BatchRequestBody["requests"]) =>
-      mutate(batchApi.batchRequest)({ requests }),
-
+  const { mutate: batch, isPending } = useBatchRequest({
     onSuccess: ({ results }) => {
       if (results.some((r) => r.reference_id === "encounter-closed")) {
         queryClient.invalidateQueries({
@@ -108,6 +109,9 @@ export function useEncounterProgressController({
       }
 
       if (results.some((r) => r.reference_id === "appointment-closed")) {
+        queryClient.invalidateQueries({
+          queryKey: ["encounter", encounter.id],
+        });
         queryClient.invalidateQueries({ queryKey: ["appointment"] });
         queryClient.invalidateQueries({ queryKey: ["tokens"] });
         toast.success(t("appointment_closed_successfully"));
