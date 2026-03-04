@@ -50,11 +50,9 @@ export const PrescriptionDialog = ({
 
   if (!prescription) return null;
 
-  console.log(prescriptionId);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-y-auto p-8">
         <div className="grid grid-cols-[1fr_1fr_auto_auto_auto] divide-y divide-gray-200 rounded-md border border-gray-200 overflow-auto divide-x">
           <div className="relative flex justify-between col-start-1 col-span-5 bg-white pt-4 pr-2 pb-2 pl-4">
             <div className="absolute top-5 left-0 h-4 w-1 bg-indigo-500 rounded-r-md" />
