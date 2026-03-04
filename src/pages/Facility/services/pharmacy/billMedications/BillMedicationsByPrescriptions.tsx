@@ -1,6 +1,7 @@
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Form } from "@/components/ui/form";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { BillMedicationsFooter } from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsFooter";
@@ -11,10 +12,13 @@ import {
 } from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsPrescriptionCard";
 import { billMedicationsByPrescriptionsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import UnbilledPrescriptionsCard from "@/pages/Facility/services/pharmacy/billMedications/UnbilledPrescriptionsCard";
+import { ACTIVE_MEDICATION_STATUSES } from "@/types/emr/medicationRequest/medicationRequest";
+import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import query from "@/Utils/request/query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueries } from "@tanstack/react-query";
+import { Pill } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect } from "react";
 import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
@@ -67,17 +71,7 @@ export default function BillMedicationsByPrescriptions({
     }
 
     form.reset({
-      prescriptions: prescriptions.map((prescription) => ({
-        prescription,
-        markComplete: true,
-        items: prescription?.medications.map((medication) => ({
-          isSelected: true,
-          medication,
-          productKnowledge: medication.requested_product,
-          lots: [],
-          allGiven: true,
-        })),
-      })),
+      prescriptions: getPrescriptionFormValues(prescriptions),
       otherItems: [],
     });
   }, [form, prescriptions, isLoading]);
@@ -89,6 +83,11 @@ export default function BillMedicationsByPrescriptions({
   if (!anyEncounter) {
     return <Loading />;
   }
+
+  const prescriptionFields = form.watch("prescriptions");
+  const otherItemsFields = form.watch("otherItems");
+  const hasMedications =
+    prescriptionFields.length > 0 || otherItemsFields.length > 0;
 
   return (
     <Page title={t("bill_medications")} hideTitleOnPage={true}>
@@ -117,12 +116,13 @@ export default function BillMedicationsByPrescriptions({
 
             <div className="flex flex-col gap-2">
               <div>{/* TODO: select all / print all / etc... */}</div>
+              {/* TODO: remove divide-x/y in favour of controlled borders */}
               <div className="grid grid-cols-[auto_1fr_1fr_auto_6rem_auto_auto] divide-x divide-y divide-gray-200 rounded-md border border-gray-200 overflow-auto">
                 {isLoading ? (
                   <BillMedicationsLoadingCard />
                 ) : (
                   <>
-                    {form.watch("prescriptions").map((prescription, index) => (
+                    {prescriptionFields.map((prescription, index) => (
                       <Fragment key={index}>
                         {index !== 0 && (
                           <div className="col-span-7 h-8 bg-gray-50" />
@@ -136,11 +136,20 @@ export default function BillMedicationsByPrescriptions({
                       </Fragment>
                     ))}
 
-                    {form.watch("otherItems").length > 0 && (
-                      <Fragment key="otherItems">
+                    {otherItemsFields.length > 0 && (
+                      <>
                         <div className="col-span-7 h-8 bg-gray-50 border-t border-gray-200" />
                         <BillMedicationsOtherItemsCard form={form} />
-                      </Fragment>
+                      </>
+                    )}
+
+                    {!hasMedications && (
+                      <EmptyState
+                        className="col-span-7 rounded-none border-none"
+                        icon={<Pill className="text-primary size-6" />}
+                        title={t("no_medications")}
+                        description={t("add_medications_to_bill_description")}
+                      />
                     )}
                   </>
                 )}
@@ -215,4 +224,40 @@ const AddMedicationTrigger = ({ form }: AddMedicationTriggerProps) => {
       className="w-full"
     />
   );
+};
+
+const getPrescriptionFormValues = (
+  prescriptions: (PrescriptionRead | undefined)[],
+) => {
+  const result = [];
+
+  for (const prescription of prescriptions) {
+    if (!prescription) {
+      continue;
+    }
+
+    const medications = prescription.medications.filter((medication) =>
+      ACTIVE_MEDICATION_STATUSES.includes(
+        medication.status as (typeof ACTIVE_MEDICATION_STATUSES)[number],
+      ),
+    );
+
+    if (medications.length === 0) {
+      continue;
+    }
+
+    result.push({
+      prescription,
+      markComplete: true,
+      items: medications.map((medication) => ({
+        isSelected: true,
+        medication,
+        productKnowledge: medication.requested_product,
+        lots: [],
+        allGiven: true,
+      })),
+    });
+  }
+
+  return result;
 };

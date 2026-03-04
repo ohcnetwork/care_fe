@@ -1,7 +1,15 @@
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { SubstitutionSheet } from "@/components/Medication/SubstitutionSheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { EmptyState } from "@/components/ui/empty-state";
 import { FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
@@ -25,7 +33,9 @@ import {
   computeMedicationDispenseQuantity,
   displayMedicationName,
   MedicationRequestDispenseStatus,
+  MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
+import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { getLocationPath } from "@/types/location/utils";
@@ -34,13 +44,21 @@ import { isLotAllowedForDispensing } from "@/Utils/inventory";
 import mutate from "@/Utils/request/mutate";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
-import { DotsVerticalIcon } from "@radix-ui/react-icons";
+import { DotsVerticalIcon, MinusCircledIcon } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { BadgeInfo, Check, PrinterIcon, RefreshCcwIcon } from "lucide-react";
-import { useEffect } from "react";
-import { UseFormReturn } from "react-hook-form";
-import { useTranslation } from "react-i18next";
+import {
+  BadgeInfo,
+  Check,
+  CheckIcon,
+  Pill,
+  PrinterIcon,
+  RefreshCcwIcon,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useFieldArray, UseFormReturn } from "react-hook-form";
+import { Trans, useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { z } from "zod";
 
 export const BillMedicationsPrescriptionCard = ({
@@ -50,24 +68,83 @@ export const BillMedicationsPrescriptionCard = ({
   form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
   name: `prescriptions.${number}`;
 }) => {
-  const items = form.watch(`${name}.items`);
+  const { t } = useTranslation();
+
+  const prescription = form.watch(`${name}.prescription`);
+
+  const { remove, fields } = useFieldArray({
+    control: form.control,
+    name: `${name}.items`,
+  });
+
+  const { mutate: updateMedicationRequest } = useMutation({
+    mutationFn: (medication: MedicationRequestRead) => {
+      return mutate(medicationRequestApi.update, {
+        pathParams: {
+          patientId: prescription.encounter.patient.id,
+          id: medication.id,
+        },
+      })(medication);
+    },
+  });
 
   return (
     <>
       <PrescriptionSummary form={form} name={name} />
       <HeaderRow form={form} name={name} />
 
-      {/* TODO: we may need to exclude medications based on their status (enterred in errors?) */}
-      {items.map((_, index) => (
+      {fields.map((field, index) => (
         <>
           <MedicineLineItem
             key={`${name}.items.${index}`}
             name={`${name}.items.${index}`}
             form={form}
+            onRemove={() =>
+              updateMedicationRequest(
+                {
+                  ...field.medication!,
+                  dispense_status: MedicationRequestDispenseStatus.incomplete,
+                },
+                {
+                  onSuccess: () => {
+                    toast.success(t("medication_request_removed_successfully"));
+                    remove(index);
+                  },
+                },
+              )
+            }
+            onMarkAsGiven={() =>
+              updateMedicationRequest(
+                {
+                  ...field.medication!,
+                  dispense_status: MedicationRequestDispenseStatus.complete,
+                },
+                {
+                  onSuccess: () => {
+                    toast.success(
+                      t("medication_request_status_updated_successfully"),
+                    );
+                    remove(index);
+                  },
+                },
+              )
+            }
           />
-          <div className="col-span-7 h-px bg-gray-200" />
+          <div
+            key={`${name}.items.${index}.divider`}
+            className="col-span-7 h-px bg-gray-200"
+          />
         </>
       ))}
+
+      {fields.length === 0 && (
+        <EmptyState
+          className="col-span-7 rounded-none border-b border-gray-200"
+          icon={<Pill className="text-primary size-6" />}
+          title={t("no_medications")}
+          description={t("add_medications_to_bill_description")}
+        />
+      )}
     </>
   );
 };
@@ -79,6 +156,11 @@ export const BillMedicationsOtherItemsCard = ({
 }) => {
   const { t } = useTranslation();
   const items = form.watch("otherItems");
+
+  const { remove } = useFieldArray({
+    control: form.control,
+    name: "otherItems",
+  });
 
   return (
     <>
@@ -106,10 +188,20 @@ export const BillMedicationsOtherItemsCard = ({
             key={`otherItems.${index}`}
             name={`otherItems.${index}`}
             form={form}
+            onRemove={() => remove(index)}
           />
           <div className="col-span-7 h-px bg-gray-200" />
         </>
       ))}
+
+      {items.length === 0 && (
+        <EmptyState
+          className="col-span-7 rounded-none border-b border-gray-200"
+          icon={<Pill className="text-primary size-6" />}
+          title={t("no_medications")}
+          description={t("add_medications_to_bill_description")}
+        />
+      )}
     </>
   );
 };
@@ -281,12 +373,23 @@ const HeaderRow = ({
 interface MedicineLineItemProps {
   form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
   name: `prescriptions.${number}.items.${number}` | `otherItems.${number}`;
+  onRemove: () => void;
+  onMarkAsGiven?: () => void;
 }
 
-const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
+const MedicineLineItem = ({
+  name,
+  form,
+  onRemove,
+  onMarkAsGiven,
+}: MedicineLineItemProps) => {
   const { facilityId } = useCurrentFacility();
   const { locationId } = useCurrentLocation();
   const { t } = useTranslation();
+
+  const [showDialog, setShowDialog] = useState<"remove" | "markAsGiven" | null>(
+    null,
+  );
 
   const isSelected = form.watch(`${name}.isSelected`);
   const medication = form.watch(`${name}.medication`);
@@ -488,6 +591,7 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
           </div>
 
           {/* All Given */}
+          {/* TODO: auto toggle this based on the quantity of the lots */}
           <div className="bg-white py-2 px-3 flex items-center justify-center">
             {medication ? (
               <FormField
@@ -513,20 +617,84 @@ const MedicineLineItem = ({ name, form }: MedicineLineItemProps) => {
 
           {/* Actions */}
           <div className="bg-white py-1 px-2 flex items-center justify-center">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => {
-                // TODO: wire this
-              }}
-            >
-              <DotsVerticalIcon />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <DotsVerticalIcon />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setShowDialog("markAsGiven")}>
+                  <CheckIcon className="size-4" />
+                  {t("mark_as_already_given")}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => setShowDialog("remove")}
+                >
+                  <MinusCircledIcon className="size-4 text-destructive" />
+                  {t("remove_medication")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </>
       )}
 
-      {/* Select Lot */}
+      <ConfirmActionDialog
+        open={showDialog === "markAsGiven"}
+        onOpenChange={(open) => {
+          if (!open) setShowDialog("markAsGiven");
+        }}
+        title={t("mark_as_already_given")}
+        description={
+          <>
+            <Trans
+              i18nKey="confirm_action_description"
+              values={{ action: t("mark_as_already_given").toLowerCase() }}
+              components={{ 1: <strong className="text-gray-900" /> }}
+            />{" "}
+            {t("you_cannot_change_once_submitted")}
+            <p className="mt-2">
+              {t("medication")}:{" "}
+              <strong>{medication && displayMedicationName(medication)}</strong>
+            </p>
+          </>
+        }
+        onConfirm={() => {
+          onMarkAsGiven?.();
+          setShowDialog(null);
+        }}
+        confirmText={t("mark_as_already_given")}
+      />
+
+      <ConfirmActionDialog
+        open={showDialog === "remove"}
+        onOpenChange={(open) => {
+          if (!open) setShowDialog("remove");
+        }}
+        title={t("remove_medication")}
+        description={
+          <>
+            <Trans
+              i18nKey="confirm_action_description"
+              values={{ action: t("remove_medication").toLowerCase() }}
+              components={{ 1: <strong className="text-gray-900" /> }}
+            />{" "}
+            {t("you_cannot_change_once_submitted")}
+            <p className="mt-2">
+              {t("medication")}:{" "}
+              <strong>{medication && displayMedicationName(medication)}</strong>
+            </p>
+          </>
+        }
+        onConfirm={() => {
+          onRemove();
+          setShowDialog(null);
+        }}
+        confirmText={t("remove_medication")}
+        variant="destructive"
+      />
     </div>
   );
 };
@@ -666,7 +834,7 @@ const MedicineLineItemSelectedLotPrice = ({ lot }: { lot: LotSelection }) => {
     <div className="text-base font-medium">
       <MonetaryDisplay amount={basePrice} />
       {hasDiscount && (
-        <span className="text-xs text-gray-500 ml-1">
+        <p className="text-xs text-gray-500 ml-1">
           (
           {discountComponents
             .map((component) =>
@@ -675,7 +843,7 @@ const MedicineLineItemSelectedLotPrice = ({ lot }: { lot: LotSelection }) => {
             .filter(Boolean)
             .join(", ")}
           )
-        </span>
+        </p>
       )}
     </div>
   );
