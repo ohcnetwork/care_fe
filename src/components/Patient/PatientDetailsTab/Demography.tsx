@@ -22,11 +22,11 @@ import { formatPatientAddress } from "@/components/Patient/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
 import {
-  ExtensionEntityType,
   getExtensionFieldsWithName,
   getExtensionValue,
   NamespacedExtensionData,
 } from "@/hooks/useExtensions";
+import { ExtensionEntityType } from "@/types/extensions/extensions";
 import {
   getOrgLabel,
   Organization,
