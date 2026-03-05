@@ -601,7 +601,6 @@ const PatientBasicsContent = ({
                   value: g.id,
                   label: t(`GENDER__${g.id}`),
                 }))}
-                required={true}
               />
             </FormControl>
             <FormMessage />
