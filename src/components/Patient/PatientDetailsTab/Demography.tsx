@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { navigate } from "raviger";
-import { Fragment, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
@@ -20,10 +20,17 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import { formatPatientAge } from "@/Utils/utils";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import useExtensionSchemas from "@/hooks/useExtensionSchemas";
 import {
+  ExtensionEntityType,
+  getExtensionFieldsWithName,
+  getExtensionValue,
+  NamespacedExtensionData,
+} from "@/hooks/useExtensions";
+import {
+  getOrgLabel,
   Organization,
   OrganizationParent,
-  getOrgLabel,
 } from "@/types/organization/organization";
 
 export const Demography = (props: PatientProps) => {
@@ -35,6 +42,15 @@ export const Demography = (props: PatientProps) => {
   const { canWritePatient } = getPermissions(
     hasPermission,
     patientData.permissions,
+  );
+
+  const { getExtensions } = useExtensionSchemas();
+
+  const allExtensions = getExtensions(ExtensionEntityType.patient, "retrieve");
+
+  const extensionFields = useMemo(
+    () => getExtensionFieldsWithName(allExtensions),
+    [allExtensions],
   );
 
   const [activeSection, _setActiveSection] = useState<string | null>(null);
@@ -54,7 +70,7 @@ export const Demography = (props: PatientProps) => {
       navigate(`/patient/${patientId}/tags`);
       return;
     }
-    if (sectionId === "general-info") {
+    if (sectionId === "general-info" || sectionId === "additional-details") {
       if (facilityId) {
         navigate(
           `/facility/${facilityId}/patient/${patientId}/update?section=${sectionId}`,
@@ -139,6 +155,19 @@ export const Demography = (props: PatientProps) => {
       label: getOrgLabel(geoOrg.org_type, geoOrg.metadata),
       value: geoOrg.name,
     });
+  };
+
+  const extensionInformation: Data = {
+    id: "additional-details",
+    allowEdit: true,
+    details: extensionFields.map((field) => {
+      const value = getExtensionValue(
+        patientData.extensions as NamespacedExtensionData,
+        field.extensionName,
+        field.name,
+      );
+      return { label: field.label, value: value as string };
+    }),
   };
 
   const data: Data[] = [
@@ -236,6 +265,7 @@ export const Demography = (props: PatientProps) => {
           : []),
       ],
     },
+    ...(extensionInformation.details.length > 0 ? [extensionInformation] : []),
     {
       id: "identifiers",
       allowEdit: false,
