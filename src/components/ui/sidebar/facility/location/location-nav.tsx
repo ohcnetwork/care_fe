@@ -4,6 +4,8 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { NavMain } from "@/components/ui/sidebar/nav-main";
 
+import { getPermissions } from "@/common/Permissions";
+import { usePermissions } from "@/context/PermissionContext";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { CalendarIcon, Logs } from "lucide-react";
@@ -11,8 +13,23 @@ import { CalendarIcon, Logs } from "lucide-react";
 export function LocationNav() {
   const { t } = useTranslation();
 
-  const { facilityId } = useCurrentFacility();
-  const { locationId } = useCurrentLocation();
+  const { facilityId, facility } = useCurrentFacility();
+  const { locationId, location } = useCurrentLocation();
+  const { hasPermission } = usePermissions();
+  const {
+    canListFacilityLocations,
+    canReadServiceRequest,
+    canReadSupplyDelivery,
+    canReadInventory,
+    canReadSupplyRequest,
+    canViewSchedule,
+    canViewAppointments,
+    canListTokens,
+  } = getPermissions(hasPermission, location?.permissions ?? []);
+  const { canViewAsPharmacist } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
+  );
 
   const baseUrl = `/facility/${facilityId}/locations/${locationId}`;
 
@@ -23,11 +40,13 @@ export function LocationNav() {
           name: t("beds"),
           url: `${baseUrl}/beds`,
           icon: <CareIcon icon="l-bed" />,
+          visibility: canListFacilityLocations,
         },
         {
           name: t("laboratory"),
           url: `${baseUrl}/laboratory`,
           icon: <CareIcon icon="l-microscope" />,
+          visibility: canReadServiceRequest,
           children: [
             {
               name: t("service_requests"),
@@ -39,18 +58,22 @@ export function LocationNav() {
           name: t("pharmacy"),
           url: `${baseUrl}/pharmacy`,
           icon: <CareIcon icon="l-medical-drip" />,
+          visibility: canViewAsPharmacist || canReadSupplyDelivery,
           children: [
             {
               name: t("prescription_queue"),
               url: `${baseUrl}/medication_requests`,
+              visibility: canViewAsPharmacist,
             },
             {
               name: "℞ " + t("dispense"),
               url: `${baseUrl}/medication_dispense`,
+              visibility: canViewAsPharmacist || canReadSupplyDelivery,
             },
             {
               name: t("medication_return"),
               url: `${baseUrl}/medication_return`,
+              visibility: canReadSupplyDelivery,
             },
           ],
         },
@@ -62,24 +85,29 @@ export function LocationNav() {
             {
               name: t("items"),
               url: `${baseUrl}/inventory/summary`,
+              visibility: canReadInventory,
             },
             {
               header: t("internal_transfers"),
               name: t("to_receive"),
               url: `${baseUrl}/inventory/internal/receive/`,
+              visibility: canReadSupplyRequest || canReadSupplyDelivery,
             },
             {
               name: t("to_dispatch"),
               url: `${baseUrl}/inventory/internal/dispatch/`,
+              visibility: canReadSupplyRequest || canReadSupplyDelivery,
             },
             {
               header: t("external_supply"),
               name: t("purchase_orders"),
               url: `${baseUrl}/inventory/external/orders/outgoing`,
+              visibility: canReadSupplyRequest,
             },
             {
               name: t("purchase_deliveries"),
               url: `${baseUrl}/inventory/external/deliveries/incoming`,
+              visibility: canReadSupplyDelivery,
             },
           ],
         },
@@ -87,16 +115,19 @@ export function LocationNav() {
           name: t("schedule"),
           url: `${baseUrl}/schedule`,
           icon: <CalendarIcon />,
+          visibility: canViewSchedule,
         },
         {
           name: t("appointments"),
           url: `${baseUrl}/appointments`,
           icon: <CareIcon icon="d-calendar" />,
+          visibility: canViewAppointments,
         },
         {
           name: t("queues"),
           url: `${baseUrl}/queues`,
           icon: <Logs />,
+          visibility: canListTokens,
         },
       ]}
     />

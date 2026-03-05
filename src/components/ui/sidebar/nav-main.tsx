@@ -71,6 +71,9 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
     [fullPath],
   );
 
+  const isAnyChildVisible = (link: NavigationLink) =>
+    link.children?.some((child) => child.visibility !== false);
+
   return (
     <SidebarGroup>
       <SidebarMenu>
@@ -78,7 +81,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
           .filter((link) => link.visibility !== false)
           .map((link) => (
             <Fragment key={link.name}>
-              {link.children ? (
+              {link.children && isAnyChildVisible(link) ? (
                 isCollapsed ? (
                   <PopoverMenu link={link} />
                 ) : (
@@ -228,18 +231,20 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
         onCloseAutoFocus={(e) => e.preventDefault()}
       >
         <div className="flex flex-col gap-1">
-          {link.children?.map((subItem) => (
-            <ActiveLink
-              key={subItem.name}
-              href={subItem.url}
-              onClick={() => setOpen(false)}
-              className="w-full rounded-md px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100"
-              activeClass="bg-gray-100 text-green-700"
-              exactActiveClass="bg-gray-100 text-green-700"
-            >
-              {subItem.name}
-            </ActiveLink>
-          ))}
+          {link.children
+            ?.filter((subItem) => subItem.visibility !== false)
+            .map((subItem) => (
+              <ActiveLink
+                key={subItem.name}
+                href={subItem.url}
+                onClick={() => setOpen(false)}
+                className="w-full rounded-md px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100"
+                activeClass="bg-gray-100 text-green-700"
+                exactActiveClass="bg-gray-100 text-green-700"
+              >
+                {subItem.name}
+              </ActiveLink>
+            ))}
         </div>
       </PopoverContent>
     </Popover>
