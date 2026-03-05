@@ -439,9 +439,9 @@ export default function ReportViewer({
             </Button>
 
             <Button
-              onClick={() => handleDownload(selectedReport!)}
+              onClick={() => selectedReport && handleDownload(selectedReport)}
               aria-label={t("download")}
-              disabled={!selectedReport}
+              disabled={!selectedReport || !pdfUrl}
             >
               <Download className="size-4" />
               <span className="hidden md:inline">{t("download")}</span>
