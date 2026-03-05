@@ -225,20 +225,20 @@ export const EncounterShow = (props: Props) => {
       )}
 
       <div className="flex flex-col gap-2">
-        <Card className="bg-white shadow-sm border-none rounded-sm p-2 md:p-4 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <Card className="bg-white shadow-sm border-none rounded-sm p-2 md:p-4 flex flex-col md:flex-row md:items-center gap-4 overflow-hidden">
           <PatientHeader
             patient={patient}
             facilityId={facilityId}
-            className="flex-1 p-0 bg-transparent shadow-none"
+            className="flex-1 min-w-0 p-0 bg-transparent shadow-none"
           />
           {selectedEncounter && (
-            <div className="flex max-md:flex-col items-end justify-center gap-4">
+            <div className="flex-shrink-0 flex max-md:flex-col items-stretch md:items-center gap-3">
               <PLUGIN_Component
                 __name="PatientInfoCardQuickActions"
                 encounter={selectedEncounter}
                 className={cn(
                   buttonVariants({ variant: "primary_gradient" }),
-                  "text-base font-semibold rounded-md w-full",
+                  "text-base font-semibold rounded-md w-full md:w-auto whitespace-nowrap",
                 )}
               />
 
@@ -250,10 +250,10 @@ export const EncounterShow = (props: Props) => {
                   <Button
                     variant="primary_gradient"
                     onClick={() => setActionsOpen(true)}
-                    className="text-base font-semibold rounded-md w-full"
+                    className="text-base font-semibold rounded-md w-full md:w-auto whitespace-nowrap"
                   >
                     {t("encounter_actions")}
-                    <CommandShortcut className="text-white hidden md:inline">
+                    <CommandShortcut className="text-white hidden md:inline ml-2">
                       {getShortcutDisplay("open-command-dialog")}
                     </CommandShortcut>
                   </Button>
