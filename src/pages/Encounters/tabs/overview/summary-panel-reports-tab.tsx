@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Download, NotebookPen, RefreshCw } from "lucide-react";
+import { Download, FileText, NotebookPen, RefreshCw } from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -22,7 +22,6 @@ import templateApi from "@/types/emr/template/templateApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { formatDateTime } from "@/Utils/utils";
 
 const downloadFileFromUrl = async (
   signedUrl: string,
@@ -264,46 +263,53 @@ export const SummaryPanelReportsTab = ({
           const latestReport = getReportForTemplate(template.id);
           const isGenerating = generatingTemplateId === template.id;
 
-          return latestReport ? (
+          return (
             <ButtonGroup key={template.id} className="w-full">
-              <TooltipComponent
-                content={`${t("download_latest_report")} (${formatDateTime(latestReport.created_date)})`}
-              >
-                <Button
-                  variant="outline"
-                  className="justify-start sm:@sm:justify-center min-w-0 flex-1"
-                  onClick={() => downloadReport(latestReport)}
-                  disabled={isGenerating}
-                >
-                  <Download className="shrink-0" />
-                  <span className="truncate">{template.name}</span>
-                </Button>
-              </TooltipComponent>
               <Button
                 variant="outline"
-                size="icon"
-                className="shrink-0"
-                onClick={() => handleGenerate(template)}
-                disabled={isGenerating}
-                aria-label={t("regenerate")}
-                title={t("regenerate")}
+                className="justify-start sm:@sm:justify-center min-w-0 flex-1"
+                asChild
               >
-                <RefreshCw
-                  className={cn("size-4", isGenerating && "animate-spin")}
-                />
+                <Link
+                  href={`../${selectedEncounterId}/reports/${template.slug}`}
+                >
+                  {latestReport ? (
+                    <FileText className="shrink-0" />
+                  ) : (
+                    <NotebookPen className="shrink-0" />
+                  )}
+                  <span className="truncate">{template.name}</span>
+                </Link>
               </Button>
+              {latestReport && (
+                <>
+                  <TooltipComponent content={t("download_latest_report")}>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="shrink-0"
+                      onClick={() => downloadReport(latestReport)}
+                      disabled={isGenerating}
+                    >
+                      <Download className="size-4" />
+                    </Button>
+                  </TooltipComponent>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="shrink-0"
+                    onClick={() => handleGenerate(template)}
+                    disabled={isGenerating}
+                    aria-label={t("regenerate")}
+                    title={t("regenerate")}
+                  >
+                    <RefreshCw
+                      className={cn("size-4", isGenerating && "animate-spin")}
+                    />
+                  </Button>
+                </>
+              )}
             </ButtonGroup>
-          ) : (
-            <Button
-              key={template.id}
-              variant="outline"
-              className="justify-start sm:@sm:justify-center w-full"
-              onClick={() => handleGenerate(template)}
-              disabled={isGenerating}
-            >
-              <NotebookPen className="shrink-0" />
-              <span className="truncate">{template.name}</span>
-            </Button>
           );
         })}
       </div>

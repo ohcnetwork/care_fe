@@ -18,6 +18,14 @@ export default {
     path: "/api/v1/template_reports/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<ReportReadList>>(),
+    TQuery: Type<{
+      associating_id: string;
+      upload_completed: string;
+      report_type: string;
+      is_archived: string;
+      template?: string;
+      limit: number;
+    }>(),
     defaultQueryParams: {
       associating_id: "{encounter_id}",
       upload_completed: "true",

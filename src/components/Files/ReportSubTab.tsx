@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import { SearchIcon } from "lucide-react";
+import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -46,9 +47,18 @@ import { toast } from "sonner";
 interface ReportTabProps {
   associatingId: string;
   reportType?: ReportType;
+  facilityId?: string;
+  patientId?: string;
+  encounterId?: string;
 }
 
-export function ReportSubTab({ associatingId, reportType }: ReportTabProps) {
+export function ReportSubTab({
+  associatingId,
+  reportType,
+  facilityId,
+  patientId,
+  encounterId,
+}: ReportTabProps) {
   const { t } = useTranslation();
   const { facility } = useCurrentFacilitySilently();
   const { qParams, updateQuery, Pagination } = useFilters({
@@ -88,11 +98,23 @@ export function ReportSubTab({ associatingId, reportType }: ReportTabProps) {
     return iconMap[reportType] || "l-file-alt";
   };
 
+  const canNavigateToPreview = !!(facilityId && patientId && encounterId);
+
+  const handleView = (report: ReportReadList) => {
+    if (canNavigateToPreview) {
+      navigate(
+        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/report/${report.id}`,
+      );
+    } else {
+      viewFile(report);
+    }
+  };
+
   const DetailButtons = ({ report }: { report: ReportReadList }) => {
     return (
       <div className="flex flex-row gap-2 justify-end">
         <Button
-          onClick={() => viewFile(report)}
+          onClick={() => handleView(report)}
           variant="secondary"
           className="w-auto flex flex-row justify-stretch items-center"
         >
@@ -145,7 +167,7 @@ export function ReportSubTab({ associatingId, reportType }: ReportTabProps) {
         <Button
           variant="secondary"
           onClick={() => {
-            viewFile(report);
+            handleView(report);
           }}
         >
           <span className="flex flex-row items-center gap-1">
