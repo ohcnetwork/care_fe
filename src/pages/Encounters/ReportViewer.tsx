@@ -27,7 +27,6 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 import {
   PERMISSION_GENERATE_REPORT_FROM_TEMPLATE,
@@ -385,7 +384,12 @@ export default function ReportViewer({
         <EmptyState
           icon={<FileText className="size-6 text-gray-400" />}
           title={t("template_not_found")}
-          className="my-16"
+          action={
+            <BackButton fallbackUrl="/">
+              <ChevronLeft /> {t("back")}
+            </BackButton>
+          }
+          className="mt-4"
         />
       </Page>
     );
@@ -458,21 +462,20 @@ export default function ReportViewer({
                   isLatest={selectedReportIndex === 0 && reports.length > 0}
                 />
               </DrawerTrigger>
-              <DrawerContent className="px-4 max-h-[85vh]">
-                <DrawerHeader className="py-1.5">
-                  <DrawerTitle className="text-lg font-semibold flex items-center gap-2">
-                    <History className="size-5" />
+              <DrawerContent className="max-h-[85vh]">
+                <DrawerHeader className="border-b py-2">
+                  <DrawerTitle className="text-lg font-semibold">
                     {t("report_history")}
                   </DrawerTitle>
                 </DrawerHeader>
-                <ScrollArea className="overflow-y-auto pb-4 pr-2">
+                <div className="overflow-y-auto py-2 mx-2">
                   <ReportList
                     reports={reports}
                     isGenerating={isGenerating}
                     selectedReportId={selectedReportId}
                     onSelectReport={handleSelectReport}
                   />
-                </ScrollArea>
+                </div>
               </DrawerContent>
             </Drawer>
           </div>
