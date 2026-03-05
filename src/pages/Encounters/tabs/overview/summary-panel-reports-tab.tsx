@@ -68,7 +68,9 @@ export const SummaryPanelReportsTab = ({
             className="justify-start w-full"
             asChild
           >
-            <Link href={`../${selectedEncounterId}/report/${template.slug}`}>
+            <Link
+              href={`../${selectedEncounterId}/report/template/${template.slug}`}
+            >
               <FileText className="size-4 shrink-0" />
               <span className="truncate">{template.name}</span>
             </Link>

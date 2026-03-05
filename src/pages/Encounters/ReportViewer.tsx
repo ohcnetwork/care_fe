@@ -1,12 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  ArrowRight,
   ChevronDown,
   ChevronLeft,
-  Clock,
+  Dot,
   Download,
   FileText,
   History,
-  Loader2,
+  Loader,
   PanelLeftClose,
   PanelLeftOpen,
   Printer,
@@ -46,7 +47,7 @@ import templateApi from "@/types/emr/template/templateApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query, { callApi } from "@/Utils/request/query";
-import { formatDateTime, formatName, relativeTime } from "@/Utils/utils";
+import { formatDateTime, relativeTime } from "@/Utils/utils";
 
 const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 30000;
@@ -55,7 +56,8 @@ interface ReportViewerProps {
   facilityId: string;
   patientId: string;
   encounterId: string;
-  templateSlug: string;
+  templateSlug?: string;
+  reportId?: string;
 }
 
 export default function ReportViewer({
@@ -63,13 +65,16 @@ export default function ReportViewer({
   patientId: patientId,
   encounterId,
   templateSlug,
+  reportId,
 }: ReportViewerProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { facility } = useCurrentFacilitySilently();
   const { hasPermission } = usePermissions();
 
-  const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(
+    reportId || null,
+  );
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -89,12 +94,24 @@ export default function ReportViewer({
     facility?.permissions,
   );
 
-  const { data: template, isLoading: isLoadingTemplate } = useQuery({
-    queryKey: ["template", templateSlug],
-    queryFn: query(templateApi.retrieveTemplate, {
-      pathParams: { slug: templateSlug },
+  const { data: initialReport } = useQuery({
+    queryKey: ["report", reportId],
+    queryFn: query(reportApi.retrieveReport, {
+      pathParams: { id: reportId! },
     }),
-    enabled: canListTemplate,
+    enabled: !!reportId && !templateSlug,
+  });
+
+  const effectiveTSlug =
+    templateSlug ||
+    (initialReport?.template as Partial<TemplateBaseRead> | undefined)?.slug;
+
+  const { data: template, isLoading: isLoadingTemplate } = useQuery({
+    queryKey: ["template", effectiveTSlug],
+    queryFn: query(templateApi.retrieveTemplate, {
+      pathParams: { slug: effectiveTSlug! },
+    }),
+    enabled: canListTemplate && !!effectiveTSlug,
   });
 
   const {
@@ -102,18 +119,18 @@ export default function ReportViewer({
     isLoading: isLoadingReports,
     refetch: refetchReports,
   } = useQuery({
-    queryKey: ["reports", encounterId, "template", templateSlug],
+    queryKey: ["reports", encounterId, "template", effectiveTSlug],
     queryFn: query(reportApi.listReports, {
       queryParams: {
         associating_id: encounterId,
         upload_completed: "true",
         report_type: "discharge_summary",
         is_archived: "false",
-        template: templateSlug,
+        template: effectiveTSlug,
         limit: 50,
       },
     }),
-    enabled: !!encounterId,
+    enabled: !!encounterId && !!effectiveTSlug,
   });
 
   const reports = useMemo(
@@ -126,10 +143,9 @@ export default function ReportViewer({
     (r) => r.id === selectedReportId,
   );
 
-  // Handler to select report and close drawer on mobile
   const handleSelectReport = useCallback((reportId: string) => {
     setSelectedReportId(reportId);
-    setDrawerOpen(false); // Close drawer on mobile after selection
+    setDrawerOpen(false);
   }, []);
 
   useEffect(() => {
@@ -187,14 +203,20 @@ export default function ReportViewer({
         stopPolling();
 
         const freshData = await queryClient.fetchQuery({
-          queryKey: ["reports", encounterId, "template", templateSlug, "fresh"],
+          queryKey: [
+            "reports",
+            encounterId,
+            "template",
+            effectiveTSlug,
+            "fresh",
+          ],
           queryFn: query(reportApi.listReports, {
             queryParams: {
               associating_id: encounterId,
               upload_completed: "true",
               report_type: "discharge_summary",
               is_archived: "false",
-              template: templateSlug,
+              template: effectiveTSlug,
               limit: 1,
             },
           }),
@@ -219,7 +241,7 @@ export default function ReportViewer({
         // Continue polling on transient errors
       }
     },
-    [encounterId, templateSlug, stopPolling, queryClient, refetchReports, t],
+    [encounterId, effectiveTSlug, stopPolling, queryClient, refetchReports, t],
   );
 
   const startPolling = useCallback(
@@ -383,7 +405,7 @@ export default function ReportViewer({
           >
             <ChevronLeft className="size-4" />
           </BackButton>
-          <h4 className="text-gray-800 truncate">{template.name}</h4>
+          <h3 className="text-gray-800 truncate">{template.name}</h3>
         </div>
       }
       options={
@@ -391,127 +413,120 @@ export default function ReportViewer({
           <div className="flex gap-2">
             <Button
               variant="outline"
-              size="sm"
               onClick={() => generateReport(template)}
               disabled={isGenerating || !canGenerateReport}
-              aria-label={
-                isGenerating ? t("generating_report") : t("regenerate_report")
-              }
+              aria-label={t("regenerate")}
             >
               <RefreshCw
                 className={cn("size-4", isGenerating && "animate-spin")}
               />
-              <span>
-                {isGenerating ? t("generating_report") : t("regenerate_report")}
-              </span>
+              <span>{t("regenerate")}</span>
             </Button>
 
-            {pdfUrl && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handlePrint}
-                aria-label={t("print")}
-              >
-                <Printer className="size-4" />
-                <span className="hidden lg:inline">{t("print")}</span>
-                <ShortcutBadge actionId="print-button" />
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              onClick={handlePrint}
+              aria-label={t("print")}
+              disabled={!pdfUrl}
+            >
+              <Printer className="size-4" />
+              <span className="hidden md:inline">{t("print")}</span>
+              <ShortcutBadge actionId="print-button" />
+            </Button>
 
-            {selectedReport && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleDownload(selectedReport)}
-                aria-label={t("download")}
-              >
-                <Download className="size-4" />
-                <span className="hidden lg:inline">{t("download")}</span>
-              </Button>
-            )}
+            <Button
+              onClick={() => handleDownload(selectedReport!)}
+              aria-label={t("download")}
+              disabled={!selectedReport}
+            >
+              <Download className="size-4" />
+              <span className="hidden md:inline">{t("download")}</span>
+            </Button>
           </div>
         </div>
       }
     >
-      <div className="flex flex-col lg:flex-row h-[calc(100vh-8rem)] gap-0 mt-2">
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-8rem)] gap-0 mt-2 bg-white rounded-lg border">
         {/* Mobile: Drawer trigger */}
-        <div className="lg:hidden mb-2">
-          <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-            <DrawerTrigger className="w-full">
-              <ReportHistoryTrigger
-                selectedReport={selectedReport}
-                template={template}
-                isLatest={selectedReportIndex === 0 && reports.length > 0}
-              />
-            </DrawerTrigger>
-            <DrawerContent className="px-4 max-h-[85vh]">
-              <DrawerHeader className="py-1.5">
-                <DrawerTitle className="text-lg font-semibold flex items-center gap-2">
-                  <History className="size-5" />
-                  {t("report_history")}
-                </DrawerTitle>
-              </DrawerHeader>
-              <ScrollArea className="overflow-y-auto pb-4 pr-2">
-                <ReportList
-                  reports={reports}
-                  isGenerating={isGenerating}
-                  selectedReportId={selectedReportId}
-                  onSelectReport={handleSelectReport}
+        {reports.length > 0 && (
+          <div className="lg:hidden mb-2">
+            <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+              <DrawerTrigger className="w-full">
+                <ReportHistoryTrigger
+                  selectedReport={selectedReport}
+                  template={template}
+                  isLatest={selectedReportIndex === 0 && reports.length > 0}
                 />
-              </ScrollArea>
-            </DrawerContent>
-          </Drawer>
-        </div>
+              </DrawerTrigger>
+              <DrawerContent className="px-4 max-h-[85vh]">
+                <DrawerHeader className="py-1.5">
+                  <DrawerTitle className="text-lg font-semibold flex items-center gap-2">
+                    <History className="size-5" />
+                    {t("report_history")}
+                  </DrawerTitle>
+                </DrawerHeader>
+                <ScrollArea className="overflow-y-auto pb-4 pr-2">
+                  <ReportList
+                    reports={reports}
+                    isGenerating={isGenerating}
+                    selectedReportId={selectedReportId}
+                    onSelectReport={handleSelectReport}
+                  />
+                </ScrollArea>
+              </DrawerContent>
+            </Drawer>
+          </div>
+        )}
 
         {/* Desktop: Sidebar */}
-        <div
-          className={cn(
-            "hidden lg:flex shrink-0 flex-col border-r bg-gray-50/50 transition-all duration-200",
-            sidebarOpen ? "w-72" : "w-0 overflow-hidden border-r-0",
-          )}
-        >
-          <div className="flex items-center justify-between px-4 py-3 h-11 border-b bg-white">
-            <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-              <History className="size-4" />
-              {t("report_history")}
+        {reports.length > 0 && (
+          <div
+            className={cn(
+              "hidden lg:flex shrink-0 border-r flex-col transition-all duration-200",
+              sidebarOpen ? "w-72" : "w-0 overflow-hidden border-r-0",
+            )}
+          >
+            <div className="flex items-center justify-between px-4 py-3 h-11 border-b">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                <History className="size-4" />
+                {t("report_history")}
+              </div>
+              <span className="text-xs text-gray-400">
+                {reports.length} {t("version")}
+              </span>
             </div>
-            <span className="text-xs text-gray-400">
-              {reports.length} {t("version")}
-            </span>
-          </div>
 
-          <div className="flex-1 px-3 py-2 overflow-auto bg-white">
-            <ReportList
-              reports={reports}
-              isGenerating={isGenerating}
-              selectedReportId={selectedReportId}
-              onSelectReport={setSelectedReportId}
-            />
+            <div className="flex-1 px-3 py-2 overflow-auto">
+              <ReportList
+                reports={reports}
+                isGenerating={isGenerating}
+                selectedReportId={selectedReportId}
+                onSelectReport={setSelectedReportId}
+              />
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Content Area */}
         <div className="flex-1 flex flex-col min-h-0 min-w-0">
-          <div className="items-center justify-between border-b bg-white pr-3 pl-1 h-11 hidden lg:flex">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-7 shrink-0"
-                onClick={() => setSidebarOpen((v) => !v)}
-                aria-label={
-                  sidebarOpen ? t("close_sidebar") : t("open_sidebar")
-                }
-              >
-                {sidebarOpen ? (
-                  <PanelLeftClose className="size-4" />
-                ) : (
-                  <PanelLeftOpen className="size-4" />
-                )}
-              </Button>
+          {selectedReport && (
+            <div className="items-center justify-between border-b pr-3 pl-1 h-11 hidden lg:flex">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-7 shrink-0"
+                  onClick={() => setSidebarOpen((v) => !v)}
+                  aria-label={
+                    sidebarOpen ? t("close_sidebar") : t("open_sidebar")
+                  }
+                >
+                  {sidebarOpen ? (
+                    <PanelLeftClose className="size-4" />
+                  ) : (
+                    <PanelLeftOpen className="size-4" />
+                  )}
+                </Button>
 
-              {selectedReport && (
                 <div className="flex items-center gap-2 text-sm text-gray-500 min-w-0">
                   <span className="font-medium text-gray-700 truncate">
                     {selectedReport.name || template.name}
@@ -522,59 +537,44 @@ export default function ReportViewer({
                     </Badge>
                   )}
                 </div>
-              )}
+              </div>
             </div>
-          </div>
-
-          <div className="flex-1 overflow-hidden bg-gray-100/50 flex items-start justify-center">
+          )}
+          <div className="flex-1 overflow-hidden flex items-start justify-center">
             {isLoadingDetail && (
               <div className="flex items-center justify-center h-full w-full">
-                <div className="flex flex-col items-center gap-3">
-                  <Loader2 className="size-8 animate-spin text-gray-400" />
-                  <p className="text-sm text-gray-400">{t("loading")}</p>
-                </div>
+                <Loader className="size-8 animate-spin text-gray-400" />
               </div>
             )}
 
             {!selectedReportId && !isGenerating && (
-              <div className="flex items-center justify-center h-full w-full">
-                <EmptyState
-                  icon={<FileText className="size-6 text-gray-400" />}
-                  title={t("no_reports_found")}
-                  description={t("no_reports_found_description")}
-                  action={
-                    canGenerateReport ? (
-                      <Button
-                        variant="primary"
-                        onClick={() => generateReport(template)}
-                        aria-label={t("generate_report")}
-                      >
-                        <RefreshCw className="size-4" />
-                        {t("generate_report")}
-                      </Button>
-                    ) : undefined
-                  }
-                  className="size-full border-none rounded-none"
-                />
-              </div>
+              <EmptyState
+                icon={<FileText className="size-6 text-gray-400" />}
+                title={t("no_reports_found")}
+                description={t("no_reports_found_description")}
+                action={
+                  canGenerateReport ? (
+                    <Button
+                      variant="primary"
+                      onClick={() => generateReport(template)}
+                      aria-label={t("generate_report")}
+                    >
+                      <RefreshCw className="size-4" />
+                      {t("generate_report")}
+                    </Button>
+                  ) : undefined
+                }
+                className="size-full"
+              />
             )}
 
             {isGenerating && !pdfUrl && (
-              <div className="flex items-center justify-center h-full w-full">
-                <div className="flex flex-col items-center gap-4 text-center">
-                  <div className="rounded-full bg-primary/10 p-4">
-                    <Loader2 className="size-8 animate-spin text-primary" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-base font-medium text-gray-700">
-                      {t("generating_report")}
-                    </p>
-                    <p className="text-sm text-gray-400 max-w-xs">
-                      {t("report_generation_please_wait")}
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <EmptyState
+                icon={<Loader className="size-6 animate-spin opacity-30" />}
+                title={t("generating_report")}
+                description={t("report_generation_please_wait")}
+                className="size-full"
+              />
             )}
 
             {pdfUrl && !isLoadingDetail && (
@@ -599,7 +599,7 @@ export default function ReportViewer({
                       {t("open_pdf")}
                     </Button>
                   }
-                  className="size-full border-none rounded-none"
+                  className="size-full"
                 />
               </object>
             )}
@@ -610,7 +610,6 @@ export default function ReportViewer({
   );
 }
 
-// Report History Trigger Component (Mobile)
 function ReportHistoryTrigger({
   selectedReport,
   template,
@@ -662,10 +661,8 @@ function ReportHistoryTrigger({
   );
 }
 
-// Report List Component
 function ReportList({
   reports,
-  isGenerating,
   selectedReportId,
   onSelectReport,
 }: {
@@ -674,73 +671,44 @@ function ReportList({
   selectedReportId: string | null;
   onSelectReport: (id: string) => void;
 }) {
-  const { t } = useTranslation();
-
   return (
     <div className="flex flex-col gap-1.5">
-      {isGenerating && (
-        <div className="mb-2 flex items-center gap-2.5 rounded-lg bg-primary/5 border border-primary/10 px-3 py-2.5 text-sm text-primary">
-          <Loader2 className="size-4 animate-spin shrink-0" />
-          <span className="font-medium">{t("generating_report")}</span>
-        </div>
-      )}
-
-      {reports.length === 0 && !isGenerating && (
-        <div className="flex flex-col items-center gap-2 py-12 text-center text-gray-400">
-          <FileText className="size-8" />
-          <p className="text-sm">{t("no_reports_found")}</p>
-        </div>
-      )}
-
-      {reports.map((report, index) => {
-        const uploaderName = report.uploaded_by
-          ? formatName(report.uploaded_by)
-          : undefined;
+      {reports.map((report) => {
         const isSelected = selectedReportId === report.id;
-        const isLatest = index === 0;
 
         return (
           <Card
             key={report.id}
             onClick={() => onSelectReport(report.id)}
             className={cn(
-              "rounded-md relative cursor-pointer transition-colors w-full",
-              isSelected
-                ? "bg-white border-primary-600 shadow-md"
-                : "bg-gray-100 hover:bg-gray-100 shadow-none",
+              "rounded-md relative cursor-pointer transition-colors w-full bg-gray-50 hover:bg-gray-100 shadow-none",
+              isSelected && "bg-white border-primary-600 shadow-md",
             )}
           >
             {isSelected && (
-              <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
+              <ArrowRight className="absolute text-primary-700 right-3 size-4 inset-y-1/2 -translate-y-1/2" />
             )}
-            <CardContent className="flex flex-col px-3 py-2.5 gap-1">
+            <CardContent
+              className={cn(
+                "flex flex-col px-3 py-2.5 gap-1",
+                isSelected && "pr-8",
+              )}
+            >
               <div className="flex items-center gap-2">
                 <span
                   className={cn(
-                    "font-medium truncate text-sm",
-                    isSelected ? "text-gray-900" : "text-gray-600",
+                    "text-sm font-medium text-gray-700 truncate",
+                    isSelected && "text-gray-900",
                   )}
                 >
-                  {formatDateTime(report.created_date)}
+                  {report.name}
                 </span>
-                {isLatest && (
-                  <Badge variant="primary" size="sm">
-                    {t("latest")}
-                  </Badge>
-                )}
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                <Clock className="size-3 shrink-0" />
-                <span className="truncate">
-                  {relativeTime(report.created_date)}
-                </span>
-                {uploaderName && (
-                  <>
-                    <span>·</span>
-                    <span className="truncate">{uploaderName}</span>
-                  </>
-                )}
-              </div>
+              <span className="flex gap-1 items-center text-xs text-gray-500">
+                {formatDateTime(report.created_date, "DD MMM YYYY, hh:mm a")}
+                <Dot className="size-2.5 shrink-0 text-gray-700" />
+                {relativeTime(report.created_date)}
+              </span>
             </CardContent>
           </Card>
         );

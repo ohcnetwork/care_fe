@@ -3712,7 +3712,7 @@
   "no_records_found": "No Records Found",
   "no_remarks": "No remarks",
   "no_reports_found": "No reports found",
-  "no_reports_found_description": "Try adjusting your filters or generate a new report",
+  "no_reports_found_description": "Try adjusting your filters (if applicable) or generate a new report.",
   "no_requested_questionnaires_found": "The requested questionnaire could not be found.",
   "no_requests_found": "No requests found",
   "no_requests_found_description": "There are no supply requests matching your filters",

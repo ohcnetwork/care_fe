@@ -94,13 +94,22 @@ const consultationRoutes: AppRoutes = {
     ({ encounterId, patientId }) => (
       <TreatmentSummary encounterId={encounterId} patientId={patientId} />
     ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/report/:templateSlug":
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/report/template/:templateSlug":
     ({ facilityId, encounterId, patientId, templateSlug }) => (
       <ReportViewer
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
         templateSlug={templateSlug}
+      />
+    ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/report/:reportId":
+    ({ facilityId, encounterId, patientId, reportId }) => (
+      <ReportViewer
+        facilityId={facilityId}
+        encounterId={encounterId}
+        patientId={patientId}
+        reportId={reportId}
       />
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire":
