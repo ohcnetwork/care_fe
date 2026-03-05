@@ -4,6 +4,7 @@ import { navigate } from "raviger";
 import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -60,7 +61,7 @@ export const Demography = (props: PatientProps) => {
           `/facility/${facilityId}/patient/${patientId}/update?section=${sectionId}`,
         );
       } else {
-        navigate(`/patient/${patientId}/update?section=${sectionId}`);
+        toast.error(t("patient_edit_requires_facility_context"));
       }
     }
   };
