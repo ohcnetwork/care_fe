@@ -48,6 +48,7 @@ Create personalized thank-you messages for community contributors when their pul
 ## Example Messages
 
 **Feature:**
+
 ```
 @contributor Thanks for adding the medication scheduling interface!
 
@@ -61,6 +62,7 @@ getting this right. Hope to see more contributions from you! 🏥
 ```
 
 **Bug Fix:**
+
 ```
 @contributor Nice catch on the facility filter bug!
 

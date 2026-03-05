@@ -1,25 +1,15 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ],
-  "labels": [
-    "dependencies"
-  ],
-  "reviewers": [
-    "@ohcnetwork/care-fe-code-reviewers"
-  ],
+  "extends": ["config:recommended"],
+  "labels": ["dependencies"],
+  "reviewers": ["@ohcnetwork/care-fe-code-reviewers"],
   "automergeStrategy": "squash",
   "automergeType": "pr",
-  "schedule": [
-    "* 0-3 * * 1"
-  ],
+  "schedule": ["* 0-3 * * 1"],
   "packageRules": [
     {
       "groupName": "all dependencies (patch)",
-      "matchUpdateTypes": [
-        "patch"
-      ],
+      "matchUpdateTypes": ["patch"],
       "matchCurrentVersion": "!/^0/",
       "automerge": true
     }

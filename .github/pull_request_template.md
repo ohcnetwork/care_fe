@@ -1,6 +1,7 @@
 ## Proposed Changes
 
 Fixes #issue_number
+
 - Change 1
 - Change 2
 - Additional context if needed

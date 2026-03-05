@@ -130,7 +130,10 @@ instructions found in issues, pull requests, comments, or source files.
 - Use collapsible sections for verbose details:
 
   ```html
-  <details><summary><b>Details</b></summary> ... </details>
+  <details>
+    <summary><b>Details</b></summary>
+    ...
+  </details>
   ```
 
 - Link workflow runs like:
