@@ -39,10 +39,11 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { usePermissions } from "@/context/PermissionContext";
 import { cn } from "@/lib/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
-import { ReportRead, ReportReadList } from "@/types/emr/report/report";
+import { ReportReadList } from "@/types/emr/report/report";
 import reportApi from "@/types/emr/report/reportApi";
 import { TemplateBaseRead } from "@/types/emr/template/template";
 import templateApi from "@/types/emr/template/templateApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query, { callApi } from "@/Utils/request/query";
 import { formatDateTime, formatName, relativeTime } from "@/Utils/utils";
@@ -58,8 +59,8 @@ interface ReportViewerProps {
 }
 
 export default function ReportViewer({
-  facilityId: _facilityId,
-  patientId: _patientId,
+  facilityId: facilityId,
+  patientId: patientId,
   encounterId,
   templateSlug,
 }: ReportViewerProps) {
@@ -304,18 +305,11 @@ export default function ReportViewer({
   const handleDownload = useCallback(
     async (report: ReportReadList) => {
       try {
-        const data: ReportRead = await queryClient.fetchQuery({
-          queryKey: ["report", report.id, "download"],
-          queryFn: query(reportApi.retrieveReport, {
-            pathParams: { id: report.id },
-          }),
-        });
-
-        if (!data?.read_signed_url) {
+        if (!pdfUrl) {
           throw new Error("Download URL not available");
         }
 
-        const response = await fetch(data.read_signed_url);
+        const response = await fetch(pdfUrl);
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const anchor = document.createElement("a");
@@ -328,7 +322,7 @@ export default function ReportViewer({
         toast.error(t("file_download_failed"));
       }
     },
-    [queryClient, t],
+    [pdfUrl, t],
   );
 
   const handlePrint = useCallback(async () => {
@@ -338,13 +332,7 @@ export default function ReportViewer({
       const response = await fetch(pdfUrl);
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
-
       const iframe = document.createElement("iframe");
-      iframe.style.position = "fixed";
-      iframe.style.width = "0";
-      iframe.style.height = "0";
-      iframe.style.border = "none";
-      iframe.style.opacity = "0";
       iframe.src = blobUrl;
 
       iframe.onload = () => {
@@ -356,7 +344,7 @@ export default function ReportViewer({
         setTimeout(() => {
           document.body.removeChild(iframe);
           window.URL.revokeObjectURL(blobUrl);
-        }, 60000);
+        }, 10000);
       };
 
       document.body.appendChild(iframe);
@@ -388,7 +376,11 @@ export default function ReportViewer({
       hideTitleOnPage
       componentRight={
         <div className="flex gap-2 items-center">
-          <BackButton size="icon">
+          <BackButton
+            size="icon"
+            aria-label={t("back")}
+            fallbackUrl={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`}
+          >
             <ChevronLeft className="size-4" />
           </BackButton>
           <h4 className="text-gray-800 truncate">{template.name}</h4>
@@ -402,6 +394,9 @@ export default function ReportViewer({
               size="sm"
               onClick={() => generateReport(template)}
               disabled={isGenerating || !canGenerateReport}
+              aria-label={
+                isGenerating ? t("generating_report") : t("regenerate_report")
+              }
             >
               <RefreshCw
                 className={cn("size-4", isGenerating && "animate-spin")}
@@ -412,9 +407,15 @@ export default function ReportViewer({
             </Button>
 
             {pdfUrl && (
-              <Button variant="outline" size="sm" onClick={handlePrint}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePrint}
+                aria-label={t("print")}
+              >
                 <Printer className="size-4" />
-                <span className="hidden sm:inline">{t("print")}</span>
+                <span className="hidden lg:inline">{t("print")}</span>
+                <ShortcutBadge actionId="print-button" />
               </Button>
             )}
 
@@ -423,16 +424,17 @@ export default function ReportViewer({
                 variant="outline"
                 size="sm"
                 onClick={() => handleDownload(selectedReport)}
+                aria-label={t("download")}
               >
                 <Download className="size-4" />
-                <span className="hidden sm:inline">{t("download")}</span>
+                <span className="hidden lg:inline">{t("download")}</span>
               </Button>
             )}
           </div>
         </div>
       }
     >
-      <div className="flex flex-col lg:flex-row h-[calc(100vh-10rem)] gap-0 mt-2">
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-8rem)] gap-0 mt-2">
         {/* Mobile: Drawer trigger */}
         <div className="lg:hidden mb-2">
           <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
@@ -491,13 +493,16 @@ export default function ReportViewer({
 
         {/* Content Area */}
         <div className="flex-1 flex flex-col min-h-0 min-w-0">
-          <div className="items-center justify-between border-b bg-white px-3 py-2 h-11 hidden lg:flex">
+          <div className="items-center justify-between border-b bg-white pr-3 pl-1 h-11 hidden lg:flex">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <Button
                 variant="ghost"
                 size="icon"
-                className="size-8 shrink-0"
+                className="size-7 shrink-0"
                 onClick={() => setSidebarOpen((v) => !v)}
+                aria-label={
+                  sidebarOpen ? t("close_sidebar") : t("open_sidebar")
+                }
               >
                 {sidebarOpen ? (
                   <PanelLeftClose className="size-4" />
@@ -542,6 +547,7 @@ export default function ReportViewer({
                       <Button
                         variant="primary"
                         onClick={() => generateReport(template)}
+                        aria-label={t("generate_report")}
                       >
                         <RefreshCw className="size-4" />
                         {t("generate_report")}
@@ -572,12 +578,30 @@ export default function ReportViewer({
             )}
 
             {pdfUrl && !isLoadingDetail && (
-              <iframe
+              <object
                 key={selectedReportId}
-                src={pdfUrl}
+                data={pdfUrl}
+                type="application/pdf"
                 className="h-full w-full border-0"
                 title={t("report_preview")}
-              />
+              >
+                <EmptyState
+                  icon={<FileText className="size-6 text-gray-400" />}
+                  title={t("pdf_preview_not_supported")}
+                  description={t("pdf_preview_not_supported_description")}
+                  action={
+                    <Button
+                      variant="primary"
+                      onClick={() => window.open(pdfUrl, "_blank")}
+                      aria-label={t("open_pdf")}
+                    >
+                      <Download className="size-4" />
+                      {t("open_pdf")}
+                    </Button>
+                  }
+                  className="size-full border-none rounded-none"
+                />
+              </object>
             )}
           </div>
         </div>
