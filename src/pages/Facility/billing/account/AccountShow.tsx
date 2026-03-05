@@ -326,7 +326,7 @@ export function AccountShow({
 
   return (
     <div className="space-y-3">
-      <BackButton size="xs">
+      <BackButton size="xs" to={`/facility/${facilityId}/billing/account`}>
         <CareIcon icon="l-arrow-left" className="size-4" />
         {t("back")}
       </BackButton>
