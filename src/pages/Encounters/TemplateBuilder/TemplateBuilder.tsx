@@ -412,10 +412,7 @@ export default function TemplateBuilder({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    {t("template_name")}
-                    <span className="text-danger-500 ml-1">*</span>
-                  </FormLabel>
+                  <FormLabel aria-required>{t("template_name")}</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder={t("enter_template_name")} />
                   </FormControl>
@@ -429,10 +426,7 @@ export default function TemplateBuilder({
               name="slug_value"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    {t("slug")}
-                    <span className="text-danger-500 ml-1">*</span>
-                  </FormLabel>
+                  <FormLabel aria-required>{t("slug")}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -450,10 +444,7 @@ export default function TemplateBuilder({
               name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    {t("status")}
-                    <span className="text-danger-500 ml-1">*</span>
-                  </FormLabel>
+                  <FormLabel aria-required>{t("status")}</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
@@ -478,10 +469,7 @@ export default function TemplateBuilder({
               name="default_format"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    {t("default_format")}
-                    <span className="text-danger-500 ml-1">*</span>
-                  </FormLabel>
+                  <FormLabel aria-required>{t("default_format")}</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
@@ -506,10 +494,7 @@ export default function TemplateBuilder({
               name="template_type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    {t("report_type")}
-                    <span className="text-danger-500 ml-1">*</span>
-                  </FormLabel>
+                  <FormLabel aria-required>{t("report_type")}</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
@@ -551,9 +536,10 @@ export default function TemplateBuilder({
             {/* Context Selector */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">
-                  {t("select_context")}
-                  <span className="text-danger-500 ml-1">*</span>
+                <CardTitle>
+                  <FormLabel className="text-lg" aria-required>
+                    {t("select_context")}
+                  </FormLabel>
                 </CardTitle>
               </CardHeader>
               <CardContent>
