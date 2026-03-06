@@ -534,6 +534,7 @@ const MedicineLineItem = ({
                             disabled={disabled || isAutoSelectingInventoryItems}
                           />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -574,12 +575,14 @@ const MedicineLineItem = ({
                         <Input
                           type="number"
                           min={0}
+                          max={lots[index].item.net_content}
                           {...field}
                           className="w-20"
                           placeholder="0"
                           disabled={disabled || isAutoSelectingInventoryItems}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -616,6 +619,7 @@ const MedicineLineItem = ({
                         disabled={disabled}
                       />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -655,7 +659,7 @@ const MedicineLineItem = ({
         name={name}
         render={({ fieldState }) => (
           <>
-            {fieldState.error && (
+            {fieldState.error?.message && (
               <FormItem className="col-start-1 col-span-7 bg-red-50 py-1 px-13 border-y border-b-red-300 border-t-gray-200">
                 <FormMessage />
               </FormItem>

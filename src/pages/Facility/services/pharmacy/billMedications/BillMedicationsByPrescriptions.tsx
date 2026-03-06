@@ -12,18 +12,21 @@ import {
 } from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsPrescriptionCard";
 import { billMedicationsByPrescriptionsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import UnbilledPrescriptionsCard from "@/pages/Facility/services/pharmacy/billMedications/UnbilledPrescriptionsCard";
+import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import { ACTIVE_MEDICATION_STATUSES } from "@/types/emr/medicationRequest/medicationRequest";
 import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueries } from "@tanstack/react-query";
+import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
 import { Pill } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect } from "react";
 import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Fragment } from "react/jsx-runtime";
+import { toast } from "sonner";
 import { z } from "zod";
 
 interface Props {
@@ -40,6 +43,7 @@ export default function BillMedicationsByPrescriptions({
   prescriptionIds,
 }: Props) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
 
   const { prescriptions, anyEncounter, isLoading } = useQueries({
     queries: prescriptionIds.map((prescriptionId) => ({
@@ -75,6 +79,89 @@ export default function BillMedicationsByPrescriptions({
       otherItems: [],
     });
   }, [form, prescriptions, isLoading]);
+
+  const { mutate: createInvoice, isPending: isCreatingInvoice } = useMutation({
+    mutationFn: mutate(invoiceApi.createInvoice, {
+      pathParams: { facilityId },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      toast.success(t("invoice_created_successfully"));
+    },
+  });
+
+  // const { mutate: dispense, isPending } = useMutation({
+  //   mutationFn: mutate(batchApi.batchRequest),
+  //   onSuccess: (response: unknown) => {
+  //     toast.success(t("medications_billed_and_prescriptions_completed"));
+
+  //     queryClient.invalidateQueries({
+  //       queryKey: ["prescription", patientId],
+  //     });
+  //     queryClient.invalidateQueries({
+  //       queryKey: ["medication_requests", patientId],
+  //     });
+
+  //     let newDispenseOrderId: string | null = null;
+
+  //     const dispenseOrder = extractDispenseOrderFromBatchResponse(
+  //       response as DispenseOrderBatchResponse,
+  //     );
+
+  //     if (dispenseOrder) {
+  //       newDispenseOrderId = dispenseOrder.id;
+  //       dispenseOrderIdRef.current = newDispenseOrderId;
+  //     }
+
+  //     if (!account?.results[0]) {
+  //       queryClient.invalidateQueries({
+  //         queryKey: ["accounts", patientId],
+  //       });
+  //     }
+
+  //     // Extract charge items and create invoice
+  //     const chargeItems = extractChargeItemsFromBatchResponse(
+  //       response as unknown as ChargeItemBatchResponse,
+  //     );
+
+  //     if (chargeItems.length === 0) {
+  //       onDispenseSuccess?.(newDispenseOrderId);
+  //     } else if (account?.results[0]) {
+  //       createInvoice({
+  //         status: InvoiceStatus.draft,
+  //         account: account.results[0].id,
+  //         charge_items: chargeItems.map((item) => item.id),
+  //       });
+  //     } else {
+  //       onDispenseSuccess?.(newDispenseOrderId);
+  //     }
+  //   },
+  //   onError: (error) => {
+  //     try {
+  //       const errorData = error.cause as {
+  //         results?: {
+  //           data?: { detail?: string; errors?: { msg: string }[] };
+  //         }[];
+  //       };
+
+  //       const errorMessages = errorData?.results
+  //         ?.flatMap(
+  //           (result) =>
+  //             result?.data?.errors?.map((err) => err.msg) ||
+  //             (result?.data?.detail ? [result.data.detail] : []),
+  //         )
+  //         .filter(Boolean);
+
+  //       if (errorMessages?.length) {
+  //         errorMessages.forEach((msg) => toast.error(msg));
+  //       } else {
+  //         toast.error(t("error_dispensing_medications"));
+  //       }
+  //     } catch {
+  //       toast.error(t("error_dispensing_medications"));
+  //     }
+  //   },
+  // });
 
   const handleBillSelected = () => {
     // TODO: Implement bill selected logic

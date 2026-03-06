@@ -20,7 +20,12 @@ import { cn } from "@/lib/utils";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
-import { isPositive, roundWhole, zodDecimal } from "@/Utils/decimal";
+import {
+  isLessThanOrEqual,
+  isPositive,
+  roundWhole,
+  zodDecimal,
+} from "@/Utils/decimal";
 import {
   getExpiryBadgeVariant,
   isProductRestrictedFromDispensing,
@@ -30,11 +35,16 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 
-export const lotSelectionSchema = z.object({
-  item: z.custom<InventoryRead>(),
-  quantity: zodDecimal({ min: 0 }),
-  autoSelected: z.boolean().optional(),
-});
+export const lotSelectionSchema = z
+  .object({
+    item: z.custom<InventoryRead>(),
+    quantity: zodDecimal({ min: 0 }),
+    autoSelected: z.boolean().optional(),
+  })
+  .refine((data) => isLessThanOrEqual(data.quantity, data.item.net_content), {
+    path: ["quantity"],
+    message: "Insufficient stock",
+  });
 
 export type LotSelection = z.infer<typeof lotSelectionSchema>;
 

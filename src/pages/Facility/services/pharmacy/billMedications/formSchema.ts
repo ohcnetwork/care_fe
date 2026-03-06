@@ -9,6 +9,7 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
+import { add, decimal, isPositive } from "@/Utils/decimal";
 import { z } from "zod";
 
 // export const billMedicationsFormSchema = z.object({
@@ -81,8 +82,20 @@ const billMedicationLineItemSchema = z
   .refine((data) => data.isSelected === false || data.lots.length > 0, {
     path: ["lots"],
     message: "At least one lot is required",
-  });
-
+  })
+  .refine(
+    (data) =>
+      data.isSelected === false ||
+      isPositive(
+        data.lots
+          .map((lot) => lot.quantity)
+          .reduce((acc, quantity) => add(acc, quantity), decimal(0)),
+      ),
+    {
+      path: [""],
+      message: "Quantity must be greater than 0",
+    },
+  );
 export type BillMedicationLineItemSchemaType = z.infer<
   typeof billMedicationLineItemSchema
 >;

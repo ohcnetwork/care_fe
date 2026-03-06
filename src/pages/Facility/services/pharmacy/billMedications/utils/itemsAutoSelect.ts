@@ -25,6 +25,7 @@ interface Options {
  * 1.5, it will be rounded down to 1.
  * If required quantity is 1.5, it will be rounded up to 2.
  */
+// TODO: check ensure expired items are not selected
 export const selectEligibleInventoryItems = (
   items: InventoryRead[],
   options: Options,
