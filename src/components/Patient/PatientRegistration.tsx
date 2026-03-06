@@ -316,7 +316,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   }
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-
     const { extensions: formExtensions, ...restValues } = values;
     const cleanedExtensions = extensions.prepareForSubmit(
       formExtensions as NamespacedExtensionData,
