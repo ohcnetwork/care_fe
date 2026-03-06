@@ -275,7 +275,9 @@ export function ChargeItemDefinitionForm({
   const priceComponents = form.watch("price_components");
   const rawBasePrice = form.watch("base_price");
   const basePrice =
-    rawBasePrice && /^-?\d+(\.\d+)?$/.test(rawBasePrice) ? rawBasePrice : "0";
+    rawBasePrice && /^-?(\d+\.?\d*|\.\d+)$/.test(rawBasePrice)
+      ? rawBasePrice
+      : "0";
 
   const { isDirty } = form.formState;
 
