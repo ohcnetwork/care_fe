@@ -1,4 +1,4 @@
-import { addMonths, endOfMonth, isBefore, startOfMonth } from "date-fns";
+import { addMonths, endOfMonth, isBefore, startOfDay } from "date-fns";
 
 import careConfig from "@careConfig";
 
@@ -15,17 +15,15 @@ export function getExpiryStatus(
   if (!expirationDate) return "valid";
 
   const expiryDate = new Date(expirationDate);
-  const currentMonthStart = startOfMonth(new Date());
+  const today = startOfDay(new Date());
   const expiryMonthOffset = careConfig.inventory.expiryMonthOffset;
 
-  // Check if expired (before current month start)
-  if (isBefore(expiryDate, currentMonthStart)) return "expired";
+  // Check if expired (expiry date has passed)
+  if (isBefore(startOfDay(expiryDate), today)) return "expired";
 
   // Check if expiring soon (within the configured month offset)
   if (expiryMonthOffset !== null) {
-    const referenceMonthEnd = endOfMonth(
-      addMonths(new Date(), expiryMonthOffset),
-    );
+    const referenceMonthEnd = endOfMonth(addMonths(today, expiryMonthOffset));
     if (isBefore(expiryDate, referenceMonthEnd)) return "expiring_soon";
   }
 
