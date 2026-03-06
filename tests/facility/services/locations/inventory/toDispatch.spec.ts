@@ -11,6 +11,7 @@ let pharmacyLocationId: string;
 let bioChembasePath: string;
 let pharmacybasePath: string;
 let isInitialized: boolean = false;
+let isExternalInitialized: boolean = false;
 
 test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
   async function createStockRequest(page: Page, orderNameParam?: string) {
@@ -152,7 +153,7 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
 
 test.describe("External Delivery Order Flow", () => {
   async function setupExternalData(page: Page) {
-    if (pharmacybasePath) return;
+    if (isExternalInitialized) return;
     const facilityId = getFacilityId();
     const servicesUrl = `/facility/${facilityId}/services/`;
     await page.goto(servicesUrl);
@@ -167,6 +168,7 @@ test.describe("External Delivery Order Flow", () => {
           ),
         )?.[1] ?? "";
     pharmacybasePath = `/facility/${facilityId}/locations/${pharmacyLocationId}`;
+    isExternalInitialized = true;
   }
 
   test.beforeEach(async ({ page }) => {
@@ -212,9 +214,25 @@ test.describe("External Delivery Order Flow", () => {
     await expect(row1).toContainText(deliveryName);
   });
 
-  test("should switch to completed tab and show the deliveries table", async ({
+  test("should show empty state on completed tab when no completed orders exist", async ({
     page,
   }) => {
+    await page.route("**/api/v1/facility/*/order/delivery/**", (route) => {
+      if (route.request().url().includes("status=completed")) {
+        route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            count: 0,
+            results: [],
+            next: null,
+            previous: null,
+          }),
+        });
+      } else {
+        route.continue();
+      }
+    });
     await page.goto(
       pharmacybasePath + "/inventory/external/deliveries/incoming",
     );
@@ -223,6 +241,11 @@ test.describe("External Delivery Order Flow", () => {
       "aria-selected",
       "true",
     );
-    await expect(page.getByRole("table")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "No orders found" }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("No orders found based on the selected filters"),
+    ).toBeVisible();
   });
 });
