@@ -1,9 +1,7 @@
 import { Redirect } from "raviger";
 import { Suspense, lazy } from "react";
-import { useTranslation } from "react-i18next";
 
 import Loading from "@/components/Common/Loading";
-import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientHome } from "@/components/Patient/PatientHome";
 import PatientIndex from "@/components/Patient/PatientIndex";
@@ -16,17 +14,6 @@ import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 import ClinicalHistoryPage from "@/pages/Patient/History";
 import VerifyPatient from "@/pages/Patient/VerifyPatient";
 import careConfig from "@careConfig";
-
-const PatientEditFacilityRequired = () => {
-  const { t } = useTranslation();
-  return (
-    <ErrorPage
-      forError="CUSTOM_ERROR"
-      title={t("patient_edit_facility_required_title")}
-      message={t("patient_edit_requires_facility_context")}
-    />
-  );
-};
 
 const ExcalidrawEditor = lazy(
   () => import("@/components/Common/Drawings/ExcalidrawEditor"),
@@ -96,7 +83,7 @@ const PatientRoutes: AppRoutes = {
 
   "/facility/:facilityId/patients/verify": () => <VerifyPatient />,
   "/patient/:id": ({ id }) => <PatientHome id={id} page="demography" />,
-  "/patient/:id/update": () => <PatientEditFacilityRequired />,
+  "/patient/:id/update": ({ id }) => <PatientRegistration patientId={id} />,
   ...patientTabs.reduce((acc: AppRoutes, tab) => {
     acc["/patient/:id/" + tab.route] = ({ id }) => (
       <PatientHome id={id} page={tab.route} />
