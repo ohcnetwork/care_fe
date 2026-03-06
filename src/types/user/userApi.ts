@@ -1,11 +1,13 @@
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 import {
   CurrentUserRead,
+  GenerateServiceAccountTokenResponse,
   UserCreate,
   UserRead,
   UserReadMinimal,
   UserUpdate,
 } from "@/types/user/user";
+import { UserPreferenceRequest } from "@/types/user/userPreferences";
 
 export default {
   list: {
@@ -57,5 +59,21 @@ export default {
     method: HttpMethod.DELETE,
     TRes: Type<void>(),
     TBody: Type<void>(),
+  },
+  generateServiceAccountToken: {
+    path: "/api/v1/users/{username}/generate_service_account_token/",
+    method: HttpMethod.POST,
+    TRes: Type<GenerateServiceAccountTokenResponse>(),
+  },
+  revokeServiceAccountToken: {
+    path: "/api/v1/users/{username}/revoke_service_account_token/",
+    method: HttpMethod.DELETE,
+    TRes: Type<void>(),
+  },
+  setPreferences: {
+    path: "/api/v1/users/set_preferences/",
+    method: HttpMethod.POST,
+    TRes: Type<CurrentUserRead>(),
+    TBody: Type<UserPreferenceRequest>(),
   },
 } as const;

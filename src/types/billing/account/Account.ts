@@ -1,3 +1,5 @@
+import { NamespacedExtensionData } from "@/hooks/useExtensions";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { Period } from "@/types/questionnaire/base";
@@ -39,8 +41,8 @@ export interface AccountBase {
   billing_status: AccountBillingStatus;
   name: string;
   service_period: Period;
-  description?: string;
-  extensions: Record<string, unknown>;
+  description?: string | null;
+  extensions: NamespacedExtensionData;
 }
 
 export interface AccountRead extends AccountBase {
@@ -50,13 +52,16 @@ export interface AccountRead extends AccountBase {
   total_gross: string;
   total_paid: string;
   total_balance: string;
+  total_billable_charge_items: string;
   created_date: string;
   tags: TagConfig[];
+  primary_encounter: EncounterRead;
 }
 
 export interface AccountUpdate extends AccountBase {
   id: string;
   patient: string;
+  primary_encounter?: string;
 }
 
 export interface AccountCreate extends Omit<AccountBase, "id"> {

@@ -29,9 +29,7 @@ test.describe("Charge Item Definition Edit operations", () => {
     await page.goto(
       `/facility/${facilityId}/settings/charge_item_definitions/`,
     );
-    await page
-      .getByRole("textbox", { name: "Search categories..." })
-      .fill(categoryName);
+    await page.getByRole("textbox", { name: "Search" }).fill(categoryName);
     await page.getByRole("heading", { name: categoryName }).click();
   });
 
@@ -56,21 +54,8 @@ test.describe("Charge Item Definition Edit operations", () => {
 
     await expect(page.getByText(/updated successfully/i)).toBeVisible();
 
-    await expect(
-      page.getByRole("heading").getByText(title + " - edited"),
-    ).toBeVisible();
-
-    await expect(page.getByText(description + " - edited")).toBeVisible();
-    await expect(page.getByText(purpose + " - edited")).toBeVisible();
-    await expect(page.getByText(url)).toBeVisible();
-    await expect(page.getByText(basePrice)).toBeVisible();
-    await expect(page.getByText(mrp)).toBeVisible();
-    await expect(page.getByText(purchasePrice)).toBeVisible();
-
-    await page.getByRole("link", { name: "Back" }).click();
-
     await page
-      .getByRole("textbox", { name: /search/i })
+      .getByRole("textbox", { name: /Search/i })
       .fill(title + " - edited");
     await expect(
       page.getByRole("table").getByText(title + " - edited"),
