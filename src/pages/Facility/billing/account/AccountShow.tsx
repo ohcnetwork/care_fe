@@ -2,7 +2,7 @@ import { DialogDescription } from "@radix-ui/react-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { Hash, MoreVertical } from "lucide-react";
-import { Link, navigate, useQueryParams } from "raviger";
+import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -116,7 +116,6 @@ export function AccountShow({
 
   const { facility } = useCurrentFacility();
   const { hasPermission } = usePermissions();
-  const [{ from }] = useQueryParams();
 
   const { canUpdateAccount } = getPermissions(
     hasPermission,
@@ -327,14 +326,7 @@ export function AccountShow({
 
   return (
     <div className="space-y-3">
-      <BackButton
-        size="xs"
-        to={
-          from === "invoice"
-            ? `/facility/${facilityId}/billing/account`
-            : undefined
-        }
-      >
+      <BackButton size="xs">
         <CareIcon icon="l-arrow-left" className="size-4" />
         {t("back")}
       </BackButton>
