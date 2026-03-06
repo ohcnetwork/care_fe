@@ -6,7 +6,7 @@ import { useLocationState } from "@/hooks/useLocationState";
 import query from "@/Utils/request/query";
 import LocationContent from "@/pages/Facility/locations/LocationContent";
 import LocationNavbar from "@/pages/Facility/locations/LocationNavbar";
-import { LocationList as LocationListType } from "@/types/location/location";
+import { LocationRead as LocationListType } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 export default function LocationList({
@@ -23,6 +23,7 @@ export default function LocationList({
     searchQuery,
     currentPage,
     handleLocationSelect,
+    setSelectedLocation,
     handleToggleExpand,
     handleSearchChange,
     handlePageChange,
@@ -50,9 +51,9 @@ export default function LocationList({
         has_children: false, // Since this is a detail view, we assume no children initially
         current_encounter: undefined, // LocationDetail doesn't have this field
       };
-      handleLocationSelect(locationList);
+      setSelectedLocation(locationList);
     }
-  }, [locationDetail, handleLocationSelect]);
+  }, [locationDetail, setSelectedLocation]);
 
   return (
     <div className="flex px-4 space-x-4 min-h-[calc(100vh-10rem)]">

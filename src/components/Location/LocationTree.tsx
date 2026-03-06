@@ -6,10 +6,10 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 
 interface LocationPathProps {
-  location: LocationList;
+  location: LocationRead;
   startTime?: string;
   endTime?: string;
   isLatest?: boolean;
@@ -17,7 +17,7 @@ interface LocationPathProps {
 }
 
 interface LocationNodeProps {
-  location: LocationList;
+  location: LocationRead;
   isLast: boolean;
   startTime?: string;
 
@@ -25,7 +25,7 @@ interface LocationNodeProps {
   children?: React.ReactNode;
 }
 
-function LocationNode({
+export function LocationNode({
   location,
   isLast,
   startTime,

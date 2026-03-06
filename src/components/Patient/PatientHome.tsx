@@ -42,7 +42,7 @@ export const PatientHome = (props: {
   useShortcutSubContext();
   const { data: patientData, isLoading } = useQuery({
     queryKey: ["patient", id],
-    queryFn: query(patientApi.getPatient, {
+    queryFn: query(patientApi.get, {
       pathParams: {
         id,
       },
@@ -136,7 +136,7 @@ export const PatientHome = (props: {
           </div>
         </div>
         <div className="lg:flex">
-          <div className="h-full lg:mr-7 lg:basis-5/6">
+          <div className="h-full min-w-0 lg:mr-7 lg:basis-5/6">
             {Tab?.component && (
               <Tab.component
                 facilityId={
@@ -162,7 +162,8 @@ export const PatientHome = (props: {
                         href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
                           {
                             phone_number: patientData.phone_number,
-                            year_of_birth: patientData.year_of_birth.toString(),
+                            year_of_birth:
+                              patientData.year_of_birth?.toString() ?? "",
                             partial_id: patientData.id.slice(0, 5),
                           },
                         ).toString()}`}

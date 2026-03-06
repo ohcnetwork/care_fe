@@ -1,6 +1,6 @@
+import { booleanFromString } from "@/common/utils";
 import { AnimatedCounter } from "@/components/Common/AnimatedCounter";
 import BackButton from "@/components/Common/BackButton";
-import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import {
@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { NavTabs } from "@/components/ui/nav-tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
@@ -45,6 +46,7 @@ import { TokenStatus } from "@/types/tokens/token/token";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
+import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import { ChevronLeft, Edit3, InfoIcon, SettingsIcon } from "lucide-react";
@@ -70,8 +72,8 @@ export function ManageQueuePage({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const resource = useScheduleResource();
-  const [{ autoRefresh }, setQueryParams] = useQueryParams<{
-    autoRefresh: string;
+  const [qParams, setQueryParams] = useQueryParams<{
+    autoRefresh?: string;
   }>();
   const { data: queue, isLoading: isQueueLoading } = useQuery({
     queryKey: ["tokenQueue", facilityId, queueId],
@@ -102,9 +104,13 @@ export function ManageQueuePage({
   );
 
   if (isQueueLoading || !queue) {
-    // TODO: build appropriate loading skeleton...
-    return <Loading />;
+    return <QueueManagementSkeleton />;
   }
+
+  const shouldAutoRefresh = booleanFromString(
+    qParams.autoRefresh ?? "",
+    careConfig.enableAutoRefresh,
+  );
 
   return (
     <Page
@@ -162,7 +168,7 @@ export function ManageQueuePage({
           <div className="flex gap-5 items-center justify-center">
             <div className="hidden sm:flex flex-col-reverse sm:flex-row gap-2 items-center text-black font-medium text-md">
               <Switch
-                checked={autoRefresh === "true"}
+                checked={shouldAutoRefresh}
                 onCheckedChange={(checked) =>
                   setQueryParams({
                     autoRefresh: checked ? "true" : "false",
@@ -178,7 +184,12 @@ export function ManageQueuePage({
                         <InfoIcon className="size-4 text-gray-500" />
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent>{t("auto_refresh_tooltip")}</TooltipContent>
+                    <TooltipContent>
+                      {t("auto_refresh_tooltip", {
+                        interval:
+                          careConfig.appointmentAndQueueRefreshInterval / 1000,
+                      })}
+                    </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               </div>
@@ -196,7 +207,7 @@ export function ManageQueuePage({
                       {t("auto_refresh")}
                     </Label>
                     <Switch
-                      checked={autoRefresh === "true"}
+                      checked={shouldAutoRefresh}
                       onCheckedChange={(checked) =>
                         setQueryParams({
                           autoRefresh: checked ? "true" : "false",
@@ -267,7 +278,7 @@ export function ManageQueuePage({
           onTabChange={(tab) => {
             navigate(tab, {
               query: {
-                autoRefresh,
+                autoRefresh: shouldAutoRefresh.toString(),
               },
             });
           }}
@@ -275,6 +286,48 @@ export function ManageQueuePage({
         />
       </div>
     </Page>
+  );
+}
+
+function QueueManagementSkeleton() {
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Header Section */}
+      <div className="flex justify-between gap-3">
+        <div className="flex gap-2 items-center">
+          <Skeleton className="size-10 rounded-md" />
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+        </div>
+        <div className="flex gap-5 items-center">
+          <div className="hidden sm:flex items-center gap-2">
+            <Skeleton className="h-5 w-10 rounded-full" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+          <Skeleton className="size-10 rounded-md" />
+        </div>
+      </div>
+
+      {/* Tabs Section */}
+      <div className="flex flex-col gap-4">
+        <div className="flex gap-4 border-b">
+          <Skeleton className="h-10 w-32 mb-[-1px]" />
+          <Skeleton className="h-10 w-32 mb-[-1px]" />
+        </div>
+
+        {/* Content Area */}
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-full rounded-lg" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Skeleton className="h-64 w-full rounded-lg" />
+            <Skeleton className="h-64 w-full rounded-lg" />
+            <Skeleton className="h-64 w-full rounded-lg" />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -290,7 +343,21 @@ function ManageServicePointsDialog({
     useQueueServicePoints();
 
   if (!allServicePoints) {
-    return <Loading />;
+    return (
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <Skeleton className="h-6 w-48" />
+        </DialogHeader>
+        <div className="space-y-2">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="flex items-center space-x-3 p-3">
+              <Skeleton className="size-4 rounded" />
+              <Skeleton className="h-4 flex-1" />
+            </div>
+          ))}
+        </div>
+      </DialogContent>
+    );
   }
 
   return (

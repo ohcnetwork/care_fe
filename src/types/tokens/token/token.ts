@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
-import { PatientRead } from "@/types/emr/patient/patient";
+import { EncounterListRead } from "@/types/emr/encounter/encounter";
+import { PatientListRead } from "@/types/emr/patient/patient";
 import {
   Appointment,
   SchedulableResourceType,
@@ -18,6 +19,18 @@ export enum TokenStatus {
   CANCELLED = "CANCELLED",
   ENTERED_IN_ERROR = "ENTERED_IN_ERROR",
 }
+
+export const TokenActiveStatuses: TokenStatus[] = [
+  TokenStatus.UNFULFILLED,
+  TokenStatus.CREATED,
+  TokenStatus.IN_PROGRESS,
+];
+
+export const TokenFinalStatuses: TokenStatus[] = [
+  TokenStatus.FULFILLED,
+  TokenStatus.CANCELLED,
+  TokenStatus.ENTERED_IN_ERROR,
+];
 
 export const TOKEN_STATUS_COLORS = {
   UNFULFILLED: "secondary",
@@ -58,7 +71,7 @@ export interface TokenRead extends Token {
   category: TokenCategoryRead;
   sub_queue?: TokenSubQueueRead;
   note: string;
-  patient?: PatientRead;
+  patient?: PatientListRead;
   number: number;
   status: TokenStatus;
   queue: TokenQueueRead;
@@ -68,6 +81,7 @@ export type TokenRetrieve = TokenRead & {
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
   booking?: Appointment;
+  encounter?: EncounterListRead;
 } & ScheduleResource;
 
 export function renderTokenNumber(token: TokenRead) {

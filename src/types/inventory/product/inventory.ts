@@ -1,5 +1,5 @@
 import { ProductRead } from "@/types/inventory/product/product";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 
 export const InventoryStatusOptions = [
   "active",
@@ -15,13 +15,13 @@ interface InventoryBase {
 
 export interface InventoryRead extends InventoryBase {
   id: string;
-  net_content: number;
+  net_content: string;
   product: ProductRead;
-  location: LocationList;
+  location: LocationRead;
 }
 
 export interface InventoryRetrieve extends InventoryRead {
-  location: LocationList;
+  location: LocationRead;
 }
 
 export type InventoryWrite = InventoryBase;

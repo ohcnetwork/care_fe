@@ -131,8 +131,7 @@ export default function CreateTokenForm({
     }),
     onSuccess: (data: TokenRead) => {
       toast.success(t("token_created"));
-      setIsOpen(false);
-      form.reset();
+      handleOpenChange(false);
       queryClient.invalidateQueries({
         queryKey: ["tokens", patient?.id, facilityId],
       });
@@ -141,7 +140,7 @@ export default function CreateTokenForm({
         navigate(`/facility/${facilityId}/patients/verify`, {
           query: {
             phone_number: patient?.phone_number,
-            year_of_birth: patient?.year_of_birth.toString(),
+            year_of_birth: patient?.year_of_birth?.toString() ?? "",
             partial_id: patient?.id.slice(0, 5),
             queue_id: data.queue.id,
             token_id: data.id,

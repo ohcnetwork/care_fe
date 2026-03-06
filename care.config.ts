@@ -1,3 +1,5 @@
+import { booleanFromString } from "@/common/utils";
+import { PaymentReconciliationPaymentMethod } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import {
   ENCOUNTER_CLASS,
   EncounterClass,
@@ -5,6 +7,7 @@ import {
 } from "@/types/emr/encounter/encounter";
 
 import { NonEmptyArray } from "@/Utils/types";
+import Decimal from "decimal.js";
 import { CountryCode } from "libphonenumber-js/types.cjs";
 
 const env = import.meta.env;
@@ -13,12 +16,6 @@ interface ILogo {
   light: string;
   dark: string;
 }
-
-const boolean = (key: string, fallback = false) => {
-  if (env[key] === "true") return true;
-  if (env[key] === "false") return false;
-  return fallback;
-};
 
 const logo = (value?: string, fallback?: ILogo) => {
   if (!value) {
@@ -32,8 +29,29 @@ const logo = (value?: string, fallback?: ILogo) => {
   }
 };
 
+/**
+ * Parse API URL map from environment variable.
+ * Maps frontend origins (including port) to backend URLs.
+ * Example: '{"http://localhost:3000": "http://careapi.localhost"}'
+ */
+const apiUrlMap: Record<string, string> = env.REACT_CARE_URL_MAP
+  ? JSON.parse(env.REACT_CARE_URL_MAP)
+  : {};
+
+/**
+ * Resolve API URL based on current origin.
+ * Priority: mapped URL for current origin > REACT_CARE_API_URL fallback
+ */
+const resolveApiUrl = (): string => {
+  if (typeof window !== "undefined") {
+    const mappedUrl = apiUrlMap[window.location.origin];
+    if (mappedUrl) return mappedUrl;
+  }
+  return env.REACT_CARE_API_URL ?? "";
+};
+
 const careConfig = {
-  apiUrl: env.REACT_CARE_API_URL,
+  apiUrl: resolveApiUrl(),
   sbomBaseUrl: env.REACT_SBOM_BASE_URL || "https://sbom.ohc.network",
   urls: {
     github: env.REACT_GITHUB_URL || "https://github.com/ohcnetwork",
@@ -102,16 +120,53 @@ const careConfig = {
       : 0,
 
     // Kill switch in-case the heatmap API doesn't scale as expected
-    useAvailabilityStatsAPI: boolean(
-      "REACT_APPOINTMENTS_USE_AVAILABILITY_STATS_API",
+    useAvailabilityStatsAPI: booleanFromString(
+      env.REACT_APPOINTMENTS_USE_AVAILABILITY_STATS_API,
       true,
     ),
   },
 
   /**
+   * Auto refresh interval in milliseconds
+   */
+  appointmentAndQueueRefreshInterval:
+    parseInt(env.REACT_AUTO_REFRESH_INTERVAL || "10", 10) * 1000,
+
+  /**
+   * App update check interval in milliseconds (env var in seconds, default: 86400 seconds = 24 hours)
+   * Clamped to minimum 60 seconds to prevent accidental hot polling
+   */
+  appUpdateCheckInterval:
+    Math.max(parseInt(env.REACT_APP_UPDATE_CHECK_INTERVAL || "86400", 10), 60) *
+    1000,
+
+  /**
    * Flag to make location field mandatory for payment reconciliation
    */
-  paymentLocationRequired: boolean("REACT_PAYMENT_LOCATION_REQUIRED", true),
+  paymentLocationRequired: booleanFromString(
+    env.REACT_PAYMENT_LOCATION_REQUIRED,
+    true,
+  ),
+
+  /**
+   * Default payment method to preselect when recording a new payment
+   * Valid values: cash, ccca, cchk, cdac, chck, ddpo, debc
+   */
+  defaultPaymentMethod: (() => {
+    const method = env.REACT_DEFAULT_PAYMENT_METHOD;
+    if (!method) return undefined;
+
+    // Validate the payment method value
+    const validMethods = Object.values(PaymentReconciliationPaymentMethod);
+    if (validMethods.includes(method as PaymentReconciliationPaymentMethod)) {
+      return method as PaymentReconciliationPaymentMethod;
+    }
+
+    console.warn(
+      `Invalid REACT_DEFAULT_PAYMENT_METHOD: "${method}". Valid values are: ${validMethods.join(", ")}`,
+    );
+    return undefined;
+  })(),
 
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
@@ -160,7 +215,18 @@ const careConfig = {
   /**
    * Disable patient login if set to "true"
    */
-  disablePatientLogin: boolean("REACT_DISABLE_PATIENT_LOGIN", false),
+  disablePatientLogin: booleanFromString(
+    env.REACT_DISABLE_PATIENT_LOGIN,
+    false,
+  ),
+
+  /**
+   * Enable auto refresh if set to "true"
+   */
+  enableAutoRefresh: booleanFromString(
+    env.REACT_AUTO_REFRESH_BY_DEFAULT,
+    false,
+  ),
 
   patientRegistration: {
     /**
@@ -179,8 +245,8 @@ const careConfig = {
 
     defaultGeoOrganization: env.REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG,
 
-    minimalPatientRegistration: boolean(
-      "REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION",
+    minimalPatientRegistration: booleanFromString(
+      env.REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION,
       false,
     ),
   },
@@ -204,10 +270,91 @@ const careConfig = {
   /**
    * Enable automatic invoice sheet after dispensing items
    */
-  enableAutoInvoiceAfterDispense: boolean(
-    "REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE",
+  enableAutoInvoiceAfterDispense: booleanFromString(
+    env.REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE,
     false,
   ),
+
+  /**
+   * Show token generation button in patient home if set to "true"
+   */
+  enableTokenGenerationInPatientHome: booleanFromString(
+    env.REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME,
+    false,
+  ),
+
+  /**
+   * Default state for tax inclusive pricing in inventory
+   * When true, base price is calculated from MRP by removing tax
+   */
+  inventory: {
+    defaultTaxInclusive: booleanFromString(
+      env.REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE,
+      false,
+    ),
+    /**
+     * Number of months offset for expiry restriction.
+     * 0 = current month, 1 = next month, etc.
+     * Products expiring before the end of (current month + offset) will be restricted.
+     * Set to null (default) to disable expiry restriction entirely.
+     */
+    expiryMonthOffset: env.REACT_INVENTORY_EXPIRY_MONTH_OFFSET
+      ? parseInt(env.REACT_INVENTORY_EXPIRY_MONTH_OFFSET, 10)
+      : null,
+  },
+
+  /**
+   * Open schedule window automatically after patient registration if set to "true"
+   */
+  openScheduleAfterPatientRegistration: booleanFromString(
+    env.REACT_OPEN_SCHEDULE_AFTER_PATIENT_REGISTRATION,
+    false,
+  ),
+
+  /**
+   * Decimal calculation configuration
+   */
+  decimal: {
+    /**
+     * Maximum precision for decimal calculations (max_digits in backend)
+     */
+    precision: env.REACT_DECIMAL_PRECISION
+      ? parseInt(env.REACT_DECIMAL_PRECISION, 10)
+      : 20,
+
+    /**
+     * Accounting display precision
+     * Matches backend `ACCOUNTING_PRECISION` config
+     */
+    accountingPrecision: env.REACT_ACCOUNTING_PRECISION
+      ? parseInt(env.REACT_ACCOUNTING_PRECISION, 10)
+      : 2,
+
+    /**
+     * Rounding method for decimal calculations
+     * Matches backend `DECIMAL_ROUNDING_METHOD` config
+     */
+    rounding: (() => {
+      const method = (env.REACT_DECIMAL_ROUNDING_METHOD || "ROUND_HALF_UP") as
+        | "ROUND_UP"
+        | "ROUND_DOWN"
+        | "ROUND_CEIL"
+        | "ROUND_FLOOR"
+        | "ROUND_HALF_UP"
+        | "ROUND_HALF_DOWN"
+        | "ROUND_HALF_EVEN"
+        | "ROUND_HALF_CEIL"
+        | "ROUND_HALF_FLOOR";
+      return Decimal[method] as Decimal.Rounding;
+    })(),
+  },
+
+  /**
+   * Maximum number of forms that can be favorited in the forms dialog
+   */
+  maxFormDialogFavorites: env.REACT_MAX_FORM_DIALOG_FAVORITES
+    ? parseInt(env.REACT_MAX_FORM_DIALOG_FAVORITES, 10)
+    : 5,
 } as const;
 
 export default careConfig;

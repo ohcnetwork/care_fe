@@ -53,7 +53,7 @@ import {
   RequestOrderStatus,
 } from "@/types/inventory/requestOrder/requestOrder";
 import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 import organizationApi from "@/types/organization/organizationApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -143,13 +143,13 @@ export default function RequestOrderForm({
     queryFn: query.debounced(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
-        search: searchDeliveryFrom,
+        name: searchDeliveryFrom,
         limit: 100,
         mode: "kind",
         ordering: "sort_index",
       },
     }),
-    select: (data: PaginatedResponse<LocationList>) => {
+    select: (data: PaginatedResponse<LocationRead>) => {
       // Filter out the current location
       return data.results.filter((location) => location.id !== locationId);
     },

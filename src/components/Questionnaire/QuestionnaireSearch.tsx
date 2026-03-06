@@ -32,14 +32,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { conditionalAttribute, isAppleDevice } from "@/Utils/utils";
-import type { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
+import { conditionalAttribute } from "@/Utils/utils";
+import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 interface QuestionnaireSearchProps {
   placeholder?: string;
   trigger?: React.ReactNode;
-  onSelect?: (questionnaire: QuestionnaireDetail) => void;
+  onSelect?: (questionnaire: QuestionnaireRead) => void;
   subjectType?: string;
   disabled?: boolean;
   size?: React.ComponentProps<typeof Button>["size"];
@@ -84,7 +84,7 @@ export function QuestionnaireSearch({
         placeholder={t("search_forms")}
         className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
         onValueChange={setSearch}
-        autoFocus={!isAppleDevice}
+        autoFocus
       />
       <CommandList className="overflow-y-auto">
         <CommandEmpty>
@@ -100,7 +100,7 @@ export function QuestionnaireSearch({
         </CommandEmpty>
 
         <CommandGroup>
-          {(questionnaires?.results ?? []).map((item: QuestionnaireDetail) => (
+          {(questionnaires?.results ?? []).map((item: QuestionnaireRead) => (
             <CommandItem
               key={item.id}
               value={item.title}

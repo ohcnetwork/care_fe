@@ -5,7 +5,7 @@ import { useLocationState } from "@/hooks/useLocationState";
 
 import query from "@/Utils/request/query";
 import LocationContent from "@/pages/Facility/locations/LocationContent";
-import { LocationList as LocationListType } from "@/types/location/location";
+import { LocationRead as LocationListType } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 export default function BedsList({
@@ -21,6 +21,7 @@ export default function BedsList({
     searchQuery,
     currentPage,
     handleLocationSelect,
+    setSelectedLocation,
     handleSearchChange,
     handlePageChange,
   } = useLocationState(`/facility/${facilityId}/locations`, "beds", locationId);
@@ -43,9 +44,9 @@ export default function BedsList({
         has_children: false, // Since this is a detail view, we assume no children initially
         current_encounter: undefined, // LocationDetail doesn't have this field
       };
-      handleLocationSelect(locationList);
+      setSelectedLocation(locationList);
     }
-  }, [locationDetail, handleLocationSelect]);
+  }, [locationDetail, setSelectedLocation]);
 
   return (
     <div className="flex px-4 space-x-4 min-h-[calc(100vh-10rem)]">

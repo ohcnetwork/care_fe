@@ -36,7 +36,7 @@ export type QuestionnaireSubmitResultValue = {
 // Based on backend Component
 export interface ObservationComponent {
   value: QuestionnaireSubmitResultValue;
-  interpretation?: string | null;
+  interpretation?: Interpretation;
   reference_range?: ObservationReferenceRange[];
   code?: Code | null;
   note?: string;
@@ -65,28 +65,61 @@ export interface ObservationBase {
   body_site?: Code | null; // ValueSetBoundCoding<...>
   method?: Code | null; // ValueSetBoundCoding<...>
   reference_range?: ObservationReferenceRange[];
-  interpretation?: string | null;
+  interpretation?: Interpretation;
   parent?: string | null; // UUID4 | null
   questionnaire_response?: string | null; // UUID4 | null
   component?: ObservationComponent[];
 }
 
-export interface ObservationRead extends ObservationBase {
+export interface ObservationListRead extends ObservationBase {
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
   data_entered_by?: UserReadMinimal | null;
+}
+
+export interface ObservationRead extends ObservationListRead {
   observation_definition?: ObservationDefinitionReadSpec | null;
 }
 
 export type ObservationCreate = Omit<ObservationBase, "id">;
 
-export interface ObservationUpdate {
-  observation_id: string;
-  observation: Partial<ObservationCreate>;
+export type ObservationUpsert = Omit<
+  ObservationBase,
+  "id" | "encounter" | "subject_type"
+>;
+
+export interface ObservationAnalyzeRequest {
+  codes: Code[];
+  page_size?: number;
 }
 
-export interface ObservationFromDefinitionCreate {
-  observation_definition?: string;
-  observation_id?: string;
-  observation: Partial<ObservationCreate>;
+export interface ObservationAnalyzeGroup {
+  code: Code;
+  results: ObservationListRead[];
 }
+export interface ObservationAnalyzeResponse {
+  results: ObservationAnalyzeGroup[];
+}
+
+export interface ObservationUpsertRequest {
+  observation: ObservationUpsert;
+  observation_id?: string | null;
+  observation_definition?: string | null;
+}
+
+export interface ObservationBatchUpsertRequest {
+  observations: ObservationUpsertRequest[];
+}
+
+export interface ObservationBatchUpsertResponse {
+  message: string;
+}
+
+export type ObservationPlotConfig = {
+  id: string;
+  name: string;
+  groups: {
+    title: string;
+    codes: Code[];
+  }[];
+}[];

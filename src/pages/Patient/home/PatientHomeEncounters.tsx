@@ -9,6 +9,7 @@ import { TimelineWrapper } from "@/components/Common/TimelineWrapper";
 import { TimelineEncounterCard } from "@/components/Facility/EncounterCard";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EncounterListRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import query from "@/Utils/request/query";
 
@@ -17,6 +18,7 @@ interface PatientHomeEncountersProps {
   facilityId: string;
   facilityPermissions: string[];
   canListEncounters: boolean;
+  actions?: (encounter: EncounterListRead) => React.ReactNode;
 }
 
 export default function PatientHomeEncounters({
@@ -24,6 +26,7 @@ export default function PatientHomeEncounters({
   facilityId,
   facilityPermissions,
   canListEncounters,
+  actions,
 }: PatientHomeEncountersProps) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("active");
@@ -58,7 +61,7 @@ export default function PatientHomeEncounters({
     if (encounters?.results && encounters.results.length > 0) {
       return (
         <TimelineWrapper>
-          {encounters.results.map((encounter, index) => (
+          {encounters.results.map((encounter) => (
             <TimelineEncounterCard
               encounter={encounter}
               key={encounter.id}
@@ -66,8 +69,7 @@ export default function PatientHomeEncounters({
               facilityId={
                 encounter.facility.id === facilityId ? facilityId : undefined
               }
-              isLast={index === encounters.results.length - 1}
-              isFirst={index === 0}
+              actions={actions?.(encounter)}
             />
           ))}
           <div className="flex items-center justify-center">

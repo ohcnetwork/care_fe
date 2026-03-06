@@ -2,7 +2,7 @@ import { CheckIcon } from "@radix-ui/react-icons";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { addDays, differenceInDays } from "date-fns";
 import { TFunction } from "i18next";
-import { FilterIcon } from "lucide-react";
+import { FilterIcon, InfoIcon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -39,6 +39,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSidebar } from "@/components/ui/sidebar";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -83,6 +84,7 @@ import {
   formatPatientAge,
 } from "@/Utils/utils";
 
+import { booleanFromString } from "@/common/utils";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import {
   dateFilter,
@@ -94,8 +96,15 @@ import {
   FilterDateRange,
   shortDateRangeOptions,
 } from "@/components/ui/multi-filter/utils/Utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAuthUser from "@/hooks/useAuthUser";
+import { renderTokenNumber } from "@/types/tokens/token/token";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import careConfig from "@careConfig";
 import { PractitionerSelector } from "./components/PractitionerSelector";
@@ -318,6 +327,11 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
     return <Loading />;
   }
 
+  const shouldAutoRefresh = booleanFromString(
+    qParams.autoRefresh ?? "",
+    careConfig.enableAutoRefresh,
+  );
+
   return (
     <Page
       title={t("appointments")}
@@ -378,6 +392,32 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <div className="flex items-center justify-between gap-2">
+            <Label className="text-sm font-medium">{t("auto_refresh")}</Label>
+            <Switch
+              checked={shouldAutoRefresh}
+              onCheckedChange={(checked) =>
+                updateQuery({
+                  autoRefresh: checked ? "true" : "false",
+                })
+              }
+            />
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="cursor-help hidden md:block">
+                    <InfoIcon className="size-4 text-gray-500" />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {t("auto_refresh_tooltip", {
+                    interval:
+                      careConfig.appointmentAndQueueRefreshInterval / 1000,
+                  })}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           {activeTab === "list" && (
             <Button
               variant="outline"
@@ -433,6 +473,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                 tags={selectedTags.map((tag) => tag.id)}
                 tags_behavior={qParams.tags_behavior}
                 patient={qParams.patient}
+                autoRefresh={shouldAutoRefresh}
               />
             ))}
           </div>
@@ -455,6 +496,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
           patient={qParams.patient}
           resourceType={resourceType}
           resourceIds={resourceId ? [resourceId] : practitionerIds}
+          autoRefresh={shouldAutoRefresh}
         />
       )}
     </Page>
@@ -472,6 +514,7 @@ function AppointmentColumn(props: {
   patient?: string;
   resourceType: SchedulableResourceType;
   resourceIds: string[];
+  autoRefresh: boolean;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -529,6 +572,8 @@ function AppointmentColumn(props: {
       return currentOffset < lastPage.count ? currentOffset : null;
     },
     enabled: !!props.resourceIds.length && props.canViewAppointments,
+    refetchInterval:
+      props.autoRefresh && careConfig.appointmentAndQueueRefreshInterval,
   });
 
   const appointments =
@@ -696,17 +741,23 @@ function AppointmentCard({
             )}
           </p>
         </div>
-
-        {appointment.token && (
-          <div className="flex">
-            <div className="bg-gray-100 px-2 py-1 ml-px text-center rounded-md">
-              <p className="text-[10px] uppercase">{t("token")}</p>
-              <p className="font-bold text-2xl uppercase">
-                {appointment.token?.number ?? "--"}
-              </p>
+        <div className="flex flex-col gap-2">
+          {patient.deceased_datetime && (
+            <Badge variant="destructive" className="h-5 justify-center text-xs">
+              {t("deceased")}
+            </Badge>
+          )}
+          {appointment.token && (
+            <div className="flex">
+              <div className="bg-gray-100 px-2 py-1 ml-px text-center rounded-md">
+                <p className="text-[10px] uppercase">{t("token")}</p>
+                <p className="font-bold text-lg uppercase">
+                  {renderTokenNumber(appointment.token)}
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       <div className="flex flex-wrap gap-1">
         {appointment.tags.map((tag) => (
@@ -761,6 +812,7 @@ function AppointmentRow(props: {
   patient?: string;
   resourceType: SchedulableResourceType;
   resourceIds: string[];
+  autoRefresh: boolean;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -797,6 +849,8 @@ function AppointmentRow(props: {
       },
     }),
     enabled: !!props.resourceIds.length && props.canViewAppointments,
+    refetchInterval:
+      props.autoRefresh && careConfig.appointmentAndQueueRefreshInterval,
   });
 
   const appointments = data?.results ?? [];
@@ -896,7 +950,7 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
 
   return (
     <>
-      <TableCell className="py-6 group-hover:bg-gray-100 bg-white rounded-l-lg">
+      <TableCell className="flex flex-row gap-2 py-6 group-hover:bg-gray-100 bg-white rounded-l-lg">
         <span className="flex flex-row items-center gap-2">
           <CareIcon
             icon="l-draggabledots"
@@ -910,6 +964,14 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
             </span>
           </span>
         </span>
+        {patient.deceased_datetime && (
+          <Badge
+            variant="destructive"
+            className="h-6 justify-center text-xs mt-1"
+          >
+            {t("deceased")}
+          </Badge>
+        )}
       </TableCell>
       {/* TODO: Replace with relevant information */}
       {appointment.resource_type === SchedulableResourceType.Practitioner && (
@@ -921,7 +983,7 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
         {t(appointment.status)}
       </TableCell>
       <TableCell className="py-6 group-hover:bg-gray-100 bg-white rounded-r-lg">
-        {appointment.token?.number ?? "--"}
+        {appointment.token ? renderTokenNumber(appointment.token) : "--"}
       </TableCell>
     </>
   );

@@ -5,10 +5,11 @@ import {
   EllipsisVertical,
   Hash,
   MoreVertical,
+  Printer,
   Truck,
 } from "lucide-react";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -44,9 +45,17 @@ import {
 import { EmptyState } from "@/components/ui/empty-state";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  getExtensionFieldsWithName,
+  getExtensionValue,
+  NamespacedExtensionData,
+} from "@/hooks/useExtensions";
+import useExtensionSchemas from "@/hooks/useExtensionSchemas";
 import { AddSupplyDeliveryForm } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/AddSupplyDeliveryForm";
+import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { SupplyDeliveryTable } from "@/pages/Facility/services/inventory/SupplyDeliveryTable";
+import { ExtensionEntityType } from "@/types/extensions/extensions";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
   DeliveryOrderRetrieve,
@@ -63,6 +72,7 @@ import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryAp
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatDateTime, formatName } from "@/Utils/utils";
 
 interface Props {
   facilityId: string;
@@ -73,7 +83,7 @@ interface Props {
 
 interface AllSupplyDeliveriesProps {
   facilityId: string;
-  deliveryOrder: any;
+  deliveryOrder: DeliveryOrderRetrieve;
   locationId: string;
   internal: boolean;
   isRequester: boolean;
@@ -139,6 +149,8 @@ function AllSupplyDeliveriesComponent({
             <SupplyDeliveryTable
               deliveries={allSupplyDeliveries.results}
               internal={internal}
+              facilityId={facilityId}
+              linkToProduct
             />
           </>
         ) : (
@@ -161,6 +173,18 @@ export function DeliveryOrderShow({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { getExtensions } = useExtensionSchemas();
+
+  const allExtensions = getExtensions(
+    ExtensionEntityType.supply_delivery_order,
+    "retrieve",
+  );
+
+  const extensionFields = useMemo(
+    () => getExtensionFieldsWithName(allExtensions),
+    [allExtensions],
+  );
+
   const [selectedDeliveries, setSelectedDeliveries] = useState<string[]>([]);
   const [confirmDialog, setConfirmDialog] = useState({
     open: false,
@@ -197,6 +221,7 @@ export function DeliveryOrderShow({
         queryParams: {
           order: deliveryOrderId,
           facility: facilityId,
+          ordering: "created_date",
         },
       }),
       enabled: !!deliveryOrderId,
@@ -272,6 +297,7 @@ export function DeliveryOrderShow({
         supplied_item_condition: delivery.supplied_item_condition,
         supplied_item_type: delivery.supplied_item_type,
         supply_request: delivery.supply_request?.id,
+        extensions: delivery.extensions,
       }));
 
     if (selectedSupplyDeliveries.length === 0) {
@@ -297,6 +323,7 @@ export function DeliveryOrderShow({
         supplied_item_condition: SupplyDeliveryCondition.damaged,
         supplied_item_type: delivery.supplied_item_type,
         supply_request: delivery.supply_request?.id,
+        extensions: delivery.extensions,
       }));
 
     if (selectedSupplyDeliveries.length === 0) {
@@ -324,6 +351,7 @@ export function DeliveryOrderShow({
         supplied_item_condition: confirmDialog.condition,
         supplied_item_type: delivery.supplied_item_type,
         supply_request: delivery.supply_request?.id,
+        extensions: delivery.extensions,
       }));
 
     upsertSupplyDeliveries({
@@ -383,12 +411,23 @@ export function DeliveryOrderShow({
       title={t("delivery_order_details")}
       hideTitleOnPage
       shortCutContext="facility:inventory:delivery"
-      className="max-w-7xl mx-auto"
+      className="max-w-[100vw] mx-auto"
     >
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-4">
-            <BackButton size="icon" className="shrink-0">
+            <BackButton
+              size="icon"
+              className="shrink-0"
+              to={getInventoryBasePath(
+                facilityId,
+                locationId,
+                internal,
+                false,
+                isRequester,
+                "",
+              )}
+            >
               <ChevronLeft />
             </BackButton>
             <div>
@@ -411,7 +450,14 @@ export function DeliveryOrderShow({
             </div>
           </div>
           <div className="flex items-center justify-end gap-2">
-            {!isRequester &&
+            <Button variant="outline" asChild>
+              <Link href={`${deliveryOrderId}/print`}>
+                <Printer className="size-4" /> {t("print")}
+                <ShortcutBadge actionId="print-delivery-order" />
+              </Link>
+            </Button>
+
+            {(!isRequester || !internal) &&
               deliveryOrder.status === DeliveryOrderStatus.draft && (
                 <Button variant="outline" asChild>
                   <Link href={`${deliveryOrderId}/edit`}>
@@ -440,7 +486,11 @@ export function DeliveryOrderShow({
                       DeliveryOrderStatus.completed,
                     )
                   }
-                  disabled={isUpdating || selectedDeliveries.length !== 0}
+                  disabled={
+                    isUpsertingDeliveries ||
+                    isUpdating ||
+                    selectedDeliveries.length !== 0
+                  }
                 >
                   {isUpdating ? t("updating") : t("mark_as_completed")}
                   <ShortcutBadge actionId="mark-as" />
@@ -556,7 +606,7 @@ export function DeliveryOrderShow({
               <div className="flex flex-wrap gap-1">
                 <div>
                   <label className="text-sm font-medium text-gray-700">
-                    {t("tags_other")}
+                    {t("tags_proper")}
                   </label>
                   <div className="flex flex-wrap gap-2">
                     <TagAssignmentSheet
@@ -593,6 +643,46 @@ export function DeliveryOrderShow({
                   </div>
                 </div>
               </div>
+
+              {extensionFields.map((field) => {
+                const value = getExtensionValue(
+                  deliveryOrder.extensions as NamespacedExtensionData,
+                  field.extensionName,
+                  field.name,
+                );
+                if (value === undefined || value === null) return null;
+
+                const displayValue =
+                  field.format === "date" || field.format === "date-time"
+                    ? formatDateTime(value as string)
+                    : String(value);
+
+                return (
+                  <div key={`${field.extensionName}-${field.name}`}>
+                    <label className="text-sm font-medium text-gray-700">
+                      {field.label}
+                    </label>
+                    <div className="text-lg font-semibold text-gray-950">
+                      {displayValue}
+                    </div>
+                  </div>
+                );
+              })}
+              {deliveryOrder.created_by && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    {t("created_by")}
+                  </label>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-md font-semibold text-gray-950">
+                      {formatName(deliveryOrder.created_by)}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {formatDateTime(deliveryOrder.created_date)}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

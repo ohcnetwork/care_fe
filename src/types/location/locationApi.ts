@@ -1,19 +1,19 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 
 import {
   LocationAssociation,
+  LocationAssociationRead,
   LocationAssociationRequest,
   LocationAssociationUpdate,
 } from "./association";
-import { LocationDetail, LocationList, LocationWrite } from "./location";
+import { LocationDetail, LocationRead, LocationWrite } from "./location";
 
 export default {
   list: {
     path: "/api/v1/facility/{facility_id}/location/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<LocationList>>(),
+    TRes: Type<PaginatedResponse<LocationRead>>(),
     defaultQueryParams: {
       ordering: "sort_index",
     },
@@ -71,7 +71,7 @@ export default {
   getAssociation: {
     path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/association/{external_id}/",
     method: HttpMethod.GET,
-    TRes: Type<LocationAssociation>(),
+    TRes: Type<LocationAssociationRead>(),
   },
   updateAssociation: {
     path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/association/{external_id}/",

@@ -46,11 +46,10 @@ import {
   SchedulableResourceType,
   formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
-import {
-  formatName,
-  getReadableDuration,
-  stringifyNestedObject,
-} from "@/Utils/utils";
+import scheduleApis from "@/types/scheduling/scheduleApi";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import { formatName, getReadableDuration } from "@/Utils/utils";
 import {
   AvatarIcon,
   CalendarIcon,
@@ -76,6 +75,7 @@ import {
   PrinterIcon,
   ReceiptText,
   SquareActivity,
+  Wallet,
   X,
 } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
@@ -111,10 +111,7 @@ import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
 import { FacilityRead } from "@/types/facility/facility";
-import scheduleApis from "@/types/scheduling/scheduleApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
@@ -130,6 +127,7 @@ export default function AppointmentDetail(props: Props) {
   const { goBack } = useAppHistory();
   const [params, setQueryParams] = useQueryParams();
   const { showSuccess } = params;
+  const [{ from_queue }] = useQueryParams();
 
   useShortcutSubContext("facility:appointment");
 
@@ -310,10 +308,7 @@ export default function AppointmentDetail(props: Props) {
             <h3 className="text-base font-semibold">{t("token")}</h3>
             {appointment.token?.number ? (
               <>
-                <div
-                  id="section-to-print"
-                  className="print:w-[400px] print:pt-4"
-                >
+                <div id="single-print">
                   <TokenCard
                     appointment={appointment}
                     token={appointment.token}
@@ -494,6 +489,7 @@ export default function AppointmentDetail(props: Props) {
                         facilityId={facilityId}
                         patientName={appointment.patient.name}
                         appointment={appointment.id}
+                        defaultOpen={from_queue === "true"}
                         defaultStatus={EncounterStatus.IN_PROGRESS}
                         trigger={
                           <QuickAction
@@ -521,12 +517,11 @@ export default function AppointmentDetail(props: Props) {
                       trigger={
                         <QuickAction
                           icon={<SquareActivity className="text-orange-500" />}
-                          title={t("create_encounter")}
+                          title={t("create_planned_encounter")}
                           actionId="create-encounter"
                         />
                       }
                       onSuccess={() => {
-                        console.log("invalidating appointment", appointment.id);
                         queryClient.invalidateQueries({
                           queryKey: ["appointment", appointment.id],
                         });
@@ -538,7 +533,16 @@ export default function AppointmentDetail(props: Props) {
                     icon={<PrinterIcon className="size-4" />}
                     title={t("print_appointment")}
                     actionId="print-appointment"
+                    basePath="/"
                     href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}/print`}
+                  />
+
+                  <QuickAction
+                    icon={<Wallet className="size-4" />}
+                    title={t("accounts")}
+                    actionId="goto-account"
+                    basePath="/"
+                    href={`/facility/${facilityId}/billing/account?status=active&patient_filter=${appointment.patient.id}&patient_name=${appointment.patient.name}`}
                   />
                 </div>
               </div>
@@ -569,6 +573,7 @@ const AppointmentDetailsContent = ({
         sourceUrl={`/facility/${facility.id}/patient/${appointment.patient.id}/appointments/${appointment.id}`}
         encounterId={appointment.associated_encounter?.id}
         viewOnly={true}
+        disableCreateChargeItems
       />
       <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
         <Card className="bg-white shadow-sm rounded-md p-1">
@@ -699,11 +704,6 @@ const AppointmentDetailsContent = ({
                       <span className="text-gray-500">
                         {t("no_address_provided")}
                       </span>
-                    )}
-                  </p>
-                  <p className="text-gray-600 break-words">
-                    {stringifyNestedObject(
-                      appointment.patient.geo_organization,
                     )}
                   </p>
                   <p className="text-gray-600">

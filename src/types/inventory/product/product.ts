@@ -22,16 +22,20 @@ export interface ProductBase {
   status: ProductStatusOptions;
   batch?: ProductBatch;
   expiration_date?: string;
+  standard_pack_size?: number;
+  purchase_price?: number;
 }
 
 export interface ProductCreate extends Omit<ProductBase, "id"> {
   product_knowledge: string;
   charge_item_definition?: string;
+  extensions: Record<string, unknown>;
 }
 
 export interface ProductUpdate extends ProductBase {
   charge_item_definition?: string;
   product_knowledge: string;
+  extensions: Record<string, unknown>;
 }
 
 export interface ProductRead extends ProductBase {

@@ -1,5 +1,4 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 import {
   FacilityOrganizationCreate,
   FacilityOrganizationRead,
@@ -61,6 +60,18 @@ export default {
     path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/users/{userRoleId}/",
     method: HttpMethod.DELETE,
     TBody: Type<void>(),
+    TRes: Type<void>(),
+  },
+  addFavorite: {
+    path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/add_favorite/",
+    method: HttpMethod.POST,
+    TBody: Type<{ favorite_list?: string }>(),
+    TRes: Type<void>(),
+  },
+  removeFavorite: {
+    path: "/api/v1/facility/{facilityId}/organizations/{organizationId}/remove_favorite/",
+    method: HttpMethod.POST,
+    TBody: Type<{ favorite_list?: string }>(),
     TRes: Type<void>(),
   },
 };

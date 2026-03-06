@@ -17,21 +17,21 @@ import {
   ENCOUNTER_STATUS_COLORS,
   ENCOUNTER_STATUS_FILTER_COLORS,
   ENCOUNTER_STATUS_ICONS,
-  EncounterRead,
+  EncounterListRead,
 } from "@/types/emr/encounter/encounter";
 
 interface TimelineEncounterCardProps {
-  encounter: EncounterRead;
+  encounter: EncounterListRead;
   permissions: string[];
   facilityId?: string;
-  isLast?: boolean;
-  isFirst?: boolean;
+  actions?: React.ReactNode;
 }
 
 export function TimelineEncounterCard({
   encounter,
   permissions,
   facilityId,
+  actions,
 }: TimelineEncounterCardProps) {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
@@ -140,7 +140,7 @@ export function TimelineEncounterCard({
           )}
         </CardContent>
         <CardFooter className="p-1">
-          <div className="bg-gray-100 p-2 rounded-b-lg w-full">
+          <div className="flex justify-between bg-gray-100 p-2 rounded-b-lg w-full">
             <Button asChild variant="outline" disabled={!canAccess}>
               <Link
                 href={
@@ -152,6 +152,7 @@ export function TimelineEncounterCard({
                 {t("view_encounter")}
               </Link>
             </Button>
+            {actions}
           </div>
         </CardFooter>
       </Card>

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, MapPinIcon } from "lucide-react";
+import { Loader2, MapPinIcon, X } from "lucide-react";
 import { navigate, usePath } from "raviger";
 import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -29,10 +29,8 @@ import PaginationComponent from "@/components/Common/Pagination";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
-import { useShortcuts } from "@/context/ShortcutContext";
-
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
@@ -42,13 +40,13 @@ export function LocationSwitcher() {
   const { facilityId } = useCurrentLocation();
   const { location: extractedLocation } = useCurrentLocation();
   const { state } = useSidebar();
-  const [location, setLocation] = useState<LocationList | undefined>(undefined);
+  const [location, setLocation] = useState<LocationRead | undefined>(undefined);
   const [openDialog, setOpenDialog] = useState(false);
 
   const fallbackUrl = `/facility/${facilityId}/overview`;
 
   useEffect(() => {
-    setLocation(extractedLocation as unknown as LocationList);
+    setLocation(extractedLocation as unknown as LocationRead);
   }, [extractedLocation]);
 
   if (state === "collapsed") {
@@ -117,33 +115,22 @@ export function LocationSelectorDialog({
   onLocationSelect,
 }: {
   facilityId: string;
-  location: LocationList | undefined;
-  setLocation: (location: LocationList | undefined) => void;
+  location: LocationRead | undefined;
+  setLocation: (location: LocationRead | undefined) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
-  navigateUrl?: (location: LocationList) => string;
+  navigateUrl?: (location: LocationRead) => string;
   myLocations?: boolean;
-  onLocationSelect?: (location: LocationList) => void;
+  onLocationSelect?: (location: LocationRead) => void;
 }) {
   const { t } = useTranslation();
-  const shortcuts = useShortcuts();
-  const [locationLevel, setLocationLevel] = useState<LocationList[]>([]);
+  const [locationLevel, setLocationLevel] = useState<LocationRead[]>([]);
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const resultsPerPage = RESULTS_PER_PAGE_LIMIT;
   const path = usePath();
   const subPath =
     path?.match(/\/facility\/[^/]+\/locations\/[^/]+\/(.*)/)?.[1] || "";
-
-  // this for enabling keyboard shortcuts even when inside input fields
-  useEffect(() => {
-    if (open) {
-      shortcuts.setIgnoreInputFields(true);
-    }
-    return () => {
-      shortcuts.setIgnoreInputFields(false);
-    };
-  }, [open, shortcuts]);
 
   const currentParentId = locationLevel.length
     ? locationLevel[locationLevel.length - 1].id
@@ -173,7 +160,7 @@ export function LocationSelectorDialog({
     enabled: open,
   });
 
-  const handleSelect = (location: LocationList) => {
+  const handleSelect = (location: LocationRead) => {
     if (location.has_children) {
       setLocationLevel([...locationLevel, location]);
     } else {
@@ -183,27 +170,24 @@ export function LocationSelectorDialog({
     setCurrentPage(1);
   };
 
-  const handleConfirmSelection = (newLocation: LocationList) => {
-    const oldLocationId = location?.id;
+  const handleConfirmSelection = (newLocation: LocationRead) => {
     setLocation(newLocation);
     setLocationLevel([]);
     setOpen(false);
     setSearchValue("");
     setCurrentPage(1);
-    if (newLocation.id !== oldLocationId) {
-      if (onLocationSelect) {
-        onLocationSelect(newLocation);
-      } else if (navigateUrl) {
-        navigate(navigateUrl(newLocation));
-      } else {
-        navigate(
-          `/facility/${facilityId}/locations/${newLocation.id}/${subPath}`,
-        );
-      }
+    if (onLocationSelect) {
+      onLocationSelect(newLocation);
+    } else if (navigateUrl) {
+      navigate(navigateUrl(newLocation));
+    } else {
+      navigate(
+        `/facility/${facilityId}/locations/${newLocation.id}/${subPath}`,
+      );
     }
   };
 
-  const handleLocationClick = (location: LocationList) => {
+  const handleLocationClick = (location: LocationRead) => {
     let currentLocation = location;
     const locationList = [location];
     while (currentLocation?.parent && currentLocation.parent.id) {
@@ -215,9 +199,15 @@ export function LocationSelectorDialog({
     setCurrentPage(1);
   };
 
-  useKeyboardShortcut(["Shift", "Enter"], () => {
-    handleConfirmSelection(locationLevel[locationLevel.length - 1]);
-  });
+  useKeyboardShortcut(
+    ["Shift", "Enter"],
+    () => {
+      if (open && locationLevel.length > 0) {
+        handleConfirmSelection(locationLevel[locationLevel.length - 1]);
+      }
+    },
+    { ignoreInputFields: false },
+  );
 
   const getCurrentLocation = () => {
     if (!location) return <></>;
@@ -235,7 +225,7 @@ export function LocationSelectorDialog({
             {locationList.map((location, index) => (
               <div
                 className="flex flex-row gap-1 items-center"
-                key={location?.id}
+                key={location.id}
               >
                 {location.has_children ? (
                   <Button
@@ -279,7 +269,7 @@ export function LocationSelectorDialog({
           <DialogTitle>{getCurrentLocation()}</DialogTitle>
         </DialogHeader>
         {locationLevel.length > 0 && (
-          <div className="flex flex-row justify-between gap-1 bg-gray-100 p-1">
+          <div className="flex flex-row justify-between gap-1 bg-gray-100 p-1 overflow-auto">
             <div className="flex flex-row gap-1 items-center">
               {locationLevel.map((level, index) => (
                 <>
@@ -309,37 +299,35 @@ export function LocationSelectorDialog({
             </div>
             <div className="flex flex-row gap-2">
               <Button
-                variant="link"
+                variant="ghost"
                 size="icon"
-                className="p-2 w-full"
                 onClick={() => {
                   setLocationLevel([]);
                   setSearchValue("");
                   setCurrentPage(1);
                 }}
+                aria-label={t("clear")}
               >
-                <CareIcon icon="l-multiply" />
-                <span>{t("clear")}</span>
+                <X />
               </Button>
               <Button
                 variant="primary"
-                size="icon"
-                className="p-2 w-full"
                 onClick={() =>
                   handleConfirmSelection(
                     locationLevel[locationLevel.length - 1],
                   )
                 }
               >
+                <span>{t("select")}</span>
                 <ShortcutBadge actionId="submit-action" />
               </Button>
             </div>
           </div>
         )}
-        <Command className="pt-3 pb-2" shouldFilter={false}>
+        <Command className="pt-3" shouldFilter={false}>
           <div className="border border-gray-200">
             <CommandInput
-              className="border-0 ring-0"
+              className="border-0 ring-0 sm:text-sm text-base"
               placeholder={t("search")}
               onValueChange={(value) => {
                 setSearchValue(value);
@@ -349,7 +337,6 @@ export function LocationSelectorDialog({
               autoFocus
             />
             <CommandList
-              className="max-h-[calc(100vh-30rem)]"
               onWheel={(e) => {
                 e.stopPropagation();
               }}
@@ -379,7 +366,7 @@ export function LocationSelectorDialog({
             </CommandList>
           </div>
         </Command>
-        <div className="flex w-full justify-center mt-4">
+        <div className="flex w-full justify-center">
           <PaginationComponent
             cPage={currentPage}
             defaultPerPage={resultsPerPage}
@@ -397,9 +384,9 @@ function LocationCommandItem({
   handleSelect,
   handleConfirmSelection,
 }: {
-  location: LocationList;
-  handleSelect: (location: LocationList) => void;
-  handleConfirmSelection: (location: LocationList) => void;
+  location: LocationRead;
+  handleSelect: (location: LocationRead) => void;
+  handleConfirmSelection: (location: LocationRead) => void;
 }) {
   const { t } = useTranslation();
   return (

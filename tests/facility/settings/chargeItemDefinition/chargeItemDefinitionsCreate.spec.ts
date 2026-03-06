@@ -32,9 +32,7 @@ test.describe("Charge Item Definition Creation", () => {
     await page.goto(
       `/facility/${facilityId}/settings/charge_item_definitions/`,
     );
-    await page
-      .getByRole("textbox", { name: "Search categories..." })
-      .fill(categoryName);
+    await page.getByRole("textbox", { name: "Search" }).fill(categoryName);
     await page.getByRole("heading", { name: categoryName }).click();
   });
 
@@ -80,10 +78,12 @@ test.describe("Charge Item Definition Creation", () => {
     );
     await expect(
       page.getByRole("textbox", { name: /base price/i }),
-    ).toHaveValue(basePrice);
+    ).toHaveValue(Number(basePrice).toFixed(2));
   });
 
   test("create charge item definition with all fields", async ({ page }) => {
+    const cgstRate = "9";
+    const sgstRate = "6";
     await page.getByRole("button", { name: /add definition/i }).click();
     await page.getByRole("textbox", { name: /title/i }).fill(title);
     await page.getByRole("textbox", { name: /slug/i }).fill(slug);
@@ -101,8 +101,28 @@ test.describe("Charge Item Definition Creation", () => {
       .filter({ hasText: /^Add tax$/ })
       .first()
       .click();
-    await page.locator("div").filter({ hasText: /^9 %$/ }).first().click();
-    await page.locator("div").filter({ hasText: /^6 %$/ }).nth(2).click();
+
+    await page
+      .getByRole("textbox", { name: "Search for tax code" })
+      .fill(cgstRate);
+
+    // Select 9% under CGST section - find exact "cgst" text, navigate to container, find radio button
+    await page
+      .getByText("cgst", { exact: true })
+      .locator("../..")
+      .locator(`button[role="radio"][value="${cgstRate}"]`)
+      .click();
+
+    await page
+      .getByRole("textbox", { name: "Search for tax code" })
+      .fill(sgstRate);
+
+    // Select 6% under SGST section - find exact "sgst" text, navigate to container, find radio button
+    await page
+      .getByText("sgst", { exact: true })
+      .locator("../..")
+      .locator(`button[role="radio"][value="${sgstRate}"]`)
+      .click();
     const doneButton = page.getByRole("button", { name: "Done" });
     await doneButton.scrollIntoViewIfNeeded();
     await doneButton.click();
@@ -114,10 +134,18 @@ test.describe("Charge Item Definition Creation", () => {
       .click();
     await page.getByRole("checkbox").first().click();
     await page.getByRole("button", { name: "Done" }).click();
+    const switchElement = page.getByRole("switch", {
+      name: "Use facility global value",
+    });
+    if (await switchElement.isChecked()) {
+      await switchElement.click();
+    }
+    await page.waitForLoadState("networkidle");
     await page.getByRole("button", { name: "Add Condition" }).click();
+    // To do: make this metric agnostic/otherwise might have to adjust everytime we add a new metric
     await page
       .getByRole("combobox")
-      .filter({ hasText: /^Metric|Patient Age$/ })
+      .filter({ hasText: /^Metric|Encounter/ })
       .click();
     await page.getByRole("option", { name: "Patient Age" }).click();
     await page.getByRole("combobox").filter({ hasText: "In range" }).click();
@@ -138,12 +166,12 @@ test.describe("Charge Item Definition Creation", () => {
     await page.getByRole("link", { name: "View" }).click();
     await expect(page.getByRole("heading", { name: title })).toBeVisible();
     await expect(page.getByText(description)).toBeVisible();
-    await expect(page.getByText(purpose)).toBeVisible();
+    await expect(page.getByText(purpose).last()).toBeVisible();
     await expect(page.getByText(url)).toBeVisible();
     await expect(page.getByText(mrp)).toBeVisible();
     await expect(page.getByText(purchasePrice)).toBeVisible();
-    await expect(page.getByText("9%")).toBeVisible();
-    await expect(page.getByText("6%")).toBeVisible();
+    await expect(page.getByText("9.00%")).toBeVisible();
+    await expect(page.getByText("6.00%")).toBeVisible();
     await expect(
       page.getByText("Patient Age is in range 60 to 120 years"),
     ).toBeVisible();

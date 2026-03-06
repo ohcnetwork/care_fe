@@ -1,5 +1,4 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 
 import {
   SpecimenBase,
@@ -30,5 +29,11 @@ export default {
     path: "/api/v1/facility/{facilityId}/specimen/{specimenId}/",
     method: HttpMethod.GET,
     TRes: Type<SpecimenRead>(),
+  },
+  retrieveByAccessionIdentifier: {
+    path: "/api/v1/facility/{facilityId}/specimen/retrieve_by_accession_identifier/",
+    method: HttpMethod.POST,
+    TRes: Type<SpecimenRead>(),
+    TBody: Type<{ accession_identifier: string }>(),
   },
 };

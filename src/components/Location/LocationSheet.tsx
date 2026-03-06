@@ -1,9 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
+import { useMemo, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
@@ -15,52 +12,35 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import batchApi from "@/types/base/batch/batchApi";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
+import { LocationAssociationRead } from "@/types/location/association";
+import { LocationRead } from "@/types/location/location";
+
+import { useLocationAssignment } from "@/components/Location/hooks/useLocationAssignment";
+import { useLocationDialogs } from "@/components/Location/hooks/useLocationDialogs";
+import { useLocationMutations } from "@/components/Location/hooks/useLocationMutations";
+import { useLocationNavigation } from "@/components/Location/hooks/useLocationNavigation";
+import { LocationHistory as LocationHistoryComponent } from "@/components/Location/LocationHistory";
 import {
-  EncounterRead,
-  LocationHistory,
-} from "@/types/emr/encounter/encounter";
-import { LocationAssociationStatus } from "@/types/location/association";
-import { LocationList } from "@/types/location/location";
-import locationApi from "@/types/location/locationApi";
-
-import { LocationActionButtons } from "./LocationActionButtons";
-import { LocationCardWrapper } from "./LocationCardWrapper";
-import { LocationHistory as LocationHistoryComponent } from "./LocationHistory";
-import { LocationNavigation } from "./LocationNavigation";
-
-type LocationScreen = "view" | "assign" | "modify";
-type LocationAction = "move" | "complete" | "cancel" | "new";
-
-interface LocationTimeConfig {
-  start: Date;
-  end?: Date;
-  status: LocationAssociationStatus;
-}
-
-interface LocationSheetState {
-  screen: LocationScreen;
-  action: LocationAction;
-  timeConfig: LocationTimeConfig;
-}
-
-interface EditingState {
-  locationId: string | null;
-  timeConfig: LocationTimeConfig;
-}
+  completeCurrentLocationAssociation,
+  createDeleteLocationAssociationRequest,
+  createLocationAssociationRequest,
+  createLocationAssociationUpdateRequest,
+  createLocationHistoryFromBed,
+  createLocationUpdateOperationalStatusRequest,
+  getCurrentLocations,
+} from "@/components/Location/utils/locationHelpers";
+import { LocationAssignmentView } from "@/components/Location/views/LocationAssignmentView";
+import { LocationModifyView } from "@/components/Location/views/LocationModifyView";
 
 interface LocationSheetProps {
-  history: LocationHistory[];
+  history: LocationAssociationRead[];
   facilityId: string;
   encounter: EncounterRead;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultTab?: "assign" | "history";
 }
-
-const ITEMS_PER_PAGE = 20;
 
 export function LocationSheet({
   history,
@@ -71,206 +51,56 @@ export function LocationSheet({
   defaultTab = "assign",
 }: LocationSheetProps) {
   const { t } = useTranslation();
-  const [showDischargeDialog, setShowDischargeDialog] = useState(false);
-  const [showOccupiedDialog, setShowOccupiedDialog] = useState(false);
-  const [selectedDischargedBed, setSelectedDischargedBed] =
-    useState<LocationList | null>(null);
+  const [tab, setTab] = useState<"assign" | "history">(defaultTab);
 
-  const [selectedLocation, setSelectedLocation] = useState<LocationList | null>(
-    null,
+  // Custom hooks
+  const navigation = useLocationNavigation({ facilityId, open, tab });
+  const assignment = useLocationAssignment();
+  const dialogs = useLocationDialogs();
+  const mutations = useLocationMutations(encounter.id);
+
+  // Derived state
+  const { currentLocation, activeLocations, plannedLocations } = useMemo(
+    () => getCurrentLocations(encounter),
+    [encounter],
   );
-  const [locationHistory, setLocationHistory] = useState<LocationList[]>([]);
-  const [selectedBed, setSelectedBed] = useState<string | null>(null);
-  const [showAvailableOnly, setShowAvailableOnly] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [locationsPage, setLocationsPage] = useState(1);
-  const [bedsPage, setBedsPage] = useState(1);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [locationToDelete, setLocationToDelete] = useState<{
-    location: string;
-    id: string;
-  } | null>(null);
-  const [hasMoreLocations, setHasMoreLocations] = useState(true);
-  const [locationStatus, setLocationStatus] = useState<string | null>(null);
-  const [hasMoreBeds, setHasMoreBeds] = useState(true);
-  const queryClient = useQueryClient();
 
-  const initialState = {
-    screen: "assign" as LocationScreen,
-    action: "new" as LocationAction,
-    timeConfig: {
-      start: new Date(),
-      status: "active" as LocationAssociationStatus,
-    },
+  const selectedBedLocation = navigation.selectedBed
+    ? createLocationHistoryFromBed(
+        navigation.selectedBed,
+        assignment.sheetState.timeConfig,
+      )
+    : undefined;
+
+  // Reset handlers
+  const resetAll = () => {
+    navigation.resetNavigation();
+    assignment.resetToInitial();
   };
 
-  const initialEditingState = {
-    locationId: null,
-    timeConfig: {
-      start: new Date(),
-      status: "active" as LocationAssociationStatus,
-    },
-  };
-
-  const [sheetState, setSheetState] =
-    useState<LocationSheetState>(initialState);
-  const [editingState, setEditingState] =
-    useState<EditingState>(initialEditingState);
-
-  const [allLocations, setAllLocations] = useState<LocationList[]>([]);
-  const [allBeds, setAllBeds] = useState<LocationList[]>([]);
-
-  const resetStates = (type: "all" | "edit" = "all") => {
-    if (type === "all") {
-      setSelectedLocation(null);
-      setLocationHistory([]);
-      setSelectedBed(null);
-      setShowAvailableOnly(false);
-      setSearchTerm("");
-      setLocationsPage(1);
-      setBedsPage(1);
-      setAllLocations([]);
-      setAllBeds([]);
-      setHasMoreLocations(true);
-      setHasMoreBeds(true);
-      setSheetState(initialState);
-      setEditingState(initialEditingState);
-    } else {
-      setEditingState(initialEditingState);
+  const handleOpenChange = (open: boolean) => {
+    onOpenChange(open);
+    if (!open) {
+      resetAll();
     }
   };
 
-  const { data: locationsData, isLoading: isLoadingLocations } = useQuery({
-    queryKey: [
-      "locations",
-      facilityId,
-      locationsPage,
-      searchTerm,
-      selectedLocation?.id,
-    ],
-    queryFn: async ({ signal }) => {
-      const response = await query(locationApi.list, {
-        pathParams: { facility_id: facilityId },
-        queryParams: {
-          limit: ITEMS_PER_PAGE,
-          offset: (locationsPage - 1) * ITEMS_PER_PAGE,
-          name: searchTerm,
-          mode: "kind",
-          parent: selectedLocation?.id,
-          ...(!selectedLocation ? { mine: true } : {}),
-        },
-        signal,
-      })({ signal });
-      return response;
-    },
-  });
-
-  const { data: bedsData, isLoading: isLoadingBeds } = useQuery({
-    queryKey: [
-      "beds",
-      facilityId,
-      selectedLocation?.id,
-      bedsPage,
-      showAvailableOnly,
-      searchTerm,
-    ],
-    queryFn: async ({ signal }) => {
-      const response = await query(locationApi.list, {
-        pathParams: { facility_id: facilityId },
-        queryParams: {
-          limit: ITEMS_PER_PAGE,
-          offset: (bedsPage - 1) * ITEMS_PER_PAGE,
-          mode: "instance",
-          name: searchTerm,
-          parent: selectedLocation?.id,
-          available: showAvailableOnly ? "true" : undefined,
-          status: "active",
-          ...(!selectedLocation ? { mine: true } : {}),
-        },
-        signal,
-      })({ signal });
-      return response;
-    },
-    enabled: !!selectedLocation && !!facilityId,
-  });
-
-  useEffect(() => {
-    if (locationsData && open) {
-      if (locationsPage === 1) {
-        setAllLocations(locationsData.results);
-      } else {
-        setAllLocations((prev) => [...prev, ...locationsData.results]);
-      }
-      setHasMoreLocations(locationsData.count > locationsPage * ITEMS_PER_PAGE);
-    }
-  }, [locationsData, locationsPage, open]);
-
-  useEffect(() => {
-    if (bedsData) {
-      if (bedsPage === 1) {
-        setAllBeds(bedsData.results);
-      } else {
-        setAllBeds((prev) => [...prev, ...bedsData.results]);
-      }
-      setHasMoreBeds(bedsData.count > bedsPage * ITEMS_PER_PAGE);
-    }
-    setSelectedBed(null);
-  }, [bedsData, bedsPage]);
-
-  const handleLocationClick = (location: LocationList) => {
-    // Find the index of the clicked location in the history
-    const locationIndex = locationHistory.findIndex(
-      (loc) => loc.id === location.id,
-    );
-
-    if (locationIndex !== -1) {
-      // If location is in history, slice the history up to that point
-      setLocationHistory((prev) => prev.slice(0, locationIndex + 1));
-    } else {
-      // If it's a new location, append it to history
-      setLocationHistory((prev) => [...prev, location]);
-    }
-
-    setSelectedLocation(location);
-    setLocationsPage(1);
-    setBedsPage(1);
-    setAllLocations([]);
-    setAllBeds([]);
-    setSelectedBed(null);
-    setSearchTerm("");
-  };
-
-  const handleLoadMore = () => {
-    if (selectedLocation) {
-      setBedsPage((prev) => prev + 1);
-    } else {
-      setLocationsPage((prev) => prev + 1);
-    }
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLocationsPage(1);
-    setBedsPage(1);
-    setAllLocations([]);
-    setAllBeds([]);
-  };
-
-  const checkBedStatus = async (selectedBed: LocationList) => {
+  // Bed status check handler
+  const handleCheckBedStatus = (selectedBed: LocationRead) => {
     if (!selectedBed.current_encounter) return;
 
     if (selectedBed.current_encounter.status === "discharged") {
-      setSelectedDischargedBed(selectedBed);
-      setShowDischargeDialog(true);
+      dialogs.openDischargeDialog(selectedBed);
     } else {
-      setShowOccupiedDialog(true);
+      dialogs.openOccupiedDialog();
     }
   };
 
+  // Discharge dialog handler
   const handleDischargeConfirm = () => {
-    if (selectedDischargedBed) {
-      setSelectedBed(selectedDischargedBed.id);
-      setSheetState((prev) => ({
+    if (dialogs.selectedDischargedBed) {
+      navigation.setSelectedBed(dialogs.selectedDischargedBed);
+      assignment.setSheetState((prev) => ({
         ...prev,
         timeConfig: {
           start: new Date(),
@@ -279,569 +109,490 @@ export function LocationSheet({
         },
       }));
     }
-    setShowDischargeDialog(false);
-    setSelectedDischargedBed(null);
+    dialogs.closeDischargeDialog();
   };
 
-  const handleMoveToAnotherBed = () => {
-    setSheetState((prev) => ({
-      ...prev,
-      screen: "assign",
-      action: "move",
-      timeConfig: {
-        start: new Date(),
-        status: "active",
-      },
-    }));
+  // Assignment action handlers
+  const handleMove = () => {
+    assignment.startMove();
   };
 
-  const getCurrentLocations = () => {
-    const activeLocation = encounter.location_history.find(
-      (loc) => loc.status === "active",
+  const handleCompleteBedStay = (location: LocationAssociationRead) => {
+    assignment.startCompletingStay(
+      location.id,
+      new Date(location.start_datetime),
+      new Date(),
     );
-    const plannedLocations = encounter.location_history.filter(
-      (loc) => loc.status === "planned",
+  };
+
+  const handleUpdateTime = (location: LocationAssociationRead) => {
+    assignment.startEditingTime(
+      location.id,
+      new Date(location.start_datetime),
+      location.end_datetime ? new Date(location.end_datetime) : undefined,
+      location.status,
     );
-    return { activeLocation, plannedLocations };
   };
 
-  const handleCompleteBedStay = (location: LocationHistory) => {
-    if (!location) return;
-
-    setEditingState({
-      locationId: location.id,
-      timeConfig: {
-        start: new Date(location.start_datetime),
-        end: new Date(),
-        status: "completed",
-      },
-    });
+  const handleAssignNowPlanned = (plannedLocation: LocationAssociationRead) => {
+    assignment.startAssigningPlanned(plannedLocation.id, "active");
   };
 
-  const handleUpdateTime = (location: LocationHistory) => {
-    if (!location) return;
-
-    setEditingState({
-      locationId: location.id,
-      timeConfig: {
-        start: new Date(location.start_datetime),
-        end: location.end_datetime
-          ? new Date(location.end_datetime)
-          : undefined,
-        status: location.status as LocationAssociationStatus,
-      },
-    });
+  const handleCancelPlan = (
+    status: "active" | "planned",
+    locationToCancel: LocationAssociationRead,
+  ) => {
+    dialogs.openDeleteDialog(
+      locationToCancel.location.id,
+      locationToCancel.id,
+      status,
+    );
   };
 
-  const handleAssignNow = () => {
-    const currentLocation = getCurrentLocations().plannedLocations[0];
-    if (!currentLocation) return;
+  const handleConfirmDelete = async () => {
+    if (!dialogs.locationToDelete) return;
 
-    const timeConfig = {
-      start: new Date(),
-      status: "active" as LocationAssociationStatus,
-      end: undefined,
-    };
-
-    setSheetState((prev) => ({
-      ...prev,
-      screen: "modify",
-      action: "new",
-      timeConfig,
-    }));
-
-    setEditingState({
-      locationId: currentLocation.id,
-      timeConfig,
-    });
-  };
-  const { mutate: unlinkLocation } = useMutation({
-    mutationFn: ({ location, id }: { location: string; id: string }) => {
-      return mutate(locationApi.deleteAssociation, {
-        pathParams: {
-          facility_external_id: facilityId,
-          location_external_id: location,
-          external_id: id,
-        },
-      })({ encounter: encounter.id, status: "completed" });
-    },
-    onSuccess: () => {
-      if (locationStatus === "active") {
-        toast.success(t("bed_active_removed_due_to_error"));
-      } else {
-        toast.success(t("bed_planned_cancelled"));
-      }
-      queryClient.invalidateQueries({ queryKey: ["encounter", encounter.id] });
-    },
-    onError: () => {
-      toast.error(t("error_removing_bed_assignment"));
-    },
-  });
-  const handleCancelPlan = (status: "active" | "planned") => {
-    const { activeLocation, plannedLocations } = getCurrentLocations();
-    const locationToCancel =
-      status === "active" ? activeLocation : plannedLocations[0];
-
-    if (!locationToCancel) return;
-
-    setLocationToDelete({
-      location: locationToCancel.location.id,
-      id: locationToCancel.id,
-    });
-    setLocationStatus(status);
-    setShowDeleteDialog(true);
-    setSheetState((prev) => ({
-      ...prev,
-      screen: "assign",
-      action: "new",
-      timeConfig: {
-        start: new Date(locationToCancel.start_datetime),
-        end: new Date(),
-        status: "completed",
-      },
-    }));
-  };
-  const confirmDeletePlan = () => {
-    if (!locationToDelete) return;
-    unlinkLocation({
-      location: locationToDelete.location,
-      id: locationToDelete.id,
-    });
-    setShowDeleteDialog(false);
-    setLocationToDelete(null);
-  };
-  const handleConfirmTime = async () => {
     const requests = [];
-    const { activeLocation, plannedLocations } = getCurrentLocations();
-    const currentPlannedLocation = plannedLocations[0];
 
-    if (
-      activeLocation &&
-      ((sheetState.action === "move" &&
-        sheetState.timeConfig.status === "active") ||
-        sheetState.action === "complete" ||
-        (sheetState.action === "new" && currentPlannedLocation))
-    ) {
-      requests.push({
-        url: `/api/v1/facility/${facilityId}/location/${activeLocation.location.id}/association/${activeLocation.id}/`,
-        method: "PUT",
-        reference_id: "completeCurrentLocation",
-        body: {
-          encounter: encounter.id,
-          end_datetime: new Date().toISOString(),
-          status: "completed",
-          start_datetime: activeLocation.start_datetime,
-        },
-      });
-    }
+    // Find the location being deleted from history
+    const locationBeingDeleted = history.find(
+      (loc) => loc.id === dialogs.locationToDelete?.associationId,
+    );
 
-    if (sheetState.action === "new" && currentPlannedLocation) {
-      requests.push({
-        url: `/api/v1/facility/${facilityId}/location/${currentPlannedLocation.location.id}/association/${currentPlannedLocation.id}/`,
-        method: "PUT",
-        reference_id: "updatePlannedLocation",
-        body: {
-          encounter: encounter.id,
-          start_datetime: new Date().toISOString(),
-          status: "active" as LocationAssociationStatus,
-          end_datetime: null,
-        },
-      });
-    } else if (selectedBed) {
-      requests.push({
-        url: `/api/v1/facility/${facilityId}/location/${selectedBed}/association/`,
-        method: "POST",
-        reference_id: "createLocationAssociation",
-        body: {
-          encounter: encounter.id,
-          start_datetime: new Date(sheetState.timeConfig.start).toISOString(),
-          ...(sheetState.timeConfig.end && {
-            end_datetime: new Date(sheetState.timeConfig.end).toISOString(),
-          }),
-          status: sheetState.timeConfig.status,
-        },
-      });
-    }
-
-    if (requests.length === 0) {
-      toast.error(t("no_changes_to_save"));
-      return;
-    }
-
-    try {
-      await executeBatch({ requests });
-    } catch (error) {
-      console.error("Error executing batch request:", error);
-      toast.error(t("error_updating_location"));
-      return;
-    }
-  };
-
-  const handleCancelEdit = () => resetStates("edit");
-
-  const createLocationUpdateRequest = (
-    location: LocationHistory,
-    config: LocationTimeConfig,
-  ) => ({
-    url: `/api/v1/facility/${facilityId}/location/${location.location.id}/association/${location.id}/`,
-    method: "PUT" as const,
-    reference_id: "updateLocation",
-    body: {
-      encounter: encounter.id,
-      start_datetime: new Date(config.start).toISOString(),
-      ...(config.status === "active"
-        ? { end_datetime: null }
-        : config.end
-          ? {
-              end_datetime: new Date(config.end).toISOString(),
-            }
-          : {}),
-      status: config.status,
-    },
-  });
-
-  const handleConfirmEdit = async (location: LocationHistory) => {
-    const requests = [];
-    const { activeLocation } = getCurrentLocations();
-
-    // Determine if we're updating the currently active location
-    const isUpdatingActiveLocation =
-      activeLocation && activeLocation.id === location.id;
-
-    // Only complete the current active location if we're changing to a different location
-    // or changing the status from active to something else
-    if (
-      editingState.timeConfig.status === "active" &&
-      activeLocation &&
-      !isUpdatingActiveLocation
-    ) {
+    // Mark the deleted location as unoccupied
+    if (locationBeingDeleted) {
       requests.push(
-        createLocationUpdateRequest(activeLocation, {
-          start: new Date(activeLocation.start_datetime),
-          end: new Date(),
-          status: "completed",
-        }),
+        createLocationUpdateOperationalStatusRequest(
+          locationBeingDeleted.location,
+          facilityId,
+          "U",
+        ),
       );
     }
 
-    // Always update the selected location with new time settings
-    requests.push(
-      createLocationUpdateRequest(location, editingState.timeConfig),
-    );
-
-    try {
-      await executeBatch({ requests });
-      handleCancelEdit();
-    } catch (error) {
-      console.error("Error updating location:", error);
-      toast.error(t("error_updating_location"));
-    }
-  };
-
-  const renderScreen = () => {
-    const { activeLocation, plannedLocations } = getCurrentLocations();
-    const selectedBedDetails = selectedBed
-      ? allBeds.find((bed) => bed.id === selectedBed)
-      : null;
-
-    const selectedBedLocation: LocationHistory | undefined = selectedBedDetails
-      ? {
-          id: selectedBedDetails.id,
-          location: selectedBedDetails,
-          start_datetime: new Date(sheetState.timeConfig.start).toISOString(),
-          end_datetime: sheetState.timeConfig.end
-            ? new Date(sheetState.timeConfig.end).toISOString()
-            : undefined,
-          status: sheetState.timeConfig.status,
-        }
-      : undefined;
-
-    const renderLocationCard = (
-      locationHistory: LocationHistory,
-      status: LocationAssociationStatus,
-    ) => (
-      <LocationCardWrapper
-        key={locationHistory.id}
-        locationHistory={locationHistory}
-        status={status}
-        editingState={editingState}
-        setEditingState={setEditingState}
-        handleCancelEdit={handleCancelEdit}
-        handleConfirmEdit={handleConfirmEdit}
-        isPending={isPending}
-      >
-        {sheetState.action !== "move" && (
-          <div className="flex justify-end gap-2">
-            <LocationActionButtons
-              status={status}
-              location={locationHistory}
-              onMove={handleMoveToAnotherBed}
-              onComplete={
-                status === "active" ? handleCompleteBedStay : undefined
-              }
-              onUpdateTime={handleUpdateTime}
-              onCancel={() =>
-                status === "active" || status === "planned"
-                  ? handleCancelPlan(status)
-                  : undefined
-              }
-              onAssignNow={status === "planned" ? handleAssignNow : undefined}
-            />
-          </div>
-        )}
-      </LocationCardWrapper>
-    );
-
-    const locationCards = (
-      <>
-        {activeLocation && renderLocationCard(activeLocation, "active")}
-        {plannedLocations.map((location) =>
-          renderLocationCard(location, "planned"),
-        )}
-      </>
-    );
-
-    switch (sheetState.screen) {
-      case "modify":
-        return (
-          <div className="space-y-4">
-            {locationCards}
-            {selectedBedLocation &&
-            (sheetState.action === "new" || sheetState.action === "move") &&
-            !editingState.locationId ? (
-              <LocationCardWrapper
-                locationHistory={selectedBedLocation}
-                status={sheetState.timeConfig.status}
-                editingState={{
-                  locationId: selectedBedLocation.id,
-                  timeConfig: sheetState.timeConfig,
-                }}
-                setEditingState={(newState) => {
-                  if ("timeConfig" in newState) {
-                    setSheetState((prev) => ({
-                      ...prev,
-                      timeConfig: newState.timeConfig,
-                    }));
-                  } else {
-                    setSheetState((prev) => ({
-                      ...prev,
-                      timeConfig: (
-                        newState as (prev: EditingState) => EditingState
-                      )({
-                        locationId: selectedBedLocation.id,
-                        timeConfig: prev.timeConfig,
-                      }).timeConfig,
-                    }));
-                  }
-                }}
-                handleCancelEdit={() =>
-                  setSheetState((prev) => ({ ...prev, screen: "assign" }))
-                }
-                handleConfirmEdit={handleConfirmTime}
-                isPending={isPending}
-              />
-            ) : null}
-          </div>
-        );
-
-      case "assign":
-        if (
-          sheetState.action === "move" ||
-          (!activeLocation && !plannedLocations.length)
-        ) {
-          return (
-            <div className="space-y-2">
-              {locationCards}
-              <LocationNavigation
-                locations={allLocations}
-                beds={allBeds}
-                selectedLocation={selectedLocation}
-                locationHistory={locationHistory}
-                selectedBed={selectedBed}
-                showAvailableOnly={showAvailableOnly}
-                searchTerm={searchTerm}
-                isLoadingLocations={isLoadingLocations}
-                isLoadingBeds={isLoadingBeds}
-                hasMore={selectedLocation ? hasMoreBeds : hasMoreLocations}
-                onLocationClick={handleLocationClick}
-                onBedSelect={setSelectedBed}
-                onCheckBedStatus={checkBedStatus}
-                onSearchChange={setSearchTerm}
-                onSearch={handleSearch}
-                onShowAvailableChange={(value) => {
-                  setShowAvailableOnly(value);
-                  setBedsPage(1);
-                  setAllBeds([]);
-                }}
-                onLoadMore={handleLoadMore}
-                onClearSelection={() => setSelectedBed(null)}
-                onGoBack={goBack}
-              />
-
-              <div className="mt-8 flex justify-end gap-2">
-                <Button
-                  variant="outline"
-                  disabled={!selectedBed}
-                  onClick={() => {
-                    setSheetState((prev) => ({
-                      ...prev,
-                      screen: "modify",
-                      action: getCurrentLocations().activeLocation
-                        ? "move"
-                        : "new",
-                      timeConfig: {
-                        start: new Date(),
-                        end: new Date(),
-                        status: "planned",
-                      },
-                    }));
-                  }}
-                >
-                  {t("schedule_for_later")}
-                </Button>
-                <Button
-                  variant="primary"
-                  disabled={!selectedBed}
-                  onClick={() => {
-                    setSheetState((prev) => ({
-                      ...prev,
-                      screen: "modify",
-                      action: getCurrentLocations().activeLocation
-                        ? "move"
-                        : "new",
-                      timeConfig: {
-                        start: new Date(),
-                        status: "active",
-                      },
-                    }));
-                  }}
-                >
-                  {t("assign_bed_now")}
-                </Button>
-              </div>
-            </div>
+    if (locationBeingDeleted?.status === "active") {
+      activeLocations
+        .filter((loc) => loc.id !== locationBeingDeleted?.id)
+        .filter((loc) => loc.status === "reserved")
+        .forEach((reservedLocation) => {
+          requests.push(
+            createDeleteLocationAssociationRequest(
+              reservedLocation.location.id,
+              reservedLocation.id,
+              facilityId,
+            ),
           );
-        }
-
-        return <div className="space-y-2">{locationCards}</div>;
-
-      default:
-        return null;
+          requests.push(
+            createLocationUpdateOperationalStatusRequest(
+              reservedLocation.location,
+              facilityId,
+              "U",
+            ),
+          );
+        });
     }
+
+    // Delete the location association
+    requests.push(
+      createDeleteLocationAssociationRequest(
+        dialogs.locationToDelete.locationId,
+        dialogs.locationToDelete.associationId,
+        facilityId,
+      ),
+    );
+
+    // Execute all requests in batch
+    await mutations.executeBatch.mutateAsync({ requests });
+
+    dialogs.closeDeleteDialog();
   };
 
-  const { mutate: executeBatch, isPending } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
-    onSuccess: () => {
-      toast.success(t("bed_assigned_successfully"));
-      resetStates();
-      queryClient.invalidateQueries({
-        queryKey: ["encounter", encounter.id],
-      });
-    },
-    onError: (error) => {
-      // Type cast to access the results property safely
-      const errorData = error.cause as {
-        results?: Array<{
-          reference_id: string;
-          status_code: number;
-          data: {
-            errors?: Array<{
-              msg?: string;
-              error?: string;
-              type?: string;
-              loc?: string[];
-            }>;
-            non_field_errors?: string[];
-            detail?: string;
-          };
-        }>;
-      };
-
-      if (errorData?.results) {
-        // Filter results for error status codes
-        const failedResults = errorData.results.filter(
-          (result) => result.status_code !== 200,
+  // Confirm time for new/move assignment
+  const handleConfirmTime = async (
+    currentPlannedLocation?: LocationAssociationRead,
+  ) => {
+    const requests = [];
+    const selectedBed = navigation.selectedBed || navigation.selectedLinkedBed;
+    if (
+      currentLocation &&
+      ((assignment.sheetState.action === "move" &&
+        assignment.sheetState.timeConfig.status === "active") ||
+        assignment.sheetState.action === "complete" ||
+        (assignment.sheetState.action === "new" && currentPlannedLocation))
+    ) {
+      // Complete current location if keepBedActive is unchecked
+      if (!assignment.keepBedActive) {
+        requests.push(
+          completeCurrentLocationAssociation(
+            currentLocation,
+            facilityId,
+            encounter.id,
+            new Date(),
+          ),
         );
-
-        // Process each failed result to extract error messages
-        let errorDisplayed = false;
-        failedResults.forEach((result) => {
-          const errors = result.data?.errors || [];
-          const nonFieldErrors = result.data?.non_field_errors || [];
-          const detailError = result.data?.detail;
-
-          // Display each error message
-          errors.forEach((error) => {
-            const message = error.msg || error.error || t("validation_failed");
-            toast.error(message);
-            errorDisplayed = true;
-          });
-
-          // Display non-field errors
-          nonFieldErrors.forEach((message) => {
-            toast.error(message);
-            errorDisplayed = true;
-          });
-
-          // Display detail error if present
-          if (detailError) {
-            toast.error(detailError);
-            errorDisplayed = true;
-          }
-        });
-
-        // If no specific errors were found but we still had failures
-        if (failedResults.length > 0 && !errorDisplayed) {
-          toast.error(t("error_updating_location"));
-        }
-      } else {
-        // Generic error if we couldn't parse the error response
-        toast.error(t("error_updating_location"));
+        requests.push(
+          createLocationUpdateOperationalStatusRequest(
+            currentLocation.location,
+            facilityId,
+            "U",
+          ),
+        );
       }
-    },
-  });
+      // Update current location to reserved if keepBedActive is checked
+      else {
+        requests.push(
+          createLocationAssociationUpdateRequest(
+            currentLocation,
+            {
+              start: new Date(currentLocation.start_datetime),
+              end: undefined,
+              status: "reserved",
+            },
+            facilityId,
+            encounter.id,
+          ),
+        );
+      }
+    }
 
-  const goBack = () => {
-    if (sheetState.screen === "modify") {
-      setSheetState((prev) => ({
-        ...prev,
-        screen: "assign",
-        ...(sheetState.action === "new" && {
-          timeConfig: {
+    // Create new location association
+    if (selectedBed) {
+      requests.push(
+        createLocationAssociationRequest(
+          selectedBed.id,
+          assignment.sheetState.timeConfig,
+          facilityId,
+          encounter.id,
+        ),
+      );
+      // Mark location as occupied for active assignments
+      requests.push(
+        createLocationUpdateOperationalStatusRequest(
+          selectedBed as LocationRead,
+          facilityId,
+          "O",
+        ),
+      );
+    }
+    // Update planned location to active
+    else if (assignment.sheetState.action === "new" && currentPlannedLocation) {
+      requests.push(
+        createLocationAssociationUpdateRequest(
+          currentPlannedLocation,
+          {
             start: new Date(),
             status: "active",
           },
-        }),
-      }));
-    } else {
-      // When clicking the root breadcrumb, reset everything to initial state
-      setLocationHistory([]);
-      setSelectedLocation(null);
-      setSelectedBed(null);
-      setLocationsPage(1);
-      setAllLocations([]);
-      setHasMoreLocations(true);
-      setBedsPage(1);
-      setAllBeds([]);
-      setHasMoreBeds(true);
-      setSearchTerm("");
+          facilityId,
+          encounter.id,
+        ),
+      );
+      requests.push(
+        createLocationUpdateOperationalStatusRequest(
+          currentPlannedLocation.location,
+          facilityId,
+          "O",
+        ),
+      );
     }
-    setSelectedBed(null);
+
+    if (requests.length > 0) {
+      await mutations.executeBatch.mutateAsync({ requests });
+      resetAll();
+    }
+  };
+
+  // Confirm edit for existing location
+  const handleConfirmEdit = async (location: LocationAssociationRead) => {
+    const requests = [];
+
+    const isUpdatingActiveLocation =
+      currentLocation && currentLocation.id === location.id;
+
+    // Complete current location if changing to a different location or changing status
+    if (
+      assignment.editingState.timeConfig.status === "active" &&
+      currentLocation &&
+      !isUpdatingActiveLocation
+    ) {
+      if (!assignment.keepBedActive) {
+        requests.push(
+          completeCurrentLocationAssociation(
+            currentLocation,
+            facilityId,
+            encounter.id,
+            new Date(),
+          ),
+        );
+        requests.push(
+          createLocationUpdateOperationalStatusRequest(
+            currentLocation.location,
+            facilityId,
+            "U",
+          ),
+        );
+      } else {
+        requests.push(
+          createLocationAssociationUpdateRequest(
+            currentLocation,
+            { ...assignment.editingState.timeConfig, status: "reserved" },
+            facilityId,
+            encounter.id,
+          ),
+        );
+      }
+    }
+
+    // Update the selected location
+    requests.push(
+      createLocationAssociationUpdateRequest(
+        location,
+        assignment.editingState.timeConfig,
+        facilityId,
+        encounter.id,
+      ),
+    );
+
+    // If completing an active location, also complete all reserved locations
+    if (assignment.editingState.timeConfig.status === "completed") {
+      if (location.status === "active") {
+        requests.push(
+          createLocationUpdateOperationalStatusRequest(
+            location.location,
+            facilityId,
+            "U",
+          ),
+        );
+
+        activeLocations.forEach((activeLocation) => {
+          if (activeLocation.status === "reserved") {
+            requests.push(
+              completeCurrentLocationAssociation(
+                activeLocation,
+                facilityId,
+                encounter.id,
+                new Date(),
+              ),
+            );
+            requests.push(
+              createLocationUpdateOperationalStatusRequest(
+                activeLocation.location,
+                facilityId,
+                "U",
+              ),
+            );
+          }
+        });
+      } else if (location.status === "reserved") {
+        requests.push(
+          createLocationUpdateOperationalStatusRequest(
+            location.location,
+            facilityId,
+            "U",
+          ),
+        );
+      }
+    }
+
+    if (requests.length > 0) {
+      await mutations.executeBatch.mutateAsync({ requests });
+      resetAll();
+    }
+  };
+
+  const handleAssignLinkedBed = async (location: LocationAssociationRead) => {
+    const requests = [];
+    if (currentLocation && assignment.sheetState.action === "move") {
+      if (assignment.keepBedActive) {
+        requests.push(
+          createLocationAssociationUpdateRequest(
+            currentLocation,
+            {
+              start: new Date(currentLocation.start_datetime),
+              end: undefined,
+              status: "reserved",
+            },
+            facilityId,
+            encounter.id,
+          ),
+        );
+        requests.push(
+          createLocationUpdateOperationalStatusRequest(
+            currentLocation.location,
+            facilityId,
+            "O",
+          ),
+        );
+      } else {
+        requests.push(
+          completeCurrentLocationAssociation(
+            currentLocation,
+            facilityId,
+            encounter.id,
+            new Date(),
+          ),
+        );
+        requests.push(
+          createLocationUpdateOperationalStatusRequest(
+            currentLocation.location,
+            facilityId,
+            "U",
+          ),
+        );
+      }
+
+      requests.push(
+        createLocationAssociationUpdateRequest(
+          location,
+          {
+            start: new Date(location.start_datetime || new Date()),
+            end: undefined,
+            status: "active",
+          },
+          facilityId,
+          encounter.id,
+        ),
+      );
+    }
+
+    if (requests.length > 0) {
+      await mutations.executeBatch.mutateAsync({ requests });
+      resetAll();
+    }
+  };
+
+  // Navigation handlers
+  const handleGoBack = () => {
+    if (assignment.sheetState.screen === "modify") {
+      assignment.setScreenToAssign();
+    } else {
+      navigation.goBack();
+    }
+    navigation.clearBedSelection();
+  };
+
+  const handleScheduleForLater = () => {
+    assignment.startNewAssignment("planned", !!currentLocation);
+  };
+
+  const handleAssignNow = () => {
+    assignment.startNewAssignment("active", !!currentLocation);
+  };
+
+  const getDeleteDialogDescription = () => {
+    const isReservedBed = activeLocations.some(
+      (loc) =>
+        loc.id === dialogs.locationToDelete?.associationId &&
+        loc.status === "reserved",
+    );
+    if (dialogs.locationToDelete?.status === "active") {
+      return activeLocations.length > 0 ? (
+        <Trans
+          i18nKey="are_you_sure_mark_as_error_multiple_beds"
+          values={{
+            beds: activeLocations.map((loc) => loc.location.name).join(", "),
+          }}
+          components={{
+            strong: (
+              <strong className="inline-block align-bottom truncate max-w-72 sm:max-w-full md:max-w-full lg:max-w-full xl:max-w-full" />
+            ),
+            br: <br />,
+          }}
+        />
+      ) : (
+        t("are_you_sure_mark_as_error_active_bed")
+      );
+    } else if (isReservedBed) {
+      return t("are_you_sure_cancel_reserved_bed");
+    }
+    return t("are_you_sure_cancel_planned_bed");
+  };
+
+  // Create handler objects
+  const assignmentHandlers = {
+    sheetState: assignment.sheetState,
+    setSheetState: assignment.setSheetState,
+    isPending: mutations.isPending,
+    editingState: assignment.editingState,
+    setEditingState: assignment.setEditingState,
+    keepBedActive: assignment.keepBedActive,
+    onKeepBedActiveChange: assignment.setKeepBedActive,
+    onMove: handleMove,
+    onComplete: handleCompleteBedStay,
+    onUpdateTime: handleUpdateTime,
+    onCancel: handleCancelPlan,
+    onCancelEdit: assignment.resetEditingState,
+    onConfirmEdit: handleConfirmEdit,
+    onConfirmTime: handleConfirmTime,
+    onAssignLinkedBed: handleAssignLinkedBed,
+  };
+
+  const navigationHandlers = {
+    onLocationClick: navigation.handleLocationClick,
+    onBedSelect: navigation.setSelectedBed,
+    onLinkedBedSelect: navigation.handleLinkedBedClick,
+    onCheckBedStatus: handleCheckBedStatus,
+    onSearchChange: navigation.setSearchTerm,
+    onSearch: navigation.handleSearch,
+    onShowAvailableChange: (value: boolean) => {
+      navigation.setShowAvailableOnly(value);
+      navigation.setBedsPage(1);
+      navigation.setAllBeds([]);
+    },
+    onLoadMore: navigation.handleLoadMore,
+    onClearSelection: navigation.clearBedSelection,
+    onGoBack: handleGoBack,
+    onAssignNowPlanned: handleAssignNowPlanned,
+    onScheduleForLater: handleScheduleForLater,
+    onAssignNow: handleAssignNow,
+    showAvailableOnly: navigation.showAvailableOnly,
+    searchTerm: navigation.searchTerm,
+    isLoadingLocations: navigation.isLoadingLocations,
+    isLoadingBeds: navigation.isLoadingBeds,
+    hasMore: navigation.selectedLocation
+      ? navigation.hasMoreBeds
+      : navigation.hasMoreLocations,
+  };
+
+  // Render the appropriate screen
+  const renderScreen = () => {
+    switch (assignment.sheetState.screen) {
+      case "modify":
+        return (
+          <LocationModifyView
+            currentLocation={currentLocation}
+            plannedLocations={plannedLocations}
+            selectedBedLocation={selectedBedLocation}
+            selectedLinkedBed={navigation.selectedLinkedBed}
+            assignmentHandlers={assignmentHandlers}
+            onAssignNowPlanned={handleAssignNowPlanned}
+          />
+        );
+
+      case "assign":
+      default:
+        return (
+          <LocationAssignmentView
+            allLocations={navigation.allLocations}
+            allBeds={navigation.allBeds}
+            selectedLocation={navigation.selectedLocation}
+            locationHistory={navigation.locationHistory}
+            selectedBed={navigation.selectedBed}
+            selectedLinkedBed={navigation.selectedLinkedBed || null}
+            currentLocation={currentLocation}
+            plannedLocations={plannedLocations}
+            activeLocations={activeLocations}
+            isPending={mutations.isPending}
+            assignmentHandlers={assignmentHandlers}
+            navigationHandlers={navigationHandlers}
+          />
+        );
+    }
   };
 
   return (
     <>
-      <Sheet
-        open={open}
-        onOpenChange={(open) => {
-          onOpenChange(open);
-          // Reset states when closing the sheet
-          if (!open) {
-            resetStates();
-          }
-        }}
-      >
+      <Sheet open={open} onOpenChange={handleOpenChange}>
         <SheetContent className="w-full sm:max-w-3xl pr-2 pl-3">
           <SheetHeader className="space-y-1 px-1">
             <SheetTitle className="text-sm font-semibold">
@@ -849,7 +600,11 @@ export function LocationSheet({
             </SheetTitle>
           </SheetHeader>
 
-          <Tabs defaultValue={defaultTab} className="mt-2">
+          <Tabs
+            value={tab}
+            onValueChange={(value) => setTab(value as "assign" | "history")}
+            className="mt-2"
+          >
             <TabsList className="w-full justify-start border-b border-gray-200 bg-transparent p-0 h-auto rounded-none">
               <TabsTrigger
                 value="assign"
@@ -882,10 +637,11 @@ export function LocationSheet({
 
       {/* Discharge Dialog */}
       <ConfirmActionDialog
-        open={showDischargeDialog}
+        open={dialogs.showDischargeDialog}
         onOpenChange={(open) => {
-          setShowDischargeDialog(open);
-          if (!open) setSelectedDischargedBed(null);
+          if (!open) {
+            dialogs.closeDischargeDialog();
+          }
         }}
         title={t("confirm_selection")}
         description={t("bed_available_soon_discharged_message")}
@@ -895,31 +651,30 @@ export function LocationSheet({
 
       {/* Delete Dialog */}
       <ConfirmActionDialog
-        open={showDeleteDialog}
+        open={dialogs.showDeleteDialog}
         onOpenChange={(open) => {
-          setShowDeleteDialog(open);
           if (!open) {
-            setLocationToDelete(null);
+            dialogs.closeDeleteDialog();
           }
         }}
         title={t("confirm")}
-        description={
-          locationStatus === "active"
-            ? t("are_you_sure_mark_as_error_active_bed")
-            : t("are_you_sure_cancel_planned_bed")
-        }
-        onConfirm={confirmDeletePlan}
+        description={getDeleteDialogDescription()}
+        onConfirm={handleConfirmDelete}
         confirmText={t("confirm")}
         variant="destructive"
       />
 
       {/* Occupied Dialog */}
       <ConfirmActionDialog
-        open={showOccupiedDialog}
-        onOpenChange={setShowOccupiedDialog}
+        open={dialogs.showOccupiedDialog}
+        onOpenChange={(open) => {
+          if (!open) {
+            dialogs.closeOccupiedDialog();
+          }
+        }}
         title={t("bed_occupied")}
         description={t("bed_unavailable_message")}
-        onConfirm={() => setShowOccupiedDialog(false)}
+        onConfirm={dialogs.closeOccupiedDialog}
         confirmText={t("close")}
         hideCancel
       />
