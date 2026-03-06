@@ -145,7 +145,6 @@ export const PrescriptionPreview = ({
         },
         queryParams: { facility: facilityId },
       }),
-      enabled: !!patientId && !!prescriptionId && !!facilityId,
     })),
     combine: (results) => ({
       prescriptions: results
