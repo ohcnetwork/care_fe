@@ -28,6 +28,7 @@ import {
 import DosageInstructionSummaryLine from "@/pages/Facility/services/pharmacy/billMedications/DosageInstructionSummary";
 import { billMedicationsByPrescriptionsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { selectEligibleInventoryItems } from "@/pages/Facility/services/pharmacy/billMedications/utils/itemsAutoSelect";
+import { isMedicationDispenseable } from "@/pages/Facility/services/pharmacy/billMedications/utils/utils";
 import { MedicineInfoCard } from "@/pages/Facility/services/pharmacy/components/MedicineInfoCard";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
@@ -311,6 +312,13 @@ const HeaderRow = ({
 }) => {
   const { t } = useTranslation();
 
+  const eligibleItems =
+    form && name
+      ? form
+          .watch(`${name}.items`)
+          .filter((q) => isMedicationDispenseable(q.medication))
+      : [];
+
   return (
     <>
       <div className="col-start-1 bg-gray-100 py-1 px-3 flex items-center">
@@ -322,12 +330,20 @@ const HeaderRow = ({
               <FormItem>
                 <FormControl>
                   <Checkbox
-                    checked={
-                      form.watch(`${name}.items`).length > 0 &&
-                      form.watch(`${name}.items`).every((q) => q.isSelected)
-                    }
+                    checked={(() => {
+                      if (eligibleItems.length === 0) {
+                        return false;
+                      }
+                      if (eligibleItems.every((q) => q.isSelected)) {
+                        return true;
+                      }
+                      if (eligibleItems.every((q) => !q.isSelected)) {
+                        return false;
+                      }
+                      return "indeterminate";
+                    })()}
                     onCheckedChange={(checked) => {
-                      const items = form.getValues(`${name}.items`);
+                      const items = eligibleItems;
                       items.forEach((_, index) => {
                         form.setValue(
                           `${name}.items.${index}.isSelected`,
@@ -402,8 +418,7 @@ const MedicineLineItem = ({
   const substitution = form.watch(`${name}.substitution`);
   const lots = form.watch(`${name}.lots`);
 
-  const dispenseCompleted =
-    medication?.dispense_status === MedicationRequestDispenseStatus.complete;
+  const canDispense = isMedicationDispenseable(medication);
 
   const disabled = !isSelected;
 
@@ -449,10 +464,10 @@ const MedicineLineItem = ({
       <div
         className={cn(
           "col-start-1 bg-white group-hover:bg-gray-100 group-focus-within:bg-gray-100 py-1 px-3 flex items-center transition-all duration-200 ease-in-out",
-          dispenseCompleted && "bg-gray-100",
+          !canDispense && "bg-gray-100",
         )}
       >
-        {!dispenseCompleted && (
+        {canDispense && (
           <FormField
             control={form.control}
             name={`${name}.isSelected`}
@@ -474,13 +489,14 @@ const MedicineLineItem = ({
       <div
         className={cn(
           "bg-white py-2 px-3 flex justify-between items-center",
-          dispenseCompleted && "bg-gray-100",
+          !canDispense && "bg-gray-100",
         )}
       >
         <MedicineLineItemMedication form={form} name={name} />
       </div>
 
-      {dispenseCompleted ? (
+      {medication?.dispense_status ===
+      MedicationRequestDispenseStatus.complete ? (
         <>
           <div className="col-span-5 bg-gray-100 py-2 px-3 flex justify-between items-center">
             <span className="text-sm italic font-medium text-gray-700">
@@ -495,9 +511,8 @@ const MedicineLineItem = ({
             {medication && effectiveProductKnowledge && (
               <Button
                 variant="white"
-                onClick={() => {
-                  autoSelectInventoryItems(undefined);
-                }}
+                type="button"
+                onClick={() => autoSelectInventoryItems(undefined)}
                 disabled={disabled || isAutoSelectingInventoryItems}
                 className="absolute top-1/2 -translate-y-1/2 -right-2.25 size-4.5 [&_svg]:size-3 z-10 text-gray-500"
                 size="xs"

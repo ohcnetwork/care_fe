@@ -1,19 +1,28 @@
 import BackButton from "@/components/Common/BackButton";
 import { Button } from "@/components/ui/button";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import { BillMedicationLineItemSchemaType } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { calculateTotalPriceWithQuantity } from "@/types/base/monetaryComponent/monetaryComponent";
 import { add } from "@/Utils/decimal";
-import { ArrowRightIcon } from "lucide-react";
+import { ArrowRightIcon, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface Props {
+  isBillingMedications: boolean;
   items: BillMedicationLineItemSchemaType[];
-  handleBillSelected: () => void;
 }
 
-export const BillMedicationsFooter = ({ items, handleBillSelected }: Props) => {
+export const BillMedicationsFooter = ({
+  isBillingMedications,
+  items,
+}: Props) => {
   const { t } = useTranslation();
+
+  const { facilityId } = useCurrentFacility();
+  const { locationId } = useCurrentLocation();
+
   const grandTotal = add(
     ...items
       .filter((item) => item.isSelected)
@@ -44,12 +53,18 @@ export const BillMedicationsFooter = ({ items, handleBillSelected }: Props) => {
         </div>
       </div>
       <div className="flex gap-6">
-        <BackButton variant="outline" size="lg">
+        <BackButton
+          variant="outline"
+          size="lg"
+          disabled={isBillingMedications}
+          to={`/facility/${facilityId}/locations/${locationId}/medication_requests`}
+        >
           {t("cancel")}
         </BackButton>
-        <Button variant="primary" size="lg" onClick={handleBillSelected}>
-          {t("bill_selected")}
-          <ArrowRightIcon className="size-4" />
+        <Button variant="primary" size="lg" disabled={isBillingMedications}>
+          {isBillingMedications && <Loader2 className="size-4 animate-spin" />}
+          {isBillingMedications ? t("billing") : t("bill_selected")}
+          {!isBillingMedications && <ArrowRightIcon className="size-4" />}
         </Button>
       </div>
     </div>

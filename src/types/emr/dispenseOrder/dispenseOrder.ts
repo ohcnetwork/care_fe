@@ -11,10 +11,9 @@ export interface DispenseOrderBatchResponse {
 export function extractDispenseOrderFromBatchResponse(
   response: DispenseOrderBatchResponse,
 ): DispenseOrderRead | undefined {
-  const orders = response.results
+  return response.results
     .map((item) => item.data?.order)
-    .filter((item): item is DispenseOrderRead => !!item);
-  return orders[0];
+    .filter((item): item is DispenseOrderRead => !!item)[0];
 }
 
 export enum DispenseOrderStatus {
