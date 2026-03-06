@@ -91,7 +91,7 @@ test.describe("Create an Encounter", () => {
 
     // Click the first patient profile button and view profile
     await page
-      .getByRole("button", { name: /.*\d+\s*Y,/ })
+      .locator('[data-slot="patient-info-hover-card-trigger"]:visible')
       .first()
       .click();
     await page.getByRole("link", { name: "View Profile" }).click();
@@ -107,7 +107,8 @@ test.describe("Create an Encounter", () => {
       .textContent();
 
     // Store the phone number for future use (remove any whitespace and special characters)
-    const cleanPhoneNumber = phoneNumber?.replace(/\D/g, "");
+    // To do: make it country code agnostic
+    const cleanPhoneNumber = phoneNumber?.replace(/\D/g, "").slice(2);
     expect(cleanPhoneNumber).toMatch(/^\d+$/);
     const yearOfBirth = dobText?.match(/\d{4}/)?.[0];
 

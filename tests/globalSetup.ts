@@ -22,18 +22,28 @@ interface LocalStorageItem {
 async function globalSetup(_config: FullConfig) {
   const authFile = path.join(__dirname, ".auth/user.json");
 
-  if (!fs.existsSync(authFile)) return;
+  // Check if auth file exists
+  if (!fs.existsSync(authFile)) {
+    console.log("⚠️ Auth file not found, skipping token refresh");
+    return;
+  }
 
   try {
     const storageState = JSON.parse(fs.readFileSync(authFile, "utf-8"));
 
+    // Validate that at least one origin exists in the storage state
     if (
       !Array.isArray(storageState.origins) ||
       storageState.origins.length === 0
-    )
+    ) {
+      console.log(
+        "⚠️ No origins found in storage state, skipping token refresh",
+      );
       return;
+    }
 
     const firstOrigin = storageState.origins[0];
+    // Extract tokens from localStorage of the first origin
     const localStorage: LocalStorageItem[] = Array.isArray(
       firstOrigin.localStorage,
     )
@@ -46,7 +56,10 @@ async function globalSetup(_config: FullConfig) {
       (item: LocalStorageItem) => item.name === REFRESH_TOKEN_KEY,
     );
 
-    if (!accessTokenEntry || !refreshTokenEntry) return;
+    if (!accessTokenEntry || !refreshTokenEntry) {
+      console.log("⚠️ No tokens found in storage state");
+      return;
+    }
 
     const refreshToken = refreshTokenEntry.value;
     const apiUrl = process.env.REACT_CARE_API_URL || "http://localhost:9000";
@@ -58,6 +71,7 @@ async function globalSetup(_config: FullConfig) {
     const page = await context.newPage();
 
     try {
+      // Call the token refresh endpoint
       const response = await page.request.post(
         `${apiUrl}/api/v1/auth/token/refresh/`,
         {
@@ -69,6 +83,7 @@ async function globalSetup(_config: FullConfig) {
       if (response.ok()) {
         const data = await response.json();
 
+        // Update tokens in localStorage
         const accessIndex = localStorage.findIndex(
           (item: LocalStorageItem) => item.name === ACCESS_TOKEN_KEY,
         );
@@ -76,12 +91,20 @@ async function globalSetup(_config: FullConfig) {
           (item: LocalStorageItem) => item.name === REFRESH_TOKEN_KEY,
         );
 
-        if (accessIndex !== -1) localStorage[accessIndex].value = data.access;
-        if (refreshIndex !== -1 && data.refresh)
+        if (accessIndex !== -1) {
+          localStorage[accessIndex].value = data.access;
+        }
+        if (refreshIndex !== -1 && data.refresh) {
           localStorage[refreshIndex].value = data.refresh;
+        }
 
         fs.writeFileSync(authFile, JSON.stringify(storageState, null, 2));
-        console.log("✅ Tokens refreshed");
+
+        console.log("✅ Tokens refreshed successfully");
+      } else {
+        console.log(
+          `⚠️ Token refresh failed with status: ${response.status()}`,
+        );
       }
     } finally {
       await browser.close();

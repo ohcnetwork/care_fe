@@ -23,7 +23,7 @@ type RV<T extends string, V> = {
 
 export type ResponseValue =
   | RV<"string", string | undefined>
-  | RV<"number", number | undefined>
+  | RV<"number", number | string | undefined>
   | RV<"boolean", boolean | undefined>
   | RV<"dateTime", Date | undefined>
   | RV<"date", Date | undefined>
