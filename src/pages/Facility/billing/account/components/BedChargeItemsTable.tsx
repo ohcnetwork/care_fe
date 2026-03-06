@@ -1,25 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  ChevronDown,
-  ChevronUp,
-  MoreHorizontal,
-  PencilIcon,
-  PlusIcon,
-} from "lucide-react";
-import { useQueryParams } from "raviger";
+import { ChevronDown, ChevronUp, PlusIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   Select,
@@ -39,6 +26,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import { EmptyState } from "@/components/ui/empty-state";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -59,11 +47,12 @@ import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import { round } from "@/Utils/decimal";
 import queryClient from "@/Utils/request/queryClient";
 import { formatName } from "@/Utils/utils";
+import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
 import AddMultipleChargeItemsSheet from "@/pages/Facility/services/serviceRequests/components/AddMultipleChargeItemsSheet";
-import encounterApi from "@/types/emr/encounter/encounterApi";
+import { AccountRead } from "@/types/billing/account/Account";
 import { LocationAssociationRead } from "@/types/location/association";
 import { differenceInDays, differenceInHours, format } from "date-fns";
-import EditChargeItemSheet from "./EditChargeItemSheet";
+import ChargeItemActionsMenu from "./ChargeItemActions";
 
 interface PriceComponentRowProps {
   label: string;
@@ -198,15 +187,17 @@ function groupChargeItemsByLocation(
 
 export interface BedChargeItemsTableProps {
   facilityId: string;
-  accountId: string;
+  account: AccountRead;
 }
 
 export function BedChargeItemsTable({
   facilityId,
-  accountId,
+  account,
 }: BedChargeItemsTableProps) {
   const { t } = useTranslation();
-  const [{ encounterId }] = useQueryParams();
+  const encounterId = account.primary_encounter?.id;
+  const accountId = account.id;
+
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
     {},
   );
@@ -219,17 +210,11 @@ export function BedChargeItemsTable({
     locationId: string;
     status: boolean;
   }>({ serviceRequestId: "", locationId: "", status: false });
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedChargeItem, setSelectedChargeItem] =
+    useState<ChargeItemRead | null>(null);
 
-  const { data: encounter, isLoading: isEncounterLoading } = useQuery({
-    queryKey: ["encounter", encounterId],
-    queryFn: query(encounterApi.get, {
-      pathParams: { id: encounterId },
-      queryParams: facilityId ? { facility: facilityId } : {},
-    }),
-    enabled: !!encounterId,
-  });
-
-  const locationHistory = encounter?.location_history || [];
+  const locationHistory = account.primary_encounter?.location_history || [];
 
   const { data: chargeItems, isLoading } = useQuery({
     queryKey: [
@@ -355,14 +340,20 @@ export function BedChargeItemsTable({
           </SelectContent>
         </Select>
       </div>
-      {isLoading || isEncounterLoading ? (
+      {isLoading ? (
         <TableSkeleton count={3} />
-      ) : encounterId == undefined || !encounterId || !encounter ? (
-        <div className="rounded-md overflow-x-auto border-2 border-white shadow-md">
-          <div className="text-center text-gray-500 py-4">
-            {t("no_encounter_associated")}
-          </div>
-        </div>
+      ) : !encounterId || !locationHistory.length ? (
+        <EmptyState
+          icon={<CareIcon icon="l-bed" className="text-primary size-6" />}
+          title={
+            !encounterId ? t("no_encounter_associated") : t("no_locations")
+          }
+          description={
+            !encounterId
+              ? t("no_encounter_associated_description")
+              : t("no_locations_description")
+          }
+        />
       ) : (
         <div className="rounded-md overflow-x-auto border-2 border-white shadow-md">
           <Table className="rounded-lg border shadow-sm w-full bg-white">
@@ -396,13 +387,7 @@ export function BedChargeItemsTable({
               </TableRow>
             </TableHeader>
             <TableBody className="bg-white">
-              {!locationHistory.length ? (
-                <TableRow>
-                  <TableCell colSpan={9} className="text-center text-gray-500">
-                    {t("no_locations")}
-                  </TableCell>
-                </TableRow>
-              ) : (
+              {locationHistory.length > 0 &&
                 locationHistory.flatMap((location) => {
                   const items = groupedChargeItems[location.id] || [];
 
@@ -415,11 +400,16 @@ export function BedChargeItemsTable({
                     ...(items.length === 0
                       ? [
                           <TableRow key={`${location.id}-no-items`}>
-                            <TableCell
-                              colSpan={9}
-                              className="text-center text-gray-500 py-4"
-                            >
-                              {t("no_charge_items_for_location")}
+                            <TableCell colSpan={9} className="py-4">
+                              <EmptyState
+                                icon={
+                                  <CareIcon
+                                    icon="l-receipt"
+                                    className="text-primary size-6"
+                                  />
+                                }
+                                title={t("no_charge_items_for_location")}
+                              />
                             </TableCell>
                           </TableRow>,
                         ]
@@ -492,56 +482,15 @@ export function BedChargeItemsTable({
                                 </div>
                               </TableCell>
                               <TableCell className="border-x p-3 text-gray-950">
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-8 w-8"
-                                    >
-                                      <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>
-                                      {t("actions")}
-                                    </DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem asChild>
-                                      <div
-                                        className="flex items-center"
-                                        onClick={() => {
-                                          // This will trigger the item to be edited, but actual edit UI is rendered elsewhere
-                                          document
-                                            .getElementById(
-                                              `edit-charge-item-${item.id}`,
-                                            )
-                                            ?.click();
-                                        }}
-                                      >
-                                        <PencilIcon className="mr-2 h-4 w-4" />
-                                        <span>{t("edit")}</span>
-                                      </div>
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-
-                                {/* Invisible trigger for the edit sheet */}
-                                <span className="hidden">
-                                  <EditChargeItemSheet
-                                    facilityId={facilityId}
-                                    item={item}
-                                    accountId={accountId}
-                                    trigger={
-                                      <Button
-                                        id={`edit-charge-item-${item.id}`}
-                                        className="hidden"
-                                      >
-                                        Edit
-                                      </Button>
-                                    }
-                                  />
-                                </span>
+                                <ChargeItemActionsMenu
+                                  item={item}
+                                  facilityId={facilityId}
+                                  accountId={accountId}
+                                  onEdit={(item) => {
+                                    setSelectedChargeItem(item);
+                                    setIsEditDialogOpen(true);
+                                  }}
+                                />
                               </TableCell>
                             </TableRow>
                           );
@@ -602,13 +551,30 @@ export function BedChargeItemsTable({
                           ].filter(Boolean);
                         })),
                   ];
-                })
-              )}
+                })}
             </TableBody>
           </Table>
         </div>
       )}
       <Pagination totalCount={chargeItems?.count || 0} />
+
+      <EditInvoiceDialog
+        open={isEditDialogOpen}
+        onOpenChange={(open) => {
+          setIsEditDialogOpen(open);
+          if (!open) {
+            setSelectedChargeItem(null);
+          }
+        }}
+        facilityId={facilityId}
+        chargeItems={selectedChargeItem ? [selectedChargeItem] : []}
+        onSuccess={() => {
+          queryClient.invalidateQueries({
+            queryKey: ["chargeItems", accountId],
+          });
+        }}
+        title={t("edit_charge_item")}
+      />
     </div>
   );
 }

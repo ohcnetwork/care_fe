@@ -56,31 +56,44 @@ export function DiagnosticReportResultsTable({
     value: QuestionnaireSubmitResultValue,
   ) => {
     if (!referenceRange || !referenceRange[0]) return "-";
-    let range = null;
-    if (value.value) {
-      for (const r of referenceRange) {
-        if (r.min && Number(value.value) < r.min) {
-          continue;
-        }
-        if (r.max && Number(value.value) > r.max) {
-          continue;
-        }
-        range = r;
-        break;
+
+    const numericValue = value.value != null ? Number(value.value) : null;
+
+    const isApplicable = (r: ObservationReferenceRange) => {
+      if (numericValue === null || isNaN(numericValue)) return false;
+      if (r.min != null && numericValue < r.min) return false;
+      if (r.max != null && numericValue > r.max) return false;
+      return true;
+    };
+
+    const rows = referenceRange.map((r, i) => {
+      let rangeText = "";
+      if (r.min != null && r.max != null) {
+        rangeText = `${r.min} - ${r.max}`;
+      } else if (r.min != null) {
+        rangeText = `> ${r.min}`;
+      } else if (r.max != null) {
+        rangeText = `< ${r.max}`;
       }
-    }
-    if (!range) return "-";
-    let innerContent = "";
-    if (range.min && range.max) {
-      innerContent = `${range.min} - ${range.max}`;
-    } else if (range.min) {
-      innerContent = `> ${range.min}`;
-    } else if (range.max) {
-      innerContent = `< ${range.max}`;
-    }
+      if (!rangeText && !r.interpretation?.display) return null;
+
+      const label = r.interpretation?.display;
+      const applicable = isApplicable(r);
+
+      return (
+        <span key={i} className={applicable ? "font-bold text-gray-900" : ""}>
+          {label ? `${label}: ` : ""}
+          {rangeText}
+        </span>
+      );
+    });
+
+    const validRows = rows.filter(Boolean);
+    if (!validRows.length) return "-";
+
     return (
-      <div className="flex items-center gap-1 text-gray-500">
-        <span>{innerContent}</span>
+      <div className="flex flex-col items-start gap-0.5 text-gray-500">
+        {validRows}
       </div>
     );
   };

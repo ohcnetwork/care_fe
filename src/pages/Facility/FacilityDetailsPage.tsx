@@ -10,7 +10,9 @@ import { Markdown } from "@/components/ui/markdown";
 
 import { Avatar } from "@/components/Common/Avatar";
 import { LoginHeader } from "@/components/Common/LoginHeader";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useFilters from "@/hooks/useFilters";
@@ -57,9 +59,20 @@ export function FacilityDetailsPage({ id }: Props) {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin">
-          <CareIcon icon="l-spinner" className="size-8" />
+      <div className="container mx-auto px-4 py-8">
+        <Card className="overflow-hidden bg-white border border-gray-200">
+          <div className="flex flex-col sm:flex-row m-6">
+            <Skeleton className="size-64 shrink-0 rounded-lg" />
+            <div className="px-4 space-y-2 flex-1">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-6 w-64" />
+            </div>
+          </div>
+        </Card>
+        <div className="mt-6">
+          <div className="grid grid-cols-1 gap-4 @xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-5 lg:grid-cols-2">
+            <CardGridSkeleton count={6} />
+          </div>
         </div>
       </div>
     );
