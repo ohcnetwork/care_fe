@@ -8,6 +8,7 @@ import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/c
 import { EncounterListRead } from "@/types/emr/encounter/encounter";
 import {
   PatientListRead,
+  PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
@@ -53,6 +54,7 @@ export interface ScheduleTemplate {
   charge_item_definition: ChargeItemDefinitionRead;
   revisit_charge_item_definition: ChargeItemDefinitionRead;
   revisit_allowed_days: number;
+  is_public: boolean;
 }
 
 type ScheduleAvailabilityBase = {
@@ -79,6 +81,7 @@ export interface ScheduleTemplateCreateRequest {
   availabilities: ScheduleAvailabilityBase[];
   resource_type: SchedulableResourceType;
   resource_id: string;
+  is_public: boolean;
 }
 export interface ScheduleTemplateSetChargeItemDefinitionRequest {
   charge_item_definition: string;
@@ -89,6 +92,7 @@ export interface ScheduleTemplateUpdateRequest {
   name: string;
   valid_from: string;
   valid_to: string;
+  is_public: boolean;
 }
 
 export type ScheduleAvailability = ScheduleAvailabilityBase & {
@@ -121,6 +125,10 @@ export interface TokenSlot {
   availability: {
     name: string;
     tokens_per_slot: number;
+    schedule: {
+      id: string;
+      name: string;
+    };
   };
   start_datetime: string; // timezone naive datetime
   end_datetime: string; // timezone naive datetime
@@ -244,6 +252,7 @@ export type PublicAppointment = AppointmentBase & {
 };
 
 export type AppointmentRead = Appointment & {
+  patient: PatientRead;
   tags: TagConfig[];
   updated_by: UserReadMinimal | null;
   created_by: UserReadMinimal;

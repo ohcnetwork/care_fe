@@ -12,7 +12,7 @@ import {
   Star,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -120,6 +120,7 @@ interface ResourceDefinitionCategoryPickerProps<T> {
   hideSelectedDisplay?: boolean;
   alignContent?: "start" | "center" | "end";
   defaultOpen?: boolean;
+  "data-shortcut-id"?: string;
 }
 
 export function ResourceDefinitionCategoryPicker<T>({
@@ -143,6 +144,7 @@ export function ResourceDefinitionCategoryPicker<T>({
   hideClearButton = false,
   alignContent = "start",
   defaultOpen = false,
+  "data-shortcut-id": shortcutId,
 }: ResourceDefinitionCategoryPickerProps<T>) {
   const shouldHideClearButton = allowMultiple || hideClearButton;
   const { t } = useTranslation();
@@ -157,6 +159,13 @@ export function ResourceDefinitionCategoryPicker<T>({
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [breadcrumbsExpanded, setBreadcrumbsExpanded] = useState(false);
+
+  // Sync open state with defaultOpen prop for controlled auto-open behavior
+  useEffect(() => {
+    if (defaultOpen) {
+      setOpen(true);
+    }
+  }, [defaultOpen]);
 
   // Fetch categories for current level
   const { data: categoriesResponse, isLoading: isLoadingCategories } = useQuery(
@@ -909,6 +918,7 @@ export function ResourceDefinitionCategoryPicker<T>({
           <div className="flex relative">
             <PopoverTrigger asChild ref={ref}>
               <Button
+                type="button"
                 variant="outline"
                 role="combobox"
                 aria-expanded={open}
@@ -920,6 +930,18 @@ export function ResourceDefinitionCategoryPicker<T>({
                   className,
                 )}
                 disabled={disabled}
+                data-shortcut-id={shortcutId}
+                onClick={() => {
+                  if (!open) {
+                    setOpen(true);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    setOpen(true);
+                  }
+                }}
               >
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   {getDisplayValue()}

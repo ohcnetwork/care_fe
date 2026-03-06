@@ -1,4 +1,10 @@
 import careConfig from "@careConfig";
+import {
+  CountryCode,
+  getCountryCallingCode,
+  getExampleNumber,
+} from "libphonenumber-js";
+import examples from "libphonenumber-js/mobile/examples";
 import { CheckIcon, ChevronsUpDown } from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
@@ -24,6 +30,21 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+function getMaxDigits(countryCode: CountryCode): number {
+  const example = getExampleNumber(countryCode, examples);
+  return example?.nationalNumber?.length ?? 15;
+}
+
+function extractDigits(str: string): string {
+  return str.replace(/\D/g, "");
+}
+
+function getMaxTotalDigits(countryCode: CountryCode): number {
+  const countryCallingCode = getCountryCallingCode(countryCode);
+  const maxNationalDigits = getMaxDigits(countryCode);
+  return countryCallingCode.length + maxNationalDigits;
+}
+
 type PhoneInputProps = Omit<
   React.ComponentProps<"input">,
   "onChange" | "value" | "ref"
@@ -32,40 +53,59 @@ type PhoneInputProps = Omit<
     onChange?: (value: RPNInput.Value) => void;
   };
 
+const PhoneInputContext = React.createContext<{
+  country: CountryCode;
+  setCountry: (country: CountryCode) => void;
+}>({
+  country: careConfig.defaultCountry.code,
+  setCountry: () => {},
+});
+
 function PhoneInput({
   className,
   onChange,
   value,
   ...props
 }: React.ComponentProps<typeof RPNInput.default> & PhoneInputProps) {
+  const [country, setCountry] = React.useState<CountryCode>(
+    careConfig.defaultCountry.code,
+  );
+
   return (
-    <RPNInput.default
-      className={cn(
-        "flex rounded-md focus-within:ring-1",
-        className,
-        props.value &&
-          !RPNInput.isValidPhoneNumber((props.value ?? "") as string)
-          ? "ring-red-500"
-          : "ring-primary-700",
-      )}
-      flagComponent={FlagComponent}
-      countrySelectComponent={CountrySelect}
-      inputComponent={InputComponent}
-      defaultCountry={careConfig.defaultCountry.code}
-      value={value || undefined}
-      smartCaret={true}
-      /**
-       * Handles the onChange event.
-       *
-       * react-phone-number-input might trigger the onChange event as undefined
-       * when a valid phone number is not entered. To prevent this,
-       * the value is coerced to an empty string.
-       *
-       * @param {E164Number | undefined} value - The entered value
-       */
-      onChange={(value) => onChange?.(value || ("" as RPNInput.Value))}
-      {...props}
-    />
+    <PhoneInputContext.Provider value={{ country, setCountry }}>
+      <RPNInput.default
+        className={cn(
+          "flex rounded-md focus-within:ring-1",
+          className,
+          props.value &&
+            !RPNInput.isValidPhoneNumber((props.value ?? "") as string)
+            ? "ring-red-500"
+            : "ring-primary-700",
+        )}
+        flagComponent={FlagComponent}
+        countrySelectComponent={CountrySelect}
+        inputComponent={InputComponent}
+        defaultCountry={careConfig.defaultCountry.code}
+        value={value || undefined}
+        smartCaret={true}
+        onCountryChange={(newCountry) => {
+          if (newCountry) {
+            setCountry(newCountry as CountryCode);
+          }
+        }}
+        /**
+         * Handles the onChange event.
+         *
+         * react-phone-number-input might trigger the onChange event as undefined
+         * when a valid phone number is not entered. To prevent this,
+         * the value is coerced to an empty string.
+         *
+         * @param {E164Number | undefined} value - The entered value
+         */
+        onChange={(value) => onChange?.(value || ("" as RPNInput.Value))}
+        {...props}
+      />
+    </PhoneInputContext.Provider>
   );
 }
 PhoneInput.displayName = "PhoneInput";
@@ -74,14 +114,72 @@ function InputComponent({
   className,
   ...props
 }: React.ComponentProps<"input">) {
+  const { t } = useTranslation();
+  const { country } = React.useContext(PhoneInputContext);
+  const maxNationalDigits = getMaxDigits(country);
+  const maxTotalDigits = getMaxTotalDigits(country);
+  const [announcement, setAnnouncement] = React.useState("");
+
+  const handleBeforeInput = React.useCallback(
+    (e: React.FormEvent<HTMLInputElement>) => {
+      const inputEvent = e.nativeEvent as InputEvent;
+      const newData = inputEvent.data || "";
+
+      if (newData.includes("+")) {
+        return;
+      }
+
+      const input = e.currentTarget;
+      const currentValue = input.value || "";
+      const currentDigits = extractDigits(currentValue);
+      const newDigits = extractDigits(newData);
+
+      // Calculate digits in the current selection that will be replaced
+      const selectionStart = input.selectionStart ?? currentValue.length;
+      const selectionEnd = input.selectionEnd ?? currentValue.length;
+      const selectedText = currentValue.slice(selectionStart, selectionEnd);
+      const selectedDigits = extractDigits(selectedText);
+
+      // Calculate post-replacement digit count:
+      // current digits - digits being replaced + new digits being added
+      const postReplacementDigits =
+        currentDigits.length - selectedDigits.length + newDigits.length;
+
+      // Determine max based on whether international format is being used
+      const isInternationalFormat = currentValue.includes("+");
+      const maxAllowed = isInternationalFormat
+        ? maxTotalDigits
+        : maxNationalDigits;
+
+      if (newDigits.length > 0 && postReplacementDigits > maxAllowed) {
+        e.preventDefault();
+        setAnnouncement(
+          t("phone_number_max_digits_reached", { max: maxAllowed }),
+        );
+        setTimeout(() => setAnnouncement(""), 1000);
+      }
+    },
+    [maxNationalDigits, maxTotalDigits, t],
+  );
+
   return (
-    <Input
-      className={cn(
-        "rounded-e-md rounded-s-none focus-visible:ring-0 focus-visible:outline-hidden focus-visible:border-gray-200",
-        className,
-      )}
-      {...props}
-    />
+    <>
+      <Input
+        className={cn(
+          "rounded-e-md rounded-s-none focus-visible:ring-0 focus-visible:outline-hidden focus-visible:border-gray-200",
+          className,
+        )}
+        onBeforeInput={handleBeforeInput}
+        aria-describedby="phone-input-constraint"
+        {...props}
+      />
+      <span id="phone-input-constraint" className="sr-only">
+        {t("phone_number_max_digits_constraint", { max: maxNationalDigits })}
+      </span>
+      <span aria-live="polite" aria-atomic="true" className="sr-only">
+        {announcement}
+      </span>
+    </>
   );
 }
 InputComponent.displayName = "InputComponent";

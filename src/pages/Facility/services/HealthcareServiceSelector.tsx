@@ -31,7 +31,10 @@ import {
 
 import query from "@/Utils/request/query";
 import useBreakpoints from "@/hooks/useBreakpoints";
-import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
+import {
+  HealthcareServiceReadSpec,
+  InternalType,
+} from "@/types/healthcareService/healthcareService";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 
 type DuoToneIconName = keyof typeof duoToneIcons;
@@ -41,6 +44,7 @@ interface HealthcareServiceSelectorProps {
   onSelect: (service: HealthcareServiceReadSpec | null) => void;
   facilityId: string;
   clearSelection?: boolean;
+  internalType?: InternalType;
 }
 
 export const HealthcareServiceSelector = ({
@@ -48,6 +52,7 @@ export const HealthcareServiceSelector = ({
   selected,
   onSelect,
   clearSelection = false,
+  internalType,
 }: HealthcareServiceSelectorProps) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -59,11 +64,12 @@ export const HealthcareServiceSelector = ({
     isLoading,
     isFetching,
   } = useQuery({
-    queryKey: ["healthcareServices", facilityId, searchValue],
+    queryKey: ["healthcareServices", facilityId, searchValue, internalType],
     queryFn: query.debounced(healthcareServiceApi.listHealthcareService, {
       pathParams: { facilityId },
       queryParams: {
         limit: 50,
+        ...(internalType && { internal_type: internalType }),
         ...(searchValue && { name: searchValue }),
       },
     }),
@@ -205,7 +211,7 @@ export const HealthcareServiceSelector = ({
         {triggerButton}
       </PopoverTrigger>
       <PopoverContent
-        className="p-0 w-[var(--radix-popover-trigger-width)]"
+        className="p-0 w-(--radix-popover-trigger-width)"
         align="start"
       >
         {commandContent}

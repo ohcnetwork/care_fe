@@ -5,11 +5,14 @@ import { IconName } from "@/CAREUI/icons/CareIcon";
 import { badgeVariants } from "@/components/ui/badge";
 
 import { Code } from "@/types/base/code/code";
-import { MonetaryComponentRead } from "@/types/base/monetaryComponent/monetaryComponent";
+import {
+  DiscountConfiguration,
+  MonetaryComponentRead,
+} from "@/types/base/monetaryComponent/monetaryComponent";
 import { FacilityPermissions } from "@/types/emr/permission/permission";
+import { PrintTemplate } from "@/types/facility/printTemplate";
 import { Organization } from "@/types/organization/organization";
 import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
-import { JSONSchema2020 } from "@/Utils/schema/types";
 
 export interface FacilityBareMinimum {
   id: string;
@@ -49,22 +52,25 @@ export interface FacilityRead extends FacilityBase, FacilityPermissions {
   invoice_number_expression: string;
   discount_codes: Code[];
   discount_monetary_components: MonetaryComponentRead[];
+  discount_configuration: DiscountConfiguration | null;
   patient_instance_identifier_configs: PatientIdentifierConfig[];
   patient_facility_identifier_configs: PatientIdentifierConfig[];
   features: number[];
-  extensions_schema_supply_delivery_order?: JSONSchema2020;
-  extensions_schema_supply_delivery?: JSONSchema2020;
-  extensions_schema_account?: JSONSchema2020;
+  print_templates: PrintTemplate[];
 }
 
 export type FacilityListRead = Omit<
   FacilityRead,
-  "permissions" | "root_org_permissions" | "child_org_permissions"
+  | "permissions"
+  | "root_org_permissions"
+  | "child_org_permissions"
+  | "print_templates"
 >;
 
 export interface FacilityCreate extends Omit<FacilityBase, "id"> {
   geo_organization: string;
   features: number[];
+  print_templates?: PrintTemplate[];
 }
 
 export const FACILITY_FEATURE_TYPES: {
