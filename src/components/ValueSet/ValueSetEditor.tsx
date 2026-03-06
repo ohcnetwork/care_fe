@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
+import { ExportValueSetButton } from "@/components/ValueSet/ExportValueSetButton";
 
 import {
   ValueSetBase,
@@ -72,13 +73,18 @@ export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">
-        {slug
-          ? existingValueset?.is_system_defined
-            ? t("preview_value_set")
-            : t("edit_value_set")
-          : t("create_new_value_set")}
-      </h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">
+          {slug
+            ? existingValueset?.is_system_defined
+              ? t("preview_value_set")
+              : t("edit_value_set")
+            : t("create_new_value_set")}
+        </h1>
+        {slug && existingValueset && (
+          <ExportValueSetButton valueSet={existingValueset} />
+        )}
+      </div>
 
       {slug && isLoading ? (
         <FormSkeleton rows={10} />

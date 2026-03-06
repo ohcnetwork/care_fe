@@ -98,4 +98,15 @@ export default {
     TBody: Type<void>(),
     TRes: Type<{ message: string }>(),
   },
+  export: {
+    path: "/api/v1/valueset/{slug}/export/",
+    method: HttpMethod.GET,
+    TRes: Type<unknown>(), // Returns FHIR ValueSet JSON
+  },
+  import: {
+    path: "/api/v1/valueset/import/",
+    method: HttpMethod.POST,
+    TBody: Type<unknown>(), // Accepts FHIR ValueSet JSON
+    TRes: Type<ValueSetRead>(),
+  },
 } as const;

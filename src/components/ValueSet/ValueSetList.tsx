@@ -34,6 +34,8 @@ import {
   CardGridSkeleton,
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
+import { ExportValueSetButton } from "@/components/ValueSet/ExportValueSetButton";
+import { ImportValueSetDialog } from "@/components/ValueSet/ImportValueSetDialog";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -154,7 +156,12 @@ const RenderCard = ({
                   </div>
                 </div>
 
-                <div className="mt-4 flex justify-end">
+                <div className="mt-4 flex justify-end gap-2">
+                  <ExportValueSetButton
+                    valueSet={valueset}
+                    variant="ghost"
+                    size="sm"
+                  />
                   <Button
                     variant="outline"
                     size="sm"
@@ -266,25 +273,32 @@ const RenderTable = ({
                   </ExpandableText>
                 </TableCell>
                 <TableCell className="whitespace-nowrap px-6 py-4 text-sm">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate(`/admin/valuesets/${valueset.slug}/edit`)
-                    }
-                  >
-                    {valueset.is_system_defined ? (
-                      <>
-                        <Eye className="size-4 mr-0" />
-                        {t("view")}
-                      </>
-                    ) : (
-                      <>
-                        <Pencil className="size-4 mr-0" />
-                        {t("edit")}
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex gap-1">
+                    <ExportValueSetButton
+                      valueSet={valueset}
+                      variant="ghost"
+                      size="sm"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        navigate(`/admin/valuesets/${valueset.slug}/edit`)
+                      }
+                    >
+                      {valueset.is_system_defined ? (
+                        <>
+                          <Eye className="size-4 mr-0" />
+                          {t("view")}
+                        </>
+                      ) : (
+                        <>
+                          <Pencil className="size-4 mr-0" />
+                          {t("edit")}
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -362,15 +376,18 @@ export function ValueSetList() {
             />
           </div>
 
-          <Button className="w-full sm:w-auto">
-            <Link
-              href="/admin/valuesets/create"
-              className="flex items-center gap-2"
-            >
-              <PlusIcon className="size-4" />
-              {t("create_valueset")}
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <ImportValueSetDialog />
+            <Button className="w-full sm:w-auto">
+              <Link
+                href="/admin/valuesets/create"
+                className="flex items-center gap-2"
+              >
+                <PlusIcon className="size-4" />
+                {t("create_valueset")}
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
       <RenderTable valuesets={valuesets} isLoading={isLoading} />
