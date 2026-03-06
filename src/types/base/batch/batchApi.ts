@@ -3,6 +3,11 @@ import { BatchRequestResponse } from "@/types/base/batch/batch";
 
 import { BatchRequestBody } from "./batch";
 
+/**
+ * 400 Bad Request handler
+ * @deprecated TODO: add a better error handler
+ */
+
 const batchApi = {
   batchRequest: {
     path: "/api/v1/batch_requests/",
