@@ -7,15 +7,17 @@ export const ResetHistoryContext = createContext(() => {});
 
 export default function HistoryAPIProvider(props: { children: ReactNode }) {
   const [history, setHistory] = useState<string[]>([]);
-  const isReplaceRef = useRef(false);
-
+  const isReplaceRef = useRef(false); // set a flag to track if the history is being replaced
+  /**
+   * Intercept the browser's replaceState function to track if the history is being replaced.
+   */
   useEffect(() => {
-    const original = window.history.replaceState.bind(window.history); //store the original browser replaceState function
+    const original = window.history.replaceState.bind(window.history);
     window.history.replaceState = (...args) => {
       isReplaceRef.current = true;
-      return original(...args); //call the original browser replaceState function
+      return original(...args);
     };
-  }, []); //run this effect only once on mount
+  }, []);
 
   useLocationChange(
     (newLocation) => {
