@@ -1,5 +1,11 @@
 import { useTranslation } from "react-i18next";
 
+import {
+  BedAvailableSelected,
+  BedAvailableUnselected,
+  BedUnavailableSelected,
+  BedUnavailableUnselected,
+} from "@/CAREUI/icons/CustomIcons";
 import { cn } from "@/lib/utils";
 
 interface BedStatusLegendProps {
@@ -11,19 +17,19 @@ export function BedStatusLegend({ className }: BedStatusLegendProps) {
 
   const statuses = [
     {
-      image: "/images/bed-available.svg",
+      icon: BedAvailableUnselected,
       label: "available",
     },
     {
-      image: "/images/bed-available-selected.svg",
+      icon: BedAvailableSelected,
       label: "available_selected",
     },
     {
-      image: "/images/bed-unavailable.svg",
+      icon: BedUnavailableUnselected,
       label: "occupied",
     },
     {
-      image: "/images/bed-unavailable-selected.svg",
+      icon: BedUnavailableSelected,
       label: "occupied_selected",
     },
   ];
@@ -33,11 +39,7 @@ export function BedStatusLegend({ className }: BedStatusLegendProps) {
       {statuses.map((status) => (
         <div key={status.label} className="flex items-center gap-2">
           <div className="relative size-6">
-            <img
-              src={status.image}
-              alt={t(status.label)}
-              className="w-full h-full"
-            />
+            <status.icon className="h-full w-full" />
           </div>
           <span className="text-xs">{t(status.label)}</span>
         </div>

@@ -84,13 +84,13 @@ export function PrintAllQuestionnaireResponses({
     >
       <div className="md:p-2 max-w-4xl mx-auto">
         <div>
-          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
+          <div className="flex flex-col sm:flex-row print:flex-row justify-between items-center print:items-start sm:items-start mb-4 pb-2 border-b border-gray-200">
             <img
               src={careConfig.mainLogo?.dark}
               alt="Care Logo"
-              className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2"
+              className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2 print:order-2"
             />
-            <div className="text-center sm:text-left sm:order-1">
+            <div className="text-center sm:text-left sm:order-1 print:text-left">
               <h1 className="text-3xl font-semibold">
                 {encounter?.facility?.name ?? patient?.name}
               </h1>
@@ -106,7 +106,7 @@ export function PrintAllQuestionnaireResponses({
           />
 
           <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
-            <div className="text-center sm:text-left sm:order-1">
+            <div className="text-center sm:text-left sm:order-1 print:text-left">
               <h3 className="text-lg font-semibold">{questionnaire?.title}</h3>
               <p className="text-gray-500 text-sm tracking-wide mt-1">
                 {questionnaire?.description}
@@ -138,7 +138,7 @@ const DetailRow = ({
 }) => {
   return (
     <div className="flex">
-      <span className="text-gray-600 w-32">{label}</span>
+      <span className="text-gray-600 w-20">{label}</span>
       <span className="text-gray-600">: </span>
       <span className={`ml-1 ${isStrong ? "font-semibold" : ""}`}>
         {value || "-"}
@@ -161,8 +161,8 @@ export function EncounterDetails({
   if (!patient) return null;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 mb-8">
-      <div className="space-y-3">
+    <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-x-6 gap-y-6 mb-8">
+      <div className="space-y-2">
         <DetailRow label={t("patient")} value={patient.name} isStrong />
         <DetailRow
           label={`${t("age")} / ${t("sex")}`}
@@ -174,7 +174,7 @@ export function EncounterDetails({
           isStrong
         />
       </div>
-      <div className="space-y-3">
+      <div className="space-y-2">
         <DetailRow
           label={t("encounter_date")}
           value={
