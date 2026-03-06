@@ -149,3 +149,80 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
     await expect(completedDeliveryRow1).toContainText(orderName);
   });
 });
+
+test.describe("External Delivery Order Flow", () => {
+  async function setupExternalData(page: Page) {
+    if (pharmacybasePath) return;
+    const facilityId = getFacilityId();
+    const servicesUrl = `/facility/${facilityId}/services/`;
+    await page.goto(servicesUrl);
+    await page.getByRole("link", { name: "Main Pharmacy" }).click();
+    await page.getByRole("link", { name: "Pharmacy" }).click();
+    pharmacyLocationId =
+      page
+        .url()
+        .match(
+          new RegExp(
+            `/facility/${facilityId}/locations/([^/]+)/medication_requests`,
+          ),
+        )?.[1] ?? "";
+    pharmacybasePath = `/facility/${facilityId}/locations/${pharmacyLocationId}`;
+  }
+
+  test.beforeEach(async ({ page }) => {
+    await setupExternalData(page);
+  });
+
+  test("should show validation errors when Name and Vendor are empty", async ({
+    page,
+  }) => {
+    await page.goto(
+      pharmacybasePath + "/inventory/external/deliveries/outgoing/new",
+    );
+    await page.getByRole("button", { name: "Create" }).click();
+    await expect(page.getByText("Name is required")).toBeVisible();
+    await expect(page.getByText("Required", { exact: true })).toBeVisible();
+  });
+
+  test("should create an external delivery order successfully", async ({
+    page,
+  }) => {
+    const deliveryName = faker.lorem.words(3);
+    await page.goto(
+      pharmacybasePath + "/inventory/external/deliveries/incoming",
+    );
+    await page.getByRole("button", { name: "Create Delivery" }).click();
+    await page.getByRole("textbox", { name: "Name" }).fill(deliveryName);
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: "Select Vendor/Distributor" })
+      .click();
+    await expect(page.getByRole("option").first()).toBeVisible({
+      timeout: 5000,
+    });
+    await page.getByRole("option").first().click();
+    await page.getByRole("button", { name: "Create" }).click();
+    await expect(page.getByText("Order created successfully")).toBeVisible({
+      timeout: 10000,
+    });
+    await page.goto(
+      pharmacybasePath + "/inventory/external/deliveries/incoming",
+    );
+    const row1 = page.locator("table tbody tr").nth(0);
+    await expect(row1).toContainText(deliveryName);
+  });
+
+  test("should switch to completed tab and show the deliveries table", async ({
+    page,
+  }) => {
+    await page.goto(
+      pharmacybasePath + "/inventory/external/deliveries/incoming",
+    );
+    await page.getByRole("tab", { name: "Completed" }).click();
+    await expect(page.getByRole("tab", { name: "Completed" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.getByRole("table")).toBeVisible();
+  });
+});
