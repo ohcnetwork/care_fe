@@ -18,12 +18,16 @@ export function ServiceNav() {
   const { hasPermission } = usePermissions();
   const { canViewSchedule, canViewAppointments, canListTokens } =
     getPermissions(hasPermission, service?.permissions ?? []);
+  const { canReadHealthcareService } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
+  );
   const {
     canViewSchedule: canViewScheduleForFacility,
     canViewAppointments: canViewAppointmentsForFacility,
     canListTokens: canListTokensForFacility,
-    canReadHealthcareService,
-  } = getPermissions(hasPermission, facility?.permissions ?? []);
+  } = getPermissions(hasPermission, facility?.root_org_permissions ?? []);
+  const hasManagingOrganization = !!service?.managing_organization?.id;
 
   const baseUrl = `/facility/${facilityId}/services/${service?.id}`;
 
@@ -40,19 +44,25 @@ export function ServiceNav() {
           name: t("schedule"),
           url: `${baseUrl}/schedule`,
           icon: <CareIcon icon="l-calender" />,
-          visibility: canViewSchedule || canViewScheduleForFacility,
+          visibility: hasManagingOrganization
+            ? canViewSchedule
+            : canViewScheduleForFacility,
         },
         {
           name: t("appointments"),
           url: `${baseUrl}/appointments`,
           icon: <CareIcon icon="d-calendar" />,
-          visibility: canViewAppointments || canViewAppointmentsForFacility,
+          visibility: hasManagingOrganization
+            ? canViewAppointments
+            : canViewAppointmentsForFacility,
         },
         {
           name: t("queues"),
           url: `${baseUrl}/queues`,
           icon: <Logs />,
-          visibility: canListTokens || canListTokensForFacility,
+          visibility: hasManagingOrganization
+            ? canListTokens
+            : canListTokensForFacility,
         },
       ]}
     />

@@ -19,7 +19,7 @@ import { pharmacyDispenseServiceAtom } from "@/atoms/pharmacy";
 import { getPermissions } from "@/common/Permissions";
 import BackButton from "@/components/Common/BackButton";
 import { usePermissions } from "@/context/PermissionContext";
-import useCurrentFacility from "@/src/pages/Facility/utils/useCurrentFacility";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { InternalType } from "@/types/healthcareService/healthcareService";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 import { useAtom } from "jotai";
@@ -131,7 +131,9 @@ export default function HealthcareServiceShow({
     canViewSchedule: canViewScheduleForFacility,
     canViewAppointments: canViewAppointmentsForFacility,
     canListTokens: canListTokensForFacility,
-  } = getPermissions(hasPermission, facility?.permissions ?? []);
+  } = getPermissions(hasPermission, facility?.root_org_permissions ?? []);
+
+  const hasManagingOrganization = !!service?.managing_organization?.id;
 
   return (
     <div className="container px-4 mx-auto max-w-4xl space-y-6">
@@ -148,21 +150,27 @@ export default function HealthcareServiceShow({
               description: t("schedule_information"),
               icon: Calendar,
               href: `/schedule`,
-              visibility: canViewSchedule || canViewScheduleForFacility,
+              visibility: hasManagingOrganization
+                ? canViewSchedule
+                : canViewScheduleForFacility,
             },
             {
               title: t("appointments"),
               description: t("view_appointments"),
               icon: CalendarDays,
               href: `/appointments`,
-              visibility: canViewAppointments || canViewAppointmentsForFacility,
+              visibility: hasManagingOrganization
+                ? canViewAppointments
+                : canViewAppointmentsForFacility,
             },
             {
               title: t("queues"),
               description: t("manage_token_queues_for_facility"),
               icon: Logs,
               href: `/queues`,
-              visibility: canListTokens || canListTokensForFacility,
+              visibility: hasManagingOrganization
+                ? canListTokens
+                : canListTokensForFacility,
             },
           ]
             .filter((shortcut) => shortcut.visibility)

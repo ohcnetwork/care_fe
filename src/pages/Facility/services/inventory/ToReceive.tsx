@@ -15,8 +15,10 @@ import useFilters from "@/hooks/useFilters";
 import { RequestOrderPriority } from "@/types/inventory/requestOrder/requestOrder";
 import query from "@/Utils/request/query";
 
+import { getPermissions } from "@/common/Permissions";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { NavTabs } from "@/components/ui/nav-tabs";
+import { usePermissions } from "@/context/PermissionContext";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import DeliveryOrderTable from "@/pages/Facility/services/inventory/externalSupply/components/DeliveryOrderTable";
 import RequestOrderTable from "@/pages/Facility/services/inventory/externalSupply/components/RequestOrderTable";
@@ -33,6 +35,9 @@ export function ToReceive({ facilityId, locationId, internal, tab }: Props) {
   const { t } = useTranslation();
   const currentTab = tab === "deliveries" ? "deliveries" : "orders";
   const { location } = useCurrentLocation();
+  const { hasPermission } = usePermissions();
+  const { canReadSupplyRequest, canReadSupplyDelivery, canWriteSupplyRequest } =
+    getPermissions(hasPermission, location?.permissions ?? []);
   return (
     <Page
       title={t("to_receive")}
@@ -61,7 +66,7 @@ export function ToReceive({ facilityId, locationId, internal, tab }: Props) {
               )}
             </p>
           </div>
-          {currentTab === "orders" && (
+          {currentTab === "orders" && canWriteSupplyRequest && (
             <div className="flex items-center gap-2">
               <Button
                 variant="primary"
@@ -98,6 +103,7 @@ export function ToReceive({ facilityId, locationId, internal, tab }: Props) {
                   internal={internal}
                 />
               ),
+              visible: canReadSupplyRequest,
             },
             deliveries: {
               label: t("incoming_deliveries"),
@@ -108,6 +114,7 @@ export function ToReceive({ facilityId, locationId, internal, tab }: Props) {
                   internal={internal}
                 />
               ),
+              visible: canReadSupplyDelivery,
             },
           }}
           currentTab={currentTab}

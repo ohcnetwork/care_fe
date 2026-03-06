@@ -15,8 +15,10 @@ import useFilters from "@/hooks/useFilters";
 import { RequestOrderPriority } from "@/types/inventory/requestOrder/requestOrder";
 import query from "@/Utils/request/query";
 
+import { getPermissions } from "@/common/Permissions";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { NavTabs } from "@/components/ui/nav-tabs";
+import { usePermissions } from "@/context/PermissionContext";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import DeliveryOrderTable from "@/pages/Facility/services/inventory/externalSupply/components/DeliveryOrderTable";
 import RequestOrderTable from "@/pages/Facility/services/inventory/externalSupply/components/RequestOrderTable";
@@ -35,6 +37,12 @@ export function ToDispatch({ facilityId, locationId, internal, tab }: Props) {
   const { t } = useTranslation();
   const currentTab = tab === "deliveries" ? "deliveries" : "orders";
   const { location } = useCurrentLocation();
+
+  const { hasPermission } = usePermissions();
+  const { canReadSupplyRequest, canReadSupplyDelivery } = getPermissions(
+    hasPermission,
+    location?.permissions ?? [],
+  );
 
   return (
     <Page
@@ -74,6 +82,7 @@ export function ToDispatch({ facilityId, locationId, internal, tab }: Props) {
                   internal={internal}
                 />
               ),
+              visible: canReadSupplyRequest,
             },
             deliveries: {
               label: t("outgoing_deliveries"),
@@ -84,6 +93,7 @@ export function ToDispatch({ facilityId, locationId, internal, tab }: Props) {
                   internal={internal}
                 />
               ),
+              visible: canReadSupplyDelivery,
             },
           }}
           currentTab={currentTab}
@@ -203,6 +213,12 @@ function OutgoingDeliveriesTab({
   internal: boolean;
 }) {
   const { t } = useTranslation();
+  const { location } = useCurrentLocation();
+  const { hasPermission } = usePermissions();
+  const { canWriteSupplyDelivery } = getPermissions(
+    hasPermission,
+    location?.permissions ?? [],
+  );
 
   const [qParams] = useQueryParams();
   const { updateQuery, Pagination, resultsPerPage } = useFilters({
@@ -254,27 +270,29 @@ function OutgoingDeliveriesTab({
             ))}
           </TabsList>
         </Tabs>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="primary"
-            onClick={() =>
-              navigate(
-                getInventoryBasePath(
-                  facilityId,
-                  locationId,
-                  internal,
-                  false,
-                  false,
-                  "new",
-                ),
-              )
-            }
-          >
-            <CareIcon icon="l-plus" />
-            {t("create_delivery")}
-            <ShortcutBadge actionId="create-order" />
-          </Button>
-        </div>
+        {canWriteSupplyDelivery && (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="primary"
+              onClick={() =>
+                navigate(
+                  getInventoryBasePath(
+                    facilityId,
+                    locationId,
+                    internal,
+                    false,
+                    false,
+                    "new",
+                  ),
+                )
+              }
+            >
+              <CareIcon icon="l-plus" />
+              {t("create_delivery")}
+              <ShortcutBadge actionId="create-order" />
+            </Button>
+          </div>
+        )}
       </div>
       <DeliveryOrderTable
         deliveries={orders}
