@@ -39,7 +39,7 @@ export const PatientInfoCard = ({
   return (
     <>
       <Card className="bg-white shadow-sm rounded-md">
-        <CardHeader>
+        <CardHeader className="flex flex-row flex-wrap items-center justify-between">
           <div className="flex flex-col md:flex-row gap-4">
             <PatientHoverCard patient={patient} facilityId={facilityId} />
             <div className="flex flex-wrap xl:gap-5 gap-2">
@@ -52,7 +52,7 @@ export const PatientInfoCard = ({
                       className="flex flex-col gap-1 items-start"
                     >
                       <span className="text-xs text-gray-700 md:w-auto">
-                        {identifier.config.config.display}:{" "}
+                        {identifier.config.config.display}:
                       </span>
                       <span className="text-sm font-semibold">
                         {identifier.value}
@@ -61,9 +61,8 @@ export const PatientInfoCard = ({
                   ))}
             </div>
           </div>
-          <div className="w-full flex items-center justify-center">
-            {children}
-          </div>
+
+          <div className="mx-auto sm:mx-0">{children}</div>
         </CardHeader>
       </Card>
       <Card className="bg-white shadow-sm mx-3 rounded-md rounded-t-none rounded-b-md">
