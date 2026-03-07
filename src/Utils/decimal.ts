@@ -72,6 +72,10 @@ export function roundWhole(value: string | number | Decimal): string {
   return new Decimal(value).toFixed(0);
 }
 
+export function roundUp(value: string | number | Decimal): string {
+  return new Decimal(value).toFixed(0, Decimal.ROUND_UP);
+}
+
 /**
  * Compare two decimal values
  * Returns: -1 if a < b, 0 if a == b, 1 if a > b

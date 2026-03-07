@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
   Table,
@@ -29,7 +28,10 @@ import {
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import {
-  APPOINTMENT_STATUS_COLORS,
+  PatientIdentifier,
+  PatientIdentifierUse,
+} from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import {
   formatScheduleResourceName,
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
@@ -53,6 +55,10 @@ export function PrintAppointments({
   const [selectedPatient, setSelectedPatient] = useState<PatientRead | null>(
     null,
   );
+
+  const practitioners = qParams.practitioners
+    ? qParams.practitioners.split(",")
+    : [];
   const [sortByTokenNo, setSortByTokenNo] = useState(false);
   const { data: appointmentsData, isLoading } = useQuery({
     queryKey: [
@@ -154,6 +160,12 @@ export function PrintAppointments({
                   {t("patient")}: {selectedPatient?.name}
                 </p>
               )}
+              {practitioners.length === 1 && (
+                <p className="text-gray-600">
+                  {t("practitioner", { count: 1 })}:{" "}
+                  {formatScheduleResourceName(appointments[0])}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <div className="flex justify-between">
@@ -178,9 +190,11 @@ export function PrintAppointments({
                     <TableHead className="p-2 font-medium text-gray-500">
                       {t("patient")}
                     </TableHead>
-                    <TableHead className="p-2 font-medium text-gray-500">
-                      {t("practitioner", { count: 1 })}
-                    </TableHead>
+                    {practitioners.length > 1 && (
+                      <TableHead className="p-2 font-medium text-gray-500">
+                        {t("practitioner", { count: 1 })}
+                      </TableHead>
+                    )}
                     <TableHead className="p-2 font-medium text-gray-500">
                       {t("appointment_time")}
                     </TableHead>
@@ -189,9 +203,6 @@ export function PrintAppointments({
                     </TableHead>
                     <TableHead className="p-2 font-medium text-gray-500">
                       {t("status")}
-                    </TableHead>
-                    <TableHead className="p-2 font-medium text-gray-500">
-                      {t("tags")}
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -206,20 +217,48 @@ export function PrintAppointments({
                           <p className="font-medium">
                             {appointment.patient.name}
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-gray-600 flex items-center gap-1">
                             {formatPatientAge(appointment.patient, true)},{" "}
                             {t(`GENDER__${appointment.patient.gender}`)}
+                            {"instance_identifiers" in appointment.patient &&
+                              (
+                                appointment.patient
+                                  .instance_identifiers as PatientIdentifier[]
+                              )
+                                ?.filter(
+                                  ({ config }: PatientIdentifier) =>
+                                    config.config.use ===
+                                      PatientIdentifierUse.official &&
+                                    !config.config.auto_maintained,
+                                )
+                                .map((identifier: PatientIdentifier) => (
+                                  <p
+                                    key={identifier.config.id}
+                                    className="text-xs text-gray-600"
+                                  >
+                                    ({identifier.config.config.display}:{" "}
+                                    {identifier.value}){" "}
+                                  </p>
+                                ))}
                           </p>
                         </div>
                       </TableCell>
-                      <TableCell className="p-2 align-top break-words whitespace-normal">
-                        {formatScheduleResourceName(appointment)}
-                      </TableCell>
-                      <TableCell className="p-2 align-top">
+                      {practitioners.length > 1 && (
+                        <TableCell className="p-2 align-top break-words whitespace-normal">
+                          {formatScheduleResourceName(appointment)}
+                        </TableCell>
+                      )}
+                      <TableCell className="p-2 align-top flex flex-col gap-1">
                         {formatDateTime(
                           appointment.token_slot.start_datetime,
-                          "ddd, DD MMM YYYY, HH:mm",
+                          "ddd, DD MMM YYYY",
                         )}
+                        <span>
+                          {formatDateTime(
+                            appointment.token_slot.start_datetime,
+                            "hh:mm a",
+                          )}
+                        </span>
                       </TableCell>
                       <TableCell className="p-2 align-top">
                         {appointment.token
@@ -227,26 +266,7 @@ export function PrintAppointments({
                           : "--"}
                       </TableCell>
                       <TableCell className="p-2 align-top">
-                        <Badge
-                          variant={
-                            APPOINTMENT_STATUS_COLORS[appointment.status]
-                          }
-                        >
-                          {t(appointment.status)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="p-2 align-top">
-                        <div className="flex flex-wrap gap-1">
-                          {appointment.tags.map((tag) => (
-                            <Badge
-                              key={tag.id}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              {tag.display}
-                            </Badge>
-                          ))}
-                        </div>
+                        {t(appointment.status)}
                       </TableCell>
                     </TableRow>
                   ))}

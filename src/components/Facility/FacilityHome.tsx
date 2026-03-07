@@ -1,6 +1,6 @@
 import careConfig from "@careConfig";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Hospital } from "lucide-react";
+import { Hospital, Printer } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -19,6 +19,7 @@ import ContactLink from "@/components/Common/ContactLink";
 import Loading from "@/components/Common/Loading";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import FacilityDeleteDialog from "@/components/Facility/FacilityDeleteDialog";
+import PrintTemplateSheet from "@/components/Facility/PrintTemplateSheet";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -222,10 +223,23 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
             <div className="flex justify-end max-sm:flex-col-reverse flex-wrap sm:gap-2">
               {canUpdateFacility && (
-                <div className="flex max-sm:flex-col mt-10 sm:mt-4">
+                <div className="flex gap-1 max-sm:flex-col mt-10 sm:mt-4">
                   <PLUGIN_Component
                     __name="FacilityHomeActions"
                     facility={facilityData}
+                  />
+                  <PrintTemplateSheet
+                    facility={facilityData}
+                    trigger={
+                      <Button
+                        className="cursor-pointer font-semibold"
+                        variant="outline"
+                        size="sm"
+                      >
+                        <Printer className="size-4" />
+                        {t("print_templates")}
+                      </Button>
+                    }
                   />
                   <EditFacilitySheet
                     facilityId={facilityId}

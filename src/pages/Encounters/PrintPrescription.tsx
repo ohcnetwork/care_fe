@@ -5,29 +5,55 @@ import { PrescriptionPreview } from "@/components/Prescription/PrescriptionPrevi
 
 import query from "@/Utils/request/query";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
-export const PrintPrescription = (props: {
+interface PrintPrescriptionProps {
   facilityId: string;
   patientId: string;
-  prescriptionId: string;
-}) => {
-  const { facilityId, patientId, prescriptionId } = props;
+  encounterId?: string;
+  prescriptionId?: string;
+}
 
-  const { data: prescription, isLoading } = useQuery({
-    queryKey: ["prescription", patientId, prescriptionId],
-    queryFn: query(prescriptionApi.get, {
-      pathParams: { patientId, id: prescriptionId! },
-      queryParams: { facility: facilityId },
-    }),
-    enabled: !!prescriptionId,
-  });
+export const PrintPrescription = ({
+  facilityId,
+  patientId,
+  encounterId,
+  prescriptionId,
+}: PrintPrescriptionProps) => {
+  const { t } = useTranslation();
 
-  if (isLoading) return <Loading />;
+  const { data: encounterPrescriptions, isLoading: isLoadingEncounter } =
+    useQuery({
+      queryKey: ["prescriptions-list", patientId, encounterId, facilityId],
+      queryFn: query.paginated(prescriptionApi.list, {
+        pathParams: { patientId: patientId! },
+        queryParams: { encounter: encounterId, facility: facilityId },
+        pageSize: 100,
+      }),
+      enabled: !!encounterId && !!patientId && !!facilityId,
+    });
 
-  if (!prescription) {
-    return <div>{t("prescription_not_found")}</div>;
+  if (!prescriptionId && !encounterId) {
+    return <div>{t("encounter_not_found")}</div>;
   }
 
-  return <PrescriptionPreview prescription={prescription} />;
+  if (encounterId && isLoadingEncounter) {
+    return <Loading />;
+  }
+
+  const resolvedPrescriptionIds = prescriptionId
+    ? [prescriptionId]
+    : (encounterPrescriptions?.results?.map((p) => p.id) ?? []);
+
+  if (resolvedPrescriptionIds.length === 0) {
+    return <div>{t("no_prescriptions_found")}</div>;
+  }
+
+  return (
+    <PrescriptionPreview
+      prescriptionIds={resolvedPrescriptionIds}
+      patientId={patientId}
+      facilityId={facilityId}
+    />
+  );
 };

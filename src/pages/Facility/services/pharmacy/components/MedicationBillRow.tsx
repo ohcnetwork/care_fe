@@ -41,7 +41,12 @@ import {
   MedicationBillLotItem,
 } from "@/pages/Facility/services/pharmacy/types";
 
-import { formatTotalUnits } from "@/components/Medicine/utils";
+import {
+  formatDosage,
+  formatDuration,
+  formatFrequency,
+  formatTotalUnits,
+} from "@/components/Medicine/utils";
 
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
@@ -300,25 +305,12 @@ export function MedicationBillRow({
             {field.medication ? (
               <div>
                 <div className="text-sm text-gray-700 font-medium flex items-center gap-1">
-                  {
-                    field.dosageInstructions?.[0]?.dose_and_rate?.dose_quantity
-                      ?.value
-                  }{" "}
-                  {
-                    field.dosageInstructions?.[0]?.dose_and_rate?.dose_quantity
-                      ?.unit?.display
-                  }{" "}
-                  × {field.dosageInstructions?.[0]?.timing?.code?.code} ×{" "}
-                  {field.dosageInstructions?.[0]?.timing?.repeat
-                    ?.bounds_duration?.value || 0}
-                  {
-                    field.dosageInstructions?.[0]?.timing?.repeat
-                      ?.bounds_duration?.unit
-                  }{" "}
-                  ={" "}
-                  <div className="text-gray-700 font-semibold text-sm">
+                  {formatDosage(field.dosageInstructions?.[0])} ×{" "}
+                  {formatFrequency(field.dosageInstructions?.[0])} ×{" "}
+                  {formatDuration(field.dosageInstructions?.[0]) || "-"} ={" "}
+                  <span className="text-gray-700 font-semibold text-sm">
                     {formatTotalUnits(field.dosageInstructions, t("units"))}
-                  </div>
+                  </span>
                 </div>
               </div>
             ) : (
@@ -338,28 +330,15 @@ export function MedicationBillRow({
                   if (currentDosageInstructions?.dose_and_rate?.dose_quantity) {
                     return (
                       <div className="text-sm text-gray-700 font-medium flex items-center gap-1">
-                        {
-                          currentDosageInstructions.dose_and_rate.dose_quantity
-                            .value
-                        }{" "}
-                        {
-                          currentDosageInstructions.dose_and_rate.dose_quantity
-                            .unit?.display
-                        }{" "}
-                        × {currentDosageInstructions.timing?.code?.code} ×{" "}
-                        {currentDosageInstructions.timing?.repeat
-                          ?.bounds_duration?.value || 0}
-                        {
-                          currentDosageInstructions.timing?.repeat
-                            ?.bounds_duration?.unit
-                        }{" "}
-                        ={" "}
-                        <div className="text-gray-700 font-semibold text-sm">
+                        {formatDosage(currentDosageInstructions)} ×{" "}
+                        {formatFrequency(currentDosageInstructions)} ×{" "}
+                        {formatDuration(currentDosageInstructions) || "-"} ={" "}
+                        <span className="text-gray-700 font-semibold text-sm">
                           {formatTotalUnits(
                             [currentDosageInstructions],
                             t("units"),
                           )}
-                        </div>
+                        </span>
                       </div>
                     );
                   }

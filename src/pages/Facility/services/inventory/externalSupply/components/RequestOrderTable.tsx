@@ -3,6 +3,8 @@ import { Eye } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import { formatDateTime, formatName } from "@/Utils/utils";
+
 import {
   Table,
   TableBody,
@@ -15,7 +17,6 @@ import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Hash } from "lucide-react";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -70,7 +71,8 @@ export default function RequestOrderTable({
           <TableHead>{t("deliver_to")}</TableHead>
           <TableHead>{t("status")}</TableHead>
           <TableHead>{t("priority")}</TableHead>
-          <TableHead>{t("tags", { count: 2 })}</TableHead>
+          <TableHead className="w-48">{t("tags", { count: 2 })}</TableHead>
+          <TableHead className="w-44">{t("created_by")}</TableHead>
           <TableHead className="w-28">{t("actions")}</TableHead>
         </TableRow>
       </TableHeader>
@@ -92,35 +94,27 @@ export default function RequestOrderTable({
                 {t(request.priority)}
               </Badge>
             </TableCell>
-            <TableCell className="sm:w-60 md:w-80">
-              <div className="flex flex-wrap gap-1">
-                <TagAssignmentSheet
-                  entityType="request_order"
-                  entityId={request.id}
-                  facilityId={facilityId}
-                  currentTags={request.tags ?? []}
-                  onUpdate={() => {
-                    queryClient.invalidateQueries({
-                      queryKey: ["requestOrders", locationId, internal],
-                    });
-                  }}
-                  trigger={
-                    request.tags && request.tags.length > 0 ? (
-                      <Button variant="outline" size="xs">
-                        <Hash className="size-3" /> {t("tags")}
-                      </Button>
-                    ) : (
-                      <Button variant="outline" size="xs">
-                        <Hash className="size-3" /> {t("add_tags")}
-                      </Button>
-                    )
-                  }
-                />
-                {request.tags.map((tag) => (
-                  <Badge key={tag.id} variant="secondary" className="text-xs">
-                    {tag.display}
-                  </Badge>
-                ))}
+            <TableCell>
+              <TagAssignmentSheet
+                entityType="request_order"
+                entityId={request.id}
+                facilityId={facilityId}
+                currentTags={request.tags ?? []}
+                onUpdate={() => {
+                  queryClient.invalidateQueries({
+                    queryKey: ["requestOrders", locationId, internal],
+                  });
+                }}
+              />
+            </TableCell>
+            <TableCell>
+              <div className="flex flex-col">
+                <span className="font-medium">
+                  {formatName(request.created_by)}
+                </span>
+                <span className="text-xs text-gray-500">
+                  {formatDateTime(request.created_date)}
+                </span>
               </div>
             </TableCell>
             <TableCell>
