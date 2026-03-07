@@ -87,7 +87,7 @@ export const AppointmentEncounterHeader = ({
   canWritePrimaryEncounter: boolean;
 }) => {
   return (
-    <div className="flex gap-3 border border-gray-300 rounded-lg py-1.5 px-2 bg-white sm:w-fit w-full items-center justify-center shadow-sm">
+    <div className="flex sm:flex-row flex-col gap-3 border border-gray-300 rounded-lg py-1.5 px-2 bg-white sm:w-fit w-full items-center justify-center shadow-sm">
       <TokenActions
         patientId={encounter.patient.id}
         facilityId={encounter.facility.id}
@@ -148,8 +148,8 @@ const AppointmentEncounterHeaderActions = ({
     return (
       <div
         className={cn(
-          "w-full sm:w-auto space-x-2",
-          appointment.token && "border-l border-gray-300 pl-2",
+          "w-full sm:w-auto flex sm:flex-row flex-col items-center gap-2",
+          appointment.token && "sm:border-l border-gray-300 sm:pl-2",
         )}
       >
         <span className="text-sm text-black">
@@ -177,8 +177,8 @@ const AppointmentEncounterHeaderActions = ({
   return (
     <div
       className={cn(
-        "w-full sm:w-auto space-x-2",
-        appointment.token && "border-l border-gray-300 pl-2",
+        "w-full sm:w-auto flex sm:flex-row flex-col items-center gap-2",
+        appointment.token && "sm:border-l border-gray-300 sm:pl-2",
       )}
     >
       <span className="text-sm text-black">
@@ -248,7 +248,7 @@ const TokenActions = ({
   const { token } = appointment;
 
   return (
-    <div className="flex divide-x gap-2">
+    <div className="flex flex-wrap divide-x gap-2">
       {appointment.id && (
         <div className="flex items-center justify-center border-gray-300">
           <Button variant="ghost" className="rounded-r-none pl-2 " asChild>
