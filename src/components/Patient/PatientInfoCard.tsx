@@ -39,8 +39,8 @@ export const PatientInfoCard = ({
   return (
     <>
       <Card className="bg-white shadow-sm rounded-md">
-        <CardHeader className="flex flex-row flex-wrap items-center justify-between">
-          <div className="flex flex-col md:flex-row gap-4">
+        <CardHeader className="flex sm:flex-row justify-between">
+          <div className="flex flex-wrap gap-4">
             <PatientHoverCard patient={patient} facilityId={facilityId} />
             <div className="flex flex-wrap xl:gap-5 gap-2">
               {"instance_identifiers" in patient &&
@@ -62,7 +62,7 @@ export const PatientInfoCard = ({
             </div>
           </div>
 
-          <div className="mx-auto sm:mx-0">{children}</div>
+          <div className="w-full sm:w-auto flex justify-center">{children}</div>
         </CardHeader>
       </Card>
       <Card className="bg-white shadow-sm mx-3 rounded-md rounded-t-none rounded-b-md">
