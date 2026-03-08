@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -18,7 +19,7 @@ test.describe("Discount Components Management", () => {
     await page.getByLabel(/name/i).fill(`Test Code ${code}`);
     await page.getByRole("textbox", { name: "Code" }).fill(code);
     await page.getByRole("button", { name: "Save" }).click();
-    await expect(page.getByText(/discount code created/i)).toBeVisible();
+    await expectToast(page, /discount[_ ]code[_ ]created/i);
 
     await page.goto(
       `/facility/${facilityId}/settings/billing/discount_components`,
@@ -52,7 +53,7 @@ test.describe("Discount Components Management", () => {
 
     await page.getByRole("button", { name: "Save" }).click();
 
-    await expect(page.getByText(/discount component created/i)).toBeVisible();
+    await expectToast(page, /discount[_ ]component[_ ]created/i);
     await expect(page.getByText(componentName)).toBeVisible();
   });
 });
