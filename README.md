@@ -33,12 +33,16 @@ Follow these steps to run CARE Frontend locally.
 
 ### 1. Clone the Repository
 
-git clone https://github.com/ohcnetwork/care_fe.git  
+```sh
+git clone https://github.com/ohcnetwork/care_fe.git
 cd care_fe
+```
 
 ### 2. Install Dependencies
 
+```sh
 npm install
+```
 
 ### 3. Setup Environment Variables
 
@@ -46,11 +50,17 @@ Create a `.env.local` file in the root directory.
 
 Example:
 
+```
 REACT_CARE_API_URL=http://127.0.0.1:9000
+```
+
+For detailed backend setup and credentials, see **Local Backend Setup and Credentials**.
 
 ### 4. Start the Development Server
 
+```sh
 npm run dev
+```
 
 ### 5. Open the Application
 
@@ -59,7 +69,6 @@ Open your browser and visit:
 http://localhost:4000
 
 If everything is configured correctly, the CARE frontend should now be running locally.
-
 ## Getting started
 
 - 💬 Comment on the issue if you are willing to take it up, and link the pull request with the issue.
@@ -86,13 +95,17 @@ Once the development server has started, open [localhost:4000](http://localhost:
 
 If port 4000 is already in use, stop the running process or use:
 
+```sh
 npx kill-port 4000
+```
 
 ### Node Version Issues
 
 Ensure you are using Node.js version 18 or above:
 
+```sh
 node -v
+```
 
 ### Backend Not Running
 
@@ -186,7 +199,7 @@ The following command should install the required dependencies on Ubuntu. If you
 
    On Debian/Ubuntu, NGINX comes with a `sites-enabled/default` file which may need to be removed before the Care will begin responding to requests.
 
-If your Nginx reverse-proxy has been set up correctly, then visit the school using your browser at
+If your Nginx reverse-proxy has been set up correctly, then visit the CARE application in your browser at
 `http://care.localhost`.
 
 ## 📱 Patient Login in Staging
