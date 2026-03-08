@@ -27,6 +27,39 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/200482ab117e4b5397ff3f5ae5719aa2)](https://www.codacy.com/gh/ohcnetwork/care_fe?utm_source=github.com&utm_medium=referral&utm_content=ohcnetwork/care_fe&utm_campaign=Badge_Grade)
 [![Maintainability](https://api.codeclimate.com/v1/badges/f1438f693aa459805301/maintainability)](https://codeclimate.com/github/ohcnetwork/care_fe/maintainability)
 
+## 🚀 Quick Local Setup (For Developers)
+
+Follow these steps to run CARE Frontend locally.
+
+### 1. Clone the Repository
+
+git clone https://github.com/ohcnetwork/care_fe.git  
+cd care_fe
+
+### 2. Install Dependencies
+
+npm install
+
+### 3. Setup Environment Variables
+
+Create a `.env.local` file in the root directory.
+
+Example:
+
+REACT_CARE_API_URL=http://127.0.0.1:9000
+
+### 4. Start the Development Server
+
+npm run dev
+
+### 5. Open the Application
+
+Open your browser and visit:
+
+http://localhost:4000
+
+If everything is configured correctly, the CARE frontend should now be running locally.
+
 ## Getting started
 
 - 💬 Comment on the issue if you are willing to take it up, and link the pull request with the issue.
@@ -46,6 +79,26 @@ npm run dev
 ```
 
 Once the development server has started, open [localhost:4000](http://localhost:4000) in your browser. The page will be automatically reloaded when you make edits and save. You will also see any lint errors in the console.
+
+## ⚠️ Troubleshooting
+
+### Port Already in Use
+
+If port 4000 is already in use, stop the running process or use:
+
+npx kill-port 4000
+
+### Node Version Issues
+
+Ensure you are using Node.js version 18 or above:
+
+node -v
+
+### Backend Not Running
+
+Make sure the CARE backend is running locally and accessible at:
+
+http://127.0.0.1:9000
 
 #### 🔑 Local Backend Setup and Credentials
 
