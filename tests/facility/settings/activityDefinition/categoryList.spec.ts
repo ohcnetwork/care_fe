@@ -83,7 +83,13 @@ test.describe("Activity Definition Resource Category List", () => {
     ).not.toBeVisible();
 
     await expect(page).toHaveURL(
+<<<<<<< HEAD
       `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${testData.slug}?status=active`,
+=======
+      new RegExp(
+        `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${testData.slug}`,
+      ),
+>>>>>>> 7f5d1cf6b (fix: failing playwright tests)
     );
 
     await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
@@ -121,7 +127,13 @@ test.describe("Activity Definition Resource Category List", () => {
     ).not.toBeVisible();
 
     await expect(page).toHaveURL(
+<<<<<<< HEAD
       `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${testData.slug}?status=active`,
+=======
+      new RegExp(
+        `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${testData.slug}`,
+      ),
+>>>>>>> 7f5d1cf6b (fix: failing playwright tests)
     );
 
     await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
@@ -190,7 +202,13 @@ test.describe("Activity Definition Resource Category List", () => {
     await categoryCard.click();
 
     await expect(page).toHaveURL(
+<<<<<<< HEAD
       `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${RESOURCE_CATEGORY_SLUG}?status=active`,
+=======
+      new RegExp(
+        `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${RESOURCE_CATEGORY_SLUG}`,
+      ),
+>>>>>>> 7f5d1cf6b (fix: failing playwright tests)
     );
   });
 

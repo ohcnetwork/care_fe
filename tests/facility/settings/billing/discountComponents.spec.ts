@@ -16,7 +16,7 @@ test.describe("Discount Components Management", () => {
     await page.getByRole("button", { name: /create discount code/i }).click();
     const code = `CODE-${faker.string.alphanumeric(5)}`;
     await page.getByLabel(/name/i).fill(`Test Code ${code}`);
-    await page.getByLabel(/code/i).fill(code);
+    await page.getByRole("textbox", { name: "Code" }).fill(code);
     await page.getByRole("button", { name: "Save" }).click();
     await expect(page.getByText(/discount code created/i)).toBeVisible();
 
