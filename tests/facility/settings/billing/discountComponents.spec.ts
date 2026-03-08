@@ -14,6 +14,14 @@ test.describe("Discount Components Management", () => {
     componentName = `Discount-${faker.string.alphanumeric(5)}`;
 
     await page.goto(`/facility/${facilityId}/settings/billing/discount_codes`);
+    page.on("response", async (response) => {
+      if (response.url().includes("set_monetary_codes")) {
+        console.log("API Status:", response.status());
+        const body = await response.text();
+        console.log("API Response:", body);
+      }
+    });
+
     await page.getByRole("button", { name: /create discount code/i }).click();
     const code = `CODE-${faker.string.alphanumeric(5)}`;
     await page.getByLabel(/name/i).fill(`Test Code ${code}`);
