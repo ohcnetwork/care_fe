@@ -1,7 +1,5 @@
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
@@ -20,11 +18,14 @@ import { usePermissions } from "@/context/PermissionContext";
 import {
   ChargeItemServiceResource,
   ChargeItemStatus,
+  EXCLUDED_CHARGE_ITEM_STATUSES,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { add, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 
 interface Props {
   appointmentId: string;
@@ -66,16 +67,6 @@ export default function AppointmentPrint(props: Props) {
     enabled: !!facilityId && !!props.appointmentId,
   });
 
-  // Auto-print when page loads and data is ready
-  useEffect(() => {
-    if (appointment && !isLoading) {
-      const timer = setTimeout(() => {
-        window.print();
-      }, 1000); // Give time for content to render
-      return () => clearTimeout(timer);
-    }
-  }, [appointment, isLoading]);
-
   if (isLoading || !appointment || !facility) {
     return (
       <PrintPreview title={t("appointment_details")} disabled>
@@ -94,30 +85,13 @@ export default function AppointmentPrint(props: Props) {
   const hasChargeItems = chargeItems?.results && chargeItems.results.length > 0;
 
   return (
-    <PrintPreview title={t("appointment_details")}>
+    <PrintPreview
+      title={t("appointment_details")}
+      autoPrint={{ enabled: true }}
+      facility={facility}
+      templateSlug={PrintTemplateType.appointment}
+    >
       <div className="max-w-7xl mx-auto text-sm">
-        {/* Header with Facility Name and Logo */}
-        <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
-          <div className="text-left">
-            <h1 className="text-2xl font-semibold">{facility.name}</h1>
-            {facility.address && (
-              <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-xs">
-                {facility.address}
-                {facility.phone_number && (
-                  <p className="text-gray-500 text-xs">
-                    {facility.phone_number}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-          <img
-            src={careConfig.mainLogo?.dark}
-            alt="Care Logo"
-            className="h-8 w-auto object-contain mb-2 sm:mb-0"
-          />
-        </div>
-
         {/* Token and Charge Items Side by Side */}
         <div className="flex space-x-2">
           {/* Token Card */}
@@ -125,7 +99,6 @@ export default function AppointmentPrint(props: Props) {
             <TokenCard
               appointment={appointment}
               token={appointment.token ?? undefined}
-              facility={facility}
               inPrintMode={true}
             />
           </div>
@@ -133,25 +106,28 @@ export default function AppointmentPrint(props: Props) {
           {/* Charge Items */}
           {hasChargeItems && (
             <div className="flex justify-center w-2/5">
-              <div className="p-2 border border-gray-200 bg-gray-100 w-full h-full rounded-md flex flex-col">
-                <div className="flex flex-row items-center  justify-between px-1">
+              <div className="p-2 border border-gray-200 bg-gray-100 w-full h-full rounded-xl flex flex-col">
+                <div className="flex flex-row items-center justify-between px-1">
                   <p className="font-semibold text-sm">{t("charges")}</p>
-                  <div className="flex items-center">
+                  {chargeItems.results.every(
+                    (item) =>
+                      !EXCLUDED_CHARGE_ITEM_STATUSES.includes(item.status),
+                  ) && (
                     <Badge className="text-xs">
-                      {chargeItems?.results?.every(
+                      {chargeItems.results.every(
                         (item) => item.status === ChargeItemStatus.paid,
                       )
                         ? t("paid")
-                        : chargeItems?.results?.some(
+                        : chargeItems.results.every(
                               (item) => item.status === ChargeItemStatus.billed,
                             )
                           ? t("billed")
                           : t("billable")}
                     </Badge>
-                  </div>
+                  )}
                 </div>
 
-                <div className="bg-white rounded-md p-3 shadow-md mt-2 h-full">
+                <div className="bg-white rounded-md p-3 mt-2 h-full">
                   <div className="space-y-2 flex flex-col justify-between h-full">
                     <div className="space-y-4">
                       {chargeItems?.results?.map((item) => (
@@ -221,8 +197,13 @@ export default function AppointmentPrint(props: Props) {
 
         {/* Footer */}
         <PrintFooter
-          leftContent={format(new Date(), "PP 'at' p")}
-          rightContent={facility.name}
+          rightContent={format(new Date(), "PP 'at' p")}
+          leftContent={
+            <>
+              <span className="font-semibold">{t("last_updated_by")}: </span>
+              {formatName(appointment.updated_by)}
+            </>
+          }
           className="text-xs"
         />
       </div>

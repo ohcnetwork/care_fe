@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
+import NoActiveAccountWarningDialog from "@/pages/Facility/billing/account/components/NoActiveAccountWarningDialog";
 import { PatientListRead } from "@/types/emr/patient/patient";
 import {
   DeliveryOrderRetrieve,
@@ -126,6 +127,11 @@ export function MedicationReturnSheet({
             })}
           </SheetDescription>
         </SheetHeader>
+
+        <NoActiveAccountWarningDialog
+          patientId={patient.id}
+          facilityId={facilityId}
+        />
 
         <Form {...form}>
           <form

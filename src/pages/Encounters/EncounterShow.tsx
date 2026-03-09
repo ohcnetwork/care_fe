@@ -38,7 +38,6 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import {
   ENCOUNTER_STATUS_COLORS,
   EncounterRead,
-  inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { LocationTypeIcons } from "@/types/location/location";
@@ -69,15 +68,15 @@ export const EncounterShow = (props: Props) => {
     primaryEncounterId,
     selectedEncounterId,
     isPrimaryEncounterLoading,
+    patientId,
     patient,
     isPatientLoading,
-    canWriteSelectedEncounter,
     canWritePrimaryEncounter,
     canReadClinicalData,
     canReadSelectedEncounter,
   } = useEncounter();
 
-  useSidebarAutoCollapse({ restore: false });
+  useSidebarAutoCollapse();
   const [actionsOpen, setActionsOpen] = useState(false);
   const getShortcutDisplay = useEncounterShortcutDisplays();
 
@@ -96,12 +95,14 @@ export const EncounterShow = (props: Props) => {
 
   const canAccess = canReadClinicalData || canReadSelectedEncounter;
   const hasToken = primaryEncounter?.appointment?.token;
-  const isEncounterActive =
-    primaryEncounter?.appointment?.id &&
-    !inactiveEncounterStatus.includes(primaryEncounter?.status ?? "");
+  // const isEncounterActive =
+  //   primaryEncounter?.appointment?.id &&
+  //   !inactiveEncounterStatus.includes(primaryEncounter?.status ?? "");
+
+  const hasAppointmentId = primaryEncounter?.appointment?.id;
 
   // Header is shown either when token is present or encounter is active and has an appointment
-  const canViewAppointmentEncounterHeader = hasToken || isEncounterActive;
+  const canViewAppointmentEncounterHeader = hasToken || hasAppointmentId;
 
   useEffect(() => {
     if (!isPrimaryEncounterLoading && !isPatientLoading && !canAccess) {
@@ -148,11 +149,21 @@ export const EncounterShow = (props: Props) => {
       visible: canReadClinicalData,
       component: (
         <EncounterResponsesTab
-          patientId={patient?.id}
-          encounterId={selectedEncounter?.id}
+          patientId={patientId}
+          encounterId={selectedEncounterId}
           canAccess={canAccess}
         />
       ),
+    },
+    service_requests: {
+      label: t(`ENCOUNTER_TAB__service_requests`),
+      visible: canReadClinicalData,
+      component: <EncounterServiceRequestTab />,
+    },
+    diagnostic_reports: {
+      label: t(`ENCOUNTER_TAB__diagnostic_reports`),
+      visible: canReadClinicalData,
+      component: <EncounterDiagnosticReportsTab />,
     },
     files: {
       label: t(`ENCOUNTER_TAB__files`),
@@ -171,16 +182,6 @@ export const EncounterShow = (props: Props) => {
     consents: {
       label: t(`ENCOUNTER_TAB__consents`),
       component: <EncounterConsentsTab />,
-    },
-    service_requests: {
-      label: t(`ENCOUNTER_TAB__service_requests`),
-      visible: canReadClinicalData,
-      component: <EncounterServiceRequestTab />,
-    },
-    diagnostic_reports: {
-      label: t(`ENCOUNTER_TAB__diagnostic_reports`),
-      visible: canReadClinicalData,
-      component: <EncounterDiagnosticReportsTab />,
     },
 
     ...Object.fromEntries(
@@ -241,25 +242,23 @@ export const EncounterShow = (props: Props) => {
                 )}
               />
 
-              {canWriteSelectedEncounter && (
-                <EncounterCommandDialog
-                  encounter={selectedEncounter}
-                  open={actionsOpen}
-                  onOpenChange={setActionsOpen}
-                  trigger={
-                    <Button
-                      variant="primary_gradient"
-                      onClick={() => setActionsOpen(true)}
-                      className="text-base font-semibold rounded-md w-full"
-                    >
-                      {t("encounter_actions")}
-                      <CommandShortcut className="text-white hidden md:inline">
-                        {getShortcutDisplay("open-command-dialog")}
-                      </CommandShortcut>
-                    </Button>
-                  }
-                />
-              )}
+              <EncounterCommandDialog
+                encounter={selectedEncounter}
+                open={actionsOpen}
+                onOpenChange={setActionsOpen}
+                trigger={
+                  <Button
+                    variant="primary_gradient"
+                    onClick={() => setActionsOpen(true)}
+                    className="text-base font-semibold rounded-md w-full"
+                  >
+                    {t("encounter_actions")}
+                    <CommandShortcut className="text-white hidden md:inline">
+                      {getShortcutDisplay("open-command-dialog")}
+                    </CommandShortcut>
+                  </Button>
+                }
+              />
             </div>
           )}
         </Card>

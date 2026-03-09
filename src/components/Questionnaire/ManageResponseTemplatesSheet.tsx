@@ -3,18 +3,19 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BookmarkIcon,
   CheckCircle2Icon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
+  ChevronDownIcon,
+  ChevronLeft,
   ClipboardListIcon,
-  Loader2,
+  Edit,
+  Loader2Icon,
   PillIcon,
-  PlusCircleIcon,
   PlusIcon,
   SaveIcon,
-  SparklesIcon,
+  Search,
   Trash2Icon,
+  X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -23,17 +24,19 @@ import * as z from "zod";
 import { cn } from "@/lib/utils";
 
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  formatDosage,
+  formatDuration,
+  formatFrequency,
+} from "@/components/Medicine/utils";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Form,
   FormControl,
@@ -45,6 +48,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetContent,
@@ -54,123 +58,518 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
-import Loading from "@/components/Common/Loading";
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { MedicationRequestCreate } from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  MedicationRequestCreate,
+  MedicationRequestTemplateSpec,
+} from "@/types/emr/medicationRequest/medicationRequest";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 import {
+  ActivityDefinitionTemplateSpec,
   QuestionnaireResponseTemplateCreateSpec,
   QuestionnaireResponseTemplateReadSpec,
-  ServiceRequestTemplateSpec,
+  QuestionnaireResponseTemplateRetrieveSpec,
+  QuestionnaireResponseTemplateUpdateSpec,
 } from "@/types/questionnaire/questionnaireResponseTemplate";
 import { questionnaireResponseTemplateApi } from "@/types/questionnaire/questionnaireResponseTemplateApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
-// Check if a string looks like a product slug (starts with 'f-' prefix)
-function isProductSlug(value: string | undefined): boolean {
-  if (!value) return false;
-  return value.startsWith("f-") && value.includes("-");
-}
+import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 
-// Extract readable name from a product slug
-// Slug format: f-{uuid}-{readable-part} -> extract last part and format
-function extractNameFromSlug(slug: string | undefined): string | null {
-  if (!slug || !isProductSlug(slug)) return null;
-  // Match pattern: f-{uuid}-{name} where uuid is 36 chars
-  const match = slug.match(/^f-[a-f0-9-]{36}-(.+)$/i);
-  if (match) {
-    // Convert slug part to readable: d5-09500-09ml -> D5 09500 09ML
-    return match[1].replace(/-/g, " ").toUpperCase();
-  }
-  return null;
-}
+import { t } from "i18next";
+import { buildMedicationForTemplate } from "./QuestionTypes/MedicationRequestQuestion";
 
-// Component to display medication name, fetching from product knowledge if needed
 function MedicationName({
   medication,
-  fallbackName,
 }: {
-  medication: MedicationRequestCreate & {
-    display_name?: string;
-    requested_product_internal?: { name?: string; slug?: string };
-  };
-  fallbackName: string;
+  medication: MedicationRequestTemplateSpec;
 }) {
-  // Get name from internal object first (this is set when applying templates)
-  const internalName = medication.requested_product_internal?.name;
-  const internalSlug = medication.requested_product_internal?.slug;
-
-  // Only fetch if we have a slug (not a UUID) and no other name source
-  const canFetch =
-    !!medication.requested_product &&
-    isProductSlug(medication.requested_product) &&
-    !medication.display_name &&
-    !internalName &&
-    !medication.medication?.display;
-
+  const { t } = useTranslation();
   const { data: productKnowledge, isLoading } = useQuery({
     queryKey: ["productKnowledge", medication.requested_product],
     queryFn: query(productKnowledgeApi.retrieveProductKnowledge, {
       pathParams: { slug: medication.requested_product! },
     }),
-    enabled: canFetch,
-    staleTime: Infinity, // Cache indefinitely since product names don't change
+    enabled: !!medication.requested_product,
+    meta: { persist: true },
   });
 
-  // Priority: display_name > internal name > product knowledge > medication.display > extract from slug > fallback
-  const name =
-    medication.display_name ||
-    internalName ||
-    productKnowledge?.name ||
-    medication.medication?.display ||
-    extractNameFromSlug(internalSlug) ||
-    extractNameFromSlug(medication.requested_product) ||
-    fallbackName;
-
-  if (isLoading && canFetch) {
-    return <span className="text-gray-400 animate-pulse">Loading...</span>;
+  if (isLoading) {
+    return (
+      <span className="animate-pulse text-gray-400">{t("loading")}...</span>
+    );
   }
 
-  return <>{name}</>;
+  return (
+    <span>
+      {medication.requested_product
+        ? productKnowledge?.name
+        : medication.medication?.display || t("unknown_medication")}
+    </span>
+  );
 }
+
+interface MedicationsPreviewProps {
+  medications: (
+    | MedicationRequestTemplateSpec
+    | (MedicationRequestCreate & {
+        requested_product_internal?: { name?: string };
+      })
+  )[];
+  onMedicationSelect?: (medication: MedicationRequestCreate) => void;
+  onMedicationRemove?: (index: number) => void;
+  showAddButton?: boolean;
+  variant?: "compact" | "form";
+}
+
+function MedicationsPreview({
+  medications,
+  onMedicationSelect,
+  onMedicationRemove,
+  showAddButton = false,
+  variant = "compact",
+}: MedicationsPreviewProps) {
+  const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
+
+  if (medications.length === 0) return null;
+
+  const isFormVariant = variant === "form";
+  const displayLimit = 5;
+  const displayedMeds = expanded
+    ? medications
+    : medications.slice(0, displayLimit);
+  const remainingCount = medications.length - displayLimit;
+
+  return (
+    <div
+      className={cn(
+        "border rounded-md bg-primary-50/30 overflow-hidden",
+        isFormVariant
+          ? "border-primary-200"
+          : "border-primary-200 rounded-t-none",
+      )}
+    >
+      <div className="flex items-center gap-1.5 px-2 py-1.5 bg-primary-100/50 border-b border-primary-200">
+        <PillIcon className="size-3 text-primary-700" />
+        <span className="text-xs font-semibold text-primary-900">
+          {isFormVariant ? t("medications_to_include") : t("medications")}
+        </span>
+        <Badge variant="secondary" className="ml-auto text-xs px-1 py-0 h-4">
+          {medications.length}
+        </Badge>
+      </div>
+      <div className="p-1 space-y-0.5">
+        {displayedMeds.map((med, idx) => {
+          if (isFormVariant) {
+            const medWithInternal = med as MedicationRequestCreate & {
+              requested_product_internal?: { name?: string };
+            };
+            const hasInternalName =
+              medWithInternal.requested_product_internal?.name ||
+              med.medication?.display;
+
+            return (
+              <div
+                key={idx}
+                className="flex items-center gap-2 text-xs text-primary-700 bg-white/60 rounded px-2 py-1.5"
+              >
+                <span className="size-1 rounded-full bg-primary-500 shrink-0" />
+                <span className="flex-1 min-w-0">
+                  {hasInternalName ? (
+                    medWithInternal.requested_product_internal?.name ||
+                    med.medication?.display
+                  ) : (
+                    <MedicationName medication={med} />
+                  )}
+                </span>
+                {onMedicationRemove && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-5 shrink-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                    onClick={() => onMedicationRemove(idx)}
+                  >
+                    <X className="size-3" />
+                  </Button>
+                )}
+              </div>
+            );
+          }
+
+          const instruction = med.dosage_instruction?.[0];
+
+          const dosageInfo = [
+            formatDosage(instruction),
+            formatFrequency(instruction),
+            formatDuration(instruction),
+          ]
+            .filter(Boolean)
+            .join(" • ");
+
+          return (
+            <Button
+              key={idx}
+              variant="ghost"
+              onClick={() => {
+                if (showAddButton && onMedicationSelect) {
+                  onMedicationSelect(med as MedicationRequestCreate);
+                  toast.success(t("medication_added"));
+                }
+              }}
+              disabled={!showAddButton || !onMedicationSelect}
+              className={cn(
+                "w-full h-auto justify-between items-start gap-2 rounded px-2 py-1.5 font-normal transition-colors whitespace-pre-wrap",
+                showAddButton && onMedicationSelect
+                  ? "cursor-pointer hover:bg-primary-100/50 active:bg-primary-50"
+                  : "cursor-default bg-white/50",
+              )}
+            >
+              <div className="flex-1 min-w-0 text-left">
+                <div className="font-medium text-gray-900 text-xs leading-tight">
+                  <MedicationName medication={med} />
+                </div>
+                {dosageInfo && (
+                  <div className="text-xs text-gray-500 mt-0.5 leading-tight">
+                    {dosageInfo}
+                  </div>
+                )}
+              </div>
+              {showAddButton && onMedicationSelect && (
+                <PlusIcon className="size-3.5 shrink-0 text-primary-600 mt-0.5" />
+              )}
+            </Button>
+          );
+        })}
+        {remainingCount > 0 && (
+          <Button
+            variant="ghost"
+            onClick={() => setExpanded(!expanded)}
+            className="w-full h-auto py-1 text-xs font-medium text-primary-600 hover:text-primary-700 hover:bg-transparent"
+          >
+            {expanded ? t("show_less") : `+${remainingCount} ${t("more")}`}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface ActivityDefinitionsPreviewProps {
+  activityDefinitions: ActivityDefinitionTemplateSpec[];
+  onActivityDefinitionSelect?: (
+    activityDefinition: ActivityDefinitionTemplateSpec,
+  ) => void;
+  onActivityDefinitionRemove?: (index: number) => void;
+  showAddButton?: boolean;
+  variant?: "compact" | "form";
+}
+
+function ActivityDefinitionsPreview({
+  activityDefinitions,
+  onActivityDefinitionSelect,
+  onActivityDefinitionRemove,
+  showAddButton = false,
+  variant = "compact",
+}: ActivityDefinitionsPreviewProps) {
+  const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
+
+  if (activityDefinitions.length === 0) return null;
+
+  const isFormVariant = variant === "form";
+  const displayLimit = 5;
+  const displayedItems = expanded
+    ? activityDefinitions
+    : activityDefinitions.slice(0, displayLimit);
+  const remainingCount = activityDefinitions.length - displayLimit;
+
+  return (
+    <div
+      className={cn(
+        "border rounded-md bg-purple-50/30 overflow-hidden",
+        isFormVariant
+          ? "border-purple-200"
+          : "border-purple-200 rounded-t-none",
+      )}
+    >
+      <div className="flex items-center gap-1.5 px-2 py-1.5 bg-purple-100/50 border-b border-purple-200">
+        <ClipboardListIcon className="size-3 text-purple-700" />
+        <span className="text-xs font-semibold text-purple-900">
+          {isFormVariant
+            ? t("activity_definitions_to_include")
+            : t("activity_definitions")}
+        </span>
+        <Badge variant="secondary" className="ml-auto text-xs px-1 py-0 h-4">
+          {activityDefinitions.length}
+        </Badge>
+      </div>
+      <div className="p-1 space-y-0.5">
+        {displayedItems.map((ad, idx) => {
+          if (isFormVariant) {
+            return (
+              <div
+                key={idx}
+                className="flex items-center gap-2 text-xs text-purple-700 bg-white/60 rounded px-2 py-1.5"
+              >
+                <span className="size-1 rounded-full bg-purple-500 shrink-0" />
+                <span className="flex-1 min-w-0 font-medium text-gray-900">
+                  {ad.service_request?.title ||
+                    ad.slug ||
+                    t("unknown_activity_definition")}
+                </span>
+                {onActivityDefinitionRemove && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-5 shrink-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                    onClick={() => onActivityDefinitionRemove(idx)}
+                  >
+                    <X className="size-3" />
+                  </Button>
+                )}
+              </div>
+            );
+          }
+
+          return (
+            <Button
+              key={idx}
+              variant="ghost"
+              onClick={() => {
+                if (showAddButton && onActivityDefinitionSelect) {
+                  onActivityDefinitionSelect(ad);
+                  toast.success(t("activity_definition_added"));
+                }
+              }}
+              disabled={!showAddButton || !onActivityDefinitionSelect}
+              className={cn(
+                "w-full h-auto justify-between items-start gap-2 rounded px-2 py-1.5 font-normal transition-colors",
+                showAddButton && onActivityDefinitionSelect
+                  ? "cursor-pointer hover:bg-purple-100/50 active:bg-purple-50"
+                  : "cursor-default bg-white/50",
+              )}
+            >
+              <div className="flex-1 min-w-0 text-left font-medium text-gray-900 text-xs leading-tight">
+                {ad.service_request?.title ||
+                  ad.slug ||
+                  t("unknown_activity_definition")}
+              </div>
+              {showAddButton && onActivityDefinitionSelect && (
+                <PlusIcon className="size-3.5 shrink-0 text-purple-600 mt-0.5" />
+              )}
+            </Button>
+          );
+        })}
+        {remainingCount > 0 && (
+          <Button
+            variant="ghost"
+            onClick={() => setExpanded(!expanded)}
+            className="w-full h-auto py-1 text-xs font-medium text-purple-600 hover:text-purple-700 hover:bg-transparent"
+          >
+            {expanded ? t("show_less") : `+${remainingCount} ${t("more")}`}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface TemplateCardProps {
+  template:
+    | QuestionnaireResponseTemplateReadSpec
+    | QuestionnaireResponseTemplateRetrieveSpec;
+  onApply?: (template: QuestionnaireResponseTemplateReadSpec) => void;
+  onEdit: (template: QuestionnaireResponseTemplateReadSpec) => void;
+  onDelete: (template: QuestionnaireResponseTemplateReadSpec) => void;
+  onMedicationSelect?: (medication: MedicationRequestCreate) => void;
+  onActivityDefinitionSelect?: (
+    activityDefinition: ActivityDefinitionTemplateSpec,
+  ) => void;
+  isApplying?: boolean;
+  isApplied?: boolean;
+  disabled?: boolean;
+}
+
+function TemplateCard({
+  template,
+  onApply,
+  onEdit,
+  onDelete,
+  onMedicationSelect,
+  onActivityDefinitionSelect,
+  isApplying,
+  isApplied,
+  disabled,
+}: TemplateCardProps) {
+  const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
+
+  const medications = template.template_data?.medication_request ?? [];
+  const activityDefinitions = template.template_data?.activity_definition ?? [];
+  const medicationCount = medications.length;
+  const activityDefinitionCount = activityDefinitions.length;
+  const hasContent = medicationCount > 0 || activityDefinitionCount > 0;
+
+  return (
+    <Collapsible
+      open={expanded}
+      onOpenChange={setExpanded}
+      disabled={!hasContent}
+      className={cn(
+        "border rounded-lg transition-all overflow-hidden",
+        isApplied && "border-green-500 bg-green-50/50",
+        isApplying && "border-primary-500 bg-primary-50/50",
+        !isApplied && !isApplying && "border-gray-200 hover:border-gray-300",
+        expanded && "shadow-sm",
+      )}
+    >
+      {/* Header - clickable to expand */}
+      <CollapsibleTrigger
+        className={cn(
+          "w-full flex items-start gap-2 p-2 transition-colors select-none",
+          hasContent && "hover:bg-gray-50/50 cursor-pointer",
+        )}
+        asChild
+      >
+        <div>
+          {hasContent && (
+            <ChevronDownIcon
+              className={cn(
+                "size-4 shrink-0 text-gray-400 transition-transform mt-0.5",
+                expanded && "rotate-180",
+              )}
+            />
+          )}
+          {!hasContent && <div className="w-4" />}
+
+          <div className="flex-1 min-w-0 text-left">
+            <h4 className="font-semibold text-sm text-gray-900 line-clamp-1">
+              {template.name}
+            </h4>
+            {template.description && (
+              <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">
+                {template.description}
+              </p>
+            )}
+            <div className="mt-1 flex items-center gap-1 flex-wrap">
+              {medicationCount > 0 && (
+                <Badge variant="green" className="gap-1 text-xs px-1 py-0 h-4">
+                  <PillIcon className="size-2.5" />
+                  {medicationCount}
+                </Badge>
+              )}
+              {activityDefinitionCount > 0 && (
+                <Badge
+                  variant="purple"
+                  className="gap-0.5 text-xs px-1 py-0 h-4"
+                >
+                  <ClipboardListIcon className="size-2.5" />
+                  {activityDefinitionCount}
+                </Badge>
+              )}
+            </div>
+          </div>
+
+          <div
+            className="flex items-center gap-1 shrink-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {isApplying && (
+              <Loader2Icon className="size-4 animate-spin text-primary-600" />
+            )}
+            {isApplied && (
+              <CheckCircle2Icon className="size-4 text-green-600" />
+            )}
+            {onApply && !isApplied && !isApplying && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onApply(template)}
+                disabled={disabled || !hasContent}
+                className="h-7 hover:text-gray-950"
+              >
+                {t("apply")}
+              </Button>
+            )}
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(template);
+              }}
+              disabled={disabled}
+            >
+              <Edit className="size-3" />
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(template);
+              }}
+              disabled={disabled}
+              className="hover:bg-red-50 hover:text-red-600"
+            >
+              <Trash2Icon className="size-3" />
+            </Button>
+          </div>
+        </div>
+      </CollapsibleTrigger>
+
+      {/* Expanded content */}
+      <CollapsibleContent>
+        <div className="space-y-2 bg-gray-50/30">
+          <MedicationsPreview
+            medications={medications}
+            onMedicationSelect={onMedicationSelect}
+            showAddButton={!!onMedicationSelect}
+          />
+          <ActivityDefinitionsPreview
+            activityDefinitions={activityDefinitions}
+            onActivityDefinitionSelect={onActivityDefinitionSelect}
+            showAddButton={!!onActivityDefinitionSelect}
+          />
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
+const templateFormSchema = z.object({
+  name: z.string().min(1, t("name_is_required")),
+  description: z.string().optional(),
+});
+
+type TemplateFormData = z.infer<typeof templateFormSchema>;
 
 interface ManageResponseTemplatesSheetProps {
   questionnaireSlug: string;
   facilityId?: string;
   trigger?: React.ReactNode;
-  /** Callback when a template is selected. Can be async - sheet will show loading state until resolved. */
   onTemplateSelect?: (
     template: QuestionnaireResponseTemplateReadSpec,
   ) => void | Promise<void>;
-  /** Callback when a single medication is selected from a template */
   onMedicationSelect?: (medication: MedicationRequestCreate) => void;
-  /** Callback when a single service request is selected from a template */
-  onServiceRequestSelect?: (serviceRequest: ServiceRequestTemplateSpec) => void;
+  onActivityDefinitionSelect?: (
+    activityDefinition: ActivityDefinitionTemplateSpec,
+  ) => void;
   disabled?: boolean;
-  /** Current medications to allow saving as template */
   currentMedications?: MedicationRequestCreate[];
-  /** Current service requests to allow saving as template */
-  currentServiceRequests?: ServiceRequestTemplateSpec[];
+  currentActivityDefinitions?: ActivityDefinitionTemplateSpec[];
   key_filter: string;
+  facilityOrganizations?: string[];
 }
 
-type ViewState = "list" | "create" | "save-current";
-
-const formSchema = z.object({
-  name: z.string().min(1, "Name is required").max(100, "Name is too long"),
-  description: z.string().max(500, "Description is too long").optional(),
-});
-
-type FormData = z.infer<typeof formSchema>;
+type ViewMode = "list" | "create";
 
 export default function ManageResponseTemplatesSheet({
   questionnaireSlug,
@@ -178,39 +577,56 @@ export default function ManageResponseTemplatesSheet({
   trigger,
   onTemplateSelect,
   onMedicationSelect,
-  onServiceRequestSelect,
+  onActivityDefinitionSelect,
   disabled,
   currentMedications = [],
-  currentServiceRequests = [],
+  currentActivityDefinitions = [],
   key_filter = "medication_request",
+  facilityOrganizations = [],
 }: ManageResponseTemplatesSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const currentUser = useAuthUser();
+
   const [open, setOpen] = useState(false);
-  const [viewState, setViewState] = useState<ViewState>("list");
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [savingCurrent, setSavingCurrent] = useState(false);
+  const [editingTemplate, setEditingTemplate] =
+    useState<QuestionnaireResponseTemplateReadSpec | null>(null);
   const [templateToDelete, setTemplateToDelete] =
     useState<QuestionnaireResponseTemplateReadSpec | null>(null);
-  const [recentlyApplied, setRecentlyApplied] = useState<string | null>(null);
   const [applyingTemplateId, setApplyingTemplateId] = useState<string | null>(
     null,
   );
-  const [expandedTemplateId, setExpandedTemplateId] = useState<string | null>(
+  const [appliedTemplateId, setAppliedTemplateId] = useState<string | null>(
     null,
   );
+  const [selectedOrganizations, setSelectedOrganizations] = useState<
+    string[] | null
+  >(facilityOrganizations.length > 0 ? facilityOrganizations : null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [editableMedications, setEditableMedications] = useState<
+    MedicationRequestTemplateSpec[]
+  >([]);
+  const [editableActivityDefinitions, setEditableActivityDefinitions] =
+    useState<ActivityDefinitionTemplateSpec[]>([]);
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<TemplateFormData>({
+    resolver: zodResolver(templateFormSchema),
     defaultValues: {
       name: "",
       description: "",
     },
   });
 
-  // Fetch templates list
+  // Fetch templates
   const { data: templatesResponse, isLoading: isLoadingTemplates } = useQuery({
-    queryKey: ["questionnaireResponseTemplates", questionnaireSlug],
-    queryFn: query(questionnaireResponseTemplateApi.list, {
+    queryKey: [
+      "questionnaireResponseTemplates",
+      questionnaireSlug,
+      searchQuery,
+    ],
+    queryFn: query.debounced(questionnaireResponseTemplateApi.list, {
       queryParams: {
         ...(questionnaireSlug &&
         questionnaireSlug !== "medication_request" &&
@@ -218,13 +634,24 @@ export default function ManageResponseTemplatesSheet({
           ? { questionnaire: questionnaireSlug }
           : {}),
         limit: 50,
+        facility: facilityId,
         key_filter: key_filter,
+        name: searchQuery || undefined,
       },
     }),
     enabled: open && !!questionnaireSlug,
   });
 
-  // Create mutation
+  // Fetch template details when editing
+  const { data: templateDetails, isLoading: isLoadingDetails } = useQuery({
+    queryKey: ["questionnaireResponseTemplate", editingTemplate?.id],
+    queryFn: query(questionnaireResponseTemplateApi.retrieve, {
+      pathParams: { id: editingTemplate?.id || "" },
+    }),
+    enabled: !!editingTemplate?.id,
+  });
+
+  // Create template mutation
   const { mutate: createTemplate, isPending: isCreating } = useMutation({
     mutationFn: mutate(questionnaireResponseTemplateApi.create),
     onSuccess: () => {
@@ -232,15 +659,35 @@ export default function ManageResponseTemplatesSheet({
         queryKey: ["questionnaireResponseTemplates", questionnaireSlug],
       });
       toast.success(t("template_created_successfully"));
-      form.reset();
-      setViewState("list");
+      handleResetForm();
     },
     onError: () => {
       toast.error(t("failed_to_create_template"));
     },
   });
 
-  // Delete mutation
+  // Update template mutation
+  const { mutate: updateTemplate, isPending: isUpdating } = useMutation({
+    mutationFn: (data: {
+      id: string;
+      body: QuestionnaireResponseTemplateUpdateSpec;
+    }) =>
+      mutate(questionnaireResponseTemplateApi.update, {
+        pathParams: { id: data.id },
+      })(data.body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["questionnaireResponseTemplates", questionnaireSlug],
+      });
+      toast.success(t("template_updated_successfully"));
+      handleResetForm();
+    },
+    onError: () => {
+      toast.error(t("failed_to_update_template"));
+    },
+  });
+
+  // Delete template mutation
   const { mutate: deleteTemplate, isPending: isDeleting } = useMutation({
     mutationFn: (id: string) =>
       mutate(questionnaireResponseTemplateApi.delete, {
@@ -253,665 +700,393 @@ export default function ManageResponseTemplatesSheet({
       toast.success(t("template_deleted_successfully"));
       setTemplateToDelete(null);
     },
-    onError: () => {
-      toast.error(t("failed_to_delete_template"));
-    },
   });
 
-  const onSubmit = (data: FormData) => {
-    const isSavingCurrent = viewState === "save-current";
+  const templates = templatesResponse?.results ?? [];
+  const hasItemsToSave =
+    currentMedications.length > 0 || currentActivityDefinitions.length > 0;
+  const totalItemsCount =
+    currentMedications.length + currentActivityDefinitions.length;
 
-    // Prepare medications for template (use product ID, handle medication field properly)
-    const medicationsForTemplate =
-      isSavingCurrent && currentMedications.length > 0
-        ? currentMedications.map((med) => {
-            const medWithInternal = med as MedicationRequestCreate & {
-              requested_product_internal?: {
-                id?: string;
-                slug?: string;
-                name?: string;
-                code?: { system: string; code: string; display: string };
-              };
-            };
+  // Populate form when template details are loaded for editing
+  useEffect(() => {
+    if (templateDetails && editingTemplate && viewMode === "create") {
+      form.reset({
+        name: templateDetails.name,
+        description: templateDetails.description || "",
+      });
+      const orgIds = templateDetails.facility_organizations.map(
+        (org) => org.id,
+      );
+      setSelectedOrganizations(orgIds.length > 0 ? orgIds : null);
+      setEditableMedications(
+        templateDetails.template_data?.medication_request ?? [],
+      );
+      setEditableActivityDefinitions(
+        templateDetails.template_data?.activity_definition ?? [],
+      );
+    }
+  }, [templateDetails, editingTemplate, viewMode]);
 
-            // Use product ID (UUID) for the template, not the slug
-            // Fall back to med.requested_product which might already be a UUID
-            const productId =
-              medWithInternal.requested_product_internal?.id ||
-              med.requested_product;
+  const handleResetForm = () => {
+    form.reset();
+    setViewMode("list");
+    setSavingCurrent(false);
+    setEditingTemplate(null);
+    setSelectedOrganizations(
+      facilityOrganizations.length > 0 ? facilityOrganizations : null,
+    );
+    setEditableMedications([]);
+    setEditableActivityDefinitions([]);
+  };
 
-            // Get the slug for display name extraction if needed
-            const productSlug =
-              medWithInternal.requested_product_internal?.slug ||
-              (isProductSlug(med.requested_product)
-                ? med.requested_product
-                : undefined);
+  const handleEditTemplate = (
+    template: QuestionnaireResponseTemplateReadSpec,
+  ) => {
+    setEditingTemplate(template);
+    setViewMode("create");
+    setSavingCurrent(false);
+  };
 
-            // If requested_product is present, don't include medication field
-            // If no requested_product, we need medication with a valid code
-            let medicationCode: typeof med.medication | undefined = undefined;
-            if (!productId) {
-              // No product ID - need medication code
-              medicationCode = med.medication?.code
-                ? med.medication
-                : undefined;
-            }
+  const handleSubmit = (data: TemplateFormData) => {
+    if (editingTemplate && templateDetails) {
+      // Update existing template with editable lists
+      updateTemplate({
+        id: editingTemplate.id || "",
+        body: {
+          name: data.name,
+          description: data.description || "",
+          template_data: {
+            medication_request: editableMedications,
+            activity_definition: editableActivityDefinitions,
+          },
+          users: templateDetails.users.map((u) => u.username),
+          facility_organizations: selectedOrganizations ?? [],
+        },
+      });
+    } else {
+      const createData: QuestionnaireResponseTemplateCreateSpec = {
+        name: data.name,
+        description: data.description || "",
+        ...(questionnaireSlug &&
+        questionnaireSlug !== "service_request" &&
+        questionnaireSlug !== "medication_request"
+          ? { questionnaire: questionnaireSlug }
+          : {}),
+        facility: facilityId,
+        template_data: {
+          medication_request: editableMedications,
+          activity_definition: editableActivityDefinitions,
+        },
+        users: [currentUser.username],
+        facility_organizations: selectedOrganizations ?? [],
+      };
 
-            // Get display name for the medication - ensure we always have a name
-            const displayName =
-              medWithInternal.requested_product_internal?.name ||
-              med.medication?.display ||
-              extractNameFromSlug(productSlug) ||
-              "Medication";
-
-            // Build template medication with display_name for UI rendering
-            const templateMed = {
-              ...med,
-              requested_product: productId,
-              // Set medication only if we don't have requested_product
-              medication: productId ? undefined : medicationCode,
-              // Store display name for template preview
-              display_name: displayName,
-            };
-
-            // Remove internal objects that shouldn't be stored in templates
-            delete (
-              templateMed as MedicationRequestCreate & {
-                requested_product_internal?: unknown;
-              }
-            ).requested_product_internal;
-            delete (templateMed as MedicationRequestCreate & { id?: unknown })
-              .id;
-
-            return templateMed;
-          })
-        : [];
-
-    // Prepare service requests for template
-    const serviceRequestsForTemplate =
-      isSavingCurrent && currentServiceRequests.length > 0
-        ? currentServiceRequests
-        : [];
-
-    const createData: QuestionnaireResponseTemplateCreateSpec = {
-      name: data.name,
-      description: data.description || "",
-      questionnaire: questionnaireSlug,
-      facility: facilityId,
-      template_data: {
-        medication_request: medicationsForTemplate,
-        service_request: serviceRequestsForTemplate,
-      },
-      users: [currentUser.username],
-      facility_organizations: [],
-    };
-    createTemplate(createData);
+      createTemplate(createData);
+    }
   };
 
   const handleApplyTemplate = async (
     template: QuestionnaireResponseTemplateReadSpec,
   ) => {
-    if (onTemplateSelect) {
-      const templateId = template.id ?? null;
-      setApplyingTemplateId(templateId);
+    if (!onTemplateSelect) return;
 
-      try {
-        // Wait for the template to be applied (may be async)
-        await onTemplateSelect(template);
-        setRecentlyApplied(templateId);
-        setApplyingTemplateId(null);
-        // Clear the applied indicator after a moment, then close
-        setTimeout(() => {
-          setRecentlyApplied(null);
-          setOpen(false);
-        }, 800);
-      } catch {
-        // Error handling is done in the parent component
-        setApplyingTemplateId(null);
-      }
+    const templateId = template.id ?? null;
+    setApplyingTemplateId(templateId);
+
+    try {
+      await onTemplateSelect(template);
+      setAppliedTemplateId(templateId);
+      setApplyingTemplateId(null);
+      setTimeout(() => {
+        setAppliedTemplateId(null);
+        setOpen(false);
+      }, 800);
+    } catch {
+      setApplyingTemplateId(null);
     }
   };
 
-  const handleDeleteTemplate = (
-    template: QuestionnaireResponseTemplateReadSpec,
-  ) => {
-    setTemplateToDelete(template);
-  };
-
-  const confirmDelete = () => {
-    if (templateToDelete?.id) {
-      deleteTemplate(templateToDelete.id);
-    }
-  };
-
-  const templates = templatesResponse?.results ?? [];
-  const hasItemsToSave =
-    currentMedications.length > 0 || currentServiceRequests.length > 0;
-  const totalItemsToSave =
-    currentMedications.length + currentServiceRequests.length;
-
-  const renderList = () => (
+  const renderTemplateList = () => (
     <div className="space-y-3">
-      {/* Compact Quick Actions - Side by Side */}
-      <div className="flex gap-2">
-        {hasItemsToSave && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 gap-1.5 h-8 border-dashed border-primary-300 bg-primary-50/50 hover:bg-primary-100/50 text-xs"
-            onClick={() => setViewState("save-current")}
-          >
-            <SaveIcon className="size-3.5 text-primary-600" />
-            <span className="text-primary-700">{t("save_current")}</span>
-            <Badge variant="primary" className="text-[10px] px-1 py-0 ml-1">
-              {totalItemsToSave}
-            </Badge>
-          </Button>
-        )}
+      {/* Action Buttons */}
+      {hasItemsToSave && (
         <Button
           variant="outline"
-          size="sm"
-          className={cn(
-            "gap-1.5 h-8 border-dashed text-xs",
-            hasItemsToSave ? "flex-1" : "w-full",
-          )}
-          onClick={() => setViewState("create")}
+          className="flex-1 gap-2 h-9"
+          onClick={() => {
+            setSavingCurrent(true);
+            setViewMode("create");
+            setEditableMedications(
+              currentMedications.map(
+                (med) =>
+                  buildMedicationForTemplate(
+                    med,
+                  ) as MedicationRequestTemplateSpec,
+              ),
+            );
+            setEditableActivityDefinitions([...currentActivityDefinitions]);
+          }}
         >
-          <PlusIcon className="size-3.5" />
-          {t("new_template")}
+          <SaveIcon className="size-3.5" />
+          <span className="text-xs">{t("save_current")}</span>
+          <Badge variant="secondary" className="ml-auto text-xs px-1.5">
+            {totalItemsCount}
+          </Badge>
         </Button>
-      </div>
+      )}
 
-      {/* Templates List */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <h3 className="text-xs font-medium text-gray-500 flex items-center gap-1.5">
-            <BookmarkIcon className="size-3" />
-            {t("saved_templates")}
-          </h3>
-          <span className="text-[10px] text-gray-400">
-            {templates.length} {t("templates").toLowerCase()}
-          </span>
-        </div>
-
-        {isLoadingTemplates ? (
-          <Loading />
-        ) : templates.length === 0 ? (
-          <div className="text-center py-6 px-4 border border-dashed rounded-lg bg-gray-50/50">
-            <SparklesIcon className="size-6 text-gray-400 mx-auto mb-2" />
-            <p className="text-sm text-gray-500">{t("no_templates_yet")}</p>
-          </div>
-        ) : (
-          <div className="space-y-1.5">
-            {templates.map((template) => {
-              const medications =
-                template.template_data?.medication_request ?? [];
-              const serviceRequests =
-                template.template_data?.service_request ?? [];
-              const medicationCount = medications.length;
-              const serviceRequestCount = serviceRequests.length;
-              const isApplied = recentlyApplied === template.id;
-              const isApplying = applyingTemplateId === template.id;
-              const isExpanded = expandedTemplateId === template.id;
-              const hasContent = medicationCount > 0 || serviceRequestCount > 0;
-
-              return (
-                <div
-                  key={template.id}
-                  className={cn(
-                    "group relative border rounded-lg bg-white transition-all duration-200 overflow-hidden",
-                    isApplied
-                      ? "border-green-300 bg-green-50 ring-1 ring-green-200"
-                      : isApplying
-                        ? "border-primary-300 bg-primary-50/50 ring-1 ring-primary-200"
-                        : isExpanded
-                          ? "border-primary-200 shadow-sm"
-                          : "hover:border-gray-300 hover:shadow-sm",
-                  )}
-                >
-                  {/* Compact template header - clickable to expand */}
-                  <div className="flex items-center gap-2 p-2">
-                    {/* Expand toggle */}
-                    {hasContent && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setExpandedTemplateId(
-                            isExpanded ? null : template.id!,
-                          )
-                        }
-                        className="shrink-0 p-1 rounded hover:bg-gray-100 transition-colors"
-                        aria-expanded={isExpanded}
-                        aria-label={t("view_template_contents", {
-                          name: template.name,
-                        })}
-                      >
-                        <ChevronRightIcon
-                          className={cn(
-                            "size-4 text-gray-400 transition-transform duration-200",
-                            isExpanded && "rotate-90",
-                          )}
-                        />
-                      </button>
-                    )}
-                    {!hasContent && <div className="w-6" />}
-
-                    {/* Template info - click to expand */}
-                    <button
-                      type="button"
-                      className="flex-1 min-w-0 text-left"
-                      onClick={() =>
-                        hasContent &&
-                        setExpandedTemplateId(isExpanded ? null : template.id!)
-                      }
-                    >
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium text-gray-900 text-sm truncate">
-                          {template.name}
-                        </h4>
-                        {medicationCount > 0 && (
-                          <Badge
-                            variant="blue"
-                            className="text-[10px] gap-0.5 px-1 py-0 shrink-0"
-                          >
-                            <PillIcon className="size-2.5" />
-                            {medicationCount}
-                          </Badge>
-                        )}
-                        {serviceRequestCount > 0 && (
-                          <Badge
-                            variant="purple"
-                            className="text-[10px] gap-0.5 px-1 py-0 shrink-0"
-                          >
-                            <ClipboardListIcon className="size-2.5" />
-                            {serviceRequestCount}
-                          </Badge>
-                        )}
-                      </div>
-                    </button>
-
-                    {/* Action buttons - inline */}
-                    <div className="flex items-center gap-1 shrink-0">
-                      {isApplying && (
-                        <span className="text-xs text-primary-600 flex items-center gap-1">
-                          <Loader2 className="size-3 animate-spin" />
-                        </span>
-                      )}
-                      {isApplied && (
-                        <span className="text-xs text-green-600 flex items-center gap-1">
-                          <CheckCircle2Icon className="size-4" />
-                        </span>
-                      )}
-                      {onTemplateSelect && !isApplied && !isApplying && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleApplyTemplate(template);
-                          }}
-                          className="h-7 px-2 text-xs hover:bg-primary-50 hover:text-primary-700"
-                          disabled={!!applyingTemplateId || !hasContent}
-                        >
-                          {t("apply")}
-                        </Button>
-                      )}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteTemplate(template);
-                            }}
-                            className="text-gray-400 hover:text-destructive size-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                            disabled={!!applyingTemplateId}
-                            aria-label={t("delete_template")}
-                          >
-                            <Trash2Icon className="size-3" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>{t("delete")}</TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </div>
-
-                  {/* Expanded content - shows template items */}
-                  {isExpanded && hasContent && (
-                    <div className="px-2 pb-2 ml-6 space-y-1.5 border-t border-gray-100 pt-2 animate-in slide-in-from-top-2 duration-200">
-                      {/* Medications preview */}
-                      {medicationCount > 0 && (
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1.5 text-xs font-medium text-blue-700">
-                            <PillIcon className="size-3" />
-                            {t("medications")}
-                          </div>
-                          <div className="space-y-0.5 pl-4">
-                            {medications.slice(0, 5).map((med, idx) => {
-                              const medWithExtra = med as typeof med & {
-                                display_name?: string;
-                              };
-
-                              // Get dosage info - compact format
-                              const dosage = med.dosage_instruction?.[0];
-                              const doseQty =
-                                dosage?.dose_and_rate?.dose_quantity;
-                              const timing = dosage?.timing?.code?.display;
-                              const duration =
-                                dosage?.timing?.repeat?.bounds_duration;
-
-                              const dosageParts = [
-                                doseQty?.value
-                                  ? `${doseQty.value}${doseQty?.unit?.display ? ` ${doseQty.unit.display}` : ""}`
-                                  : null,
-                                timing,
-                                duration?.value
-                                  ? `${duration.value}${duration?.unit ? ` ${duration.unit}` : ""}`
-                                  : null,
-                              ].filter(Boolean);
-
-                              return (
-                                <div
-                                  key={idx}
-                                  className="group/item flex items-center gap-1 text-sm py-0.5"
-                                >
-                                  <span className="size-1 rounded-full bg-blue-400 shrink-0" />
-                                  <span className="text-gray-800 truncate flex-1">
-                                    <MedicationName
-                                      medication={medWithExtra}
-                                      fallbackName={t("unknown_medication")}
-                                    />
-                                  </span>
-                                  {dosageParts.length > 0 && (
-                                    <span className="text-xs text-gray-400 shrink-0">
-                                      ({dosageParts.join(" • ")})
-                                    </span>
-                                  )}
-                                  {onMedicationSelect && (
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <button
-                                          type="button"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            onMedicationSelect(
-                                              med as MedicationRequestCreate,
-                                            );
-                                            toast.success(
-                                              t("medication_added"),
-                                            );
-                                          }}
-                                          className="opacity-0 group-hover/item:opacity-100 transition-opacity p-0.5 rounded hover:bg-blue-100 text-blue-600"
-                                        >
-                                          <PlusCircleIcon className="size-3.5" />
-                                        </button>
-                                      </TooltipTrigger>
-                                      <TooltipContent side="left">
-                                        {t("add_this_medication")}
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  )}
-                                </div>
-                              );
-                            })}
-                            {medicationCount > 5 && (
-                              <p className="text-xs text-blue-500">
-                                +{medicationCount - 5} {t("more")}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Service requests preview */}
-                      {serviceRequestCount > 0 && (
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1.5 text-xs font-medium text-purple-700">
-                            <ClipboardListIcon className="size-3" />
-                            {t("service_requests")}
-                          </div>
-                          <div className="space-y-0.5 pl-4">
-                            {serviceRequests.slice(0, 5).map((sr, idx) => (
-                              <div
-                                key={idx}
-                                className="group/item flex items-center gap-1 text-sm py-0.5"
-                              >
-                                <span className="size-1 rounded-full bg-purple-400 shrink-0" />
-                                <span className="text-gray-800 truncate flex-1">
-                                  {sr.service_request?.title ||
-                                    sr.slug ||
-                                    t("unknown_service_request")}
-                                </span>
-                                {onServiceRequestSelect && (
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <button
-                                        type="button"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          onServiceRequestSelect(sr);
-                                          toast.success(
-                                            t("service_request_added"),
-                                          );
-                                        }}
-                                        className="opacity-0 group-hover/item:opacity-100 transition-opacity p-0.5 rounded hover:bg-purple-100 text-purple-600"
-                                      >
-                                        <PlusCircleIcon className="size-3.5" />
-                                      </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="left">
-                                      {t("add_this_service_request")}
-                                    </TooltipContent>
-                                  </Tooltip>
-                                )}
-                              </div>
-                            ))}
-                            {serviceRequestCount > 5 && (
-                              <p className="text-xs text-purple-500">
-                                +{serviceRequestCount - 5} {t("more")}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+      <div className="relative mt-1">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+        <Input
+          placeholder={t("search_templates")}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="h-9 text-sm px-9"
+        />
+        {searchQuery && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="absolute right-1 top-1/2 -translate-y-1/2 size-7 text-gray-400 hover:text-gray-600"
+            onClick={() => setSearchQuery("")}
+          >
+            <X className="size-4" />
+            <span className="sr-only">{t("clear_search")}</span>
+          </Button>
         )}
       </div>
+
+      <Separator className="my-2" />
+
+      {isLoadingTemplates ? (
+        <CardListSkeleton count={3} />
+      ) : templates.length === 0 ? (
+        <EmptyState
+          icon={<BookmarkIcon className="size-6 text-primary" />}
+          title={
+            searchQuery ? t("no_templates_match_search") : t("no_templates_yet")
+          }
+          description={
+            searchQuery
+              ? t("try_different_search_terms")
+              : t("create_your_first_template")
+          }
+        />
+      ) : (
+        <div className="space-y-2">
+          {templates.map((template) => (
+            <TemplateCard
+              key={template.id}
+              template={template}
+              onApply={onTemplateSelect ? handleApplyTemplate : undefined}
+              onEdit={handleEditTemplate}
+              onDelete={setTemplateToDelete}
+              onMedicationSelect={onMedicationSelect}
+              onActivityDefinitionSelect={onActivityDefinitionSelect}
+              isApplying={applyingTemplateId === template.id}
+              isApplied={appliedTemplateId === template.id}
+              disabled={!!applyingTemplateId}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 
-  const renderForm = () => {
-    const isSavingCurrent = viewState === "save-current";
+  const renderCreateForm = () => (
+    <div className="space-y-4">
+      {editingTemplate && isLoadingDetails && <CardListSkeleton count={4} />}
 
-    return (
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              form.reset();
-              setViewState("list");
-            }}
-            className="size-8"
-          >
-            <ChevronLeftIcon className="size-4" />
-          </Button>
-          <div>
-            <h3 className="font-semibold text-gray-900">
-              {isSavingCurrent ? t("save_as_template") : t("create_template")}
-            </h3>
-            <p className="text-sm text-gray-500">
-              {isSavingCurrent
-                ? t("save_current_items_as_template")
-                : t("create_empty_template_description")}
-            </p>
-          </div>
+      {/* Preview of items being saved (for saving current medications/activities) */}
+      {savingCurrent && (
+        <div className="space-y-2">
+          <h3 className="text-xs font-medium text-gray-700">{t("preview")}</h3>
+          {editableMedications.length > 0 && (
+            <MedicationsPreview
+              medications={editableMedications}
+              variant="form"
+              onMedicationRemove={(index) => {
+                setEditableMedications((prev) =>
+                  prev.filter((_, i) => i !== index),
+                );
+              }}
+            />
+          )}
+          {editableActivityDefinitions.length > 0 && (
+            <ActivityDefinitionsPreview
+              activityDefinitions={editableActivityDefinitions}
+              variant="form"
+              onActivityDefinitionRemove={(index) => {
+                setEditableActivityDefinitions((prev) =>
+                  prev.filter((_, i) => i !== index),
+                );
+              }}
+            />
+          )}
+          {editableMedications.length === 0 &&
+            editableActivityDefinitions.length === 0 && (
+              <p className="text-xs text-gray-500 italic">
+                {t("no_items_to_save")}
+              </p>
+            )}
+          <Separator className="my-2" />
         </div>
+      )}
 
-        {/* Preview of what will be saved - Medications */}
-        {isSavingCurrent && currentMedications.length > 0 && (
-          <div className="rounded-lg border border-blue-200 bg-blue-50/50 p-4 space-y-3">
-            <div className="flex items-center gap-2 text-sm font-medium text-blue-800">
-              <PillIcon className="size-4" />
-              {t("medications_to_include")}
-            </div>
-            <div className="space-y-2">
-              {currentMedications.slice(0, 5).map((med, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-2 text-sm text-blue-700 bg-white/60 rounded-md px-3 py-2"
-                >
-                  <CheckCircle2Icon className="size-3.5 text-blue-500" />
-                  <span className="truncate">
-                    {(
-                      med as MedicationRequestCreate & {
-                        requested_product_internal?: { name?: string };
-                      }
-                    ).requested_product_internal?.name ||
-                      med.medication?.display ||
-                      t("unknown_medication")}
-                  </span>
-                </div>
-              ))}
-              {currentMedications.length > 5 && (
-                <p className="text-xs text-blue-600 pl-6">
-                  {t("and_more_medications", {
-                    count: currentMedications.length - 5,
-                  })}
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Preview of what will be saved - Service Requests */}
-        {isSavingCurrent && currentServiceRequests.length > 0 && (
-          <div className="rounded-lg border border-purple-200 bg-purple-50/50 p-4 space-y-3">
-            <div className="flex items-center gap-2 text-sm font-medium text-purple-800">
-              <ClipboardListIcon className="size-4" />
-              {t("service_requests_to_include")}
-            </div>
-            <div className="space-y-2">
-              {currentServiceRequests.slice(0, 5).map((sr, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-2 text-sm text-purple-700 bg-white/60 rounded-md px-3 py-2"
-                >
-                  <CheckCircle2Icon className="size-3.5 text-purple-500" />
-                  <span className="truncate">
-                    {sr.service_request?.title || t("unknown_service_request")}
-                  </span>
-                </div>
-              ))}
-              {currentServiceRequests.length > 5 && (
-                <p className="text-xs text-purple-600 pl-6">
-                  {t("and_more_service_requests", {
-                    count: currentServiceRequests.length - 5,
-                  })}
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("template_name")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder={t("enter_template_name_placeholder")}
-                      {...field}
-                      autoFocus
-                    />
-                  </FormControl>
-                  <FormDescription>{t("template_name_help")}</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+      {editingTemplate && !isLoadingDetails && (
+        <div className="space-y-2">
+          {editableMedications.length > 0 && (
+            <MedicationsPreview
+              medications={editableMedications}
+              variant="form"
+              onMedicationRemove={(index) => {
+                setEditableMedications((prev) =>
+                  prev.filter((_, i) => i !== index),
+                );
+              }}
             />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    {t("description")} ({t("optional")})
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder={t("enter_template_description")}
-                      className="resize-none"
-                      rows={3}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    {t("template_description_help")}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+          )}
+          {editableActivityDefinitions.length > 0 && (
+            <ActivityDefinitionsPreview
+              activityDefinitions={editableActivityDefinitions}
+              variant="form"
+              onActivityDefinitionRemove={(index) => {
+                setEditableActivityDefinitions((prev) =>
+                  prev.filter((_, i) => i !== index),
+                );
+              }}
             />
+          )}
+          {editableMedications.length === 0 &&
+            editableActivityDefinitions.length === 0 && (
+              <p className="text-xs text-gray-500 italic">
+                {t("no_items_in_template")}
+              </p>
+            )}
+          <Separator className="my-2" />
+        </div>
+      )}
 
-            <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  form.reset();
-                  setViewState("list");
-                }}
-                disabled={isCreating}
-              >
-                {t("cancel")}
-              </Button>
-              <Button type="submit" disabled={isCreating}>
-                {isCreating ? (
-                  <>
-                    <Loader2 className="size-4 mr-2 animate-spin" />
-                    {t("creating")}
-                  </>
-                ) : (
-                  <>
-                    {isSavingCurrent ? (
-                      <SaveIcon className="size-4 mr-2" />
-                    ) : (
-                      <PlusIcon className="size-4 mr-2" />
-                    )}
-                    {isSavingCurrent
-                      ? t("save_template")
-                      : t("create_template")}
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </div>
-    );
-  };
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("template_name")}</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder={t("enter_template_name")}
+                    {...field}
+                    autoFocus
+                    className="h-9 text-sm"
+                  />
+                </FormControl>
+                <FormDescription className="text-xs -mt-1.5">
+                  {t("template_name_help")}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  {t("description")} ({t("optional")})
+                </FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder={t("enter_template_description")}
+                    rows={2}
+                    className="resize-none text-sm"
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription className="text-xs -mt-1.5">
+                  {t("template_description_help")}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {facilityId &&
+            (!editingTemplate || (editingTemplate && templateDetails)) && (
+              <div className="space-y-1.5">
+                <FacilityOrganizationSelector
+                  key={editingTemplate?.id || "new"}
+                  facilityId={facilityId}
+                  value={selectedOrganizations}
+                  onChange={setSelectedOrganizations}
+                  currentOrganizations={
+                    editingTemplate && templateDetails
+                      ? templateDetails.facility_organizations
+                      : undefined
+                  }
+                  optional
+                />
+                <FormDescription className="text-xs">
+                  {t("select_departments_to_share_template")}
+                </FormDescription>
+              </div>
+            )}
+
+          <div className="flex gap-2 justify-end pt-2">
+            <Button
+              variant="outline"
+              onClick={handleResetForm}
+              disabled={isCreating || isUpdating}
+              size="sm"
+              className="h-9"
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              type="submit"
+              disabled={isCreating || isUpdating || isLoadingDetails}
+              size="sm"
+              className="h-9"
+            >
+              {isCreating || isUpdating ? (
+                <>
+                  <Loader2Icon className="size-3.5 mr-1.5 animate-spin" />
+                  <span className="text-xs">
+                    {editingTemplate ? t("updating") : t("creating")}
+                  </span>
+                </>
+              ) : (
+                <>
+                  {savingCurrent || editingTemplate ? (
+                    <SaveIcon className="size-3.5 mr-1.5" />
+                  ) : (
+                    <PlusIcon className="size-3.5 mr-1.5" />
+                  )}
+                  <span className="text-xs">
+                    {editingTemplate ? t("save_changes") : t("create_template")}
+                  </span>
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
+  );
 
   const defaultTrigger = (
     <Button variant="outline" size="sm" disabled={disabled} className="gap-2">
       <BookmarkIcon className="size-4" />
-      {t("templates")}
+      <span className="text-xs">{t("templates")}</span>
       {hasItemsToSave && (
-        <Badge variant="primary" className="text-xs px-1.5 py-0">
-          {totalItemsToSave}
+        <Badge variant="primary" className="py-0 text-xs px-1.5">
+          {totalItemsCount}
         </Badge>
       )}
     </Button>
@@ -924,67 +1099,75 @@ export default function ManageResponseTemplatesSheet({
         onOpenChange={(isOpen) => {
           setOpen(isOpen);
           if (!isOpen) {
-            // Reset state when closing
-            setViewState("list");
-            setRecentlyApplied(null);
-            form.reset();
+            handleResetForm();
+            setAppliedTemplateId(null);
           }
         }}
       >
         <SheetTrigger asChild>{trigger ?? defaultTrigger}</SheetTrigger>
-        <SheetContent className="sm:max-w-lg flex flex-col">
-          <SheetHeader className="space-y-1">
-            <SheetTitle className="flex items-center gap-2">
-              <div className="rounded-lg bg-primary-100 p-1.5">
-                <BookmarkIcon className="size-4 text-primary-700" />
+        <SheetContent className="flex flex-col sm:max-w-lg p-0 overflow-y-auto">
+          <SheetHeader className="p-4 space-y-2 bg-gray-100 border border-b-gray-200">
+            <div className="flex items-center gap-2">
+              {viewMode === "create" && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="size-8 shrink-0"
+                  onClick={handleResetForm}
+                >
+                  <ChevronLeft className="size-4" />
+                </Button>
+              )}
+              <div className="flex-1 min-w-0">
+                <SheetTitle className="flex items-center gap-2 text-base">
+                  <BookmarkIcon className="size-4" />
+                  {viewMode === "list"
+                    ? t("response_templates")
+                    : editingTemplate
+                      ? t("edit_template")
+                      : savingCurrent
+                        ? t("save_as_template")
+                        : t("create_template")}
+                </SheetTitle>
+                {viewMode === "list" && (
+                  <SheetDescription className="text-xs mt-1">
+                    {onTemplateSelect
+                      ? key_filter === "medication_request"
+                        ? t("medication_templates_quick_fill_description")
+                        : t("service_request_templates_quick_fill_description")
+                      : key_filter === "medication_request"
+                        ? t("manage_medication_templates_description")
+                        : t("manage_service_request_templates_description")}
+                  </SheetDescription>
+                )}
               </div>
-              {viewState === "list"
-                ? onTemplateSelect
-                  ? t("prescription_templates")
-                  : t("manage_templates")
-                : viewState === "save-current"
-                  ? t("save_as_template")
-                  : t("create_template")}
-            </SheetTitle>
-            {viewState === "list" && (
-              <SheetDescription>
-                {onTemplateSelect
-                  ? t("templates_quick_fill_description")
-                  : t("manage_templates_description")}
-              </SheetDescription>
-            )}
+            </div>
           </SheetHeader>
-          <ScrollArea className="flex-1 mt-6 -mx-6 px-6">
-            {viewState === "list" ? renderList() : renderForm()}
+
+          <ScrollArea className="flex-1 pb-4">
+            <div className="px-4">
+              {viewMode === "list" ? renderTemplateList() : renderCreateForm()}
+            </div>
           </ScrollArea>
         </SheetContent>
       </Sheet>
 
-      <AlertDialog
+      <ConfirmActionDialog
         open={!!templateToDelete}
         onOpenChange={() => setTemplateToDelete(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("delete_template")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("delete_template_confirmation", {
-                name: templateToDelete?.name,
-              })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {isDeleting ? t("deleting") : t("delete")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title={t("delete_template")}
+        description={t("delete_template_confirmation", {
+          name: templateToDelete?.name,
+        })}
+        onConfirm={() => {
+          if (templateToDelete?.id) {
+            deleteTemplate(templateToDelete.id);
+          }
+        }}
+        confirmText={isDeleting ? t("deleting") : t("delete")}
+        variant="destructive"
+        disabled={isDeleting}
+      />
     </>
   );
 }

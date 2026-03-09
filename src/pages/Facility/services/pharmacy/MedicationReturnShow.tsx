@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   ChevronLeft,
   Edit,
@@ -8,7 +13,7 @@ import {
   Printer,
   Truck,
 } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { Link, navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -40,6 +45,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { AddMedicationReturnItemForm } from "@/pages/Facility/services/pharmacy/components/AddMedicationReturnItemForm";
 import { MedicationReturnItemsTable } from "@/pages/Facility/services/pharmacy/components/MedicationReturnItemsTable";
+import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
   DeliveryOrderRetrieve,
@@ -82,6 +88,12 @@ export default function MedicationReturnShow({
     open: false,
     status: null,
   });
+  const [{ dispenseOrderIds: dispenseOrderIdsParam }] = useQueryParams<{
+    dispenseOrderIds?: string;
+  }>();
+
+  const dispenseOrderIds =
+    dispenseOrderIdsParam?.split(",").filter(Boolean) || [];
 
   const { data: deliveryOrder, isLoading } = useQuery({
     queryKey: ["medicationReturns", deliveryOrderId],
@@ -142,6 +154,26 @@ export default function MedicationReturnShow({
               status: t(updatedDeliveryOrder.status),
             }),
       );
+    },
+  });
+
+  const { data: medicationDispenses } = useQueries({
+    queries: dispenseOrderIds.map((orderId) => ({
+      queryKey: ["medication_dispense", orderId, locationId],
+      queryFn: query(medicationDispenseApi.list, {
+        queryParams: {
+          location: locationId,
+          limit: 100,
+          order: orderId,
+        },
+      }),
+      enabled: !!orderId && !!locationId,
+    })),
+    combine: (results) => {
+      return {
+        data: results.flatMap((result) => result.data?.results || []),
+        loading: results.some((result) => result.isLoading),
+      };
     },
   });
 
@@ -220,6 +252,9 @@ export default function MedicationReturnShow({
 
     const selectedSupplyDeliveries = supplyDeliveries.results
       .filter((delivery) => selectedDeliveries.includes(delivery.id))
+      .filter(
+        (delivery) => delivery.status === SupplyDeliveryStatus.in_progress,
+      )
       .map((delivery) => ({
         id: delivery.id,
         status: confirmDialog.status,
@@ -474,11 +509,31 @@ export default function MedicationReturnShow({
                     <Button
                       variant="link"
                       className="p-0 h-auto text-primary-600 font-semibold"
-                      onClick={() =>
+                      onClick={() => {
+                        // Filter out the return invoice itself from related invoices
+                        const relatedInvoiceIds = [
+                          ...new Set(
+                            medicationDispenses.flatMap(
+                              (item) =>
+                                item.charge_item?.paid_invoice?.id ?? [],
+                            ) || [],
+                          ),
+                        ].filter(
+                          (id) => id !== deliveryOrder.patient_invoice_id,
+                        );
+                        const queryParams = new URLSearchParams({
+                          sourceUrl: basePath + "/order/" + deliveryOrderId,
+                        });
+                        if (relatedInvoiceIds.length > 0) {
+                          queryParams.set(
+                            "relatedInvoices",
+                            relatedInvoiceIds.join(","),
+                          );
+                        }
                         navigate(
-                          `/facility/${facilityId}/billing/invoices/${deliveryOrder.patient_invoice_id}?sourceUrl=${encodeURIComponent(basePath + "/order/" + deliveryOrderId)}`,
-                        )
-                      }
+                          `/facility/${facilityId}/billing/invoices/${deliveryOrder.patient_invoice_id}?${queryParams.toString()}`,
+                        );
+                      }}
                     >
                       {t("view_invoice")}
                       <ExternalLink className="ml-1 size-4" />
@@ -617,6 +672,9 @@ export default function MedicationReturnShow({
                     facilityId={facilityId}
                     locationId={locationId}
                     onSuccess={handleSupplyDeliverySuccess}
+                    medicationDispenses={
+                      dispenseOrderIds.length > 0 ? medicationDispenses : []
+                    }
                   />
                 )}
               </div>

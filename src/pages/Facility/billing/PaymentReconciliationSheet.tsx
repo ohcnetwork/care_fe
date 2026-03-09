@@ -9,7 +9,13 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
-import { Banknote, CreditCard, Landmark, Signature } from "lucide-react";
+import {
+  Banknote,
+  BanknoteArrowUp,
+  CreditCard,
+  Landmark,
+  Signature,
+} from "lucide-react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -40,7 +46,7 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
-import { locationAtomFamily } from "@/atoms/location-atom";
+import { paymentReconcilationLocationAtom } from "@/atoms/paymentReconcilationLocationAtom";
 import { LocationPicker } from "@/components/Location/LocationPicker";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -99,6 +105,11 @@ const PAYMENT_METHODS = [
     value: PaymentReconciliationPaymentMethod.chck,
     icon: Signature,
     label: "check",
+  },
+  {
+    value: PaymentReconciliationPaymentMethod.cdac,
+    icon: BanknoteArrowUp,
+    label: "credit_account",
   },
 ] as const;
 
@@ -185,7 +196,7 @@ export function PaymentReconciliationSheet({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedLocationObject, setSelectedLocationObject] = useAtom(
-    locationAtomFamily(facilityId),
+    paymentReconcilationLocationAtom(facilityId),
   );
   useShortcutSubContext();
 
@@ -306,15 +317,23 @@ export function PaymentReconciliationSheet({
       const initialAmount = invoice?.total_gross
         ? round(new Decimal(invoice.total_gross).abs())
         : "";
+
+      // Determine the default payment method
+      const defaultMethod = careConfig.defaultPaymentMethod
+        ? (careConfig.defaultPaymentMethod as PaymentReconciliationPaymentMethod)
+        : undefined;
+
       form.reset({
-        reconciliation_type: invoice
-          ? PaymentReconciliationType.payment
-          : PaymentReconciliationType.advance,
+        reconciliation_type: isCreditNote
+          ? undefined
+          : invoice
+            ? PaymentReconciliationType.payment
+            : PaymentReconciliationType.advance,
         status: PaymentReconciliationStatus.active,
         kind: PaymentReconciliationKind.deposit,
         issuer_type: PaymentReconciliationIssuerType.patient,
         outcome: PaymentReconciliationOutcome.complete,
-        method: undefined,
+        method: defaultMethod,
         payment_datetime: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
         amount: initialAmount,
         tendered_amount: initialAmount,
@@ -372,12 +391,14 @@ export function PaymentReconciliationSheet({
                   {invoice ? (
                     <>
                       <p className="text-sm text-gray-600 mb-1">
-                        {isCreditNote
-                          ? t("refund_given")
-                          : t("payment_received")}
+                        {isCreditNote ? t("refund_given") : t("amount_due")}
                       </p>
                       <p className="text-3xl font-bold text-gray-900">
-                        <MonetaryDisplay amount={invoice.total_payments} />
+                        <MonetaryDisplay
+                          amount={new Decimal(invoice.total_gross)
+                            .minus(invoice.total_payments)
+                            .toString()}
+                        />
                       </p>
                     </>
                   ) : (

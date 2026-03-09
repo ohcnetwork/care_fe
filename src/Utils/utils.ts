@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { differenceInMinutes, format } from "date-fns";
+import { differenceInMinutes, endOfDay, format, startOfDay } from "date-fns";
 import { toPng } from "html-to-image";
 import { t } from "i18next";
 
@@ -97,9 +97,9 @@ export const dateTimeQueryString = (date: DateLike, isEndDate = false) => {
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export const isAppleDevice =
-  /iPhone|iPad|iPod|Mac/i.test(navigator.userAgent) ||
-  (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+export const isIOSDevice = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+export const isMacDevice = /Mac/i.test(navigator.userAgent);
+export const isAppleDevice = isIOSDevice || isMacDevice;
 
 function hasTouch() {
   try {
@@ -343,8 +343,8 @@ export function getWeeklyIntervalsFromTodayTill(pastDate?: Date | string) {
   }
 
   const intervals = [];
-  let current = new Date(pastDate);
-  let currentEnd = new Date();
+  let current = startOfDay(new Date(pastDate));
+  let currentEnd = endOfDay(new Date());
 
   while (currentEnd >= current) {
     let currentStart = new Date(currentEnd);
@@ -429,4 +429,13 @@ export function formatTruncatedList<T>(
   const remainingCount = items.length - maxItems;
 
   return `${displayedItems.map(getDisplayValue).join(", ")} ... +${remainingCount} ${t("more") || moreText}`;
+}
+
+export function deepFreeze<T>(obj: T): T {
+  if (!obj || typeof obj !== "object") return obj;
+
+  Object.freeze(obj);
+  Object.values(obj).forEach(deepFreeze);
+
+  return obj;
 }

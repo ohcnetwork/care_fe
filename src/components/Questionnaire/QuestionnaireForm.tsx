@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -54,6 +54,8 @@ import { isQuestionEnabled } from "./QuestionTypes/QuestionGroup";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
+
+import queryClient from "@/Utils/request/queryClient";
 
 export interface QuestionnaireFormState {
   questionnaire: QuestionnaireRead;
@@ -400,7 +402,7 @@ export function QuestionnaireForm({
   // Fetch draft if continue_draft query param is present
   const {
     data: draftData,
-    isLoading: isDraftLoading,
+    isFetching: isDraftFetching,
     error: draftError,
   } = useQuery({
     queryKey: ["formSubmission", continueDraftId],
@@ -530,6 +532,9 @@ export function QuestionnaireForm({
     onSuccess: () => {
       setIsDirty(false);
       toast.success(t("draft_saved_successfully"));
+      queryClient.invalidateQueries({
+        queryKey: ["formSubmission", continueDraftId],
+      });
       navigate(
         `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
       );
@@ -543,6 +548,31 @@ export function QuestionnaireForm({
 
   const isPending = isSubmitPending || isDraftPending;
 
+  // Check if questionnaire is saveable as draft (no structured questions)
+  const isDraftSaveable = useMemo(() => {
+    if (!questionnaireSlug || questionnaireForms.length > 1) {
+      return false;
+    }
+
+    const findStructuredQuestions = (questions: Question[]): boolean => {
+      for (const q of questions) {
+        if (q.type === "structured") {
+          return true;
+        }
+        if (q.type === "group" && q.questions) {
+          if (findStructuredQuestions(q.questions)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+
+    return !questionnaireForms.some((form) =>
+      findStructuredQuestions(form.questionnaire.questions),
+    );
+  }, [questionnaireSlug, questionnaireForms]);
+
   // TODO: Use useBlocker hook after switching to tanstack router
   // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
   useNavigationPrompt(isDirty && !import.meta.env.DEV, t("unsaved_changes"));
@@ -554,7 +584,7 @@ export function QuestionnaireForm({
 
       // If we have a draft to continue, wait for it to load
       if (continueDraftId) {
-        if (draftData && questionnaire) {
+        if (draftData && questionnaire && !isDraftFetching) {
           // Extract the questionnaire from the draft
           const draftQuestionnaireResponses = draftData.response_dump
             ?.questionnaireResponses as QuestionnaireFormState | undefined;
@@ -597,10 +627,11 @@ export function QuestionnaireForm({
     questionnaireSlug,
     continueDraftId,
     draftData,
+    isDraftFetching,
   ]);
 
   // Show loading while fetching questionnaire or draft
-  if (isQuestionnaireLoading || (continueDraftId && isDraftLoading)) {
+  if (isQuestionnaireLoading || (continueDraftId && isDraftFetching)) {
     return <Loading />;
   }
 
@@ -676,37 +707,6 @@ export function QuestionnaireForm({
   const hasErrors = questionnaireForms.some((form) => form.errors.length > 0);
 
   const handleSaveDraft = () => {
-    if (!questionnaireSlug || questionnaireForms.length > 1) {
-      toast.error(t("cannot_save_draft_multiple_questionnaires"));
-      return;
-    }
-
-    // Check for structured questions
-    const structuredQuestionNames: string[] = [];
-    const findStructuredQuestions = (questions: Question[]) => {
-      for (const q of questions) {
-        if (q.type === "structured") {
-          structuredQuestionNames.push(q.text);
-        }
-        if (q.type === "group" && q.questions) {
-          findStructuredQuestions(q.questions);
-        }
-      }
-    };
-
-    questionnaireForms.forEach((form) => {
-      findStructuredQuestions(form.questionnaire.questions);
-    });
-
-    if (structuredQuestionNames.length > 0) {
-      toast.error(
-        t("cannot_save_draft_structured_questions", {
-          questions: structuredQuestionNames.join(", "),
-        }),
-      );
-      return;
-    }
-
     const draftQuestionnaire = questionnaireForms[0];
 
     const responseDump = {
@@ -733,8 +733,6 @@ export function QuestionnaireForm({
   };
 
   const handleSubmit = async () => {
-    setIsDirty(false);
-
     // Clear existing errors first
     const formsWithClearedErrors = questionnaireForms.map((form) => ({
       ...form,
@@ -935,6 +933,7 @@ export function QuestionnaireForm({
       });
     }
 
+    setIsDirty(false);
     submitBatch({ requests });
   };
 
@@ -1137,24 +1136,26 @@ export function QuestionnaireForm({
                 >
                   {t("cancel")}
                 </Button>
-                <Button
-                  type="button"
-                  variant="outline_primary"
-                  onClick={handleSaveDraft}
-                  disabled={isPending || !questionnaireSlug}
-                  className="relative"
-                >
-                  {isDraftPending ? (
-                    <>
-                      <span className="opacity-0">{t("save_as_draft")}</span>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="size-5 animate-spin rounded-full border-b-2 border-primary-600" />
-                      </div>
-                    </>
-                  ) : (
-                    t("save_as_draft")
-                  )}
-                </Button>
+                {isDraftSaveable && (
+                  <Button
+                    type="button"
+                    variant="outline_primary"
+                    onClick={handleSaveDraft}
+                    disabled={isPending}
+                    className="relative"
+                  >
+                    {isDraftPending ? (
+                      <>
+                        <span className="opacity-0">{t("save_as_draft")}</span>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="size-5 animate-spin rounded-full border-b-2 border-primary-600" />
+                        </div>
+                      </>
+                    ) : (
+                      t("save_as_draft")
+                    )}
+                  </Button>
+                )}
                 <Button
                   type="submit"
                   onClick={handleSubmit}

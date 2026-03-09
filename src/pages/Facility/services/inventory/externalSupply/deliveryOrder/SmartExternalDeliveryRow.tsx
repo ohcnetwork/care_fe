@@ -41,7 +41,10 @@ import { ProcessedExtension } from "@/hooks/useExtensions";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
-import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import {
+  MonetaryComponent,
+  MonetaryComponentType,
+} from "@/types/base/monetaryComponent/monetaryComponent";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ProductRead } from "@/types/inventory/product/product";
 
@@ -89,6 +92,8 @@ export function SmartExternalDeliveryRow({
     suppliedItem,
     batchNumber,
     unitPrice,
+    purchasePrice,
+    totalPurchasePrice,
     packQuantity,
     packSize,
     taxComponents,
@@ -360,6 +365,19 @@ export function SmartExternalDeliveryRow({
             value={chargeItemCategory}
             onValueChange={(category) => {
               setField("charge_item_category", category?.slug || "");
+
+              // Auto-apply configured monetary components from category
+              if (category?.configured_monetary_components) {
+                const taxes = category.configured_monetary_components.filter(
+                  (c): c is MonetaryComponent =>
+                    c.monetary_component_type === MonetaryComponentType.tax,
+                );
+                setField("tax_components", taxes);
+              } else {
+                // Clear components when category is cleared
+                setField("tax_components", []);
+              }
+              markAsEdited();
             }}
             placeholder={t("select_category")}
             className="w-full min-w-[140px]"
@@ -398,7 +416,6 @@ export function SmartExternalDeliveryRow({
           onChange={(e) => {
             const value = parseInt(e.target.value) || undefined;
             setField("supplied_item_pack_quantity", value);
-            markAsEdited();
           }}
           disabled={!productKnowledge}
           className="w-[7rem]"
@@ -499,6 +516,42 @@ export function SmartExternalDeliveryRow({
           </TableCell>
         );
       })}
+
+      {/* Purchase Price (auto-calculated: tpr / pack_quantity) */}
+      <TableCell className="align-top p-2">
+        <div className="flex items-center">
+          <span className="text-xs text-gray-500 mr-1">{CURRENCY_SYMBOL}</span>
+          <Input
+            type="number"
+            min={0}
+            step="0.01"
+            value={purchasePrice || ""}
+            placeholder="0"
+            disabled
+            className="w-[90px] bg-gray-100 text-gray-600"
+          />
+        </div>
+      </TableCell>
+
+      {/* Total Purchase Price (user-entered) */}
+      <TableCell className="align-top p-2">
+        <div className="flex items-center">
+          <span className="text-xs text-gray-500 mr-1">{CURRENCY_SYMBOL}</span>
+          <Input
+            type="number"
+            min={0}
+            step="0.01"
+            value={totalPurchasePrice || ""}
+            placeholder="0"
+            onChange={(e) => {
+              setField("total_purchase_price", e.target.value || undefined);
+              markAsEdited();
+            }}
+            disabled={!productKnowledge}
+            className="w-[100px]"
+          />
+        </div>
+      </TableCell>
 
       {/* Taxes */}
       <TableCell className="align-top p-2">

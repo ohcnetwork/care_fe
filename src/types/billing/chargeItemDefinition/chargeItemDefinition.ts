@@ -1,4 +1,7 @@
-import { MonetaryComponent } from "@/types/base/monetaryComponent/monetaryComponent";
+import {
+  DiscountConfiguration,
+  MonetaryComponent,
+} from "@/types/base/monetaryComponent/monetaryComponent";
 import { ResourceCategoryRead } from "@/types/base/resourceCategory/resourceCategory";
 import { SlugConfig } from "@/types/base/slug/slugConfig";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
@@ -27,6 +30,7 @@ export interface ChargeItemDefinitionBase {
   category: ResourceCategoryRead;
   slug_config: SlugConfig;
   tags: TagConfig[];
+  can_edit_charge_item: boolean;
 }
 
 export interface ChargeItemDefinitionRead extends ChargeItemDefinitionBase {
@@ -41,4 +45,5 @@ export interface ChargeItemDefinitionCreate extends Omit<
   slug_value: string;
   category: string;
   version?: number;
+  discount_configuration: DiscountConfiguration | null;
 }

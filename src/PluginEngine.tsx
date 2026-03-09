@@ -10,14 +10,15 @@ import {
   __federation_method_setRemote as setFederationRemote,
   __federation_method_unwrapDefault as unwrapModule,
 } from "__federation__";
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect, useMemo } from "react";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import Loading from "@/components/Common/Loading";
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
-import { PlugConfig } from "@/types/plugConfig";
+import { PlugConfig, PlugConfigMeta } from "@/types/plugConfig";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
 import query from "@/Utils/request/query";
+import { deepFreeze } from "@/Utils/utils";
 import { t } from "i18next";
 import { Loader2Icon } from "lucide-react";
 import { z } from "zod";
@@ -81,6 +82,22 @@ export default function PluginEngine({
         return { ...config, isLoading: false as const, ...data! };
       }),
   });
+
+  const pluginMeta = useMemo(() => {
+    return pluginsQuery.reduce(
+      (acc, plugin) => {
+        if (!plugin.isLoading && plugin.meta) {
+          acc[plugin.slug] = deepFreeze({ ...plugin.meta });
+        }
+        return acc;
+      },
+      {} as Record<string, PlugConfigMeta>,
+    );
+  }, [pluginsQuery]);
+
+  useEffect(() => {
+    window.__CARE_PLUGIN_RUNTIME__ = deepFreeze({ meta: pluginMeta });
+  }, [pluginMeta]);
 
   return (
     <Suspense fallback={<Loading />}>

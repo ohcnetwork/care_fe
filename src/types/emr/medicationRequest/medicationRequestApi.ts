@@ -6,6 +6,12 @@ export default {
     path: "/api/v1/patient/{patientId}/medication/request/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<MedicationRequestRead>>(),
+    TQuery: Type<{
+      encounter?: string;
+      prescription?: string;
+      product_type?: string;
+      medications_only?: boolean;
+    }>(),
     defaultQueryParams: {
       ordering: "-created_date",
     },

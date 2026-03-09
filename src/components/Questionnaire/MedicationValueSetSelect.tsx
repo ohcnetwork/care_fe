@@ -50,7 +50,6 @@ import {
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 import query from "@/Utils/request/query";
-import { isAppleDevice } from "@/Utils/utils";
 
 interface Props {
   onSelect: (value: Code) => void;
@@ -118,7 +117,6 @@ export default function MedicationValueSetSelect({
         limit: 100,
         offset: 0,
         name: search,
-        product_type: "medication",
         category: search ? undefined : currentCategory,
         status: ProductKnowledgeStatus.active,
       },
@@ -502,7 +500,7 @@ export function MedicationValueSetSelectTabContent({
                 onValueChange={onSearchChange}
                 value={search}
                 className="border-none ring-0 text-base sm:text-sm"
-                autoFocus={!isAppleDevice}
+                autoFocus
               />
             </div>
 

@@ -29,7 +29,6 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import { isAppleDevice } from "@/Utils/utils";
 
 interface AutoCompleteOption {
   label: string;
@@ -49,6 +48,7 @@ interface AutocompleteProps {
   align?: "start" | "center" | "end";
   className?: string;
   popoverClassName?: string;
+  popoverContentClassName?: string;
   freeInput?: boolean;
   closeOnSelect?: boolean;
   showClearButton?: boolean;
@@ -72,6 +72,7 @@ export default function Autocomplete({
   align = "center",
   className,
   popoverClassName,
+  popoverContentClassName,
   freeInput = false,
   closeOnSelect = true,
   showClearButton = true,
@@ -148,7 +149,7 @@ export default function Autocomplete({
         disabled={disabled}
         onValueChange={handleInputChange}
         className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm md:pr-0"
-        autoFocus={!isAppleDevice}
+        autoFocus
       />
       <CommandList className="overflow-y-auto">
         {isLoading ? (
@@ -290,7 +291,10 @@ export default function Autocomplete({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]"
+          className={cn(
+            "p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]",
+            popoverContentClassName,
+          )}
           align={align}
         >
           <Command>{commandContent}</Command>
