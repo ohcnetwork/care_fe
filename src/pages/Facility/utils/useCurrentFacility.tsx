@@ -35,19 +35,9 @@ export default function useCurrentFacility() {
 }
 
 export function useCurrentFacilitySilently() {
-  const path = useFullPath();
-  const segments = path.split("/");
-  const facilityId =
-    segments[1] === "facility" && segments[2] ? segments[2] : undefined;
-
-  const { data: facility, isLoading: isFacilityLoading } = useQuery({
-    queryKey: ["facility", facilityId],
-    queryFn: query(facilityApi.get, {
-      pathParams: { facilityId: facilityId ?? "" },
-    }),
-    enabled: !!facilityId,
-    staleTime: 1000 * 60 * 5,
-  });
-
-  return { facilityId, facility, isFacilityLoading };
+  try {
+    return useCurrentFacility();
+  } catch {
+    return { facilityId: undefined, facility: undefined };
+  }
 }

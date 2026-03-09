@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Card } from "@/components/ui/card";
@@ -26,6 +27,17 @@ export function FacilitiesPage() {
   });
 
   const { t } = useTranslation();
+  const [selectedOrg, setSelectedOrg] = useState<string | undefined>(
+    qParams.organization,
+  );
+
+  useEffect(() => {
+    if (selectedOrg) {
+      updateQuery({ organization: selectedOrg });
+    } else {
+      updateQuery({ organization: undefined });
+    }
+  }, [selectedOrg, updateQuery]);
 
   const { data: facilitiesResponse, isLoading } = useQuery({
     queryKey: ["facilities", qParams],
@@ -57,7 +69,18 @@ export function FacilitiesPage() {
         <OrganizationFilter
           skipLevels={[]}
           selected={qParams.organization}
-          onChange={(filter) => updateQuery(filter)}
+          onChange={(filter) => {
+            if ("organization" in filter) {
+              if (filter.organization) {
+                setSelectedOrg(filter.organization as string);
+              } else {
+                setSelectedOrg(undefined);
+              }
+            }
+            if ("facility_type" in filter) {
+              updateQuery({ facility_type: filter.facility_type });
+            }
+          }}
           className="flex flex-row w-full"
         />
         <SearchInput
