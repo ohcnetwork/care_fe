@@ -13,7 +13,7 @@ import { EncounterListRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import query from "@/Utils/request/query";
 
-interface PatientProfileEncountersProps {
+interface PatientHomeEncountersProps {
   patientId: string;
   facilityId: string;
   facilityPermissions: string[];
@@ -21,13 +21,13 @@ interface PatientProfileEncountersProps {
   actions?: (encounter: EncounterListRead) => React.ReactNode;
 }
 
-export default function PatientProfileEncounters({
+export default function PatientHomeEncounters({
   patientId,
   facilityId,
   facilityPermissions,
   canListEncounters,
   actions,
-}: PatientProfileEncountersProps) {
+}: PatientHomeEncountersProps) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("active");
   const [page, setPage] = useState(1);
