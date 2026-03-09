@@ -1,6 +1,6 @@
 import careConfig from "@careConfig";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Hospital, Printer } from "lucide-react";
+import { ChevronDown, Hospital, Printer } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -20,6 +20,12 @@ import Loading from "@/components/Common/Loading";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import FacilityDeleteDialog from "@/components/Facility/FacilityDeleteDialog";
 import PrintTemplateSheet from "@/components/Facility/PrintTemplateSheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -35,6 +41,7 @@ import { FACILITY_FEATURE_TYPES } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
 import { renderGeoOrganizations } from "@/types/organization/organization";
 
+import { useCareApps } from "@/hooks/useCareApps";
 import { FacilityMapsLink } from "./FacilityMapLink";
 
 type Props = {
@@ -57,6 +64,11 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const [editCoverImage, setEditCoverImage] = useState(false);
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
+
+  const careApps = useCareApps();
+  const isFacilityHomeActionsPresent = careApps.some(
+    (plugin) => !plugin.isLoading && plugin.components?.FacilityHomeActions,
+  );
 
   const { data: facilityData, isLoading } = useQuery({
     queryKey: ["facility", facilityId],
@@ -224,10 +236,31 @@ export const FacilityHome = ({ facilityId }: Props) => {
             <div className="flex justify-end max-sm:flex-col-reverse flex-wrap sm:gap-2">
               {canUpdateFacility && (
                 <div className="flex gap-1 max-sm:flex-col mt-10 sm:mt-4">
-                  <PLUGIN_Component
-                    __name="FacilityHomeActions"
-                    facility={facilityData}
-                  />
+                  {isFacilityHomeActionsPresent && (
+                    <DropdownMenu modal={false}>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="cursor-pointer font-semibold"
+                          aria-label="More Options"
+                          type="button"
+                        >
+                          {t("more_configurations")}
+                          <ChevronDown className="size-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-full">
+                        <DropdownMenuGroup className="flex flex-col gap-1">
+                          <PLUGIN_Component
+                            __name="FacilityHomeActions"
+                            facility={facilityData}
+                            className="flex justify-start items-center border border-gray-200 rounded-md p-2 shadow-sm"
+                          />
+                        </DropdownMenuGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                   <PrintTemplateSheet
                     facility={facilityData}
                     trigger={
