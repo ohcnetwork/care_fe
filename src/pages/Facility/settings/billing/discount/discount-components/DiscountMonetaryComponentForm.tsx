@@ -121,7 +121,7 @@ export function DiscountMonetaryComponentForm({
     if (value === "factor") {
       form.setValue("amount", null);
     } else {
-      form.setValue("factor", null as unknown as string);
+      form.setValue("factor", null);
     }
   };
 
