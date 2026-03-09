@@ -101,6 +101,8 @@ const supplyDeliveryItemSchema = z.object({
   expiry_date: z.string().optional(),
   charge_item_definition: z.object({ slug: z.string() }).optional(),
   unit_price: zodDecimal({ min: 0 }).optional(),
+  purchase_price: zodDecimal({ min: 0 }).optional(),
+  total_purchase_price: zodDecimal({ min: 0 }).optional(),
   is_manually_edited: z.boolean().optional(),
   is_tax_inclusive: z.boolean().optional(),
   charge_item_category: z.string().optional(),
@@ -260,6 +262,7 @@ export function AddSupplyDeliveryForm({
       inputPlaceholder={t("search_order")}
       noOptionsMessage={t("no_orders_found")}
       className="px-10"
+      popoverContentClassName="w-auto"
     />
   );
 
@@ -453,6 +456,7 @@ export function AddSupplyDeliveryForm({
           category,
           title: `${item.product_knowledge.name}${item.batch_number ? ` - ${item.batch_number}` : ""}`,
           status: ChargeItemDefinitionStatus.active,
+          can_edit_charge_item: false,
           price_components:
             priceComponents.length > 0
               ? priceComponents
@@ -462,6 +466,7 @@ export function AddSupplyDeliveryForm({
                     amount: "0",
                   },
                 ],
+          discount_configuration: null,
         };
 
         const newChargeItem =
@@ -486,6 +491,10 @@ export function AddSupplyDeliveryForm({
           expiration_date: item.expiry_date!,
           product_knowledge: item.product_knowledge.slug,
           charge_item_definition: chargeItemSlug,
+          standard_pack_size: item.supplied_item_pack_size,
+          purchase_price: item.purchase_price
+            ? parseFloat(item.purchase_price)
+            : undefined,
           extensions: {},
         };
 
@@ -512,6 +521,9 @@ export function AddSupplyDeliveryForm({
             supplied_item: productId,
             supplied_item_pack_quantity: item.supplied_item_pack_quantity,
             supplied_item_pack_size: item.supplied_item_pack_size,
+            total_purchase_price: item.total_purchase_price
+              ? parseFloat(item.total_purchase_price)
+              : undefined,
           }),
       supply_request: item.supply_request?.id,
       origin: origin,
@@ -627,56 +639,87 @@ export function AddSupplyDeliveryForm({
                     <div className="overflow-x-auto">
                       <Table>
                         <TableHeader className="bg-gray-100">
-                          <TableRow className="divide-x divide-gray-200">
-                            <TableHead className="min-w-[180px] text-xs font-semibold">
-                              {t("product")}
-                            </TableHead>
-                            {origin ? (
-                              <>
-                                <TableHead className="text-xs font-semibold">
-                                  {t("inventory_item")}
+                          {origin ? (
+                            <TableRow className="divide-x divide-gray-200">
+                              <TableHead className="min-w-[180px] text-xs font-semibold">
+                                {t("product")}
+                              </TableHead>
+                              <TableHead className="text-xs font-semibold">
+                                {t("inventory_item")}
+                              </TableHead>
+                              <TableHead className="text-xs font-semibold">
+                                {t("quantity")}
+                              </TableHead>
+                              <TableHead className="text-xs font-semibold">
+                                {t("actions")}
+                              </TableHead>
+                            </TableRow>
+                          ) : (
+                            <>
+                              <TableRow className="divide-x divide-gray-200">
+                                <TableHead
+                                  rowSpan={2}
+                                  className="min-w-[180px] text-xs font-semibold"
+                                >
+                                  {t("product")}
                                 </TableHead>
-                                <TableHead className="text-xs font-semibold">
-                                  {t("quantity")}
-                                </TableHead>
-                              </>
-                            ) : (
-                              <>
-                                <TableHead className="min-w-[140px] text-xs font-semibold">
+                                <TableHead
+                                  rowSpan={2}
+                                  className="min-w-[140px] text-xs font-semibold"
+                                >
                                   {t("batch")}
                                 </TableHead>
-                                <TableHead className="min-w-[130px] text-xs font-semibold">
+                                <TableHead
+                                  rowSpan={2}
+                                  className="min-w-[130px] text-xs font-semibold"
+                                >
                                   {t("expiry")}
                                 </TableHead>
-                                <TableHead className="min-w-[140px] text-xs font-semibold text-center">
+                                <TableHead
+                                  rowSpan={2}
+                                  className="min-w-[140px] text-xs font-semibold text-center"
+                                >
                                   {t("category")}
                                 </TableHead>
-                                <TableHead className="w-20 text-xs font-semibold">
+                                <TableHead
+                                  rowSpan={2}
+                                  className="w-20 text-xs font-semibold"
+                                >
                                   {t("pack_size")}
                                 </TableHead>
-                                <TableHead className="w-28 text-xs font-semibold">
+                                <TableHead
+                                  rowSpan={2}
+                                  className="w-28 text-xs font-semibold"
+                                >
                                   {t("pack_qty")}
                                 </TableHead>
-                                <TableHead className="w-32 text-xs font-semibold">
+                                <TableHead
+                                  rowSpan={2}
+                                  className="w-32 text-xs font-semibold"
+                                >
                                   {t("qty")}
                                 </TableHead>
-                                <TableHead className="min-w-[100px] text-xs font-semibold">
-                                  {t("item_price")}
+                                <TableHead
+                                  colSpan={1 + informationalCodes.length}
+                                  className="text-xs font-semibold text-center border-b"
+                                >
+                                  {t("sale")}
                                 </TableHead>
-                                {informationalCodes.map((code) => (
-                                  <TableHead
-                                    key={code.code}
-                                    className="min-w-[100px] text-xs font-semibold"
-                                  >
-                                    {code.display}
-                                  </TableHead>
-                                ))}
-
-                                <TableHead className="min-w-[120px] text-xs font-semibold">
+                                <TableHead
+                                  colSpan={2}
+                                  className="text-xs font-semibold text-center border-b"
+                                >
+                                  {t("purchase")}
+                                </TableHead>
+                                <TableHead
+                                  rowSpan={2}
+                                  className="min-w-[120px] text-xs font-semibold"
+                                >
                                   {t("tax")}
                                 </TableHead>
                                 {extensionFields.map((field) => (
                                   <TableHead
+                                    rowSpan={2}
                                     key={`${field.extensionName}-${field.name}`}
                                     className="min-w-[100px] text-xs font-semibold"
                                   >
@@ -688,12 +731,34 @@ export function AddSupplyDeliveryForm({
                                     )}
                                   </TableHead>
                                 ))}
-                              </>
-                            )}
-                            <TableHead className="text-xs font-semibold">
-                              {t("actions")}
-                            </TableHead>
-                          </TableRow>
+                                <TableHead
+                                  rowSpan={2}
+                                  className="text-xs font-semibold"
+                                >
+                                  {t("actions")}
+                                </TableHead>
+                              </TableRow>
+                              <TableRow className="divide-x divide-gray-200">
+                                <TableHead className="min-w-[100px] text-xs font-semibold">
+                                  {t("item_price")}
+                                </TableHead>
+                                {informationalCodes.map((code) => (
+                                  <TableHead
+                                    key={code.code}
+                                    className="min-w-[100px] text-xs font-semibold"
+                                  >
+                                    {code.display}
+                                  </TableHead>
+                                ))}
+                                <TableHead className="min-w-[100px] text-xs font-semibold border-r">
+                                  {t("pr")}
+                                </TableHead>
+                                <TableHead className="min-w-[120px] text-xs font-semibold">
+                                  {t("tpr")}
+                                </TableHead>
+                              </TableRow>
+                            </>
+                          )}
                         </TableHeader>
                         <TableBody>
                           {fields.map((field, index) =>

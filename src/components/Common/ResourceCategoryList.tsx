@@ -261,7 +261,7 @@ interface ItemSearchConfig<T extends BaseSearchableItem> {
     queryFn: {
       path: string;
       method: "GET";
-      TRes: { results: T[] };
+      TRes: { results: T[]; count: number };
     };
     pathParams?: Record<string, string>;
     queryParams?: Record<string, unknown>;
@@ -341,7 +341,7 @@ export function ResourceCategoryList<
         facilityId,
         categorySlug,
         qParams.searchCategory,
-        qParams.page ?? "1",
+        qParams.page || 1,
       ],
       queryFn: query.debounced(resourceCategoryApi.list, {
         pathParams: { facilityId },
@@ -350,7 +350,7 @@ export function ResourceCategoryList<
           parent: categorySlug || "",
           title: qParams.searchCategory,
           limit: resultsPerPage,
-          offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+          offset: ((qParams.page || 1) - 1) * resultsPerPage,
         },
       }),
     },
@@ -362,7 +362,7 @@ export function ResourceCategoryList<
       itemSearchConfig?.queryKeyPrefix || "items",
       facilityId,
       qParams.searchCategory,
-      qParams.page ?? 1,
+      qParams.page || 1,
     ],
     queryFn: query.debounced(itemSearchConfig!.listItems.queryFn, {
       pathParams: { facilityId, ...itemSearchConfig?.listItems.pathParams },
@@ -547,7 +547,13 @@ export function ResourceCategoryList<
         />
       )}
 
-      <Pagination totalCount={categoriesResponse?.count || 0} />
+      <Pagination
+        totalCount={
+          isSearching && itemSearchConfig
+            ? itemsResponse?.count || 0
+            : categoriesResponse?.count || 0
+        }
+      />
     </div>
   );
 }

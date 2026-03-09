@@ -5,6 +5,7 @@ import { Suspense, useEffect } from "react";
 
 import { Toaster } from "@/components/ui/sonner";
 
+import { AppUpdateNotifier } from "@/components/Common/AppUpdateNotifier";
 import Loading from "@/components/Common/Loading";
 import ProductionWarningBanner from "@/components/Common/ProductionWarningBanner";
 
@@ -57,7 +58,9 @@ const App = () => {
                   // For `richColors` to work, pass at-least an empty object.
                   // Refer: https://github.com/shadcn-ui/ui/issues/2234.
                   toastOptions={{}}
+                  closeButton
                 />
+                <AppUpdateNotifier />
               </PluginEngine>
             </ShortcutProvider>
           </PubSubProvider>

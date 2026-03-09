@@ -20,6 +20,8 @@ import {
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
+import TagBadge from "@/components/Tags/TagBadge";
+
 import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
 
 import useFilters from "@/hooks/useFilters";
@@ -76,6 +78,13 @@ function ActivityDefinitionCard({
               <div className="mt-2 text-xs text-gray-400">
                 {t("kind")}: {t(definition.kind)}
               </div>
+              {definition.tags.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {definition.tags.map((tag) => (
+                    <TagBadge key={tag.id} tag={tag} className="text-xs" />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <div className="ml-auto flex flex-wrap gap-2">
@@ -134,6 +143,17 @@ function ActivityDefinitionTableRow({
         {t(definition.kind)}
       </TableCell>
       <TableCell>
+        <div className="flex flex-wrap gap-1">
+          {definition.tags.length > 0 ? (
+            definition.tags.map((tag) => (
+              <TagBadge key={tag.id} tag={tag} className="text-xs" />
+            ))
+          ) : (
+            <span className="text-gray-400">—</span>
+          )}
+        </div>
+      </TableCell>
+      <TableCell>
         <div className="flex gap-2">
           <ActivityDefinitionActions
             definition={definition}
@@ -175,7 +195,7 @@ export function ActivityDefinitionList({
       pathParams: { facilityId },
       queryParams: {
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         title: qParams.search,
         status: qParams.status,
         classification: qParams.classification,
@@ -266,12 +286,13 @@ export function ActivityDefinitionList({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[30%]">{t("title")}</TableHead>
-                    <TableHead className="w-[15%]">
+                    <TableHead className="w-[25%]">{t("title")}</TableHead>
+                    <TableHead className="w-[12%]">
                       {t("classification")}
                     </TableHead>
-                    <TableHead className="w-[15%]">{t("status")}</TableHead>
-                    <TableHead className="w-[15%]">{t("kind")}</TableHead>
+                    <TableHead className="w-[10%]">{t("status")}</TableHead>
+                    <TableHead className="w-[10%]">{t("kind")}</TableHead>
+                    <TableHead className="w-[20%]">{t("tags")}</TableHead>
                     <TableHead className="w-[5%]">{t("actions")}</TableHead>
                   </TableRow>
                 </TableHeader>

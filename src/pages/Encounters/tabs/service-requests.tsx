@@ -49,7 +49,7 @@ export const EncounterServiceRequestTab = () => {
       pathParams: { facilityId: facilityId || "" },
       queryParams: {
         encounter: encounterId,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         limit: resultsPerPage,
         status: qParams.status,
         title: qParams.search,

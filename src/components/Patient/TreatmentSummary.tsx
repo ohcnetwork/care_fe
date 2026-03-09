@@ -1,4 +1,9 @@
-import { formatDosage, formatSig } from "@/components/Medicine/utils";
+import {
+  formatDosage,
+  formatDuration,
+  formatFrequency,
+  formatSig,
+} from "@/components/Medicine/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 
@@ -8,7 +13,6 @@ import Loading from "@/components/Common/Loading";
 import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
-import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { usePermissions } from "@/context/PermissionContext";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
@@ -140,7 +144,7 @@ export default function TreatmentSummary({
       queryParams: {
         encounter: encounterId,
         facility: facilityId,
-        product_type: "medication",
+        medications_only: true,
       },
       pageSize: 100,
     }),
@@ -547,31 +551,18 @@ export default function TreatmentSummary({
                           ?.map((item) => item.display)
                           .filter(Boolean)
                           .join(", ");
-                      const frequency = getFrequencyDisplay(
-                        instruction?.timing,
-                      );
-                      const dosage = formatDosage(instruction);
-                      const duration =
-                        instruction?.timing?.repeat?.bounds_duration;
                       const remarks = formatSig(instruction);
                       const notes = medication.note;
+                      const freqText = formatFrequency(instruction);
                       return {
                         medicine: displayMedicationName(medication),
                         status: t(`medication_status__${medication.status}`),
-                        dosage: dosage,
-                        frequency: instruction?.as_needed_boolean
-                          ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})` +
-                            (instruction?.additional_instruction?.length
-                              ? `, ${additionalInstructions}`
-                              : "")
-                          : `${frequency?.meaning ?? "-"}${
-                              instruction?.additional_instruction?.length
-                                ? `, ${additionalInstructions}`
-                                : ""
-                            }`,
-                        duration: duration
-                          ? `${duration.value} ${duration.unit}`
-                          : "-",
+                        dosage: formatDosage(instruction),
+                        frequency:
+                          [freqText, additionalInstructions]
+                            .filter(Boolean)
+                            .join(", ") || "-",
+                        duration: formatDuration(instruction) || "-",
                         instructions: `${remarks || "-"}${notes ? ` (${t("note")}: ${notes})` : ""}`,
                       };
                     })}

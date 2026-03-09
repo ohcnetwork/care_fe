@@ -94,26 +94,24 @@ function EncounterCard({
       )}
       <CardContent className="flex flex-col px-4 py-3 gap-2">
         <div className="flex justify-between items-center">
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 min-w-0">
             <span className="text-base font-semibold">
               {t(`encounter_class__${encounter.encounter_class}`)}
             </span>
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-gray-700 block truncate">
               {isSameFacility && careTeam.length > 0 ? (
                 <span className="flex items-center gap-1">
-                  <span className="truncate max-w-40">
+                  <span className="truncate">
                     {formatName(careTeam[0].member)}
                   </span>
                   {additionalMembersCount > 0 && (
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 shrink-0">
                       +{additionalMembersCount}
                     </span>
                   )}
                 </span>
               ) : (
-                <span className="truncate max-w-40">
-                  {encounter.facility.name}
-                </span>
+                encounter.facility.name
               )}
             </span>
             {encounter.tags.length > 0 && (
@@ -564,7 +562,7 @@ const EncounterSheetTrigger = () => {
 
   return (
     <Card className="relative rounded-md cursor-pointer w-full lg:w-80 bg-white border-primary-600">
-      <CardContent className="flex flex-col px-3 py-2 gap-1">
+      <CardContent className="flex flex-col px-4 py-3 gap-2">
         <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
         <div className="flex justify-between items-start">
           <div className="flex flex-col items-start gap-1">
@@ -575,8 +573,8 @@ const EncounterSheetTrigger = () => {
               {encounter.facility.name}
             </span>
           </div>
-          <div className="flex gap-1 items-center justify-center">
-            <div className="flex flex-col gap-1 items-end ">
+          <div className="flex flex-col items-start">
+            <div className="flex items-center gap-1 -mt-2">
               <span className="text-sm text-gray-600 whitespace-nowrap">
                 {encounter.period.start && (
                   <span>
@@ -584,30 +582,32 @@ const EncounterSheetTrigger = () => {
                   </span>
                 )}
                 {encounter.period.end && encounter.period.start && (
-                  <span>{" - "}</span>
+                  <span> - </span>
                 )}
                 {encounter.period.end ? (
                   <span>
                     {format(new Date(encounter.period.end), "dd MMM")}
                   </span>
                 ) : (
-                  <span>
-                    {" - "}
-                    {t("ongoing")}
-                  </span>
+                  <span> - {t("ongoing")}</span>
                 )}
               </span>
-              <Badge
-                variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
-                size="sm"
-                className=" whitespace-nowrap"
+              <div
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "icon" }),
+                )}
+                aria-hidden="true"
               >
-                {t(`encounter_status__${encounter.status}`)}
-              </Badge>
+                <ChevronDown />
+              </div>
             </div>
-            <div className={buttonVariants({ variant: "ghost", size: "icon" })}>
-              <ChevronDown />
-            </div>
+            <Badge
+              variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
+              size="sm"
+              className="whitespace-nowrap"
+            >
+              {t(`encounter_status__${encounter.status}`)}
+            </Badge>
           </div>
         </div>
       </CardContent>

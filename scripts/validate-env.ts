@@ -158,6 +158,7 @@ const envSchema = z
     REACT_CUSTOM_SHORTCUTS: customShortcutsSchemaString.optional(),
     REACT_AUTO_REFRESH_INTERVAL: numberAsString.optional(),
     REACT_AUTO_REFRESH_BY_DEFAULT: booleanAsStringSchema.optional(),
+    REACT_APP_UPDATE_CHECK_INTERVAL: numberAsString.optional(),
     REACT_DECIMAL_PRECISION: numberAsString.optional(),
     REACT_ACCOUNTING_PRECISION: numberAsString.optional(),
     REACT_DECIMAL_ROUNDING_METHOD: z
@@ -166,6 +167,7 @@ const envSchema = z
         message: `Must be one of: ${VALID_ROUNDING_METHODS.join(", ")}`,
       })
       .optional(),
+    REACT_MAX_FORM_DIALOG_FAVORITES: numberAsString.optional(),
   })
   .superRefine(async (data, ctx) => {
     // Ensure at least one API URL configuration is provided

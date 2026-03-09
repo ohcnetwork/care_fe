@@ -1,4 +1,5 @@
 import { booleanFromString } from "@/common/utils";
+import { PaymentReconciliationPaymentMethod } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import {
   ENCOUNTER_CLASS,
   EncounterClass,
@@ -132,12 +133,40 @@ const careConfig = {
     parseInt(env.REACT_AUTO_REFRESH_INTERVAL || "10", 10) * 1000,
 
   /**
+   * App update check interval in milliseconds (env var in seconds, default: 86400 seconds = 24 hours)
+   * Clamped to minimum 60 seconds to prevent accidental hot polling
+   */
+  appUpdateCheckInterval:
+    Math.max(parseInt(env.REACT_APP_UPDATE_CHECK_INTERVAL || "86400", 10), 60) *
+    1000,
+
+  /**
    * Flag to make location field mandatory for payment reconciliation
    */
   paymentLocationRequired: booleanFromString(
     env.REACT_PAYMENT_LOCATION_REQUIRED,
     true,
   ),
+
+  /**
+   * Default payment method to preselect when recording a new payment
+   * Valid values: cash, ccca, cchk, cdac, chck, ddpo, debc
+   */
+  defaultPaymentMethod: (() => {
+    const method = env.REACT_DEFAULT_PAYMENT_METHOD;
+    if (!method) return undefined;
+
+    // Validate the payment method value
+    const validMethods = Object.values(PaymentReconciliationPaymentMethod);
+    if (validMethods.includes(method as PaymentReconciliationPaymentMethod)) {
+      return method as PaymentReconciliationPaymentMethod;
+    }
+
+    console.warn(
+      `Invalid REACT_DEFAULT_PAYMENT_METHOD: "${method}". Valid values are: ${validMethods.join(", ")}`,
+    );
+    return undefined;
+  })(),
 
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
@@ -319,6 +348,13 @@ const careConfig = {
       return Decimal[method] as Decimal.Rounding;
     })(),
   },
+
+  /**
+   * Maximum number of forms that can be favorited in the forms dialog
+   */
+  maxFormDialogFavorites: env.REACT_MAX_FORM_DIALOG_FAVORITES
+    ? parseInt(env.REACT_MAX_FORM_DIALOG_FAVORITES, 10)
+    : 5,
 } as const;
 
 export default careConfig;
