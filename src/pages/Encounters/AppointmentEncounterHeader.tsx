@@ -1,3 +1,4 @@
+import PatientIDScanDialog from "@/components/Scan/PatientIDScanDialog";
 import { resourceTypeToResourcePathSlug } from "@/components/Schedule/useScheduleResource";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +15,7 @@ import {
   inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
+import patientApi from "@/types/emr/patient/patientApi";
 import {
   AppointmentRead,
   AppointmentStatus,
@@ -22,6 +24,7 @@ import {
 
 import { renderTokenNumber } from "@/types/tokens/token/token";
 import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -30,8 +33,10 @@ import {
   ChevronDown,
   ExternalLinkIcon,
   ListOrdered,
+  ScanLine,
 } from "lucide-react";
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 /**
@@ -240,6 +245,24 @@ const TokenActions = ({
   resourceId: string;
 }) => {
   const { t } = useTranslation();
+  const [scanDialogOpen, setScanDialogOpen] = useState(false);
+
+  const handleScanSuccess = async (scannedPatientId: string) => {
+    setScanDialogOpen(false);
+
+    // Fetch patient data to get required parameters for verify page
+    const patient = await query(patientApi.get, {
+      pathParams: { id: scannedPatientId },
+    })({ signal: new AbortController().signal });
+
+    const params = new URLSearchParams({
+      phone_number: patient.phone_number,
+      year_of_birth: patient.year_of_birth?.toString() || "",
+      partial_id: patient.id.slice(0, 5),
+    });
+
+    navigate(`/facility/${facilityId}/patients/home?${params.toString()}`);
+  };
 
   if (!appointment?.id && !appointment?.token) {
     return null;
@@ -248,66 +271,86 @@ const TokenActions = ({
   const { token } = appointment;
 
   return (
-    <div className="flex divide-x gap-2">
-      {appointment.id && (
+    <>
+      <div className="flex divide-x gap-2">
         <div className="flex items-center justify-center border-gray-300">
-          <Button variant="ghost" className="rounded-r-none pl-2 " asChild>
-            <Link href={getQueueLink(appointment)}>
-              <div className="flex sm:flex-row flex-col items-center justify-center sm:gap-1">
-                <div className="flex gap-2 items-center underline">
-                  <CalendarRange className="size-4 text-black" />
-                  {t("list")}
-                  <ExternalLinkIcon className="size-4 text-black" />
-                </div>
-              </div>
-            </Link>
+          <Button
+            variant="ghost"
+            className="rounded-r-none pl-2"
+            onClick={() => setScanDialogOpen(true)}
+          >
+            <ScanLine className="size-4 text-black" />
+            {t("scan")}
           </Button>
         </div>
-      )}
-      {appointment.id && (
-        <div className="flex items-center justify-center border-gray-300">
-          <Button variant="ghost" className="rounded-r-none" asChild>
-            <Link
-              href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointment.id}`}
-            >
-              <div className="flex sm:flex-row flex-col items-center justify-center sm:gap-1">
-                {token ? (
-                  <>
-                    <span className="text-sm text-gray-600">{t("token")}:</span>
-                    <div className="flex whitespace-nowrap gap-1 items-center">
-                      <span className="text-sm text-black font-semibold underline ">
-                        {renderTokenNumber(token)}
-                      </span>
-                      <ExternalLinkIcon className="size-4 text-black" />
-                    </div>
-                  </>
-                ) : (
+        {appointment.id && (
+          <div className="flex items-center justify-center border-gray-300">
+            <Button variant="ghost" className="rounded-r-none pl-2 " asChild>
+              <Link href={getQueueLink(appointment)}>
+                <div className="flex sm:flex-row flex-col items-center justify-center sm:gap-1">
                   <div className="flex gap-2 items-center underline">
-                    <CalendarCheck className="size-4 text-black" />
-                    {t("view")}
+                    <CalendarRange className="size-4 text-black" />
+                    {t("list")}
                     <ExternalLinkIcon className="size-4 text-black" />
                   </div>
-                )}
-              </div>
-            </Link>
-          </Button>
-        </div>
-      )}
-      {token && (
-        <div className="flex items-center justify-center">
-          <Button variant="link" className="underline ">
-            <Link
-              basePath="/"
-              className="flex items-center gap-1"
-              href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/queues/${token.queue.id}`}
-            >
-              <ListOrdered className="size-4 text-black" />
-              {t("queue")}
-              <ExternalLinkIcon className="size-4 text-black" />
-            </Link>
-          </Button>
-        </div>
-      )}
-    </div>
+                </div>
+              </Link>
+            </Button>
+          </div>
+        )}
+        {appointment.id && (
+          <div className="flex items-center justify-center border-gray-300">
+            <Button variant="ghost" className="rounded-r-none" asChild>
+              <Link
+                href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointment.id}`}
+              >
+                <div className="flex sm:flex-row flex-col items-center justify-center sm:gap-1">
+                  {token ? (
+                    <>
+                      <span className="text-sm text-gray-600">
+                        {t("token")}:
+                      </span>
+                      <div className="flex whitespace-nowrap gap-1 items-center">
+                        <span className="text-sm text-black font-semibold underline ">
+                          {renderTokenNumber(token)}
+                        </span>
+                        <ExternalLinkIcon className="size-4 text-black" />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex gap-2 items-center underline">
+                      <CalendarCheck className="size-4 text-black" />
+                      {t("view")}
+                      <ExternalLinkIcon className="size-4 text-black" />
+                    </div>
+                  )}
+                </div>
+              </Link>
+            </Button>
+          </div>
+        )}
+        {token && (
+          <div className="flex items-center justify-center">
+            <Button variant="link" className="underline ">
+              <Link
+                basePath="/"
+                className="flex items-center gap-1"
+                href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/queues/${token.queue.id}`}
+              >
+                <ListOrdered className="size-4 text-black" />
+                {t("queue")}
+                <ExternalLinkIcon className="size-4 text-black" />
+              </Link>
+            </Button>
+          </div>
+        )}
+      </div>
+
+      <PatientIDScanDialog
+        open={scanDialogOpen}
+        onOpenChange={setScanDialogOpen}
+        onScanSuccess={handleScanSuccess}
+      />
+    </>
   );
 };

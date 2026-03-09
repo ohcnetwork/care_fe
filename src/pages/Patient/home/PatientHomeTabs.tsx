@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { BookingsList } from "@/pages/Appointments/BookAppointment/BookingsList";
 import { EncounterListRead } from "@/types/emr/encounter/encounter";
 import { FacilityRead } from "@/types/facility/facility";
-import PatientHomeEncounters from "./PatientHomeEncounters";
+import PatientProfileEncounters from "./PatientProfileEncounters";
 
 interface PatientHomeTabsProps {
   patientId: string;
@@ -81,7 +81,7 @@ export default function PatientHomeTabs({
       {/* Tab Content */}
       <div className="mt-6">
         {activeTab === "encounters" && (
-          <PatientHomeEncounters
+          <PatientProfileEncounters
             patientId={patientId}
             facilityId={facility.id}
             facilityPermissions={facilityPermissions}
