@@ -86,11 +86,11 @@ export function LocationSwitcher() {
           >
             <div className="flex items-center gap-2">
               <MapPinIcon className="size-5 text-green-600" />
-              <div className="flex flex-col items-start">
+              <div className="flex flex-col items-start min-w-0">
                 <span className="text-xs text-gray-500">
                   {t("current_location")}
                 </span>
-                <span className="text-sm font-medium text-gray-900">
+                <span className="text-sm font-medium text-gray-900 truncate w-full">
                   {location?.name}
                 </span>
               </div>
