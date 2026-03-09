@@ -163,7 +163,7 @@ export function PatientIdentifierSelector({
   });
 
   // Patient verification query
-  const { data: verifiedPatient, refetch: PatientHome } = useQuery({
+  const { data: verifiedPatient, refetch: refetchPatient } = useQuery({
     queryKey: ["patient-verify", pendingPatient?.id, yearOfBirth],
     queryFn: query(patientApi.searchRetrieve, {
       pathParams: { facilityId },
@@ -221,7 +221,7 @@ export function PatientIdentifierSelector({
       toast.error(t("valid_year_of_birth"));
       return;
     }
-    PatientHome();
+    refetchPatient();
   };
 
   const handleScanSuccess = (scannedPatientId: string) => {
