@@ -83,7 +83,6 @@ const PatientRoutes: AppRoutes = {
 
   "/facility/:facilityId/patients/verify": () => <VerifyPatient />,
   "/patient/:id": ({ id }) => <PatientHome id={id} page="demography" />,
-  "/patient/:id/update": ({ id }) => <PatientRegistration patientId={id} />,
   ...patientTabs.reduce((acc: AppRoutes, tab) => {
     acc["/patient/:id/" + tab.route] = ({ id }) => (
       <PatientHome id={id} page={tab.route} />
