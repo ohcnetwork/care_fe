@@ -1,5 +1,6 @@
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { SubstitutionSheet } from "@/components/Medication/SubstitutionSheet";
+import { formatMedicationLine } from "@/components/Medicine/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -25,7 +26,6 @@ import {
   InventoryItemsSelector,
   LotSelection,
 } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
-import DosageInstructionSummaryLine from "@/pages/Facility/services/pharmacy/billMedications/DosageInstructionSummary";
 import { billMedicationsByPrescriptionsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { selectEligibleInventoryItems } from "@/pages/Facility/services/pharmacy/billMedications/utils/itemsAutoSelect";
 import { isMedicationDispenseable } from "@/pages/Facility/services/pharmacy/billMedications/utils/utils";
@@ -157,6 +157,63 @@ export const BillMedicationsPrescriptionCard = ({
 };
 
 export const BillMedicationsOtherItemsCard = ({
+  form,
+}: {
+  form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
+}) => {
+  const { t } = useTranslation();
+  const items = form.watch("otherItems");
+
+  const { remove } = useFieldArray({
+    control: form.control,
+    name: "otherItems",
+  });
+
+  return (
+    <>
+      <div className="relative flex justify-between col-start-1 col-span-7 bg-white pt-4 pr-2 pb-2 pl-4">
+        <div className="absolute top-5 left-0 h-4 w-1 bg-amber-500 rounded-r-md" />
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-0.5">
+            <div className="text-base text-gray-950">
+              <span className="font-semibold">{t("other_items")} </span>
+            </div>
+            <div className="flex gap-2.5">
+              <span className="text-sm font-medium text-gray-700">
+                ({t("items_count", { count: items.length })})
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <HeaderRow />
+
+      {items.map((_, index) => (
+        <>
+          <MedicineLineItem
+            key={`otherItems.${index}`}
+            name={`otherItems.${index}`}
+            form={form}
+            onRemove={() => remove(index)}
+          />
+          <div className="col-span-7 h-px bg-gray-200" />
+        </>
+      ))}
+
+      {items.length === 0 && (
+        <EmptyState
+          className="col-span-7 rounded-none border-b border-gray-200"
+          icon={<Pill className="text-primary size-6" />}
+          title={t("no_medications")}
+          description={t("add_medications_to_bill_description")}
+        />
+      )}
+    </>
+  );
+};
+
+export const BillMedicationsNewDispenseCard = ({
   form,
 }: {
   form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
@@ -416,6 +473,7 @@ const MedicineLineItem = ({
 
   const isSelected = form.watch(`${name}.isSelected`);
   const medication = form.watch(`${name}.medication`);
+  const dosageInstructions = form.watch(`${name}.dosageInstructions`);
   const productKnowledge = form.watch(`${name}.productKnowledge`);
   const substitution = form.watch(`${name}.substitution`);
   const lots = form.watch(`${name}.lots`);
@@ -426,6 +484,13 @@ const MedicineLineItem = ({
 
   const effectiveProductKnowledge =
     substitution?.substitutedProductKnowledge || productKnowledge;
+
+  const effectiveDosageInstructions =
+    dosageInstructions ?? medication?.dosage_instruction;
+
+  const canAutoSelectInventoryItems = !!(
+    effectiveDosageInstructions && effectiveProductKnowledge
+  );
 
   const {
     mutate: autoSelectInventoryItems,
@@ -441,11 +506,13 @@ const MedicineLineItem = ({
       },
     }),
     onSuccess: (data: PaginatedResponse<InventoryRead>) => {
-      if (!medication) {
+      if (!effectiveDosageInstructions) {
         return;
       }
 
-      const quantity = computeMedicationDispenseQuantity(medication);
+      const quantity = computeMedicationDispenseQuantity(
+        effectiveDosageInstructions[0],
+      );
       const autoSelectedLots = selectEligibleInventoryItems(data.results, {
         quantity: decimal(quantity),
         canSelect: isLotAllowedForDispensing,
@@ -456,10 +523,10 @@ const MedicineLineItem = ({
   });
 
   useEffect(() => {
-    if (medication && effectiveProductKnowledge?.id) {
+    if (canAutoSelectInventoryItems) {
       autoSelectInventoryItems(undefined);
     }
-  }, [medication, effectiveProductKnowledge?.id, autoSelectInventoryItems]);
+  }, [canAutoSelectInventoryItems, autoSelectInventoryItems]);
 
   return (
     <div className="contents group divide-x divide-gray-200">
@@ -510,7 +577,7 @@ const MedicineLineItem = ({
         <>
           {/* Select Lot */}
           <div className="relative bg-white">
-            {medication && effectiveProductKnowledge && (
+            {canAutoSelectInventoryItems && (
               <Button
                 variant="white"
                 type="button"
@@ -756,6 +823,7 @@ const MedicineLineItemMedication = ({
   const medication = form.watch(`${name}.medication`);
   const productKnowledge = form.watch(`${name}.productKnowledge`);
   const substitution = form.watch(`${name}.substitution`);
+  const dosageInstructions = form.watch(`${name}.dosageInstructions`);
 
   const effectiveProductKnowledge =
     substitution?.substitutedProductKnowledge || productKnowledge;
@@ -785,9 +853,9 @@ const MedicineLineItemMedication = ({
             </span>
           )}
           <span className="text-sm text-gray-700 font-medium flex items-center gap-1 whitespace-nowrap capitalize">
-            <DosageInstructionSummaryLine
-              dosageInstruction={medication?.dosage_instruction?.[0]}
-            />
+            {formatMedicationLine(
+              (dosageInstructions ?? medication?.dosage_instruction)?.[0],
+            )}
           </span>
         </div>
         <div className="flex gap-1">
@@ -827,6 +895,7 @@ const MedicineLineItemMedication = ({
               effectiveProductKnowledge={effectiveProductKnowledge}
               substitution={substitution}
               productKnowledge={productKnowledge}
+              dosageInstructions={dosageInstructions}
             />
           )}
 

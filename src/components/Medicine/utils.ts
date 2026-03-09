@@ -63,24 +63,16 @@ export function formatFrequency(
   return getFrequencyDisplayLabel(instruction) || "";
 }
 
-export function formatFrequencyShort(
-  instruction?: MedicationRequestDosageInstruction,
-): string {
-  if (!instruction) return "";
-  return instruction.text || "";
-}
-
 /**
  * Standard duration display for a dosage instruction.
  * Returns human-readable label like "5 days", "2 weeks".
  */
 export function formatDuration(
   instruction?: MedicationRequestDosageInstruction,
-  { abbreviated = false }: { abbreviated?: boolean } = {},
 ): string {
   const duration = instruction?.timing?.repeat?.bounds_duration;
   if (!duration?.value || duration.value === "0") return "";
-  return formatDurationLabel(duration, { abbreviated });
+  return formatDurationLabel(duration);
 }
 
 /**

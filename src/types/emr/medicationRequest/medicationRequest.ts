@@ -1519,11 +1519,9 @@ export function computeTotalDoseQuantity(
 // ─── Consumers of computeTotalDoseQuantity ──────────────────────────
 
 export function computeMedicationDispenseQuantity(
-  medication: MedicationRequestRead,
+  instruction: MedicationRequestDosageInstruction,
 ): string {
   const DEFAULT_QTY = "1";
-  const instruction = medication.dosage_instruction[0];
-  if (!instruction) return DEFAULT_QTY;
 
   const doseValue = instruction.dose_and_rate?.dose_quantity?.value;
   if (!doseValue) return DEFAULT_QTY;

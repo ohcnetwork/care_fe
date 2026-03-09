@@ -93,7 +93,7 @@ export default function useBillMedications({
       prescriptionsToComplete,
     }: {
       items: BillMedicationLineItemSchemaType[];
-      prescriptionsToComplete: string[];
+      prescriptionsToComplete?: string[];
     }) => {
       const requests = [
         ...getDispenseCreateRequests({
@@ -102,7 +102,10 @@ export default function useBillMedications({
           fallbackEncounterId,
           alternateIdentifier: getDispenseCreateAlternateIdentifier(patientId),
         }),
-        ...getPrescriptionCompletionRequest(prescriptionsToComplete, patientId),
+
+        ...(prescriptionsToComplete
+          ? getPrescriptionCompletionRequest(prescriptionsToComplete, patientId)
+          : []),
       ];
       try {
         const response = await dispenseMutation.mutateAsync({ requests });

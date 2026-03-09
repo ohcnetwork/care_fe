@@ -3,7 +3,7 @@ import Page from "@/components/Common/Page";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Form } from "@/components/ui/form";
-import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
+import { AddMedicationTrigger } from "@/pages/Facility/services/pharmacy/AddMedicationTrigger";
 import { BillMedicationsFooter } from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsFooter";
 import { BillMedicationsLoadingCard } from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsLoadingCard";
 import {
@@ -23,10 +23,9 @@ import { useQueries } from "@tanstack/react-query";
 import { Pill } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect } from "react";
-import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Fragment } from "react/jsx-runtime";
-import { z } from "zod";
 
 interface Props {
   facilityId: string;
@@ -192,61 +191,6 @@ export default function BillMedicationsByPrescriptions({
     </Page>
   );
 }
-
-interface AddMedicationTriggerProps {
-  form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
-}
-
-const AddMedicationTrigger = ({ form }: AddMedicationTriggerProps) => {
-  const { t } = useTranslation();
-
-  const { append } = useFieldArray({
-    control: form.control,
-    name: "otherItems",
-  });
-
-  // TODO: switch to using AddMedicationSheet once it's cleaned up to use the new form schema approach
-
-  return (
-    <ProductKnowledgeSelect
-      onChange={(productKnowledge) => {
-        if (!productKnowledge) return;
-
-        append({
-          reference_id: crypto.randomUUID(),
-          isSelected: true,
-          medication: null,
-          dosageInstructions: [
-            {
-              dose_and_rate: productKnowledge.base_unit
-                ? {
-                    type: "ordered",
-                    dose_quantity: {
-                      value: "1",
-                      unit: productKnowledge.base_unit,
-                    },
-                  }
-                : undefined,
-              timing: undefined,
-              as_needed_boolean: true,
-              route: undefined,
-              site: undefined,
-              method: undefined,
-              additional_instruction: undefined,
-              as_needed_for: undefined,
-            },
-          ],
-          productKnowledge,
-          substitution: null,
-          lots: [],
-          allGiven: true,
-        });
-      }}
-      placeholder={t("add_medication")}
-      className="w-full"
-    />
-  );
-};
 
 const getPrescriptionFormValues = (
   prescriptions: (PrescriptionRead | undefined)[],

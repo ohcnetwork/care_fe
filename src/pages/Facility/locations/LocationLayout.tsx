@@ -22,6 +22,7 @@ import { PrintDeliveryOrder } from "@/pages/Facility/services/inventory/external
 import { PrintRequestOrder } from "@/pages/Facility/services/inventory/externalSupply/requestOrder/PrintRequestOrder";
 import { ToDispatch } from "@/pages/Facility/services/inventory/ToDispatch";
 import { ToReceive } from "@/pages/Facility/services/inventory/ToReceive";
+import BillMedicationsByNewDispense from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsByNewDispense";
 import BillMedicationsByPrescriptions from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsByPrescriptions";
 import DispensesView from "@/pages/Facility/services/pharmacy/DispensesView";
 import MedicationDispenseHistory from "@/pages/Facility/services/pharmacy/MedicationDispenseHistory";
@@ -63,14 +64,6 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       prescriptionId={prescriptionId}
     />
   ),
-  // Todo: Re-check if this route is needed
-  // "/medication_requests/patient/:patientId/print": ({
-  //   patientId,
-  // }: {
-  //   patientId: string;
-  // }) => (
-  //   <PrintPharmacyPrescription facilityId={facilityId} patientId={patientId} />
-  // ),
   "/medication_requests/patient/:patientId/bill/prescriptions/:prescriptionIds":
     ({
       patientId,
@@ -86,6 +79,20 @@ const getRoutes = (facilityId: string, locationId: string) => ({
         prescriptionIds={prescriptionIds.split(",")}
       />
     ),
+  "/medication_requests/patient/:patientId/bill/dispense/:encounterId": ({
+    patientId,
+    encounterId,
+  }: {
+    patientId: string;
+    encounterId: string;
+  }) => (
+    <BillMedicationsByNewDispense
+      facilityId={facilityId}
+      locationId={locationId}
+      patientId={patientId}
+      encounterId={encounterId}
+    />
+  ),
   "/medication_dispense": () => (
     <MedicationDispenseHistory
       facilityId={facilityId}

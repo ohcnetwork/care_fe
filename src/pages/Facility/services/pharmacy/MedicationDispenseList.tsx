@@ -405,17 +405,14 @@ export default function MedicationDispenseList({
               {t("print")}
               <ShortcutBadge actionId="print-button" />
             </Button>
-            <Button
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${patientId}/prescription/${prescriptionId}/bill`,
-                )
-              }
-              className="w-full sm:w-auto"
-            >
-              <ShortcutBadge actionId="billing-action" />
-              {t("billing")}
-              <ArrowRightIcon className="size-4" />
+            <Button asChild className="w-full sm:w-auto">
+              <Link
+                href={`/medication_requests/patient/${patientId}/bill/prescriptions/${prescriptionId}`}
+              >
+                <ArrowRightIcon className="size-4" />
+                {t("billing")}
+                <ShortcutBadge actionId="billing-action" />
+              </Link>
             </Button>
           </div>
         </div>

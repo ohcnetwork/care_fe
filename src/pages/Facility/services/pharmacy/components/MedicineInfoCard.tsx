@@ -1,11 +1,12 @@
+import { formatMedicationLine } from "@/components/Medicine/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
-import DosageInstructionSummaryLine from "@/pages/Facility/services/pharmacy/billMedications/DosageInstructionSummary";
 import { DispensedItemsSheet } from "@/pages/Facility/services/pharmacy/components/DispensedItemsSheet";
 import { MedicationBillSubstitution } from "@/pages/Facility/services/pharmacy/types";
 import {
   MedicationRequestDispenseStatus,
+  MedicationRequestDosageInstruction,
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
@@ -20,6 +21,7 @@ interface MedicineInfoCardProps {
   effectiveProductKnowledge: ProductKnowledgeBase | null;
   substitution: MedicationBillSubstitution | null;
   productKnowledge: ProductKnowledgeBase | null;
+  dosageInstructions?: MedicationRequestDosageInstruction[] | null;
 }
 
 export const MedicineInfoCard = ({
@@ -28,6 +30,7 @@ export const MedicineInfoCard = ({
   effectiveProductKnowledge,
   substitution,
   productKnowledge,
+  dosageInstructions,
 }: MedicineInfoCardProps) => {
   const { t } = useTranslation();
   const [openPopover, setOpenPopover] = useState(false);
@@ -56,9 +59,9 @@ export const MedicineInfoCard = ({
                     t("unknown_medication")}
                 </h4>
                 <span className="text-xs text-gray-600">
-                  <DosageInstructionSummaryLine
-                    dosageInstruction={medication?.dosage_instruction?.[0]}
-                  />
+                  {formatMedicationLine(
+                    (dosageInstructions ?? medication?.dosage_instruction)?.[0],
+                  )}
                 </span>
               </div>
               <Button

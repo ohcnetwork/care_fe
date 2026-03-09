@@ -7,7 +7,7 @@ import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { useQuery } from "@tanstack/react-query";
-import { PlusIcon } from "lucide-react";
+import { ListPlus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -61,7 +61,7 @@ export default function UnbilledPrescriptionsCard({
               ])
             }
           >
-            <PlusIcon className="size-4" />
+            <ListPlus className="size-4" />
             {t("include_all")}
           </Button>
         </div>
