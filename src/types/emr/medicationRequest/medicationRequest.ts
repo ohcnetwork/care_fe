@@ -1407,17 +1407,12 @@ export function encodeDurationValue(duration?: BoundsDuration): string {
 /**
  * Format a BoundsDuration as a human-readable label.
  */
-export function formatDurationLabel(
-  duration?: BoundsDuration,
-  { abbreviated = false }: { abbreviated?: boolean } = {},
-): string {
+export function formatDurationLabel(duration?: BoundsDuration): string {
   if (!duration?.value || duration.value === "0") return "";
   const info = DURATION_UNIT_LABELS[duration.unit];
   if (!info) return `${duration.value} ${duration.unit}`;
   const numVal = parseFloat(duration.value);
-  return abbreviated
-    ? `${duration.value} ${info.shorthand.toUpperCase()}`
-    : `${duration.value} ${numVal === 1 ? info.singular : info.plural}`;
+  return `${duration.value} ${numVal === 1 ? info.singular : info.plural}`;
 }
 
 // ─── Shared dose-quantity computation helpers ───────────────────────
@@ -1521,12 +1516,9 @@ export function computeTotalDoseQuantity(
 // ─── Consumers of computeTotalDoseQuantity ──────────────────────────
 
 export function computeMedicationDispenseQuantity(
-  medication: MedicationRequestRead,
+  instruction: MedicationRequestDosageInstruction,
 ): string {
   const DEFAULT_QTY = "1";
-  const instruction = medication.dosage_instruction[0];
-  if (!instruction) return DEFAULT_QTY;
-
   const doseValue = instruction.dose_and_rate?.dose_quantity?.value;
   if (!doseValue) return DEFAULT_QTY;
 
