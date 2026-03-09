@@ -292,6 +292,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 month={selectedMonth}
                 onMonthChange={setSelectedMonth}
                 renderDay={renderDay}
+                setSelectedDate={setSelectedDate}
                 highlightToday={false}
               />
               <div className="space-y-6">
