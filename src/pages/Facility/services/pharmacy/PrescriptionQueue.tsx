@@ -181,32 +181,32 @@ export default function PrescriptionQueue({
   });
 
   const isFilteredByPatient = !!qParams.patient_external_id;
+  const isActiveStatusFilter =
+    (qParams.status || PrescriptionStatus.active) === PrescriptionStatus.active;
+  const showBillingSelection = isFilteredByPatient && isActiveStatusFilter;
 
   // State for selected prescription IDs
   const [selectedPrescriptionIds, setSelectedPrescriptionIds] = useState<
     string[]
   >([]);
 
-  // Auto-select all prescriptions when filtered by patient and data loads
+  // Auto-select all prescriptions when billing selection is shown and data loads
   useEffect(() => {
-    if (isFilteredByPatient && prescriptionQueue?.results) {
-      const allIds = prescriptionQueue.results.map((item) => item.id);
-      setSelectedPrescriptionIds(allIds);
+    if (showBillingSelection && prescriptionQueue?.results) {
+      setSelectedPrescriptionIds(
+        prescriptionQueue.results.map((item) => item.id),
+      );
     } else {
       setSelectedPrescriptionIds([]);
     }
-  }, [
-    isFilteredByPatient,
-    prescriptionQueue?.results,
-    qParams.status,
-    qParams.page,
-  ]);
+  }, [showBillingSelection, prescriptionQueue?.results, qParams.page]);
 
   // Handle select all toggle
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      const allIds = prescriptionQueue?.results?.map((item) => item.id) || [];
-      setSelectedPrescriptionIds(allIds);
+      setSelectedPrescriptionIds(
+        prescriptionQueue?.results?.map((item) => item.id) || [],
+      );
     } else {
       setSelectedPrescriptionIds([]);
     }
@@ -221,7 +221,6 @@ export default function PrescriptionQueue({
     );
   };
 
-  // Check if all prescriptions on current page are selected
   const allSelected =
     (prescriptionQueue?.results?.length ?? 0) > 0 &&
     prescriptionQueue?.results?.every((item) =>
@@ -311,8 +310,8 @@ export default function PrescriptionQueue({
         />
       </div>
 
-      {/* Selection bar when filtered by patient */}
-      {isFilteredByPatient && (
+      {/* Selection bar when filtered by patient with active status */}
+      {showBillingSelection && (
         <div className="mt-4 border border-gray-300 bg-white rounded-lg p-4">
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex flex-col gap-1">
@@ -377,7 +376,7 @@ export default function PrescriptionQueue({
           <Table>
             <TableHeader>
               <TableRow>
-                {isFilteredByPatient && <TableHead className="min-w-8" />}
+                {showBillingSelection && <TableHead className="min-w-8" />}
                 <TableHead className="w-1/3">{t("patient_name")}</TableHead>
                 <TableHead className="w-1/3">
                   {t("encounter_status_location")}
@@ -391,7 +390,7 @@ export default function PrescriptionQueue({
             <TableBody>
               {prescriptionQueue?.results?.map((item: PrescriptionSummary) => (
                 <TableRow key={item.id} className="group">
-                  {isFilteredByPatient && (
+                  {showBillingSelection && (
                     <TableCell>
                       <Checkbox
                         checked={selectedPrescriptionIds.includes(item.id)}
@@ -405,7 +404,7 @@ export default function PrescriptionQueue({
                   <TableCell
                     className="cursor-pointer min-h-15"
                     onClick={() => {
-                      if (isFilteredByPatient) {
+                      if (showBillingSelection) {
                         handleSelectPrescription(item.id);
                       } else {
                         updateQuery({
@@ -498,18 +497,19 @@ export default function PrescriptionQueue({
                           {t("view_prescription")}
                         </Link>
                       </span>
-                      {!isFilteredByPatient && (
-                        <Button
-                          variant="outline"
-                          className="font-semibold text-sm text-gray-950"
-                        >
-                          <Link
-                            href={`/medication_requests/patient/${item.encounter.patient.id}/bill/prescriptions/${item.id}`}
+                      {item.status === PrescriptionStatus.active &&
+                        !isFilteredByPatient && (
+                          <Button
+                            variant="outline"
+                            className="font-semibold text-sm text-gray-950"
                           >
-                            {t("bill_now")}
-                          </Link>
-                        </Button>
-                      )}
+                            <Link
+                              href={`/medication_requests/patient/${item.encounter.patient.id}/bill/prescriptions/${item.id}`}
+                            >
+                              {t("bill_now")}
+                            </Link>
+                          </Button>
+                        )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon">
