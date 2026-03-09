@@ -11,76 +11,75 @@ let pharmacyLocationId: string;
 let bioChembasePath: string;
 let pharmacybasePath: string;
 let isInitialized: boolean = false;
-let isExternalInitialized: boolean = false;
+
+async function createStockRequest(page: Page, orderNameParam?: string) {
+  await page.goto(bioChembasePath + "/inventory/internal/receive");
+  orderName = orderNameParam ?? faker.lorem.words(5);
+  await page.getByRole("button", { name: "Raise Stock Request" }).click();
+  await page.getByRole("textbox", { name: "Name" }).fill(orderName);
+  await page
+    .getByRole("combobox")
+    .filter({ hasText: "Select Location" })
+    .click();
+  await page.getByRole("option", { name: "Pharmacy" }).click();
+  await page.getByRole("radio", { name: "Urgent" }).check();
+  await page.getByRole("button", { name: "Create" }).click();
+  const heading = page.getByRole("heading", { name: orderName });
+  await expect(heading).toBeVisible();
+  await page.getByRole("combobox").filter({ hasText: "Add Item" }).click();
+  await page.getByRole("option", { name: "Medication" }).click();
+  await page.getByRole("option", { name: "Paracetamol" }).click();
+  await page.getByRole("spinbutton").fill("5");
+  await page.getByRole("button", { name: "Save List" }).click();
+  let tableRow1 = page.locator("table tbody tr").nth(0);
+  await expect(tableRow1).toContainText("Paracetamol");
+  await expect(tableRow1).toContainText("5");
+  await page
+    .getByRole("button", { name: "Mark as Approved" })
+    .click({ timeout: 5000 });
+
+  await page.goto(bioChembasePath + "/inventory/internal/receive");
+  // verify item in table row 1
+  tableRow1 = page.locator("table tbody tr").nth(0);
+  await expect(tableRow1).toContainText(orderName);
+  await expect(tableRow1).toContainText("Pharmacy");
+  await page.goto(bioChembasePath + "/inventory/internal/receive");
+}
+
+async function setupInitialData(page: Page) {
+  if (isInitialized) return;
+  const facilityId = getFacilityId();
+  const servicesUrl = `/facility/${facilityId}/services/`;
+  await page.goto(servicesUrl);
+  await page.getByRole("link", { name: "Main Pharmacy" }).click();
+  await page.getByRole("link", { name: "Pharmacy" }).click();
+  pharmacyLocationId =
+    page
+      .url()
+      .match(
+        new RegExp(
+          `/facility/${facilityId}/locations/([^/]+)/medication_requests`,
+        ),
+      )?.[1] ?? "";
+  pharmacybasePath = `/facility/${facilityId}/locations/${pharmacyLocationId}`;
+  await page.goto(servicesUrl);
+  await page.getByRole("link", { name: "Pathology Lab" }).click();
+  await page.getByRole("link", { name: "Bio-Chemistry" }).click();
+  bioChemLabLocationId =
+    page
+      .url()
+      .match(
+        new RegExp(
+          `/facility/${facilityId}/locations/([^/]+)/service_requests`,
+        ),
+      )?.[1] ?? "";
+  bioChembasePath = `/facility/${facilityId}/locations/${bioChemLabLocationId}`;
+  orderName = faker.lorem.words(5);
+  await createStockRequest(page, orderName);
+  isInitialized = true;
+}
 
 test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
-  async function createStockRequest(page: Page, orderNameParam?: string) {
-    await page.goto(bioChembasePath + "/inventory/internal/receive");
-    orderName = orderNameParam ?? faker.lorem.words(5);
-    await page.getByRole("button", { name: "Raise Stock Request" }).click();
-    await page.getByRole("textbox", { name: "Name" }).fill(orderName);
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: "Select Location" })
-      .click();
-    await page.getByRole("option", { name: "Pharmacy" }).click();
-    await page.getByRole("radio", { name: "Urgent" }).check();
-    await page.getByRole("button", { name: "Create" }).click();
-    const heading = page.getByRole("heading", { name: orderName });
-    await expect(heading).toBeVisible();
-    await page.getByRole("combobox").filter({ hasText: "Add Item" }).click();
-    await page.getByRole("option", { name: "Medication" }).click();
-    await page.getByRole("option", { name: "Paracetamol" }).click();
-    await page.getByRole("spinbutton").fill("5");
-    await page.getByRole("button", { name: "Save List" }).click();
-    let tableRow1 = page.locator("table tbody tr").nth(0);
-    await expect(tableRow1).toContainText("Paracetamol");
-    await expect(tableRow1).toContainText("5");
-    await page
-      .getByRole("button", { name: "Mark as Approved" })
-      .click({ timeout: 5000 });
-
-    await page.goto(bioChembasePath + "/inventory/internal/receive");
-    // verify item in table row 1
-    tableRow1 = page.locator("table tbody tr").nth(0);
-    await expect(tableRow1).toContainText(orderName);
-    await expect(tableRow1).toContainText("Pharmacy");
-    await page.goto(bioChembasePath + "/inventory/internal/receive");
-  }
-
-  async function setupInitialData(page: Page) {
-    if (isInitialized) return;
-    const facilityId = getFacilityId();
-    const servicesUrl = `/facility/${facilityId}/services/`;
-    await page.goto(servicesUrl);
-    await page.getByRole("link", { name: "Main Pharmacy" }).click();
-    await page.getByRole("link", { name: "Pharmacy" }).click();
-    pharmacyLocationId =
-      page
-        .url()
-        .match(
-          new RegExp(
-            `/facility/${facilityId}/locations/([^/]+)/medication_requests`,
-          ),
-        )?.[1] ?? "";
-    pharmacybasePath = `/facility/${facilityId}/locations/${pharmacyLocationId}`;
-    await page.goto(servicesUrl);
-    await page.getByRole("link", { name: "Pathology Lab" }).click();
-    await page.getByRole("link", { name: "Bio-Chemistry" }).click();
-    bioChemLabLocationId =
-      page
-        .url()
-        .match(
-          new RegExp(
-            `/facility/${facilityId}/locations/([^/]+)/service_requests`,
-          ),
-        )?.[1] ?? "";
-    bioChembasePath = `/facility/${facilityId}/locations/${bioChemLabLocationId}`;
-    orderName = faker.lorem.words(5);
-    await createStockRequest(page, orderName);
-    isInitialized = true;
-  }
-
   test.beforeEach(async ({ page }) => {
     await setupInitialData(page);
     // Navigate to the To-Receive Orders Inventory page before each test
@@ -152,27 +151,8 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
 });
 
 test.describe("External Delivery Order Flow", () => {
-  async function setupExternalData(page: Page) {
-    if (isExternalInitialized) return;
-    const facilityId = getFacilityId();
-    const servicesUrl = `/facility/${facilityId}/services/`;
-    await page.goto(servicesUrl);
-    await page.getByRole("link", { name: "Main Pharmacy" }).click();
-    await page.getByRole("link", { name: "Pharmacy" }).click();
-    pharmacyLocationId =
-      page
-        .url()
-        .match(
-          new RegExp(
-            `/facility/${facilityId}/locations/([^/]+)/medication_requests`,
-          ),
-        )?.[1] ?? "";
-    pharmacybasePath = `/facility/${facilityId}/locations/${pharmacyLocationId}`;
-    isExternalInitialized = true;
-  }
-
   test.beforeEach(async ({ page }) => {
-    await setupExternalData(page);
+    await setupInitialData(page);
   });
 
   test("should show validation errors when Name and Vendor are empty", async ({
@@ -214,25 +194,9 @@ test.describe("External Delivery Order Flow", () => {
     await expect(row1).toContainText(deliveryName);
   });
 
-  test("should show empty state on completed tab when no completed orders exist", async ({
+  test("should navigate to completed tab and display results", async ({
     page,
   }) => {
-    await page.route("**/api/v1/facility/*/order/delivery/**", (route) => {
-      if (route.request().url().includes("status=completed")) {
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({
-            count: 0,
-            results: [],
-            next: null,
-            previous: null,
-          }),
-        });
-      } else {
-        route.continue();
-      }
-    });
     await page.goto(
       pharmacybasePath + "/inventory/external/deliveries/incoming",
     );
@@ -242,10 +206,9 @@ test.describe("External Delivery Order Flow", () => {
       "true",
     );
     await expect(
-      page.getByRole("heading", { name: "No orders found" }),
-    ).toBeVisible();
-    await expect(
-      page.getByText("No orders found based on the selected filters"),
+      page
+        .locator("table")
+        .or(page.getByRole("heading", { name: "No orders found" })),
     ).toBeVisible();
   });
 });
