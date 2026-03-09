@@ -41,7 +41,6 @@ import { FACILITY_FEATURE_TYPES } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
 import { renderGeoOrganizations } from "@/types/organization/organization";
 
-import { useCareApps } from "@/hooks/useCareApps";
 import { FacilityMapsLink } from "./FacilityMapLink";
 
 type Props = {
@@ -64,11 +63,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const [editCoverImage, setEditCoverImage] = useState(false);
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
-
-  const careApps = useCareApps();
-  const isFacilityHomeActionsPresent = careApps.some(
-    (plugin) => !plugin.isLoading && plugin.components?.FacilityHomeActions,
-  );
 
   const { data: facilityData, isLoading } = useQuery({
     queryKey: ["facility", facilityId],
@@ -236,44 +230,45 @@ export const FacilityHome = ({ facilityId }: Props) => {
             <div className="flex justify-end max-sm:flex-col-reverse flex-wrap sm:gap-2">
               {canUpdateFacility && (
                 <div className="flex gap-1 max-sm:flex-col mt-10 sm:mt-4">
-                  {isFacilityHomeActionsPresent && (
-                    <DropdownMenu modal={false}>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="cursor-pointer font-semibold"
-                          aria-label="More Options"
-                          type="button"
-                        >
-                          {t("more_configurations")}
-                          <ChevronDown className="size-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-full">
-                        <DropdownMenuGroup className="flex flex-col gap-1">
-                          <PLUGIN_Component
-                            __name="FacilityHomeActions"
-                            facility={facilityData}
-                            className="flex justify-start items-center border border-gray-200 rounded-md p-2 shadow-sm"
-                          />
-                        </DropdownMenuGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                  <PrintTemplateSheet
-                    facility={facilityData}
-                    trigger={
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger asChild>
                       <Button
-                        className="cursor-pointer font-semibold"
                         variant="outline"
                         size="sm"
+                        className="cursor-pointer font-semibold"
+                        aria-label="More Options"
+                        type="button"
                       >
-                        <Printer className="size-4" />
-                        {t("print_templates")}
+                        {t("configurations")}
+                        <ChevronDown className="size-4" />
                       </Button>
-                    }
-                  />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-full min-w-48"
+                    >
+                      <DropdownMenuGroup className="flex flex-col gap-1">
+                        <PrintTemplateSheet
+                          facility={facilityData}
+                          trigger={
+                            <Button
+                              className="flex justify-start items-center border border-gray-200 rounded-md p-2 shadow-sm"
+                              variant="outline"
+                              size="sm"
+                            >
+                              <Printer className="size-4" />
+                              {t("print_templates")}
+                            </Button>
+                          }
+                        />
+                        <PLUGIN_Component
+                          __name="FacilityHomeActions"
+                          facility={facilityData}
+                          className="flex justify-start items-center border border-gray-200 rounded-md p-2 shadow-sm"
+                        />
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                   <EditFacilitySheet
                     facilityId={facilityId}
                     trigger={
