@@ -106,8 +106,7 @@ const Login = (props: LoginProps) => {
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState<string>("");
   const [otpValidationError, setOtpValidationError] = useState<string>("");
-  const [resendOtpCountdown, setResendOtpCountdown] =
-    useState(resendOtpTimeout);
+  const [resendOtpCountdown, setResendOtpCountdown] = useState(0);
   const [resendPasswordCountdown, setResendPasswordCountdown] = useState(0);
 
   // Timer Function for resend OTP
