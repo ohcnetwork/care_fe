@@ -28,7 +28,9 @@ interface Props {
 // Thsi facilitates Dynamic redirection, just add new structured inputs here.
 const SLUG_TO_TAB_MAP: Record<string, string> = {
   medication_request: "medicines",
+  medication_statement: "medicines",
   service_request: "service_requests",
+  files: "files",
 };
 
 export default function EncounterQuestionnaire({
