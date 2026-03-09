@@ -4099,7 +4099,7 @@
   "patient_name_uhid": "Patient Name/UHID",
   "patient_next_location": "Patient's Next Location",
   "patient_no": "OP/IP No",
-  "patient_not_found": "Patient Not Found",
+  "patient_not_found": "Patient not found or not accessible. Access requires an active encounter with your facility.",
   "patient_notes_thread__Doctors": "Doctor's Discussions",
   "patient_notes_thread__Nurses": "Nurse's Discussions",
   "patient_phone_number": "Patient Phone Number",
