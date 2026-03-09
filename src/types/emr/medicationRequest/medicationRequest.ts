@@ -3,6 +3,7 @@ import {
   PrescriptionCreate,
   PrescriptionRead,
 } from "@/types/emr/prescription/prescription";
+import { InventoryRead } from "@/types/inventory/product/inventory";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { UserReadMinimal } from "@/types/user/user";
 import { add, divide, isZero, multiply, round, roundUp } from "@/Utils/decimal";
@@ -278,6 +279,7 @@ export interface MedicationRequestRead {
   updated_by: UserReadMinimal;
   authored_on: string;
   requested_product?: ProductKnowledgeBase;
+  inventory_items_internal?: InventoryRead[];
   dispense_status?: MedicationRequestDispenseStatus;
   requester?: UserReadMinimal;
   prescription?: PrescriptionRead;
@@ -1519,9 +1521,11 @@ export function computeTotalDoseQuantity(
 // ─── Consumers of computeTotalDoseQuantity ──────────────────────────
 
 export function computeMedicationDispenseQuantity(
-  instruction: MedicationRequestDosageInstruction,
+  medication: MedicationRequestRead,
 ): string {
   const DEFAULT_QTY = "1";
+  const instruction = medication.dosage_instruction[0];
+  if (!instruction) return DEFAULT_QTY;
 
   const doseValue = instruction.dose_and_rate?.dose_quantity?.value;
   if (!doseValue) return DEFAULT_QTY;

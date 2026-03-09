@@ -60,31 +60,6 @@ export default function useBillMedications({
         queryKey: ["accounts", patientId],
       });
     },
-    // onError: (error) => {
-    //   try {
-    //     const errorData = error.cause as {
-    //       results?: {
-    //         data?: { detail?: string; errors?: { msg: string }[] };
-    //       }[];
-    //     };
-
-    //     const errorMessages = errorData?.results
-    //       ?.flatMap(
-    //         (result) =>
-    //           result?.data?.errors?.map((err) => err.msg) ||
-    //           (result?.data?.detail ? [result.data.detail] : []),
-    //       )
-    //       .filter(Boolean);
-
-    //     if (errorMessages?.length) {
-    //       errorMessages.forEach((msg) => toast.error(msg));
-    //     } else {
-    //       toast.error(t("error_dispensing_medications"));
-    //     }
-    //   } catch {
-    //     toast.error(t("error_dispensing_medications"));
-    //   }
-    // },
   });
 
   const billMedicationsMutation = useMutation({
