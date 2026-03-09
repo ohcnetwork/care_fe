@@ -116,6 +116,9 @@ export const FilesTab = ({
                 ? ReportType.PATIENT_SUMMARY
                 : ReportType.DISCHARGE_SUMMARY
             }
+            facilityId={encounter?.facility?.id}
+            patientId={patient?.id}
+            encounterId={encounter?.id}
           />
         </TabsContent>
 
