@@ -11,7 +11,7 @@ import { AuthUserContext } from "@/hooks/useAuthUser";
 import { LocalStorageKeys } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
+import query, { callApi } from "@/Utils/request/query";
 import { userAtom } from "@/atoms/user-atom";
 import {
   JwtTokenObtainPair,
@@ -65,16 +65,20 @@ export default function AuthUserProvider({
   useEffect(() => {
     setUser(user);
   }, [user, setUser]);
-  const refreshToken = localStorage.getItem(LocalStorageKeys.refreshToken);
-
   const tokenRefreshQuery = useQuery({
     queryKey: ["user-refresh-token"],
-    queryFn: query(authApi.tokenRefresh, {
-      body: { refresh: refreshToken || "" },
-    }),
+    queryFn: ({ signal }) => {
+      const currentRefreshToken = localStorage.getItem(
+        LocalStorageKeys.refreshToken,
+      );
+      return callApi(authApi.tokenRefresh, {
+        body: { refresh: currentRefreshToken || "" },
+        signal,
+      });
+    },
     refetchIntervalInBackground: true,
     refetchInterval: careConfig.auth.tokenRefreshInterval,
-    enabled: !!refreshToken && !!user,
+    enabled: !!localStorage.getItem(LocalStorageKeys.refreshToken) && !!user,
   });
 
   useEffect(() => {
