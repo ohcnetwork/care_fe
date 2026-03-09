@@ -43,4 +43,4 @@ export default {
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<PrescriptionSummary>>(),
   },
-} as const;
+};
