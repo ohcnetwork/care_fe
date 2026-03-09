@@ -84,24 +84,6 @@ export function DiscountMonetaryComponentForm({
     [t],
   );
 
-  type DiscountFormValues = z.infer<typeof formSchema>;
-
-  const handleSubmitForm = (data: DiscountFormValues) => {
-    const payload: MonetaryComponentRead = {
-      ...data,
-      factor:
-        typeof data.factor === "string" && data.factor.trim() !== ""
-          ? data.factor
-          : undefined,
-      amount:
-        typeof data.amount === "string" && data.amount.trim() !== ""
-          ? data.amount
-          : undefined,
-    };
-
-    onSubmit(payload);
-  };
-
   const { facility } = useCurrentFacility();
   const discountCodes = [
     ...(facility?.instance_discount_codes || []),
@@ -139,7 +121,7 @@ export function DiscountMonetaryComponentForm({
     if (value === "factor") {
       form.setValue("amount", null);
     } else {
-      form.setValue("factor", "");
+      form.setValue("factor", null as unknown as string);
     }
   };
 
