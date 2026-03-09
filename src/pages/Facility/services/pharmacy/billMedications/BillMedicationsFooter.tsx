@@ -30,7 +30,7 @@ export const BillMedicationsFooter = ({
       .map((lot) =>
         calculateTotalPriceWithQuantity(
           lot.item.product.charge_item_definition?.price_components || [],
-          lot.quantity,
+          lot.quantity || "0",
         ),
       ),
   );

@@ -750,6 +750,7 @@ const MedicineLineItemMedication = ({
 }) => {
   const { t } = useTranslation();
 
+  const isSelected = form.watch(`${name}.isSelected`);
   const medication = form.watch(`${name}.medication`);
   const productKnowledge = form.watch(`${name}.productKnowledge`);
   const substitution = form.watch(`${name}.substitution`);
@@ -764,7 +765,12 @@ const MedicineLineItemMedication = ({
     <>
       <div className="flex flex-col gap-1">
         <div className={cn("flex flex-col", dispenseCompleted && "italic")}>
-          <span className="font-semibold text-gray-950">
+          <span
+            className={cn(
+              "font-semibold text-gray-950",
+              !isSelected && "line-through",
+            )}
+          >
             {effectiveProductKnowledge?.name ||
               (medication && displayMedicationName(medication)) ||
               t("unknown_medication")}

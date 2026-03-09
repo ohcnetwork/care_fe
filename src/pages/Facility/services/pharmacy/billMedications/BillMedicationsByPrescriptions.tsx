@@ -65,6 +65,8 @@ export default function BillMedicationsByPrescriptions({
       prescriptions: [],
       otherItems: [],
     },
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
 
   useEffect(() => {
@@ -99,8 +101,6 @@ export default function BillMedicationsByPrescriptions({
         .map(({ prescription }) => prescription.id),
     });
   };
-
-  console.log(form.getValues());
 
   if (!anyEncounter) {
     return <Loading />;

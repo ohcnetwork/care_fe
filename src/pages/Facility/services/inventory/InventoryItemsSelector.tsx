@@ -41,10 +41,14 @@ export const lotSelectionSchema = z
     quantity: zodDecimal({ min: 0 }),
     autoSelected: z.boolean().optional(),
   })
-  .refine((data) => isLessThanOrEqual(data.quantity, data.item.net_content), {
-    path: ["quantity"],
-    message: "Insufficient stock",
-  });
+  .refine(
+    (data) =>
+      data.quantity && isLessThanOrEqual(data.quantity, data.item.net_content),
+    {
+      path: ["quantity"],
+      message: "Insufficient stock",
+    },
+  );
 
 export type LotSelection = z.infer<typeof lotSelectionSchema>;
 

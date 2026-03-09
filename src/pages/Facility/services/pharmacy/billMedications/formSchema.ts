@@ -12,26 +12,6 @@ import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/product
 import { add, decimal, isPositive } from "@/Utils/decimal";
 import { z } from "zod";
 
-// export const billMedicationsFormSchema = z.object({
-//   items: z.array(
-//     z.object({
-//       reference_id: z.string().uuid(),
-//       prescriptionId: z.string().optional(),
-//       isSelected: z.boolean(),
-//       medication: z.custom<MedicationRequestRead>().optional(),
-//       productKnowledge: z.custom<ProductKnowledgeBase>().optional(),
-//       allGiven: z.boolean(),
-//       lots: z.array(
-//         z.object({
-//           inventory: z.string(),
-//           quantity: zodDecimal({ min: 0 }),
-//         }),
-//       ),
-//       substitution: substitutionSchema.optional(),
-//     }),
-//   ),
-// });
-
 const billMedicationLineItemSchema = z
   .object({
     /** The reference id for the dispense line item */
@@ -88,7 +68,7 @@ const billMedicationLineItemSchema = z
       data.isSelected === false ||
       isPositive(
         data.lots
-          .map((lot) => lot.quantity)
+          .map((lot) => lot.quantity || "0")
           .reduce((acc, quantity) => add(acc, quantity), decimal(0)),
       ),
     {
