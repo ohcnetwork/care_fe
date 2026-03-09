@@ -2465,6 +2465,7 @@
   "failed_to_link_abha_number": "Failed to link ABHA Number. Please try again later.",
   "failed_to_load_activity_definition": "Failed to load activity definition: {{slug}}",
   "failed_to_load_categories": "Failed to load categories",
+  "failed_to_complete_encounter": "Failed to complete encounter",
   "failed_to_load_definitions": "Failed to load definitions",
   "failed_to_load_locations": "Failed to load locations",
   "failed_to_load_medication_details": "Failed to load medication details",
