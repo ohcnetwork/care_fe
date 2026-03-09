@@ -207,7 +207,7 @@ const Login = (props: LoginProps) => {
     mutationFn: mutate(authApi.forgotPassword),
     onSuccess: () => {
       toast.success(t("password_sent"));
-      setResendPasswordCountdown(60);
+      setResendPasswordCountdown(resendOtpTimeout);
     },
   });
 
