@@ -21,7 +21,6 @@ import query from "@/Utils/request/query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueries } from "@tanstack/react-query";
 import { Pill } from "lucide-react";
-import { navigate } from "raviger";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -128,11 +127,9 @@ export default function BillMedicationsByPrescriptions({
 
             <UnbilledPrescriptionsCard
               included={prescriptionIds}
-              onChangeIncluded={(ids) =>
-                navigate(ids.join(","), { replace: true })
-              }
               patientId={patientId}
               facilityId={facilityId}
+              encounterId={anyEncounter.id}
             />
 
             <div className="flex flex-col gap-2">

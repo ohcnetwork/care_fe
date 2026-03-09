@@ -12,7 +12,6 @@ import encounterApi from "@/types/emr/encounter/encounterApi";
 import query from "@/Utils/request/query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -82,13 +81,9 @@ export default function BillMedicationsByNewDispense({
 
             <UnbilledPrescriptionsCard
               included={[]}
-              onChangeIncluded={(ids) =>
-                navigate(
-                  `/medication_requests/patient/${patientId}/bill/prescriptions/${ids.join(",")}?encounterId=${encounterId}`,
-                )
-              }
               patientId={patientId}
               facilityId={facilityId}
+              encounterId={encounterId}
             />
 
             <div className="flex flex-col gap-2">
