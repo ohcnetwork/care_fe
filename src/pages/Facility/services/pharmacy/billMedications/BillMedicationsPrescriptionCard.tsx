@@ -42,6 +42,7 @@ import {
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { getLocationPath } from "@/types/location/utils";
@@ -269,6 +270,7 @@ const PrescriptionSummary = ({
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    disabled={prescription.status !== PrescriptionStatus.active}
                   />
                   <span className="text-sm font-medium text-gray-950">
                     {t("mark_complete")}
