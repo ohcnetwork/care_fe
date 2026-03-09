@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -51,7 +50,7 @@ export default function EncounterQuestionnaire({
     enabled: !!encounterId,
   });
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = () => {
     if (encounterId && facilityId) {
       if (questionnaireSlug) {
         const targetTab = SLUG_TO_TAB_MAP[questionnaireSlug] || "updates";
@@ -66,7 +65,7 @@ export default function EncounterQuestionnaire({
     } else {
       navigate(`/patient/${patientId}/updates`);
     }
-  }, [facilityId, patientId, encounterId, questionnaireSlug, goBack]);
+  };
 
   return (
     <Page
