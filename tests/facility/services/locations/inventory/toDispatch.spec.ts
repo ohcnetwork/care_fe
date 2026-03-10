@@ -43,7 +43,6 @@ async function createStockRequest(page: Page, orderNameParam?: string) {
   tableRow1 = page.locator("table tbody tr").nth(0);
   await expect(tableRow1).toContainText(orderName);
   await expect(tableRow1).toContainText("Pharmacy");
-  await page.goto(bioChembasePath + "/inventory/internal/receive");
 }
 
 async function setupInitialData(page: Page) {
