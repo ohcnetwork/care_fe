@@ -191,9 +191,16 @@ export function SupplyDeliveryTable({
           <TableHead rowSpan={2}>
             {isRequester ? t("received_qty") : t("dispatched_qty")}
           </TableHead>
-          <TableHead rowSpan={2}>
-            {isRequester ? t("received_date") : t("dispatched_date")}
-          </TableHead>
+          {internal && (
+            <TableHead rowSpan={2}>
+              {isRequester ? t("received_date") : t("dispatched_date")}
+            </TableHead>
+          )}
+          {extensionFields.map((field) => (
+            <TableHead rowSpan={2} key={`${field.extensionName}-${field.name}`}>
+              {field.label}
+            </TableHead>
+          ))}
           <TableHead
             colSpan={1 + informationalCodes.length}
             className="text-center border-b"
@@ -209,11 +216,6 @@ export function SupplyDeliveryTable({
           <TableHead rowSpan={2}>{t("disc")}</TableHead>
           <TableHead rowSpan={2}>{t("status")}</TableHead>
           <TableHead rowSpan={2}>{t("condition")}</TableHead>
-          {extensionFields.map((field) => (
-            <TableHead rowSpan={2} key={`${field.extensionName}-${field.name}`}>
-              {field.label}
-            </TableHead>
-          ))}
           {showActionsColumn && (
             <TableHead rowSpan={2}>{t("actions")}</TableHead>
           )}
@@ -223,8 +225,8 @@ export function SupplyDeliveryTable({
           {informationalCodes.map((code) => (
             <TableHead key={code.code}>{code.display}</TableHead>
           ))}
-          {!internal && <TableHead className="border-r">{t("pr")}</TableHead>}
-          {!internal && <TableHead>{t("tpr")}</TableHead>}
+          {!internal && <TableHead>{t("pr")}</TableHead>}
+          {!internal && <TableHead className="border-x">{t("tpr")}</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody className="text-sm">
@@ -293,10 +295,24 @@ export function SupplyDeliveryTable({
               </TableCell>
             )}
             <TableCell>{round(delivery.supplied_item_quantity)}</TableCell>
-            <TableCell>
-              {delivery.created_date &&
-                formatDate(new Date(delivery.created_date), "dd/MM/yyyy")}
-            </TableCell>
+            {internal && (
+              <TableCell>
+                {delivery.created_date &&
+                  formatDate(new Date(delivery.created_date), "dd/MM/yyyy")}
+              </TableCell>
+            )}
+            {extensionFields.map((field) => {
+              const value = getExtensionValue(
+                delivery.extensions as NamespacedExtensionData,
+                field.extensionName,
+                field.name,
+              );
+              return (
+                <TableCell key={`${field.extensionName}-${field.name}`}>
+                  {value !== undefined && value !== null ? String(value) : "-"}
+                </TableCell>
+              );
+            })}
             <TableCell>
               <MonetaryDisplay
                 amount={
@@ -384,18 +400,6 @@ export function SupplyDeliveryTable({
                 </Badge>
               )}
             </TableCell>
-            {extensionFields.map((field) => {
-              const value = getExtensionValue(
-                delivery.extensions as NamespacedExtensionData,
-                field.extensionName,
-                field.name,
-              );
-              return (
-                <TableCell key={`${field.extensionName}-${field.name}`}>
-                  {value !== undefined && value !== null ? String(value) : "-"}
-                </TableCell>
-              );
-            })}
             {showActionsColumn && (
               <TableCell>
                 {delivery.status === SupplyDeliveryStatus.in_progress && (

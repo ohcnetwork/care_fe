@@ -699,6 +699,20 @@ export function AddSupplyDeliveryForm({
                                 >
                                   {t("qty")}
                                 </TableHead>
+                                {extensionFields.map((field) => (
+                                  <TableHead
+                                    rowSpan={2}
+                                    key={`${field.extensionName}-${field.name}`}
+                                    className="min-w-[100px] text-xs font-semibold"
+                                  >
+                                    {field.label}
+                                    {field.required && (
+                                      <span className="text-red-500 ml-0.5">
+                                        *
+                                      </span>
+                                    )}
+                                  </TableHead>
+                                ))}
                                 <TableHead
                                   colSpan={1 + informationalCodes.length}
                                   className="text-xs font-semibold text-center border-b"
@@ -717,20 +731,6 @@ export function AddSupplyDeliveryForm({
                                 >
                                   {t("tax")}
                                 </TableHead>
-                                {extensionFields.map((field) => (
-                                  <TableHead
-                                    rowSpan={2}
-                                    key={`${field.extensionName}-${field.name}`}
-                                    className="min-w-[100px] text-xs font-semibold"
-                                  >
-                                    {field.label}
-                                    {field.required && (
-                                      <span className="text-red-500 ml-0.5">
-                                        *
-                                      </span>
-                                    )}
-                                  </TableHead>
-                                ))}
                                 <TableHead
                                   rowSpan={2}
                                   className="text-xs font-semibold"
@@ -750,10 +750,10 @@ export function AddSupplyDeliveryForm({
                                     {code.display}
                                   </TableHead>
                                 ))}
-                                <TableHead className="min-w-[100px] text-xs font-semibold border-r">
+                                <TableHead className="min-w-[100px] text-xs font-semibold">
                                   {t("pr")}
                                 </TableHead>
-                                <TableHead className="min-w-[120px] text-xs font-semibold">
+                                <TableHead className="min-w-[120px] text-xs font-semibold border-x">
                                   {t("tpr")}
                                 </TableHead>
                               </TableRow>

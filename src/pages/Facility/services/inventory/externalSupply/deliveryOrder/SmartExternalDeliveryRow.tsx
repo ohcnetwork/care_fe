@@ -445,6 +445,35 @@ export function SmartExternalDeliveryRow({
         />
       </TableCell>
 
+      {/* Extension Fields - each field in its own column, name-namespaced */}
+      {extensionsWithFields.flatMap(
+        ({ config, fieldMetadata, conditionalRules }) =>
+          fieldMetadata.map((fieldMeta) => (
+            <TableCell
+              key={`${config.name}-${fieldMeta.name}`}
+              className="align-top"
+            >
+              <SchemaField
+                metadata={{
+                  ...fieldMeta,
+                  label: "",
+                  description: undefined,
+                  required: false, // Hide asterisk - shown in table header
+                }}
+                control={form.control}
+                basePath={`items.${index}.extensions.${config.name}`}
+                className="min-w-[100px] [&_input]:h-9 gap-0"
+                conditionalRules={conditionalRules}
+              />
+              {fieldMeta.description && (
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  {fieldMeta.description}
+                </p>
+              )}
+            </TableCell>
+          )),
+      )}
+
       {/* Item Price */}
       <TableCell className="align-top p-2!">
         <div className="flex flex-col gap-1">
@@ -580,35 +609,6 @@ export function SmartExternalDeliveryRow({
           />
         </span>
       </TableCell>
-
-      {/* Extension Fields - each field in its own column, name-namespaced */}
-      {extensionsWithFields.flatMap(
-        ({ config, fieldMetadata, conditionalRules }) =>
-          fieldMetadata.map((fieldMeta) => (
-            <TableCell
-              key={`${config.name}-${fieldMeta.name}`}
-              className="align-top"
-            >
-              <SchemaField
-                metadata={{
-                  ...fieldMeta,
-                  label: "",
-                  description: undefined,
-                  required: false, // Hide asterisk - shown in table header
-                }}
-                control={form.control}
-                basePath={`items.${index}.extensions.${config.name}`}
-                className="min-w-[100px] [&_input]:h-9 gap-0"
-                conditionalRules={conditionalRules}
-              />
-              {fieldMeta.description && (
-                <p className="text-[10px] text-muted-foreground mt-1">
-                  {fieldMeta.description}
-                </p>
-              )}
-            </TableCell>
-          )),
-      )}
 
       <TableCell>
         <Button
