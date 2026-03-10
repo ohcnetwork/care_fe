@@ -86,20 +86,30 @@ export default function CreateEncounterForm({
   const { t } = useTranslation();
   useShortcutSubContext();
 
-  const encounterFormSchema = z.object({
-    status: z.enum([
-      EncounterStatus.PLANNED,
-      EncounterStatus.IN_PROGRESS,
-      EncounterStatus.ON_HOLD,
-    ] as const),
-    encounter_class: z.enum(careConfig.encounterClasses),
-    priority: z.enum(ENCOUNTER_PRIORITY),
-    organizations: z.array(z.string()).min(1, {
-      message: t("at_least_one_department_is_required"),
-    }),
-    start_date: z.string(),
-    tags: z.array(z.string()),
-  });
+  const encounterFormSchema = z
+    .object({
+      status: z.enum([
+        EncounterStatus.PLANNED,
+        EncounterStatus.IN_PROGRESS,
+        EncounterStatus.ON_HOLD,
+      ] as const),
+      encounter_class: z.enum(careConfig.encounterClasses),
+      priority: z.enum(ENCOUNTER_PRIORITY),
+      organizations: z.array(z.string()).min(1, {
+        message: t("at_least_one_department_is_required"),
+      }),
+      start_date: z.string(),
+      tags: z.array(z.string()),
+    })
+    .refine(
+      (data) =>
+        data.status === EncounterStatus.PLANNED ||
+        new Date(data.start_date) <= new Date(),
+      {
+        message: t("encounter_future_date_restriction"),
+        path: ["start_date"],
+      },
+    );
 
   const form = useForm({
     resolver: zodResolver(encounterFormSchema),
@@ -138,13 +148,6 @@ export default function CreateEncounterForm({
   });
 
   function onSubmit(data: z.infer<typeof encounterFormSchema>) {
-    if (
-      data.status !== EncounterStatus.PLANNED &&
-      new Date(data.start_date) > new Date()
-    ) {
-      toast.error(t("encounter_future_date_restriction"));
-      return;
-    }
     const encounterRequest: EncounterCreate = {
       ...data,
       patient: patientId,
