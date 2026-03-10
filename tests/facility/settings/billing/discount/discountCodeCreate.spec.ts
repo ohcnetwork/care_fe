@@ -28,6 +28,11 @@ test.describe("Discount Code Settings", () => {
     await expect(applicabilityOrderTrigger).toBeVisible({ timeout: 15000 });
     await applicabilityOrderTrigger.click();
 
+    const totalDescOption = page.getByRole("option", {
+      name: /highest value first/i,
+    });
+    await totalDescOption.click();
+
     const saveButton = page.getByRole("button", { name: /save/i });
     await expect(saveButton).toBeVisible({ timeout: 15000 });
     await saveButton.click();
