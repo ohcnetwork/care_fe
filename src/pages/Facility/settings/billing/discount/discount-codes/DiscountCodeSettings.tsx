@@ -64,6 +64,7 @@ export function DiscountCodeSettings() {
     deleteCode({
       discount_codes: updatedCodes,
       discount_monetary_components: facility.discount_monetary_components,
+      discount_configuration: facility.discount_configuration,
     });
 
     setCodeToDelete(undefined);

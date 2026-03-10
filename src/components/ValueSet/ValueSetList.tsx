@@ -306,7 +306,7 @@ export function ValueSetList() {
     queryFn: query.debounced(valueSetApi.list, {
       queryParams: {
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         name: qParams.name,
         status: qParams.status || ValueSetStatus.ACTIVE,
       },
