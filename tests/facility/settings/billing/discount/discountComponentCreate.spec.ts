@@ -22,19 +22,16 @@ test.describe("Discount Component Settings", () => {
     await expect(editButton).toBeVisible({ timeout: 15000 });
     await editButton.click();
 
-    // Set a simple, valid configuration using the real labels
     const maxApplicableInput = page.getByLabel(/maximum applicable discounts/i);
     await expect(maxApplicableInput).toBeVisible({ timeout: 15000 });
     await maxApplicableInput.fill("0"); // 0 = no limit
 
-    const applicabilityOrderTrigger = page.getByRole("button", {
-      name: /applicability order/i,
-    });
+    const applicabilityOrderTrigger = page.getByLabel(/applicability order/i);
     await expect(applicabilityOrderTrigger).toBeVisible({ timeout: 15000 });
     await applicabilityOrderTrigger.click();
 
     const totalDescOption = page.getByRole("option", {
-      name: /total desc/i,
+      name: /highest value first/i,
     });
     await expect(totalDescOption).toBeVisible({ timeout: 15000 });
     await totalDescOption.click();
