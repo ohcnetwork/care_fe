@@ -171,11 +171,7 @@ export default function ConsentFormSheet({
 
   const handleSuccess = async (consentId?: string) => {
     if (fileUpload.files.length > 0 && consentId) {
-      try {
-        await fileUpload.handleFileUpload(consentId);
-      } catch (_error) {
-        toast.error(t("error_uploading_files"));
-      }
+      await fileUpload.handleFileUpload(consentId);
     }
 
     queryClient.invalidateQueries({
