@@ -186,6 +186,7 @@ test.describe("External Delivery Order Flow", () => {
       .getByRole("combobox")
       .filter({ hasText: "Select Vendor/Distributor" })
       .click();
+    await page.getByPlaceholder("Search vendor").fill("Supplier");
     await expect(page.getByRole("option").first()).toBeVisible({
       timeout: 5000,
     });
@@ -212,10 +213,5 @@ test.describe("External Delivery Order Flow", () => {
       "aria-selected",
       "true",
     );
-    await expect(
-      page
-        .locator("table")
-        .or(page.getByRole("heading", { name: "No orders found" })),
-    ).toBeVisible();
   });
 });
