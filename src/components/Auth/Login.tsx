@@ -107,7 +107,6 @@ const Login = (props: LoginProps) => {
   const [otpError, setOtpError] = useState<string>("");
   const [otpValidationError, setOtpValidationError] = useState<string>("");
   const [resendOtpCountdown, setResendOtpCountdown] = useState(0);
-  const [resendPasswordCountdown, setResendPasswordCountdown] = useState(0);
 
   // Timer Function for resend OTP
   useEffect(() => {
@@ -121,19 +120,6 @@ const Login = (props: LoginProps) => {
 
     return () => clearInterval(timer);
   }, [resendOtpCountdown]);
-
-  // Timer Function for resend Password
-  useEffect(() => {
-    if (resendPasswordCountdown <= 0) {
-      return;
-    }
-
-    const timer = setInterval(() => {
-      setResendPasswordCountdown((prevTime) => prevTime - 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [resendPasswordCountdown]);
 
   // Remember the last login mode
   useEffect(() => {
@@ -202,13 +188,13 @@ const Login = (props: LoginProps) => {
   });
 
   // Forgot Password Mutation
-  const { mutate: submitForgetPassword } = useMutation({
-    mutationFn: mutate(authApi.forgotPassword),
-    onSuccess: () => {
-      toast.success(t("password_sent"));
-      setResendPasswordCountdown(resendOtpTimeout);
-    },
-  });
+  const { mutate: submitForgetPassword, isPending: forgotPasswordPending } =
+    useMutation({
+      mutationFn: mutate(authApi.forgotPassword),
+      onSuccess: () => {
+        toast.success(t("password_sent"));
+      },
+    });
 
   // Login form validation
   const handleChange = (e: any) => {
@@ -507,9 +493,9 @@ const Login = (props: LoginProps) => {
                             type="submit"
                             className="w-full"
                             variant="primary"
-                            disabled={isLoading}
+                            disabled={isLoading || forgotPasswordPending}
                           >
-                            {isLoading ? (
+                            {isLoading || forgotPasswordPending ? (
                               <CircularProgress className="text-white" />
                             ) : (
                               t("send_reset_link")
@@ -669,16 +655,10 @@ const Login = (props: LoginProps) => {
                               type="submit"
                               className="w-full"
                               variant="primary"
-                              disabled={
-                                isLoading || resendPasswordCountdown > 0
-                              }
+                              disabled={isLoading || forgotPasswordPending}
                             >
-                              {isLoading ? (
+                              {isLoading || forgotPasswordPending ? (
                                 <CircularProgress className="text-white" />
-                              ) : resendPasswordCountdown > 0 ? (
-                                t("resend_link_timer", {
-                                  time: resendPasswordCountdown,
-                                })
                               ) : (
                                 t("send_reset_link")
                               )}
