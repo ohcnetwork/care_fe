@@ -125,7 +125,7 @@ export default function RolesIndex() {
     queryFn: query.debounced(roleApi.listRoles, {
       queryParams: {
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         name: qParams.search,
       },
     }),

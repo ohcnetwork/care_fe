@@ -98,7 +98,7 @@ export default function OrganizationUsers({
         phone_number: qParams.phone_number,
         page: qParams.page,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         is_service_account: isServiceAccount,
       },
     }),
