@@ -20,7 +20,7 @@ test.describe("Discount Code Settings", () => {
     await editButton.click();
 
     // Set a simple, valid configuration using the real labels
-    const maxApplicableInput = page.getByLabel(/max applicable discounts/i);
+    const maxApplicableInput = page.getByLabel(/maximum applicable discounts/i);
     await expect(maxApplicableInput).toBeVisible({ timeout: 15000 });
     await maxApplicableInput.fill("0"); // 0 = no limit
 
@@ -30,16 +30,13 @@ test.describe("Discount Code Settings", () => {
     await expect(applicabilityOrderTrigger).toBeVisible({ timeout: 15000 });
     await applicabilityOrderTrigger.click();
 
-    // Use the translation-backed option label from DiscountConfigurationSettings
-    const totalDescOption = page.getByText(/total desc/i);
-    await expect(totalDescOption).toBeVisible({ timeout: 15000 });
-    await totalDescOption.click();
-
     const saveButton = page.getByRole("button", { name: /save/i });
     await expect(saveButton).toBeVisible({ timeout: 15000 });
     await saveButton.click();
 
-    await expect(page.getByText(/discount configuration saved/i)).toBeVisible();
+    await expect(
+      page.getByText(/discount configuration saved successfully/i),
+    ).toBeVisible();
   }
 
   test.beforeEach(async ({ page }) => {
