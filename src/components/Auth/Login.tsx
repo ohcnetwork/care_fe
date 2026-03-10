@@ -73,6 +73,11 @@ interface OtpValidationError {
 
 type LoginMode = "staff" | "patient";
 
+const LOGIN_MODES: LoginMode[] = ["staff", "patient"];
+
+const toLoginMode = (value: string | null | undefined): LoginMode =>
+  LOGIN_MODES.includes(value as LoginMode) ? (value as LoginMode) : "staff";
+
 interface LoginProps {
   forgot?: boolean;
 }
@@ -122,9 +127,19 @@ const Login = (props: LoginProps) => {
     return () => clearInterval(timer);
   }, []);
 
+  // Restore login mode preference on mount
+  useEffect(() => {
+    if (!mode) {
+      const saved = localStorage.getItem(LocalStorageKeys.loginPreference);
+      setQueryParams({ mode: toLoginMode(saved) }, { replace: true });
+    }
+  }, [setQueryParams, mode]);
+
   // Remember the last login mode
   useEffect(() => {
-    localStorage.setItem(LocalStorageKeys.loginPreference, mode);
+    if (LOGIN_MODES.includes(mode as LoginMode)) {
+      localStorage.setItem(LocalStorageKeys.loginPreference, mode as LoginMode);
+    }
   }, [mode]);
 
   // Send OTP Mutation
