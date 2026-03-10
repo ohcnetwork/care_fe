@@ -24,9 +24,8 @@ test.describe("Discount Code Settings", () => {
     await expect(maxApplicableInput).toBeVisible({ timeout: 15000 });
     await maxApplicableInput.fill("0"); // 0 = no limit
 
-    const applicabilityOrderTrigger = page.getByRole("button", {
-      name: /applicability order/i,
-    });
+    // Radix Select renders the trigger as a combobox; it can be found by its associated label
+    const applicabilityOrderTrigger = page.getByLabel(/applicability order/i);
     await expect(applicabilityOrderTrigger).toBeVisible({ timeout: 15000 });
     await applicabilityOrderTrigger.click();
 
