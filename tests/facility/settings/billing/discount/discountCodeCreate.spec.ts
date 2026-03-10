@@ -31,6 +31,7 @@ test.describe("Discount Code Settings", () => {
     const totalDescOption = page.getByRole("option", {
       name: /highest value first/i,
     });
+    await expect(totalDescOption).toBeVisible({ timeout: 15000 });
     await totalDescOption.click();
 
     const saveButton = page.getByRole("button", { name: /save/i });
