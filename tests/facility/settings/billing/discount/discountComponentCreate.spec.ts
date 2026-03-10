@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
+import { expect, Page, test } from "@playwright/test";
 
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -8,10 +8,55 @@ test.use({ storageState: "tests/.auth/user.json" });
 test.describe("Discount Component Settings", () => {
   let facilityId: string;
   let componentName: string;
+  let discountValue: string;
+  let conditionMin: string;
+  let conditionMax: string;
+
+  async function ensureDiscountConfiguration(page: Page) {
+    await page.goto(
+      `/facility/${facilityId}/settings/billing/discount_configuration`,
+    );
+
+    // Enter edit mode
+    const editButton = page.getByRole("button", { name: /edit/i });
+    await expect(editButton).toBeVisible({ timeout: 15000 });
+    await editButton.click();
+
+    // Set a simple, valid configuration using the real labels
+    const maxApplicableInput = page.getByLabel(/maximum applicable discounts/i);
+    await expect(maxApplicableInput).toBeVisible({ timeout: 15000 });
+    await maxApplicableInput.fill("0"); // 0 = no limit
+
+    const applicabilityOrderTrigger = page.getByRole("button", {
+      name: /applicability order/i,
+    });
+    await expect(applicabilityOrderTrigger).toBeVisible({ timeout: 15000 });
+    await applicabilityOrderTrigger.click();
+
+    const totalDescOption = page.getByRole("option", {
+      name: /total desc/i,
+    });
+    await expect(totalDescOption).toBeVisible({ timeout: 15000 });
+    await totalDescOption.click();
+
+    const saveButton = page.getByRole("button", { name: /save/i });
+    await expect(saveButton).toBeVisible({ timeout: 15000 });
+    await saveButton.click();
+
+    await expect(
+      page.getByText(/discount configuration saved successfully/i),
+    ).toBeVisible();
+  }
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
     componentName = faker.commerce.productName();
+    discountValue = faker.number.int({ min: 1, max: 100 }).toString();
+    conditionMin = faker.number.int({ min: 50, max: 80 }).toString();
+    conditionMax = faker.number.int({ min: 81, max: 120 }).toString();
+
+    // Ensure the facility has a valid discount configuration before creating codes
+    await ensureDiscountConfiguration(page);
 
     await page.goto(
       `/facility/${facilityId}/settings/billing/discount_components`,
@@ -27,23 +72,17 @@ test.describe("Discount Component Settings", () => {
       .getByRole("button", { name: /create discount component/i })
       .click();
 
-    const nameInput = page.getByRole("textbox", { name: /name/i });
+    await page
+      .getByRole("spinbutton", { name: /discount amount or factor/i })
+      .fill(discountValue);
     const saveButton = page.getByRole("button", { name: /save/i });
-
-    await nameInput.fill("temp");
-    await nameInput.fill("");
 
     await saveButton.click();
 
     await expect(page.getByText(/this field is required/i)).toBeVisible();
-    await expect(
-      page.getByText(/either amount or factor is required/i),
-    ).toBeVisible();
   });
 
   test("create discount component and search", async ({ page }) => {
-    const discountValue = "100";
-
     await page
       .getByRole("button", { name: /create discount component/i })
       .click();
@@ -76,8 +115,6 @@ test.describe("Discount Component Settings", () => {
   });
 
   test("create discount component with condition", async ({ page }) => {
-    const discountValue = "5";
-
     await page
       .getByRole("button", { name: /create discount component/i })
       .click();
@@ -101,8 +138,8 @@ test.describe("Discount Component Settings", () => {
     await page.getByRole("combobox").filter({ hasText: "In range" }).click();
     await page.getByRole("option", { name: "In range" }).click();
 
-    await page.getByPlaceholder("Min").fill("60");
-    await page.getByPlaceholder("Max").fill("120");
+    await page.getByPlaceholder("Min").fill(conditionMin);
+    await page.getByPlaceholder("Max").fill(conditionMax);
     await page.getByRole("button", { name: /^add$/i }).click();
 
     await page.getByRole("button", { name: /save/i }).click();
