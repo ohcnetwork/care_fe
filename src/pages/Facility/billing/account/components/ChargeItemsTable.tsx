@@ -1,10 +1,10 @@
+import { CheckedState } from "@radix-ui/react-checkbox";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  ArrowRightLeft,
   ChevronDown,
   ChevronUp,
   ExternalLinkIcon,
-  MoreHorizontal,
-  PencilIcon,
   PlusIcon,
   PrinterIcon,
   Zap,
@@ -18,14 +18,7 @@ import { useShortcutSubContext } from "@/context/ShortcutContext";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Checkbox } from "@/components/ui/checkbox";
 import { EmptyState } from "@/components/ui/empty-state";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
@@ -67,12 +60,14 @@ import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./AddChargeItemsBillingSheet";
-import EditChargeItemSheet from "./EditChargeItemSheet";
+import ChangeAccountSheet from "./ChangeAccountSheet";
+import ChargeItemActionsMenu from "./ChargeItemActions";
 import QuickAddChargeItemsSheet from "./QuickAddChargeItemsSheet";
 
 interface PriceComponentRowProps {
@@ -88,6 +83,7 @@ function PriceComponentRow({ label, components }: PriceComponentRowProps) {
       {components.map((component, index) => {
         return (
           <TableRow key={`${label}-${index}`} className="text-xs text-gray-500">
+            <TableCell></TableCell>
             <TableCell></TableCell>
             <TableCell>
               {component.code && `${component.code.display} `}({label})
@@ -126,6 +122,11 @@ export function ChargeItemsTable({
   );
   const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = useState(false);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedChargeItem, setSelectedChargeItem] =
+    useState<ChargeItemRead | null>(null);
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [isChangeAccountOpen, setIsChangeAccountOpen] = useState(false);
 
   // Register shortcuts for this table
   useShortcutSubContext("facility:billing");
@@ -247,7 +248,46 @@ export function ChargeItemsTable({
     queryClient.invalidateQueries({
       queryKey: ["infinite-chargeItems", accountId],
     });
+    setSelectedItems(new Set());
   };
+
+  const handleSelectItem = (id: string, checked: boolean) => {
+    setSelectedItems((prev) => {
+      const next = new Set(prev);
+      if (checked) {
+        next.add(id);
+      } else {
+        next.delete(id);
+      }
+      return next;
+    });
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked && chargeItems) {
+      setSelectedItems(new Set(chargeItems.map((item) => item.id)));
+    } else {
+      setSelectedItems(new Set());
+    }
+  };
+
+  const selectedChargeItems =
+    chargeItems?.filter((item) => selectedItems.has(item.id)) ?? [];
+
+  useEffect(() => {
+    if (!chargeItems?.length) {
+      if (selectedItems.size > 0) {
+        setSelectedItems(new Set());
+      }
+      return;
+    }
+
+    const validIds = new Set(chargeItems.map((item) => item.id));
+    setSelectedItems((prev) => {
+      const next = new Set([...prev].filter((id) => validIds.has(id)));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [chargeItems, selectedItems.size]);
 
   const toggleItemExpand = (itemId: string) => {
     setExpandedItems((prev) => ({
@@ -280,6 +320,8 @@ export function ChargeItemsTable({
         return `/facility/${facilityId}/service_requests/${item.service_resource_id}`;
       case ChargeItemServiceResource.appointment:
         return `/facility/${facilityId}/patient/${patientId}/appointments/${item.service_resource_id}`;
+      case ChargeItemServiceResource.medication_dispense:
+        return `/facility/${facilityId}/medication_dispense/redirect/${item.service_resource_id}`;
       default:
         return "";
     }
@@ -352,6 +394,28 @@ export function ChargeItemsTable({
           onSearch={(key, value) => updateQuery({ [key]: value })}
         />
       </div>
+      {selectedItems.size > 0 && chargeItems?.length && (
+        <div className="mb-4 flex items-center gap-3 rounded-md border bg-primary/5 border-primary/20 p-3">
+          <span className="text-sm font-medium">
+            {selectedItems.size} {t("items_selected")}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsChangeAccountOpen(true)}
+          >
+            <ArrowRightLeft className="size-4 mr-2" />
+            {t("change_account")}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSelectedItems(new Set())}
+          >
+            {t("clear_selection")}
+          </Button>
+        </div>
+      )}
       {isLoading ? (
         <TableSkeleton count={3} />
       ) : !chargeItems?.length ? (
@@ -364,6 +428,18 @@ export function ChargeItemsTable({
           <Table className="rounded-lg border shadow-sm w-full bg-white">
             <TableHeader className="bg-gray-100">
               <TableRow className="border-b">
+                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10">
+                  <Checkbox
+                    checked={
+                      !!chargeItems?.length &&
+                      chargeItems.every((item) => selectedItems.has(item.id))
+                    }
+                    onCheckedChange={(checked: CheckedState) =>
+                      handleSelectAll(checked === true)
+                    }
+                    aria-label={t("select_all")}
+                  />
+                </TableHead>
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10"></TableHead>
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
                   {t("created_by")}
@@ -406,7 +482,19 @@ export function ChargeItemsTable({
                     c.code?.code === MRP_CODE,
                 )?.amount;
                 const mainRow = (
-                  <TableRow key={item.id} className="border-b hover:bg-gray-50">
+                  <TableRow
+                    key={item.id}
+                    className={`border-b hover:bg-gray-50 ${selectedItems.has(item.id) ? "bg-primary/5" : ""}`}
+                  >
+                    <TableCell className="border-x p-3 text-gray-950">
+                      <Checkbox
+                        checked={selectedItems.has(item.id)}
+                        onCheckedChange={(checked: CheckedState) =>
+                          handleSelectItem(item.id, checked === true)
+                        }
+                        aria-label={t("select_item")}
+                      />
+                    </TableCell>
                     <TableCell className="border-x p-3 text-gray-950">
                       <Button
                         variant="ghost"
@@ -484,52 +572,19 @@ export function ChargeItemsTable({
                       </div>
                     </TableCell>
                     <TableCell className="border-x p-3 text-gray-950">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem asChild>
-                            <div
-                              className="flex items-center"
-                              onClick={() => {
-                                // This will trigger the item to be edited, but actual edit UI is rendered elsewhere
-                                document
-                                  .getElementById(`edit-charge-item-${item.id}`)
-                                  ?.click();
-                              }}
-                            >
-                              <PencilIcon className="mr-2 h-4 w-4" />
-                              <span>{t("edit")}</span>
-                            </div>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-
-                      {/* Invisible trigger for the edit sheet */}
-                      <span className="hidden">
-                        <EditChargeItemSheet
-                          facilityId={facilityId}
-                          item={item}
-                          accountId={accountId}
-                          trigger={
-                            <Button
-                              id={`edit-charge-item-${item.id}`}
-                              className="hidden"
-                            >
-                              Edit
-                            </Button>
-                          }
-                        />
-                      </span>
+                      <ChargeItemActionsMenu
+                        item={item}
+                        facilityId={facilityId}
+                        accountId={accountId}
+                        onEdit={(item) => {
+                          setSelectedChargeItem(item);
+                          setIsEditDialogOpen(true);
+                        }}
+                        onChangeAccount={(item) => {
+                          setSelectedItems(new Set([item.id]));
+                          setIsChangeAccountOpen(true);
+                        }}
+                      />
                     </TableCell>
                   </TableRow>
                 );
@@ -561,6 +616,7 @@ export function ChargeItemsTable({
                     className="text-xs text-gray-500"
                   >
                     <TableCell></TableCell>
+                    <TableCell></TableCell>
                     <TableCell>{t("mrp")}</TableCell>
                     <TableCell></TableCell>
                     <TableCell>
@@ -582,11 +638,10 @@ export function ChargeItemsTable({
                     className="bg-muted/30 font-medium border-b"
                   >
                     <TableCell></TableCell>
+                    <TableCell></TableCell>
                     <TableCell className="text-gray-950">
                       {t("total")}
                     </TableCell>
-                    <TableCell></TableCell>
-                    <TableCell></TableCell>
                     <TableCell></TableCell>
                     <TableCell className="p-3">
                       <MonetaryDisplay amount={item.total_price} />
@@ -600,7 +655,7 @@ export function ChargeItemsTable({
 
                 const emptyRow = (
                   <TableRow key={`${item.id}-empty`} className="bg-muted">
-                    <TableCell colSpan={10}></TableCell>
+                    <TableCell colSpan={11}></TableCell>
                   </TableRow>
                 );
 
@@ -627,6 +682,7 @@ export function ChargeItemsTable({
         onOpenChange={setIsAddChargeItemsOpen}
         facilityId={facilityId}
         patientId={patientId}
+        accountId={accountId}
         onChargeItemsAdded={handleChargeItemsAdded}
       />
 
@@ -635,7 +691,36 @@ export function ChargeItemsTable({
         onOpenChange={setIsQuickAddOpen}
         facilityId={facilityId}
         patientId={patientId}
+        accountId={accountId}
         onChargeItemsAdded={handleChargeItemsAdded}
+      />
+
+      <EditInvoiceDialog
+        open={isEditDialogOpen}
+        onOpenChange={(open) => {
+          setIsEditDialogOpen(open);
+          if (!open) {
+            setSelectedChargeItem(null);
+          }
+        }}
+        facilityId={facilityId}
+        chargeItems={selectedChargeItem ? [selectedChargeItem] : []}
+        onSuccess={() => {
+          queryClient.invalidateQueries({
+            queryKey: ["infinite-chargeItems", accountId],
+          });
+        }}
+        title={t("edit_charge_item")}
+      />
+
+      <ChangeAccountSheet
+        open={isChangeAccountOpen}
+        onOpenChange={setIsChangeAccountOpen}
+        facilityId={facilityId}
+        patientId={patientId}
+        currentAccountId={accountId}
+        chargeItems={selectedChargeItems}
+        onSuccess={handleChargeItemsAdded}
       />
     </div>
   );

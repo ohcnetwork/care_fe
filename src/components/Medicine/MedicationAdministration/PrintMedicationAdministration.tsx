@@ -447,7 +447,7 @@ const DrugChartTable = ({
             return (
               <tr key={group.productId} className={cn(isPRN && "bg-pink-50")}>
                 <td className="border-r-2 border-b border-gray-400 p-1.5 align-top">
-                  <div className="font-bold text-[11px] leading-tight">
+                  <div className="font-bold text-[11px] leading-tight text-wrap break-all">
                     {group.productName}
                   </div>
                   <div className="text-[9px] text-gray-600 mt-0.5 leading-snug">
