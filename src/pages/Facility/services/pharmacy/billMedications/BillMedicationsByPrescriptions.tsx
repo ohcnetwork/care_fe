@@ -26,6 +26,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Fragment } from "react/jsx-runtime";
+import { toast } from "sonner";
 
 interface Props {
   facilityId: string;
@@ -85,6 +86,12 @@ export default function BillMedicationsByPrescriptions({
       locationId,
       patientId,
       fallbackEncounterId: anyEncounter?.id ?? "",
+      onSuccess: (dispenseOrder) => {
+        toast.success(t("medications_billed_successfully"));
+        navigate(
+          `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrder.id}`,
+        );
+      },
     });
 
   const handleBillSelected = () => {

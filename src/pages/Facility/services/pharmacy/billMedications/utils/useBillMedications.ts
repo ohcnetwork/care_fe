@@ -5,7 +5,7 @@ import {
   ChargeItemBatchResponse,
   extractChargeItemsFromBatchResponse,
 } from "@/types/billing/chargeItem/chargeItem";
-import { InvoiceStatus } from "@/types/billing/invoice/invoice";
+import { InvoiceRead, InvoiceStatus } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import {
   DispenseOrderBatchResponse,
@@ -26,6 +26,7 @@ interface Options {
   locationId: string;
   patientId: string;
   fallbackEncounterId: string;
+  onSuccess?: (dispenseOrder: DispenseOrderRead) => void;
 }
 
 export default function useBillMedications({
@@ -33,19 +34,11 @@ export default function useBillMedications({
   locationId,
   patientId,
   fallbackEncounterId,
+  onSuccess,
 }: Options) {
   const queryClient = useQueryClient();
 
   const { data: account } = useDefaultBillingAccount({ patientId, facilityId });
-
-  const createInvoiceMutation = useMutation({
-    mutationFn: mutate(invoiceApi.createInvoice, {
-      pathParams: { facilityId },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["invoices"] });
-    },
-  });
 
   const dispenseMutation = useMutation({
     mutationFn: mutate(batchApi.batchRequest),
@@ -59,6 +52,35 @@ export default function useBillMedications({
       queryClient.invalidateQueries({
         queryKey: ["accounts", patientId],
       });
+    },
+  });
+
+  const createInvoiceMutation = useMutation({
+    mutationFn: mutate(invoiceApi.createInvoice, {
+      pathParams: { facilityId },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+    },
+  });
+
+  const issueInvoiceMutation = useMutation({
+    mutationFn: (invoice: InvoiceRead) => {
+      return mutate(invoiceApi.updateInvoice, {
+        pathParams: { facilityId, invoiceId: invoice.id },
+      })({
+        status: InvoiceStatus.issued,
+        payment_terms: invoice.payment_terms,
+        note: invoice.note,
+        account: invoice.account?.id || "",
+        charge_items: invoice.charge_items?.map((item) => item.id) || [],
+        issue_date: new Date().toISOString(),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["invoice"] });
     },
   });
 
@@ -82,30 +104,32 @@ export default function useBillMedications({
           ? getPrescriptionCompletionRequest(prescriptionsToComplete, patientId)
           : []),
       ];
-      try {
-        const response = await dispenseMutation.mutateAsync({ requests });
 
-        const dispenseOrder = (response as DispenseOrderBatchResponse).results
-          .map((item) => item.data?.order)
-          .filter((item): item is DispenseOrderRead => !!item)[0];
+      const response = await dispenseMutation.mutateAsync({ requests });
 
-        const chargeItems = extractChargeItemsFromBatchResponse(
-          response as ChargeItemBatchResponse,
-        );
+      const dispenseOrder = (response as DispenseOrderBatchResponse).results
+        .map((item) => item.data?.order)
+        .filter((item): item is DispenseOrderRead => !!item)[0];
 
-        if (chargeItems.length > 0 && account) {
-          // TODO: so what happens if patient doesn't have an account?
-          await createInvoiceMutation.mutateAsync({
-            status: InvoiceStatus.issued,
-            account: account.id,
-            charge_items: chargeItems.map((item) => item.id),
-          });
-        }
+      const chargeItems = extractChargeItemsFromBatchResponse(
+        response as ChargeItemBatchResponse,
+      );
 
-        return dispenseOrder;
-      } catch {
-        // TODO: handle error
+      if (chargeItems.length > 0 && account) {
+        // TODO: so what happens if patient doesn't have an account?
+        const invoice = await createInvoiceMutation.mutateAsync({
+          status: InvoiceStatus.issued,
+          account: account.id,
+          charge_items: chargeItems.map((item) => item.id),
+        });
+
+        await issueInvoiceMutation.mutateAsync(invoice);
       }
+
+      return dispenseOrder;
+    },
+    onSuccess: (response: DispenseOrderRead) => {
+      onSuccess?.(response);
     },
   });
 
