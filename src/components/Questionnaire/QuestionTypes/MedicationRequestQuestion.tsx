@@ -1227,7 +1227,7 @@ export function MedicationRequestQuestion({
                                     <div className="flex-1 min-w-0 mr-2">
                                       <CardTitle
                                         className={cn(
-                                          "text-base text-gray-950 wrap-break-word",
+                                          "text-base text-gray-950 break-all",
                                           isInactive &&
                                             medication.status !== "ended" &&
                                             "line-through",
