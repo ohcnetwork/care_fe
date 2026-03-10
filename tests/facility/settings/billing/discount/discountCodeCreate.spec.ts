@@ -14,25 +14,32 @@ test.describe("Discount Code Settings", () => {
       `/facility/${facilityId}/settings/billing/discount_configuration`,
     );
 
-    // Enter edit mode (safe even if config already exists)
+    // Enter edit mode
     const editButton = page.getByRole("button", { name: /edit/i });
-    if (await editButton.isVisible().catch(() => false)) {
-      await editButton.click();
-    }
+    await expect(editButton).toBeVisible({ timeout: 15000 });
+    await editButton.click();
 
-    // Set a simple, valid configuration
-    await page
-      .getByRole("spinbutton", { name: /maximum applicable discounts/i })
-      .fill("0"); // 0 = no limit
+    // Set a simple, valid configuration using the real labels
+    const maxApplicableInput = page.getByLabel(/max applicable discounts/i);
+    await expect(maxApplicableInput).toBeVisible({ timeout: 15000 });
+    await maxApplicableInput.fill("0"); // 0 = no limit
 
-    await page.getByRole("combobox", { name: /applicability order/i }).click();
-    await page.getByRole("option", { name: /highest value first/i }).click();
+    const applicabilityOrderTrigger = page.getByRole("button", {
+      name: /applicability order/i,
+    });
+    await expect(applicabilityOrderTrigger).toBeVisible({ timeout: 15000 });
+    await applicabilityOrderTrigger.click();
 
-    await page.getByRole("button", { name: /save/i }).click();
+    // Use the translation-backed option label from DiscountConfigurationSettings
+    const totalDescOption = page.getByText(/total desc/i);
+    await expect(totalDescOption).toBeVisible({ timeout: 15000 });
+    await totalDescOption.click();
 
-    await expect(
-      page.getByText(/discount configuration saved successfully/i),
-    ).toBeVisible();
+    const saveButton = page.getByRole("button", { name: /save/i });
+    await expect(saveButton).toBeVisible({ timeout: 15000 });
+    await saveButton.click();
+
+    await expect(page.getByText(/discount configuration saved/i)).toBeVisible();
   }
 
   test.beforeEach(async ({ page }) => {
