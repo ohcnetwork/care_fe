@@ -52,26 +52,34 @@ async function setupInitialData(page: Page) {
   await page.goto(servicesUrl);
   await page.getByRole("link", { name: "Main Pharmacy" }).click();
   await page.getByRole("link", { name: "Pharmacy" }).click();
-  pharmacyLocationId =
-    page
-      .url()
-      .match(
-        new RegExp(
-          `/facility/${facilityId}/locations/([^/]+)/medication_requests`,
-        ),
-      )?.[1] ?? "";
+  const pharmacyMatch = page
+    .url()
+    .match(
+      new RegExp(
+        `/facility/${facilityId}/locations/([^/]+)/medication_requests`,
+      ),
+    );
+  if (!pharmacyMatch) {
+    throw new Error(
+      "Unable to extract the pharmacy location ID from the current URL.",
+    );
+  }
+  pharmacyLocationId = pharmacyMatch[1];
   pharmacybasePath = `/facility/${facilityId}/locations/${pharmacyLocationId}`;
   await page.goto(servicesUrl);
   await page.getByRole("link", { name: "Pathology Lab" }).click();
   await page.getByRole("link", { name: "Bio-Chemistry" }).click();
-  bioChemLabLocationId =
-    page
-      .url()
-      .match(
-        new RegExp(
-          `/facility/${facilityId}/locations/([^/]+)/service_requests`,
-        ),
-      )?.[1] ?? "";
+  const bioChemMatch = page
+    .url()
+    .match(
+      new RegExp(`/facility/${facilityId}/locations/([^/]+)/service_requests`),
+    );
+  if (!bioChemMatch) {
+    throw new Error(
+      "Unable to extract the bio-chemistry location ID from the current URL.",
+    );
+  }
+  bioChemLabLocationId = bioChemMatch[1];
   bioChembasePath = `/facility/${facilityId}/locations/${bioChemLabLocationId}`;
   orderName = faker.lorem.words(5);
   await createStockRequest(page, orderName);
