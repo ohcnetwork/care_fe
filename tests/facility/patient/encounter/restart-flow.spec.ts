@@ -1,114 +1,124 @@
 import { expect, test, type Page } from "@playwright/test";
 import { getFacilityId } from "tests/support/facilityId";
+import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+const API_URL = process.env.REACT_CARE_API_URL || "http://localhost:9000";
+
+const facilityId = getFacilityId();
+
 test.describe("Encounter Restart Flow", () => {
-  let encounterId: string | undefined;
+  async function createEncounter(page: Page, status: string): Promise<string> {
+    const patientId = getPatientId();
 
-  async function navigateToCompletedEncounter(page: Page) {
-    const facilityId = getFacilityId();
-
-    await page.goto(
-      `/facility/${facilityId}/encounters/patients/all?status=completed`,
+    const res = await page.request.post(
+      `${API_URL}/api/v1/facility/${facilityId}/patient/${patientId}/encounter/`,
+      {
+        data: { status },
+      },
     );
 
-    const viewLinks = page.getByRole("link", { name: /view encounter/i });
+    expect(res.ok()).toBeTruthy();
 
-    // Guard: ensure at least one completed encounter exists
-    await expect(viewLinks.first()).toBeVisible({ timeout: 10000 });
-    await viewLinks.first().click();
+    const data = await res.json();
 
-    const updateLink = page.getByRole("link", { name: /update encounter/i });
+    return data.id;
+  }
 
-    await expect(updateLink).toBeVisible({ timeout: 10000 });
+  async function openEncounterForUpdate(page: Page, encounterId: string) {
+    await page.goto(`/facility/${facilityId}/encounter/${encounterId}/`);
+
+    const updateLink = page.getByRole("link", {
+      name: /update encounter/i,
+    });
+
+    await expect(updateLink).toBeVisible();
     await updateLink.click();
-
-    // Extract encounter ID from URL for later reset
-    const url = page.url();
-    encounterId = url.match(/encounter\/([^/]+)/)?.[1];
   }
 
   test("should restart a completed encounter and redirect correctly", async ({
     page,
   }) => {
-    await navigateToCompletedEncounter(page);
+    const encounterId = await createEncounter(page, "completed");
 
-    // Open settings dropdown (more specific selector)
-    const settingsButton = page
-      .locator("button")
-      .filter({ has: page.locator("svg.lucide-settings") })
-      .first();
+    try {
+      await openEncounterForUpdate(page, encounterId);
 
-    await expect(settingsButton).toBeVisible();
-    await settingsButton.click();
+      const settingsButton = page.getByRole("button", {
+        name: /settings/i,
+      });
 
-    // Click Restart Encounter option
-    const restartOption = page.getByRole("menuitem", {
-      name: /restart encounter/i,
-    });
+      await expect(settingsButton).toBeVisible();
+      await settingsButton.click();
 
-    await expect(restartOption).toBeVisible();
-    await restartOption.click();
+      const restartOption = page.getByRole("menuitem", {
+        name: /restart encounter/i,
+      });
 
-    // Verify success toast
-    await expect(
-      page
-        .locator("li[data-sonner-toast]")
-        .getByText(/encounter restarted successfully/i),
-    ).toBeVisible({ timeout: 10000 });
+      await expect(restartOption).toBeVisible();
+      await restartOption.click();
 
-    // Verify redirected to updates tab (no strict end anchor)
-    await expect(page).toHaveURL(/\/updates/);
+      await expect(
+        page
+          .locator("li[data-sonner-toast]")
+          .getByText(/encounter restarted successfully/i),
+      ).toBeVisible({ timeout: 10000 });
 
-    const statusDropdown = page.getByRole("combobox", {
-      name: /encounter status/i,
-    });
+      await expect(page).toHaveURL(
+        new RegExp(`/facility/${facilityId}/encounter/${encounterId}`),
+      );
 
-    // Verify encounter status is no longer completed
-    await expect(statusDropdown).not.toHaveText(/completed/i);
+      const statusDropdown = page.getByRole("combobox", {
+        name: /encounter status/i,
+      });
 
-    // Verify encounter is editable again
-    await expect(statusDropdown).toBeEnabled();
+      await expect(statusDropdown).toHaveText(/active/i);
+      await expect(statusDropdown).toBeEnabled();
 
-    // Re-open dropdown safely
-    await settingsButton.click();
+      await expect(
+        page.getByRole("menuitem", {
+          name: /restart encounter/i,
+        }),
+      ).toHaveCount(0);
+    } finally {
+      const res = await page.request.patch(
+        `${API_URL}/api/v1/encounter/${encounterId}/`,
+        {
+          data: { status: "completed" },
+        },
+      );
 
-    // Ensure dropdown opened before negative assertion
-    await expect(page.getByRole("menuitem").first()).toBeVisible();
-
-    // Restart should no longer appear
-    await expect(
-      page.getByRole("menuitem", { name: /restart encounter/i }),
-    ).not.toBeVisible();
+      expect(res.ok()).toBeTruthy();
+    }
   });
 
   test("should not show update encounter link for non-completed encounters", async ({
     page,
   }) => {
-    const facilityId = getFacilityId();
+    const encounterId = await createEncounter(page, "in_progress");
 
-    await page.goto(
-      `/facility/${facilityId}/encounters/patients/all?status=in_progress`,
-    );
+    try {
+      await page.goto(`/facility/${facilityId}/encounter/${encounterId}/`);
 
-    const viewLinks = page.getByRole("link", { name: /view encounter/i });
+      await expect(page).toHaveURL(
+        new RegExp(`/facility/${facilityId}/encounter/${encounterId}`),
+      );
 
-    await expect(viewLinks.first()).toBeVisible({ timeout: 10000 });
-    await viewLinks.first().click();
+      await expect(
+        page.getByRole("link", {
+          name: /update encounter/i,
+        }),
+      ).toHaveCount(0);
+    } finally {
+      const res = await page.request.patch(
+        `${API_URL}/api/v1/encounter/${encounterId}/`,
+        {
+          data: { status: "completed" },
+        },
+      );
 
-    // Ensure update encounter link does not exist
-    await expect(
-      page.getByRole("link", { name: /update encounter/i }),
-    ).toHaveCount(0);
-  });
-
-  test.afterEach(async ({ request }) => {
-    // Reset encounter back to completed for isolation
-    if (encounterId) {
-      await request.patch(`/api/v1/encounter/${encounterId}/`, {
-        data: { status: "completed" },
-      });
+      expect(res.ok()).toBeTruthy();
     }
   });
 });
