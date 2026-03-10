@@ -169,7 +169,7 @@ export function AccountList({
       queryParams: {
         patient: patientId || qParams.patient_filter,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         status: qParams.status,
         billing_status: qParams.billing_status,
         created_date_after: qParams.created_date_after,

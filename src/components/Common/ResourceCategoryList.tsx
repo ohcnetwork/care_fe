@@ -341,7 +341,7 @@ export function ResourceCategoryList<
         facilityId,
         categorySlug,
         qParams.searchCategory,
-        qParams.page ?? "1",
+        qParams.page || 1,
       ],
       queryFn: query.debounced(resourceCategoryApi.list, {
         pathParams: { facilityId },
@@ -350,7 +350,7 @@ export function ResourceCategoryList<
           parent: categorySlug || "",
           title: qParams.searchCategory,
           limit: resultsPerPage,
-          offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+          offset: ((qParams.page || 1) - 1) * resultsPerPage,
         },
       }),
     },
@@ -362,7 +362,7 @@ export function ResourceCategoryList<
       itemSearchConfig?.queryKeyPrefix || "items",
       facilityId,
       qParams.searchCategory,
-      qParams.page ?? 1,
+      qParams.page || 1,
     ],
     queryFn: query.debounced(itemSearchConfig!.listItems.queryFn, {
       pathParams: { facilityId, ...itemSearchConfig?.listItems.pathParams },

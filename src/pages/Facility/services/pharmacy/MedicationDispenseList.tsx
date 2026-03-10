@@ -123,7 +123,7 @@ function MedicationTable({
                 )}
               >
                 <TableCell className="font-semibold text-gray-950 h-full items-center max-w-xs break-words">
-                  <span className="flex flex-col gap-2">
+                  <span className="flex flex-col gap-2 text-wrap">
                     {displayMedicationName(medication)}
                     {medication?.dispense_status ===
                       MedicationRequestDispenseStatus.partial && (

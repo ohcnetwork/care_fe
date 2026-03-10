@@ -1,0 +1,17 @@
+export const permissions = [
+  "Can Manage Users in an Organization",
+  "Can Create/Update Facility Locations",
+  "Can Create Healthcare Service on Facility",
+  "Can submit questionnaire about patients",
+  "Can view questionnaire responses on patient",
+  "Update Encounter non clinical",
+  "Can create User in care",
+  "Can Read Specimen",
+  "Can Create on Facility",
+  "Can Read Observation Definition",
+  "Can View Organizations",
+  "Can Create Organizations",
+  "Can reschedule bookings on Object",
+  "Can Read Tag Config",
+  "Can Manage Facility Organizations",
+];
