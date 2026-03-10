@@ -79,7 +79,7 @@ const PrescriptionContent = ({
                 instructions: [remarks, notes].filter(Boolean).join("\n"),
               };
             })}
-            className="text-sm font-semibold whitespace-break-spaces text-gray-950"
+            className="text-sm break-all font-semibold whitespace-break-spaces text-gray-950"
             cellConfig={{
               medicine: { className: "text-left" },
             }}
