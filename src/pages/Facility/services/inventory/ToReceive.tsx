@@ -163,7 +163,7 @@ function OutgoingOrdersTab({
       queryParams: {
         destination: locationId,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         status: qParams.status,
         origin_isnull: !internal,
         priority: qParams.priority,
@@ -252,7 +252,7 @@ function IncomingDeliveriesTab({
       queryParams: {
         destination: locationId,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         status: qParams.status,
         origin_isnull: !internal,
         priority: qParams.priority,

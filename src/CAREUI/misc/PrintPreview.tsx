@@ -42,7 +42,7 @@ export default function PrintPreview(props: Props) {
   const { t } = useTranslation();
   useShortcutSubContext();
 
-  const autoPrintPreference = props.facility?.print_templates?.find?.(
+  const autoPrintPreference = props.facility?.print_templates?.find(
     (t) => t.slug === (props.templateSlug ?? "default"),
   )?.print_setup?.auto_print;
 

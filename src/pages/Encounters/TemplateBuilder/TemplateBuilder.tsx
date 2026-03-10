@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -50,7 +50,6 @@ import BackButton from "@/components/Common/BackButton";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import DOMPurify from "dompurify";
-import { t } from "i18next";
 import { navigate } from "raviger";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -61,27 +60,16 @@ import {
   insertAtCursor,
 } from "./templateUtils";
 
-const templateBuilderSchema = z.object({
-  name: z.string().min(1),
-  slug_value: z
-    .string()
-    .trim()
-    .min(5, {
-      message: t("character_count_validation", { min: 5, max: 25 }),
-    })
-    .max(25, {
-      message: t("character_count_validation", { min: 5, max: 25 }),
-    })
-    .regex(/^[a-z0-9-]+$/, {
-      message: t("slug_format_message"),
-    }),
-  status: z.enum(TemplateStatuses),
-  template_type: z.enum(TemplateTypes, { required_error: t("field_required") }),
-  default_format: z.enum(TemplateFormats),
-  context: z.string().min(1, { message: t("field_required") }),
-  description: z.string().optional(),
-  template_data: z.string().min(1),
-});
+interface TemplateBuilderFormValues {
+  name: string;
+  slug_value: string;
+  status: TemplateStatus;
+  template_type: string;
+  default_format: TemplateFormat;
+  context: string;
+  description?: string;
+  template_data: string;
+}
 
 export default function TemplateBuilder({
   facilityId,
@@ -103,15 +91,39 @@ export default function TemplateBuilder({
     format: TemplateFormat | null;
   }>({ isActive: false, data: null, format: null });
 
-  const form = useForm({
+  const templateBuilderSchema = z.object({
+    name: z.string().trim().min(1, t("field_required")),
+    slug_value: z
+      .string()
+      .trim()
+      .min(5, {
+        message: t("character_count_validation", { min: 5, max: 36 }),
+      })
+      .max(25, {
+        message: t("character_count_validation", { min: 5, max: 36 }),
+      })
+      .regex(/^[a-z0-9-]+$/, {
+        message: t("slug_format_message"),
+      }),
+    status: z.enum(TemplateStatuses),
+    template_type: z.string().min(1, t("field_required")),
+    default_format: z.enum(TemplateFormats),
+    context: z.string().min(1, t("field_required")),
+    description: z.string().optional(),
+    template_data: z.string().min(1, t("field_required")),
+  });
+
+  const form = useForm<TemplateBuilderFormValues>({
     resolver: zodResolver(templateBuilderSchema),
     defaultValues: {
       name: "",
       slug_value: "",
       status: "draft" as TemplateStatus,
+      template_type: "",
       default_format: "html" as TemplateFormat,
-      template_data: DEFAULT_TEMPLATE,
       context: "",
+      description: "",
+      template_data: DEFAULT_TEMPLATE,
     },
   });
 
@@ -121,7 +133,10 @@ export default function TemplateBuilder({
     queryFn: query(templateApi.retrieveSchema),
   });
 
-  const availableContexts = schema?.contexts ?? {};
+  const availableContexts = useMemo(
+    () => schema?.contexts ?? {},
+    [schema?.contexts],
+  );
   const reportTypes = schema?.report_types ?? {};
   const supportedContexts =
     reportTypes[selectedTemplateType]?.supported_contexts ?? null;
@@ -200,7 +215,7 @@ export default function TemplateBuilder({
         description: template.description,
       });
     }
-  }, [template]);
+  }, [form, template]);
 
   useEffect(() => {
     if (template && availableContexts) {
@@ -220,6 +235,12 @@ export default function TemplateBuilder({
   const handleSaveTemplate = async () => {
     const isValid = await form.trigger();
     if (!isValid) return;
+
+    if (!form.formState.isDirty) {
+      toast.success(t("template_updated"));
+      return;
+    }
+
     const formData = form.getValues();
     const templateData = {
       template_type: formData.template_type,
@@ -717,7 +738,7 @@ function TemplateEditor({
   form,
   textareaRef,
 }: {
-  form: UseFormReturn<z.infer<typeof templateBuilderSchema>>;
+  form: UseFormReturn<TemplateBuilderFormValues>;
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
 }) {
   const { t } = useTranslation();
