@@ -132,6 +132,8 @@
 
   "encounter": [
     { "key": "a", "action": "add-allergy", "description": "Add Allergy", "when": "canEdit" },
+    { "key": "r", "action": "add-service-request", "description": "Add Service Request", "when": "canEdit" },
+    { "key": "t", "action": "add-medication-request", "description": "Add Medication", "when": "canEdit" },
     { "key": "s", "action": "add-symptoms", "description": "Add Symptoms", "when": "canEdit" },
     { "key": "d", "action": "add-diagnosis", "description": "Add Diagnosis", "when": "canEdit" },
     { "key": "f", "action": "add-questionnaire", "description": "New Questionnaire/Form", "when": "canEdit && questionnairesEnabled" },

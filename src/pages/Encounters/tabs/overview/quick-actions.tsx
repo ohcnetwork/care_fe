@@ -43,8 +43,8 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
       <QuickAction
         icon={<MedicineIcon className="text-blue-800 size-8" />}
         title={t("add_medication")}
+        shortcut={getShortcutDisplay("add-medication-request")}
         href={`questionnaire/medication_request`}
-        actionId="add-medication-request"
       />
       <FormDialog
         subjectType="encounter"
