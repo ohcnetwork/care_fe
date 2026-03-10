@@ -16,6 +16,10 @@ import {
 import mutate from "@/Utils/request/mutate";
 import { DiscountCodeForm } from "@/pages/Facility/settings/billing/discount/discount-codes/DiscountCodeForm";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import {
+  DiscountApplicabilityOrder,
+  DiscountConfiguration,
+} from "@/types/base/monetaryComponent/monetaryComponent";
 import facilityApi from "@/types/facility/facilityApi";
 
 export function CreateDiscountCodeSheet() {
@@ -23,6 +27,11 @@ export function CreateDiscountCodeSheet() {
   const { facility, facilityId } = useCurrentFacility();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+
+  const defaultDiscountConfiguration: DiscountConfiguration = {
+    max_applicable: 0,
+    applicability_order: DiscountApplicabilityOrder.total_desc,
+  };
 
   const { mutate: createCode } = useMutation({
     mutationFn: mutate(facilityApi.setMonetaryComponents, {
@@ -53,12 +62,15 @@ export function CreateDiscountCodeSheet() {
                 return;
               }
 
+              const payloadConfig =
+                facility.discount_configuration ?? defaultDiscountConfiguration;
+
               setOpen(false);
               createCode({
                 discount_codes: [...(facility.discount_codes ?? []), data],
                 discount_monetary_components:
                   facility.discount_monetary_components,
-                discount_configuration: facility.discount_configuration,
+                discount_configuration: payloadConfig,
               });
             }}
           />

@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
+import { expect, Page, test } from "@playwright/test";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -9,10 +9,39 @@ test.describe("Discount Code Settings", () => {
   let discountName: string;
   let discountCode: string;
 
+  async function ensureDiscountConfiguration(page: Page) {
+    await page.goto(
+      `/facility/${facilityId}/settings/billing/discount_configuration`,
+    );
+
+    // Enter edit mode (safe even if config already exists)
+    const editButton = page.getByRole("button", { name: /edit/i });
+    if (await editButton.isVisible().catch(() => false)) {
+      await editButton.click();
+    }
+
+    // Set a simple, valid configuration
+    await page
+      .getByRole("spinbutton", { name: /maximum applicable discounts/i })
+      .fill("0"); // 0 = no limit
+
+    await page.getByRole("combobox", { name: /applicability order/i }).click();
+    await page.getByRole("option", { name: /highest value first/i }).click();
+
+    await page.getByRole("button", { name: /save/i }).click();
+
+    await expect(
+      page.getByText(/discount configuration saved successfully/i),
+    ).toBeVisible();
+  }
+
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
     discountName = faker.commerce.productName();
     discountCode = discountName.replace(/\s+/g, "-").slice(0, 20).toLowerCase();
+
+    // Ensure the facility has a valid discount configuration before creating codes
+    await ensureDiscountConfiguration(page);
 
     await page.goto(`/facility/${facilityId}/settings/billing/discount_codes`);
 
