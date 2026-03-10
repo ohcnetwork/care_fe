@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   PrescriptionStatus,
   PrescritionList,
@@ -14,8 +15,9 @@ import { useTranslation } from "react-i18next";
 interface Props {
   included: string[];
   patientId: string;
-  facilityId?: string;
-  encounterId: string;
+  facilityId: string;
+  encounterId?: string;
+  allButton?: (props: { prescriptionIds: string[] }) => React.ReactNode;
 }
 
 export default function UnbilledPrescriptionsCard({
@@ -23,6 +25,7 @@ export default function UnbilledPrescriptionsCard({
   facilityId,
   patientId,
   encounterId,
+  allButton,
 }: Props) {
   const { t } = useTranslation();
 
@@ -42,11 +45,17 @@ export default function UnbilledPrescriptionsCard({
         .map((prescription) => prescription.id),
   });
 
-  if (!unbilledPrescriptionIds || unbilledPrescriptionIds.length === 0) {
+  if (!unbilledPrescriptionIds) {
+    return <Skeleton className="w-full h-16" />;
+  }
+
+  if (unbilledPrescriptionIds.length === 0) {
     return null;
   }
 
-  const ids = [...new Set([...included, ...unbilledPrescriptionIds])];
+  const allPrescriptionIds = [
+    ...new Set([...included, ...unbilledPrescriptionIds]),
+  ];
 
   return (
     <div className="p-1 bg-indigo-100 rounded-md">
@@ -55,14 +64,18 @@ export default function UnbilledPrescriptionsCard({
           {t("patient_has_unbilled_prescriptions_count", {
             count: unbilledPrescriptionIds.length,
           })}
-          <Button variant="outline" size="sm" asChild>
-            <Link
-              href={`/medication_requests/patient/${patientId}/bill/prescriptions/${ids.join(",")}?encounterId=${encounterId}`}
-            >
-              <ListPlus className="size-4" />
-              {t("include_all")}
-            </Link>
-          </Button>
+          {allButton ? (
+            allButton({ prescriptionIds: allPrescriptionIds })
+          ) : (
+            <Button variant="outline" size="sm" asChild>
+              <Link
+                href={`/medication_requests/patient/${patientId}/bill/prescriptions/${allPrescriptionIds.join(",")}?encounterId=${encounterId}`}
+              >
+                <ListPlus className="size-4" />
+                {t("include_all")}
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
     </div>

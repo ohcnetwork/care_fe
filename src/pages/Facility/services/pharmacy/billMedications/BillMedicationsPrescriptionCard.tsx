@@ -42,7 +42,11 @@ import {
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
-import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
+import {
+  PrescriptionRead,
+  PrescriptionStatus,
+} from "@/types/emr/prescription/prescription";
+import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { getLocationPath } from "@/types/location/utils";
@@ -52,16 +56,20 @@ import mutate from "@/Utils/request/mutate";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import { DotsVerticalIcon, MinusCircledIcon } from "@radix-ui/react-icons";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
   BadgeInfo,
   Check,
+  CheckCircleIcon,
   CheckIcon,
+  FileTextIcon,
   Pill,
   PrinterIcon,
   RefreshCcwIcon,
+  XCircleIcon,
 } from "lucide-react";
+import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -71,9 +79,11 @@ import { z } from "zod";
 export const BillMedicationsPrescriptionCard = ({
   form,
   name,
+  onRemove,
 }: {
   form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
   name: `prescriptions.${number}`;
+  onRemove: () => void;
 }) => {
   const { t } = useTranslation();
 
@@ -97,7 +107,7 @@ export const BillMedicationsPrescriptionCard = ({
 
   return (
     <>
-      <PrescriptionSummary form={form} name={name} />
+      <PrescriptionSummary form={form} name={name} onRemove={onRemove} />
       <HeaderRow form={form} name={name} />
 
       {fields.map((field, index) => (
@@ -273,13 +283,53 @@ export const BillMedicationsNewDispenseCard = ({
 const PrescriptionSummary = ({
   form,
   name,
+  onRemove,
 }: {
   form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
   name: `prescriptions.${number}`;
+  onRemove: () => void;
 }) => {
+  const { facilityId } = useCurrentFacility();
+  const { locationId } = useCurrentLocation();
+
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  const { mutate: updatePrescriptionStatus, isPending } = useMutation({
+    mutationFn: ({
+      prescription,
+      newStatus,
+    }: {
+      prescription: PrescriptionRead;
+      newStatus: PrescriptionStatus;
+    }) => {
+      const patientId = prescription.encounter.patient.id;
+      const id = prescription.id;
+      return mutate(prescriptionApi.update, {
+        pathParams: { patientId, id },
+        queryParams: { facility: prescription.encounter.facility.id },
+      })({ ...prescription, status: newStatus });
+    },
+    onSuccess: (_, { prescription, newStatus }) => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          "prescription",
+          prescription.encounter.patient.id,
+          prescription.id,
+        ],
+      });
+
+      if (newStatus === PrescriptionStatus.completed) {
+        toast.success(t("prescription_marked_as_completed"));
+      } else if (newStatus === PrescriptionStatus.cancelled) {
+        toast.success(t("prescription_marked_as_cancelled"));
+      }
+    },
+  });
 
   const prescription = form.watch(`${name}.prescription`);
+  const encounter = prescription.encounter;
+  const isActive = prescription.status === PrescriptionStatus.active;
 
   return (
     <div className="relative flex justify-between col-start-1 col-span-7 bg-white pt-4 pr-2 pb-2 pl-4">
@@ -303,8 +353,8 @@ const PrescriptionSummary = ({
                 {t("location")}:{" "}
               </span>
               <span className="text-sm text-gray-700">
-                {prescription.encounter.current_location
-                  ? getLocationPath(prescription.encounter.current_location)
+                {encounter.current_location
+                  ? getLocationPath(encounter.current_location)
                   : "-"}
               </span>
             </div>
@@ -337,24 +387,72 @@ const PrescriptionSummary = ({
             </FormItem>
           )}
         />
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => {
-            // TODO: wire this
-          }}
-        >
-          <PrinterIcon />
+        <Button variant="outline" size="icon" asChild>
+          <Link
+            href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/prescription/${prescription.id}/print`}
+            basePath="/"
+          >
+            <PrinterIcon />
+          </Link>
         </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => {
-            // TODO: wire this
-          }}
-        >
-          <DotsVerticalIcon />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon">
+              <DotsVerticalIcon />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              disabled={!isActive || isPending}
+              onSelect={() => {
+                navigate(
+                  `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${encounter.patient.id}/prescriptions/${prescription.id}`,
+                );
+              }}
+            >
+              <FileTextIcon />
+              {t("view_prescription")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={isPending}
+              onSelect={() => {
+                navigate(
+                  `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/prescription/${prescription.id}/print`,
+                );
+              }}
+            >
+              <PrinterIcon />
+              {t("print_prescription")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={!isActive || isPending}
+              onSelect={() => {
+                updatePrescriptionStatus({
+                  prescription,
+                  newStatus: PrescriptionStatus.completed,
+                });
+                onRemove();
+              }}
+            >
+              <CheckCircleIcon />
+              {t("mark_as_completed")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={!isActive || isPending}
+              onSelect={() => {
+                updatePrescriptionStatus({
+                  prescription,
+                  newStatus: PrescriptionStatus.cancelled,
+                });
+                onRemove();
+              }}
+              variant="destructive"
+            >
+              <XCircleIcon />
+              {t("cancel_prescription")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );

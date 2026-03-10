@@ -1,4 +1,10 @@
-import { addMonths, endOfMonth, isBefore, startOfMonth } from "date-fns";
+import {
+  addMonths,
+  endOfMonth,
+  formatDate,
+  isBefore,
+  startOfMonth,
+} from "date-fns";
 
 import { Badge } from "@/components/ui/badge";
 import { InventoryRead } from "@/types/inventory/product/inventory";
@@ -52,7 +58,7 @@ export function isProductRestrictedFromDispensing(
  * @param expirationDate - The expiration date string
  * @returns boolean - true if the lot is valid for selection
  */
-export function isLotAllowedForDispensing(inventory: InventoryRead): boolean {
+export function isLotAllowedForDispensing(inventory: InventoryRead) {
   return !isProductRestrictedFromDispensing(inventory.product.expiration_date);
 }
 
@@ -68,4 +74,15 @@ export function getExpiryBadgeVariant(
   if (status === "expired") return "destructive";
   if (status === "expiring_soon") return "yellow";
   return "green";
+}
+
+/**
+ * Formats the expiry date of a lot
+ * @param inventory - The inventory object
+ * @returns The formatted expiry date
+ */
+export function formatLotExpiry(inventory: InventoryRead) {
+  return inventory.product.expiration_date
+    ? formatDate(inventory.product.expiration_date, "MM/yyyy")
+    : "-";
 }

@@ -81,7 +81,13 @@ export function formatDuration(
  */
 export function formatMedicationLine(
   instruction?: MedicationRequestDosageInstruction,
-  unitLabel = "units",
+  {
+    unitLabel = "units",
+    includeTotal = true,
+  }: {
+    unitLabel?: string;
+    includeTotal?: boolean;
+  } = {},
 ): string {
   if (!instruction) return "";
   const parts: string[] = [];
@@ -101,9 +107,11 @@ export function formatMedicationLine(
   if (parts.length === 0) return "";
 
   // Total
-  const total = formatTotalUnits([instruction], unitLabel);
-  if (total) {
-    return `${parts.join(" × ")} = ${total}`;
+  if (includeTotal) {
+    const total = formatTotalUnits([instruction], unitLabel);
+    if (total) {
+      return `${parts.join(" × ")} = ${total}`;
+    }
   }
   return parts.join(" × ");
 }

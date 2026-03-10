@@ -492,7 +492,7 @@ export default function PrescriptionQueue({
                     <div className="flex gap-4 items-center">
                       <span className="font-semibold underline">
                         <Link
-                          href={`/medication_requests/patient/${item.encounter.patient.id}/prescription/${item.id}`}
+                          href={`/medication_requests/patient/${item.encounter.patient.id}/prescriptions/${item.id}`}
                         >
                           {t("view_prescription")}
                         </Link>

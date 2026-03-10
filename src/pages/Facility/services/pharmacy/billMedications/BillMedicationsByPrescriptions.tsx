@@ -21,6 +21,7 @@ import query from "@/Utils/request/query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueries } from "@tanstack/react-query";
 import { Pill } from "lucide-react";
+import { navigate } from "raviger";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -104,10 +105,10 @@ export default function BillMedicationsByPrescriptions({
     return <Loading />;
   }
 
-  const prescriptionFields = form.watch("prescriptions");
+  const prescriptionsFields = form.watch("prescriptions");
   const otherItemsFields = form.watch("otherItems");
   const hasMedications =
-    prescriptionFields.length > 0 || otherItemsFields.length > 0;
+    prescriptionsFields.length > 0 || otherItemsFields.length > 0;
 
   return (
     <Page title={t("bill_medications")} hideTitleOnPage={true}>
@@ -140,7 +141,7 @@ export default function BillMedicationsByPrescriptions({
                   <BillMedicationsLoadingCard />
                 ) : (
                   <>
-                    {prescriptionFields.map((prescription, index) => (
+                    {prescriptionsFields.map((prescription, index) => (
                       <Fragment key={index}>
                         {index !== 0 && (
                           <div className="col-span-7 h-8 bg-gray-50" />
@@ -149,6 +150,19 @@ export default function BillMedicationsByPrescriptions({
                           <BillMedicationsPrescriptionCard
                             form={form}
                             name={`prescriptions.${index}`}
+                            onRemove={() => {
+                              const newIds = prescriptionIds.filter(
+                                (id) => id !== prescription.prescription.id,
+                              );
+
+                              if (newIds.length === 0) {
+                                navigate(
+                                  `/facility/${facilityId}/locations/${locationId}/medication_requests`,
+                                );
+                              } else {
+                                navigate(newIds.join(","), { replace: true });
+                              }
+                            }}
                           />
                         )}
                       </Fragment>

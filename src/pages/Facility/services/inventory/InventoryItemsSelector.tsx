@@ -1,4 +1,3 @@
-import { formatDate } from "date-fns";
 import { ChevronDownIcon, SearchIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -27,6 +26,7 @@ import {
   zodDecimal,
 } from "@/Utils/decimal";
 import {
+  formatLotExpiry,
   getExpiryBadgeVariant,
   isProductRestrictedFromDispensing,
 } from "@/Utils/inventory";
@@ -183,10 +183,7 @@ export const InventoryItemsSelector = ({
                       )}
                       className="rounded-sm text-xs px-1.5 py-0"
                     >
-                      {formatDate(
-                        value.item.product.expiration_date,
-                        "dd/MM/yyyy",
-                      )}
+                      {formatLotExpiry(value.item)}
                     </Badge>
                   </div>
                 )}
@@ -318,7 +315,7 @@ export const InventoryItemsSelector = ({
                             size="sm"
                             className="text-sm font-medium py-0 px-1.5"
                           >
-                            {formatDate(inv.product.expiration_date, "MM/yyyy")}
+                            {formatLotExpiry(inv)}
                           </Badge>
                         ) : (
                           <span className="text-gray-400">-</span>
