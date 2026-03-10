@@ -117,12 +117,13 @@ export default function BedAvailabilityDashboard({
         // This is a bed
         totalBeds++;
 
-        if (location.current_encounter) {
-          if (location.current_encounter.status === "discharged") {
-            availableBeds++; // Discharged patients make beds available
-          } else {
-            occupiedBeds++;
-          }
+        if (
+          location.current_encounter &&
+          location.current_encounter.status !== "discharged"
+        ) {
+          occupiedBeds++;
+        } else if (location.operational_status === "O") {
+          reservedBeds++;
         } else {
           availableBeds++;
         }
@@ -148,12 +149,13 @@ export default function BedAvailabilityDashboard({
           wardStats.total++;
           wardStats.beds.push(location);
 
-          if (location.current_encounter) {
-            if (location.current_encounter.status === "discharged") {
-              wardStats.available++;
-            } else {
-              wardStats.occupied++;
-            }
+          if (
+            location.current_encounter &&
+            location.current_encounter.status !== "discharged"
+          ) {
+            wardStats.occupied++;
+          } else if (location.operational_status === "O") {
+            wardStats.reserved++;
           } else {
             wardStats.available++;
           }
@@ -499,6 +501,7 @@ function WardCard({ ward }: WardCardProps) {
               const isOccupied =
                 !!bed.current_encounter &&
                 bed.current_encounter.status !== "discharged";
+              const isReserved = !isOccupied && bed.operational_status === "O";
               return (
                 <div
                   key={bed.id}
@@ -506,7 +509,7 @@ function WardCard({ ward }: WardCardProps) {
                 >
                   <div className="flex items-center gap-3">
                     <div className="relative size-8">
-                      {isOccupied ? (
+                      {isOccupied || isReserved ? (
                         <BedUnavailableUnselected className="w-full h-full" />
                       ) : (
                         <BedAvailableUnselected className="w-full h-full" />
@@ -521,8 +524,16 @@ function WardCard({ ward }: WardCardProps) {
                       )}
                     </div>
                   </div>
-                  <Badge variant={isOccupied ? "blue" : "green"}>
-                    {isOccupied ? t("occupied") : t("available")}
+                  <Badge
+                    variant={
+                      isReserved ? "orange" : isOccupied ? "blue" : "green"
+                    }
+                  >
+                    {isReserved
+                      ? t("reserved")
+                      : isOccupied
+                        ? t("occupied")
+                        : t("available")}
                   </Badge>
                 </div>
               );
