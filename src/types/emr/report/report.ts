@@ -33,6 +33,7 @@ export interface ReportGenerateCreate {
   output_format: string;
   options: string;
   force: boolean;
+  status_check?: boolean;
 }
 
 export interface ReportDownloadRead {
