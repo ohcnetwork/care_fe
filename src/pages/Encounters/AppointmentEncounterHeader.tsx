@@ -20,8 +20,12 @@ import {
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 
+import { PatientIDScanDialog } from "@/components/Scan/PatientIDScanDialog";
+import patientApi from "@/types/emr/patient/patientApi";
+import scheduleApi from "@/types/scheduling/scheduleApi";
 import { renderTokenNumber } from "@/types/tokens/token/token";
 import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -30,9 +34,12 @@ import {
   ChevronDown,
   ExternalLinkIcon,
   ListOrdered,
+  ScanLine,
 } from "lucide-react";
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 /**
  * Get the appointments page link for an appointment based on resource type.
@@ -77,6 +84,87 @@ const getOptions = (encounter: EncounterRead) => {
   return options;
 };
 
+const PatientScanButton = ({
+  facilityId,
+  appointment,
+}: {
+  facilityId: string;
+  appointment: AppointmentRead;
+}) => {
+  const { t } = useTranslation();
+  const [scanDialogOpen, setScanDialogOpen] = useState(false);
+
+  const { mutate: checkPatientAppointments, isPending } = useMutation({
+    mutationFn: async (patientId: string) => {
+      const today = dateQueryString(new Date());
+      const controller = new AbortController();
+
+      const [appointments, patient] = await Promise.all([
+        query(scheduleApi.appointments.list, {
+          pathParams: { facilityId },
+          queryParams: {
+            status: `${AppointmentStatus.BOOKED},${AppointmentStatus.CHECKED_IN}`,
+            resource_type: appointment.resource_type,
+            resource_ids: appointment.resource.id,
+            date_after: today,
+            date_before: today,
+            patient: patientId,
+          },
+        })({ signal: controller.signal }),
+        query(patientApi.get, {
+          pathParams: { id: patientId },
+        })({ signal: controller.signal }),
+      ]);
+
+      return { appointments, patient, patientId };
+    },
+    onSuccess: ({ appointments, patient, patientId }) => {
+      if (appointments.results?.length) {
+        navigate(
+          `/facility/${facilityId}/patient/${patientId}/appointments/${appointments.results[0].id}`,
+        );
+      } else {
+        toast.info(t("no_appointments_found_for_today"));
+        navigate(
+          `/facility/${facilityId}/patients/home?${new URLSearchParams({
+            phone_number: patient.phone_number,
+            year_of_birth: patient.year_of_birth?.toString() ?? "",
+            partial_id: patientId.slice(0, 5),
+          }).toString()}`,
+        );
+      }
+    },
+    onError: () => {
+      toast.error(t("failed_to_check_appointments"));
+    },
+  });
+
+  const handleScanSuccess = (patientId: string) => {
+    setScanDialogOpen(false);
+    checkPatientAppointments(patientId);
+  };
+
+  return (
+    <>
+      <Button
+        variant="ghost"
+        className="flex items-center border-r border-gray-300 rounded-r-none"
+        onClick={() => setScanDialogOpen(true)}
+        disabled={isPending}
+        aria-label={t("scan_qr")}
+      >
+        <ScanLine className="size-4 text-black" />
+        <span className="text-sm text-black">{t("scan")}</span>
+      </Button>
+      <PatientIDScanDialog
+        open={scanDialogOpen}
+        onOpenChange={setScanDialogOpen}
+        onScanSuccess={handleScanSuccess}
+      />
+    </>
+  );
+};
+
 export const AppointmentEncounterHeader = ({
   appointment,
   encounter,
@@ -88,6 +176,10 @@ export const AppointmentEncounterHeader = ({
 }) => {
   return (
     <div className="flex gap-3 border border-gray-300 rounded-lg py-1.5 px-2 bg-white sm:w-fit w-full items-center justify-center shadow-sm">
+      <PatientScanButton
+        facilityId={encounter.facility.id}
+        appointment={appointment}
+      />
       <TokenActions
         patientId={encounter.patient.id}
         facilityId={encounter.facility.id}
