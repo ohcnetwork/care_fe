@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -182,9 +183,20 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
                                 {index + 1}
                               </div>
                               <div>
-                                <p className="text-sm font-medium break-all">
-                                  {attachment.name}
-                                </p>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-medium break-all">
+                                    {attachment.name}
+                                  </p>
+                                  {attachment.upload_completed ? (
+                                    <Badge variant="green" size="sm">
+                                      {t("uploaded")}
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="yellow" size="sm">
+                                      {t("file_upload_error")}
+                                    </Badge>
+                                  )}
+                                </div>
                                 <p className="text-xs text-gray-500">
                                   {formatDateTime(attachment.created_date)}
                                 </p>

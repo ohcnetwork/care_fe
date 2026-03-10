@@ -29,6 +29,7 @@ import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppoi
 import { UpcomingAppointmentCard } from "@/pages/Appointments/components/UpcomingAppointmentCard";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import PatientHomeTabs from "@/pages/Patient/home/PatientHomeTabs";
 import { PLUGIN_Component } from "@/PluginEngine";
 import patientApi from "@/types/emr/patient/patientApi";
 import query from "@/Utils/request/query";
@@ -36,7 +37,6 @@ import careConfig from "@careConfig";
 import { useAtomValue } from "jotai";
 import { Link, navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
-import PatientHomeTabs from "./home/PatientHomeTabs";
 
 interface QParams {
   phone_number?: string;
@@ -46,7 +46,7 @@ interface QParams {
   action?: "schedule" | "create_encounter";
 }
 
-export default function VerifyPatient() {
+export default function PatientHome() {
   useShortcutSubContext("facility:patient:home");
   const { t } = useTranslation();
   const [{ phone_number, year_of_birth, partial_id, flow, action }] =

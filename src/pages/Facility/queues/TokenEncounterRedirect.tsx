@@ -47,7 +47,7 @@ const TokenEncounterRedirect = ({
   if (!token.booking && token?.patient?.id) {
     return (
       <Redirect
-        to={`/facility/${facilityId}/patients/verify?${new URLSearchParams({
+        to={`/facility/${facilityId}/patients/home?${new URLSearchParams({
           phone_number: token.patient.phone_number,
           flow: "queue",
           year_of_birth: token.patient.year_of_birth?.toString() || "",
