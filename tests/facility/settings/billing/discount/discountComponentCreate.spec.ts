@@ -69,11 +69,13 @@ test.describe("Discount Component Settings", () => {
       .getByRole("button", { name: /create discount component/i })
       .click();
 
-    await page
-      .getByRole("spinbutton", { name: /discount amount or factor/i })
-      .fill(discountValue);
-    const saveButton = page.getByRole("button", { name: /save/i });
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible({ timeout: 15000 });
+    const discountValueInput = dialog.getByRole("spinbutton").first();
+    await expect(discountValueInput).toBeVisible({ timeout: 15000 });
+    await discountValueInput.fill(discountValue);
 
+    const saveButton = page.getByRole("button", { name: /save/i });
     await saveButton.click();
 
     await expect(page.getByText(/this field is required/i)).toBeVisible();
@@ -84,11 +86,13 @@ test.describe("Discount Component Settings", () => {
       .getByRole("button", { name: /create discount component/i })
       .click();
 
-    await page.getByRole("textbox", { name: /name/i }).fill(componentName);
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible({ timeout: 15000 });
+    await dialog.getByRole("textbox", { name: /name/i }).fill(componentName);
 
-    await page
-      .getByRole("spinbutton", { name: /discount amount or factor/i })
-      .fill(discountValue);
+    const discountValueInput = dialog.getByRole("spinbutton").first();
+    await expect(discountValueInput).toBeVisible({ timeout: 15000 });
+    await discountValueInput.fill(discountValue);
 
     await page.getByRole("button", { name: /save/i }).click();
 
@@ -97,7 +101,7 @@ test.describe("Discount Component Settings", () => {
     const table = page.getByRole("table");
     await expect(table.getByText(componentName)).toBeVisible();
 
-    const searchInput = page.getByRole("textbox", { name: /search/i });
+    const searchInput = page.getByPlaceholder(/search/i);
 
     await searchInput.fill(componentName);
     await expect(table.getByText(componentName)).toBeVisible();
@@ -116,13 +120,15 @@ test.describe("Discount Component Settings", () => {
       .getByRole("button", { name: /create discount component/i })
       .click();
 
-    await page
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible({ timeout: 15000 });
+    await dialog
       .getByRole("textbox", { name: /name/i })
       .fill(`${componentName} with condition`);
 
-    await page
-      .getByRole("spinbutton", { name: /discount amount or factor/i })
-      .fill(discountValue);
+    const discountValueInput = dialog.getByRole("spinbutton").first();
+    await expect(discountValueInput).toBeVisible({ timeout: 15000 });
+    await discountValueInput.fill(discountValue);
 
     await page.getByRole("button", { name: /add condition/i }).click();
 
