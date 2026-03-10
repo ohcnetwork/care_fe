@@ -17,6 +17,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 
 import BackButton from "@/components/Common/BackButton";
@@ -152,20 +158,50 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
                     {t("supporting_documents")}
                   </h3>
                   {canWrite && (
-                    <Button
-                      variant="outline"
-                      className="flex flex-row items-center"
-                      asChild
-                    >
-                      <Label className="flex flex-row items-center cursor-pointer w-fit">
-                        <CareIcon icon="l-file-upload" className="mr-1" />
-                        <span>{t("add_files")}</span>
-                        {fileUpload.Input({
-                          className: "hidden",
-                          ref: fileInputRef,
-                        })}
-                      </Label>
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="flex flex-row items-center"
+                        >
+                          <CareIcon icon="l-file-upload" className="mr-1" />
+                          <span>{t("add_files")}</span>
+                          <CareIcon icon="l-angle-down" className="ml-1" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className="w-[calc(100vw-2.5rem)] sm:w-full"
+                      >
+                        <DropdownMenuItem
+                          className="flex flex-row items-center"
+                          onSelect={(e) => {
+                            e.preventDefault();
+                          }}
+                          aria-label={t("choose_file")}
+                        >
+                          <Label
+                            htmlFor={`file_upload_${FileType.CONSENT}`}
+                            className="flex items-center w-full text-primary-900 hover:text-black py-1 font-medium"
+                          >
+                            <CareIcon icon="l-file-upload-alt" />
+                            <span>{t("choose_file")}</span>
+                          </Label>
+                          {fileUpload.Input({
+                            className: "hidden",
+                            ref: fileInputRef,
+                          })}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onSelect={() => fileUpload.handleCameraCapture()}
+                          className="flex items-center text-primary-900 font-medium"
+                          aria-label={t("open_camera")}
+                        >
+                          <CareIcon icon="l-camera" />
+                          <span>{t("open_camera")}</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
                 </div>
 
