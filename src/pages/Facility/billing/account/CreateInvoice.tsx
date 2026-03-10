@@ -378,6 +378,7 @@ export function CreateInvoicePage({
           charge_item_definition: pendingItem.definition.slug,
           quantity: pendingItem.quantity,
           patient: account.patient.id,
+          account: account.id,
           ...(pendingItem.performer
             ? { performer_actor: pendingItem.performer.id }
             : {}),
@@ -985,6 +986,7 @@ export function CreateInvoicePage({
             onOpenChange={setIsAddChargeItemsOpen}
             facilityId={facilityId}
             patientId={account.patient.id}
+            accountId={account.id}
             onChargeItemsAdded={handleChargeItemsAdded}
           />
           <QuickAddChargeItemsSheet
@@ -992,6 +994,7 @@ export function CreateInvoicePage({
             onOpenChange={setIsQuickAddOpen}
             facilityId={facilityId}
             patientId={account.patient.id}
+            accountId={account.id}
             onChargeItemsAdded={handleChargeItemsAdded}
           />
           <EditInvoiceDialog

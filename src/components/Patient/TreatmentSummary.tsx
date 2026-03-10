@@ -144,7 +144,7 @@ export default function TreatmentSummary({
       queryParams: {
         encounter: encounterId,
         facility: facilityId,
-        product_type: "medication",
+        medications_only: true,
       },
       pageSize: 100,
     }),
