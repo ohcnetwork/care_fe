@@ -145,13 +145,13 @@ const PatientScanButton = ({
   };
 
   return (
-    <>
+    <div className="flex-1 flex items-center justify-center">
       <Button
         variant="ghost"
-        className="flex items-center border-r border-gray-300 rounded-r-none"
         onClick={() => setScanDialogOpen(true)}
         disabled={isPending}
         aria-label={t("scan_qr")}
+        className="flex-col gap-0 size-auto sm:flex-row sm:gap-2"
       >
         <ScanLine className="size-4 text-black" />
         <span className="text-sm text-black">{t("scan")}</span>
@@ -161,7 +161,7 @@ const PatientScanButton = ({
         onOpenChange={setScanDialogOpen}
         onScanSuccess={handleScanSuccess}
       />
-    </>
+    </div>
   );
 };
 
@@ -175,18 +175,20 @@ export const AppointmentEncounterHeader = ({
   canWritePrimaryEncounter: boolean;
 }) => {
   return (
-    <div className="flex gap-3 border border-gray-300 rounded-lg py-1.5 px-2 bg-white sm:w-fit w-full items-center justify-center shadow-sm">
-      <PatientScanButton
-        facilityId={encounter.facility.id}
-        appointment={appointment}
-      />
-      <TokenActions
-        patientId={encounter.patient.id}
-        facilityId={encounter.facility.id}
-        appointment={appointment}
-        resourceType={appointment.resource_type}
-        resourceId={appointment.resource.id}
-      />
+    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 border border-gray-300 rounded-lg py-1.5 px-2 bg-white sm:w-fit w-full sm:items-center items-stretch justify-center shadow-sm">
+      <div className="flex divide-x-2 items-stretch justify-evenly overflow-auto">
+        <PatientScanButton
+          facilityId={encounter.facility.id}
+          appointment={appointment}
+        />
+        <TokenActions
+          patientId={encounter.patient.id}
+          facilityId={encounter.facility.id}
+          appointment={appointment}
+          resourceType={appointment.resource_type}
+          resourceId={appointment.resource.id}
+        />
+      </div>
       {canWritePrimaryEncounter && (
         <div className="flex sm:flex-row flex-col gap-2 sm:items-center items-start">
           <AppointmentEncounterHeaderActions
@@ -240,8 +242,8 @@ const AppointmentEncounterHeaderActions = ({
     return (
       <div
         className={cn(
-          "w-full sm:w-auto space-x-2",
-          appointment.token && "border-l border-gray-300 pl-2",
+          "w-full sm:w-auto space-x-2 text-center",
+          appointment.token && "sm:border-l-2 sm:pl-2",
         )}
       >
         <span className="text-sm text-black">
@@ -269,11 +271,11 @@ const AppointmentEncounterHeaderActions = ({
   return (
     <div
       className={cn(
-        "w-full sm:w-auto space-x-2",
-        appointment.token && "border-l border-gray-300 pl-2",
+        "w-full sm:w-auto space-x-2 text-center",
+        appointment.token && "sm:border-l-2 sm:pl-2",
       )}
     >
-      <span className="text-sm text-black">
+      <span className=" text-sm text-black">
         {t("how_do_you_to_finish_this_visit")}
       </span>
       <DropdownMenu>
@@ -340,66 +342,75 @@ const TokenActions = ({
   const { token } = appointment;
 
   return (
-    <div className="flex divide-x gap-2">
+    <>
       {appointment.id && (
-        <div className="flex items-center justify-center border-gray-300">
-          <Button variant="ghost" className="rounded-r-none pl-2 " asChild>
+        <div className="flex-1 flex items-center justify-center">
+          <Button
+            variant="ghost"
+            asChild
+            className="flex-col gap-0 size-auto sm:flex-row sm:gap-2"
+          >
             <Link href={getQueueLink(appointment)}>
-              <div className="flex sm:flex-row flex-col items-center justify-center sm:gap-1">
-                <div className="flex gap-2 items-center underline">
-                  <CalendarRange className="size-4 text-black" />
-                  {t("list")}
-                  <ExternalLinkIcon className="size-4 text-black" />
-                </div>
-              </div>
+              <CalendarRange className="size-4 text-black" />
+              <span className="text-sm text-black underline">{t("list")}</span>
+              <ExternalLinkIcon className="size-4 text-black hidden sm:block" />
             </Link>
           </Button>
         </div>
       )}
       {appointment.id && (
-        <div className="flex items-center justify-center border-gray-300">
-          <Button variant="ghost" className="rounded-r-none" asChild>
+        <div className="flex-1 flex items-center justify-center">
+          <Button
+            variant="ghost"
+            asChild
+            className="flex-col gap-0 size-auto sm:flex-row sm:gap-2"
+          >
             <Link
               href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointment.id}`}
             >
-              <div className="flex sm:flex-row flex-col items-center justify-center sm:gap-1">
+              <>
                 {token ? (
                   <>
-                    <span className="text-sm text-gray-600">{t("token")}:</span>
+                    <span className="text-xs sm:text-sm text-gray-600">
+                      {t("token")}:
+                    </span>
                     <div className="flex whitespace-nowrap gap-1 items-center">
-                      <span className="text-sm text-black font-semibold underline ">
+                      <span className="text-sm text-black font-semibold underline">
                         {renderTokenNumber(token)}
                       </span>
-                      <ExternalLinkIcon className="size-4 text-black" />
+                      <ExternalLinkIcon className="size-4 text-black hidden sm:block" />
                     </div>
                   </>
                 ) : (
-                  <div className="flex gap-2 items-center underline">
+                  <>
                     <CalendarCheck className="size-4 text-black" />
-                    {t("view")}
-                    <ExternalLinkIcon className="size-4 text-black" />
-                  </div>
+                    <span className="text-black underline">{t("view")}</span>
+                    <ExternalLinkIcon className="size-4 text-black hidden sm:block" />
+                  </>
                 )}
-              </div>
+              </>
             </Link>
           </Button>
         </div>
       )}
       {token && (
-        <div className="flex items-center justify-center">
-          <Button variant="link" className="underline ">
+        <div className="flex-1 flex items-center justify-center">
+          <Button
+            variant="ghost"
+            className="flex-col gap-0 size-auto sm:flex-row sm:gap-2"
+            asChild
+          >
             <Link
               basePath="/"
-              className="flex items-center gap-1"
               href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/queues/${token.queue.id}`}
             >
               <ListOrdered className="size-4 text-black" />
-              {t("queue")}
-              <ExternalLinkIcon className="size-4 text-black" />
+              <span className="text-sm text-black underline">{t("queue")}</span>
+              <ExternalLinkIcon className="size-4 text-black hidden sm:block" />
             </Link>
           </Button>
         </div>
       )}
-    </div>
+    </>
   );
 };
