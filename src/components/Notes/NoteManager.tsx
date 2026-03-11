@@ -488,9 +488,9 @@ export function NoteManager({
   const totalMessages = messagesData?.pages[0]?.count ?? 0;
 
   return (
-    <div className="flex h-[calc(100vh-15rem)] overflow-hidden">
+    <div className="flex h-full overflow-hidden">
       {/* Desktop Sidebar */}
-      <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r border-gray-200">
+      <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r border-gray-200 min-w-0 overflow-hidden">
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -511,7 +511,7 @@ export function NoteManager({
           </div>
         </div>
 
-        <ScrollArea className="flex-1">
+        <div className="flex-1 overflow-y-auto">
           <div className="space-y-2 p-4">
             {threadsData?.results.length === 0 ? (
               <div className="text-center py-6">
@@ -531,7 +531,7 @@ export function NoteManager({
               ))
             )}
           </div>
-        </ScrollArea>
+        </div>
       </div>
 
       {/* Mobile Sheet */}
@@ -638,7 +638,7 @@ export function NoteManager({
                 <>
                   {/* Messages List */}
                   {isMobile ? (
-                    <div className="flex-1 overflow-y-auto overscroll-y-contain -mx-2 px-2">
+                    <div className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain -mx-2 px-2">
                       <div className="flex flex-col-reverse py-2 min-h-full">
                         {messages.map((message, i) => (
                           <MessageItem
@@ -663,7 +663,7 @@ export function NoteManager({
                       </div>
                     </div>
                   ) : (
-                    <ScrollArea className="flex-1 px-4 h-[calc(100vh-16rem)] overflow-y-auto">
+                    <ScrollArea className="flex-1 min-h-0 px-4">
                       <div className="flex flex-col-reverse py-4 min-h-full">
                         {messages.map((message, i) => (
                           <MessageItem
