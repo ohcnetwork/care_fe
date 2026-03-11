@@ -1,5 +1,5 @@
 import { useLocationChange } from "raviger";
-import { ReactNode, createContext, useEffect, useRef, useState } from "react";
+import { ReactNode, createContext, useState } from "react";
 
 export const HistoryContext = createContext<string[]>([]);
 
@@ -7,37 +7,33 @@ export const ResetHistoryContext = createContext(() => {});
 
 export default function HistoryAPIProvider(props: { children: ReactNode }) {
   const [history, setHistory] = useState<string[]>([]);
-  const isReplaceRef = useRef(false); // set a flag to track if the history is being replaced
-  /**
-   * Intercept the browser's replaceState function to track if the history is being replaced.
-   */
-  useEffect(() => {
-    const original = window.history.replaceState.bind(window.history);
-    window.history.replaceState = (...args) => {
-      isReplaceRef.current = true;
-      return original(...args);
-    };
-  }, []);
-
   useLocationChange(
-    (newLocation) => {
-      const newPath = newLocation.fullPath + newLocation.search;
-      const isReplace = isReplaceRef.current;
-      isReplaceRef.current = false;
+    (location) => {
+      const newPath = location.fullPath + location.search;
+      const action = location.initiatedBy;
 
       setHistory((history) => {
-        if (history.length && newPath === history[0]) {
-          return history;
-        }
-
-        if (isReplace) {
-          return [newPath, ...history.slice(1)];
-        }
-
+        // instead of pushing, we are popping the history when the same page is navigated to
         if (history.length > 1 && newPath === history[1]) {
           return history.slice(1);
         }
 
+        // replace navigation
+        if (action === "replace") {
+          return [newPath, ...history.slice(1)];
+        }
+
+        // browser back/forward
+        if (action === "pop") {
+          return history.slice(1);
+        }
+
+        // push navigation
+        if (action === "push") {
+          return [newPath, ...history];
+        }
+
+        // normal navigation
         return [newPath, ...history];
       });
     },

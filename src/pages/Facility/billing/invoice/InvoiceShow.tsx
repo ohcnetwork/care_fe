@@ -55,6 +55,7 @@ import { useState } from "react";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import AddChargeItemSheet from "@/components/Billing/Invoice/AddChargeItemSheet";
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
+import BackButton from "@/components/Common/BackButton";
 import { DisablingCover } from "@/components/Common/DisablingCover";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { formatPatientAddress } from "@/components/Patient/utils";
@@ -390,18 +391,10 @@ export function InvoiceShow({
       <div className="space-y-8 relative">
         <div className="flex items-start justify-between flex-col sm:flex-row gap-4 sm:items-center border-b-3 border-double pb-4">
           <div className="flex gap-3 sm:gap-6 flex-col md:flex-row">
-            <Button
-              variant="link"
-              className="px-0 justify-start"
-              onClick={() => {
-                navigate(
-                  `/facility/${facilityId}/billing/account/${invoice.account.id}`,
-                );
-              }}
-            >
+            <BackButton variant="link" className="px-0 justify-start">
               <ChevronLeft />
               <span>{t("back")}</span>
-            </Button>
+            </BackButton>
             <div className="h-auto w-px bg-gray-300" aria-hidden="true" />
             <div>
               <label className="text-gray-700 text-sm font-medium">
