@@ -140,7 +140,6 @@ const PatientScanButton = ({
   });
 
   const handleScanSuccess = (patientId: string) => {
-    setScanDialogOpen(false);
     checkPatientAppointments(patientId);
   };
 
@@ -275,7 +274,7 @@ const AppointmentEncounterHeaderActions = ({
         appointment.token && "sm:border-l-2 sm:pl-2",
       )}
     >
-      <span className=" text-sm text-black">
+      <span className="text-sm text-black">
         {t("how_do_you_to_finish_this_visit")}
       </span>
       <DropdownMenu>
