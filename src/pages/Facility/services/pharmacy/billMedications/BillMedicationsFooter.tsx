@@ -1,9 +1,7 @@
 import BackButton from "@/components/Common/BackButton";
 import { Button } from "@/components/ui/button";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
-import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import { BillMedicationLineItemSchemaType } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { calculateTotalPriceWithQuantity } from "@/types/base/monetaryComponent/monetaryComponent";
 import { add } from "@/Utils/decimal";
 import { ArrowRightIcon, Loader2 } from "lucide-react";
@@ -19,9 +17,6 @@ export const BillMedicationsFooter = ({
   items,
 }: Props) => {
   const { t } = useTranslation();
-
-  const { facilityId } = useCurrentFacility();
-  const { locationId } = useCurrentLocation();
 
   const grandTotal = add(
     ...items
@@ -53,12 +48,7 @@ export const BillMedicationsFooter = ({
         </div>
       </div>
       <div className="flex gap-6">
-        <BackButton
-          variant="outline"
-          size="lg"
-          disabled={isBillingMedications}
-          to={`/facility/${facilityId}/locations/${locationId}/medication_requests`}
-        >
+        <BackButton variant="outline" size="lg" disabled={isBillingMedications}>
           {t("cancel")}
         </BackButton>
         <Button variant="primary" size="lg" disabled={isBillingMedications}>
