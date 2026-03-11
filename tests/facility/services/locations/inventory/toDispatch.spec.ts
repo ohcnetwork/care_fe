@@ -177,7 +177,7 @@ test.describe("External Delivery Order Flow", () => {
     );
     await page.getByRole("button", { name: "Create" }).click();
     await expect(page.getByText("Name is required")).toBeVisible();
-    await expect(page.getByText("Supplier is required")).toBeVisible();
+    await expect(page.getByText("Required", { exact: true })).toBeVisible();
   });
 
   test("should create an external delivery order successfully", async ({
