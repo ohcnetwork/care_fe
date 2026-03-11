@@ -3481,7 +3481,7 @@
   "no_allergies_recorded_description": "No Allergies have been recorded",
   "no_alternative_names_added": "No alternative names added",
   "no_appointments": "No appointments found",
-  "no_appointments_found_for_today": "No appointments found for today. Redirecting to patient home page...",
+  "no_appointments_found_for_today": "No matching appointment found for today. Redirecting to Patient Home...",
   "no_attachments_found": "This communication has no attachments.",
   "no_availabilities_yet": "No availabilities yet",
   "no_available_beds_found": "No available beds found",
