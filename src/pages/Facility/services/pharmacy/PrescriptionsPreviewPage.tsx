@@ -8,7 +8,10 @@ import { useShortcutSubContext } from "@/context/ShortcutContext";
 import UnbilledPrescriptionsCard from "@/pages/Facility/services/pharmacy/billMedications/UnbilledPrescriptionsCard";
 import PrescriptionsPreviewTable from "@/pages/Facility/services/pharmacy/components/PrescriptionsPreviewTable";
 import { MedicationRequestDispenseStatus } from "@/types/emr/medicationRequest/medicationRequest";
-import { PrescriptionRead } from "@/types/emr/prescription/prescription";
+import {
+  PrescriptionRead,
+  PrescriptionStatus,
+} from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
@@ -39,7 +42,7 @@ export default function PrescriptionsPreviewPage({
 
   const [qParams, setQParams] = useQueryParams<QParams>();
 
-  const { prescriptions, anyEncounter } = useQueries({
+  const { prescriptions, anyEncounter, activePrescriptionIds } = useQueries({
     queries: prescriptionIds.map((prescriptionId) => ({
       queryKey: ["prescription", patientId, prescriptionId],
       queryFn: query(prescriptionApi.get, {
@@ -50,6 +53,9 @@ export default function PrescriptionsPreviewPage({
       return {
         isLoading: results.some((result) => result.isLoading),
         prescriptions: results.map((result) => result.data),
+        activePrescriptionIds: results
+          .filter((result) => result.data?.status === PrescriptionStatus.active)
+          .map((result) => result.data?.id ?? ""),
         anyEncounter: results.find((result) => !!result.data)?.data.encounter,
       };
     },
@@ -103,15 +109,17 @@ export default function PrescriptionsPreviewPage({
               />
             </div>
           </div>
-          <Button size="lg" asChild>
-            <Link
-              href={`/medication_requests/patient/${patientId}/bill/prescriptions/${prescriptionIds.join(",")}`}
-            >
-              {t("start_billing")}
-              <ShortcutBadge actionId="billing-action" />
-              <ArrowRightIcon className="size-4" />
-            </Link>
-          </Button>
+          {activePrescriptionIds.length > 0 && (
+            <Button size="lg" asChild>
+              <Link
+                href={`/medication_requests/patient/${patientId}/bill/prescriptions/${activePrescriptionIds.join(",")}`}
+              >
+                {t("start_billing")}
+                <ShortcutBadge actionId="billing-action" />
+                <ArrowRightIcon className="size-4" />
+              </Link>
+            </Button>
+          )}
         </div>
 
         <UnbilledPrescriptionsCard
