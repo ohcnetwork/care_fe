@@ -90,6 +90,7 @@ export default function BillMedicationsByPrescriptions({
         toast.success(t("medications_billed_successfully"));
         navigate(
           `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrder.id}`,
+          { replace: true },
         );
       },
     });
