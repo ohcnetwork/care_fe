@@ -65,9 +65,7 @@ export default function PrescriptionsPreviewTable({
       {prescriptions.map((prescription, index) => (
         <React.Fragment key={index}>
           {index !== 0 && <div className="col-span-5 h-8 bg-gray-50" />}
-          {prescription && (
-            <PrescriptionCard prescription={prescription} filters={filters} />
-          )}
+          {<PrescriptionCard prescription={prescription} filters={filters} />}
         </React.Fragment>
       ))}
     </div>
