@@ -10,6 +10,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import careConfig from "@careConfig";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -20,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
+import { FilterSelect } from "@/components/ui/filter-select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
@@ -40,7 +43,6 @@ import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilte
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import {
   dateFilter,
-  encounterClassFilter,
   tagFilter,
 } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
@@ -97,7 +99,6 @@ export default function PrescriptionQueue({
   // Create filter configurations
   const filters = useMemo(
     () => [
-      encounterClassFilter(),
       tagFilter("tags", TagResource.PRESCRIPTION, "multi", "tags"),
       dateFilter("created_date", t("date"), longDateRangeOptions),
     ],
@@ -297,6 +298,23 @@ export default function PrescriptionQueue({
           className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
           patientId={qParams.patient_external_id}
           patientName={qParams.patient_name}
+        />
+        <FilterSelect
+          value={
+            qParams.encounter_class
+              ? `encounter_class__${qParams.encounter_class}`
+              : ""
+          }
+          onValueChange={(value) =>
+            updateQuery({
+              encounter_class: value?.replace("encounter_class__", ""),
+            })
+          }
+          options={careConfig.encounterClasses.map(
+            (c) => `encounter_class__${c}`,
+          )}
+          label={t("encounter_class")}
+          onClear={() => updateQuery({ encounter_class: undefined })}
         />
         <MultiFilter
           selectedFilters={selectedFilters}
