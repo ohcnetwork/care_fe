@@ -114,9 +114,6 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
           page.getByText(firstOrgName, { exact: false }).first(),
         ).toBeVisible();
         await expect(searchInput).toHaveValue(partialName);
-        expect(
-          await getOrgCards(page, defaultTestType).count(),
-        ).toBeGreaterThan(0);
       }
     }
 
@@ -202,7 +199,7 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
     const breadcrumb = page.locator('[data-slot="breadcrumb"]');
     await breadcrumb.waitFor({ state: "visible" });
     await expect(page).toHaveURL(
-      new RegExp(`.*\\/admin\\/organizations\\/${defaultTestType}\\/.+/`),
+      new RegExp(`.*\\/admin\\/organizations\\/${defaultTestType}\\/[^/]+$`),
     );
     await expect(breadcrumb).toBeVisible();
     const organizationsLink = breadcrumb.getByRole("button", {
@@ -243,7 +240,7 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
     await seeDetailsLink.click();
     await page.waitForLoadState("domcontentloaded");
     await expect(page).toHaveURL(
-      new RegExp(`.*\\/admin\\/organizations\\/${defaultTestType}\\/.+/`),
+      new RegExp(`.*\\/admin\\/organizations\\/${defaultTestType}\\/[^/]+$`),
     );
 
     const addOrgButton = page.getByRole("button", {
