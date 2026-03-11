@@ -103,7 +103,11 @@ const PatientScanButton = ({
         query(scheduleApi.appointments.list, {
           pathParams: { facilityId },
           queryParams: {
-            status: `${AppointmentStatus.BOOKED},${AppointmentStatus.CHECKED_IN}`,
+            status: [
+              AppointmentStatus.BOOKED,
+              AppointmentStatus.CHECKED_IN,
+              AppointmentStatus.IN_CONSULTATION,
+            ].join(","),
             resource_type: appointment.resource_type,
             resource_ids: appointment.resource.id,
             date_after: today,
@@ -112,6 +116,7 @@ const PatientScanButton = ({
           },
         })({ signal: controller.signal }),
         query(patientApi.get, {
+          silent: true,
           pathParams: { id: patientId },
         })({ signal: controller.signal }),
       ]);
