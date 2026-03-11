@@ -308,7 +308,7 @@ export default function ServiceRequestList({
       queryParams: {
         location: locationId,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         title: qParams.search,
         status: qParams.status,
         priority: qParams.priority,
