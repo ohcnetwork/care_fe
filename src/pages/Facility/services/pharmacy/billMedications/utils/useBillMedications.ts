@@ -38,7 +38,10 @@ export default function useBillMedications({
 }: Options) {
   const queryClient = useQueryClient();
 
-  const { data: account } = useDefaultBillingAccount({ patientId, facilityId });
+  const { data: account, refetch: refetchAccount } = useDefaultBillingAccount({
+    patientId,
+    facilityId,
+  });
 
   const dispenseMutation = useMutation({
     mutationFn: mutate(batchApi.batchRequest),
@@ -115,11 +118,13 @@ export default function useBillMedications({
         response as ChargeItemBatchResponse,
       );
 
-      if (chargeItems.length > 0 && account) {
-        // TODO: so what happens if patient doesn't have an account?
+      // Get the account ID from the account or refetch it if it's not available.
+      const accountId = account?.id ?? (await refetchAccount()).data?.id;
+
+      if (chargeItems.length > 0 && accountId) {
         const invoice = await createInvoiceMutation.mutateAsync({
           status: InvoiceStatus.issued,
-          account: account.id,
+          account: accountId,
           charge_items: chargeItems.map((item) => item.id),
         });
 
