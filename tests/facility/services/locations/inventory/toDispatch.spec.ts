@@ -4,13 +4,15 @@ import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
+test.describe.configure({ mode: "serial" });
 
 let orderName: string;
 let bioChemLabLocationId: string;
 let pharmacyLocationId: string;
 let bioChembasePath: string;
 let pharmacybasePath: string;
-let isInitialized: boolean = false;
+let areLocationsInitialized = false;
+let isInternalDataInitialized = false;
 
 async function createStockRequest(page: Page, orderNameParam?: string) {
   await page.goto(bioChembasePath + "/inventory/internal/receive");
@@ -45,8 +47,8 @@ async function createStockRequest(page: Page, orderNameParam?: string) {
   await expect(tableRow1).toContainText("Pharmacy");
 }
 
-async function setupInitialData(page: Page) {
-  if (isInitialized) return;
+async function setupLocationPaths(page: Page) {
+  if (areLocationsInitialized) return;
   const facilityId = getFacilityId();
   const servicesUrl = `/facility/${facilityId}/services/`;
   await page.goto(servicesUrl);
@@ -81,15 +83,20 @@ async function setupInitialData(page: Page) {
   }
   bioChemLabLocationId = bioChemMatch[1];
   bioChembasePath = `/facility/${facilityId}/locations/${bioChemLabLocationId}`;
+  areLocationsInitialized = true;
+}
+
+async function setupInitialData(page: Page) {
+  await setupLocationPaths(page);
+  if (isInternalDataInitialized) return;
   orderName = faker.lorem.words(5);
   await createStockRequest(page, orderName);
-  isInitialized = true;
+  isInternalDataInitialized = true;
 }
 
 test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
   test.beforeEach(async ({ page }) => {
     await setupInitialData(page);
-    // Navigate to the To-Receive Orders Inventory page before each test
     await page.goto(pharmacybasePath + "/inventory/internal/dispatch");
   });
 
@@ -159,7 +166,7 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
 
 test.describe("External Delivery Order Flow", () => {
   test.beforeEach(async ({ page }) => {
-    await setupInitialData(page);
+    await setupLocationPaths(page);
   });
 
   test("should show validation errors when Name and Vendor are empty", async ({
@@ -170,7 +177,7 @@ test.describe("External Delivery Order Flow", () => {
     );
     await page.getByRole("button", { name: "Create" }).click();
     await expect(page.getByText("Name is required")).toBeVisible();
-    await expect(page.getByText("Required", { exact: true })).toBeVisible();
+    await expect(page.getByText("Supplier is required")).toBeVisible();
   });
 
   test("should create an external delivery order successfully", async ({
@@ -178,7 +185,7 @@ test.describe("External Delivery Order Flow", () => {
   }) => {
     const deliveryName = faker.lorem.words(3);
     await page.goto(
-      pharmacybasePath + "/inventory/external/deliveries/incoming",
+      pharmacybasePath + "/inventory/external/deliveries/outgoing",
     );
     await page.getByRole("button", { name: "Create Delivery" }).click();
     await page.getByRole("textbox", { name: "Name" }).fill(deliveryName);
@@ -195,23 +202,30 @@ test.describe("External Delivery Order Flow", () => {
     await expect(page.getByText("Order created successfully")).toBeVisible({
       timeout: 10000,
     });
-    await page.goto(
-      pharmacybasePath + "/inventory/external/deliveries/incoming",
+    await expect(page).toHaveURL(
+      /\/inventory\/external\/deliveries\/outgoing\/[^/?]+/,
     );
-    const row1 = page.locator("table tbody tr").nth(0);
+    await page.goto(
+      pharmacybasePath + "/inventory/external/deliveries/outgoing",
+    );
+    const row1 = page
+      .locator("table tbody tr")
+      .filter({ hasText: deliveryName });
     await expect(row1).toContainText(deliveryName);
   });
 
-  test("should navigate to completed tab and display results", async ({
-    page,
-  }) => {
+  test("should show empty state in the completed tab", async ({ page }) => {
     await page.goto(
-      pharmacybasePath + "/inventory/external/deliveries/incoming",
+      pharmacybasePath + "/inventory/external/deliveries/outgoing",
     );
     await page.getByRole("tab", { name: "Completed" }).click();
     await expect(page.getByRole("tab", { name: "Completed" })).toHaveAttribute(
       "aria-selected",
       "true",
     );
+    await expect(page.getByText("No orders found")).toBeVisible();
+    await expect(
+      page.getByText("No orders found based on the selected filters"),
+    ).toBeVisible();
   });
 });
