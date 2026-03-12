@@ -112,7 +112,7 @@ test.describe("Keyboard navigation in search patients", () => {
     await expect(commandItems).toHaveCount(0);
   });
 
-  test("keyboard navigation: single item remains selected", async ({
+  test("keyboard navigation: multiple key presses end with last item selected after End", async ({
     page,
   }) => {
     await page.keyboard.press("Control+k");
