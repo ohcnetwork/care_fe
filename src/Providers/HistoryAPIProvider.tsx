@@ -13,7 +13,7 @@ export default function HistoryAPIProvider(props: { children: ReactNode }) {
       const action = location.initiatedBy;
 
       setHistory((history) => {
-        // instead of pushing, we are popping the history when the same page is navigated to
+        // Pop current path if navigate back to previous path
         if (
           (history.length > 1 && newPath === history[1]) ||
           action === "pop"
@@ -21,12 +21,11 @@ export default function HistoryAPIProvider(props: { children: ReactNode }) {
           return history.slice(1);
         }
 
-        // replace navigation
         if (action === "replace") {
           return [newPath, ...history.slice(1)];
         }
 
-        // normal navigation or push navigation
+        // Otherwise just push the current path
         return [newPath, ...history];
       });
     },
