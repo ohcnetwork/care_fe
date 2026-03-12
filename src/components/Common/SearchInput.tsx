@@ -351,9 +351,9 @@ export default function SearchInput({
                                 </span>
                                 <kbd
                                   className="ml-2 border border-gray-300 rounded px-1 bg-white text-xs text-gray-500 hidden group-data-[selected=true]:block"
-                                  title="Press Enter to select"
+                                  title={t("press_enter_to_select")}
                                 >
-                                  ⏎ Enter
+                                  ⏎ {t("enter")}
                                 </kbd>
                               </CommandItem>
                             );

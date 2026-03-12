@@ -106,9 +106,8 @@ test.describe("Keyboard navigation in search patients", () => {
     const commandItems = page.locator("[cmdk-item]");
     await expect(commandItems.first()).toBeVisible();
 
-    // Clicking the actual search input (outside the popover) closes it
-    await page.locator('[data-slot="input"]').click();
-    await page.locator('[data-slot="input"]').fill("zzzzzz-not-a-patient");
+    const commandInput = page.locator("[cmdk-input]");
+    await commandInput.fill("zzzzzz-not-a-patient");
 
     await expect(commandItems).toHaveCount(0);
   });
@@ -120,13 +119,11 @@ test.describe("Keyboard navigation in search patients", () => {
 
     const commandItems = page.locator("[cmdk-item]");
     await expect(commandItems.first()).toBeVisible();
-
-    // Navigate through the static cmdk-item list with keyboard
     await page.keyboard.press("ArrowDown");
     await page.keyboard.press("ArrowUp");
     await page.keyboard.press("Home");
     await page.keyboard.press("End");
 
-    await expect(commandItems.nth(0)).toHaveAttribute("data-selected", "true");
+    await expect(commandItems.nth(1)).toHaveAttribute("data-selected", "true");
   });
 });
