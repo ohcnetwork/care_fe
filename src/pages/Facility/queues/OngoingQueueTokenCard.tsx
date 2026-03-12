@@ -81,12 +81,12 @@ export function OngoingQueueTokenCard({
       <ContextMenuTrigger ref={contextMenuTriggerRef}>
         <div
           className={cn(
-            "relative flex gap-3 items-center justify-between p-3 bg-gray-50 rounded-lg shadow",
+            "relative flex flex-col md:flex-row gap-1 md:gap-3 items-start md:items-center justify-between p-3 bg-gray-50 rounded-lg shadow",
             token?.status === TokenStatus.IN_PROGRESS &&
               "border border-primary-500",
           )}
         >
-          <div className="flex flex-col">
+          <div className="w-full md:w-auto">
             {token ? (
               <Link
                 basePath="/"
@@ -105,9 +105,9 @@ export function OngoingQueueTokenCard({
             )}
             {/* TODO: do we show tags here? or something else? */}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex w-full md:w-auto items-center gap-3 mt-1">
             {token ? (
-              <div className="flex gap-3 justify-center items-center">
+              <>
                 <Button variant="outline" asChild>
                   <Link
                     basePath="/"
@@ -116,42 +116,44 @@ export function OngoingQueueTokenCard({
                     {t("encounter")}
                   </Link>
                 </Button>
-                <div className="flex gap-2 items-center justify-center p-2 bg-gray-100 border border-gray-200 rounded-lg">
+                <div className="flex gap-2 items-center justify-center p-1 bg-gray-100 border border-gray-200 rounded-lg">
                   <span className="text-lg font-bold text-black">
                     {renderTokenNumber(token)}
                   </span>
                 </div>
-              </div>
+                {options}
+                <div className="ml-auto">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const x = rect.left + rect.width / 2;
+                      const y = rect.bottom;
+                      contextMenuTriggerRef.current?.dispatchEvent(
+                        new MouseEvent("contextmenu", {
+                          bubbles: true,
+                          cancelable: true,
+                          clientX: x,
+                          clientY: y,
+                        }),
+                      );
+                    }}
+                  >
+                    <MoreHorizontal className="size-4" />
+                  </Button>
+                </div>
+              </>
             ) : (
               <Skeleton className="h-12 w-20" />
             )}
-            {options}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={(e) => {
-                e.preventDefault();
-                const rect = e.currentTarget.getBoundingClientRect();
-                const x = rect.left + rect.width / 2;
-                const y = rect.bottom;
-                contextMenuTriggerRef.current?.dispatchEvent(
-                  new MouseEvent("contextmenu", {
-                    bubbles: true,
-                    cancelable: true,
-                    clientX: x,
-                    clientY: y,
-                  }),
-                );
-              }}
-            >
-              <MoreHorizontal className="size-4" />
-            </Button>
           </div>
         </div>
       </ContextMenuTrigger>
       {token && (
         <>
-          <ContextMenuContent>
+          <ContextMenuContent collisionPadding={8} avoidCollisions={true}>
             {token.status === TokenStatus.CREATED && token.sub_queue && (
               <>
                 <ContextMenuItem

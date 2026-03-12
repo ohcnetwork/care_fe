@@ -4,6 +4,7 @@ import { SlugConfig } from "@/types/base/slug/slugConfig";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { ObservationDefinitionReadSpec } from "@/types/emr/observationDefinition/observationDefinition";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
+import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
 import { LocationRead } from "@/types/location/location";
 
@@ -79,6 +80,7 @@ export interface ActivityDefinitionUpdateSpec extends Omit<
 
 export interface ActivityDefinitionReadSpec extends BaseActivityDefinitionSpec {
   version?: number;
+  tags: TagConfig[];
   specimen_requirements: SpecimenDefinitionRead[];
   charge_item_definitions: ChargeItemDefinitionRead[];
   observation_result_requirements: ObservationDefinitionReadSpec[];

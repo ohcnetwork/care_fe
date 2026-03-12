@@ -1,4 +1,3 @@
-import Loading from "@/components/Common/Loading";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -6,6 +5,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
 import { ChevronDownIcon } from "lucide-react";
@@ -21,7 +21,12 @@ export const ServicePointsDropDown = () => {
   const defaultServicePoints = useBreakpoints({ default: 2, sm: 6 });
 
   if (!allServicePoints) {
-    return <Loading />;
+    return (
+      <div className="flex">
+        <Skeleton className="h-11 w-40 rounded-r-none rounded-l-md" />
+        <Skeleton className="h-11 w-10 rounded-l-none rounded-r-md" />
+      </div>
+    );
   }
 
   const activeServicePointCount = allServicePoints.filter((subQueue) =>
