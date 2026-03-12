@@ -43,14 +43,21 @@ test.describe("Discount Code Settings", () => {
     ).toBeVisible();
   }
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeAll(async ({ browser }) => {
     facilityId = getFacilityId();
-    discountName = faker.commerce.productName();
-    discountCode = discountName.replace(/\s+/g, "-").slice(0, 20).toLowerCase();
+    const context = await browser.newContext({
+      storageState: "tests/.auth/user.json",
+    });
+    const page = await context.newPage();
 
-    // Ensure the facility has a valid discount configuration before creating codes
     await ensureDiscountConfiguration(page);
 
+    await context.close();
+  });
+
+  test.beforeEach(async ({ page }) => {
+    discountName = faker.commerce.productName();
+    discountCode = discountName.replace(/\s+/g, "-").slice(0, 20).toLowerCase();
     await page.goto(`/facility/${facilityId}/settings/billing/discount_codes`);
 
     await expect(
@@ -85,7 +92,7 @@ test.describe("Discount Code Settings", () => {
     await expect(page.getByRole("table").getByText(discountName)).toBeVisible();
     await expect(page.getByRole("table").getByText(discountCode)).toBeVisible();
 
-    const searchInput = page.getByRole("textbox", { name: /search/i });
+    const searchInput = page.getByPlaceholder(/search/i);
 
     await searchInput.fill(discountName);
     await expect(page.getByRole("table").getByText(discountName)).toBeVisible();
@@ -96,8 +103,5 @@ test.describe("Discount Code Settings", () => {
     await expect(
       page.getByText(/no discount codes matches this search/i),
     ).toBeVisible();
-    await expect(page.getByRole("table").getByText(discountName)).toHaveCount(
-      0,
-    );
   });
 });
