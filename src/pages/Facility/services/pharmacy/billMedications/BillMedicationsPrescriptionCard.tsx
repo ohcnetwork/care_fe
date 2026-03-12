@@ -762,10 +762,14 @@ const MedicineLineItem = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setShowDialog("markAsGiven")}>
-                  <CheckIcon className="size-4" />
-                  {t("mark_as_already_given")}
-                </DropdownMenuItem>
+                {onMarkAsGiven && (
+                  <DropdownMenuItem
+                    onClick={() => setShowDialog("markAsGiven")}
+                  >
+                    <CheckIcon className="size-4" />
+                    {t("mark_as_already_given")}
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem
                   variant="destructive"
                   onClick={() => setShowDialog("remove")}
