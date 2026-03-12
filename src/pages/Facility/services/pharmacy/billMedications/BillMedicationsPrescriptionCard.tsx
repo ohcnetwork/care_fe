@@ -263,8 +263,10 @@ const PrescriptionSummary = ({
       });
 
       if (newStatus === PrescriptionStatus.completed) {
+        onRemove();
         toast.success(t("prescription_marked_as_completed"));
       } else if (newStatus === PrescriptionStatus.cancelled) {
+        onRemove();
         toast.success(t("prescription_marked_as_cancelled"));
       }
     },
@@ -374,7 +376,6 @@ const PrescriptionSummary = ({
                   prescription,
                   newStatus: PrescriptionStatus.completed,
                 });
-                onRemove();
               }}
             >
               <CheckCircleIcon />
@@ -387,7 +388,6 @@ const PrescriptionSummary = ({
                   prescription,
                   newStatus: PrescriptionStatus.cancelled,
                 });
-                onRemove();
               }}
               variant="destructive"
             >
