@@ -853,7 +853,7 @@ const MedicineLineItem = ({
       <ConfirmActionDialog
         open={showDialog === "markAsGiven"}
         onOpenChange={(open) => {
-          if (!open) setShowDialog("markAsGiven");
+          if (!open) setShowDialog(null);
         }}
         title={t("mark_as_already_given")}
         description={
@@ -880,7 +880,7 @@ const MedicineLineItem = ({
       <ConfirmActionDialog
         open={showDialog === "remove"}
         onOpenChange={(open) => {
-          if (!open) setShowDialog("remove");
+          if (!open) setShowDialog(null);
         }}
         title={t("remove_medication")}
         description={
