@@ -101,6 +101,7 @@ test.describe("Activity Definition List", () => {
         false,
         {
           classification: "Laboratory",
+          status: "Active",
         },
       );
 
@@ -121,6 +122,7 @@ test.describe("Activity Definition List", () => {
         false,
         {
           classification: "Imaging",
+          status: "Active",
         },
       );
 
@@ -136,6 +138,7 @@ test.describe("Activity Definition List", () => {
         false,
         {
           classification: "Procedure",
+          status: "Active",
         },
       );
 
@@ -156,6 +159,7 @@ test.describe("Activity Definition List", () => {
         false,
         {
           classification: "Counselling",
+          status: "Active",
         },
       );
 

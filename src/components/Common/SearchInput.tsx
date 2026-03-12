@@ -392,7 +392,7 @@ export default function SearchInput({
                                 {focusedIndex === index && (
                                   <kbd
                                     className="ml-2 border border-gray-300 rounded px-1 bg-white text-xs text-gray-500"
-                                    title="Press Enter to select"
+                                    title={t("press_enter_to_select")}
                                   >
                                     ⏎ Enter
                                   </kbd>

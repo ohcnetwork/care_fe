@@ -282,7 +282,7 @@ export default function QueuesIndex({
         resource_id: effectiveResourceId,
         date: qParams.date,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
     }),
   });
