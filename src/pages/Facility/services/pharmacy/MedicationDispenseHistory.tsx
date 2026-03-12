@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { startOfDay } from "date-fns";
 import { ArrowUpRightSquare } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +17,7 @@ import {
   TableRow,
 } from "@/components/Common/Table";
 import { CreateDispenseSheet } from "@/pages/Facility/services/pharmacy/CreateDispenseSheet";
+import { MedicationReturnSheet } from "@/pages/Facility/services/pharmacy/MedicationReturnSheet";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -26,6 +26,7 @@ import query from "@/Utils/request/query";
 import { dateQueryString, formatDateTime } from "@/Utils/utils";
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import {
   createdByFilter,
@@ -41,10 +42,11 @@ import useAuthUser from "@/hooks/useAuthUser";
 import {
   DISPENSE_ORDER_STATUS_STYLES,
   DispenseOrderRead,
+  DispenseOrderStatus,
 } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import { UserReadMinimal } from "@/types/user/user";
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
 
 export default function MedicationDispenseHistory({
   facilityId,
@@ -59,18 +61,12 @@ export default function MedicationDispenseHistory({
     limit: 14,
     disableCache: true,
   });
+  const [selectedDispenses, setSelectedDispenses] = useState<string[]>([]);
 
-  // Set default filters on mount (today's date and current user)
+  // Clear selections when patient filter changes
   useEffect(() => {
-    const today = dateQueryString(startOfDay(new Date()));
-    if (!qParams.created_date_after && !qParams.created_by) {
-      updateQuery({
-        created_date_after: today,
-        created_date_before: today,
-        created_by: authUser.id,
-      });
-    }
-  }, []);
+    setSelectedDispenses([]);
+  }, [qParams.patientId]);
 
   const filters = [
     createdByFilter("created_by"),
@@ -145,7 +141,7 @@ export default function MedicationDispenseHistory({
             ? "completed,entered_in_error,abandoned"
             : "draft,in_progress",
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         created_by: qParams.created_by,
         created_date_after: qParams.created_date_after,
         created_date_before: qParams.created_date_before,
@@ -162,15 +158,68 @@ export default function MedicationDispenseHistory({
     },
   } as const;
 
+  const showCheckboxes = !!qParams.patientId;
+
+  const completedDispenses =
+    dispenseOrderQueue?.results?.filter(
+      (item) => item.status === DispenseOrderStatus.completed,
+    ) || [];
+
+  const allCompletedSelected =
+    completedDispenses.length > 0 &&
+    completedDispenses.every((item) => selectedDispenses.includes(item.id));
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedDispenses(completedDispenses.map((item) => item.id));
+    } else {
+      setSelectedDispenses([]);
+    }
+  };
+
+  const handleSelectDispense = (dispenseId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedDispenses([...selectedDispenses, dispenseId]);
+    } else {
+      setSelectedDispenses(selectedDispenses.filter((id) => id !== dispenseId));
+    }
+  };
+
+  // Get patient info from the first selected dispense (all should be for same patient)
+  const selectedPatient = dispenseOrderQueue?.results?.find((item) =>
+    selectedDispenses.includes(item.id),
+  )?.patient;
+
   return (
     <Page
       title={t("dispense_orders")}
       options={
-        <CreateDispenseSheet
-          facilityId={facilityId}
-          locationId={locationId}
-          patientId={qParams.patientId}
-        />
+        <div className="flex items-center gap-2">
+          {selectedDispenses.length > 0 &&
+            qParams.patientId &&
+            selectedPatient && (
+              <MedicationReturnSheet
+                facilityId={facilityId}
+                locationId={locationId}
+                patient={selectedPatient}
+                onSuccess={(deliveryOrder) => {
+                  navigate(
+                    `/facility/${facilityId}/locations/${locationId}/medication_return/order/${deliveryOrder.id}?dispenseOrderIds=${selectedDispenses.join(",")}`,
+                  );
+                }}
+                trigger={
+                  <Button>
+                    {t("return_medicines")} ({selectedDispenses.length})
+                  </Button>
+                }
+              />
+            )}
+          <CreateDispenseSheet
+            facilityId={facilityId}
+            locationId={locationId}
+            patientId={qParams.patientId}
+          />
+        </div>
       }
     >
       <div className="mb-4 pt-6">
@@ -235,6 +284,15 @@ export default function MedicationDispenseHistory({
           <Table>
             <TableHeader>
               <TableRow>
+                {showCheckboxes && (
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={allCompletedSelected}
+                      onCheckedChange={handleSelectAll}
+                      aria-label={t("select_all")}
+                    />
+                  </TableHead>
+                )}
                 <TableHead>{t("patient_name")}</TableHead>
                 <TableHead>{t("status")}</TableHead>
                 <TableHead>{t("location")}</TableHead>
@@ -242,39 +300,73 @@ export default function MedicationDispenseHistory({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {dispenseOrderQueue?.results?.map((item: DispenseOrderRead) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-semibold">
-                    {item.patient.name}
-                    <div className="text-xs text-gray-500">
-                      {t("created_at")}: {formatDateTime(item.created_date)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={DISPENSE_ORDER_STATUS_STYLES[item.status]}>
-                      {t(`dispense_order_status__${item.status}`)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    <div className="font-medium">{item.location.name}</div>
-                    <div className="text-xs text-gray-500">
-                      {item.location.description}
-                    </div>
-                  </TableCell>
-
-                  <TableCell>
-                    <Button variant="outline" asChild>
-                      <Link href={`/medication_dispense/order/${item.id}`}>
-                        <ArrowUpRightSquare
-                          strokeWidth={1.5}
-                          className="size-4"
+              {dispenseOrderQueue?.results?.map((item: DispenseOrderRead) => {
+                const isCompleted =
+                  item.status === DispenseOrderStatus.completed;
+                const isSelected = selectedDispenses.includes(item.id);
+                return (
+                  <TableRow
+                    key={item.id}
+                    className={`group ${isSelected ? "bg-primary-50" : ""}`}
+                  >
+                    {showCheckboxes && (
+                      <TableCell className="w-12">
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={(checked) =>
+                            handleSelectDispense(item.id, checked as boolean)
+                          }
+                          disabled={!isCompleted}
+                          aria-label={
+                            isCompleted
+                              ? t("select_dispense")
+                              : t("dispense_not_completed")
+                          }
                         />
-                        {t("view_order")}
-                      </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+                      </TableCell>
+                    )}
+                    <TableCell
+                      className="font-semibold group-hover:underline cursor-pointer"
+                      onClick={() =>
+                        updateQuery({
+                          patientId: item.patient.id,
+                          patient_name: item.patient.name,
+                        })
+                      }
+                    >
+                      {item.patient.name}
+                      <div className="text-xs text-gray-500">
+                        {t("created_at")}: {formatDateTime(item.created_date)}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={DISPENSE_ORDER_STATUS_STYLES[item.status]}
+                      >
+                        {t(`dispense_order_status__${item.status}`)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      <div className="font-medium">{item.location.name}</div>
+                      <div className="text-xs text-gray-500">
+                        {item.location.description}
+                      </div>
+                    </TableCell>
+
+                    <TableCell>
+                      <Button variant="outline" asChild>
+                        <Link href={`/medication_dispense/order/${item.id}`}>
+                          <ArrowUpRightSquare
+                            strokeWidth={1.5}
+                            className="size-4"
+                          />
+                          {t("view_order")}
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         )}

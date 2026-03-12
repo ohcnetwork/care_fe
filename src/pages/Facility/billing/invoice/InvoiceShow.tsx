@@ -391,7 +391,11 @@ export function InvoiceShow({
       <div className="space-y-8 relative">
         <div className="flex items-start justify-between flex-col sm:flex-row gap-4 sm:items-center border-b-3 border-double pb-4">
           <div className="flex gap-3 sm:gap-6 flex-col md:flex-row">
-            <BackButton variant="link" className="px-0 justify-start">
+            <BackButton
+              variant="link"
+              className="px-0 justify-start"
+              to={`/facility/${facilityId}/billing/account/${invoice.account.id}`}
+            >
               <ChevronLeft />
               <span>{t("back")}</span>
             </BackButton>
@@ -401,7 +405,7 @@ export function InvoiceShow({
                 {t("patient_name")}
               </label>
               <Link
-                href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
+                href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
                   {
                     phone_number: invoice.account.patient.phone_number,
                     year_of_birth:
@@ -890,7 +894,7 @@ export function InvoiceShow({
                             <TableCell
                               className={cn(
                                 tableCellClass,
-                                "font-medium whitespace-pre-wrap",
+                                "font-semibold min-w-40",
                               )}
                             >
                               <InvoiceChargeItemTitle
@@ -899,7 +903,12 @@ export function InvoiceShow({
                                 isLoading={isLoadingDispenses}
                               />
                             </TableCell>
-                            <TableCell className={cn(tableCellClass)}>
+                            <TableCell
+                              className={cn(
+                                tableCellClass,
+                                "max-w-32 whitespace-pre-wrap",
+                              )}
+                            >
                               {formatName(item.performer_actor)}
                             </TableCell>
                             <TableCell
@@ -1139,6 +1148,12 @@ export function InvoiceShow({
                       </div>
                     ))}
 
+                  {/* Subtotal */}
+                  <div className="flex w-64 justify-between">
+                    <span className="text-gray-500">{t("net_amount")}</span>
+                    <MonetaryDisplay amount={invoice.total_net} />
+                  </div>
+
                   {/* Taxes */}
                   {invoice.total_price_components
                     ?.filter(
@@ -1159,12 +1174,6 @@ export function InvoiceShow({
                         </span>
                       </div>
                     ))}
-
-                  {/* Subtotal */}
-                  <div className="flex w-64 justify-between">
-                    <span className="text-gray-500">{t("net_amount")}</span>
-                    <MonetaryDisplay amount={invoice.total_net} />
-                  </div>
 
                   <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
 
