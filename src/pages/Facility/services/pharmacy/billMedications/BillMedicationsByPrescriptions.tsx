@@ -222,8 +222,8 @@ const getPrescriptionFormValues = (
     }
 
     const medications = prescription.medications.filter((medication) =>
-      ACTIVE_MEDICATION_STATUSES.includes(
-        medication.status as (typeof ACTIVE_MEDICATION_STATUSES)[number],
+      (ACTIVE_MEDICATION_STATUSES as readonly string[]).includes(
+        medication.status,
       ),
     );
 
