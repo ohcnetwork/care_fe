@@ -20,7 +20,9 @@ test.describe("Keyboard navigation in search patients", () => {
     await expect(commandItems.nth(0)).toHaveAttribute("data-selected", "false");
     await expect(commandItems.nth(1)).toHaveAttribute("data-selected", "true");
 
-    const highlightedText = await commandItems.nth(1).innerText();
+    const highlightedText = (
+      await commandItems.nth(1).locator("span").first().innerText()
+    ).trim();
 
     await page.keyboard.press("Enter");
     await expect(commandItems).toHaveCount(0);
@@ -45,7 +47,9 @@ test.describe("Keyboard navigation in search patients", () => {
     await expect(commandItems.nth(1)).toHaveAttribute("data-selected", "false");
     await expect(commandItems.nth(0)).toHaveAttribute("data-selected", "true");
 
-    const highlightedText = await commandItems.nth(0).innerText();
+    const highlightedText = (
+      await commandItems.nth(0).locator("span").first().innerText()
+    ).trim();
 
     await page.keyboard.press("Enter");
     await expect(commandItems).toHaveCount(0);
