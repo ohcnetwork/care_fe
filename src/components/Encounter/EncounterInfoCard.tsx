@@ -155,7 +155,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
       <CardFooter className="flex justify-end items-center px-4 py-2 space-x-4 mt-auto">
         <Link
           basePath="/"
-          href={`/facility/${facilityId}/patients/verify?${new URLSearchParams({
+          href={`/facility/${facilityId}/patients/home?${new URLSearchParams({
             phone_number: encounter.patient.phone_number,
             year_of_birth: encounter.patient.year_of_birth?.toString() || "",
             partial_id: encounter.patient.id.slice(0, 5),

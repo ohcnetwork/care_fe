@@ -5,7 +5,10 @@ import { IconName } from "@/CAREUI/icons/CareIcon";
 import { badgeVariants } from "@/components/ui/badge";
 
 import { Code } from "@/types/base/code/code";
-import { MonetaryComponentRead } from "@/types/base/monetaryComponent/monetaryComponent";
+import {
+  DiscountConfiguration,
+  MonetaryComponentRead,
+} from "@/types/base/monetaryComponent/monetaryComponent";
 import { FacilityPermissions } from "@/types/emr/permission/permission";
 import { PrintTemplate } from "@/types/facility/printTemplate";
 import { Organization } from "@/types/organization/organization";
@@ -49,6 +52,7 @@ export interface FacilityRead extends FacilityBase, FacilityPermissions {
   invoice_number_expression: string;
   discount_codes: Code[];
   discount_monetary_components: MonetaryComponentRead[];
+  discount_configuration: DiscountConfiguration | null;
   patient_instance_identifier_configs: PatientIdentifierConfig[];
   patient_facility_identifier_configs: PatientIdentifierConfig[];
   features: number[];
