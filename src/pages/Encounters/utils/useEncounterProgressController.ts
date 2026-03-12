@@ -29,12 +29,7 @@ export function useEncounterProgressController({
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
-  const {
-    mutate: mutateBatch,
-    addToBatch,
-    isPending,
-    requests,
-  } = useBatchRequest({
+  const { addToBatch, isPending, executeBatch } = useBatchRequest({
     onSuccess: ({ results }) => {
       if (results.some((r) => r.reference_id === "encounter-closed")) {
         queryClient.invalidateQueries({
@@ -125,18 +120,18 @@ export function useEncounterProgressController({
     if (checkDischarge()) return;
     encounterCloseRequest();
     appointmentCloseRequests();
-    mutateBatch(requests);
+    executeBatch();
   };
 
   const completeEncounter = () => {
     if (checkDischarge()) return;
     encounterCloseRequest();
-    mutateBatch(requests);
+    executeBatch();
   };
 
   const completeAppointment = () => {
     appointmentCloseRequests();
-    mutateBatch(requests);
+    executeBatch();
   };
 
   return {

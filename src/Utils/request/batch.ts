@@ -8,7 +8,6 @@ import {
   QueryClient,
   useMutation,
   UseMutationOptions,
-  UseMutationResult,
 } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 
@@ -27,14 +26,10 @@ export function useBatchRequest<TError = DefaultError, TContext = unknown>(
     TContext
   >,
   queryClient?: QueryClient,
-): UseMutationResult<
-  BatchRequestResponse,
-  TError,
-  BatchRequestObject[],
-  TContext
-> & {
+): {
+  isPending: boolean;
+  executeBatch: () => void;
   addToBatch: (request: BatchRequestObject) => void;
-  requests: BatchRequestObject[];
 } {
   const [requests, setRequests] = useState<BatchRequestObject[]>([]);
 
@@ -65,9 +60,13 @@ export function useBatchRequest<TError = DefaultError, TContext = unknown>(
     queryClient,
   );
 
+  const executeBatch = () => {
+    mutation.mutate(requests);
+  };
+
   return {
-    ...mutation,
+    isPending: mutation.isPending,
+    executeBatch,
     addToBatch,
-    requests,
   };
 }
