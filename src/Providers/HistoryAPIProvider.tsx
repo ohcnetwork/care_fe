@@ -14,23 +14,16 @@ export default function HistoryAPIProvider(props: { children: ReactNode }) {
 
       setHistory((history) => {
         // instead of pushing, we are popping the history when the same page is navigated to
-        if (history.length > 1 && newPath === history[1]) {
+        if (
+          (history.length > 1 && newPath === history[1]) ||
+          action === "pop"
+        ) {
           return history.slice(1);
         }
 
         // replace navigation
         if (action === "replace") {
           return [newPath, ...history.slice(1)];
-        }
-
-        // browser back/forward
-        if (action === "pop") {
-          return history.slice(1);
-        }
-
-        // push navigation
-        if (action === "push") {
-          return [newPath, ...history];
         }
 
         // normal navigation
