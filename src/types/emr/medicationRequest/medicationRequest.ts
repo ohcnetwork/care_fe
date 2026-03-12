@@ -208,7 +208,7 @@ export interface MedicationRequest {
   status?: MedicationRequestStatus;
   status_reason?: MedicationRequestStatusReason;
   intent?: MedicationRequestIntent;
-  category?: "inpatient" | "outpatient" | "community" | "discharge";
+  category?: MedicationCategory;
   priority?: "stat" | "urgent" | "asap" | "routine";
   do_not_perform: boolean;
   medication?: Code;
@@ -261,12 +261,19 @@ export const MEDICATION_PRIORITY_COLORS = {
   routine: "indigo",
 } as const satisfies Record<MedicationPriority, string>;
 
+export enum MedicationCategory {
+  inpatient = "inpatient",
+  outpatient = "outpatient",
+  community = "community",
+  discharge = "discharge",
+}
+
 export interface MedicationRequestRead {
   id: string;
   status: MedicationRequestStatus;
   status_reason?: MedicationRequestStatusReason;
   intent: MedicationRequestIntent;
-  category: "inpatient" | "outpatient" | "community" | "discharge";
+  category: MedicationCategory;
   priority: MedicationPriority;
   do_not_perform: boolean;
   medication: Code;
@@ -811,7 +818,7 @@ export function parseMedicationStringToRequest(
     status: "active",
     intent: "order",
     priority: "routine",
-    category: "inpatient",
+    category: MedicationCategory.inpatient,
     authored_on: new Date().toISOString(),
     requester: requester,
   };

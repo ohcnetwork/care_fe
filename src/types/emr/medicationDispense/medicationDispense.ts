@@ -1,7 +1,10 @@
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import { DispenseOrderRead } from "@/types/emr/dispenseOrder/dispenseOrder";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { MedicationRequestDosageInstruction } from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  MedicationCategory,
+  MedicationRequestDosageInstruction,
+} from "@/types/emr/medicationRequest/medicationRequest";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import { LocationRead } from "@/types/location/location";
 
@@ -36,12 +39,6 @@ export enum MedicationDispenseNotPerformedReason {
   sdupther = "sdupther",
   saig = "saig",
   preg = "preg",
-}
-
-export enum MedicationDispenseCategory {
-  inpatient = "inpatient",
-  outpatient = "outpatient",
-  community = "community",
 }
 
 export enum SubstitutionType {
@@ -165,7 +162,7 @@ export interface MedicationDispenseBase {
   id: string;
   status: MedicationDispenseStatus;
   not_performed_reason?: MedicationDispenseNotPerformedReason;
-  category: MedicationDispenseCategory;
+  category: MedicationCategory;
   when_prepared: Date;
   when_handed_over?: Date;
   note?: string;

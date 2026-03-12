@@ -12,10 +12,10 @@ import {
   DispenseOrderRead,
 } from "@/types/emr/dispenseOrder/dispenseOrder";
 import {
-  MedicationDispenseCategory,
   MedicationDispenseCreate,
   MedicationDispenseStatus,
 } from "@/types/emr/medicationDispense/medicationDispense";
+import { MedicationCategory } from "@/types/emr/medicationRequest/medicationRequest";
 import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
 import mutate from "@/Utils/request/mutate";
 import { HttpMethod } from "@/Utils/request/types";
@@ -168,7 +168,7 @@ const getDispenseCreateRequests = ({
     for (const lot of item.lots) {
       const body: MedicationDispenseCreate = {
         status: MedicationDispenseStatus.preparation,
-        category: MedicationDispenseCategory.outpatient, // TODO:
+        category: item.medication?.category ?? MedicationCategory.outpatient,
         when_prepared: whenPrepared,
         dosage_instruction: [],
         encounter: (item.medication?.encounter ?? fallbackEncounterId)!,
