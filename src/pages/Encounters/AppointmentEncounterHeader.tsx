@@ -18,7 +18,10 @@ import {
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 
-import { useEncounterProgressController } from "@/pages/Encounters/utils/useEncounterProgressController";
+import {
+  encounterRequiresDischarge,
+  useEncounterProgressController,
+} from "@/pages/Encounters/utils/useEncounterProgressController";
 import { renderTokenNumber } from "@/types/tokens/token/token";
 import mutate from "@/Utils/request/mutate";
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
@@ -171,7 +174,9 @@ const AppointmentEncounterHeaderActions = ({
         onClick={completeEverything}
       >
         <CheckCircle />
-        {t("complete")}
+        {encounterRequiresDischarge(encounter)
+          ? t("mark_for_discharge")
+          : t("complete")}
       </Button>
       {encounter.appointment?.status !== AppointmentStatus.FULFILLED && (
         <DropdownMenu>

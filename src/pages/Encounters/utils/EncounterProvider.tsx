@@ -237,7 +237,10 @@ export function EncounterProvider({
         canWriteClinicalData,
         actions: {
           markAsCompleted: () => {
-            if (!selectedEncounter) return;
+            if (!selectedEncounter) {
+              toast.error(t("encounter_not_found"));
+              return;
+            }
             if (encounterRequiresDischarge(selectedEncounter)) {
               navigate(
                 `/facility/${selectedEncounter.facility.id}/patient/${selectedEncounter.patient.id}/encounter/${selectedEncounter.id}/questionnaire/encounter?toDischarge=true`,
