@@ -2,6 +2,7 @@ import { Redirect } from "raviger";
 
 import FacilityUsers from "@/components/Facility/FacilityUsers";
 import ResourceCreate from "@/components/Resource/ResourceForm";
+import MedicationDispenseRedirect from "@/pages/Facility/billing/account/components/MedicationDispenseRedirect";
 
 import BedAvailabilityDashboard from "@/pages/Facility/BedAvailabilityDashboard";
 
@@ -189,6 +190,15 @@ const FacilityRoutes: AppRoutes = {
   ),
   "/facility/:facilityId/template/builder/:slug": ({ facilityId, slug }) => (
     <TemplateBuilder facilityId={facilityId} slug={slug} />
+  ),
+  "/facility/:facilityId/medication_dispense/redirect/:medicationDispenseId": ({
+    facilityId,
+    medicationDispenseId,
+  }) => (
+    <MedicationDispenseRedirect
+      facilityId={facilityId}
+      medicationDispenseId={medicationDispenseId}
+    />
   ),
 };
 

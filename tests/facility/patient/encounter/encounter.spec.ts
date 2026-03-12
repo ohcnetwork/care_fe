@@ -91,7 +91,7 @@ test.describe("Create an Encounter", () => {
 
     // Click the first patient profile button and view profile
     await page
-      .getByRole("button", { name: /.*\d+\s*Y,/ })
+      .locator('[data-slot="patient-info-hover-card-trigger"]:visible')
       .first()
       .click();
     await page.getByRole("link", { name: "View Profile" }).click();

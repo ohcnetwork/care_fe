@@ -100,7 +100,7 @@ export default function InvoicesData({
       queryParams: {
         account: accountId,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         number: qParams.search,
         status: qParams.status,
         patient: qParams.patient,
