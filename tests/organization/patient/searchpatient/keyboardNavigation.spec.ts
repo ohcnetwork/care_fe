@@ -98,7 +98,7 @@ test.describe("Keyboard navigation in search patients", () => {
     await expect(commandItems.nth(1)).toHaveAttribute("data-selected", "true");
   });
 
-  test("keyboard navigation: empty search results show no selectable items", async ({
+  test("no selectable options when filter matches nothing", async ({
     page,
   }) => {
     await page.keyboard.press("Control+k");
