@@ -26,7 +26,7 @@ export default function HistoryAPIProvider(props: { children: ReactNode }) {
           return [newPath, ...history.slice(1)];
         }
 
-        // normal navigation
+        // normal navigation or push navigation
         return [newPath, ...history];
       });
     },
