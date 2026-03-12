@@ -185,7 +185,7 @@ export function ChargeItemList({
             status: qParams.status,
             category: categorySlug,
             limit: resultsPerPage,
-            offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+            offset: ((qParams.page || 1) - 1) * resultsPerPage,
           },
         },
       ),
