@@ -320,6 +320,8 @@ export function ChargeItemsTable({
         return `/facility/${facilityId}/service_requests/${item.service_resource_id}`;
       case ChargeItemServiceResource.appointment:
         return `/facility/${facilityId}/patient/${patientId}/appointments/${item.service_resource_id}`;
+      case ChargeItemServiceResource.medication_dispense:
+        return `/facility/${facilityId}/medication_dispense/redirect/${item.service_resource_id}`;
       default:
         return "";
     }

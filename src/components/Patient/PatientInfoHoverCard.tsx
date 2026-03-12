@@ -25,7 +25,7 @@ export const PatientInfoHoverCard = ({
 
   const path = usePath();
   const isPatientHomePage = path?.endsWith(
-    `/facility/${facilityId}/patients/verify`,
+    `/facility/${facilityId}/patients/home`,
   );
 
   return (
@@ -49,7 +49,7 @@ export const PatientInfoHoverCard = ({
           <Button variant="outline" className="text-gray-950" asChild>
             <Link
               basePath="/"
-              href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
+              href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
                 {
                   phone_number: patient.phone_number,
                   year_of_birth: patient.year_of_birth?.toString() ?? "",
