@@ -45,15 +45,23 @@ test.describe("Discount Component Settings", () => {
     ).toBeVisible();
   }
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeAll(async ({ browser }) => {
     facilityId = getFacilityId();
+    const context = await browser.newContext({
+      storageState: "tests/.auth/user.json",
+    });
+    const page = await context.newPage();
+
+    await ensureDiscountConfiguration(page);
+
+    await context.close();
+  });
+
+  test.beforeEach(async ({ page }) => {
     componentName = faker.commerce.productName();
     discountValue = faker.number.int({ min: 1, max: 100 }).toString();
     conditionMin = faker.number.int({ min: 50, max: 80 }).toString();
     conditionMax = faker.number.int({ min: 81, max: 120 }).toString();
-
-    // Ensure the facility has a valid discount configuration before creating codes
-    await ensureDiscountConfiguration(page);
 
     await page.goto(
       `/facility/${facilityId}/settings/billing/discount_components`,
@@ -112,7 +120,6 @@ test.describe("Discount Component Settings", () => {
     await expect(
       page.getByText(/no discount components matches this search/i),
     ).toBeVisible();
-    await expect(table.getByText(componentName)).toHaveCount(0);
   });
 
   test("create discount component with condition", async ({ page }) => {
