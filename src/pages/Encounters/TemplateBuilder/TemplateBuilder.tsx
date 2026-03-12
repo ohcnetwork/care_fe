@@ -274,16 +274,45 @@ export default function TemplateBuilder({
     createTemplatePreview(previewData);
   };
 
+  const editorFormatTimeoutRef = useRef<number | null>(null);
+
   // Handle Monaco Editor mount
   const handleEditorMount: OnMount = (editor) => {
     editorRef.current = editor;
 
+    // Clear any existing pending format timeout before scheduling a new one
+    if (editorFormatTimeoutRef.current !== null) {
+      clearTimeout(editorFormatTimeoutRef.current);
+      editorFormatTimeoutRef.current = null;
+    }
+
     // Auto-format the document after a short delay to ensure content is loaded
-    setTimeout(() => {
-      editor.getAction("editor.action.formatDocument")?.run();
+    const timeoutId = window.setTimeout(() => {
+      // If the editor has been unmounted/disposed, do nothing
+      if (!editorRef.current) {
+        return;
+      }
+
+      editorRef.current
+        .getAction("editor.action.formatDocument")
+        ?.run();
     }, 100);
+
+    editorFormatTimeoutRef.current = timeoutId;
   };
 
+  useEffect(() => {
+    return () => {
+      if (editorFormatTimeoutRef.current !== null) {
+        clearTimeout(editorFormatTimeoutRef.current);
+        editorFormatTimeoutRef.current = null;
+      }
+
+      if (editorRef.current) {
+        editorRef.current = null;
+      }
+    };
+  }, []);
   // Get cursor position from Monaco editor
   const getCursorPosition = (): number => {
     const editor = editorRef.current;
