@@ -24,7 +24,7 @@ interface MedicineInfoCardProps {
   dosageInstructions?: MedicationRequestDosageInstruction[] | null;
 }
 
-export const MedicineInfoCard = ({
+export const MedicineInfoPopover = ({
   trigger,
   medication,
   effectiveProductKnowledge,

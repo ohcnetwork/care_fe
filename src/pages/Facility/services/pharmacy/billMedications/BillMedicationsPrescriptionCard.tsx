@@ -29,7 +29,7 @@ import {
 import { billMedicationsByPrescriptionsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { selectEligibleInventoryItems } from "@/pages/Facility/services/pharmacy/billMedications/utils/itemsAutoSelect";
 import { isMedicationDispenseable } from "@/pages/Facility/services/pharmacy/billMedications/utils/utils";
-import { MedicineInfoCard } from "@/pages/Facility/services/pharmacy/components/MedicineInfoCard";
+import { MedicineInfoPopover } from "@/pages/Facility/services/pharmacy/components/MedicineInfoPopover";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   getBasePrice,
@@ -983,7 +983,7 @@ const MedicineLineItemMedication = ({
       {!dispenseCompleted && (
         <div className="flex gap-3">
           {effectiveProductKnowledge && (
-            <MedicineInfoCard
+            <MedicineInfoPopover
               trigger={
                 <Button variant="outline" size="icon" className="text-gray-950">
                   <BadgeInfo />
