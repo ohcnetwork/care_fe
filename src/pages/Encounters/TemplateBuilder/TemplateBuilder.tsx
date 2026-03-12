@@ -7,6 +7,7 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -50,7 +51,6 @@ import {
   TemplateRead,
   TemplateStatus,
   TemplateStatuses,
-  TemplateTypes,
 } from "@/types/emr/template/template";
 import templateApi from "@/types/emr/template/templateApi";
 
@@ -71,27 +71,17 @@ import {
 const Editor = lazy(() =>
   import("@monaco-editor/react").then((mod) => ({ default: mod.Editor })),
 );
-const templateBuilderSchema = z.object({
-  name: z.string().min(1),
-  slug_value: z
-    .string()
-    .trim()
-    .min(5, {
-      message: t("character_count_validation", { min: 5, max: 25 }),
-    })
-    .max(25, {
-      message: t("character_count_validation", { min: 5, max: 25 }),
-    })
-    .regex(/^[a-z0-9-]+$/, {
-      message: t("slug_format_message"),
-    }),
-  status: z.enum(TemplateStatuses),
-  template_type: z.enum(TemplateTypes),
-  default_format: z.enum(TemplateFormats),
-  context: z.string().min(1),
-  description: z.string().optional(),
-  template_data: z.string().min(1),
-});
+
+interface TemplateBuilderFormValues {
+  name: string;
+  slug_value: string;
+  status: TemplateStatus;
+  template_type: string;
+  default_format: TemplateFormat;
+  context: string;
+  description?: string;
+  template_data: string;
+}
 
 export default function TemplateBuilder({
   facilityId,
@@ -156,6 +146,11 @@ export default function TemplateBuilder({
   const availableContexts = useMemo(
     () => schema?.contexts ?? {},
     [schema?.contexts],
+  );
+
+  const availableReportTypes = useMemo(
+    () => schema?.report_types ?? {},
+    [schema?.report_types],
   );
 
   const { data: template } = useQuery({
@@ -228,7 +223,7 @@ export default function TemplateBuilder({
         default_format: template.default_format,
         template_data: template.template_data,
         context: template.context,
-        template_type: template.template_type as (typeof TemplateTypes)[number],
+        template_type: template.template_type,
         description: template.description,
       });
     }
@@ -411,7 +406,7 @@ export default function TemplateBuilder({
       <div className="border-b p-4">
         <div className="mb-2">
           <BackButton>
-            <ArrowLeft />
+            <ChevronLeft />
             {t("back")}
           </BackButton>
         </div>
@@ -549,11 +544,13 @@ export default function TemplateBuilder({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {TemplateTypes.map((reportType) => (
-                        <SelectItem key={reportType} value={reportType}>
-                          {t(reportType)}
-                        </SelectItem>
-                      ))}
+                      {Object.entries(availableReportTypes).map(
+                        ([key, config]) => (
+                          <SelectItem key={key} value={key}>
+                            {config.display_name}
+                          </SelectItem>
+                        ),
+                      )}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -739,7 +736,7 @@ function TemplateEditor({
   form,
   onEditorMount,
 }: {
-  form: UseFormReturn<z.infer<typeof templateBuilderSchema>>;
+  form: UseFormReturn<TemplateBuilderFormValues>;
   onEditorMount: OnMount;
 }) {
   const { t } = useTranslation();
