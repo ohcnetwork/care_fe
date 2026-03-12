@@ -167,25 +167,45 @@ function AllSupplyDeliveriesComponent({
   );
 }
 
-function getDeliveryOrderStatusActions(status: DeliveryOrderStatus) {
+function getDeliveryOrderStatusActions(
+  status: DeliveryOrderStatus,
+  internal: boolean,
+  anyCompletedSupplyDeliveries: boolean,
+) {
+  const isPendingOrCompleted = [
+    DeliveryOrderStatus.pending,
+    DeliveryOrderStatus.completed,
+  ].includes(status);
+  if (
+    (internal && status !== DeliveryOrderStatus.draft) ||
+    (!internal && !isPendingOrCompleted)
+  ) {
+    return [];
+  }
+
   const actions = [
     {
       status: DeliveryOrderStatus.draft,
       icon: <Edit className="size-4" />,
       label: "mark_as_draft",
+      visibility: true,
     },
     {
       status: DeliveryOrderStatus.entered_in_error,
       icon: <CareIcon icon="l-exclamation-circle" />,
       label: "mark_as_entered_in_error",
+      visibility: internal ? true : !anyCompletedSupplyDeliveries,
     },
     {
       status: DeliveryOrderStatus.abandoned,
       icon: <CareIcon icon="l-ban" />,
       label: "mark_as_abandoned",
+      visibility: internal ? true : !anyCompletedSupplyDeliveries,
     },
   ];
-  return actions.filter((action) => action.status !== status);
+  return actions.filter(
+    (action) => action.status !== status && action.visibility,
+  );
 }
 
 export function DeliveryOrderShow({
@@ -430,9 +450,16 @@ export function DeliveryOrderShow({
   const canAddSupplyDeliveries =
     deliveryOrder.status === DeliveryOrderStatus.draft;
 
-  const canChangeDeliveryOrderStatus =
-    (internal && deliveryOrder.status === DeliveryOrderStatus.draft) ||
-    (!internal && deliveryOrder.status !== DeliveryOrderStatus.completed);
+  const anyCompletedSupplyDeliveries =
+    supplyDeliveries?.results?.some(
+      (delivery) => delivery.status === SupplyDeliveryStatus.completed,
+    ) ?? false;
+
+  const deliveryOrderStatusActions = getDeliveryOrderStatusActions(
+    deliveryOrder.status,
+    internal,
+    anyCompletedSupplyDeliveries,
+  );
 
   return (
     <Page
@@ -532,7 +559,7 @@ export function DeliveryOrderShow({
                 </Button>
               )}
 
-            {canChangeDeliveryOrderStatus && (
+            {deliveryOrderStatusActions.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="icon">
@@ -540,28 +567,26 @@ export function DeliveryOrderShow({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  {getDeliveryOrderStatusActions(deliveryOrder.status).map(
-                    (action) => {
-                      return (
-                        <DropdownMenuItem asChild key={action.status}>
-                          <Button
-                            variant="ghost"
-                            onClick={() =>
-                              setDeliveryOrderStatusDialog({
-                                open: true,
-                                status: action.status,
-                              })
-                            }
-                            disabled={isUpdating}
-                            className="w-full flex justify-stretch"
-                          >
-                            {action.icon}
-                            <span>{t(action.label)}</span>
-                          </Button>
-                        </DropdownMenuItem>
-                      );
-                    },
-                  )}
+                  {deliveryOrderStatusActions.map((action) => {
+                    return (
+                      <DropdownMenuItem asChild key={action.status}>
+                        <Button
+                          variant="ghost"
+                          onClick={() =>
+                            setDeliveryOrderStatusDialog({
+                              open: true,
+                              status: action.status,
+                            })
+                          }
+                          disabled={isUpdating}
+                          className="w-full flex justify-stretch"
+                        >
+                          {action.icon}
+                          <span>{t(action.label)}</span>
+                        </Button>
+                      </DropdownMenuItem>
+                    );
+                  })}
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
