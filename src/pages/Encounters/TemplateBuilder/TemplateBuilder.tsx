@@ -584,9 +584,10 @@ export default function TemplateBuilder({
             <CardContent className="px-3 pb-3 pt-0">
               <Select
                 value={selectedContext?.slug}
-                onValueChange={(value) =>
-                  setSelectedContext(availableContexts[value])
-                }
+                onValueChange={(value) => {
+                  setSelectedContext(availableContexts[value]);
+                  form.setValue("context", value, { shouldValidate: true });
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder={t("select_context")} />
