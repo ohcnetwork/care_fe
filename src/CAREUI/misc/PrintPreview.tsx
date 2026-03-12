@@ -46,12 +46,14 @@ export default function PrintPreview(props: Props) {
     (t) => t.slug === (props.templateSlug ?? "default"),
   )?.print_setup?.auto_print;
 
+  const isAutoPrintEnabled =
+    autoPrintPreference !== undefined
+      ? autoPrintPreference
+      : (props.autoPrint?.enabled ?? false);
+
   const { isPrinting } = useAutoPrint({
     ...props.autoPrint,
-    enabled:
-      autoPrintPreference !== undefined
-        ? autoPrintPreference
-        : (props.autoPrint?.enabled ?? false) && !props.disabled,
+    enabled: isAutoPrintEnabled && !props.disabled,
   });
 
   return (
