@@ -762,9 +762,10 @@ export function AccountShow({
           setCloseAccountStatus({ ...closeAccountStatus, sheetOpen: open })
         }
       >
-        <DialogHeader></DialogHeader>
         <DialogContent>
-          <DialogTitle>{t("close_account")}</DialogTitle>
+          <DialogHeader>
+            <DialogTitle>{t("close_account")}</DialogTitle>
+          </DialogHeader>
           <DialogDescription className="text-xs text-gray-500 -mt-1">
             {t(
               closedStatusText[
@@ -809,7 +810,7 @@ export function AccountShow({
 
 const ClosedCallout = ({ balance }: { balance: string }) => {
   const { t } = useTranslation();
-  const isNegative = isPositive(balance);
+  const isNegative = !isPositive(balance) && balance !== "0";
   if (!isNegative) return <></>;
   return (
     <span className="text-red-500 bg-red-50 text-xs -mt-2 p-2 rounded">

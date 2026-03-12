@@ -185,10 +185,15 @@ export default function InvoicesData({
                   </TableCell>
                   <TableCell>
                     <div>
-                      {formatDateTime(
-                        invoice.created_date,
-                        "DD/MM/YY, hh:mm A",
-                      )}
+                      {invoice.issue_date
+                        ? formatDateTime(
+                            invoice.issue_date,
+                            "DD/MM/YY, hh:mm A",
+                          )
+                        : formatDateTime(
+                            invoice.created_date,
+                            "DD/MM/YY, hh:mm A",
+                          )}
                     </div>
                   </TableCell>
 

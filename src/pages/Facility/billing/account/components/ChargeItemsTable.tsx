@@ -517,7 +517,7 @@ export function ChargeItemsTable({
                         {formatDateTime(item.created_date)}
                       </p>
                     </TableCell>
-                    <TableCell className="bor-medium">
+                    <TableCell className="border-x p-3 text-gray-950">
                       {item.title}
                       {item.description && (
                         <p className="text-xs text-gray-500 whitespace-pre-wrap">
