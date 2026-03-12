@@ -7,10 +7,6 @@ test.use({ storageState: "tests/.auth/user.json" });
 // Constants
 const SCHEDULE_CONSTANTS = {
   DEFAULT_SLOT_COUNT: 1,
-  MID_MONTH_DAY: 15,
-  TIME_DISPLAY_FORMAT: {
-    "10:00-15:00": "10 AM - 3 PM",
-  },
   WEEKDAYS: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
   WEEKDAY_ABBREVIATIONS: "Mon, Tue, Wed, Thu, Fri",
 } as const;
@@ -26,161 +22,216 @@ interface ScheduleTestData {
   displayTime: string;
 }
 
-// Helper Classes
+async function fillTemplateName(page: Page, name: string): Promise<void> {
+  await page.getByRole("textbox", { name: "Template Name *" }).fill(name);
+}
 
-class ScheduleFormPage {
-  constructor(private readonly page: Page) {}
+async function selectMidMonthDate(
+  page: Page,
+  datePickerIndex: "first" | "second",
+  monthsToNavigate: number,
+): Promise<void> {
+  const pickerButton =
+    datePickerIndex === "first"
+      ? page.getByRole("button", { name: "Pick a date" }).first()
+      : page
+          .locator('label:has-text("Valid Till")')
+          .locator("..")
+          .locator('button[data-slot="popover-trigger"]');
 
-  async fillTemplateName(name: string): Promise<void> {
-    await this.page
-      .getByRole("textbox", { name: "Template Name *" })
-      .fill(name);
+  await pickerButton.click();
+
+  const nextMonthBtn = page.getByRole("button", {
+    name: "Go to the Next Month",
+  });
+  await expect(nextMonthBtn).toBeVisible();
+
+  for (let i = 0; i < monthsToNavigate; i++) {
+    await nextMonthBtn.click({ force: true });
   }
 
-  async selectMidMonthDate(
-    datePickerIndex: "first" | "second",
-    monthsToNavigate: number,
-  ): Promise<void> {
-    const pickerButton =
-      datePickerIndex === "first"
-        ? this.page.getByRole("button", { name: "Pick a date" }).first()
-        : this.page
-            .locator('label:has-text("Valid Till")')
-            .locator("..")
-            .locator('button[data-slot="popover-trigger"]');
+  await page
+    .getByRole("gridcell")
+    .filter({ hasText: /^15$/ })
+    .getByRole("button")
+    .click();
+}
 
-    await pickerButton.click();
-
-    const nextMonthBtn = this.page.getByRole("button", {
-      name: "Go to the Next Month",
-    });
-    await expect(nextMonthBtn).toBeVisible();
-
-    for (let i = 0; i < monthsToNavigate; i++) {
-      await nextMonthBtn.click({ force: true });
-    }
-
-    await this.page
-      .getByRole("gridcell")
-      .filter({ hasText: /^15$/ })
-      .getByRole("button")
-      .click();
+async function selectWeekdays(
+  page: Page,
+  weekdays: readonly string[],
+): Promise<void> {
+  const formItemDiv = page.locator('div[data-slot="form-item"]');
+  for (const day of weekdays) {
+    await formItemDiv.getByRole("button", { name: day }).click();
   }
+}
 
-  async selectWeekdays(weekdays: readonly string[]): Promise<void> {
-    const formItemDiv = this.page.locator('div[data-slot="form-item"]');
-    for (const day of weekdays) {
-      await formItemDiv.getByRole("button", { name: day }).click();
-    }
-  }
-
-  async fillSessionDetails(data: {
+async function fillSessionDetails(
+  page: Page,
+  data: {
     title: string;
     startTime: string;
     endTime: string;
     patientsPerSlot: string;
-  }): Promise<void> {
-    await this.page
-      .getByRole("textbox", { name: "Session Title *" })
-      .fill(data.title);
-    await this.page
-      .getByRole("textbox", { name: "Start Time *" })
-      .fill(data.startTime);
-    await this.page
-      .getByRole("textbox", { name: "End Time *" })
-      .fill(data.endTime);
-    await this.page
-      .getByRole("switch", { name: "Auto-fill slot duration" })
-      .click();
-    await this.page
-      .getByRole("spinbutton", { name: "Patients per Slot *" })
-      .fill(data.patientsPerSlot);
-  }
+  },
+): Promise<void> {
+  await page.getByRole("textbox", { name: "Session Title *" }).fill(data.title);
+  await page
+    .getByRole("textbox", { name: "Start Time *" })
+    .fill(data.startTime);
+  await page.getByRole("textbox", { name: "End Time *" }).fill(data.endTime);
+  await page.getByRole("switch", { name: "Auto-fill slot duration" }).click();
+  await page
+    .getByRole("spinbutton", { name: "Patients per Slot *" })
+    .fill(data.patientsPerSlot);
+}
 
-  async getAutoFilledSlotDuration(): Promise<string> {
-    const slotDurationInput = this.page.getByRole("spinbutton", {
-      name: "Slot duration (mins.)",
-    });
-    return await slotDurationInput.inputValue();
-  }
+async function getAutoFilledSlotDuration(page: Page): Promise<string> {
+  const slotDurationInput = page.getByRole("spinbutton", {
+    name: "Slot duration (mins.)",
+  });
+  return await slotDurationInput.inputValue();
+}
 
-  async submitTemplate(): Promise<void> {
-    await this.page.getByRole("button", { name: "Save" }).click();
+async function submitTemplate(page: Page): Promise<void> {
+  await page.getByRole("button", { name: "Save" }).click();
+}
+
+function getScheduleCard(page: Page, templateName: string) {
+  return page
+    .locator("div.rounded-lg.bg-white")
+    .filter({ hasText: templateName });
+}
+
+async function verifyCardContent(
+  page: Page,
+  templateName: string,
+  data: {
+    sessionTitle: string;
+    displayTime: string;
+    slotDuration: string;
+    numberOfSlots: number;
+  },
+): Promise<void> {
+  const card = getScheduleCard(page, templateName);
+
+  await expect(
+    card.locator("span.text-lg.font-semibold", { hasText: templateName }),
+  ).toBeVisible();
+
+  await expect(
+    card.locator("span.text-sm.text-gray-700", {
+      hasText: "Scheduled for:",
+    }),
+  ).toContainText(SCHEDULE_CONSTANTS.WEEKDAY_ABBREVIATIONS);
+
+  await expect(card.getByText(data.sessionTitle)).toBeVisible();
+
+  await expect(
+    card.locator("span.text-sm", { hasText: "Appointment" }),
+  ).toBeVisible();
+
+  await expect(
+    card.locator("span.text-sm", {
+      hasText: `${data.numberOfSlots} slots of ${data.slotDuration} mins.`,
+    }),
+  ).toBeVisible();
+
+  await expect(card.getByText(data.displayTime)).toBeVisible();
+}
+
+async function openEditForm(page: Page, templateName: string): Promise<void> {
+  const card = getScheduleCard(page, templateName);
+  await card
+    .locator('button[data-slot="button"]')
+    .filter({ has: page.locator("svg.lucide-pen-line") })
+    .first()
+    .click();
+}
+
+function getEditSheet(page: Page) {
+  return page.locator('div[role="dialog"][data-slot="sheet-content"]');
+}
+
+async function verifySheetVisible(page: Page): Promise<void> {
+  const sheet = getEditSheet(page);
+  await expect(sheet).toBeVisible();
+  await expect(
+    sheet.locator('h2[data-slot="sheet-title"]', {
+      hasText: "Edit Schedule Template",
+    }),
+  ).toBeVisible();
+}
+
+async function verifyDateFieldsPresent(page: Page): Promise<void> {
+  const sheet = getEditSheet(page);
+  const validFromButton = sheet
+    .locator("label", { hasText: "Valid From" })
+    .locator("..")
+    .locator('button[data-slot="popover-trigger"]');
+  await expect(validFromButton).toBeVisible();
+  await expect(validFromButton).not.toBeEmpty();
+
+  const validTillButton = sheet
+    .locator("label", { hasText: "Valid Till" })
+    .locator("..")
+    .locator('button[data-slot="popover-trigger"]');
+  await expect(validTillButton).toBeVisible();
+  await expect(validTillButton).not.toBeEmpty();
+}
+
+async function verifySlotConfiguration(
+  page: Page,
+  slotDuration: string,
+  patientsPerSlot: string,
+): Promise<void> {
+  const sheet = getEditSheet(page);
+  const slotConfig = sheet
+    .locator("div.flex.flex-col.rounded-md.bg-gray-50", {
+      hasText: "Slot Configuration",
+    })
+    .first();
+  await expect(slotConfig).toContainText(slotDuration);
+  await expect(slotConfig).toContainText("minutes");
+  await expect(slotConfig).toContainText(patientsPerSlot);
+  await expect(slotConfig).toContainText("Patients");
+}
+
+async function verifySessionCapacity(
+  page: Page,
+  numberOfSlots: number,
+  patientsPerSlot: string,
+): Promise<void> {
+  const sheet = getEditSheet(page);
+  const sessionCapacity = sheet
+    .locator("div.flex.flex-col.rounded-md.bg-gray-50", {
+      hasText: "Session Capacity",
+    })
+    .first();
+  await expect(sessionCapacity).toContainText(numberOfSlots.toString());
+  await expect(sessionCapacity).toContainText("Slots");
+  await expect(sessionCapacity).toContainText(
+    `${patientsPerSlot} Total Patients`,
+  );
+}
+
+async function verifyWeekdaySchedules(
+  page: Page,
+  weekdays: readonly string[],
+  displayTime: string,
+): Promise<void> {
+  const sheet = getEditSheet(page);
+  for (const day of weekdays) {
+    const daySchedule = sheet.locator("p", { hasText: day });
+    await expect(daySchedule).toBeVisible();
+    await expect(daySchedule).toContainText(displayTime);
   }
 }
 
-class ScheduleCardPage {
-  constructor(private readonly page: Page) {}
-
-  getScheduleCard(templateName: string) {
-    return this.page
-      .locator("div.rounded-lg.bg-white")
-      .filter({ hasText: templateName });
-  }
-
-  async verifyCardContent(
-    templateName: string,
-    data: {
-      sessionTitle: string;
-      displayTime: string;
-      slotDuration: string;
-      numberOfSlots: number;
-    },
-  ): Promise<void> {
-    const card = this.getScheduleCard(templateName);
-
-    await expect(
-      card.locator("span.text-lg.font-semibold", { hasText: templateName }),
-    ).toBeVisible();
-
-    await expect(
-      card.locator("span.text-sm.text-gray-700", {
-        hasText: "Scheduled for:",
-      }),
-    ).toContainText(SCHEDULE_CONSTANTS.WEEKDAY_ABBREVIATIONS);
-
-    await expect(card.getByText(data.sessionTitle)).toBeVisible();
-
-    await expect(
-      card.locator("span.text-sm", { hasText: "Appointment" }),
-    ).toBeVisible();
-
-    await expect(
-      card.locator("span.text-sm", {
-        hasText: `${data.numberOfSlots} slots of ${data.slotDuration} mins.`,
-      }),
-    ).toBeVisible();
-
-    await expect(card.getByText(data.displayTime)).toBeVisible();
-  }
-
-  async openEditForm(templateName: string): Promise<void> {
-    const card = this.getScheduleCard(templateName);
-    await card
-      .locator('button[data-slot="button"]')
-      .filter({ has: this.page.locator("svg.lucide-pen-line") })
-      .first()
-      .click();
-  }
-}
-
-class ScheduleEditSheetPage {
-  constructor(private readonly page: Page) {}
-
-  private get sheet() {
-    return this.page.locator('div[role="dialog"][data-slot="sheet-content"]');
-  }
-
-  async verifySheetVisible(): Promise<void> {
-    await expect(this.sheet).toBeVisible();
-    await expect(
-      this.sheet.locator('h2[data-slot="sheet-title"]', {
-        hasText: "Edit Schedule Template",
-      }),
-    ).toBeVisible();
-  }
-
-  async verifyTemplateDetails(data: {
+async function verifyTemplateDetails(
+  page: Page,
+  data: {
     templateName: string;
     sessionTitle: string;
     slotDuration: string;
@@ -188,98 +239,37 @@ class ScheduleEditSheetPage {
     numberOfSlots: number;
     weekdays: readonly string[];
     displayTime: string;
-  }): Promise<void> {
-    await expect(this.sheet.locator('input[name="name"]')).toHaveValue(
-      data.templateName,
-    );
+  },
+): Promise<void> {
+  const sheet = getEditSheet(page);
 
-    await this.verifyDateFieldsPresent();
+  await expect(sheet.locator('input[name="name"]')).toHaveValue(
+    data.templateName,
+  );
 
-    await expect(this.sheet.getByText(data.sessionTitle)).toBeVisible();
+  await verifyDateFieldsPresent(page);
 
-    await expect(
-      this.sheet.locator('span[data-slot="badge"]', { hasText: "Appointment" }),
-    ).toBeVisible();
+  await expect(sheet.getByText(data.sessionTitle)).toBeVisible();
 
-    await this.verifySlotConfiguration(data.slotDuration, data.patientsPerSlot);
+  await expect(
+    sheet.locator('span[data-slot="badge"]', { hasText: "Appointment" }),
+  ).toBeVisible();
 
-    await this.verifySessionCapacity(data.numberOfSlots, data.patientsPerSlot);
-
-    await this.verifyWeekdaySchedules(data.weekdays, data.displayTime);
-  }
-
-  private async verifyDateFieldsPresent(): Promise<void> {
-    const validFromButton = this.sheet
-      .locator("label", { hasText: "Valid From" })
-      .locator("..")
-      .locator('button[data-slot="popover-trigger"]');
-    await expect(validFromButton).toBeVisible();
-    await expect(validFromButton).not.toBeEmpty();
-
-    const validTillButton = this.sheet
-      .locator("label", { hasText: "Valid Till" })
-      .locator("..")
-      .locator('button[data-slot="popover-trigger"]');
-    await expect(validTillButton).toBeVisible();
-    await expect(validTillButton).not.toBeEmpty();
-  }
-
-  private async verifySlotConfiguration(
-    slotDuration: string,
-    patientsPerSlot: string,
-  ): Promise<void> {
-    const slotConfig = this.sheet
-      .locator("div.flex.flex-col.rounded-md.bg-gray-50", {
-        hasText: "Slot Configuration",
-      })
-      .first();
-    await expect(slotConfig).toContainText(slotDuration);
-    await expect(slotConfig).toContainText("minutes");
-    await expect(slotConfig).toContainText(patientsPerSlot);
-    await expect(slotConfig).toContainText("Patients");
-  }
-
-  private async verifySessionCapacity(
-    numberOfSlots: number,
-    patientsPerSlot: string,
-  ): Promise<void> {
-    const sessionCapacity = this.sheet
-      .locator("div.flex.flex-col.rounded-md.bg-gray-50", {
-        hasText: "Session Capacity",
-      })
-      .first();
-    await expect(sessionCapacity).toContainText(numberOfSlots.toString());
-    await expect(sessionCapacity).toContainText("Slots");
-    await expect(sessionCapacity).toContainText(
-      `${patientsPerSlot} Total Patients`,
-    );
-  }
-
-  private async verifyWeekdaySchedules(
-    weekdays: readonly string[],
-    displayTime: string,
-  ): Promise<void> {
-    for (const day of weekdays) {
-      const daySchedule = this.sheet.locator("p", { hasText: day });
-      await expect(daySchedule).toBeVisible();
-      await expect(daySchedule).toContainText(displayTime);
-    }
-  }
+  await verifySlotConfiguration(page, data.slotDuration, data.patientsPerSlot);
+  await verifySessionCapacity(page, data.numberOfSlots, data.patientsPerSlot);
+  await verifyWeekdaySchedules(page, data.weekdays, data.displayTime);
 }
 
-// Test Data Factory
-class ScheduleTestDataFactory {
-  static createWeekdaySchedule(): ScheduleTestData {
-    return {
-      templateName: faker.lorem.words(2),
-      sessionTitle: faker.lorem.words(2),
-      startTime: "10:00",
-      endTime: "15:00",
-      patientsPerSlot: "300",
-      weekdays: SCHEDULE_CONSTANTS.WEEKDAYS,
-      displayTime: "10 AM - 3 PM",
-    };
-  }
+function createWeekdaySchedule(): ScheduleTestData {
+  return {
+    templateName: faker.lorem.words(2),
+    sessionTitle: faker.lorem.words(2),
+    startTime: "10:00",
+    endTime: "15:00",
+    patientsPerSlot: "300",
+    weekdays: SCHEDULE_CONSTANTS.WEEKDAYS,
+    displayTime: "10 AM - 3 PM",
+  };
 }
 
 test.describe("Schedule Template Management", () => {
@@ -294,10 +284,7 @@ test.describe("Schedule Template Management", () => {
   test("should create and verify a weekday schedule template", async ({
     page,
   }) => {
-    const testData = ScheduleTestDataFactory.createWeekdaySchedule();
-    const formPage = new ScheduleFormPage(page);
-    const cardPage = new ScheduleCardPage(page);
-    const editSheetPage = new ScheduleEditSheetPage(page);
+    const testData = createWeekdaySchedule();
 
     // Navigate to create template form - wait for button to be visible
     await expect(
@@ -309,22 +296,22 @@ test.describe("Schedule Template Management", () => {
     ).toBeVisible();
 
     // Fill template form
-    await formPage.fillTemplateName(testData.templateName);
-    await formPage.selectMidMonthDate("first", 1);
-    await formPage.selectWeekdays(testData.weekdays);
-    await formPage.selectMidMonthDate("second", 2);
+    await fillTemplateName(page, testData.templateName);
+    await selectMidMonthDate(page, "first", 1);
+    await selectWeekdays(page, testData.weekdays);
+    await selectMidMonthDate(page, "second", 2);
 
-    await formPage.fillSessionDetails({
+    await fillSessionDetails(page, {
       title: testData.sessionTitle,
       startTime: testData.startTime,
       endTime: testData.endTime,
       patientsPerSlot: testData.patientsPerSlot,
     });
 
-    const slotDuration = await formPage.getAutoFilledSlotDuration();
+    const slotDuration = await getAutoFilledSlotDuration(page);
 
     // Submit and verify success
-    await formPage.submitTemplate();
+    await submitTemplate(page);
     await expect(
       page
         .getByRole("region", { name: "Notifications alt+T" })
@@ -338,7 +325,7 @@ test.describe("Schedule Template Management", () => {
     await nextMonthButton.click();
 
     // Verify schedule card
-    await cardPage.verifyCardContent(testData.templateName, {
+    await verifyCardContent(page, testData.templateName, {
       sessionTitle: testData.sessionTitle,
       displayTime: testData.displayTime,
       slotDuration,
@@ -346,9 +333,9 @@ test.describe("Schedule Template Management", () => {
     });
 
     // Open and verify edit form
-    await cardPage.openEditForm(testData.templateName);
-    await editSheetPage.verifySheetVisible();
-    await editSheetPage.verifyTemplateDetails({
+    await openEditForm(page, testData.templateName);
+    await verifySheetVisible(page);
+    await verifyTemplateDetails(page, {
       templateName: testData.templateName,
       sessionTitle: testData.sessionTitle,
       slotDuration,
