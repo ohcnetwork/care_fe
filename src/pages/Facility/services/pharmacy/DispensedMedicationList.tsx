@@ -24,7 +24,6 @@ import {
 } from "@/types/billing/chargeItem/chargeItem";
 import {
   MEDICATION_DISPENSE_STATUS_COLORS,
-  MedicationDispenseCategory,
   MedicationDispenseRead,
   MedicationDispenseStatus,
   MedicationDispenseUpdate,
@@ -88,6 +87,7 @@ import {
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { PatientListRead } from "@/types/emr/patient/patient";
 
+import { MedicationCategory } from "@/types/emr/medicationRequest/medicationRequest";
 import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
@@ -1130,7 +1130,7 @@ export default function DispensedMedicationList({
         (dispense) => ({
           id: dispense.id,
           status: newMedicationDispenseStatus,
-          category: MedicationDispenseCategory.outpatient,
+          category: MedicationCategory.outpatient,
           when_prepared: dispense.when_prepared,
           dosage_instruction: dispense.dosage_instruction,
         }),
