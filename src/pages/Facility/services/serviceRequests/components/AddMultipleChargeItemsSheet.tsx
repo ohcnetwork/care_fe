@@ -59,7 +59,7 @@ interface AddMultipleChargeItemsSheetProps {
   onChargeItemsAdded: () => void;
   disabled?: boolean;
   resourceSubType?: ResourceCategorySubType;
-  accountId?: string;
+  accountId: string;
 }
 
 interface ApplyChargeItemDefinitionRequestWithObject extends ApplyChargeItemDefinitionRequest {

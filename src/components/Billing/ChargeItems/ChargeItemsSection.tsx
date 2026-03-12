@@ -171,23 +171,24 @@ export function ChargeItemsSection({
           sourceUrl={sourceUrl}
         />
       )}
-
-      <AddMultipleChargeItemsSheet
-        open={isMultiAddOpen}
-        onOpenChange={setIsMultiAddOpen}
-        facilityId={facilityId}
-        serviceResourceId={resourceId}
-        patientId={patientId}
-        encounterId={encounterId}
-        serviceResourceType={serviceResourceType}
-        onChargeItemsAdded={() => {
-          queryClient.invalidateQueries({
-            queryKey: ["chargeItems", facilityId, resourceId],
-          });
-        }}
-        resourceSubType={ResourceCategorySubType.other}
-        accountId={account?.results[0]?.id ?? ""}
-      />
+      {account?.results[0]?.id && (
+        <AddMultipleChargeItemsSheet
+          open={isMultiAddOpen}
+          onOpenChange={setIsMultiAddOpen}
+          facilityId={facilityId}
+          serviceResourceId={resourceId}
+          patientId={patientId}
+          encounterId={encounterId}
+          serviceResourceType={serviceResourceType}
+          onChargeItemsAdded={() => {
+            queryClient.invalidateQueries({
+              queryKey: ["chargeItems", facilityId, resourceId],
+            });
+          }}
+          resourceSubType={ResourceCategorySubType.other}
+          accountId={account?.results[0]?.id}
+        />
+      )}
     </>
   );
 }
