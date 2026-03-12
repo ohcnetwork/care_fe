@@ -307,7 +307,6 @@ export default function SearchInput({
                         </p>
                         <div className="flex mt-2">
                           <Button
-                            data-testid="selected-option-button"
                             onClick={() => {
                               setOpen(false);
                               if (inputRef.current) {
