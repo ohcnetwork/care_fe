@@ -223,63 +223,6 @@ export const BillMedicationsOtherItemsCard = ({
   );
 };
 
-export const BillMedicationsNewDispenseCard = ({
-  form,
-}: {
-  form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
-}) => {
-  const { t } = useTranslation();
-  const items = form.watch("otherItems");
-
-  const { remove } = useFieldArray({
-    control: form.control,
-    name: "otherItems",
-  });
-
-  return (
-    <>
-      <div className="relative flex justify-between col-start-1 col-span-7 bg-white pt-4 pr-2 pb-2 pl-4">
-        <div className="absolute top-5 left-0 h-4 w-1 bg-amber-500 rounded-r-md" />
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-col gap-0.5">
-            <div className="text-base text-gray-950">
-              <span className="font-semibold">{t("other_items")} </span>
-            </div>
-            <div className="flex gap-2.5">
-              <span className="text-sm font-medium text-gray-700">
-                ({t("items_count", { count: items.length })})
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <HeaderRow />
-
-      {items.map((_, index) => (
-        <>
-          <MedicineLineItem
-            key={`otherItems.${index}`}
-            name={`otherItems.${index}`}
-            form={form}
-            onRemove={() => remove(index)}
-          />
-          <div className="col-span-7 h-px bg-gray-200" />
-        </>
-      ))}
-
-      {items.length === 0 && (
-        <EmptyState
-          className="col-span-7 rounded-none border-b border-gray-200"
-          icon={<Pill className="text-primary size-6" />}
-          title={t("no_medications")}
-          description={t("add_medications_to_bill_description")}
-        />
-      )}
-    </>
-  );
-};
-
 const PrescriptionSummary = ({
   form,
   name,
