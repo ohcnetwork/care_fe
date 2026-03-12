@@ -57,7 +57,7 @@ import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemStatus } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
-import { isPositive } from "@/Utils/decimal";
+import { isNegative, isPositive } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import BackButton from "@/components/Common/BackButton";
 import { ReportSubTab } from "@/components/Files/ReportSubTab";
@@ -810,8 +810,7 @@ export function AccountShow({
 
 const ClosedCallout = ({ balance }: { balance: string }) => {
   const { t } = useTranslation();
-  const isNegative = !isPositive(balance) && balance !== "0";
-  if (!isNegative) return <></>;
+  if (!isNegative(balance)) return <></>;
   return (
     <span className="text-red-500 bg-red-50 text-xs -mt-2 p-2 rounded">
       <p>{t("close_account_negative_balance")}</p>
