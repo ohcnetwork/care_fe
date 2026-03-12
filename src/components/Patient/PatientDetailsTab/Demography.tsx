@@ -253,7 +253,11 @@ export const Demography = (props: PatientProps) => {
         <TagAssignmentSheet
           entityType="patient"
           entityId={patientId}
-          currentTags={patientData.instance_tags}
+          facilityId={facilityId}
+          currentTags={[
+            ...patientData.instance_tags,
+            ...patientData.facility_tags,
+          ]}
           onUpdate={() => {
             queryClient.invalidateQueries({
               queryKey: ["patient", patientId],
@@ -268,10 +272,12 @@ export const Demography = (props: PatientProps) => {
           }
         />
       ),
-      details: patientData.instance_tags.map((t) => ({
-        label: t.parent ? t.parent.display : t.display,
-        value: t.display,
-      })),
+      details: [...patientData.instance_tags, ...patientData.facility_tags].map(
+        (t) => ({
+          label: t.parent ? t.parent.display : t.display,
+          value: t.display,
+        }),
+      ),
     },
   ];
 

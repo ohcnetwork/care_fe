@@ -29,7 +29,7 @@ import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { cn } from "@/lib/utils";
 import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import { PatientNotesTab } from "./PatientDetailsTab/PatientNotes";
-export const PatientHome = (props: {
+export const PatientProfile = (props: {
   facilityId?: string;
   id: string;
   page: (typeof tabs)[0]["route"];
@@ -41,11 +41,12 @@ export const PatientHome = (props: {
   const { hasPermission } = usePermissions();
   useShortcutSubContext();
   const { data: patientData, isLoading } = useQuery({
-    queryKey: ["patient", id],
+    queryKey: ["patient", id, facilityId],
     queryFn: query(patientApi.get, {
       pathParams: {
         id,
       },
+      queryParams: { facility: facilityId },
     }),
     enabled: !!id,
   });
@@ -136,7 +137,7 @@ export const PatientHome = (props: {
           </div>
         </div>
         <div className="lg:flex">
-          <div className="h-full lg:mr-7 lg:basis-5/6">
+          <div className="h-full min-w-0 lg:mr-7 lg:basis-5/6">
             {Tab?.component && (
               <Tab.component
                 facilityId={
@@ -159,7 +160,7 @@ export const PatientHome = (props: {
                   <div className="mt-2 h-full space-y-2">
                     <Button asChild variant="outline" className="w-full">
                       <Link
-                        href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
+                        href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
                           {
                             phone_number: patientData.phone_number,
                             year_of_birth:
