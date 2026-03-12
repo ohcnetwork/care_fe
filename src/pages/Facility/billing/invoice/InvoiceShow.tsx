@@ -405,7 +405,7 @@ export function InvoiceShow({
                 {t("patient_name")}
               </label>
               <Link
-                href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
+                href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
                   {
                     phone_number: invoice.account.patient.phone_number,
                     year_of_birth:
