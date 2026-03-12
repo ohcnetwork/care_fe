@@ -30,7 +30,7 @@ export default function FacilityServicesPage({
       pathParams: { facilityId },
       queryParams: {
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
     }),
   });

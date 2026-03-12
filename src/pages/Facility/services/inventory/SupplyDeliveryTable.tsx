@@ -268,7 +268,11 @@ export function SupplyDeliveryTable({
                     </Link>
                   );
                 }
-                return <div className="font-medium">{productName}</div>;
+                return (
+                  <div className="font-medium text-wrap wrap-break-word">
+                    {productName}
+                  </div>
+                );
               })()}
             </TableCell>
             <TableCell>
