@@ -63,7 +63,10 @@ import BackButton from "@/components/Common/BackButton";
 import { ReportSubTab } from "@/components/Files/ReportSubTab";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import useBreakpoints from "@/hooks/useBreakpoints";
-import { canAddChargeItemsToAccount } from "@/pages/Facility/billing/account/utils";
+import {
+  canAddChargeItemsToAccount,
+  isAccountBillingClosed,
+} from "@/pages/Facility/billing/account/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { ReportType } from "@/types/emr/report/report";
 import AccountSheet from "./AccountSheet";
@@ -155,22 +158,18 @@ export function AccountShow({
     "2xl": 12,
   });
 
-  const isAccountBillingClosed =
-    account?.billing_status === AccountBillingStatus.closed_baddebt ||
-    account?.billing_status === AccountBillingStatus.closed_voided ||
-    account?.billing_status === AccountBillingStatus.closed_completed ||
-    account?.billing_status === AccountBillingStatus.closed_combined;
+  const isBillingClosed = isAccountBillingClosed(account);
 
   useEffect(() => {
     if (account) {
       setCloseAccountStatus({
         sheetOpen: false,
-        reason: isAccountBillingClosed
+        reason: isBillingClosed
           ? account?.billing_status
           : AccountBillingStatus.closed_baddebt,
       });
     }
-  }, [account, isAccountBillingClosed]);
+  }, [account, isBillingClosed]);
 
   const rebalanceMutation = useMutation({
     mutationFn: mutate(accountApi.rebalanceAccount, {
@@ -713,7 +712,7 @@ export function AccountShow({
             </span>
             <BillingLifecycleStepper
               account={account}
-              isAccountBillingClosed={isAccountBillingClosed}
+              isAccountBillingClosed={isBillingClosed}
               canUpdateAccount={canUpdateAccount}
               onAdvance={advanceBillingStatus}
               onSettleClose={() =>
