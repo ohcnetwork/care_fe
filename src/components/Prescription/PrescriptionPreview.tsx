@@ -1,11 +1,14 @@
 import careConfig from "@careConfig";
+import { useQueries } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { QRCodeSVG } from "qrcode.react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import { Markdown } from "@/components/ui/markdown";
 
+import Loading from "@/components/Common/Loading";
 import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
 import {
@@ -15,14 +18,15 @@ import {
   formatSig,
 } from "@/components/Medicine/utils";
 
+import query from "@/Utils/request/query";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { displayMedicationName } from "@/types/emr/medicationRequest/medicationRequest";
 import { PrescriptionRead } from "@/types/emr/prescription/prescription";
+import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
-import { QRCodeSVG } from "qrcode.react";
 
-interface DetailRowProps {
+export interface DetailRowProps {
   label: string;
   value?: string | null;
   isStrong?: boolean;
@@ -75,7 +79,7 @@ const PrescriptionContent = ({
                 instructions: [remarks, notes].filter(Boolean).join("\n"),
               };
             })}
-            className="text-sm font-semibold whitespace-break-spaces text-gray-950"
+            className="text-sm break-all font-semibold whitespace-break-spaces text-gray-950"
             cellConfig={{
               medicine: { className: "text-left" },
             }}
@@ -117,16 +121,65 @@ const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
   );
 };
 
+interface PrescriptionPreviewProps {
+  prescriptionIds: string[];
+  patientId: string;
+  facilityId: string;
+}
+
 export const PrescriptionPreview = ({
-  prescription,
-}: {
-  prescription: PrescriptionRead;
-}) => {
+  prescriptionIds,
+  patientId,
+  facilityId,
+}: PrescriptionPreviewProps) => {
   const { t } = useTranslation();
   const { facility } = useCurrentFacility();
-  const patient = prescription.encounter.patient;
 
-  if (!prescription.medications?.length) {
+  const { prescriptions, isLoading } = useQueries({
+    queries: prescriptionIds.map((prescriptionId) => ({
+      queryKey: ["prescription", patientId, prescriptionId, facilityId],
+      queryFn: query(prescriptionApi.get, {
+        pathParams: {
+          patientId,
+          id: prescriptionId,
+        },
+        queryParams: { facility: facilityId },
+      }),
+    })),
+    combine: (results) => ({
+      prescriptions: results
+        .map((r) => r.data)
+        .filter((data): data is PrescriptionRead => !!data),
+      isLoading: results.some((r) => r.isLoading || r.isFetching),
+    }),
+  });
+
+  const hasMedications = prescriptions.some(
+    (prescription) =>
+      prescription.medications && prescription.medications.length > 0,
+  );
+
+  const displayDate =
+    prescriptions.length === 1 && prescriptions[0].encounter.period.start
+      ? format(
+          new Date(prescriptions[0].encounter.period.start),
+          "dd MMM yyyy, EEEE",
+        )
+      : null;
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (!prescriptions.length) {
+    return (
+      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
+        {t("no_prescriptions_found")}
+      </div>
+    );
+  }
+
+  if (!hasMedications) {
     return (
       <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
         {t("no_medications_found_for_this_encounter")}
@@ -134,11 +187,13 @@ export const PrescriptionPreview = ({
     );
   }
 
+  const patient = prescriptions[0].encounter.patient;
+
   return (
     <PrintPreview
       title={`${t("prescriptions")} - ${patient.name}`}
-      autoPrint={{ enabled: !!prescription.medications?.length }}
-      disabled={!prescription.medications?.length}
+      autoPrint={{ enabled: hasMedications }}
+      disabled={!hasMedications}
     >
       <div className="max-w-5xl mx-auto">
         <div>
@@ -195,18 +250,9 @@ export const PrescriptionPreview = ({
                 ))}
             </div>
             <div className="space-y-1">
-              <DetailRow
-                label={t("date")}
-                value={
-                  prescription.encounter.period?.start
-                    ? format(
-                        new Date(prescription.encounter.period.start),
-                        "dd MMM yyyy, EEEE",
-                      )
-                    : format(new Date(), "dd MMM yyyy, EEEE")
-                }
-                isStrong
-              />
+              {prescriptions.length === 1 && (
+                <DetailRow label={t("date")} value={displayDate} isStrong />
+              )}
               <DetailRow
                 label={t("mobile_number")}
                 value={patient && formatPhoneNumberIntl(patient.phone_number)}
@@ -215,7 +261,20 @@ export const PrescriptionPreview = ({
             </div>
           </div>
 
-          <PrescriptionContent prescription={prescription} />
+          {prescriptions.length > 1 && (
+            <div className="mb-4 text-sm text-gray-500 border-b pb-2">
+              {t("prescriptions_count", { count: prescriptions.length })}
+            </div>
+          )}
+
+          {prescriptions.map((prescription, index) => (
+            <div key={prescription.id}>
+              {index > 0 && (
+                <div className="border-t border-dashed border-gray-300 my-6" />
+              )}
+              <PrescriptionContent prescription={prescription} />
+            </div>
+          ))}
 
           {/* Footer */}
           <PrintFooter

@@ -578,6 +578,7 @@ export default function FacilityOrganizationSelector(
                           ? "text-yellow-500 hover:text-yellow-600"
                           : "text-gray-400 hover:text-yellow-500",
                       )}
+                      type="button"
                       onClick={(e) => handleTogglePreferred(e, org)}
                       disabled={
                         addFavoriteMutation.isPending ||
@@ -598,6 +599,7 @@ export default function FacilityOrganizationSelector(
                     variant="ghost"
                     size="sm"
                     className="size-8 p-0 text-gray-500 hover:text-gray-900"
+                    type="button"
                     onClick={() => handleRemoveOrganization(index)}
                   >
                     <X className="size-4" />

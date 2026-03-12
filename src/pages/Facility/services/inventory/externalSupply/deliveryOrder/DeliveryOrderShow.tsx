@@ -45,12 +45,14 @@ import {
 import { EmptyState } from "@/components/ui/empty-state";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useSidebar } from "@/components/ui/sidebar";
 import {
   getExtensionFieldsWithName,
   getExtensionValue,
   NamespacedExtensionData,
 } from "@/hooks/useExtensions";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
+import { cn } from "@/lib/utils";
 import { AddSupplyDeliveryForm } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/AddSupplyDeliveryForm";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
@@ -177,7 +179,7 @@ export function DeliveryOrderShow({
 
   const allExtensions = getExtensions(
     ExtensionEntityType.supply_delivery_order,
-    "read",
+    "retrieve",
   );
 
   const extensionFields = useMemo(
@@ -201,6 +203,7 @@ export function DeliveryOrderShow({
     open: false,
     status: null,
   });
+  const { open: isSidebarOpen } = useSidebar();
 
   const { data: deliveryOrder, isLoading } = useQuery({
     queryKey: ["deliveryOrders", deliveryOrderId],
@@ -413,7 +416,14 @@ export function DeliveryOrderShow({
       shortCutContext="facility:inventory:delivery"
       className="max-w-[100vw] mx-auto"
     >
-      <div className="space-y-6">
+      <div
+        className={cn(
+          "space-y-6",
+          isSidebarOpen
+            ? "md:max-w-[calc(100vw-22.5rem)]"
+            : "md:max-w-[calc(100vw-9rem)]",
+        )}
+      >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-4">
             <BackButton
