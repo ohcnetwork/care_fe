@@ -37,8 +37,6 @@ export function useBatchRequest<TError = DefaultError, TContext = unknown>(
     setRequests((prev) => [...prev, request]);
   }, []);
 
-  console.log(requests);
-
   const mutation = useMutation<
     BatchRequestResponse,
     TError,
