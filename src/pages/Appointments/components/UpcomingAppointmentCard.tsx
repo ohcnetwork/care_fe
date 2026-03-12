@@ -87,10 +87,10 @@ const AppointmentRow = ({
   return (
     <Link
       href={`/facility/${appointment.facility.id}/patient/${patientId}/appointments/${appointment.id}`}
-      className="flex items-center justify-between gap-4 p-3 border-1 border-blue-500 rounded-lg bg-white hover:bg-gray-50 transition-colors"
+      className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4 p-3 border-1 border-blue-500 rounded-lg bg-white hover:bg-gray-50 transition-colors"
     >
-      <div className="flex items-center gap-4 flex-1 min-w-0">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-row items-center gap-2 sm:gap-4 flex-1 min-w-0 w-full">
+        <div className="flex items-center gap-2 min-w-0">
           <ScheduleResourceIcon resource={appointment} className="size-5" />
           <span className="font-medium text-gray-900 truncate text-sm">
             {formatScheduleResourceName(appointment)}
@@ -106,11 +106,15 @@ const AppointmentRow = ({
         <span className="hidden sm:block text-sm text-gray-600 truncate">
           {appointment.token_slot.availability.name}
         </span>
+      </div>
+      <div className="flex flex-row items-center justify-between sm:justify-end gap-2">
         <Badge variant={APPOINTMENT_STATUS_COLORS[appointment.status]}>
           {t(appointment.status)}
         </Badge>
+        <span className="flex items-center">
+          <ChevronRight className="size-5 text-gray-400 flex-shrink-0" />
+        </span>
       </div>
-      <ChevronRight className="size-5 text-gray-400 flex-shrink-0" />
     </Link>
   );
 };
