@@ -20,6 +20,7 @@ import {
   MedicationRequestDispenseStatus,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import {
+  PRESCRIPTION_STATUS_STYLES,
   PrescriptionRead,
   PrescriptionStatus,
 } from "@/types/emr/prescription/prescription";
@@ -33,6 +34,7 @@ import { format } from "date-fns";
 import {
   CheckCircleIcon,
   FileTextIcon,
+  MinusCircleIcon,
   Pill,
   PrinterIcon,
   XCircleIcon,
@@ -174,6 +176,21 @@ const PrescriptionCard = ({
           )}
         </div>
         <div className="flex gap-4 items-center">
+          {/* Completed or cancelled badge */}
+          {!isActive && (
+            <Badge variant={PRESCRIPTION_STATUS_STYLES[prescription.status]}>
+              {prescription.status === PrescriptionStatus.completed && (
+                <CheckCircleIcon className="size-3" />
+              )}
+              {prescription.status === PrescriptionStatus.cancelled && (
+                <MinusCircleIcon className="size-3" />
+              )}
+              {t(prescription.status)}
+            </Badge>
+          )}
+
+          {/* Collapse button */}
+          {/* Print button */}
           <Button variant="outline" size="icon" asChild>
             <Link
               href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/prescription/${prescription.id}/print`}
@@ -182,6 +199,8 @@ const PrescriptionCard = ({
               <PrinterIcon />
             </Link>
           </Button>
+
+          {/* Actions dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon">

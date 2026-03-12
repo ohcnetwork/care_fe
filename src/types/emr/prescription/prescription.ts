@@ -38,7 +38,7 @@ export interface PrescriptionRead extends Prescription {
 }
 
 export const PRESCRIPTION_STATUS_STYLES = {
-  active: "primary",
+  active: "green",
   completed: "blue",
   cancelled: "destructive",
 } as const satisfies Record<PrescriptionStatus, string>;
