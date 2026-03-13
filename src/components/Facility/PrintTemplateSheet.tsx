@@ -405,7 +405,7 @@ function PageSection({ template, onUpdate }: SectionProps) {
                     },
                   }));
                 }}
-                placeholder="0"
+                placeholder={t("placeholder_margin")}
                 className="mt-1"
               />
             </div>
@@ -854,7 +854,7 @@ function WatermarkSection({ template, onUpdate }: SectionProps) {
                     watermark: { ...tpl.watermark, opacity: val },
                   }));
                 }}
-                placeholder="0.15"
+                placeholder={t("placeholder_opacity")}
                 className="mt-1"
               />
             </div>
@@ -875,7 +875,7 @@ function WatermarkSection({ template, onUpdate }: SectionProps) {
                     watermark: { ...tpl.watermark, rotation: val },
                   }));
                 }}
-                placeholder="-45"
+                placeholder={t("placeholder_rotation")}
                 className="mt-1"
               />
             </div>

@@ -566,7 +566,7 @@ export function EditInvoiceTable({
                                       e.target.value,
                                     );
                                   }}
-                                  placeholder="0.00"
+                                  placeholder={t("placeholder_amount")}
                                   disabled={!canEditRow}
                                 />
                               </FormControl>
@@ -768,7 +768,9 @@ export function EditInvoiceTable({
                                                       );
                                                     }
                                                   }}
-                                                  placeholder="0.00"
+                                                  placeholder={t(
+                                                    "placeholder_amount",
+                                                  )}
                                                   disabled={isDisabled}
                                                 />
                                               </FormControl>
