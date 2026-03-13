@@ -19,12 +19,7 @@ export interface BatchRequestObject<T = unknown> {
 }
 
 export function useBatchRequest<TError = DefaultError, TContext = unknown>(
-  options: UseMutationOptions<
-    BatchRequestResponse,
-    TError,
-    BatchRequestObject[],
-    TContext
-  >,
+  options: UseMutationOptions<BatchRequestResponse, TError, void, TContext>,
   queryClient?: QueryClient,
 ): {
   isPending: boolean;
@@ -37,12 +32,7 @@ export function useBatchRequest<TError = DefaultError, TContext = unknown>(
     setRequests((prev) => [...prev, request]);
   }, []);
 
-  const mutation = useMutation<
-    BatchRequestResponse,
-    TError,
-    BatchRequestObject[],
-    TContext
-  >(
+  const mutation = useMutation<BatchRequestResponse, TError, void, TContext>(
     {
       mutationFn: () =>
         mutate(batchApi.batchRequest)({
@@ -59,7 +49,7 @@ export function useBatchRequest<TError = DefaultError, TContext = unknown>(
   );
 
   const executeBatch = () => {
-    mutation.mutate(requests);
+    mutation.mutate();
   };
 
   return {

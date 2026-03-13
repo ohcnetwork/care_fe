@@ -12,6 +12,7 @@ import { TokenActiveStatuses, TokenStatus } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import { useBatchRequest } from "@/Utils/request/batch";
 import { useQueryClient } from "@tanstack/react-query";
+import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -21,10 +22,8 @@ export const encounterRequiresDischarge = (encounter: EncounterRead) =>
 
 export function useEncounterProgressController({
   encounter,
-  onDischargeRequired,
 }: {
   encounter: EncounterRead;
-  onDischargeRequired?: () => void;
 }) {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
@@ -109,8 +108,10 @@ export function useEncounterProgressController({
   };
 
   const checkDischarge = () => {
-    if (onDischargeRequired && encounterRequiresDischarge(encounter)) {
-      onDischargeRequired();
+    if (encounterRequiresDischarge(encounter)) {
+      navigate(
+        `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?toDischarge=true`,
+      );
       return true;
     }
     return false;

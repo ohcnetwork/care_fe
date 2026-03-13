@@ -26,7 +26,7 @@ import { renderTokenNumber } from "@/types/tokens/token/token";
 import mutate from "@/Utils/request/mutate";
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { dateQueryString } from "@/Utils/utils";
@@ -100,19 +100,10 @@ const AppointmentEncounterHeaderActions = ({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const { completeEverything, isPending: isCompleteEverythingPending } =
+  const { completeEverything, completeAppointment, isPending } =
     useEncounterProgressController({
       encounter,
-      onDischargeRequired: () => {
-        navigate(
-          `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?toDischarge=true`,
-        );
-      },
     });
-  const { completeAppointment, isPending: isCompleteAppointmentPending } =
-    useEncounterProgressController({ encounter });
-  const isEndEncounterPending =
-    isCompleteEverythingPending || isCompleteAppointmentPending;
 
   const { mutate: startEncounter } = useMutation({
     mutationFn: mutate(encounterApi.update, {
@@ -170,7 +161,7 @@ const AppointmentEncounterHeaderActions = ({
       <Button
         variant="outline"
         className="w-full sm:w-auto"
-        disabled={isEndEncounterPending}
+        disabled={isPending}
         onClick={completeEverything}
       >
         <CheckCircle />
@@ -189,7 +180,7 @@ const AppointmentEncounterHeaderActions = ({
             <DropdownMenuItem
               className="p-2.5"
               onClick={() => completeAppointment()}
-              disabled={isCompleteAppointmentPending}
+              disabled={isPending}
             >
               <div className="flex flex-col items-start">
                 <span className="text-sm font-medium text-black">
