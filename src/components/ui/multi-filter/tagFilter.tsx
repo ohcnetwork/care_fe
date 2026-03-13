@@ -207,14 +207,10 @@ function TagFilterDropdown({
   const filteredTags = rootTags?.results || [];
   const isSearching = !!search;
 
-  // Separate tags into groups - only when not searching
-  const rootLevelGroupTags = isSearching
-    ? []
-    : filteredTags.filter((tag) => tag.has_children);
+  // Separate tags into groups
+  const rootLevelGroupTags = filteredTags.filter((tag) => tag.has_children);
   const nonSelectedRootLevelTags = filteredTags.filter(
-    (tag) =>
-      !selectedTags.some((t) => t.id === tag.id) &&
-      (isSearching || !tag.has_children),
+    (tag) => !selectedTags.some((t) => t.id === tag.id) && !tag.has_children,
   );
 
   const [hasOpenSubmenu, setHasOpenSubmenu] = useState(false);
@@ -304,7 +300,7 @@ function TagFilterDropdown({
         })()}
 
         {/* Groups */}
-        {rootLevelGroupTags.length > 0 && (
+        {rootLevelGroupTags.length > 0 && !isSearching && (
           <>
             <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
               {t("tag_groups")}
