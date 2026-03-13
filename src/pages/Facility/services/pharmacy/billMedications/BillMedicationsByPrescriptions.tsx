@@ -23,7 +23,7 @@ import { useQueries } from "@tanstack/react-query";
 import { Pill } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { GlobalError, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Fragment } from "react/jsx-runtime";
 import { toast } from "sonner";
@@ -65,7 +65,7 @@ export default function BillMedicationsByPrescriptions({
       prescriptions: [],
       otherItems: [],
     },
-    mode: "onChange",
+    mode: "onSubmit",
     reValidateMode: "onChange",
   });
 
@@ -121,7 +121,15 @@ export default function BillMedicationsByPrescriptions({
   return (
     <Page title={t("bill_medications")} hideTitleOnPage={true}>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleBillSelected)}>
+        <form
+          onSubmit={form.handleSubmit(handleBillSelected, (errors) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const errorMessage = ((errors as any)[""] as GlobalError)?.message;
+            if (errorMessage) {
+              toast.error(errorMessage);
+            }
+          })}
+        >
           <div className="flex flex-col gap-3">
             <div>
               <h4 className="font-semibold text-xl">{t("bill_medications")}</h4>

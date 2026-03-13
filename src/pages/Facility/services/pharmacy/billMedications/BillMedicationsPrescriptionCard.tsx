@@ -559,7 +559,11 @@ const MedicineLineItem = ({
         canSelect: isLotAllowedForDispensing,
       });
 
-      form.setValue(`${name}.lots`, autoSelectedLots);
+      form.setValue(`${name}.lots`, autoSelectedLots, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      });
     },
   });
 
@@ -649,9 +653,13 @@ const MedicineLineItem = ({
                           <InventoryItemsSelector
                             {...field}
                             selected={lots}
-                            onChange={(lots) =>
-                              form.setValue(`${name}.lots`, lots)
-                            }
+                            onChange={(lots) => {
+                              form.setValue(`${name}.lots`, lots, {
+                                shouldDirty: true,
+                                shouldTouch: true,
+                                shouldValidate: true,
+                              });
+                            }}
                             facilityId={facilityId}
                             locationId={locationId}
                             productKnowledgeId={effectiveProductKnowledge.id}
@@ -669,7 +677,13 @@ const MedicineLineItem = ({
                   {effectiveProductKnowledge ? (
                     <InventoryItemsSelector
                       selected={lots}
-                      onChange={(lots) => form.setValue(`${name}.lots`, lots)}
+                      onChange={(lots) =>
+                        form.setValue(`${name}.lots`, lots, {
+                          shouldDirty: true,
+                          shouldTouch: true,
+                          shouldValidate: true,
+                        })
+                      }
                       facilityId={facilityId}
                       locationId={locationId}
                       productKnowledgeId={effectiveProductKnowledge.id}
@@ -960,6 +974,7 @@ const MedicineLineItemMedication = ({
                     form.setValue(`${name}.lots`, [], {
                       shouldDirty: true,
                       shouldTouch: true,
+                      shouldValidate: true,
                     });
                   }}
                   onClear={() => {
@@ -967,6 +982,7 @@ const MedicineLineItemMedication = ({
                     form.setValue(`${name}.lots`, [], {
                       shouldDirty: true,
                       shouldTouch: true,
+                      shouldValidate: true,
                     });
                   }}
                   trigger={

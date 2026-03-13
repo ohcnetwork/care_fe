@@ -60,7 +60,7 @@ const billMedicationLineItemSchema = z
     },
   )
   .refine((data) => data.isSelected === false || data.lots.length > 0, {
-    path: ["lots"],
+    path: [""],
     message: "At least one lot is required",
   })
   .refine(
@@ -76,20 +76,35 @@ const billMedicationLineItemSchema = z
       message: "Quantity must be greater than 0",
     },
   );
+
 export type BillMedicationLineItemSchemaType = z.infer<
   typeof billMedicationLineItemSchema
 >;
 
-export const billMedicationsByPrescriptionsFormSchema = z.object({
-  /** Medicines added from prescriptions */
-  prescriptions: z.array(
-    z.object({
-      prescription: z.custom<PrescriptionRead>(),
-      markComplete: z.boolean(),
-      items: z.array(billMedicationLineItemSchema),
-    }),
-  ),
+export const billMedicationsByPrescriptionsFormSchema = z
+  .object({
+    /** Medicines added from prescriptions */
+    prescriptions: z.array(
+      z.object({
+        prescription: z.custom<PrescriptionRead>(),
+        markComplete: z.boolean(),
+        items: z.array(billMedicationLineItemSchema),
+      }),
+    ),
 
-  /** The other items (medicines added without prescription) */
-  otherItems: z.array(billMedicationLineItemSchema),
-});
+    /** The other items (medicines added without prescription) */
+    otherItems: z.array(billMedicationLineItemSchema),
+  })
+  .refine(
+    (data) => {
+      const items = [
+        ...data.prescriptions.flatMap(({ items }) => items),
+        ...data.otherItems,
+      ];
+      return items.filter((item) => item.isSelected).length > 0;
+    },
+    {
+      path: [""],
+      message: "At least one medication must be selected",
+    },
+  );
