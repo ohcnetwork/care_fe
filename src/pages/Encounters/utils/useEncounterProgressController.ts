@@ -28,7 +28,11 @@ export function useEncounterProgressController({
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
-  const { addToBatch, isPending, executeBatch } = useBatchRequest({
+  const {
+    mutate: executeBatch,
+    addToBatch,
+    isPending,
+  } = useBatchRequest({
     onSuccess: ({ results }) => {
       if (results.some((r) => r.reference_id === "encounter-closed")) {
         queryClient.invalidateQueries({
@@ -48,7 +52,7 @@ export function useEncounterProgressController({
     },
   });
 
-  const encounterCloseRequest = () => {
+  const addEncounterCloseRequestToBatch = () => {
     addToBatch({
       api: encounterApi.update,
       referenceId: "encounter-closed",
@@ -64,7 +68,7 @@ export function useEncounterProgressController({
     });
   };
 
-  const appointmentCloseRequests = () => {
+  const addAppointmentCloseRequestsToBatch = () => {
     const appointment = encounter.appointment;
 
     if (
@@ -119,19 +123,19 @@ export function useEncounterProgressController({
 
   const completeEverything = () => {
     if (checkDischarge()) return;
-    encounterCloseRequest();
-    appointmentCloseRequests();
+    addEncounterCloseRequestToBatch();
+    addAppointmentCloseRequestsToBatch();
     executeBatch();
   };
 
   const completeEncounter = () => {
     if (checkDischarge()) return;
-    encounterCloseRequest();
+    addEncounterCloseRequestToBatch();
     executeBatch();
   };
 
   const completeAppointment = () => {
-    appointmentCloseRequests();
+    addAppointmentCloseRequestsToBatch();
     executeBatch();
   };
 
