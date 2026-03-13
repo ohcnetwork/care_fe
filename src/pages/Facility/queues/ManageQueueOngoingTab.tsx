@@ -70,12 +70,12 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col sm:flex-row justify-between items-start mt-2 gap-4">
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 w-full">
           <Label className="text-gray-950 text-sm font-medium">
             {t("search_patients")}
           </Label>
-          <div className="flex flex-row gap-2">
-            <div className="relative w-64">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="relative">
               <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
               <Input
                 type="search"
@@ -87,7 +87,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
                     { overwrite: false, replace: true },
                   )
                 }
-                className="pl-10"
+                className="pl-10 w-full sm:w-64 h-9"
               />
             </div>
             <PatientIdentifierFilter
@@ -113,7 +113,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
             />
           </div>
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 w-full sm:items-end">
           <Label className="text-gray-950 text-sm font-medium">
             {t("service_points")}
           </Label>
