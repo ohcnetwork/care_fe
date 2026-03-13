@@ -1,8 +1,3 @@
-import { useMemo } from "react";
-
-import shortcutsConfig from "@/config/keyboardShortcuts.json";
-
-import { useIsMobile } from "@/hooks/use-mobile";
 import { isAppleDevice } from "./utils";
 
 /**
@@ -57,58 +52,6 @@ export function formatKeyboardShortcut(key: string): string {
   }
 }
 
-type ShortcutContext = keyof typeof shortcutsConfig;
-
-interface ShortcutConfig {
-  key: string;
-  action: string;
-}
-
-/**
- * Generic hook to get shortcut display strings for any context
- *
- * @deprecated Use `useShortcutDisplay` from `@/context/ShortcutContext` instead.
- * This hook is now integrated with the ShortcutContext and automatically uses the current context hierarchy.
- *
- * @param contexts Optional array of contexts to search for shortcuts. If not provided, searches all contexts.
- * @param dynamicResolver Optional function to resolve dynamic shortcuts (e.g., questionnaires)
- * @returns Function to get display string for an action ID
- */
-export function useShortcutDisplays(
-  contexts?: ShortcutContext[],
-  dynamicResolver?: (actionId: string) => string | undefined,
-) {
-  const isMobile = useIsMobile();
-
-  return useMemo(() => {
-    const getDisplay = (actionId: string): string | undefined => {
-      if (isMobile) {
-        return undefined;
-      }
-
-      const searchContexts =
-        contexts || (Object.keys(shortcutsConfig) as ShortcutContext[]);
-
-      for (const context of searchContexts) {
-        const shortcuts = shortcutsConfig[context] as ShortcutConfig[];
-        const shortcut = shortcuts.find((s) => s.action === actionId);
-
-        if (shortcut) {
-          return formatKeyboardShortcut(shortcut.key);
-        }
-      }
-
-      if (dynamicResolver) {
-        return dynamicResolver(actionId);
-      }
-
-      return undefined;
-    };
-
-    return getDisplay;
-  }, [contexts, dynamicResolver, isMobile]);
-}
-
 // Debounce map to prevent multiple rapid clicks
 const clickDebounceMap = new Map<string, number>();
 
@@ -129,18 +72,7 @@ export function shortcutActionHandler(shortcutId: string) {
     ) as HTMLElement;
 
     if (element) {
-      if (element.tagName === "A" && "href" in element) {
-        window.location.href = (element as HTMLAnchorElement).href;
-      } else {
-        element.click();
-      }
+      element.click();
     }
   };
-}
-
-export function shortcutActionHandlers(shortcutIds: string[]) {
-  return shortcutIds.map((id) => ({
-    id,
-    handler: shortcutActionHandler(id),
-  }));
 }

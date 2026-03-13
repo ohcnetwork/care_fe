@@ -128,19 +128,6 @@ export const FormDialog = ({
     (id) => allQuestionnaires.find((q) => q.id === id)!,
   );
 
-  // Handle keyboard shortcut to open forms dialog
-  useEffect(() => {
-    const handleOpenFormsDialog = () => {
-      setOpen(true);
-    };
-
-    document.addEventListener("open-forms-dialog", handleOpenFormsDialog);
-
-    return () => {
-      document.removeEventListener("open-forms-dialog", handleOpenFormsDialog);
-    };
-  }, []);
-
   useEffect(() => {
     if (open) {
       setSearch("");
@@ -149,7 +136,11 @@ export const FormDialog = ({
 
   return (
     <>
-      <div className="flex" onClick={() => setOpen(true)}>
+      <div
+        className="flex"
+        onClick={() => setOpen(true)}
+        data-shortcut-id="add-questionnaire"
+      >
         {trigger}
       </div>
       <CommandDialog
