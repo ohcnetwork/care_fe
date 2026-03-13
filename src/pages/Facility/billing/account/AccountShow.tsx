@@ -64,7 +64,7 @@ import { ReportSubTab } from "@/components/Files/ReportSubTab";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import {
-  canAddChargeItemsToAccount,
+  isAccountActiveAndBillable,
   isAccountBillingClosed,
 } from "@/pages/Facility/billing/account/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -269,7 +269,7 @@ export function AccountShow({
     );
   }
 
-  const canAddChargeItems = canAddChargeItemsToAccount(account);
+  const isAccountBillableAndActive = isAccountActiveAndBillable(account);
 
   const tabs = {
     invoices: {
@@ -291,7 +291,7 @@ export function AccountShow({
           facilityId={facilityId}
           accountId={accountId}
           patientId={account.patient.id}
-          canAddChargeItems={canAddChargeItems}
+          canAddChargeItems={isAccountBillableAndActive}
         />
       ),
       shortcutId: "switch-to-charge-items-tab",
@@ -324,7 +324,7 @@ export function AccountShow({
         <BedChargeItemsTable
           facilityId={facilityId}
           account={account}
-          canAddChargeItems={canAddChargeItems}
+          canAddChargeItems={isAccountBillableAndActive}
         />
       ),
       shortcutId: "switch-to-bed-charge-items-tab",
@@ -345,7 +345,7 @@ export function AccountShow({
         />
         <div className="flex gap-2">
           <div className="hidden lg:flex gap-2">
-            {canAddChargeItems && (
+            {isAccountBillableAndActive && (
               <Button
                 variant="ghost"
                 className="text-gray-950 gap-1 flex flex-row items-center justify-between"
@@ -361,7 +361,7 @@ export function AccountShow({
                 <ShortcutBadge actionId="settle-close-account" />
               </Button>
             )}
-            {canAddChargeItems && (
+            {isAccountBillableAndActive && (
               <>
                 <Button
                   variant="outline"
@@ -420,7 +420,7 @@ export function AccountShow({
             )}
           </div>
 
-          {canAddChargeItems && (
+          {isAccountBillableAndActive && (
             <div className="lg:hidden w-full flex justify-end gap-2">
               <Button
                 variant="outline"
@@ -460,7 +460,7 @@ export function AccountShow({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  {canAddChargeItems && (
+                  {isAccountBillableAndActive && (
                     <DropdownMenuItem
                       onClick={() =>
                         setCloseAccountStatus({

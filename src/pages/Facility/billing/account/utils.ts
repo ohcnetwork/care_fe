@@ -5,7 +5,7 @@ import {
   AccountStatus,
 } from "@/types/billing/account/Account";
 
-export const canAddChargeItemsToAccount = (
+export const isAccountActiveAndBillable = (
   account: AccountRead | AccountBase | undefined,
 ) => {
   if (!account) return false;

@@ -65,7 +65,7 @@ import { Separator } from "@/components/ui/separator";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { useCareApps } from "@/hooks/useCareApps";
 import { cn } from "@/lib/utils";
-import { canAddChargeItemsToAccount } from "@/pages/Facility/billing/account/utils";
+import { isAccountActiveAndBillable } from "@/pages/Facility/billing/account/utils";
 import {
   InvoiceChargeItemTitle,
   useMedicationDispenseData,
@@ -1063,7 +1063,7 @@ export function InvoiceShow({
                 )}
               >
                 {invoice.status === InvoiceStatus.draft &&
-                  canAddChargeItemsToAccount(invoice.account) && (
+                  isAccountActiveAndBillable(invoice.account) && (
                     <AddChargeItemSheet
                       facilityId={facilityId}
                       invoiceId={invoiceId}
