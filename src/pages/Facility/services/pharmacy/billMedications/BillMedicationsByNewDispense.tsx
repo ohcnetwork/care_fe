@@ -12,8 +12,10 @@ import encounterApi from "@/types/emr/encounter/encounterApi";
 import query from "@/Utils/request/query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
+import { navigate } from "raviger";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 interface Props {
   facilityId: string;
@@ -53,6 +55,13 @@ export default function BillMedicationsByNewDispense({
       locationId,
       patientId,
       fallbackEncounterId: encounterId,
+      onSuccess: (dispenseOrder) => {
+        toast.success(t("medications_billed_successfully"));
+        navigate(
+          `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrder.id}`,
+          { replace: true },
+        );
+      },
     });
 
   const handleBillSelected = () => {
