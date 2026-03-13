@@ -1,14 +1,13 @@
 import { Avatar } from "@/components/Common/Avatar";
 import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
+import { PatientTagsDisplay } from "@/components/Patient/PatientTagsDisplay";
 import { formatPatientAddress } from "@/components/Patient/utils";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   PatientListRead,
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
-import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import { formatPatientAge } from "@/Utils/utils";
 import { Phone } from "lucide-react";
 import { Link, usePath } from "raviger";
@@ -27,6 +26,13 @@ export const PatientInfoHoverCard = ({
   const isPatientHomePage = path?.endsWith(
     `/facility/${facilityId}/patients/home`,
   );
+
+  const hasPatientTags =
+    "instance_tags" in patient &&
+    (patient.instance_tags.length > 0 ||
+      ("facility_tags" in patient &&
+        patient.facility_tags &&
+        patient.facility_tags.length > 0));
 
   return (
     <>
@@ -135,25 +141,9 @@ export const PatientInfoHoverCard = ({
             </div>
           </div>
         </div>
-        {"instance_tags" in patient && patient.instance_tags.length > 0 && (
+        {hasPatientTags && (
           <div className="flex items-start border-t border-gray-200 pt-2">
-            <div className="flex flex-col gap-1 text-sm font-medium w-full">
-              <span className="text-gray-700">{t("patient_tags")}:</span>
-              <div className="flex flex-wrap gap-2 text-sm whitespace-nowrap">
-                <>
-                  {patient.instance_tags.map((tag) => (
-                    <Badge
-                      key={tag.id}
-                      variant="secondary"
-                      className="capitalize"
-                      title={tag.description}
-                    >
-                      {getTagHierarchyDisplay(tag)}
-                    </Badge>
-                  ))}
-                </>
-              </div>
-            </div>
+            <PatientTagsDisplay patient={patient} />
           </div>
         )}
       </div>
