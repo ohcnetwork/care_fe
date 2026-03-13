@@ -36,7 +36,7 @@ const CommentSection = ({ id }: { id: string }) => {
     queryFn: query(resourceRequestCommentApi.list, {
       queryParams: {
         limit: RESULTS_PER_PAGE_LIMIT,
-        offset: ((qParams.page ?? 1) - 1) * RESULTS_PER_PAGE_LIMIT,
+        offset: ((qParams.page || 1) - 1) * RESULTS_PER_PAGE_LIMIT,
       },
       pathParams: { resourceRequestId: id },
     }),
@@ -115,7 +115,7 @@ const CommentSection = ({ id }: { id: string }) => {
                       )}
                     >
                       <PaginationComponent
-                        cPage={qParams.page ?? 1}
+                        cPage={qParams.page || 1}
                         defaultPerPage={RESULTS_PER_PAGE_LIMIT}
                         data={{ totalCount: resourceComments?.count ?? 0 }}
                         onChange={(page) => setQueryParams({ page })}
