@@ -69,6 +69,7 @@ import AccountSheet from "./AccountSheet";
 import BedChargeItemsTable from "./components/BedChargeItemsTable";
 import ChargeItemsTable from "./components/ChargeItemsTable";
 
+/** Formats a date for account summary cards in Indian locale. */
 function formatDate(date?: string) {
   if (!date) return "-";
   return new Date(date).toLocaleDateString("en-IN", {
@@ -808,6 +809,7 @@ export function AccountShow({
   );
 }
 
+/** Shows a caution message when closing an account with negative balance. */
 const ClosedCallout = ({ balance }: { balance: string }) => {
   const { t } = useTranslation();
   if (!isNegative(balance)) return <></>;
@@ -825,6 +827,7 @@ const BILLING_STEPS = [
   "closed",
 ] as const;
 
+/** Renders the billing state stepper and handles valid forward transitions. */
 function BillingLifecycleStepper({
   account,
   isAccountBillingClosed,
