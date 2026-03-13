@@ -227,10 +227,7 @@ const Login = (props: LoginProps) => {
     const err: LoginFormErrors = { ...errors };
 
     // Validate username
-    if (
-      !form.username ||
-      (typeof form.username === "string" && !form.username.match(/\w/))
-    ) {
+    if (!form.username || !form.username.match(/\w/)) {
       hasError = true;
       err.username = "field_required";
     }
@@ -270,10 +267,7 @@ const Login = (props: LoginProps) => {
     let hasError = false;
     const err: LoginFormErrors = { ...errors };
 
-    if (
-      !form.username ||
-      (typeof form.username === "string" && !form.username.match(/\w/))
-    ) {
+    if (!form.username || !form.username.match(/\w/)) {
       hasError = true;
       err.username = "field_required";
     }
@@ -289,7 +283,7 @@ const Login = (props: LoginProps) => {
     const valid = validateForgetData();
     if (!valid) return;
 
-    submitForgetPassword(valid);
+    submitForgetPassword({ username: valid.username });
   };
 
   const onCaptchaChange = (value: string | null) => {
