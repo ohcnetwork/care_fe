@@ -69,6 +69,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
         phone_number: patient?.phone_number ?? "",
         year_of_birth: patient?.year_of_birth?.toString() ?? "",
         partial_id: patient ? getPartialId(patient) : "",
+        facility: facilityId,
       },
     }),
     enabled: !!patient,
@@ -210,8 +211,8 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
               </div>
               <QRCodeSVG
                 value={invoice.account.patient.id}
-                size={50}
-                level="Q"
+                size={100}
+                level="M"
                 marginSize={0}
               />
             </div>

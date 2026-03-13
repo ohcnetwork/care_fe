@@ -1,9 +1,10 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
+import BackButton from "@/components/Common/BackButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -46,11 +47,9 @@ import templateApi from "@/types/emr/template/templateApi";
 
 import queryClient from "@/Utils/request/queryClient";
 import { generateSlug } from "@/Utils/utils";
-import BackButton from "@/components/Common/BackButton";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import DOMPurify from "dompurify";
-import { t } from "i18next";
 import { navigate } from "raviger";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -61,27 +60,16 @@ import {
   insertAtCursor,
 } from "./templateUtils";
 
-const templateBuilderSchema = z.object({
-  name: z.string().min(1),
-  slug_value: z
-    .string()
-    .trim()
-    .min(5, {
-      message: t("character_count_validation", { min: 5, max: 25 }),
-    })
-    .max(25, {
-      message: t("character_count_validation", { min: 5, max: 25 }),
-    })
-    .regex(/^[a-z0-9-]+$/, {
-      message: t("slug_format_message"),
-    }),
-  status: z.enum(TemplateStatuses),
-  template_type: z.enum(TemplateTypes),
-  default_format: z.enum(TemplateFormats),
-  context: z.string().min(1),
-  description: z.string().optional(),
-  template_data: z.string().min(1),
-});
+interface TemplateBuilderFormValues {
+  name: string;
+  slug_value: string;
+  status: TemplateStatus;
+  template_type: string;
+  default_format: TemplateFormat;
+  context: string;
+  description?: string;
+  template_data: string;
+}
 
 export default function TemplateBuilder({
   facilityId,
@@ -103,13 +91,36 @@ export default function TemplateBuilder({
     format: TemplateFormat | null;
   }>({ isActive: false, data: null, format: null });
 
-  const form = useForm({
+  const templateBuilderSchema = z.object({
+    name: z.string().trim().min(1, t("field_required")),
+    slug_value: z
+      .string()
+      .trim()
+      .min(5, {
+        message: t("character_count_validation", { min: 5, max: 36 }),
+      })
+      .max(25, {
+        message: t("character_count_validation", { min: 5, max: 36 }),
+      })
+      .regex(/^[a-z0-9-]+$/, {
+        message: t("slug_format_message"),
+      }),
+    status: z.enum(TemplateStatuses),
+    template_type: z.string().min(1, t("field_required")),
+    default_format: z.enum(TemplateFormats),
+    context: z.string().min(1, t("field_required")),
+    description: z.string().optional(),
+    template_data: z.string().min(1, t("field_required")),
+  });
+
+  const form = useForm<TemplateBuilderFormValues>({
     resolver: zodResolver(templateBuilderSchema),
     defaultValues: {
       name: "",
       slug_value: "",
       status: "draft" as TemplateStatus,
       default_format: "html" as TemplateFormat,
+      template_type: "",
       template_data: DEFAULT_TEMPLATE,
       context: "",
     },
@@ -120,7 +131,10 @@ export default function TemplateBuilder({
     queryFn: query(templateApi.retrieveSchema),
   });
 
-  const availableContexts = schema?.contexts ?? {};
+  const availableContexts = useMemo(
+    () => schema?.contexts ?? {},
+    [schema?.contexts],
+  );
 
   const { data: template } = useQuery({
     queryKey: ["template", slug],
@@ -196,11 +210,14 @@ export default function TemplateBuilder({
         description: template.description,
       });
     }
-  }, [template]);
+  }, [form, template]);
 
   useEffect(() => {
     if (template && availableContexts) {
       setSelectedContext(availableContexts[template.context]);
+    } else if (availableContexts) {
+      const firstContext = Object.values(availableContexts)[0] ?? null;
+      setSelectedContext(firstContext);
     }
   }, [template, availableContexts]);
 
@@ -342,21 +359,18 @@ export default function TemplateBuilder({
   return (
     <div className="h-screen flex flex-col">
       <div className="border-b p-4">
+        <div className="mb-2">
+          <BackButton>
+            <ArrowLeft />
+            {t("back")}
+          </BackButton>
+        </div>
         <div className="flex flex-col sm:flex-row gap-2 items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <BackButton
-              size="icon"
-              to={`/facility/${facilityId}/template`}
-              aria-label={t("back")}
-            >
-              <ChevronLeft />
-            </BackButton>
-            <div>
-              <h1 className="text-2xl font-bold">{t("template_builder")}</h1>
-              <p className="text-sm text-muted-foreground">
-                {t("template_builder_description")}
-              </p>
-            </div>
+          <div>
+            <h1 className="text-2xl font-bold">{t("template_builder")}</h1>
+            <p className="text-sm text-muted-foreground">
+              {t("template_builder_description")}
+            </p>
           </div>
           <div className="flex gap-2">
             <Button
@@ -376,7 +390,12 @@ export default function TemplateBuilder({
             >
               {t("preview_template")}
             </Button>
-            <Button type="button" onClick={handleSaveTemplate}>
+            <Button
+              type="button"
+              onClick={() => {
+                form.handleSubmit(handleSaveTemplate)();
+              }}
+            >
               {t("save_template")}
             </Button>
           </div>
@@ -390,10 +409,7 @@ export default function TemplateBuilder({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    {t("template_name")}
-                    <span className="text-destructive ml-1">*</span>
-                  </FormLabel>
+                  <FormLabel aria-required>{t("template_name")}</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder={t("enter_template_name")} />
                   </FormControl>
@@ -407,10 +423,7 @@ export default function TemplateBuilder({
               name="slug_value"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    {t("slug")}
-                    <span className="text-destructive ml-1">*</span>
-                  </FormLabel>
+                  <FormLabel aria-required>{t("slug")}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -428,10 +441,7 @@ export default function TemplateBuilder({
               name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    {t("status")}
-                    <span className="text-destructive ml-1">*</span>
-                  </FormLabel>
+                  <FormLabel aria-required>{t("status")}</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
@@ -456,10 +466,7 @@ export default function TemplateBuilder({
               name="default_format"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    {t("default_format")}
-                    <span className="text-destructive ml-1">*</span>
-                  </FormLabel>
+                  <FormLabel aria-required>{t("default_format")}</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
@@ -484,7 +491,7 @@ export default function TemplateBuilder({
               name="template_type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("report_type")}</FormLabel>
+                  <FormLabel aria-required>{t("report_type")}</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
@@ -523,35 +530,49 @@ export default function TemplateBuilder({
         {/* Sidebar - 1/4 of screen */}
         <div className="flex-1 border-l p-4 overflow-auto flex flex-col gap-4">
           {/* Context Selector */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">{t("select_context")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Select
-                value={selectedContext?.slug}
-                onValueChange={(value) =>
-                  setSelectedContext(availableContexts[value])
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t("select_context")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.values(availableContexts).map((context) => (
-                    <SelectItem key={context.slug} value={context.slug}>
-                      {context.display_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selectedContext?.description && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  {selectedContext.description}
-                </p>
-              )}
-            </CardContent>
-          </Card>
+          <Form {...form}>
+            <FormField
+              control={form.control}
+              name="context"
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel aria-required>{t("select_context")}</FormLabel>
+
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        setSelectedContext(availableContexts[value] ?? null);
+                      }}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t("select_context")} />
+                        </SelectTrigger>
+                      </FormControl>
+
+                      <SelectContent>
+                        {Object.values(availableContexts).map((context) => (
+                          <SelectItem key={context.slug} value={context.slug}>
+                            {context.display_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {selectedContext?.description && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        {selectedContext.description}
+                      </p>
+                    )}
+
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+          </Form>
 
           {/* Fields List */}
           {selectedContext && (
@@ -682,16 +703,17 @@ function TemplateEditor({
   form,
   textareaRef,
 }: {
-  form: UseFormReturn<z.infer<typeof templateBuilderSchema>>;
+  form: UseFormReturn<TemplateBuilderFormValues>;
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
 }) {
   const { t } = useTranslation();
+
   return (
     <Form {...form}>
       <FormField
         control={form.control}
         name="template_data"
-        render={({ field: { ...field } }) => (
+        render={({ field }) => (
           <FormItem className="h-full flex flex-col">
             <FormLabel>{t("template_html")}</FormLabel>
             <FormControl>
@@ -703,6 +725,7 @@ function TemplateEditor({
                 spellCheck={false}
               />
             </FormControl>
+            <FormMessage />
           </FormItem>
         )}
       />

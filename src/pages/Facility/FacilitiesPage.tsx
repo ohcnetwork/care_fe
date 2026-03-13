@@ -36,9 +36,9 @@ export function FacilitiesPage() {
         ...(qParams.organization && {
           organization: qParams.organization,
         }),
-        page: qParams.page,
+        page: qParams.page || 1,
         limit: RESULTS_PER_PAGE_LIMIT,
-        offset: (qParams.page - 1) * RESULTS_PER_PAGE_LIMIT,
+        offset: ((qParams.page || 1) - 1) * RESULTS_PER_PAGE_LIMIT,
         ...advancedFilter.filter,
       },
     }),
