@@ -285,48 +285,44 @@ export function EncounterProvider({
       )}
 
       {selectedEncounter && (
-        <LocationSheet
-          open={
-            activeAction === EncounterAction.AssignLocation ||
-            activeAction === EncounterAction.LocationHistory
-          }
-          onOpenChange={(open) => {
-            setActiveAction(open ? EncounterAction.AssignLocation : null);
-          }}
-          facilityId={selectedEncounter.facility.id}
-          history={selectedEncounter.location_history}
-          encounter={selectedEncounter}
-          defaultTab={
-            activeAction === EncounterAction.LocationHistory
-              ? "history"
-              : "assign"
-          }
-        />
-      )}
-
-      {selectedEncounter && (
-        <CareTeamSheet
-          open={activeAction === EncounterAction.ManageCareTeam}
-          setOpen={(open) => {
-            setActiveAction(open ? EncounterAction.ManageCareTeam : null);
-          }}
-          encounter={selectedEncounter}
-          canWrite={canWriteSelectedEncounter}
-        />
-      )}
-
-      {selectedEncounter && (
-        <LinkDepartmentsSheet
-          entityType="encounter"
-          entityId={selectedEncounter.id}
-          currentOrganizations={selectedEncounter.organizations}
-          facilityId={selectedEncounter.facility.id}
-          open={activeAction === EncounterAction.ManageDepartments}
-          setOpen={(open) => {
-            setActiveAction(open ? EncounterAction.ManageDepartments : null);
-          }}
-          trigger={<span />}
-        />
+        <>
+          <LocationSheet
+            open={
+              activeAction === EncounterAction.AssignLocation ||
+              activeAction === EncounterAction.LocationHistory
+            }
+            onOpenChange={(open) => {
+              setActiveAction(open ? EncounterAction.AssignLocation : null);
+            }}
+            facilityId={selectedEncounter.facility.id}
+            history={selectedEncounter.location_history}
+            encounter={selectedEncounter}
+            defaultTab={
+              activeAction === EncounterAction.LocationHistory
+                ? "history"
+                : "assign"
+            }
+          />
+          <CareTeamSheet
+            open={activeAction === EncounterAction.ManageCareTeam}
+            setOpen={(open) => {
+              setActiveAction(open ? EncounterAction.ManageCareTeam : null);
+            }}
+            encounter={selectedEncounter}
+            canWrite={canWriteSelectedEncounter}
+          />
+          <LinkDepartmentsSheet
+            entityType="encounter"
+            entityId={selectedEncounter.id}
+            currentOrganizations={selectedEncounter.organizations}
+            facilityId={selectedEncounter.facility.id}
+            open={activeAction === EncounterAction.ManageDepartments}
+            setOpen={(open) => {
+              setActiveAction(open ? EncounterAction.ManageDepartments : null);
+            }}
+            trigger={<span />}
+          />
+        </>
       )}
 
       {facilityId && (
