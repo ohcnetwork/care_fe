@@ -19,7 +19,6 @@ import {
   extractChargeItemsFromBatchResponse,
 } from "@/types/billing/chargeItem/chargeItem";
 import {
-  MedicationDispenseCategory,
   MedicationDispenseCreate,
   MedicationDispenseStatus,
 } from "@/types/emr/medicationDispense/medicationDispense";
@@ -77,6 +76,7 @@ import {
   extractDispenseOrderFromBatchResponse,
 } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
+import { MedicationCategory } from "@/types/emr/medicationRequest/medicationRequest";
 import {
   isGreaterThan,
   isLessThanOrEqual,
@@ -462,7 +462,7 @@ export default function DispenseDrawer({
 
           const dispenseData: MedicationDispenseCreate = {
             status: MedicationDispenseStatus.completed,
-            category: MedicationDispenseCategory.outpatient,
+            category: MedicationCategory.outpatient,
             when_prepared: new Date(),
             dosage_instruction: [],
             encounter: encounterId,

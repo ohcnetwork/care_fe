@@ -15,6 +15,20 @@ interface Options {
 }
 
 /**
+ * In-place sort items by expiration date.
+ */
+function sortItemsByExpirationDate(items: InventoryRead[]) {
+  return items.sort((a, b) => {
+    if (!a.product.expiration_date) return 1;
+    if (!b.product.expiration_date) return -1;
+    return (
+      new Date(a.product.expiration_date).getTime() -
+      new Date(b.product.expiration_date).getTime()
+    );
+  });
+}
+
+/**
  * Auto-select inventory items based on the provided options.
  * It iterates through the items and selects them until the desired quantity is
  * met or there are no more items to select.
@@ -33,6 +47,8 @@ export const selectEligibleInventoryItems = (
 
   // Start with the full required quantity, and reduce it as we select items
   let remainingQuantity = options.quantity.ceil();
+
+  sortItemsByExpirationDate(items);
 
   for (const item of items) {
     // Escape hatch to prevent unnecessary iterations once we've met the required quantity
