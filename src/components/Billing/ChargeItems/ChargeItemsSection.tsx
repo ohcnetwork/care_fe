@@ -126,6 +126,7 @@ export function ChargeItemsSection({
               )}
               {!disableCreateChargeItemsSection &&
                 !viewOnly &&
+                account?.results[0] &&
                 isAccountActiveAndBillable(account?.results[0]) && (
                   <Button
                     variant="outline"

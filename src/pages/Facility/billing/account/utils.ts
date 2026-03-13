@@ -6,18 +6,14 @@ import {
 } from "@/types/billing/account/Account";
 
 export const isAccountActiveAndBillable = (
-  account: AccountRead | AccountBase | undefined,
+  account: AccountRead | AccountBase,
 ) => {
-  if (!account) return false;
   return (
     account.status === AccountStatus.active && !isAccountBillingClosed(account)
   );
 };
 
-export const isAccountBillingClosed = (
-  account: AccountRead | AccountBase | undefined,
-) => {
-  if (!account) return false;
+export const isAccountBillingClosed = (account: AccountRead | AccountBase) => {
   return [
     AccountBillingStatus.closed_baddebt,
     AccountBillingStatus.closed_voided,

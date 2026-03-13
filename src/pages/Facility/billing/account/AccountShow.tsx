@@ -63,10 +63,7 @@ import BackButton from "@/components/Common/BackButton";
 import { ReportSubTab } from "@/components/Files/ReportSubTab";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import useBreakpoints from "@/hooks/useBreakpoints";
-import {
-  isAccountActiveAndBillable,
-  isAccountBillingClosed,
-} from "@/pages/Facility/billing/account/utils";
+import { isAccountBillingClosed } from "@/pages/Facility/billing/account/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { ReportType } from "@/types/emr/report/report";
 import AccountSheet from "./AccountSheet";
@@ -158,7 +155,7 @@ export function AccountShow({
     "2xl": 12,
   });
 
-  const isBillingClosed = isAccountBillingClosed(account);
+  const isBillingClosed = !!(account && isAccountBillingClosed(account));
 
   useEffect(() => {
     if (account) {
@@ -269,7 +266,9 @@ export function AccountShow({
     );
   }
 
-  const isAccountBillableAndActive = isAccountActiveAndBillable(account);
+  const isAccountBillableAndActive = !!(
+    account && isAccountBillingClosed(account)
+  );
 
   const tabs = {
     invoices: {
