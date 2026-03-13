@@ -1,7 +1,9 @@
-import { BatchRequestResponse } from "@/types/base/batch/batch";
-import batchApi from "@/types/base/batch/batchApi";
+import {
+  BatchRequestBody,
+  BatchRequestResponse,
+} from "@/types/base/batch/batch";
 import mutate from "@/Utils/request/mutate";
-import { ApiRoute, HttpMethod } from "@/Utils/request/types";
+import { ApiRoute, HttpMethod, Type } from "@/Utils/request/types";
 import { makeUrl } from "@/Utils/request/utils";
 import {
   DefaultError,
@@ -11,7 +13,7 @@ import {
 } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 
-export interface BatchRequestObject<T = unknown> {
+interface BatchRequestObject<T = unknown> {
   api: ApiRoute<unknown, unknown>;
   pathParams?: Record<string, string>;
   body: T;
@@ -31,8 +33,13 @@ export function useBatchRequest<TError = DefaultError, TContext = unknown>(
   const mutation = useMutation(
     {
       mutationFn: () =>
-        mutate(batchApi.batchRequest)({
-          requests: requests.map((request: BatchRequestObject) => ({
+        mutate({
+          path: "/api/v1/batch_requests/",
+          method: HttpMethod.POST,
+          TRes: Type<BatchRequestResponse>(),
+          TBody: Type<BatchRequestBody>(),
+        })({
+          requests: requests.map((request) => ({
             url: makeUrl(request.api.path, undefined, request.pathParams),
             method: request.api.method ?? HttpMethod.GET,
             reference_id: request.referenceId,

@@ -111,25 +111,25 @@ export function useEncounterProgressController({
     }
   };
 
-  const checkDischarge = () => {
+  const completeEverything = () => {
     if (encounterRequiresDischarge(encounter)) {
       navigate(
         `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?toDischarge=true`,
       );
-      return true;
+      return;
     }
-    return false;
-  };
-
-  const completeEverything = () => {
-    if (checkDischarge()) return;
     addEncounterCloseRequestToBatch();
     addAppointmentCloseRequestsToBatch();
     executeBatch();
   };
 
   const completeEncounter = () => {
-    if (checkDischarge()) return;
+    if (encounterRequiresDischarge(encounter)) {
+      navigate(
+        `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?toDischarge=true`,
+      );
+      return;
+    }
     addEncounterCloseRequestToBatch();
     executeBatch();
   };
