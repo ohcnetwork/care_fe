@@ -5,16 +5,64 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+const CHARGE_ITEM_CATEGORY_NAMES = ["Medications"] as const;
+
 test.describe("Discount Component & Charge Item Definition Integration", () => {
   let facilityId: string;
   let discountComponentName: string;
   let chargeItemTitle: string;
   let chargeItemSlug: string;
   let basePrice: string;
-  const categoryName = "Medications";
+  let categoryName: string;
+
+  async function ensureDiscountConfiguration(page: Page) {
+    await page.goto(
+      `/facility/${facilityId}/settings/billing/discount_configuration`,
+    );
+
+    // Enter edit mode
+    const editButton = page.getByRole("button", { name: /edit/i });
+    await expect(editButton).toBeVisible({ timeout: 15000 });
+    await editButton.click();
+
+    // Set a simple, valid configuration using the real labels
+    const maxApplicableInput = page.getByLabel(/maximum applicable discounts/i);
+    await expect(maxApplicableInput).toBeVisible({ timeout: 15000 });
+    await maxApplicableInput.fill("0"); // 0 = no limit
+
+    const applicabilityOrderTrigger = page.getByLabel(/applicability order/i);
+    await expect(applicabilityOrderTrigger).toBeVisible({ timeout: 15000 });
+    await applicabilityOrderTrigger.click();
+
+    const totalDescOption = page.getByRole("option", {
+      name: /highest value first/i,
+    });
+    await expect(totalDescOption).toBeVisible({ timeout: 15000 });
+    await totalDescOption.click();
+
+    const saveButton = page.getByRole("button", { name: /save/i });
+    await expect(saveButton).toBeVisible({ timeout: 15000 });
+    await saveButton.click();
+
+    await expect(
+      page.getByText(/discount configuration saved successfully/i),
+    ).toBeVisible();
+  }
+
+  test.beforeAll(async ({ browser }) => {
+    facilityId = getFacilityId();
+    const context = await browser.newContext({
+      storageState: "tests/.auth/user.json",
+    });
+    const page = await context.newPage();
+
+    await ensureDiscountConfiguration(page);
+
+    await context.close();
+  });
 
   test.beforeEach(async ({ page }) => {
-    facilityId = getFacilityId();
+    categoryName = faker.helpers.arrayElement([...CHARGE_ITEM_CATEGORY_NAMES]);
 
     const discountName = faker.commerce.productName();
     discountComponentName = discountName;
@@ -43,13 +91,15 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
       .getByRole("button", { name: /create discount component/i })
       .click();
 
-    await page
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible({ timeout: 15000 });
+    await dialog
       .getByRole("textbox", { name: /name/i })
       .fill(discountComponentName);
 
-    await page
-      .getByRole("spinbutton", { name: /discount amount or factor/i })
-      .fill("10");
+    const discountValueInput = dialog.getByRole("spinbutton").first();
+    await expect(discountValueInput).toBeVisible({ timeout: 15000 });
+    await discountValueInput.fill("10");
 
     if (withCondition) {
       await page.getByRole("button", { name: /add condition/i }).click();
@@ -77,7 +127,7 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     await page.goto(
       `/facility/${facilityId}/settings/charge_item_definitions/`,
     );
-    await page.getByRole("textbox", { name: "Search" }).fill(categoryName);
+    await page.getByPlaceholder(/search/i).fill(categoryName);
     await page.getByRole("heading", { name: categoryName }).click();
   }
 
@@ -119,7 +169,7 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
       page.getByText(/charge item definition.*created successfully/i),
     ).toBeVisible();
 
-    await page.getByRole("textbox", { name: /search/i }).fill(chargeItemTitle);
+    await page.getByPlaceholder(/search definitions/i).fill(chargeItemTitle);
     await expect(
       page.getByRole("table").getByText(chargeItemTitle),
     ).toBeVisible();
@@ -180,7 +230,7 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
       page.getByText(/charge item definition.*created successfully/i),
     ).toBeVisible();
 
-    await page.getByRole("textbox", { name: /search/i }).fill(chargeItemTitle);
+    await page.getByPlaceholder(/search definitions/i).fill(chargeItemTitle);
     await expect(
       page.getByRole("table").getByText(chargeItemTitle),
     ).toBeVisible();
