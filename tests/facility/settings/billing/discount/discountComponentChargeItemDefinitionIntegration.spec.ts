@@ -200,7 +200,7 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
 
     await page.getByRole("button", { name: "Edit" }).click();
 
-    await expect(page.getByText(/selected/i)).toBeVisible();
+    await expect(page.getByText(/selected/i).first()).toBeVisible();
   });
 
   test("conditional discount component can be attached and conditions persist", async ({
