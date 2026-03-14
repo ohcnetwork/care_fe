@@ -160,7 +160,12 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
 
     await openDiscountSelectorAndFilter(page);
 
-    await page.getByRole("checkbox").first().click();
+    const discountPopover = page
+      .locator('[data-slot="popover-content"]')
+      .filter({ has: page.getByPlaceholder(/search for discount code/i) });
+    const discountCheckbox = discountPopover.getByRole("checkbox").first();
+    await expect(discountCheckbox).toBeVisible({ timeout: 15000 });
+    await discountCheckbox.click();
     await page.getByRole("button", { name: "Done" }).click();
 
     await page.getByRole("button", { name: /create/i }).click();
@@ -202,7 +207,12 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
 
     await openDiscountSelectorAndFilter(page);
 
-    await page.getByRole("checkbox").first().click();
+    const discountPopover = page
+      .locator('[data-slot="popover-content"]')
+      .filter({ has: page.getByPlaceholder(/search for discount code/i) });
+    const discountCheckbox = discountPopover.getByRole("checkbox").first();
+    await expect(discountCheckbox).toBeVisible({ timeout: 15000 });
+    await discountCheckbox.click();
     await page.getByRole("button", { name: "Done" }).click();
 
     const switchElement = page.getByRole("switch", {
