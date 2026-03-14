@@ -147,7 +147,16 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
       .click();
 
     const discountSearch = page.getByPlaceholder(/search for discount code/i);
+    await expect(discountSearch).toBeVisible({ timeout: 15000 });
     await discountSearch.fill(discountComponentName);
+  }
+
+  function getDiscountPopoverCheckbox(page: Page) {
+    const discountSearch = page.getByPlaceholder(/search for discount code/i);
+    const popoverContent = discountSearch.locator(
+      "xpath=ancestor::*[.//button[normalize-space()='Done']][1]",
+    );
+    return popoverContent.getByRole("checkbox").first();
   }
 
   test("discount component appears in Add Discount and persists on view/edit", async ({
@@ -160,10 +169,7 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
 
     await openDiscountSelectorAndFilter(page);
 
-    const discountPopover = page
-      .locator('[data-slot="popover-content"]')
-      .filter({ has: page.getByPlaceholder(/search for discount code/i) });
-    const discountCheckbox = discountPopover.getByRole("checkbox").first();
+    const discountCheckbox = getDiscountPopoverCheckbox(page);
     await expect(discountCheckbox).toBeVisible({ timeout: 15000 });
     await discountCheckbox.click();
     await page.getByRole("button", { name: "Done" }).click();
@@ -207,10 +213,7 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
 
     await openDiscountSelectorAndFilter(page);
 
-    const discountPopover = page
-      .locator('[data-slot="popover-content"]')
-      .filter({ has: page.getByPlaceholder(/search for discount code/i) });
-    const discountCheckbox = discountPopover.getByRole("checkbox").first();
+    const discountCheckbox = getDiscountPopoverCheckbox(page);
     await expect(discountCheckbox).toBeVisible({ timeout: 15000 });
     await discountCheckbox.click();
     await page.getByRole("button", { name: "Done" }).click();
