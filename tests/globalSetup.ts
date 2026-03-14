@@ -1,5 +1,5 @@
 import { FullConfig } from "@playwright/test";
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -41,7 +41,7 @@ function restoreDatabase() {
 
   try {
     console.log("🔄 Restoring database from snapshot...");
-    execSync(`bash ${scriptPath} restore`, {
+    execFileSync("bash", [scriptPath, "restore"], {
       stdio: "pipe",
       timeout: 30000,
     });

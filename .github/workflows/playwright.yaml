@@ -103,6 +103,7 @@ jobs:
           ref: ${{ steps.backend-branch.outputs.branch }}
 
       - name: Cache Docker images
+        id: docker-cache
         uses: actions/cache@v4
         with:
           path: /tmp/docker-cache
@@ -130,9 +131,11 @@ jobs:
           JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
 
       - name: Save Docker images to cache
+        if: steps.docker-cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p /tmp/docker-cache
-          docker images --format '{{.Repository}}:{{.Tag}}' | grep -v '<none>' | while read img; do
+          # Only cache images used by the CARE backend services (not base images)
+          docker compose -f care/docker-compose.local.yaml config --images 2>/dev/null | while read img; do
             filename=$(echo "$img" | tr '/:' '_')
             if [ ! -f "/tmp/docker-cache/${filename}.tar" ]; then
               docker save -o "/tmp/docker-cache/${filename}.tar" "$img" 2>/dev/null || true

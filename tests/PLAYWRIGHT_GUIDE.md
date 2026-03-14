@@ -7,9 +7,10 @@ This guide contains everything needed to write Playwright E2E tests for CARE. It
 ```bash
 # First time setup
 npm run playwright:install        # Install browsers
-npm run playwright:db-reset       # Create DB snapshot with fixtures
+npm run build                     # Build the app (required — tests run against production build)
+npm run playwright:db-reset       # Create DB snapshot with fixtures (requires CARE_BACKEND_DIR)
 
-# Run tests
+# Run tests (backend must be running on port 9000)
 npx playwright test tests/auth/   # Run a specific directory
 npx playwright test --workers=4   # Run with parallelism
 

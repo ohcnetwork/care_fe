@@ -38,13 +38,32 @@ case "${1:-}" in
     echo "Restoring DB from snapshot..."
     # Terminate existing connections
     pg_cmd psql -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$DB_NAME' AND pid <> pg_backend_pid();" > /dev/null 2>&1 || true
-    pg_cmd pg_restore --clean --if-exists -d "$DB_NAME" "$SNAPSHOT_FILE" 2>/dev/null || true
+    # pg_restore returns non-zero for harmless warnings (e.g., "role already exists"),
+    # so we capture stderr and only fail on actual restore errors
+    restore_output=$(pg_cmd pg_restore --clean --if-exists -d "$DB_NAME" "$SNAPSHOT_FILE" 2>&1) || {
+      # Filter out expected warnings; fail on real errors
+      if echo "$restore_output" | grep -qiE "FATAL|could not connect|no matching tables"; then
+        echo "Error: Failed to restore database from snapshot" >&2
+        echo "$restore_output" >&2
+        exit 1
+      fi
+    }
     echo "DB restored"
     ;;
 
   reset)
     echo "Full DB reset: drop → create → migrate → fixtures → snapshot"
-    CARE_DIR="${CARE_BACKEND_DIR:-/home/user/care}"
+    CARE_DIR="${CARE_BACKEND_DIR:-}"
+    if [ -z "$CARE_DIR" ]; then
+      echo "Error: CARE_BACKEND_DIR environment variable is not set." >&2
+      echo "Set it to the path of your care backend checkout, e.g.:" >&2
+      echo "  export CARE_BACKEND_DIR=/path/to/care" >&2
+      exit 1
+    fi
+    if [ ! -f "$CARE_DIR/manage.py" ]; then
+      echo "Error: manage.py not found in $CARE_DIR — is CARE_BACKEND_DIR correct?" >&2
+      exit 1
+    fi
 
     # Terminate connections and recreate
     pg_cmd psql -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$DB_NAME' AND pid <> pg_backend_pid();" > /dev/null 2>&1 || true

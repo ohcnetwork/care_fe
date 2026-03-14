@@ -30,7 +30,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
 
   retries: process.env.CI ? 2 : 0,
-  /* Use 4 workers on CI to match ubuntu-latest vCPU count */
+  /* Use 4 workers on CI to match ubuntu-latest vCPU count.
+   * Setup files (auth.setup.ts, nurse.setup.ts, facilityAdmin.setup.ts) are independent
+   * and safe to run in parallel. The "chromium" project depends on "setup" completing first. */
   workers: process.env.CI ? 4 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI

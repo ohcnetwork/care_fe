@@ -10,7 +10,7 @@ CARE is a Digital Public Good building an open source EMR + Hospital Management 
 
 ### Backend Setup (care)
 
-The backend lives at `/home/user/care` with a Python 3.13 venv at `/home/user/care/.venv`.
+Clone the [care backend](https://github.com/ohcnetwork/care) alongside this repo and create a Python 3.13 venv with dependencies installed.
 
 **Start backend services:**
 ```bash
@@ -18,21 +18,19 @@ The backend lives at `/home/user/care` with a Python 3.13 venv at `/home/user/ca
 pg_isready || sudo pg_ctlcluster 16 main start
 redis-cli ping || redis-server --daemonize yes
 
-# Start Django backend on port 9000
-cd /home/user/care
+# Start Django backend on port 9000 (from the care backend directory)
+cd <care-backend-dir>
 DJANGO_SETTINGS_MODULE=config.settings.local DJANGO_READ_DOT_ENV_FILE=true .venv/bin/python manage.py runserver 0.0.0.0:9000
 ```
 
-Or use the convenience script: `/home/user/start-backend.sh`
-
 **Database commands:**
 ```bash
-cd /home/user/care
+cd <care-backend-dir>
 .venv/bin/python manage.py migrate                    # Run migrations
 .venv/bin/python manage.py load_fixtures              # Load test data
 ```
 
-**Test credentials (from fixtures):**
+**Backend fixture credentials:**
 
 | Role | Username | Password |
 |------|----------|----------|
@@ -41,6 +39,14 @@ cd /home/user/care
 | Nurse | `nurse_2_0` | `Coronasafe@123` |
 | Staff | `staff_2_0` | `Coronasafe@123` |
 | Facility Admin | `facility_admin_2_0` | `Coronasafe@123` |
+
+**Playwright E2E test credentials** (used in `tests/setup/*.setup.ts`):
+
+| Storage State | Username | Password |
+|--------------|----------|----------|
+| `tests/.auth/user.json` | `admin` | `admin` |
+| `tests/.auth/nurse.json` | `nurse_2_0` | `Coronasafe@123` |
+| `tests/.auth/facilityAdmin.json` | `facility_admin_2_0` | `Coronasafe@123` |
 
 ### Frontend Setup
 
@@ -82,6 +88,9 @@ npm run playwright:test:ui                              # Interactive Playwright
 Tests create data (patients, roles, locations, etc.) that can cause conflicts on re-run. Use the DB snapshot system:
 
 ```bash
+# Set CARE_BACKEND_DIR to your care backend checkout (required for db-reset)
+export CARE_BACKEND_DIR=/path/to/care
+
 npm run playwright:db-reset      # First time: migrate + fixtures + snapshot (~30s)
 npm run playwright:db-restore    # Before re-runs: restore clean state (~2s)
 npm run playwright:db-snapshot   # Save current state as new baseline
@@ -218,7 +227,7 @@ When working autonomously on this codebase, follow this sequence:
 1. **Before coding:** Read relevant source files and understand existing patterns
 2. **After changes:** Run `npm run lint-fix` and `npm run format` on changed files
 3. **Verify:** Run relevant Playwright tests against the local backend to validate changes
-4. **For API changes:** Check corresponding backend endpoint at `/home/user/care` and update both repos if needed
+4. **For API changes:** Check corresponding backend endpoint in the care backend repo and update both repos if needed
 5. **For new features:** Add Playwright tests in `tests/` following `tests/PLAYWRIGHT_GUIDE.md`
 6. **For i18n:** Add English strings to `public/locale/en.json`
 7. **For writing tests:** Read `tests/PLAYWRIGHT_GUIDE.md` — it contains complete patterns for all form interactions, selectors, assertions, and helpers
