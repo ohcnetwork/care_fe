@@ -186,7 +186,12 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
       page.getByRole("table").getByText(chargeItemTitle),
     ).toBeVisible();
 
-    await page.getByRole("link", { name: "View" }).click();
+    await page
+      .getByRole("table")
+      .getByRole("row")
+      .filter({ hasText: chargeItemTitle })
+      .getByRole("link", { name: "View" })
+      .click();
     await expect(
       page.getByRole("heading", { name: chargeItemTitle }),
     ).toBeVisible();
@@ -197,7 +202,7 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
 
     await page
       .locator("div")
-      .filter({ hasText: /^Add Discount$/ })
+      .filter({ hasText: /Add Discount|\d+ selected/ })
       .first()
       .click();
 
@@ -257,7 +262,12 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     await expect(
       page.getByRole("table").getByText(chargeItemTitle),
     ).toBeVisible();
-    await page.getByRole("link", { name: "View" }).click();
+    await page
+      .getByRole("table")
+      .getByRole("row")
+      .filter({ hasText: chargeItemTitle })
+      .getByRole("link", { name: "View" })
+      .click();
 
     await expect(
       page.getByText("Patient Age is in range 60 to 120 years"),

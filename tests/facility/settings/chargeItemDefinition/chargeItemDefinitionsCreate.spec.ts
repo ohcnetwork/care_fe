@@ -163,7 +163,12 @@ test.describe("Charge Item Definition Creation", () => {
     // Verify all fields
     await page.getByRole("textbox", { name: /search/i }).fill(title);
     await expect(page.getByRole("table").getByText(title)).toBeVisible();
-    await page.getByRole("link", { name: "View" }).click();
+    await page
+      .getByRole("table")
+      .getByRole("row")
+      .filter({ hasText: title })
+      .getByRole("link", { name: "View" })
+      .click();
     await expect(page.getByRole("heading", { name: title })).toBeVisible();
     await expect(page.getByText(description)).toBeVisible();
     await expect(page.getByText(purpose).last()).toBeVisible();
