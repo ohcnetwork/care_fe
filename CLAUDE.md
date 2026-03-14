@@ -219,8 +219,9 @@ When working autonomously on this codebase, follow this sequence:
 2. **After changes:** Run `npm run lint-fix` and `npm run format` on changed files
 3. **Verify:** Run relevant Playwright tests against the local backend to validate changes
 4. **For API changes:** Check corresponding backend endpoint at `/home/user/care` and update both repos if needed
-5. **For new features:** Add Playwright tests in `tests/` following existing patterns
+5. **For new features:** Add Playwright tests in `tests/` following `tests/PLAYWRIGHT_GUIDE.md`
 6. **For i18n:** Add English strings to `public/locale/en.json`
+7. **For writing tests:** Read `tests/PLAYWRIGHT_GUIDE.md` — it contains complete patterns for all form interactions, selectors, assertions, and helpers
 
 ### Quick verification cycle
 
