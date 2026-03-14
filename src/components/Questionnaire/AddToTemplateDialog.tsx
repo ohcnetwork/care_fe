@@ -130,7 +130,7 @@ export function AddToTemplateDialog<T>({
             <div className="flex-1 min-w-0">
               <p
                 className={cn(
-                  "font-medium",
+                  "font-medium text-wrap break-all",
                   isMedication ? "text-blue-900" : "text-purple-900",
                 )}
               >
