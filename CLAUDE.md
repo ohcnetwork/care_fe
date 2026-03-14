@@ -77,6 +77,23 @@ npm run playwright:test:ui                              # Interactive Playwright
 - Run specific test directories to iterate faster: `npx playwright test tests/auth/`
 - The `setup` project runs first to authenticate test users and save storage state
 
+**Database management for re-runs:**
+
+Tests create data (patients, roles, locations, etc.) that can cause conflicts on re-run. Use the DB snapshot system:
+
+```bash
+npm run playwright:db-reset      # First time: migrate + fixtures + snapshot (~30s)
+npm run playwright:db-restore    # Before re-runs: restore clean state (~2s)
+npm run playwright:db-snapshot   # Save current state as new baseline
+npm run playwright:db-status     # Check snapshot info
+```
+
+The `globalSetup` automatically restores the DB snapshot before each local test run (skipped on CI). To set up for the first time:
+```bash
+npm run playwright:db-reset      # Creates snapshot with fixtures
+npm run playwright:test           # Tests run against clean DB, auto-restores on next run
+```
+
 **Test structure:**
 - `tests/setup/` — Authentication & fixture setup (runs before tests)
 - `tests/auth/` — Login, session, homepage tests
@@ -85,6 +102,12 @@ npm run playwright:test:ui                              # Interactive Playwright
 - `tests/organization/` — Organization management
 - `tests/helper/` — Shared test utilities
 - `tests/support/` — ID management (facility, patient, encounter IDs)
+
+**Writing new tests:**
+- Use `faker` for data generation — avoid hardcoded names/slugs that collide on re-run
+- Use `Date.now()` or `faker.string.alphanumeric()` for unique identifiers
+- Don't rely on cleanup — the DB snapshot system handles state reset
+- Use `getFacilityId()`, `getPatientId()`, `getEncounterId()` from `tests/support/` for fixture IDs
 
 ## Code Style Guidelines
 

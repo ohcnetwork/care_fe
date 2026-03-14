@@ -1,4 +1,5 @@
 import { FullConfig } from "@playwright/test";
+import { execSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -15,24 +16,58 @@ interface LocalStorageItem {
 }
 
 /**
- * Global setup that runs once before all tests.
- * Refreshes authentication tokens to ensure they're valid for the test run.
- * Uses native fetch() instead of launching a browser for speed.
+ * Restore database from snapshot before tests run.
+ * Ensures a clean, repeatable state for every test execution.
+ * Skipped on CI (CI uses fresh Docker containers per run).
  */
-async function globalSetup(_config: FullConfig) {
+function restoreDatabase() {
+  if (process.env.CI) return;
+
+  const snapshotFile =
+    process.env.PLAYWRIGHT_DB_SNAPSHOT || "/tmp/care_playwright_snapshot.dump";
+  const scriptPath = path.resolve(__dirname, "../scripts/playwright-db.sh");
+
+  if (!fs.existsSync(snapshotFile)) {
+    console.log(
+      "⚠️ No DB snapshot found. Run 'npm run playwright:db-reset' to create one.",
+    );
+    return;
+  }
+
+  if (!fs.existsSync(scriptPath)) {
+    console.log("⚠️ playwright-db.sh not found, skipping DB restore");
+    return;
+  }
+
+  try {
+    console.log("🔄 Restoring database from snapshot...");
+    execSync(`bash ${scriptPath} restore`, {
+      stdio: "pipe",
+      timeout: 30000,
+    });
+    console.log("✅ Database restored to clean state");
+  } catch (error) {
+    console.error(
+      "⚠️ DB restore failed (tests will continue):",
+      error instanceof Error ? error.message : error,
+    );
+  }
+}
+
+/**
+ * Refresh authentication tokens using native fetch.
+ */
+async function refreshTokens() {
   const authFile = path.join(__dirname, ".auth/user.json");
 
-  // Check if auth file exists
   if (!fs.existsSync(authFile)) {
     console.log("⚠️ Auth file not found, skipping token refresh");
     return;
   }
 
   try {
-    // Read the current storage state
     const storageState = JSON.parse(fs.readFileSync(authFile, "utf-8"));
 
-    // Validate that at least one origin exists in the storage state
     if (
       !Array.isArray(storageState.origins) ||
       storageState.origins.length === 0
@@ -44,7 +79,6 @@ async function globalSetup(_config: FullConfig) {
     }
 
     const firstOrigin = storageState.origins[0];
-    // Extract tokens from localStorage of the first origin
     const localStorage: LocalStorageItem[] = Array.isArray(
       firstOrigin.localStorage,
     )
@@ -67,7 +101,6 @@ async function globalSetup(_config: FullConfig) {
 
     console.log("🔄 Refreshing authentication tokens...");
 
-    // Use native fetch instead of launching a browser
     const response = await fetch(`${apiUrl}/api/v1/auth/token/refresh/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -77,7 +110,6 @@ async function globalSetup(_config: FullConfig) {
     if (response.ok) {
       const data = await response.json();
 
-      // Update tokens in localStorage
       const accessIndex = localStorage.findIndex(
         (item: LocalStorageItem) => item.name === ACCESS_TOKEN_KEY,
       );
@@ -92,7 +124,6 @@ async function globalSetup(_config: FullConfig) {
         localStorage[refreshIndex].value = data.refresh;
       }
 
-      // Write updated storage state back to file
       fs.writeFileSync(authFile, JSON.stringify(storageState, null, 2));
 
       console.log("✅ Tokens refreshed successfully");
@@ -101,8 +132,17 @@ async function globalSetup(_config: FullConfig) {
     }
   } catch (error) {
     console.error("❌ Error refreshing tokens:", error);
-    // Don't fail the test run, just log the error
   }
+}
+
+/**
+ * Global setup that runs once before all tests.
+ * 1. Restores database from snapshot (local only)
+ * 2. Refreshes authentication tokens
+ */
+async function globalSetup(_config: FullConfig) {
+  restoreDatabase();
+  await refreshTokens();
 }
 
 export default globalSetup;
