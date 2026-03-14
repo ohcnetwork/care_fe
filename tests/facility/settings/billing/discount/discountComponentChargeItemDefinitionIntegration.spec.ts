@@ -191,7 +191,7 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
       page.getByRole("heading", { name: chargeItemTitle }),
     ).toBeVisible();
 
-    await expect(page.getByText(/discount/i)).toBeVisible();
+    await expect(page.getByText(/discount/i).first()).toBeVisible();
 
     await page.getByRole("button", { name: "Edit" }).click();
 
