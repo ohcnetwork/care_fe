@@ -78,6 +78,7 @@ export interface TagConfigRequest {
   organization?: string;
   facility?: string;
   facility_organization?: string;
+  meta?: TagConfigMeta;
 }
 
 export function getTagHierarchyDisplay(
