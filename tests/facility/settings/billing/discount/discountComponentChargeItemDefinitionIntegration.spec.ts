@@ -200,12 +200,6 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
 
     await page.getByRole("button", { name: "Edit" }).click();
 
-    await page
-      .locator("div")
-      .filter({ hasText: /Add Discount|\d+ selected/ })
-      .first()
-      .click();
-
     await expect(page.getByText(/selected/i)).toBeVisible();
   });
 
