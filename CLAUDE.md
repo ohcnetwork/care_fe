@@ -6,6 +6,49 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 CARE is a Digital Public Good building an open source EMR + Hospital Management system. This is the React frontend (React 19 + TypeScript + Vite).
 
+## Local Development Environment
+
+### Backend Setup (care)
+
+The backend lives at `/home/user/care` with a Python 3.13 venv at `/home/user/care/.venv`.
+
+**Start backend services:**
+```bash
+# Ensure PostgreSQL and Redis are running
+pg_isready || sudo pg_ctlcluster 16 main start
+redis-cli ping || redis-server --daemonize yes
+
+# Start Django backend on port 9000
+cd /home/user/care
+DJANGO_SETTINGS_MODULE=config.settings.local DJANGO_READ_DOT_ENV_FILE=true .venv/bin/python manage.py runserver 0.0.0.0:9000
+```
+
+Or use the convenience script: `/home/user/start-backend.sh`
+
+**Database commands:**
+```bash
+cd /home/user/care
+.venv/bin/python manage.py migrate                    # Run migrations
+.venv/bin/python manage.py load_fixtures              # Load test data
+```
+
+**Test credentials (from fixtures):**
+
+| Role | Username | Password |
+|------|----------|----------|
+| Doctor | `doctor_2_0` | `Coronasafe@123` |
+| Admin | `administrator_2_0` | `Coronasafe@123` |
+| Nurse | `nurse_2_0` | `Coronasafe@123` |
+| Staff | `staff_2_0` | `Coronasafe@123` |
+| Facility Admin | `facility_admin_2_0` | `Coronasafe@123` |
+
+### Frontend Setup
+
+The frontend is configured via `.env.local` to use the local backend:
+```
+REACT_CARE_API_URL=http://127.0.0.1:9000
+```
+
 ## Build/Lint/Test Commands
 
 - `npm run dev` — Start dev server at http://localhost:4000
@@ -13,12 +56,35 @@ CARE is a Digital Public Good building an open source EMR + Hospital Management 
 - `npm run lint` — Run ESLint (takes 85s+, set timeout to 120s+)
 - `npm run lint-fix` — ESLint with auto-fix
 - `npm run format` — Prettier formatting
-- `npm run playwright:test` — Run all Playwright E2E tests headlessly
-- `npm run playwright:test -- tests/auth/login.spec.ts` — Run a single test file
-- `npm run playwright:test -- -g "test name"` — Run tests matching a pattern
-- `npm run playwright:test:ui` — Interactive Playwright UI mode
 
-Playwright requires a local backend running (`REACT_CARE_API_URL=http://127.0.0.1:9000` in `.env.local`) and `npm run playwright:install` for browsers.
+### Playwright E2E Tests
+
+**Prerequisites:** Backend must be running on port 9000, and a production build must exist (`npm run build`).
+
+```bash
+npm run playwright:install                              # Install browsers (first time)
+npm run playwright:test                                 # Run all tests
+npm run playwright:test -- tests/auth/login.spec.ts     # Run a single test file
+npm run playwright:test -- -g "test name"               # Run tests matching a pattern
+npm run playwright:test -- --workers=4                   # Run with 4 parallel workers
+npm run playwright:test -- --shard=1/3                   # Run shard 1 of 3
+npm run playwright:test:ui                              # Interactive Playwright UI mode
+```
+
+**Running tests efficiently:**
+- Use `--workers=4` for parallel execution (default on CI, matches 4 vCPUs)
+- Use `--shard=N/TOTAL` to split across multiple processes
+- Run specific test directories to iterate faster: `npx playwright test tests/auth/`
+- The `setup` project runs first to authenticate test users and save storage state
+
+**Test structure:**
+- `tests/setup/` — Authentication & fixture setup (runs before tests)
+- `tests/auth/` — Login, session, homepage tests
+- `tests/facility/` — Facility management, settings, patients, encounters
+- `tests/admin/` — Admin panel tests
+- `tests/organization/` — Organization management
+- `tests/helper/` — Shared test utilities
+- `tests/support/` — ID management (facility, patient, encounter IDs)
 
 ## Code Style Guidelines
 
@@ -89,9 +155,9 @@ Errors handled globally — session expiry redirects to `/session-expired`, 400/
 
 ### UI Components
 
-Built on **shadcn/uishadcn/ui** + **Radix UI primitives** + **Tailwind CSS v4** (shadcn/ui pattern):
+Built on **shadcn/ui** + **Radix UI primitives** + **Tailwind CSS v4** (shadcn/ui pattern):
 - `src/components/ui/` — Base UI primitives (Button, Dialog, Form, Select, etc.). Do not modify these directly.
-- `src/CAREUI/` — Custom healthcare icon library, use `lucide-react` unless you are explicitly asked to use CAREUI icons. 
+- `src/CAREUI/` — Custom healthcare icon library, use `lucide-react` unless you are explicitly asked to use CAREUI icons.
 - Forms use `react-hook-form` + `zod` validation with the custom `<Form>` component
 
 ### Plugin System (Module Federation)
@@ -121,3 +187,28 @@ JWT tokens in localStorage. `AuthUserProvider` handles login/logout, token refre
 - Branch naming: `issues/{issue#}/{short-name}`
 - Default branch: `develop` (staging auto-deploys)
 - Pre-commit hooks via husky run Prettier and ESLint on staged files
+
+## Autonomous AI Workflow
+
+When working autonomously on this codebase, follow this sequence:
+
+1. **Before coding:** Read relevant source files and understand existing patterns
+2. **After changes:** Run `npm run lint-fix` and `npm run format` on changed files
+3. **Verify:** Run relevant Playwright tests against the local backend to validate changes
+4. **For API changes:** Check corresponding backend endpoint at `/home/user/care` and update both repos if needed
+5. **For new features:** Add Playwright tests in `tests/` following existing patterns
+6. **For i18n:** Add English strings to `public/locale/en.json`
+
+### Quick verification cycle
+
+```bash
+# 1. Lint & format
+npx eslint --fix src/path/to/changed/file.tsx
+npx prettier --write src/path/to/changed/file.tsx
+
+# 2. Type check
+npx tsc --noEmit
+
+# 3. Run related tests (requires backend + build)
+npx playwright test tests/path/to/related/
+```

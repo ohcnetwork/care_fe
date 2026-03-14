@@ -1,4 +1,4 @@
-import { chromium, FullConfig } from "@playwright/test";
+import { FullConfig } from "@playwright/test";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -17,6 +17,7 @@ interface LocalStorageItem {
 /**
  * Global setup that runs once before all tests.
  * Refreshes authentication tokens to ensure they're valid for the test run.
+ * Uses native fetch() instead of launching a browser for speed.
  */
 async function globalSetup(_config: FullConfig) {
   const authFile = path.join(__dirname, ".auth/user.json");
@@ -66,50 +67,37 @@ async function globalSetup(_config: FullConfig) {
 
     console.log("🔄 Refreshing authentication tokens...");
 
-    // Launch a browser to make the API call
-    const browser = await chromium.launch();
-    const context = await browser.newContext();
-    const page = await context.newPage();
+    // Use native fetch instead of launching a browser
+    const response = await fetch(`${apiUrl}/api/v1/auth/token/refresh/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh: refreshToken }),
+    });
 
-    try {
-      // Call the token refresh endpoint
-      const response = await page.request.post(
-        `${apiUrl}/api/v1/auth/token/refresh/`,
-        {
-          data: { refresh: refreshToken },
-          headers: { "Content-Type": "application/json" },
-        },
+    if (response.ok) {
+      const data = await response.json();
+
+      // Update tokens in localStorage
+      const accessIndex = localStorage.findIndex(
+        (item: LocalStorageItem) => item.name === ACCESS_TOKEN_KEY,
+      );
+      const refreshIndex = localStorage.findIndex(
+        (item: LocalStorageItem) => item.name === REFRESH_TOKEN_KEY,
       );
 
-      if (response.ok()) {
-        const data = await response.json();
-
-        // Update tokens in localStorage
-        const accessIndex = localStorage.findIndex(
-          (item: LocalStorageItem) => item.name === ACCESS_TOKEN_KEY,
-        );
-        const refreshIndex = localStorage.findIndex(
-          (item: LocalStorageItem) => item.name === REFRESH_TOKEN_KEY,
-        );
-
-        if (accessIndex !== -1) {
-          localStorage[accessIndex].value = data.access;
-        }
-        if (refreshIndex !== -1 && data.refresh) {
-          localStorage[refreshIndex].value = data.refresh;
-        }
-
-        // Write updated storage state back to file
-        fs.writeFileSync(authFile, JSON.stringify(storageState, null, 2));
-
-        console.log("✅ Tokens refreshed successfully");
-      } else {
-        console.log(
-          `⚠️ Token refresh failed with status: ${response.status()}`,
-        );
+      if (accessIndex !== -1) {
+        localStorage[accessIndex].value = data.access;
       }
-    } finally {
-      await browser.close();
+      if (refreshIndex !== -1 && data.refresh) {
+        localStorage[refreshIndex].value = data.refresh;
+      }
+
+      // Write updated storage state back to file
+      fs.writeFileSync(authFile, JSON.stringify(storageState, null, 2));
+
+      console.log("✅ Tokens refreshed successfully");
+    } else {
+      console.log(`⚠️ Token refresh failed with status: ${response.status}`);
     }
   } catch (error) {
     console.error("❌ Error refreshing tokens:", error);
