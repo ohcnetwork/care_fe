@@ -151,25 +151,26 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     await discountSearch.fill(discountComponentName);
   }
 
-  function getDiscountPopoverCheckbox(page: Page) {
-    const discountSearch = page.getByPlaceholder(/search for discount code/i);
-    const popoverContent = discountSearch.locator(
-      "xpath=ancestor::*[.//button[normalize-space()='Done']][1]",
-    );
-    return popoverContent.getByRole("checkbox").first();
-  }
-
   test("discount component appears in Add Discount and persists on view/edit", async ({
     page,
   }) => {
     await createDiscountComponent(page);
 
     await navigateToChargeItemCategory(page);
+    await page.reload();
+    await expect(
+      page.getByRole("button", { name: /add definition/i }),
+    ).toBeVisible({ timeout: 15000 });
+
     await openCreateChargeItemDefinition(page);
 
     await openDiscountSelectorAndFilter(page);
 
-    const discountCheckbox = getDiscountPopoverCheckbox(page);
+    const popover = page
+      .getByRole("button", { name: "Done" })
+      .locator("..")
+      .locator("..");
+    const discountCheckbox = popover.getByRole("checkbox").first();
     await expect(discountCheckbox).toBeVisible({ timeout: 15000 });
     await discountCheckbox.click();
     await page.getByRole("button", { name: "Done" }).click();
@@ -209,11 +210,20 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     await createDiscountComponent(page, { withCondition: true });
 
     await navigateToChargeItemCategory(page);
+    await page.reload();
+    await expect(
+      page.getByRole("button", { name: /add definition/i }),
+    ).toBeVisible({ timeout: 15000 });
+
     await openCreateChargeItemDefinition(page);
 
     await openDiscountSelectorAndFilter(page);
 
-    const discountCheckbox = getDiscountPopoverCheckbox(page);
+    const popover = page
+      .getByRole("button", { name: "Done" })
+      .locator("..")
+      .locator("..");
+    const discountCheckbox = popover.getByRole("checkbox").first();
     await expect(discountCheckbox).toBeVisible({ timeout: 15000 });
     await discountCheckbox.click();
     await page.getByRole("button", { name: "Done" }).click();
