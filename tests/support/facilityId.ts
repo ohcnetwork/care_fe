@@ -2,16 +2,27 @@ import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
 
+import { getFacilityIdFromManifest } from "./fixtureManifest";
+
 const META_PATH = path.resolve("tests/.auth/facilityMeta.json");
 let cachedId: string | null = null;
 
 /**
- * Returns the facilityId saved during setup.
- * Auto-runs the setup if the meta file is missing or invalid.
+ * Returns the facilityId.
+ * Prefers the backend fixture manifest (written by load_fixtures --output-json).
+ * Falls back to the legacy meta file written by facility.setup.ts.
  */
 export function getFacilityId(): string {
   if (cachedId) return cachedId;
 
+  // Try manifest first
+  const manifestId = getFacilityIdFromManifest();
+  if (manifestId) {
+    cachedId = manifestId;
+    return manifestId;
+  }
+
+  // Fall back to legacy meta file
   if (!fs.existsSync(META_PATH)) {
     console.warn("⚠️ Facility meta missing — running facility setup...");
     try {

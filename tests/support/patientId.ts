@@ -2,16 +2,27 @@ import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
 
+import { getPatientIdFromManifest } from "./fixtureManifest";
+
 const META_PATH = path.resolve("tests/.auth/patientMeta.json");
 let cachedId: string | null = null;
 
 /**
- * Returns the patientId saved during setup.
- * Auto-runs the setup if the meta file is missing or invalid.
+ * Returns the patientId.
+ * Prefers the backend fixture manifest (written by load_fixtures --output-json).
+ * Falls back to the legacy meta file written by patient.setup.ts.
  */
 export function getPatientId(): string {
   if (cachedId) return cachedId;
 
+  // Try manifest first
+  const manifestId = getPatientIdFromManifest();
+  if (manifestId) {
+    cachedId = manifestId;
+    return manifestId;
+  }
+
+  // Fall back to legacy meta file
   if (!fs.existsSync(META_PATH)) {
     console.warn("⚠️ Patient meta missing — running patient setup...");
     try {

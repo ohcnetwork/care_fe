@@ -113,6 +113,9 @@ jobs:
           echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.local.env
           echo MAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500 >> docker/.local.env
           make docker_config_file=docker-compose.local.yaml up load-fixtures
+          # Copy fixture manifest from backend container so FE tests can read IDs directly
+          mkdir -p ../tests/.auth
+          docker compose cp backend:/app/fixture_manifest.json ../tests/.auth/fixture_manifest.json || echo "Warning: fixture_manifest.json not found in container"
           cd ..
         env:
           JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
