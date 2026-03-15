@@ -34,7 +34,6 @@ import {
 import questionnaireResponseApi from "@/types/questionnaire/questionnaireResponseApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import {
   useInfiniteQuery,
   useMutation,
@@ -667,7 +666,7 @@ export default function QuestionnaireResponsesList({
           },
         })({ signal });
 
-        return response as PaginatedResponse<QuestionnaireResponse>;
+        return response;
       },
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
