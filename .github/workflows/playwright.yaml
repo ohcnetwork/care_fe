@@ -93,7 +93,7 @@ jobs:
 
       - name: Set backend branch
         id: backend-branch
-        run: echo "branch=develop" >> $GITHUB_OUTPUT
+        run: echo "branch=develop" >> "$GITHUB_OUTPUT"
 
       - name: Checkout care
         uses: actions/checkout@v4
@@ -135,7 +135,7 @@ jobs:
         run: |
           mkdir -p /tmp/docker-cache
           # Only cache images used by the CARE backend services (not base images)
-          docker compose -f care/docker-compose.local.yaml config --images 2>/dev/null | while read img; do
+          docker compose -f care/docker-compose.local.yaml config --images 2>/dev/null | while read -r img; do
             filename=$(echo "$img" | tr '/:' '_')
             if [ ! -f "/tmp/docker-cache/${filename}.tar" ]; then
               docker save -o "/tmp/docker-cache/${filename}.tar" "$img" 2>/dev/null || true
@@ -218,9 +218,9 @@ jobs:
         id: skipped
         run: |
           if [ "${{ needs.changes.outputs.tests }}" != "true" ]; then
-            echo "skipped=true" >> $GITHUB_OUTPUT
+            echo "skipped=true" >> "$GITHUB_OUTPUT"
           else
-            echo "skipped=false" >> $GITHUB_OUTPUT
+            echo "skipped=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Generate skipped comment
@@ -281,15 +281,15 @@ jobs:
             fi
           done
 
-          echo "total=$TOTAL_TESTS" >> $GITHUB_OUTPUT
-          echo "passed=$PASSED_TESTS" >> $GITHUB_OUTPUT
-          echo "failed=$FAILED_TESTS" >> $GITHUB_OUTPUT
-          echo "skipped=$SKIPPED_TESTS" >> $GITHUB_OUTPUT
+          echo "total=$TOTAL_TESTS" >> "$GITHUB_OUTPUT"
+          echo "passed=$PASSED_TESTS" >> "$GITHUB_OUTPUT"
+          echo "failed=$FAILED_TESTS" >> "$GITHUB_OUTPUT"
+          echo "skipped=$SKIPPED_TESTS" >> "$GITHUB_OUTPUT"
 
           if [ $FAILED_TESTS -gt 0 ]; then
-            echo "status=❌ Failed" >> $GITHUB_OUTPUT
+            echo "status=❌ Failed" >> "$GITHUB_OUTPUT"
           else
-            echo "status=✅ Passed" >> $GITHUB_OUTPUT
+            echo "status=✅ Passed" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Upload final report

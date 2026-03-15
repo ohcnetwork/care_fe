@@ -69,6 +69,7 @@ REACT_CARE_API_URL=http://127.0.0.1:9000
 
 ```bash
 npm run playwright:install                              # Install browsers (first time)
+npm run build                                           # Build app (tests run against production build)
 npm run playwright:test                                 # Run all tests
 npm run playwright:test -- tests/auth/login.spec.ts     # Run a single test file
 npm run playwright:test -- -g "test name"               # Run tests matching a pattern
@@ -225,7 +226,7 @@ JWT tokens in localStorage. `AuthUserProvider` handles login/logout, token refre
 When working autonomously on this codebase, follow this sequence:
 
 1. **Before coding:** Read relevant source files and understand existing patterns
-2. **After changes:** Run `npm run lint-fix` and `npm run format` on changed files
+2. **After changes:** Run `npm run lint-fix` and `npm run format` on changed files (pre-commit hooks also run these automatically)
 3. **Verify:** Run relevant Playwright tests against the local backend to validate changes
 4. **For API changes:** Check corresponding backend endpoint in the care backend repo and update both repos if needed
 5. **For new features:** Add Playwright tests in `tests/` following `tests/PLAYWRIGHT_GUIDE.md`
@@ -235,9 +236,8 @@ When working autonomously on this codebase, follow this sequence:
 ### Quick verification cycle
 
 ```bash
-# 1. Lint & format
-npx eslint --fix src/path/to/changed/file.tsx
-npx prettier --write src/path/to/changed/file.tsx
+# 1. Lint & format (or rely on pre-commit hooks)
+npm run lint-fix && npm run format
 
 # 2. Type check
 npx tsc --noEmit

@@ -41,15 +41,21 @@ function restoreDatabase() {
 
   try {
     console.log("🔄 Restoring database from snapshot...");
-    execFileSync("bash", [scriptPath, "restore"], {
+    const output = execFileSync("bash", [scriptPath, "restore"], {
       stdio: "pipe",
       timeout: 30000,
+      encoding: "utf-8",
     });
+    if (output) console.log(output.trim());
     console.log("✅ Database restored to clean state");
   } catch (error) {
+    const stderr =
+      error instanceof Error && "stderr" in error
+        ? (error as { stderr: string }).stderr
+        : "";
     console.error(
       "⚠️ DB restore failed (tests will continue):",
-      error instanceof Error ? error.message : error,
+      stderr || (error instanceof Error ? error.message : error),
     );
   }
 }
