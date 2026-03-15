@@ -27,6 +27,11 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import mutate from "@/Utils/request/mutate";
 import {
@@ -36,7 +41,7 @@ import {
   OrganizationUpdate,
 } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
-
+import { PenLine } from "lucide-react";
 interface Props {
   organizationType: string;
   parentId?: string;
@@ -140,18 +145,38 @@ export default function AdminOrganizationFormSheet({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        {isEditMode ? (
-          <Button variant="white" size="sm" className="font-semibold">
-            {t("edit")}
-          </Button>
-        ) : (
+      {isEditMode ? (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <SheetTrigger asChild>
+              <span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="hidden sm:inline-flex items-center"
+                >
+                  <PenLine className="size-4 mr-2" />
+                </Button>
+                <Button
+                  variant="white"
+                  size="sm"
+                  className="font-semibold sm:hidden"
+                >
+                  {t("edit")}
+                </Button>
+              </span>
+            </SheetTrigger>
+          </TooltipTrigger>
+          <TooltipContent>{t("edit")}</TooltipContent>
+        </Tooltip>
+      ) : (
+        <SheetTrigger asChild>
           <Button className="w-full md:w-auto">
             <CareIcon icon="l-plus" className="mr-2 size-4" />
             {t("add_organization")}
           </Button>
-        )}
-      </SheetTrigger>
+        </SheetTrigger>
+      )}
       <SheetContent>
         <SheetHeader>
           <SheetTitle>

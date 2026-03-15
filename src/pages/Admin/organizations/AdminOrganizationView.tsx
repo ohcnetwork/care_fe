@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { MoreVertical } from "lucide-react";
-import { Link } from "raviger";
+import { Building, FolderOpen, MoreVertical, Trash } from "lucide-react";
+import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -17,6 +17,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
@@ -33,6 +47,57 @@ import FacilityOrganizationFormSheet from "./components/AdminOrganizationFormShe
 interface Props {
   id?: string;
   organizationType: string;
+}
+
+function DeleteOrgDialog({
+  org,
+  organizationType,
+  parentId,
+}: {
+  org: Organization;
+  organizationType: string;
+  parentId?: string;
+}) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  const { mutate: deleteOrganization } = useMutation({
+    mutationFn: mutate(organizationApi.delete, {
+      pathParams: { id: org.id },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["organization", "list", organizationType, parentId],
+      });
+      toast.success(t("organization_deleted_successfully"));
+    },
+  });
+  return (
+    <>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowDeleteDialog(true)}
+          >
+            <Trash className="size-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{t("delete")}</TooltipContent>
+      </Tooltip>
+      <ConfirmActionDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title={t("delete_organization")}
+        description={t("are_you_sure_want_to_delete", { name: org.name })}
+        onConfirm={() => deleteOrganization()}
+        confirmText={t("delete")}
+        variant="destructive"
+      />
+    </>
+  );
 }
 
 function OrganizationCard({
@@ -191,14 +256,94 @@ export default function AdminOrganizationView({ id, organizationType }: Props) {
         <div className="space-y-6 md:pb-6">
           <div className="space-y-4">
             {children?.results?.length ? (
-              children.results.map((org) => (
-                <OrganizationCard
-                  key={org.id}
-                  org={org}
-                  organizationType={organizationType}
-                  parentId={id}
-                />
-              ))
+              <>
+                <div className="hidden sm:block rounded-lg border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>{t("name")}</TableHead>
+                        <TableHead>{t("type")}</TableHead>
+                        <TableHead className="text-right">
+                          {t("actions")}
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {children.results.map(
+                        (org) => (
+                          console.log("org", org),
+                          (
+                            <TableRow
+                              key={org.id}
+                              onClick={() =>
+                                navigate(
+                                  `/admin/organizations/${org.org_type}/${org.id}`,
+                                )
+                              }
+                              className="hover:cursor-pointer group"
+                            >
+                              <TableCell>
+                                <div className="font-medium flex items-center gap-2 py-2">
+                                  <Building className="size-4" />
+                                  <span className="group-hover:underline group-hover:text-primary">
+                                    {org.name}
+                                  </span>
+                                  {org.has_children && (
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <span className="cursor-help">
+                                            <FolderOpen className="size-3 text-gray-400" />
+                                          </span>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          {t("has_child_organizations")}
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {" "}
+                                <Badge variant="indigo" className="w-fit">
+                                  {org.org_type}
+                                </Badge>
+                              </TableCell>
+                              <TableCell
+                                className="text-right"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <div className="flex items-center justify-end gap-1">
+                                  <FacilityOrganizationFormSheet
+                                    organizationType={organizationType}
+                                    parentId={id}
+                                    org={org}
+                                  />
+                                  <DeleteOrgDialog
+                                    org={org}
+                                    organizationType={org.org_type}
+                                  />
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          )
+                        ),
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+                <div className="block sm:hidden space-y-4">
+                  {children.results.map((org) => (
+                    <OrganizationCard
+                      key={org.id}
+                      org={org}
+                      organizationType={organizationType}
+                      parentId={id}
+                    />
+                  ))}
+                </div>
+              </>
             ) : (
               <Card className="col-span-full">
                 <CardContent className="p-6 text-center text-gray-500">
