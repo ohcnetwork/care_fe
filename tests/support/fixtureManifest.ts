@@ -24,9 +24,8 @@ const MANIFEST_PATH = path.resolve("tests/.auth/fixture_manifest.json");
 let cached: FixtureManifest | null = null;
 
 /**
- * Returns the fixture manifest written by the backend.
- * Falls back to individual meta files if the manifest doesn't exist
- * (backwards-compatible with the old UI-extraction approach).
+ * Returns the fixture manifest written by the backend, or null if
+ * unavailable. Callers fall back to individual meta files when null.
  */
 export function getFixtureManifest(): FixtureManifest | null {
   if (cached) return cached;
@@ -36,8 +35,15 @@ export function getFixtureManifest(): FixtureManifest | null {
   }
 
   const raw = fs.readFileSync(MANIFEST_PATH, "utf8");
-  cached = JSON.parse(raw) as FixtureManifest;
-  return cached;
+  try {
+    cached = JSON.parse(raw) as FixtureManifest;
+    return cached;
+  } catch (error) {
+    console.warn(
+      `Invalid fixture_manifest.json at ${MANIFEST_PATH}: ${error instanceof Error ? error.message : String(error)}. Falling back to legacy meta files.`,
+    );
+    return null;
+  }
 }
 
 /**
