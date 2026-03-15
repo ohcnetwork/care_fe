@@ -54,15 +54,7 @@ export function EditDiscountMonetarySheet({
         </SheetHeader>
         <div className="mt-6">
           <DiscountMonetaryComponentForm
-            defaultValues={{
-              monetary_component_type: component.monetary_component_type,
-              code: component.code,
-              factor: component.factor,
-              amount: component.amount,
-              tax_included_amount: component.tax_included_amount,
-              conditions: component.conditions,
-              title: component.title,
-            }}
+            defaultValues={component}
             onSubmit={(data) => {
               if (!facility) {
                 return;
@@ -72,7 +64,9 @@ export function EditDiscountMonetarySheet({
 
               const updatedComponents =
                 facility.discount_monetary_components.map((existing, index) =>
-                  index === component.facilityIndex ? data : existing,
+                  index === component.facilityIndex
+                    ? { ...existing, ...data }
+                    : existing,
                 );
 
               updateComponent({

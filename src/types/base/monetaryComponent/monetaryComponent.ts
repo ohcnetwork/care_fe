@@ -19,31 +19,28 @@ export enum MonetaryComponentType {
   informational = "informational",
 }
 
-export interface BaseMonetaryComponent {
+interface SharedMonetaryFields {
+  code?: Code;
+  factor?: string | null;
+  amount?: string | null;
+  tax_included_amount?: string;
+  conditions?: Condition[];
+}
+
+export interface StandardMonetaryComponent extends SharedMonetaryFields {
   monetary_component_type: Exclude<
     MonetaryComponentType,
     MonetaryComponentType.discount
   >;
-  code?: Code;
-  factor?: string | null;
-  amount?: string | null;
-  tax_included_amount?: string;
-  conditions?: Condition[];
 }
 
-// Only DiscountMonetaryComponent has global_component
-export interface DiscountMonetaryComponent {
+export interface DiscountMonetaryComponent extends SharedMonetaryFields {
   monetary_component_type: MonetaryComponentType.discount;
-  code?: Code;
-  factor?: string | null;
-  amount?: string | null;
-  tax_included_amount?: string;
-  conditions?: Condition[];
   global_component?: boolean;
 }
 
 export type MonetaryComponent =
-  | BaseMonetaryComponent
+  | StandardMonetaryComponent
   | DiscountMonetaryComponent;
 
 export enum DiscountApplicabilityOrder {

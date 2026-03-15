@@ -71,8 +71,7 @@ function toMonetaryComponent(
   component: MonetaryComponentRead,
   type: MonetaryComponentType,
 ): MonetaryComponent {
-  const baseMonetaryComponent: MonetaryComponent = {
-    monetary_component_type: type,
+  const shared = {
     code: component.code,
     factor: isPercentageBased(component) ? component.factor : null,
     amount: !isPercentageBased(component) ? component.amount : null,
@@ -80,11 +79,15 @@ function toMonetaryComponent(
   };
   if (type === MonetaryComponentType.discount) {
     return {
-      ...baseMonetaryComponent,
+      monetary_component_type: MonetaryComponentType.discount,
+      ...shared,
       global_component: true,
-    } as DiscountMonetaryComponent;
+    };
   }
-  return baseMonetaryComponent;
+  return {
+    monetary_component_type: type,
+    ...shared,
+  };
 }
 
 /**
