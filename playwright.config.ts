@@ -30,8 +30,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
 
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  /* CI workers are controlled per-phase in the workflow (setup=1, chromium=4).
+   * Locally, use all available cores. */
+  workers: undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI
     ? [["html"], ["json", { outputFile: "test-results.json" }], ["list"]]
@@ -58,7 +59,9 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      dependencies: ["setup"],
+      // On CI, setup runs as a separate step (--workers=1) before chromium (--workers=4).
+      // Locally, Playwright handles the dependency ordering automatically.
+      dependencies: process.env.CI ? [] : ["setup"],
     },
     // {
     //   name: "firefox",
