@@ -3,7 +3,7 @@ name: Playwright Tests
 # This workflow runs Playwright E2E tests with backend integration
 # - Triggers on push to main branches and PRs
 # - Uses path filtering to skip unnecessary runs
-# - Runs tests in parallel using shards with multiple workers
+# - Runs tests in parallel using shards
 # - Caches Docker images and Playwright browsers
 # - Provides detailed test reports as artifacts
 

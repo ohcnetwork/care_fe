@@ -79,7 +79,7 @@ npm run playwright:test:ui                              # Interactive Playwright
 ```
 
 **Running tests efficiently:**
-- Use `--workers=4` for parallel execution (default on CI, matches 4 vCPUs)
+- Use `--workers=4` for local parallel execution (CI uses 1 worker due to setup ordering dependencies)
 - Use `--shard=N/TOTAL` to split across multiple processes
 - Run specific test directories to iterate faster: `npx playwright test tests/auth/`
 - The `setup` project runs first to authenticate test users and save storage state
