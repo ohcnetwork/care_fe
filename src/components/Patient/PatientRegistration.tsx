@@ -600,7 +600,6 @@ const PatientBasicsContent = ({
                   value: g.id,
                   label: t(`GENDER__${g.id}`),
                 }))}
-                required={true}
               />
             </FormControl>
             <FormMessage />
@@ -756,7 +755,6 @@ const PatientBasicsContent = ({
               </FormLabel>
               <FormControl>
                 <TagSelectorPopover
-                  facilityId={facilityId}
                   selected={selectedTags}
                   onChange={(tags) => {
                     field.onChange(tags.map((tag) => tag.id));

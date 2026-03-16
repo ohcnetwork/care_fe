@@ -148,6 +148,7 @@ export function InvoiceShow({
         phone_number: patient?.phone_number ?? "",
         year_of_birth: patient?.year_of_birth?.toString() ?? "",
         partial_id: patient ? getPartialId(patient) : "",
+        facility: facilityId,
       },
     }),
     enabled: !!patient,

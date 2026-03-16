@@ -21,7 +21,7 @@ test.describe("Facility Location Creation", () => {
     "Housekeeping",
     "Isolated",
     "Contaminated",
-    "Operational",
+    "Occupied",
     "Unoccupied",
   ];
 
