@@ -1,14 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusCircle, XCircle } from "lucide-react";
-import { navigate } from "raviger";
-import React from "react";
+import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -33,7 +32,8 @@ import { Textarea } from "@/components/ui/textarea";
 import ComboboxQuantityInput from "@/components/Common/ComboboxQuantityInput";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import Page from "@/components/Common/Page";
+import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { Code, CodeSchema } from "@/types/base/code/code";
 import {
   ContainerSpec,
@@ -44,8 +44,13 @@ import {
   SpecimenDefinitionRead,
   SpecimenDefinitionStatus,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
+import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
 import { zodDecimal } from "@/Utils/decimal";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { navigate } from "raviger";
 
 const typeTestedSchema = z.object({
   is_derived: z.boolean(),
@@ -89,17 +94,89 @@ const typeTestedSchema = z.object({
 });
 
 interface SpecimenDefinitionFormProps {
-  initialData?: SpecimenDefinitionRead;
-  onSubmit: (data: SpecimenDefinitionCreate) => void;
-  isLoading?: boolean;
+  facilityId: string;
+  specimenSlug?: string;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-export function SpecimenDefinitionForm({
-  initialData,
-  onSubmit,
-  isLoading,
+export default function SpecimenDefinitionForm({
+  facilityId,
+  specimenSlug,
+  onSuccess,
+  onCancel,
 }: SpecimenDefinitionFormProps) {
   const { t } = useTranslation();
+
+  const isEditMode = Boolean(specimenSlug);
+
+  const { data: specimenDefinition, isFetching } = useQuery({
+    queryKey: ["specimenDefinitions", facilityId, specimenSlug],
+    queryFn: query(specimenDefinitionApi.retrieveSpecimenDefinition, {
+      pathParams: { facilityId, specimenSlug },
+    }),
+    enabled: isEditMode,
+  });
+
+  if (isEditMode && isFetching) {
+    return (
+      <Page title={t("update_specimen_definition")} hideTitleOnPage>
+        <div className="container mx-auto max-w-3xl">
+          <div className="mb-6">
+            <h1 className="text-xl font-semibold text-gray-900">
+              {t("update_specimen_definition")}
+            </h1>
+          </div>
+          <FormSkeleton rows={10} />
+        </div>
+      </Page>
+    );
+  }
+
+  return (
+    <SpecimenDefinitionFormContent
+      facilityId={facilityId}
+      specimenSlug={specimenSlug}
+      initialData={specimenDefinition}
+      onSuccess={onSuccess}
+      onCancel={onCancel}
+    />
+  );
+}
+
+interface SpecimenDefinitionFormContentProps {
+  facilityId: string;
+  specimenSlug?: string;
+  initialData?: SpecimenDefinitionRead;
+  onSuccess?: () => void;
+  onCancel?: () => void;
+}
+
+function SpecimenDefinitionFormContent({
+  facilityId,
+  specimenSlug,
+  initialData,
+  onSuccess = () => {
+    if (specimenSlug) {
+      navigate(
+        `/facility/${facilityId}/settings/specimen_definitions/${specimenSlug}`,
+      );
+    } else {
+      navigate(`/facility/${facilityId}/settings/specimen_definitions`);
+    }
+  },
+  onCancel = () => {
+    if (specimenSlug) {
+      navigate(
+        `/facility/${facilityId}/settings/specimen_definitions/${specimenSlug}`,
+      );
+    } else {
+      navigate(`/facility/${facilityId}/settings/specimen_definitions`);
+    }
+  },
+}: SpecimenDefinitionFormContentProps) {
+  const { t } = useTranslation();
+  const isEditMode = Boolean(specimenSlug);
 
   const formSchema = z.object({
     title: z.string().min(1, t("field_required")),
@@ -118,8 +195,6 @@ export function SpecimenDefinitionForm({
     collection: CodeSchema.optional(),
     type_tested: typeTestedSchema.optional(),
   });
-
-  const { facilityId } = useCurrentFacility();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -149,12 +224,14 @@ export function SpecimenDefinitionForm({
     },
   });
 
+  const queryClient = useQueryClient();
+
   const { fields, append, remove, update } = useFieldArray({
     control: form.control,
     name: "patient_preparation",
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (initialData) return;
 
     const subscription = form.watch((value, { name }) => {
@@ -204,433 +281,230 @@ export function SpecimenDefinitionForm({
     return cleanedContainer;
   };
 
+  const { mutate: createSpecimenDefinition, isPending: isCreating } =
+    useMutation({
+      mutationFn: mutate(specimenDefinitionApi.createSpecimenDefinition, {
+        pathParams: { facilityId },
+      }),
+      onSuccess: () => {
+        toast.success(t("specimen_definition_created"));
+        queryClient.invalidateQueries({
+          queryKey: ["specimenDefinitions", facilityId],
+        });
+        onSuccess?.();
+      },
+    });
+
+  const { mutate: updateSpecimenDefinition, isPending: isUpdating } =
+    useMutation({
+      mutationFn: mutate(specimenDefinitionApi.updateSpecimenDefinition, {
+        pathParams: { facilityId, specimenSlug },
+      }),
+      onSuccess: () => {
+        toast.success(t("specimen_definition_updated"));
+        queryClient.invalidateQueries({
+          queryKey: ["specimenDefinitions", facilityId],
+        });
+        onSuccess?.();
+      },
+    });
+
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
-    onSubmit({
+    const payload: SpecimenDefinitionCreate = {
       ...data,
       patient_preparation:
-        data.patient_preparation?.filter((item: Code) => item && item.code) ||
-        [],
+        data.patient_preparation?.filter((item) => item && item.code) || [],
       type_tested: data.type_tested
         ? {
             ...data.type_tested,
             container: cleanContainerData(data.type_tested.container),
           }
         : undefined,
-    });
+    };
+    if (isEditMode) {
+      updateSpecimenDefinition(payload);
+    } else {
+      createSpecimenDefinition(payload);
+    }
   };
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          form.handleSubmit(handleSubmit)();
-        }}
-        className="space-y-4"
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("specimen_definition")}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Basic Information */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">{t("basic_information")}</h3>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel aria-required>{t("title")}</FormLabel>
-                      <FormControl>
-                        <Input placeholder={t("title")} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="slug_value"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel aria-required>{t("slug")}</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder={t("unique_identifier")}
-                          {...field}
-                          onChange={(e) => {
-                            const sanitizedValue = e.target.value
-                              .toLowerCase()
-                              .replace(/[^a-z0-9_-]/g, "");
-                            form.setValue("slug_value", sanitizedValue, {
-                              shouldValidate: true,
-                            });
-                          }}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        {t("slug_format_message")}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel aria-required>{t("status")}</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger ref={field.ref}>
-                            <SelectValue placeholder={t("select_status")} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {Object.values(SpecimenDefinitionStatus).map(
-                            (status) => (
-                              <SelectItem key={status} value={status}>
-                                {t(status)}
-                              </SelectItem>
-                            ),
-                          )}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="derived_from_uri"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>{t("derived_from_uri")}</FormLabel>
-                      <FormControl>
-                        <Input placeholder={t("uri")} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel aria-required>{t("description")}</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder={t("description")} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Specimen Details */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">{t("specimen_details")}</h3>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="type_collected"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel aria-required>{t("type_collected")}</FormLabel>
-                      <FormControl>
-                        <ValueSetSelect
-                          {...field}
-                          system="system-specimen_type-code"
-                          placeholder={t("select_type_collected")}
-                          onSelect={handleTypeCollectedSelect}
-                          disabled={isLoading}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="collection"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>{t("collection")}</FormLabel>
-                      <FormControl>
-                        <ValueSetSelect
-                          {...field}
-                          system="system-specimen_collection_code"
-                          placeholder={t("select_collection")}
-                          onSelect={handleCollectionMethodSelect}
-                          disabled={isLoading}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="patient_preparation"
-                render={() => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>{t("patient_preparation")}</FormLabel>
-                    <div className="space-y-2">
-                      {fields.map((field, index) => (
-                        <div key={field.id} className="flex items-center gap-2">
+    <Page
+      title={
+        isEditMode
+          ? t("update_specimen_definition")
+          : t("create_specimen_definition")
+      }
+      hideTitleOnPage
+    >
+      <div className="container mx-auto max-w-3xl">
+        <div className="mb-6">
+          <h1 className="text-xl font-semibold text-gray-900">
+            {isEditMode
+              ? t("update_specimen_definition")
+              : t("create_specimen_definition")}
+          </h1>
+        </div>
+        <Form {...form}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              form.handleSubmit(handleSubmit)();
+            }}
+            className="space-y-4"
+          >
+            <Card>
+              <CardContent className="space-y-4 py-3">
+                {/* Basic Information */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">
+                    {t("basic_information")}
+                  </h3>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel aria-required>{t("title")}</FormLabel>
                           <FormControl>
-                            <ValueSetSelect
-                              system="system-prepare_patient_prior_specimen_code"
-                              placeholder={t("select_patient_preparation")}
-                              value={field}
-                              onSelect={(code) => {
-                                const current = form.getValues(
-                                  "patient_preparation",
-                                );
-                                const isDuplicate = current.some(
-                                  (prep, i) =>
-                                    prep?.code === code.code && i !== index,
-                                );
-                                if (!isDuplicate) {
-                                  update(index, code);
-                                } else {
-                                  toast.error(
-                                    t("duplicate_patient_preparation"),
-                                  );
-                                }
+                            <Input placeholder={t("title")} {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="slug_value"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel aria-required>{t("slug")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder={t("unique_identifier")}
+                              {...field}
+                              onChange={(e) => {
+                                const sanitizedValue = e.target.value
+                                  .toLowerCase()
+                                  .replace(/[^a-z0-9_-]/g, "");
+                                form.setValue("slug_value", sanitizedValue, {
+                                  shouldValidate: true,
+                                });
                               }}
-                              disabled={isLoading}
                             />
                           </FormControl>
-                          {fields.length > 0 && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => remove(index)}
-                              className="size-10"
-                            >
-                              <XCircle className="size-5" />
-                            </Button>
-                          )}
-                        </div>
-                      ))}
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() =>
-                          append({ code: "", display: "", system: "" })
-                        }
-                        className="w-full"
-                      >
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        {t("add")}
-                      </Button>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                          <FormDescription>
+                            {t("slug_format_message")}
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-            {/* Type Tested Information */}
-            <div className="space-y-4 rounded-md border bg-gray-50 px-2 py-4">
-              <h3 className="text-base font-medium">
-                {t("type_tested_information")}
-              </h3>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel aria-required>{t("status")}</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger ref={field.ref}>
+                                <SelectValue placeholder={t("select_status")} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {Object.values(SpecimenDefinitionStatus).map(
+                                (status) => (
+                                  <SelectItem key={status} value={status}>
+                                    {t(status)}
+                                  </SelectItem>
+                                ),
+                              )}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="type_tested.is_derived"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between border p-2 rounded-md">
-                      <div className="space-y-0.5">
-                        <FormLabel>{t("is_derived")}</FormLabel>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value || false}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="type_tested.single_use"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between border p-2 rounded-md">
-                      <div className="space-y-0.5">
-                        <FormLabel>{t("single_use")}</FormLabel>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value || false}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                    <FormField
+                      control={form.control}
+                      name="derived_from_uri"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>{t("derived_from_uri")}</FormLabel>
+                          <FormControl>
+                            <Input placeholder={t("uri")} {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-                <FormField
-                  control={form.control}
-                  name="type_tested.preference"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>{t("preference")}</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger ref={field.ref}>
-                            <SelectValue placeholder={t("select_preference")} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="preferred">
-                            {t("preferred")}
-                          </SelectItem>
-                          <SelectItem value="alternate">
-                            {t("alternate")}
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div>
                   <FormField
                     control={form.control}
-                    name="type_tested.retention_time"
+                    name="description"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
-                        <FormLabel>{t("retention_time")}</FormLabel>
+                        <FormLabel aria-required>{t("description")}</FormLabel>
                         <FormControl>
-                          <ComboboxQuantityInput
-                            quantity={
-                              field.value
-                                ? {
-                                    value: field.value.value,
-                                    unit: field.value.unit,
-                                  }
-                                : null
-                            }
-                            onChange={field.onChange}
-                            disabled={isLoading}
-                            placeholder={t("enter_retention_time")}
-                            units={RETENTION_TIME_UNITS}
-                          />
+                          <Textarea placeholder={t("description")} {...field} />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <FormMessage>
-                    {
-                      form.formState.errors.type_tested?.retention_time?.value
-                        ?.message
-                    }
-                  </FormMessage>
                 </div>
 
-                <FormField
-                  control={form.control}
-                  name="type_tested.requirement"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>{t("requirement")}</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder={t("requirement")} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="space-y-4 rounded-md border bg-gray-50 shadow-sm p-2">
-                <h4 className="text-sm font-medium">
-                  {t("container_information")}
-                </h4>
-                <FormField
-                  control={form.control}
-                  name="type_tested.container.description"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>{t("description")}</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder={t("description")} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="space-y-4">
+                {/* Specimen Details */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">
+                    {t("specimen_details")}
+                  </h3>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <FormField
                       control={form.control}
-                      name="type_tested.container.cap"
+                      name="type_collected"
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
-                          <FormLabel>{t("cap")}</FormLabel>
+                          <FormLabel aria-required>
+                            {t("type_collected")}
+                          </FormLabel>
                           <FormControl>
                             <ValueSetSelect
                               {...field}
-                              system="system-container_cap-code"
-                              placeholder={t("select_cap")}
-                              onSelect={handleCapTypeSelect}
-                              disabled={isLoading}
+                              system="system-specimen_type-code"
+                              placeholder={t("select_type_collected")}
+                              onSelect={handleTypeCollectedSelect}
                             />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                  </div>
-                  <div className="space-y-4">
+
                     <FormField
                       control={form.control}
-                      name="type_tested.container.capacity"
+                      name="collection"
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
-                          <FormLabel>{t("capacity")}</FormLabel>
+                          <FormLabel>{t("collection")}</FormLabel>
                           <FormControl>
-                            <ComboboxQuantityInput
-                              quantity={
-                                field.value
-                                  ? {
-                                      value: field.value.value,
-                                      unit: field.value.unit,
-                                    }
-                                  : undefined
-                              }
-                              onChange={field.onChange}
-                              disabled={isLoading}
-                              placeholder={t("enter_capacity")}
-                              units={SPECIMEN_DEFINITION_UNITS_CODES}
+                            <ValueSetSelect
+                              {...field}
+                              system="system-specimen_collection_code"
+                              placeholder={t("select_collection")}
+                              onSelect={handleCollectionMethodSelect}
                             />
                           </FormControl>
                           <FormMessage />
@@ -638,33 +512,245 @@ export function SpecimenDefinitionForm({
                       )}
                     />
                   </div>
+
+                  <FormField
+                    control={form.control}
+                    name="patient_preparation"
+                    render={() => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>{t("patient_preparation")}</FormLabel>
+                        <div className="space-y-2">
+                          {fields.map((field, index) => (
+                            <div
+                              key={field.id}
+                              className="flex items-center gap-2"
+                            >
+                              <FormControl>
+                                <ValueSetSelect
+                                  system="system-prepare_patient_prior_specimen_code"
+                                  placeholder={t("select_patient_preparation")}
+                                  value={field}
+                                  onSelect={(code) => {
+                                    const current = form.getValues(
+                                      "patient_preparation",
+                                    );
+                                    const isDuplicate = current.some(
+                                      (prep, i) =>
+                                        prep?.code === code.code && i !== index,
+                                    );
+                                    if (!isDuplicate) {
+                                      update(index, code);
+                                    } else {
+                                      toast.error(
+                                        t("duplicate_patient_preparation"),
+                                      );
+                                    }
+                                  }}
+                                />
+                              </FormControl>
+                              {fields.length > 0 && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => remove(index)}
+                                  className="size-10"
+                                >
+                                  <XCircle className="size-5" />
+                                </Button>
+                              )}
+                            </div>
+                          ))}
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() =>
+                              append({ code: "", display: "", system: "" })
+                            }
+                            className="w-full"
+                          >
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            {t("add")}
+                          </Button>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex flex-col gap-2">
-                    <FormLabel>{t("minimum_volume")}</FormLabel>
-                    <Tabs
-                      className="w-full"
-                      defaultValue={
-                        form.watch(
-                          "type_tested.container.minimum_volume.quantity",
-                        )
-                          ? "quantity"
-                          : "text"
-                      }
-                    >
-                      <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="quantity">
-                          {t("quantity")}
-                        </TabsTrigger>
-                        <TabsTrigger value="text">{t("text")}</TabsTrigger>
-                      </TabsList>
-                      <TabsContent value="quantity">
+                {/* Type Tested Information */}
+                <div className="space-y-4 rounded-md border bg-gray-50 px-2 py-4">
+                  <h3 className="text-base font-medium">
+                    {t("type_tested_information")}
+                  </h3>
+
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="type_tested.is_derived"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between border p-2 rounded-md">
+                          <div className="space-y-0.5">
+                            <FormLabel>{t("is_derived")}</FormLabel>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value || false}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="type_tested.single_use"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between border p-2 rounded-md">
+                          <div className="space-y-0.5">
+                            <FormLabel>{t("single_use")}</FormLabel>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value || false}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="type_tested.preference"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>{t("preference")}</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger ref={field.ref}>
+                                <SelectValue
+                                  placeholder={t("select_preference")}
+                                />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="preferred">
+                                {t("preferred")}
+                              </SelectItem>
+                              <SelectItem value="alternate">
+                                {t("alternate")}
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div>
+                      <FormField
+                        control={form.control}
+                        name="type_tested.retention_time"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                            <FormLabel>{t("retention_time")}</FormLabel>
+                            <FormControl>
+                              <ComboboxQuantityInput
+                                quantity={
+                                  field.value
+                                    ? {
+                                        value: field.value.value,
+                                        unit: field.value.unit,
+                                      }
+                                    : null
+                                }
+                                onChange={field.onChange}
+                                placeholder={t("enter_retention_time")}
+                                units={RETENTION_TIME_UNITS}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <FormMessage>
+                        {
+                          form.formState.errors.type_tested?.retention_time
+                            ?.value?.message
+                        }
+                      </FormMessage>
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="type_tested.requirement"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>{t("requirement")}</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder={t("requirement")}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="space-y-4 rounded-md border bg-gray-50 shadow-sm p-2">
+                    <h4 className="text-sm font-medium">
+                      {t("container_information")}
+                    </h4>
+                    <FormField
+                      control={form.control}
+                      name="type_tested.container.description"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>{t("description")}</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder={t("description")}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div className="space-y-4">
                         <FormField
                           control={form.control}
-                          name="type_tested.container.minimum_volume.quantity"
+                          name="type_tested.container.cap"
                           render={({ field }) => (
                             <FormItem className="flex flex-col">
+                              <FormLabel>{t("cap")}</FormLabel>
+                              <FormControl>
+                                <ValueSetSelect
+                                  {...field}
+                                  system="system-container_cap-code"
+                                  placeholder={t("select_cap")}
+                                  onSelect={handleCapTypeSelect}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="type_tested.container.capacity"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-col">
+                              <FormLabel>{t("capacity")}</FormLabel>
                               <FormControl>
                                 <ComboboxQuantityInput
                                   quantity={
@@ -675,15 +761,8 @@ export function SpecimenDefinitionForm({
                                         }
                                       : undefined
                                   }
-                                  onChange={(value) => {
-                                    field.onChange(value);
-                                    form.setValue(
-                                      "type_tested.container.minimum_volume.string",
-                                      undefined,
-                                    );
-                                  }}
-                                  disabled={isLoading}
-                                  placeholder={t("enter_minimum_volume")}
+                                  onChange={field.onChange}
+                                  placeholder={t("enter_capacity")}
                                   units={SPECIMEN_DEFINITION_UNITS_CODES}
                                 />
                               </FormControl>
@@ -691,68 +770,119 @@ export function SpecimenDefinitionForm({
                             </FormItem>
                           )}
                         />
-                      </TabsContent>
-                      <TabsContent value="text">
-                        <FormField
-                          control={form.control}
-                          name="type_tested.container.minimum_volume.string"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                              <FormControl>
-                                <Input
-                                  placeholder={t("enter_minimum_volume")}
-                                  {...field}
-                                  disabled={isLoading}
-                                  onChange={(e) => {
-                                    field.onChange(e.target.value);
-                                    form.setValue(
-                                      "type_tested.container.minimum_volume.quantity",
-                                      undefined,
-                                    );
-                                  }}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </TabsContent>
-                    </Tabs>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex flex-col gap-2">
+                        <FormLabel>{t("minimum_volume")}</FormLabel>
+                        <Tabs
+                          className="w-full"
+                          defaultValue={
+                            form.watch(
+                              "type_tested.container.minimum_volume.quantity",
+                            )
+                              ? "quantity"
+                              : "text"
+                          }
+                        >
+                          <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="quantity">
+                              {t("quantity")}
+                            </TabsTrigger>
+                            <TabsTrigger value="text">{t("text")}</TabsTrigger>
+                          </TabsList>
+                          <TabsContent value="quantity">
+                            <FormField
+                              control={form.control}
+                              name="type_tested.container.minimum_volume.quantity"
+                              render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                  <FormControl>
+                                    <ComboboxQuantityInput
+                                      quantity={
+                                        field.value
+                                          ? {
+                                              value: field.value.value,
+                                              unit: field.value.unit,
+                                            }
+                                          : undefined
+                                      }
+                                      onChange={(value) => {
+                                        field.onChange(value);
+                                        form.setValue(
+                                          "type_tested.container.minimum_volume.string",
+                                          undefined,
+                                        );
+                                      }}
+                                      placeholder={t("enter_minimum_volume")}
+                                      units={SPECIMEN_DEFINITION_UNITS_CODES}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </TabsContent>
+                          <TabsContent value="text">
+                            <FormField
+                              control={form.control}
+                              name="type_tested.container.minimum_volume.string"
+                              render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                  <FormControl>
+                                    <Input
+                                      placeholder={t("enter_minimum_volume")}
+                                      {...field}
+                                      onChange={(e) => {
+                                        field.onChange(e.target.value);
+                                        form.setValue(
+                                          "type_tested.container.minimum_volume.quantity",
+                                          undefined,
+                                        );
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </TabsContent>
+                        </Tabs>
+                      </div>
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="type_tested.container.preparation"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>{t("preparation")}</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder={t("preparation")}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 </div>
-                <FormField
-                  control={form.control}
-                  name="type_tested.container.preparation"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>{t("preparation")}</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder={t("preparation")} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
 
-        <div className="flex justify-between">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() =>
-              navigate(`/facility/${facilityId}/settings/specimen_definitions`)
-            }
-          >
-            {t("cancel")}
-          </Button>
-          <Button type="submit" disabled={isLoading}>
-            {t("save")}
-          </Button>
-        </div>
-      </form>
-    </Form>
+            <div className="flex justify-end gap-3">
+              <Button type="button" variant="outline" onClick={onCancel}>
+                {t("cancel")}
+              </Button>
+              <Button type="submit" disabled={isCreating || isUpdating}>
+                {t("save")}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </div>
+    </Page>
   );
 }
