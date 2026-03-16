@@ -1,13 +1,14 @@
-import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Stethoscope } from "lucide-react";
 import { navigate } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
+
+import careConfig from "@careConfig";
 
 import { cn } from "@/lib/utils";
 
@@ -42,6 +43,7 @@ import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import appointmentApi from "@/types/emr/appointment/appointmentApi";
 import {
   ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_PRIORITY,
@@ -54,6 +56,7 @@ import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 
 interface Props {
   patientId: string;
@@ -86,6 +89,12 @@ export default function CreateEncounterForm({
   const { t } = useTranslation();
   useShortcutSubContext();
 
+  const { data: appointmentData } = useQuery({
+    queryKey: ["appointment", appointment],
+    queryFn: query(appointmentApi.get, { pathParams: { id: appointment! } }),
+    enabled: !!appointment && isOpen,
+  });
+
   const encounterFormSchema = z.object({
     status: z.enum([
       EncounterStatus.PLANNED,
@@ -112,6 +121,16 @@ export default function CreateEncounterForm({
       tags: [],
     },
   });
+
+  useEffect(() => {
+    const departmentId =
+      appointmentData?.practitioner_performance?.[0]?.practitioner
+        ?.home_facility_organization;
+
+    if (departmentId) {
+      form.setValue("organizations", [departmentId]);
+    }
+  }, [appointmentData, form]);
 
   const tagIds = form.watch("tags");
   const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
@@ -153,9 +172,9 @@ export default function CreateEncounterForm({
   return (
     <Sheet
       open={isOpen}
-      onOpenChange={() => {
-        setIsOpen(!isOpen);
-        form.reset();
+      onOpenChange={(open) => {
+        setIsOpen(open);
+        if (!open) form.reset();
       }}
     >
       <SheetTrigger asChild>
@@ -169,7 +188,7 @@ export default function CreateEncounterForm({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="overflow-y-auto">
+      <SheetContent className="overflow-y-auto text-left" side="right">
         <SheetHeader>
           <SheetTitle>{t("initiate_encounter")}</SheetTitle>
           <SheetDescription>
@@ -210,7 +229,7 @@ export default function CreateEncounterForm({
                         />
                         <Input
                           type="time"
-                          className="border-gray-400 text-sm sm:py-px shadow-sm"
+                          className="border-gray-400 text-sm shadow-sm sm:py-px"
                           value={date.toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -249,7 +268,7 @@ export default function CreateEncounterForm({
                             className={cn(
                               "h-auto min-h-24 w-full justify-center text-lg",
                               field.value === value &&
-                                "ring-2 ring-primary text-primary",
+                                "ring-primary text-primary ring-2",
                             )}
                             variant="outline"
                             onClick={() => field.onChange(value)}
@@ -280,6 +299,7 @@ export default function CreateEncounterForm({
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger ref={field.ref}>
@@ -312,6 +332,7 @@ export default function CreateEncounterForm({
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger ref={field.ref}>
@@ -359,11 +380,7 @@ export default function CreateEncounterForm({
                       facilityId={facilityId}
                       value={field.value}
                       onChange={(value) => {
-                        if (value === null) {
-                          form.setValue("organizations", []);
-                        } else {
-                          form.setValue("organizations", value);
-                        }
+                        form.setValue("organizations", value || []);
                       }}
                       favoriteList="encounter_departments"
                     />
@@ -372,14 +389,14 @@ export default function CreateEncounterForm({
                 )}
               />
             </div>
-            <div className="flex justify-end mt-6 space-x-2">
+            <div className="mt-6 flex justify-end space-x-2">
               <Button
                 type="button"
                 onClick={() => {
                   setIsOpen(false);
                   form.reset();
                 }}
-                className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
+                className="border border-gray-300 bg-white text-gray-800 hover:bg-gray-100"
               >
                 {t("cancel")}
                 <ShortcutBadge actionId="cancel-action" />
