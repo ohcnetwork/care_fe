@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -42,6 +42,35 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { isIOSDevice } from "@/Utils/utils";
 
+// Helper to extract ID from organization object or string without using 'any'
+const extractOrgId = (value: string | { id: string } | null | undefined) => {
+  if (!value) return undefined;
+  return typeof value === "string" ? value : value.id;
+};
+
+const OrgSchema = z.union([
+  z.string(),
+  z.object({ id: z.string() }).passthrough(),
+]);
+
+const getTagConfigSchema = (t: (key: string) => string) =>
+  z.object({
+    display: z.string().trim().min(1, t("field_required")),
+    category: z.nativeEnum(TagCategory, {
+      required_error: t("field_required"),
+    }),
+    description: z.string().trim().optional(),
+    priority: z.number().min(0, t("priority_non_negative")),
+    status: z.nativeEnum(TagStatus, {
+      required_error: t("field_required"),
+    }),
+    resource: z.nativeEnum(TagResource, {
+      required_error: t("field_required"),
+    }),
+    facility_organization: OrgSchema.optional(),
+    organization: OrgSchema.optional(),
+  });
+
 interface TagConfigFormProps {
   configId?: string;
   parentId?: string;
@@ -61,28 +90,7 @@ export default function TagConfigForm({
   const isCreatingChild = Boolean(parentId);
   const isMobile = useBreakpoints({ default: true, sm: false });
 
-  // FIXED: Replaced z.any() with a specific union to satisfy code reviews
-  const OrgSchema = z.union([
-    z.string(),
-    z.object({ id: z.string() }).passthrough(),
-  ]);
-
-  const tagConfigSchema = z.object({
-    display: z.string().trim().min(1, t("field_required")),
-    category: z.nativeEnum(TagCategory, {
-      required_error: t("field_required"),
-    }),
-    description: z.string().trim().optional(),
-    priority: z.number().min(0, t("priority_non_negative")),
-    status: z.nativeEnum(TagStatus, {
-      required_error: t("field_required"),
-    }),
-    resource: z.nativeEnum(TagResource, {
-      required_error: t("field_required"),
-    }),
-    facility_organization: OrgSchema.optional(),
-    organization: OrgSchema.optional(),
-  });
+  const tagConfigSchema = useMemo(() => getTagConfigSchema(t), [t]);
 
   type TagConfigFormValues = z.infer<typeof tagConfigSchema>;
 
@@ -187,11 +195,10 @@ export default function TagConfigForm({
       ...(parentId && { parent: parentId }),
       ...(facilityId && { facility: facilityId }),
       ...(data.facility_organization && {
-        facility_organization:
-          (data.facility_organization as any).id || data.facility_organization,
+        facility_organization: extractOrgId(data.facility_organization),
       }),
       ...(data.organization && {
-        organization: (data.organization as any).id || data.organization,
+        organization: extractOrgId(data.organization),
       }),
     };
 
@@ -371,11 +378,7 @@ export default function TagConfigForm({
                 <FormControl>
                   <FacilityOrganizationSelector
                     facilityId={facilityId}
-                    value={
-                      field.value
-                        ? [(field.value as any).id || field.value]
-                        : null
-                    }
+                    value={field.value ? [extractOrgId(field.value)!] : null}
                     onChange={(value: string[] | null) => {
                       field.onChange(value?.[0] || null);
                     }}
@@ -401,11 +404,7 @@ export default function TagConfigForm({
                 <FormLabel>Organization</FormLabel>
                 <FormControl>
                   <RoleOrgSelector
-                    value={
-                      field.value
-                        ? [(field.value as any).id || field.value]
-                        : null
-                    }
+                    value={field.value ? [extractOrgId(field.value)!] : null}
                     onChange={(value: string[] | null) => {
                       field.onChange(value?.[0] || null);
                     }}
@@ -424,7 +423,7 @@ export default function TagConfigForm({
           />
         )}
 
-        {/* RESTORED: Parent tag info block for child tag creation */}
+        {/* Show parent tag details when creating a child tag to provide context */}
         {isCreatingChild && parentTag && (
           <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
             <div className="flex items-center gap-2 text-sm text-blue-800">
