@@ -144,7 +144,7 @@ export const Demography = (props: PatientProps) => {
   const data: Data[] = [
     {
       id: "general-info",
-      allowEdit: true,
+      allowEdit: canWritePatient && !!facilityId,
       details: [
         <PLUGIN_Component
           key="patient_details_tab__demography__general_info"
@@ -253,7 +253,11 @@ export const Demography = (props: PatientProps) => {
         <TagAssignmentSheet
           entityType="patient"
           entityId={patientId}
-          currentTags={patientData.instance_tags}
+          facilityId={facilityId}
+          currentTags={[
+            ...patientData.instance_tags,
+            ...patientData.facility_tags,
+          ]}
           onUpdate={() => {
             queryClient.invalidateQueries({
               queryKey: ["patient", patientId],
@@ -268,10 +272,12 @@ export const Demography = (props: PatientProps) => {
           }
         />
       ),
-      details: patientData.instance_tags.map((t) => ({
-        label: t.parent ? t.parent.display : t.display,
-        value: t.display,
-      })),
+      details: [...patientData.instance_tags, ...patientData.facility_tags].map(
+        (t) => ({
+          label: t.parent ? t.parent.display : t.display,
+          value: t.display,
+        }),
+      ),
     },
   ];
 

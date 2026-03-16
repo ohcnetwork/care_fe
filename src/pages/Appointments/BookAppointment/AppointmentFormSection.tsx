@@ -73,6 +73,7 @@ export const AppointmentFormSection = ({
           selected={selectedTags}
           onChange={setSelectedTags}
           resource={TagResource.APPOINTMENT}
+          facilityId={facilityId}
         />
       </div>
       <div className="w-full">
