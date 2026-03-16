@@ -59,6 +59,7 @@ import {
   NumericRange,
   QualifiedRange,
 } from "@/types/base/qualifiedRange/qualifiedRange";
+import { ENCOUNTER_CLASS } from "@/types/emr/encounter/encounter";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
@@ -82,6 +83,7 @@ export function ObservationInterpretation<
   name = "qualified_ranges",
   onCancel,
   onSheetOpen,
+  facilityId,
 }: {
   form: UseFormReturn<TFieldValues>;
   qualifiedRanges: QualifiedRange[];
@@ -92,6 +94,7 @@ export function ObservationInterpretation<
   name?: string;
   onSheetOpen?: () => void;
   onCancel?: () => void;
+  facilityId?: string;
 }) {
   const { t } = useTranslation();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -131,7 +134,7 @@ export function ObservationInterpretation<
   const hasExistingData = () => {
     return qualifiedRanges.some(
       (range) =>
-        range.conditions.length > 0 ||
+        (range.conditions?.length ?? 0) > 0 ||
         range.ranges.length > 0 ||
         (range.valueset_interpretation?.length || 0) > 0,
     );
@@ -293,7 +296,7 @@ export function ObservationInterpretation<
       newRanges = [
         ...newRanges.map((r) => ({
           ...r,
-          conditions: r.conditions.map((condition) => ({
+          conditions: r.conditions?.map((condition) => ({
             ...condition,
             _conditionType: getConditionDiscriminatorValue(
               condition.metric,
@@ -332,7 +335,7 @@ export function ObservationInterpretation<
   const getInterpretationSummary = (range: QualifiedRange, index: number) => {
     const rangeCount = range.ranges.length;
     const valuesetCount = range.valueset_interpretation?.length || 0;
-    let operationSummary = range.conditions
+    let operationSummary = (range.conditions ?? [])
       .slice(0, 2)
       .map((condition, index) => {
         return (
@@ -342,8 +345,8 @@ export function ObservationInterpretation<
           />
         );
       });
-    if (range.conditions.length > 2) {
-      operationSummary.push(<span>+{range.conditions.length - 2}...</span>);
+    if ((range.conditions?.length ?? 0) > 2) {
+      operationSummary.push(<span>+{range.conditions!.length - 2}...</span>);
     }
     const rangeSummary = range.ranges?.slice(0, 2).map((range, index) => {
       return <span key={`range-${index}`}>{getRangeSummary(range)}</span>;
@@ -369,12 +372,14 @@ export function ObservationInterpretation<
     return (
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 items-start flex-1 text-sm">
         <span>#{index + 1}</span>
-        <div className="flex flex-col gap-1 sm:w-1/2">
-          <span className="text-xs font-medium">{t("conditions")}</span>
-          <div className="flex flex-col gap-1 text-gray-500">
-            {operationSummary}
+        {operationSummary.length > 0 && (
+          <div className="flex flex-col gap-1 sm:w-1/2">
+            <span className="text-xs font-medium">{t("conditions")}</span>
+            <div className="flex flex-col gap-1 text-gray-500">
+              {operationSummary}
+            </div>
           </div>
-        </div>
+        )}
         {rangeCount > 0 && (
           <div className="flex flex-col gap-1 sm:w-1/2">
             <span className="text-xs font-medium">{t("effect")}</span>
@@ -530,6 +535,7 @@ export function ObservationInterpretation<
               interpretationType={selectedInterpretationType}
               //handleTypeChange={handleTypeChange}
               fieldName={`${name}.${editedRange.id || 0}`}
+              facilityId={facilityId}
             />
           )}
         </SheetContent>
@@ -575,6 +581,7 @@ function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
   interpretationType,
   //handleTypeChange,
   fieldName,
+  facilityId,
 }: {
   form: UseFormReturn<TFieldValues>;
   editedRange: QualifiedRange;
@@ -588,6 +595,7 @@ function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
   interpretationType: InterpretationType;
   //handleTypeChange: (newType: InterpretationType) => void;
   fieldName: string;
+  facilityId?: string;
 }) {
   const { t } = useTranslation();
 
@@ -620,10 +628,11 @@ function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
     <div>
       <div className="flex flex-col gap-3 mt-6 p-3 max-h-[calc(100vh-200px)] overflow-y-auto">
         <ConditionComponent
-          conditions={editedRange.conditions}
+          conditions={editedRange.conditions ?? []}
           setConditions={handleSetConditions}
           form={form}
           fieldName={`${fieldName}.conditions`}
+          facilityId={facilityId}
         />
         {/* TODO: Hide interpretation type selector until BE is ready*/}
         {/*         <div>
@@ -696,6 +705,7 @@ export function RenderConditionInput({
   handleSetValueType,
   form,
   fieldName,
+  facilityId,
 }: {
   condition: Condition;
   index: number;
@@ -710,6 +720,7 @@ export function RenderConditionInput({
   handleSetValueType: (value: string, index: number) => void;
   form: UseFormReturn<any>;
   fieldName: string;
+  facilityId?: string;
 }) {
   const { t } = useTranslation();
   const operation = condition.operation;
@@ -916,6 +927,41 @@ export function RenderConditionInput({
       }
       break;
     }
+    case "encounter_class": {
+      if (operation === ConditionOperation.equality) {
+        return (
+          <FormField
+            control={form.control}
+            name={`${fieldName}.value` as any}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Select
+                    value={field.value}
+                    onValueChange={(value) => {
+                      handleSetValue(value, index);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("select_a_value")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ENCOUNTER_CLASS.map((encounterClass) => (
+                        <SelectItem key={encounterClass} value={encounterClass}>
+                          {t(`encounter_class__${encounterClass}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        );
+      }
+      break;
+    }
     default: {
       if (operation === ConditionOperation.equality) {
         const value = condition.value as string;
@@ -1040,6 +1086,7 @@ export function RenderConditionInput({
                   <FormItem>
                     <FormControl>
                       <TagSelectorPopover
+                        facilityId={facilityId}
                         selected={selectedTags}
                         resource={tagResource}
                         onChange={(tags) => {
@@ -1070,11 +1117,13 @@ export function ConditionComponent<
   setConditions,
   form,
   fieldName,
+  facilityId,
 }: {
   conditions: Condition[];
   setConditions: (value: Condition[]) => void;
   form: UseFormReturn<TFieldValues>;
   fieldName: string;
+  facilityId?: string;
 }) {
   const { t } = useTranslation();
   const { data } = useQuery({
@@ -1084,12 +1133,7 @@ export function ConditionComponent<
 
   const metrics = data?.filter((m) => !m.name.includes("patient_tag"));
 
-  useEffect(() => {
-    if (metrics?.[0] && conditions.length === 0) {
-      const defaultCondition = getDefaultCondition(metrics);
-      setConditions([defaultCondition]);
-    }
-  }, [metrics, conditions]);
+  // No longer enforce a default condition — conditions are optional
 
   const handleSetMetric = (metric: string, index: number) => {
     const newMetric = metrics?.find((m) => m.name === metric) || metrics?.[0];
@@ -1292,6 +1336,7 @@ export function ConditionComponent<
                       handleSetValueType={handleSetValueType}
                       form={form}
                       fieldName={`${fieldName}.${index}`}
+                      facilityId={facilityId}
                     />
                   </div>
                 )}
@@ -1433,13 +1478,11 @@ function NumericRangeComponent<TFieldValues extends FieldValues = FieldValues>({
   };
 
   const handleSetMin = (value: string, index: number) => {
-    const parsedValue = value === "" ? undefined : Number(value);
-    handleSetRange({ ...ranges[index], min: parsedValue }, index);
+    handleSetRange({ ...ranges[index], min: value || undefined }, index);
   };
 
-  const handleSetMax = (value: string | number, index: number) => {
-    const parsedValue = value === "" ? undefined : Number(value);
-    handleSetRange({ ...ranges[index], max: parsedValue }, index);
+  const handleSetMax = (value: string, index: number) => {
+    handleSetRange({ ...ranges[index], max: value || undefined }, index);
   };
 
   const handleAddRange = () => {

@@ -15,7 +15,7 @@ export enum QuestionType {
 export interface ObservationDefinitionComponentSpec {
   code: Code;
   permitted_data_type: QuestionType;
-  permitted_unit: Code;
+  permitted_unit: Code | null;
   qualified_ranges: QualifiedRange[];
 }
 
@@ -78,19 +78,15 @@ export interface ObservationDefinitionReadSpec extends BaseObservationDefinition
   version?: number;
 }
 
-export const OBSERVATION_DEFINITION_STATUS = [
-  "draft",
-  "active",
-  "retired",
-  "unknown",
-] as const;
-
+export enum ObservationDefinitionStatus {
+  draft = "draft",
+  active = "active",
+  retired = "retired",
+  unknown = "unknown",
+}
 export const OBSERVATION_DEFINITION_STATUS_COLORS = {
   draft: "secondary",
   active: "primary",
   retired: "destructive",
   unknown: "outline",
 } as const satisfies Record<ObservationDefinitionStatus, string>;
-
-export type ObservationDefinitionStatus =
-  (typeof OBSERVATION_DEFINITION_STATUS)[number];

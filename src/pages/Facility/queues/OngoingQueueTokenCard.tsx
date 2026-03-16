@@ -1,3 +1,4 @@
+import { PatientTagsDisplay } from "@/components/Patient/PatientTagsDisplay";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,10 +11,11 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { AssignToServicePointDialog } from "@/pages/Facility/queues/AssignToServicePointDialog";
 import { CancelTokenDialog } from "@/pages/Facility/queues/CancelTokenDialog";
-import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
+import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePoints";
 import {
+  getQueueTokenStatus,
+  QUEUE_TOKEN_STATUS_COLORS,
   renderTokenNumber,
   TokenRead,
   TokenStatus,
@@ -52,9 +54,8 @@ export function OngoingQueueTokenCard({
   const { t } = useTranslation();
   const contextMenuTriggerRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  const { assignedServicePoints } = useQueueServicePoints();
 
-  const [showAssignToServicePointDialog, setShowAssignToServicePointDialog] =
-    useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   const { mutate: updateToken } = useMutation({
@@ -83,138 +84,123 @@ export function OngoingQueueTokenCard({
   return (
     <ContextMenu>
       <ContextMenuTrigger ref={contextMenuTriggerRef}>
-        <div
+        <Link
           className={cn(
-            "relative grid grid-cols-[1fr_auto_auto] bg-gray-50 rounded-lg shadow p-1",
+            "relative flex flex-col gap-2 md:gap-3 items-start justify-between bg-gray-50 rounded-lg shadow hover:shadow-md transition-all duration-300 ease-in-out mx-1",
             token?.status === TokenStatus.IN_PROGRESS &&
               "border border-primary-500",
           )}
+          basePath="/"
+          href={`/facility/${facilityId}/queue/${token?.queue.id}/token/${token?.id}`}
         >
-          <Link
-            basePath="/"
-            href={
-              token?.patient
-                ? `/facility/${facilityId}/patients/verify?${new URLSearchParams(
-                    {
-                      phone_number: token.patient.phone_number,
-                      year_of_birth:
-                        token.patient.year_of_birth?.toString() ?? "",
-                      partial_id: token.patient.id.slice(0, 5),
-                      queue_id: token.queue.id,
-                      token_id: token.id,
-                    },
-                  ).toString()}`
-                : "#"
-            }
-            className="flex gap-3 items-center p-3 min-w-0 hover:bg-gray-100 transition-colors rounded-l-lg"
-          >
-            <div className="flex flex-col min-w-0 flex-1">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-1 items-center justify-between w-full p-3">
+            <div className="w-full">
               {token ? (
-                <>
-                  <div className="font-semibold flex items-center gap-1 group">
+                <div className="flex flex-col justify-between">
+                  <span className="font-semibold flex items-center gap-1">
                     {token.patient
                       ? token.patient.name
                       : renderTokenNumber(token)}
-                  </div>
+                  </span>
                   {token.patient && (
                     <div className="flex flex-col gap-1 mt-1">
                       <span className="text-xs text-gray-700">
                         {formatPatientAge(token.patient, true)},{" "}
                         {t(`GENDER__${token.patient.gender}`)}
                       </span>
-                      {token.patient.instance_tags?.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {token.patient.instance_tags.map((tag) => (
-                            <Badge
-                              key={tag.id}
-                              variant="secondary"
-                              size="sm"
-                              className="capitalize"
-                              title={tag.description}
-                            >
-                              {getTagHierarchyDisplay(tag)}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
                     </div>
                   )}
-                </>
+                </div>
               ) : (
-                <>
-                  <Skeleton className="h-5 w-36" />
-                </>
+                <Skeleton className="h-4 w-36 my-2" />
               )}
             </div>
-            <div className="flex items-center gap-3">
+            <>
               {token ? (
-                <div className="flex gap-2 items-center justify-center p-2 bg-gray-100 border border-gray-200 rounded-lg">
-                  <span className="text-lg font-bold text-black">
-                    {renderTokenNumber(token)}
-                  </span>
+                <div className="flex flex-row gap-1 items-center justify-between w-full">
+                  <div className="flex gap-2 items-center justify-center p-1 bg-gray-100 border border-gray-200 rounded-lg">
+                    <Badge
+                      variant={
+                        QUEUE_TOKEN_STATUS_COLORS[getQueueTokenStatus(token)]
+                      }
+                      className="h-2 w-2 rounded-full p-0 border"
+                    />
+
+                    <span className="text-base font-medium text-black">
+                      {t(`token_status__${getQueueTokenStatus(token)}`)}:
+                    </span>
+
+                    <span className="text-lg font-bold text-black">
+                      {renderTokenNumber(token)}
+                    </span>
+                  </div>
+                  {options}
+                  <div className="ml-auto">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-full rounded-r-lg"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const x = rect.left + rect.width / 2;
+                        const y = rect.bottom;
+                        contextMenuTriggerRef.current?.dispatchEvent(
+                          new MouseEvent("contextmenu", {
+                            bubbles: true,
+                            cancelable: true,
+                            clientX: x,
+                            clientY: y,
+                          }),
+                        );
+                      }}
+                    >
+                      <MoreHorizontal className="size-4" />
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <Skeleton className="h-12 w-20" />
               )}
-              {options}
-            </div>
-          </Link>
-          <Separator orientation="vertical" className="self-stretch mx-1" />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-full rounded-r-lg"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              const rect = e.currentTarget.getBoundingClientRect();
-              const x = rect.left + rect.width / 2;
-              const y = rect.bottom;
-              contextMenuTriggerRef.current?.dispatchEvent(
-                new MouseEvent("contextmenu", {
-                  bubbles: true,
-                  cancelable: true,
-                  clientX: x,
-                  clientY: y,
-                }),
-              );
-            }}
-          >
-            <MoreHorizontal className="size-4" />
-          </Button>
-        </div>
+            </>
+          </div>
+          {token && token.patient && (
+            <>
+              <Separator orientation="horizontal" />
+              <div className="pb-2 px-1">
+                <PatientTagsDisplay
+                  patient={token.patient}
+                  className="text-xs flex-1"
+                  badgeSize="xs"
+                  showLabel={false}
+                />
+              </div>
+            </>
+          )}
+        </Link>
       </ContextMenuTrigger>
       {token && (
         <>
-          <ContextMenuContent>
+          <ContextMenuContent collisionPadding={8} avoidCollisions={true}>
             {token.status === TokenStatus.CREATED && token.sub_queue && (
-              <ContextMenuItem
-                onClick={() =>
-                  updateToken({
-                    status: TokenStatus.IN_PROGRESS,
-                    note: token.note,
-                    sub_queue: token.sub_queue?.id || null,
-                  })
-                }
-              >
-                <CircleDot className="size-4 mr-2" />
-                {t("mark_as_now_serving")}
-              </ContextMenuItem>
-            )}
-            {token.status === TokenStatus.IN_PROGRESS && (
               <>
                 <ContextMenuItem
                   onClick={() =>
                     updateToken({
-                      status: TokenStatus.FULFILLED,
+                      status: TokenStatus.IN_PROGRESS,
                       note: token.note,
                       sub_queue: token.sub_queue?.id || null,
                     })
                   }
                 >
-                  <Check className="size-4 mr-2" />
-                  {t("mark_as_complete")}
+                  <CircleDot className="size-4 mr-2" />
+                  {t("mark_as_now_serving")}
                 </ContextMenuItem>
+              </>
+            )}
+            {token.status === TokenStatus.IN_PROGRESS && (
+              <>
                 <ContextMenuItem
                   onClick={() =>
                     updateToken({
@@ -256,20 +242,59 @@ export function OngoingQueueTokenCard({
               </ContextMenuItem>
             )}
 
+            {assignedServicePoints
+              .filter((service) => service.id !== token.sub_queue?.id)
+              .map((service) => (
+                <ContextMenuItem
+                  key={service.id}
+                  onClick={() =>
+                    updateToken({
+                      status: TokenStatus.IN_PROGRESS,
+                      note: token.note,
+                      sub_queue: service.id,
+                    })
+                  }
+                >
+                  {token.sub_queue ? (
+                    <RedoDot className="size-4 mr-2" />
+                  ) : (
+                    <TicketCheck className="size-4 mr-2" />
+                  )}
+                  {token.sub_queue
+                    ? t("reassign_service_point", { name: service.name })
+                    : t("mark_as_in_service", { name: service.name })}
+                </ContextMenuItem>
+              ))}
+
+            {assignedServicePoints
+              .filter((service) => service.id !== token.sub_queue?.id)
+              .map((service) => (
+                <ContextMenuItem
+                  key={service.id}
+                  onClick={() =>
+                    updateToken({
+                      status: TokenStatus.CREATED,
+                      note: token.note,
+                      sub_queue: service.id,
+                    })
+                  }
+                >
+                  <Megaphone className="size-4 mr-2" />
+                  {t("call_to", { name: service.name })}
+                </ContextMenuItem>
+              ))}
+
             <ContextMenuItem
-              onClick={() => setShowAssignToServicePointDialog(true)}
+              onClick={() =>
+                updateToken({
+                  status: TokenStatus.FULFILLED,
+                  note: token.note,
+                  sub_queue: token.sub_queue?.id || null,
+                })
+              }
             >
-              {token.sub_queue ? (
-                <>
-                  <RedoDot className="size-4 mr-2" />
-                  {t("reassign_service_point")}
-                </>
-              ) : (
-                <>
-                  <TicketCheck className="size-4 mr-2" />
-                  {t("assign_to_service_point")}
-                </>
-              )}
+              <Check className="size-4 mr-2" />
+              {t("mark_as_complete")}
             </ContextMenuItem>
 
             <ContextMenuSeparator />
@@ -302,11 +327,7 @@ export function OngoingQueueTokenCard({
               </ContextMenuItem>
             )}
           </ContextMenuContent>
-          <AssignToServicePointDialog
-            open={showAssignToServicePointDialog}
-            onOpenChange={setShowAssignToServicePointDialog}
-            token={token}
-          />
+
           <CancelTokenDialog
             open={showCancelDialog}
             onOpenChange={setShowCancelDialog}

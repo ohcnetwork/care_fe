@@ -20,7 +20,6 @@ import {
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
-import { isAppleDevice } from "@/Utils/utils";
 
 import { Code } from "@/types/base/code/code";
 
@@ -152,7 +151,7 @@ export default function InstructionsPopover({
 
   if (isMobile) {
     return (
-      <Drawer repositionInputs={!isAppleDevice}>
+      <Drawer repositionInputs>
         <DrawerTrigger asChild>
           {TriggerButton(currentInstructions, disabledButton)}
         </DrawerTrigger>

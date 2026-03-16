@@ -21,7 +21,11 @@ import FilePreviewDialog, {
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { ReportRead, ReportReadList } from "@/types/emr/report/report";
+import {
+  ReportRead,
+  ReportReadList,
+  ReportType,
+} from "@/types/emr/report/report";
 import reportApi from "@/types/emr/report/reportApi";
 import { FILE_EXTENSIONS, FileReadMinimal } from "@/types/files/file";
 
@@ -29,6 +33,7 @@ export interface UseReportManagerOptions {
   associatingId: string;
   enabled?: boolean;
   qParams?: Record<string, string>;
+  reportType?: ReportType;
 }
 
 export interface UseReportManagerResult {
@@ -45,6 +50,7 @@ export default function useReportManager({
   associatingId,
   enabled = true,
   qParams,
+  reportType = ReportType.DISCHARGE_SUMMARY,
 }: UseReportManagerOptions): UseReportManagerResult {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -79,8 +85,7 @@ export default function useReportManager({
         ...qParams,
         associating_id: associatingId,
         upload_completed: "true",
-        // TO DO: Temporary for v1 report templates
-        report_type: "discharge_summary",
+        report_type: reportType,
       },
     }),
     enabled: enabled && !!associatingId,

@@ -10,6 +10,7 @@ import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -20,7 +21,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  mapPriceComponent,
   MonetaryAmountInput,
   MonetaryDisplay,
 } from "@/components/ui/monetary-display";
@@ -62,26 +62,10 @@ import {
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import facilityApi from "@/types/facility/facilityApi";
+import { round, zodDecimal } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
-
-// Schema factory for a single price component
-const createPriceComponentSchema = (
-  t: (key: string, options?: Record<string, unknown>) => string,
-) =>
-  z.object({
-    monetary_component_type: z.nativeEnum(MonetaryComponentType),
-    code: CodeSchema.optional(),
-    factor: z.number().gt(0).max(100).optional(),
-    amount: z
-      .string()
-      .refine((val) => !val || Number(val) > 0, {
-        message: t("must_be_greater_than_value", { value: 0 }),
-      })
-      .optional(),
-    conditions: z.array(conditionSchema),
-  });
 
 interface ChargeItemDefinitionFormProps {
   facilityId: string;
@@ -135,7 +119,6 @@ export function ChargeItemDefinitionForm({
     queryFn: query(chargeItemDefinitionApi.listMetrics),
   });
 
-  const priceComponentSchema = createPriceComponentSchema(t);
   const createFormSchema = (
     t: (key: string, options?: Record<string, unknown>) => string,
   ) =>
@@ -167,25 +150,20 @@ export function ChargeItemDefinitionForm({
           },
           { message: t("invalid_url") },
         ),
-      base_price: z
-        .string()
-        .min(1, { message: t("base_price_is_required") })
-        .refine((val) => Number(val) > 0, {
-          message: t("must_be_greater_than_value", { value: 0 }),
+      base_price: zodDecimal({ message: t("base_price_is_required") }),
+      mrp: zodDecimal({ min: 0 }).optional().nullable(),
+      purchase_price: zodDecimal({ min: 0 }).optional().nullable(),
+      can_edit_charge_item: z.boolean(),
+      price_components: z.array(
+        z.object({
+          monetary_component_type: z.nativeEnum(MonetaryComponentType),
+          code: CodeSchema.optional(),
+          factor: zodDecimal({ min: 0, max: 100 }).optional().nullable(),
+          amount: zodDecimal({ min: 0 }).optional().nullable(),
+          conditions: z.array(conditionSchema),
+          global_component: z.boolean().optional(),
         }),
-      mrp: z
-        .string()
-        .optional()
-        .refine((val) => !val || Number(val) > 0, {
-          message: t("must_be_greater_than_value", { value: 0 }),
-        }),
-      purchase_price: z
-        .string()
-        .optional()
-        .refine((val) => !val || Number(val) > 0, {
-          message: t("must_be_greater_than_value", { value: 0 }),
-        }),
-      price_components: z.array(priceComponentSchema),
+      ),
     });
 
   const formSchema = createFormSchema(t);
@@ -202,6 +180,10 @@ export function ChargeItemDefinitionForm({
         c.code?.code === PURCHASE_PRICE_CODE &&
         c.monetary_component_type === MonetaryComponentType.informational,
     );
+
+    const initialDataBasePrice = initialData?.price_components.find(
+      (c) => c.monetary_component_type === MonetaryComponentType.base,
+    )?.amount;
 
     return {
       // Basic information fields
@@ -221,15 +203,15 @@ export function ChargeItemDefinitionForm({
       derived_from_uri: initialData?.derived_from_uri || undefined,
 
       // Base price
-      base_price:
-        initialData?.price_components
-          .find((c) => c.monetary_component_type === MonetaryComponentType.base)
-          ?.amount?.toString() || "",
+      base_price: initialDataBasePrice ? round(initialDataBasePrice) : "",
 
       // MRP and Purchase Price
-      mrp: mrpComponent?.amount?.toString() || "",
-      purchase_price: purchasePriceComponent?.amount?.toString() || "",
-
+      mrp: mrpComponent?.amount ? round(mrpComponent.amount) : null,
+      purchase_price: purchasePriceComponent?.amount
+        ? round(purchasePriceComponent.amount)
+        : null,
+      // Can edit charge item
+      can_edit_charge_item: initialData?.can_edit_charge_item ?? true,
       // Price components (excluding base price, MRP, and Purchase Price components)
       price_components:
         initialData?.price_components
@@ -240,7 +222,13 @@ export function ChargeItemDefinitionForm({
               c.code?.code !== PURCHASE_PRICE_CODE,
           )
           .map((component) => ({
-            ...mapPriceComponent(component),
+            ...component,
+            amount: component.amount
+              ? round(component.amount)
+              : component.amount,
+            factor: component.factor
+              ? round(component.factor)
+              : component.factor,
             conditions:
               component.conditions?.map((condition) => ({
                 ...condition,
@@ -366,7 +354,12 @@ export function ChargeItemDefinitionForm({
       ...finalData
     } = submissionData;
 
-    upsert(finalData as ChargeItemDefinitionCreate);
+    const submissionDataWithDiscountConfiguration = {
+      ...finalData,
+      discount_configuration: null,
+    } as ChargeItemDefinitionCreate;
+
+    upsert(submissionDataWithDiscountConfiguration);
   };
 
   if (isLoading || !facilityData) {
@@ -377,11 +370,7 @@ export function ChargeItemDefinitionForm({
   const availableDiscounts = [
     ...facilityData.discount_monetary_components,
     ...facilityData.instance_discount_monetary_components,
-  ].map((component) => ({
-    ...component,
-    amount:
-      component?.amount != null ? String(component.amount) : component.amount,
-  }));
+  ];
   const availableTaxes = [...facilityData.instance_tax_monetary_components];
 
   const mrpCode = facilityData.instance_informational_codes.find(
@@ -420,8 +409,6 @@ export function ChargeItemDefinitionForm({
     const newSelectedComponents = selectedComponents.map((component) => ({
       ...component,
       monetary_component_type: type,
-      factor: component.factor != null ? component.factor : undefined,
-      amount: component.factor != null ? undefined : String(component.amount),
       conditions:
         component.conditions?.map((condition) => ({
           ...condition,
@@ -522,6 +509,7 @@ export function ChargeItemDefinitionForm({
                         .replace(/[^a-z0-9_-]/g, "");
                       form.setValue("slug_value", sanitizedValue, {
                         shouldValidate: true,
+                        shouldDirty: true,
                       });
                     }}
                   />
@@ -651,6 +639,24 @@ export function ChargeItemDefinitionForm({
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="can_edit_charge_item"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>{t("can_edit_charge_item")}</FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
             </CardContent>
           </Card>
         )}
@@ -679,13 +685,17 @@ export function ChargeItemDefinitionForm({
                           <FormControl>
                             <MonetaryAmountInput
                               {...field}
-                              value={field.value ?? 0}
+                              value={field.value || ""}
                               onChange={(e) =>
-                                field.onChange(String(e.target.value))
+                                field.onChange(e.target.value || "")
                               }
                               placeholder="0.00"
+                              allowNegative
                             />
                           </FormControl>
+                          <p className="text-xs text-muted-foreground">
+                            {t("negative_price_for_discount_hint")}
+                          </p>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -706,8 +716,10 @@ export function ChargeItemDefinitionForm({
                       <FormControl>
                         <MonetaryAmountInput
                           {...field}
-                          value={field.value ?? 0}
-                          onChange={(e) => field.onChange(e.target.value)}
+                          value={field.value || ""}
+                          onChange={(e) =>
+                            field.onChange(e.target.value || null)
+                          }
                           placeholder="0.00"
                         />
                       </FormControl>
@@ -729,8 +741,10 @@ export function ChargeItemDefinitionForm({
                       <FormControl>
                         <MonetaryAmountInput
                           {...field}
-                          value={field.value ?? 0}
-                          onChange={(e) => field.onChange(e.target.value)}
+                          value={field.value || ""}
+                          onChange={(e) =>
+                            field.onChange(e.target.value || null)
+                          }
                           placeholder="0.00"
                         />
                       </FormControl>
@@ -771,6 +785,7 @@ export function ChargeItemDefinitionForm({
               showConditionsEditor
               availableMetrics={availableMetrics}
               className={minimal ? "w-full" : ""}
+              facilityId={facilityId}
             />
 
             {/* Price Summary */}

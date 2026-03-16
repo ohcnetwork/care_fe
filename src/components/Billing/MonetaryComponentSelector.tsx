@@ -12,6 +12,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import RadioInput from "@/components/ui/RadioInput";
+import { Switch } from "@/components/ui/switch";
 
 import { CompactConditionEditor } from "@/components/Billing/CompactConditionEditor";
 
@@ -59,6 +60,8 @@ export interface MonetaryComponentSelectorProps {
   displayMode?: "inline" | "full" | "short";
   /** Additional CSS classes */
   className?: string;
+  /** Facility ID for facility-scoped tag filtering */
+  facilityId?: string;
 }
 
 /**
@@ -71,11 +74,10 @@ function toMonetaryComponent(
   return {
     monetary_component_type: type,
     code: component.code,
-    factor: isPercentageBased(component) ? component.factor : undefined,
-    amount: isPercentageBased(component)
-      ? undefined
-      : String(component.amount || 0),
+    factor: isPercentageBased(component) ? component.factor : null,
+    amount: !isPercentageBased(component) ? component.amount : null,
     conditions: [],
+    global_component: true,
   };
 }
 
@@ -95,6 +97,7 @@ export function MonetaryComponentSelector({
   disabled = false,
   displayMode = "full",
   className = "",
+  facilityId,
 }: MonetaryComponentSelectorProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -217,6 +220,22 @@ export function MonetaryComponentSelector({
     );
   };
 
+  const handleToggleGlobal = (component: MonetaryComponent) => {
+    const isCurrentlyGlobal = component.global_component === true;
+    onSelectionChange(
+      selectedComponents.map((c) =>
+        isSameComponentCode(c, component)
+          ? {
+              ...c,
+              global_component: !isCurrentlyGlobal,
+              // Clear conditions when switching to global
+              ...(!isCurrentlyGlobal ? { conditions: [] } : {}),
+            }
+          : c,
+      ),
+    );
+  };
+
   const renderGroupCheckList = (
     groups: Record<string, MonetaryComponentRead[]>,
   ) => {
@@ -227,12 +246,12 @@ export function MonetaryComponentSelector({
         isComponentSelected(item, draftSelection),
       );
       const selectedValue = selectedInGroup
-        ? String(getComponentNumericValue(selectedInGroup))
+        ? getComponentNumericValue(selectedInGroup)
         : "";
 
       const radioOptions = groupItems.map((item) => ({
         label: formatComponentValue(item),
-        value: String(getComponentNumericValue(item)),
+        value: getComponentNumericValue(item),
       }));
 
       return (
@@ -361,7 +380,7 @@ export function MonetaryComponentSelector({
 
     // Full display mode
     return (
-      <div className="bg-white border rounded-md p-3 cursor-pointer hover:border-gray-400 transition-colors min-h-[44px] flex items-center justify-between">
+      <div className="bg-white border rounded-md p-3 cursor-pointer hover:border-gray-400 transition-colors min-h-11 flex items-center justify-between">
         <div className="flex items-center gap-2 flex-wrap">
           {selectedComponents.length === 0 ? (
             <span className="text-gray-500 text-sm">
@@ -408,11 +427,11 @@ export function MonetaryComponentSelector({
             <p className="text-sm font-medium text-gray-700">
               {t("selected")} {title?.toLowerCase()}
             </p>
-
             {selectedComponents.map((component, idx) => {
               const componentRead = components.find((c) =>
                 isSameComponentCode(c, component),
               );
+              const isGlobal = component.global_component === true;
 
               return (
                 <div
@@ -437,7 +456,27 @@ export function MonetaryComponentSelector({
                     </Button>
                   </div>
 
-                  {onConditionsChange && (
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={isGlobal}
+                        onCheckedChange={() => handleToggleGlobal(component)}
+                        aria-label={t("use_facility_global_value")}
+                      />
+                      <span className="text-sm text-gray-600">
+                        {isGlobal
+                          ? t("use_facility_global_value")
+                          : t("override_with_local_value")}
+                      </span>
+                    </div>
+                    {isGlobal && (
+                      <Badge variant="secondary" className="text-xs">
+                        {t("global")}
+                      </Badge>
+                    )}
+                  </div>
+
+                  {!isGlobal && onConditionsChange && (
                     <CompactConditionEditor
                       conditions={
                         component.conditions?.map((condition) => ({
@@ -456,6 +495,7 @@ export function MonetaryComponentSelector({
                         )
                       }
                       className="mt-3"
+                      facilityId={facilityId}
                     />
                   )}
                 </div>
@@ -472,11 +512,11 @@ export function MonetaryComponentSelector({
       )}
 
       {/* Trigger and Popover */}
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <Popover open={isOpen} onOpenChange={setIsOpen} modal>
         <PopoverTrigger asChild>{renderTrigger()}</PopoverTrigger>
 
         <PopoverContent
-          className={cn("p-0", displayMode === "inline" ? "w-[320px]" : "w-68")}
+          className={cn("p-0", displayMode === "inline" ? "w-80" : "w-68")}
           align="start"
         >
           {/* Search */}

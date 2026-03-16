@@ -1,6 +1,6 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 
+import { MonetaryComponent } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
   ResourceCategoryCreate,
   ResourceCategoryRead,
@@ -34,5 +34,11 @@ export default {
     path: "/api/v1/facility/{facilityId}/resource_category/{slug}/",
     method: HttpMethod.DELETE,
     TRes: Type<void>(),
+  },
+  setMonetaryComponents: {
+    path: "/api/v1/facility/{facilityId}/resource_category/{slug}/set_monetary_components/",
+    method: HttpMethod.POST,
+    TRes: Type<ResourceCategoryRead>(),
+    TBody: Type<MonetaryComponent[]>(),
   },
 } as const;

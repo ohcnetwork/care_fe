@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 
+import { Separator } from "@/components/ui/separator";
 import {
   MonetaryComponent,
   MonetaryComponentType,
@@ -48,43 +49,29 @@ export default function ChargeItemPriceDisplay({
     (c) => c.monetary_component_type === MonetaryComponentType.surcharge,
   );
 
-  const baseAmount = baseComponents[0]?.amount || 0;
-  const mrpAmount = mrpComponents[0]?.amount || undefined;
-  const purchasePriceAmount = purchasePriceComponents[0]?.amount || undefined;
+  const baseAmount = baseComponents[0]?.amount || "0";
+  const mrpAmount = mrpComponents[0]?.amount;
+  const purchasePriceAmount = purchasePriceComponents[0]?.amount;
+  const showAsterisk =
+    discountComponents.some((c) => c.conditions?.length) || false;
 
   const renderComponentValue = (
     component: MonetaryComponent,
     prefix: string,
   ) => {
-    const hasAmount =
-      component.amount !== undefined && component.amount !== null;
-    const hasFactor =
-      component.factor !== undefined && component.factor !== null;
-
-    if (hasAmount && hasFactor) {
-      return (
-        <span>
-          {prefix}
-          <MonetaryDisplay amount={component.amount} /> (
-          <MonetaryDisplay factor={component.factor} />)
-        </span>
-      );
-    } else if (hasAmount) {
-      return (
-        <span>
-          {prefix}
-          <MonetaryDisplay amount={component.amount} />
-        </span>
-      );
-    } else if (hasFactor) {
-      return (
-        <span>
-          {prefix}
-          <MonetaryDisplay factor={component.factor} />
-        </span>
-      );
+    if (!component.amount && !component.factor) {
+      return null;
     }
-    return null;
+
+    return (
+      <span>
+        {prefix}
+        {component.amount && (
+          <MonetaryDisplay amount={component.amount} className="mr-2" />
+        )}
+        {component.factor && <MonetaryDisplay factor={component.factor} />}
+      </span>
+    );
   };
 
   return (
@@ -95,7 +82,7 @@ export default function ChargeItemPriceDisplay({
       <div className="flex flex-col gap-1 text-xs">
         <div className="flex justify-between">
           <span>{t("base_amount")}</span>
-          <MonetaryDisplay amount={String(baseAmount)} />
+          <MonetaryDisplay amount={baseAmount} />
         </div>
 
         {surchargeComponents.map((component, index) => (
@@ -103,7 +90,7 @@ export default function ChargeItemPriceDisplay({
             key={`surcharge-${index}`}
             className="flex justify-between text-gray-500"
           >
-            <span className="max-w-[10rem]">
+            <span className="max-w-40">
               {component.code?.display || t("surcharge")}
             </span>
             {renderComponentValue(component, "+")}
@@ -113,10 +100,15 @@ export default function ChargeItemPriceDisplay({
         {discountComponents.map((component, index) => (
           <div
             key={`discount-${index}`}
-            className="flex justify-between text-gray-500"
+            className="flex justify-between gap-2 text-gray-500"
           >
-            <span className="max-w-[10rem]">
+            <span className="max-w-40">
               {component.code?.display || t("discount")}
+              {component.conditions?.length ? (
+                <span className="ml-1 text-xs text-gray-400">
+                  ({t("conditional")})*
+                </span>
+              ) : null}
             </span>
             {renderComponentValue(component, "-")}
           </div>
@@ -127,7 +119,7 @@ export default function ChargeItemPriceDisplay({
             key={`tax-${index}`}
             className="flex justify-between text-gray-500"
           >
-            <span className="max-w-[10rem]">
+            <span className="max-w-40">
               {component.code?.display || t("tax")}
             </span>
             {renderComponentValue(component, "+")}
@@ -146,6 +138,15 @@ export default function ChargeItemPriceDisplay({
             <span>{t("purchase_price")}</span>
             <MonetaryDisplay amount={purchasePriceAmount} />
           </div>
+        )}
+
+        {showAsterisk && (
+          <>
+            <Separator />
+            <p className="text-xs text-gray-400 mt-2">
+              *{t("conditional_discounts_not_applied")}
+            </p>
+          </>
         )}
       </div>
     </div>

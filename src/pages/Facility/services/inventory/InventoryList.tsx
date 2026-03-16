@@ -24,6 +24,7 @@ import {
 
 import useFilters from "@/hooks/useFilters";
 
+import { isLessThan, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
@@ -72,7 +73,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
         status: qParams.status,
         facility: facilityId,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         product_knowledge: qParams.product_knowledge_id,
         ordering: qParams.ordering,
       },
@@ -178,10 +179,11 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                   <TableCell
                     className={cn(
                       "font-medium",
-                      inventory.net_content < 10 && "text-yellow-600",
+                      isLessThan(inventory.net_content, 10) &&
+                        "text-yellow-600",
                     )}
                   >
-                    {inventory.net_content}
+                    {round(inventory.net_content)}
                   </TableCell>
                   <TableCell className="font-medium">
                     <Badge variant={ACCOUNT_STATUS_COLORS[inventory.status]}>

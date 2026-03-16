@@ -12,7 +12,7 @@ import {
   Star,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -44,6 +44,7 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import {
   ResourceCategoryParent,
   ResourceCategoryResourceType,
+  ResourceCategorySubType,
 } from "@/types/base/resourceCategory/resourceCategory";
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
 import { ProductKnowledgeType } from "@/types/inventory/productKnowledge/productKnowledge";
@@ -75,6 +76,7 @@ interface ResourceDefinitionCategoryPickerProps<T> {
   allowMultiple?: boolean;
   // Resource type specific props
   resourceType: ResourceCategoryResourceType;
+  resourceSubType?: ResourceCategorySubType;
   searchParamName?: string;
   listDefinitions: {
     queryFn: {
@@ -118,6 +120,7 @@ interface ResourceDefinitionCategoryPickerProps<T> {
   hideSelectedDisplay?: boolean;
   alignContent?: "start" | "center" | "end";
   defaultOpen?: boolean;
+  "data-shortcut-id"?: string;
 }
 
 export function ResourceDefinitionCategoryPicker<T>({
@@ -128,6 +131,7 @@ export function ResourceDefinitionCategoryPicker<T>({
   disabled = false,
   className,
   resourceType,
+  resourceSubType,
   searchParamName = "title",
   listDefinitions,
   translationBaseKey,
@@ -140,6 +144,7 @@ export function ResourceDefinitionCategoryPicker<T>({
   hideClearButton = false,
   alignContent = "start",
   defaultOpen = false,
+  "data-shortcut-id": shortcutId,
 }: ResourceDefinitionCategoryPickerProps<T>) {
   const shouldHideClearButton = allowMultiple || hideClearButton;
   const { t } = useTranslation();
@@ -155,15 +160,30 @@ export function ResourceDefinitionCategoryPicker<T>({
   const [searchQuery, setSearchQuery] = useState("");
   const [breadcrumbsExpanded, setBreadcrumbsExpanded] = useState(false);
 
+  // Sync open state with defaultOpen prop for controlled auto-open behavior
+  useEffect(() => {
+    if (defaultOpen) {
+      setOpen(true);
+    }
+  }, [defaultOpen]);
+
   // Fetch categories for current level
   const { data: categoriesResponse, isLoading: isLoadingCategories } = useQuery(
     {
-      queryKey: ["resourceCategories", facilityId, resourceType, currentParent],
+      queryKey: [
+        "resourceCategories",
+        facilityId,
+        resourceType,
+        resourceSubType,
+        currentParent,
+      ],
       queryFn: query(resourceCategoryApi.list, {
         pathParams: { facilityId },
         queryParams: {
           resource_type: resourceType,
           parent: currentParent || "",
+          limit: 100,
+          ...(resourceSubType ? { resource_sub_type: resourceSubType } : {}),
         },
       }),
     },
@@ -427,8 +447,10 @@ export function ResourceDefinitionCategoryPicker<T>({
     }
 
     return (
-      <div className="flex items-center gap-1 truncate">
-        <span className="truncate">{selectedDefinition.title}</span>
+      <div className="flex items-center gap-1 min-w-0">
+        <span className="wrap-break-word text-wrap">
+          {selectedDefinition.title}
+        </span>
       </div>
     );
   };
@@ -787,7 +809,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                 role="combobox"
                 aria-expanded={open}
                 className={cn(
-                  "justify-between px-3 py-2 w-full shadow-xs border border-gray-300 font-medium",
+                  "justify-between px-3 py-2 w-full shadow-xs border border-gray-300 font-medium h-auto min-h-9",
                   disabled && "opacity-50 cursor-not-allowed",
                   className,
                 )}
@@ -898,17 +920,30 @@ export function ResourceDefinitionCategoryPicker<T>({
           <div className="flex relative">
             <PopoverTrigger asChild ref={ref}>
               <Button
+                type="button"
                 variant="outline"
                 role="combobox"
                 aria-expanded={open}
                 className={cn(
-                  "justify-between px-3 py-2 w-full shadow-xs border-gray-300",
+                  "justify-between px-3 py-2 w-full shadow-xs border-gray-300 h-auto min-h-9",
                   "hover:bg-gray-50 hover:text-gray-900",
                   "transition-all duration-200",
                   disabled && "opacity-50 cursor-not-allowed",
                   className,
                 )}
                 disabled={disabled}
+                data-shortcut-id={shortcutId}
+                onClick={() => {
+                  if (!open) {
+                    setOpen(true);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    setOpen(true);
+                  }
+                }}
               >
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   {getDisplayValue()}

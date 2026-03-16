@@ -14,8 +14,10 @@ import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 
+import { TemplateType } from "@/types/emr/template/template";
 import { navigate } from "raviger";
 import TemplateList from "./TemplateList";
+
 interface TemplateReportSheetProps {
   facilityId: string;
   encounterId?: string;
@@ -24,6 +26,7 @@ interface TemplateReportSheetProps {
   trigger: React.ReactNode;
   onSuccess?: () => void;
   permissions: string[];
+  reportType?: TemplateType;
 }
 
 export default function TemplateReportSheet({
@@ -31,6 +34,7 @@ export default function TemplateReportSheet({
   associatingId,
   trigger,
   permissions,
+  reportType,
   onSuccess,
 }: TemplateReportSheetProps) {
   const { t } = useTranslation();
@@ -46,7 +50,7 @@ export default function TemplateReportSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-lg">
+      <SheetContent className="w-full sm:max-w-lg overflow-auto">
         <SheetHeader>
           <SheetTitle className="flex flex-col sm:flex-row justify-between mt-4">
             <span>{t("available_templates")}</span>
@@ -72,6 +76,7 @@ export default function TemplateReportSheet({
             enabled={open}
             onSuccess={handleSuccess}
             showFilters={false}
+            reportType={reportType}
             className="flex flex-col"
           />
         </div>

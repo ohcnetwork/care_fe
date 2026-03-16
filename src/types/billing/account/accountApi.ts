@@ -1,5 +1,4 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 
 import {
   AccountBase,
@@ -50,5 +49,11 @@ export default {
     method: HttpMethod.POST,
     TRes: Type<AccountRead>(),
     TBody: Type<{ tags: string[] }>(),
+  },
+  defaultAccount: {
+    path: "/api/v1/facility/{facilityId}/account/default_account/",
+    method: HttpMethod.POST,
+    TRes: Type<AccountRead>(),
+    TBody: Type<{ patient: string; facility: string; encounter: string }>(),
   },
 } as const;
