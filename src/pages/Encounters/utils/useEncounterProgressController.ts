@@ -118,8 +118,8 @@ export function useEncounterProgressController({
       );
       return;
     }
-    addEncounterCloseRequestToBatch();
     addAppointmentCloseRequestsToBatch();
+    addEncounterCloseRequestToBatch();
     executeBatch();
   };
 

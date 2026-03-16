@@ -46,11 +46,11 @@ export function useBatchRequest<TError = DefaultError, TContext = unknown>(
             body: request.body,
           })),
         }),
+      ...options,
       onSuccess: (data, variables, context) => {
         options.onSuccess?.(data, variables, context);
         setRequests([]);
       },
-      ...options,
     },
     queryClient,
   );
