@@ -72,7 +72,7 @@ The facility overview page loads. The left sidebar shows facility-specific navig
 - Visibility depends on permissions: `canWriteAppointment || canListEncounters || canCreateEncounter`
 
 **Screenshot:**
-![Facility overview with sidebar](../../step-02-facility-overview.png)
+![Facility overview with sidebar](screenshots/step-02-facility-overview.png)
 
 **Notes:**
 
@@ -105,7 +105,7 @@ Clicking **Search patients** navigates to the patient search page.
 - Page description (for users with create permission): `t("search_patient_page_text")` → **"Search for existing patients using their phone number or create a new patient record"**
 
 **Screenshot:**
-![Sidebar Patients menu expanded](../../step-03-sidebar-patients-expanded.png)
+![Sidebar Patients menu expanded](screenshots/step-03-sidebar-patients-expanded.png)
 
 **Notes:**
 
@@ -133,7 +133,7 @@ On the Search Patients page, use the search box to look up the patient by **phon
 - No results text: `t("no_patient_record_text")` → **"No existing records found with this {{text}}. Would you like to register a new patient?"**
 
 **Screenshot:**
-![Search patients page](../../step-04-search-patients.png)
+![Search patients page](screenshots/step-04-search-patients.png)
 
 **Notes:**
 
@@ -163,7 +163,7 @@ You are navigated to the patient registration form page. The page title shows **
 - Page description: `t("patient_create_description")` → **"Please provide the required details to create a new patient record."**
 
 **Screenshot:**
-![Patient registration form heading](../../step-05-register-new-patient.png)
+![Patient registration form heading](screenshots/step-05-register-new-patient.png)
 
 **Notes:**
 
@@ -321,17 +321,17 @@ The form is divided into two accordion sections. **Section 1: Patient Basics** i
 
 When you enter a phone number that matches an existing patient, CARE will show a duplicate patient warning dialog:
 
-![Duplicate patient match dialog](../../step-06-patient-match-dialog.png)
+![Duplicate patient match dialog](screenshots/step-06-patient-match-dialog.png)
 
 You can dismiss this and continue, or navigate to the existing patient.
 
 Here is the Patient Basics section partially filled in:
 
-![Patient basics section partially filled](../../step-06-form-filled-partial.png)
+![Patient basics section partially filled](screenshots/step-06-form-filled-partial.png)
 
 And the completed Patient Basics section:
 
-![Patient basics section filled](../../step-08-form-section1-filled.png)
+![Patient basics section filled](screenshots/step-08-form-section1-filled.png)
 
 ---
 
@@ -442,16 +442,16 @@ The second accordion section is labeled **"2: Additional Details"**. In standard
 
 The Geo Organization selector uses cascading dropdowns. Here is the state/district selection:
 
-![State and district selection](../../step-07-state-district-selection.png)
+![State and district selection](screenshots/step-07-state-district-selection.png)
 
 Searching for a district within the selector:
 
-![District search](../../step-07b-district-search.png)
+![District search](screenshots/step-07b-district-search.png)
 
 ---
 
 **Screenshot:**
-![Additional details and Register Patient button](../../step-09-form-section2-register.png)
+![Additional details and Register Patient button](screenshots/step-09-form-section2-register.png)
 
 ---
 
@@ -478,7 +478,7 @@ Click the **Register Patient** button at the bottom of the form.
 - Keyboard shortcut: `submit-action` (badge displayed on button)
 
 **Screenshot:**
-See the bottom of the form in the screenshot above ([step-09-form-section2-register.png](../../step-09-form-section2-register.png)).
+See the bottom of the form in the screenshot above ([step-09-form-section2-register.png](screenshots/step-09-form-section2-register.png)).
 
 **Notes:**
 
@@ -580,17 +580,17 @@ After successful submission:
 
 ## Screenshots Reference
 
-The following screenshots were captured from the live application and are located in the repository root:
+The following screenshots were captured from the live application and are located in `docs/flows/screenshots/`:
 
 | Filename                                | Step | Description                                                         |
 | --------------------------------------- | ---- | ------------------------------------------------------------------- |
-| `step-02-facility-overview.png`         | 1    | Facility overview page with sidebar showing navigation items        |
-| `step-03-sidebar-patients-expanded.png` | 2    | Sidebar with "Patients" expanded showing "Search patients" link     |
-| `step-04-search-patients.png`           | 3    | Search patients page with search input and "Add New Patient" button |
-| `step-05-register-new-patient.png`      | 4    | Top of registration form showing "Register New Patient" heading     |
-| `step-06-form-filled-partial.png`       | 5    | Patient Basics section partially filled                             |
-| `step-06-patient-match-dialog.png`      | 5b   | Duplicate patient warning dialog when phone number matches          |
-| `step-07-state-district-selection.png`  | 6d   | Geo Organization cascading selector — state/district level          |
-| `step-07b-district-search.png`          | 6d   | Searching within the district dropdown                              |
-| `step-08-form-section1-filled.png`      | 5    | Patient Basics section fully filled                                 |
-| `step-09-form-section2-register.png`    | 6–7  | Additional Details section and Register Patient button              |
+| `screenshots/step-02-facility-overview.png`         | 1    | Facility overview page with sidebar showing navigation items        |
+| `screenshots/step-03-sidebar-patients-expanded.png` | 2    | Sidebar with "Patients" expanded showing "Search patients" link     |
+| `screenshots/step-04-search-patients.png`           | 3    | Search patients page with search input and "Add New Patient" button |
+| `screenshots/step-05-register-new-patient.png`      | 4    | Top of registration form showing "Register New Patient" heading     |
+| `screenshots/step-06-form-filled-partial.png`       | 5    | Patient Basics section partially filled                             |
+| `screenshots/step-06-patient-match-dialog.png`      | 5b   | Duplicate patient warning dialog when phone number matches          |
+| `screenshots/step-07-state-district-selection.png`  | 6d   | Geo Organization cascading selector — state/district level          |
+| `screenshots/step-07b-district-search.png`          | 6d   | Searching within the district dropdown                              |
+| `screenshots/step-08-form-section1-filled.png`      | 5    | Patient Basics section fully filled                                 |
+| `screenshots/step-09-form-section2-register.png`    | 6–7  | Additional Details section and Register Patient button              |
