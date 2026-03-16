@@ -6,13 +6,14 @@ type BackButtonProps = {
   className?: string;
   size?: ButtonSize;
   disabled?: boolean;
-};
+} & Omit<React.ComponentProps<"button">, "onClick">;
 export default function BackButton({
   children,
   variant = "outline",
   className,
   size = "default",
   disabled = false,
+  ...props
 }: BackButtonProps) {
   return (
     <Button
@@ -22,6 +23,7 @@ export default function BackButton({
       className={className}
       size={size}
       disabled={disabled}
+      {...props}
     >
       {children}
     </Button>
