@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
 import RoleOrgSelector from "@/components/Common/RoleOrgSelector";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 
@@ -74,13 +73,12 @@ export default function TagConfigForm({
     resource: z.nativeEnum(TagResource, {
       required_error: t("field_required"),
     }),
-    facility_organization: z.string().optional(),
-    organization: z.string().optional(),
+    facility_organization: z.any().optional(),
+    organization: z.any().optional(),
   });
 
   type TagConfigFormValues = z.infer<typeof tagConfigSchema>;
 
-  // Fetch parent tag data when creating a child
   const { data: parentTag } = useQuery({
     queryKey: ["tagConfig", parentId, facilityId],
     queryFn: query(tagConfigApi.retrieve, {
@@ -104,7 +102,6 @@ export default function TagConfigForm({
     },
   });
 
-  // Fetch existing config data when editing
   const { data: existingConfig, isLoading: isLoadingConfig } = useQuery({
     queryKey: ["tagConfig", configId, facilityId],
     queryFn: query(tagConfigApi.retrieve, {
@@ -114,7 +111,6 @@ export default function TagConfigForm({
     enabled: isEditing,
   });
 
-  // Populate form when editing data is loaded
   useEffect(() => {
     if (existingConfig && isEditing) {
       form.reset({
@@ -124,13 +120,13 @@ export default function TagConfigForm({
         priority: existingConfig.priority,
         status: existingConfig.status,
         resource: existingConfig.resource,
-        facility_organization: existingConfig.facility_organization?.id,
-        organization: existingConfig.organization?.id,
+        // FIX: Pass the whole object so the selector can see the name
+        facility_organization: existingConfig.facility_organization,
+        organization: existingConfig.organization,
       });
     }
   }, [existingConfig, isEditing, form]);
 
-  // Update form when parent tag data is loaded
   useEffect(() => {
     if (parentTag && isCreatingChild) {
       form.reset({
@@ -184,11 +180,13 @@ export default function TagConfigForm({
       resource: data.resource,
       ...(parentId && { parent: parentId }),
       ...(facilityId && { facility: facilityId }),
+      // FIX: Send only the ID to the API
       ...(data.facility_organization && {
-        facility_organization: data.facility_organization,
+        facility_organization:
+          data.facility_organization.id || data.facility_organization,
       }),
       ...(data.organization && {
-        organization: data.organization,
+        organization: data.organization.id || data.organization,
       }),
     };
 
@@ -368,7 +366,8 @@ export default function TagConfigForm({
                 <FormControl>
                   <FacilityOrganizationSelector
                     facilityId={facilityId}
-                    value={field.value ? [field.value] : null}
+                    // FIX: Extract ID for the internal value
+                    value={field.value ? [field.value.id || field.value] : null}
                     onChange={(value: string[] | null) => {
                       field.onChange(value?.[0] || null);
                     }}
@@ -394,7 +393,8 @@ export default function TagConfigForm({
                 <FormLabel>Organization</FormLabel>
                 <FormControl>
                   <RoleOrgSelector
-                    value={field.value ? [field.value] : null}
+                    // FIX: Extract ID for the internal value
+                    value={field.value ? [field.value.id || field.value] : null}
                     onChange={(value: string[] | null) => {
                       field.onChange(value?.[0] || null);
                     }}
@@ -411,33 +411,6 @@ export default function TagConfigForm({
               </FormItem>
             )}
           />
-        )}
-
-        {/* Add parent tag info when creating a child */}
-        {isCreatingChild && parentTag && (
-          <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
-            <div className="flex items-center gap-2 text-sm text-blue-800">
-              <CareIcon icon="l-info-circle" className="size-4" />
-              <span>
-                {t("creating_child_tag_for")}{" "}
-                <strong>{parentTag.display}</strong>
-              </span>
-            </div>
-            <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-blue-700">
-              <div>
-                <span className="font-medium">{t("category")}:</span>{" "}
-                {t(parentTag.category)}
-              </div>
-              <div>
-                <span className="font-medium">{t("resource")}:</span>{" "}
-                {t(parentTag.resource)}
-              </div>
-              <div>
-                <span className="font-medium">{t("priority")}:</span>{" "}
-                {parentTag.priority}
-              </div>
-            </div>
-          </div>
         )}
 
         <div
