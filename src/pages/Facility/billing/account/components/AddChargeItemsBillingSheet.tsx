@@ -17,7 +17,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
@@ -160,7 +159,7 @@ export default function AddChargeItemsBillingSheet({
         <SheetHeader className="px-4 py-4">
           <SheetTitle>{t("add_charge_items")}</SheetTitle>
         </SheetHeader>
-        <ScrollArea className="flex-1 px-4 pt-0">
+        <ScrollArea className="flex-1 pb-12 px-4 pt-0">
           <div className="mt-4 space-y-4">
             {selectedItems.length > 0 && (
               <div className="space-y-2">
@@ -172,6 +171,7 @@ export default function AddChargeItemsBillingSheet({
                         key={index}
                         className="bg-white rounded-lg border p-4 space-y-3"
                       >
+                        {/* Title and Remove Button */}
                         <div className="flex items-start justify-between gap-2">
                           <h4 className="font-medium text-base flex-1">
                             {item.charge_item_definition_object.title}
@@ -186,6 +186,7 @@ export default function AddChargeItemsBillingSheet({
                           </Button>
                         </div>
 
+                        {/* Quantity and Price */}
                         <div className="flex flex-wrap gap-4 items-center">
                           <div className="space-y-1">
                             <label className="text-sm text-gray-500">
@@ -372,31 +373,31 @@ export default function AddChargeItemsBillingSheet({
                 defaultOpen={open}
               />
             </div>
+
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={isPending}
+              >
+                {t("cancel")}
+                <ShortcutBadge actionId="cancel-action" />
+              </Button>
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSubmit();
+                }}
+                disabled={isPending || selectedItems.length === 0 || disabled}
+                className="flex flex-row items-center gap-2 justify-between"
+              >
+                {t("add_items")}
+                {open && <ShortcutBadge actionId="enter-action" />}
+              </Button>
+            </div>
           </div>
         </ScrollArea>
-        {/* Fixed Footer with Action Buttons */}
-        <SheetFooter className="p-4 border-t bg-white sticky bottom-0 flex-row justify-end gap-2">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isPending}
-          >
-            {t("cancel")}
-            <ShortcutBadge actionId="cancel-action" />
-          </Button>
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleSubmit();
-            }}
-            disabled={isPending || selectedItems.length === 0 || disabled}
-            className="flex flex-row items-center gap-2"
-          >
-            {t("add_items")}
-            {open && <ShortcutBadge actionId="enter-action" />}
-          </Button>
-        </SheetFooter>
       </SheetContent>
     </Sheet>
   );
