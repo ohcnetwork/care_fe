@@ -71,6 +71,11 @@ function ProductCard({
                 {format(new Date(product.expiration_date), "PPP")}
               </p>
             )}
+            {product.standard_pack_size != null && (
+              <p className="mt-1 text-xs text-gray-400">
+                {t("pack_size")}: {product.standard_pack_size}
+              </p>
+            )}
           </div>
           <div className="ml-auto flex flex-wrap gap-2">
             <ProductActions product={product} facilityId={facilityId} />
@@ -99,7 +104,7 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
       },
       queryParams: {
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         status: qParams.status,
         product_knowledge: qParams.product_knowledge_slug,
       },
@@ -194,6 +199,7 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
                       <TableHead>{t("name")}</TableHead>
                       <TableHead>{t("status")}</TableHead>
                       <TableHead>{t("lot_number")}</TableHead>
+                      <TableHead>{t("pack_size")}</TableHead>
                       <TableHead>{t("expires")}</TableHead>
                       <TableHead>{t("base_price")}</TableHead>
                       <TableHead>{t("actions")}</TableHead>
@@ -209,7 +215,7 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
                         )?.amount;
                       return (
                         <TableRow key={product.id} className="divide-x">
-                          <TableCell className="font-medium">
+                          <TableCell className="font-medium whitespace-pre-wrap">
                             {product.product_knowledge.name}
                           </TableCell>
                           <TableCell>
@@ -221,6 +227,9 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
                           </TableCell>
                           <TableCell>
                             {product.batch?.lot_number || "-"}
+                          </TableCell>
+                          <TableCell>
+                            {product.standard_pack_size ?? "-"}
                           </TableCell>
                           <TableCell>
                             {product.expiration_date

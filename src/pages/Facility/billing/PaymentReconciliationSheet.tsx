@@ -391,12 +391,14 @@ export function PaymentReconciliationSheet({
                   {invoice ? (
                     <>
                       <p className="text-sm text-gray-600 mb-1">
-                        {isCreditNote
-                          ? t("refund_given")
-                          : t("payment_received")}
+                        {isCreditNote ? t("refund_given") : t("amount_due")}
                       </p>
                       <p className="text-3xl font-bold text-gray-900">
-                        <MonetaryDisplay amount={invoice.total_payments} />
+                        <MonetaryDisplay
+                          amount={new Decimal(invoice.total_gross)
+                            .minus(invoice.total_payments)
+                            .toString()}
+                        />
                       </p>
                     </>
                   ) : (

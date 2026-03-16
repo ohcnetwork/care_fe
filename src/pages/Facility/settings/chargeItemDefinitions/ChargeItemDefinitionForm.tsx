@@ -354,7 +354,12 @@ export function ChargeItemDefinitionForm({
       ...finalData
     } = submissionData;
 
-    upsert(finalData as ChargeItemDefinitionCreate);
+    const submissionDataWithDiscountConfiguration = {
+      ...finalData,
+      discount_configuration: null,
+    } as ChargeItemDefinitionCreate;
+
+    upsert(submissionDataWithDiscountConfiguration);
   };
 
   if (isLoading || !facilityData) {
@@ -504,6 +509,7 @@ export function ChargeItemDefinitionForm({
                         .replace(/[^a-z0-9_-]/g, "");
                       form.setValue("slug_value", sanitizedValue, {
                         shouldValidate: true,
+                        shouldDirty: true,
                       });
                     }}
                   />
@@ -779,6 +785,7 @@ export function ChargeItemDefinitionForm({
               showConditionsEditor
               availableMetrics={availableMetrics}
               className={minimal ? "w-full" : ""}
+              facilityId={facilityId}
             />
 
             {/* Price Summary */}

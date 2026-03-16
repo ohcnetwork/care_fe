@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -14,6 +15,8 @@ import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAppHistory from "@/hooks/useAppHistory";
 import useAutoPrint, { AutoPrintOptions } from "@/hooks/useAutoPrint";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { FacilityRead } from "@/types/facility/facility";
+import type { PrintTemplate } from "@/types/facility/printTemplate";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 interface WatermarkProps {
@@ -29,6 +32,8 @@ type Props = {
   showBackButton?: boolean;
   watermark?: WatermarkProps;
   autoPrint?: AutoPrintOptions;
+  facility?: FacilityRead;
+  templateSlug?: string;
 };
 
 export default function PrintPreview(props: Props) {
@@ -37,9 +42,16 @@ export default function PrintPreview(props: Props) {
   const { t } = useTranslation();
   useShortcutSubContext();
 
+  const autoPrintPreference = props.facility?.print_templates?.find(
+    (t) => t.slug === (props.templateSlug ?? "default"),
+  )?.print_setup?.auto_print;
+
   const { isPrinting } = useAutoPrint({
     ...props.autoPrint,
-    enabled: (props.autoPrint?.enabled ?? false) && !props.disabled,
+    enabled:
+      autoPrintPreference !== undefined
+        ? autoPrintPreference
+        : (props.autoPrint?.enabled ?? false) && !props.disabled,
   });
 
   return (
@@ -91,12 +103,127 @@ export default function PrintPreview(props: Props) {
                     {props.watermark.text}
                   </div>
                 )}
-                {props.children}
+                <FacilityPrintLayout
+                  facility={props.facility}
+                  templateSlug={props.templateSlug}
+                >
+                  {props.children}
+                </FacilityPrintLayout>
               </div>
             </ZoomTransform>
           </ZoomProvider>
         </div>
       </Page>
     </div>
+  );
+}
+
+function resolvePrintTemplate(
+  facility: FacilityRead,
+  templateSlug?: string,
+): PrintTemplate | undefined {
+  const templates = facility.print_templates;
+  if (!templates?.length) return undefined;
+
+  const match = templateSlug
+    ? templates.find((t) => t.slug === templateSlug)
+    : undefined;
+
+  return match ?? templates.find((t) => t.slug === "default");
+}
+
+function buildPageStyle(template?: PrintTemplate): string | null {
+  const page = template?.page;
+  if (!page) return null;
+
+  const parts: string[] = [];
+
+  if (page.size || page.orientation) {
+    const sizeParts = [page.size, page.orientation].filter(Boolean).join(" ");
+    parts.push(`size: ${sizeParts}`);
+  }
+
+  if (page.margin) {
+    const { top, right, bottom, left } = page.margin;
+    parts.push(`margin: ${top}mm ${right}mm ${bottom}mm ${left}mm`);
+  }
+
+  if (parts.length === 0) return null;
+
+  return `@media print { @page { ${parts.join("; ")}; } }`;
+}
+
+function FacilityPrintLayout({
+  templateSlug,
+  facility,
+  children,
+}: {
+  templateSlug?: string;
+  facility?: FacilityRead;
+  children: ReactNode;
+}) {
+  if (!facility) {
+    return <>{children}</>;
+  }
+
+  const printTemplate = resolvePrintTemplate(facility, templateSlug);
+  const headerImage = printTemplate?.branding?.header_image;
+  const footerImage = printTemplate?.branding?.footer_image;
+  const pageStyle = buildPageStyle(printTemplate);
+
+  return (
+    <>
+      {pageStyle && <style>{pageStyle}</style>}
+      {headerImage?.url ? (
+        <div className="flex justify-between items-start mb-4 pb-2">
+          <img
+            src={headerImage.url}
+            alt="Custom Header"
+            className="flex-1 h-auto object-contain"
+            style={
+              headerImage.height
+                ? { maxHeight: `${headerImage.height}px` }
+                : undefined
+            }
+          />
+        </div>
+      ) : (
+        <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
+          <div className="text-left">
+            <h1 className="text-2xl font-semibold">{facility.name}</h1>
+            {facility.address && (
+              <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-xs">
+                {facility.address}
+                {facility.phone_number && (
+                  <p className="text-gray-500 text-xs">
+                    {facility.phone_number}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+          <img
+            src={careConfig.mainLogo?.dark}
+            alt="Care Logo"
+            className="h-8 w-auto object-contain mb-2 sm:mb-0"
+          />
+        </div>
+      )}
+      {children}
+      {footerImage?.url && (
+        <div className="mt-4 pt-2">
+          <img
+            src={footerImage.url}
+            alt="Footer"
+            className="w-full h-auto object-contain"
+            style={
+              footerImage.height
+                ? { maxHeight: `${footerImage.height}px` }
+                : undefined
+            }
+          />
+        </div>
+      )}
+    </>
   );
 }

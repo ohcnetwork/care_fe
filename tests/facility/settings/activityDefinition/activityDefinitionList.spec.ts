@@ -101,6 +101,7 @@ test.describe("Activity Definition List", () => {
         false,
         {
           classification: "Laboratory",
+          status: "Active",
         },
       );
 
@@ -121,13 +122,14 @@ test.describe("Activity Definition List", () => {
         false,
         {
           classification: "Imaging",
+          status: "Active",
         },
       );
 
       await filterAndVerify(page, "classification", "Imaging", imagingAD.title);
     });
 
-    test("should filter activity definitions by surgical procedure classification", async ({
+    test("should filter activity definitions by procedure classification", async ({
       page,
     }) => {
       const surgicalAD = await createActivityDefinition(
@@ -135,14 +137,15 @@ test.describe("Activity Definition List", () => {
         facilityId,
         false,
         {
-          classification: "Surgical Procedure",
+          classification: "Procedure",
+          status: "Active",
         },
       );
 
       await filterAndVerify(
         page,
         "classification",
-        "Surgical Procedure",
+        "Procedure",
         surgicalAD.title,
       );
     });
@@ -156,6 +159,7 @@ test.describe("Activity Definition List", () => {
         false,
         {
           classification: "Counselling",
+          status: "Active",
         },
       );
 
