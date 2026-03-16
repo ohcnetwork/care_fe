@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { usePath, useRedirect, useRoutes } from "raviger";
+import { Redirect, usePath, useRedirect, useRoutes } from "raviger";
 
 import IconIndex from "@/CAREUI/icons/Index";
 
@@ -15,6 +15,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { useOrganizationRoutes, usePluginRoutes } from "@/hooks/useCareApps";
 import useSidebarState from "@/hooks/useSidebarState";
 
+import { routes as publicRoutes } from "@/Routers/PublicRouter";
 import ConsultationRoutes from "@/Routers/routes/ConsultationRoutes";
 import FacilityRoutes from "@/Routers/routes/FacilityRoutes";
 import OrganizationRoutes from "@/Routers/routes/OrganizationRoutes";
@@ -89,6 +90,10 @@ const AdminRouter: AppRoutes = {
   ...AdminRoutes,
 };
 
+const publicRedirects = Object.fromEntries(
+  Object.keys(publicRoutes).map((path) => [path, () => <Redirect to="/" />]),
+);
+
 export default function AppRouter() {
   const pluginRoutes = usePluginRoutes();
   const organizationRoutes = useOrganizationRoutes();
@@ -105,13 +110,14 @@ export default function AppRouter() {
 
   const appPages = useRoutes(routes);
   const adminPages = useRoutes(AdminRouter);
+  const publicRedirectsPages = useRoutes(publicRedirects);
 
   const currentPath = usePath();
   const isAdminPage = currentPath?.startsWith("/admin");
 
   const sidebarFor = isAdminPage ? SidebarFor.ADMIN : SidebarFor.FACILITY;
 
-  const pages = appPages || adminPages || <ErrorPage />;
+  const pages = appPages || adminPages || publicRedirectsPages || <ErrorPage />;
 
   const user = useAuthUser();
 
