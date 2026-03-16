@@ -37,6 +37,7 @@ interface RoleSelectProps {
 const PAGE_LIMIT = 10;
 
 interface RoleCommandContentProps {
+  searchTerm: string;
   setSearchTerm: (value: string) => void;
   rolesList?: RoleBase[];
   isFetching: boolean;
@@ -48,6 +49,7 @@ interface RoleCommandContentProps {
 }
 
 function RoleCommandContent({
+  searchTerm,
   setSearchTerm,
   rolesList,
   isFetching,
@@ -63,6 +65,7 @@ function RoleCommandContent({
     <Command>
       <CommandInput
         placeholder={t("search_roles")}
+        value={searchTerm}
         onValueChange={setSearchTerm}
         className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
         autoFocus
@@ -180,6 +183,7 @@ export function RoleSelect({
         <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
           <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
             <RoleCommandContent
+              searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
               rolesList={rolesList}
               isFetching={isFetching}
@@ -200,6 +204,7 @@ export function RoleSelect({
       <PopoverTrigger asChild>{renderTriggerButton()}</PopoverTrigger>
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
         <RoleCommandContent
+          searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           rolesList={rolesList}
           isFetching={isFetching}
