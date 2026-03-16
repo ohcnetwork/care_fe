@@ -226,6 +226,9 @@ export default function DeliveryOrderForm({
           false,
           `${deliveryOrder.id}${supplyOrderId ? `?supplyOrder=${supplyOrderId}` : ""}`,
         ),
+        {
+          replace: true,
+        },
       );
     },
   });

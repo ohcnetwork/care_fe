@@ -83,6 +83,9 @@ export function UpdateChargeItemDefinition({
   const handleSuccess = () => {
     navigate(
       `/facility/${facilityId}/settings/charge_item_definitions/categories/${chargeItemDefinition.category.slug}`,
+      {
+        replace: true,
+      },
     );
   };
 

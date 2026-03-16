@@ -30,7 +30,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { ChargeItemsSection } from "@/components/Billing/ChargeItems/ChargeItemsSection";
 
-import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import mutate from "@/Utils/request/mutate";
@@ -53,6 +52,7 @@ import specimenApi from "@/types/emr/specimen/specimenApi";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import BackButton from "@/components/Common/BackButton";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import { DiagnosticReportForm } from "./components/DiagnosticReportForm";
 import { DiagnosticReportReview } from "./components/DiagnosticReportReview";
@@ -77,7 +77,6 @@ export default function ServiceRequestShow({
 }: ServiceRequestShowProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const { goBack } = useAppHistory();
   const isMobile = useBreakpoints({
     default: true,
     lg: false,
@@ -311,15 +310,13 @@ export default function ServiceRequestShow({
       <div className="flex-1 p-4 max-w-6xl">
         <div className="space-y-6">
           <div className="flex items-center justify-between gap-2">
-            <Button
+            <BackButton
               variant="outline"
-              size="sm"
-              onClick={() => goBack()}
               className="font-semibold border border-gray-400 text-gray-950 underline underline-offset-2"
             >
               <ArrowLeft />
               {t("back")}
-            </Button>
+            </BackButton>
 
             <div className="flex items-end gap-2">
               {(!request?.activity_definition?.diagnostic_report_codes ||

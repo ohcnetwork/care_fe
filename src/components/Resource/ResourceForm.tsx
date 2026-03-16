@@ -38,13 +38,13 @@ import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
 import UserSelector from "@/components/Common/UserSelector";
 
-import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName, mergeAutocompleteOptions, valuesOf } from "@/Utils/utils";
 import validators from "@/Utils/validators";
+import BackButton from "@/components/Common/BackButton";
 import patientApi from "@/types/emr/patient/patientApi";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import {
@@ -64,7 +64,6 @@ interface ResourceProps {
 
 export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const [facilitySearch, setFacilitySearch] = useState("");
-  const { goBack } = useAppHistory();
   const { t } = useTranslation();
   const [{ related_patient }] = useQueryParams();
   const [assignedToUser, setAssignedToUser] = useState<UserReadMinimal>();
@@ -153,7 +152,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     mutationFn: mutate(resourceRequestApi.create),
     onSuccess: (data: ResourceRequestRead) => {
       toast.success(t("resource_created_successfully"));
-      navigate(`/facility/${facilityId}/resource/${data.id}`);
+      navigate(`/facility/${facilityId}/resource/${data.id}`, {
+        replace: true,
+      });
     },
   });
 
@@ -163,7 +164,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     }),
     onSuccess: (data: ResourceRequestRead) => {
       toast.success(t("resource_updated_successfully"));
-      navigate(`/facility/${facilityId}/resource/${data.id}`);
+      navigate(`/facility/${facilityId}/resource/${data.id}`, {
+        replace: true,
+      });
     },
   });
 
@@ -541,9 +544,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
           </div>
 
           <div className="flex justify-end gap-4 border-t border-gray-200 pt-4">
-            <Button type="button" variant="outline" onClick={() => goBack()}>
-              {t("cancel")}
-            </Button>
+            <BackButton variant="outline">{t("cancel")}</BackButton>
             <Button
               type="submit"
               variant="primary"

@@ -52,16 +52,12 @@ const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 30000;
 
 interface ReportViewerProps {
-  facilityId: string;
-  patientId: string;
   encounterId: string;
   templateSlug?: string;
   reportId?: string;
 }
 
 export default function ReportViewer({
-  facilityId: facilityId,
-  patientId: patientId,
   encounterId,
   templateSlug,
   reportId,
@@ -385,7 +381,7 @@ export default function ReportViewer({
           icon={<FileText className="size-6 text-gray-400" />}
           title={t("template_not_found")}
           action={
-            <BackButton fallbackUrl="/">
+            <BackButton>
               <ChevronLeft /> {t("back")}
             </BackButton>
           }
@@ -402,11 +398,7 @@ export default function ReportViewer({
       hideTitleOnPage
       componentRight={
         <div className="flex gap-2 items-center">
-          <BackButton
-            size="icon"
-            aria-label={t("back")}
-            fallbackUrl={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`}
-          >
+          <BackButton size="icon" aria-label={t("back")}>
             <ChevronLeft className="size-4" />
           </BackButton>
           <h3 className="text-gray-800 truncate">{template.name}</h3>

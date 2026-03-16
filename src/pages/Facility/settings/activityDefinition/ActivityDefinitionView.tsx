@@ -88,7 +88,9 @@ export default function ActivityDefinitionView({
         queryClient.invalidateQueries({
           queryKey: ["activityDefinition", activityDefinitionSlug],
         });
-        navigate(`/facility/${facilityId}/settings/activity_definitions`);
+        navigate(`/facility/${facilityId}/settings/activity_definitions`, {
+          replace: true,
+        });
       },
     });
 
@@ -129,11 +131,7 @@ export default function ActivityDefinitionView({
             <AlertTitle>{t("error_loading_definitions")}</AlertTitle>
             <AlertDescription>{t("definition_not_found")}</AlertDescription>
           </Alert>
-          <BackButton
-            variant="outline"
-            className="mt-4"
-            to={`/facility/${facilityId}/settings/activity_definitions`}
-          >
+          <BackButton variant="outline" className="mt-4">
             <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
             {t("back_to_list")}
           </BackButton>
@@ -145,9 +143,7 @@ export default function ActivityDefinitionView({
   return (
     <Page title={definition.title} hideTitleOnPage={true}>
       <div className="container mx-auto max-w-3xl space-y-6">
-        <BackButton
-          fallbackUrl={`/facility/${facilityId}/settings/activity_definitions/categories/${definition.category.slug}`}
-        >
+        <BackButton>
           <ArrowLeft />
           {t("back")}
         </BackButton>

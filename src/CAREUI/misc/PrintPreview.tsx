@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button";
 
 import Page from "@/components/Common/Page";
 
+import BackButton from "@/components/Common/BackButton";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import useAppHistory from "@/hooks/useAppHistory";
 import useAutoPrint, { AutoPrintOptions } from "@/hooks/useAutoPrint";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { FacilityRead } from "@/types/facility/facility";
@@ -38,7 +38,6 @@ type Props = {
 
 export default function PrintPreview(props: Props) {
   const initialScale = useBreakpoints({ default: 0.44, md: 1 });
-  const { goBack } = useAppHistory();
   const { t } = useTranslation();
   useShortcutSubContext();
 
@@ -61,14 +60,10 @@ export default function PrintPreview(props: Props) {
         options={
           <div className="flex items-center gap-2">
             {props.showBackButton !== false && (
-              <Button
-                variant="outline"
-                onClick={() => goBack()}
-                data-shortcut-id="go-back"
-              >
+              <BackButton variant="outline" data-shortcut-id="go-back">
                 <CareIcon icon="l-arrow-left" className="text-lg" />
                 {t("back")}
-              </Button>
+              </BackButton>
             )}
             <Button
               variant="primary"

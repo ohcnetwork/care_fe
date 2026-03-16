@@ -330,7 +330,7 @@ export default function MedicationReturnShow({
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-4">
-            <BackButton size="icon" className="shrink-0" to={basePath}>
+            <BackButton size="icon" className="shrink-0">
               <ChevronLeft />
             </BackButton>
             <div>

@@ -87,19 +87,18 @@ export function ChargeItemDefinitionForm({
     if (categorySlug) {
       navigate(
         `/facility/${facilityId}/settings/charge_item_definitions/categories/${categorySlug}`,
+        {
+          replace: true,
+        },
       );
     } else {
-      navigate(`/facility/${facilityId}/settings/charge_item_definitions`);
+      navigate(`/facility/${facilityId}/settings/charge_item_definitions`, {
+        replace: true,
+      });
     }
   },
   onCancel = () => {
-    if (categorySlug) {
-      navigate(
-        `/facility/${facilityId}/settings/charge_item_definitions/categories/${categorySlug}`,
-      );
-    } else {
-      navigate(`/facility/${facilityId}/settings/charge_item_definitions`);
-    }
+    history.back();
   },
 }: ChargeItemDefinitionFormProps) {
   const { t } = useTranslation();

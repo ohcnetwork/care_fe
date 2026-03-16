@@ -82,7 +82,6 @@ export interface QuestionnaireFormProps {
   encounterId?: string;
   subjectType?: string;
   onSubmit?: () => void;
-  onCancel?: () => void;
   facilityId?: string;
 }
 
@@ -370,7 +369,6 @@ export function QuestionnaireForm({
   encounterId,
   subjectType,
   onSubmit,
-  onCancel,
   facilityId,
 }: QuestionnaireFormProps) {
   const { t } = useTranslation();
@@ -1128,14 +1126,9 @@ export function QuestionnaireForm({
             {/* Submit and Cancel Buttons */}
             {questionnaireForms.length > 0 && (
               <div className="flex justify-end gap-4 mx-4 mt-4 max-w-4xl">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onCancel}
-                  disabled={isPending}
-                >
+                <BackButton variant="outline" disabled={isPending}>
                   {t("cancel")}
-                </Button>
+                </BackButton>
                 {isDraftSaveable && (
                   <Button
                     type="button"

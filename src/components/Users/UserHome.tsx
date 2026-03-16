@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -13,7 +13,6 @@ import UserBanner from "@/components/Users/UserBanner";
 import UserDepartmentsTab from "@/components/Users/UserDepartmentsTab";
 import UserSummaryTab from "@/components/Users/UserSummary";
 
-import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
@@ -43,7 +42,6 @@ export default function UserHome(props: UserHomeProps) {
     username = authUser.username;
   }
   const { hasPermission } = usePermissions();
-  const { goBack } = useAppHistory();
 
   const {
     data: userData,
@@ -72,7 +70,7 @@ export default function UserHome(props: UserHomeProps) {
   );
 
   if (isError) {
-    goBack("/");
+    navigate("/");
   }
 
   if (isLoading || !userData) {

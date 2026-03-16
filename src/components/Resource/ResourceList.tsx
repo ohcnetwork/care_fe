@@ -91,7 +91,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
       },
     }),
   });
-
   const resources = queryResources?.results || [];
 
   return (

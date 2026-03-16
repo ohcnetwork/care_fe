@@ -36,7 +36,6 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import useAppHistory from "@/hooks/useAppHistory";
 import {
   ExtensionEntityType,
   getCombinedExtensionProps,
@@ -88,7 +87,6 @@ interface QParams {
 export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   useShortcutSubContext();
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
   const [{ phone_number, flow }] = useQueryParams<QParams>();
 
@@ -279,6 +277,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
             open_schedule: "true",
           }),
         },
+        replace: true,
       });
     },
   });
@@ -290,7 +289,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     }),
     onSuccess: () => {
       toast.success(t("patient_update_success"));
-      goBack();
+      history.back();
     },
   });
 

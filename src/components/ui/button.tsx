@@ -62,6 +62,7 @@ export type ButtonVariant =
   | "alert"
   | "warning"
   | "outline_primary";
+export type ButtonSize = "default" | "xs" | "sm" | "md" | "lg" | "icon";
 
 function Button({
   className,

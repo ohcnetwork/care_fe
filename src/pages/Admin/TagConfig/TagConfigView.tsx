@@ -14,8 +14,6 @@ import TagConfigFormDrawer from "./components/TagConfigFormDrawer";
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
@@ -25,6 +23,7 @@ import {
 } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
+import BackButton from "@/components/Common/BackButton";
 import TagConfigTable from "./components/TagConfigTable";
 
 interface TagConfigViewProps {
@@ -38,7 +37,6 @@ export default function TagConfigView({
 }: TagConfigViewProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const { goBack } = useAppHistory();
 
   // Fetch tag details
   const { data: tagConfig, isLoading } = useQuery({
@@ -146,18 +144,10 @@ export default function TagConfigView({
   return (
     <Page title={tagConfig.display} hideTitleOnPage>
       <div className="container mx-auto space-y-6">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={(e) => {
-            e.preventDefault();
-            goBack();
-          }}
-          className="shrink-0"
-        >
+        <BackButton variant="outline" size="sm" className="shrink-0">
           <CareIcon icon="l-arrow-left" className="size-5" />
           {t("back")}
-        </Button>
+        </BackButton>
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">

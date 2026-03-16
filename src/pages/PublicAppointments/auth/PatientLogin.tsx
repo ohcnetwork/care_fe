@@ -30,7 +30,6 @@ import { PhoneInput } from "@/components/ui/phone-input";
 
 import CircularProgress from "@/components/Common/CircularProgress";
 
-import useAppHistory from "@/hooks/useAppHistory";
 import { useAuthContext } from "@/hooks/useAuthUser";
 
 import mutate from "@/Utils/request/mutate";
@@ -52,7 +51,6 @@ export default function PatientLogin({
   staffId: string;
   page: string;
 }) {
-  const { goBack } = useAppHistory();
   const { t } = useTranslation();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [error, setError] = useState("");
@@ -243,7 +241,7 @@ export default function PatientLogin({
         className="border border-secondary-400"
         onClick={() =>
           page === "send"
-            ? goBack(`/facility/${facilityId}`)
+            ? navigate(`/facility/${facilityId}`)
             : navigate(
                 `/facility/${facilityId}/appointments/${staffId}/otp/send`,
               )

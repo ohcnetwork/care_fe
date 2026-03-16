@@ -16,6 +16,7 @@ import { useState } from "react";
 
 import { pharmacyDispenseServiceAtom } from "@/atoms/pharmacy";
 import { getPermissions } from "@/common/Permissions";
+import BackButton from "@/components/Common/BackButton";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
 import CreateTokenForm from "@/components/Tokens/CreateTokenForm";
@@ -23,7 +24,6 @@ import PatientTokensList from "@/components/Tokens/PatientTokensList";
 import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import { UpcomingAppointmentCard } from "@/pages/Appointments/components/UpcomingAppointmentCard";
@@ -53,7 +53,6 @@ export default function PatientHome() {
     useQueryParams<QParams>();
   const queryClient = useQueryClient();
 
-  const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
 
   const pharmacyDispenseService = useAtomValue(
@@ -264,13 +263,9 @@ export default function PatientHome() {
               <p className="text-sm text-gray-500 mb-6">
                 {t("please_enter_correct_birth_year")}
               </p>
-              <Button
-                variant={"primary_gradient"}
-                className="gap-3 group"
-                onClick={() => goBack(`/facility/${facilityId}/patients`)}
-              >
+              <BackButton variant="primary_gradient" className="gap-3 group">
                 {t("go_back")}
-              </Button>
+              </BackButton>
             </div>
           </div>
         )

@@ -3,10 +3,7 @@ import { AnimatedCounter } from "@/components/Common/AnimatedCounter";
 import BackButton from "@/components/Common/BackButton";
 import Page from "@/components/Common/Page";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
-import {
-  resourceTypeToResourcePathSlug,
-  useScheduleResource,
-} from "@/components/Schedule/useScheduleResource";
+import { useScheduleResource } from "@/components/Schedule/useScheduleResource";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -45,7 +42,6 @@ import {
 import { TokenStatus } from "@/types/tokens/token/token";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
@@ -128,11 +124,6 @@ export function ManageQueuePage({
           <div className="flex gap-2 items-center">
             <BackButton
               // TODO: move queue index page for practitioner to similar pattern path
-              to={
-                resourceType === SchedulableResourceType.Practitioner
-                  ? `/facility/${facilityId}/queues?date=${dateQueryString(queue.date)}&resource_id=${resourceId}`
-                  : `/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/queues?date=${dateQueryString(queue.date)}&resource_id=${resourceId}`
-              }
               size="icon"
               variant="ghost"
             >

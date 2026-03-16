@@ -27,8 +27,6 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
 import {
   TERMINOLOGY_SYSTEMS,
   ValueSetBase,
@@ -37,6 +35,7 @@ import {
 } from "@/types/valueSet/valueSet";
 import { valuesOf } from "@/Utils/utils";
 
+import BackButton from "@/components/Common/BackButton";
 import { generateSlug } from "@/Utils/utils";
 import { CodingField } from "./CodingField";
 import { ValueSetPreview } from "./ValueSetPreview";
@@ -369,8 +368,6 @@ export function ValueSetForm({
     }),
   });
 
-  const { goBack } = useAppHistory();
-
   const form = useForm({
     resolver: zodResolver(valuesetFormSchema),
     defaultValues: {
@@ -507,14 +504,9 @@ export function ValueSetForm({
           </div>
         )}
         <div className="flex gap-2 w-full justify-end">
-          <Button
-            variant="outline"
-            disabled={isSubmitting}
-            type="button"
-            onClick={() => goBack("/admin/valuesets")}
-          >
+          <BackButton variant="outline" size="sm" disabled={isSubmitting}>
             {t("cancel")}
-          </Button>
+          </BackButton>
 
           <Button
             variant="primary"

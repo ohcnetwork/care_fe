@@ -1,4 +1,4 @@
-import { navigate, useQueryParams } from "raviger";
+import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -35,7 +35,7 @@ export default function CreateDevice({ facilityId }: Props) {
           facilityId={facilityId}
           onSuccess={() => {
             toast.success(t("device_registered"));
-            navigate(`/facility/${facilityId}/settings/devices`);
+            history.back();
           }}
         />
       </div>

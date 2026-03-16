@@ -40,6 +40,7 @@ import { HealthcareServiceSelector } from "@/pages/Facility/services/HealthcareS
 import { CodeSchema } from "@/types/base/code/code";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 
+import BackButton from "@/components/Common/BackButton";
 import ObservationDefinitionForm from "@/pages/Facility/settings/observationDefinition/ObservationDefinitionForm";
 import { CreateSpecimenDefinition } from "@/pages/Facility/settings/specimen-definitions/CreateSpecimenDefinition";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
@@ -358,7 +359,9 @@ function ActivityDefinitionFormContent({
           queryKey: ["activityDefinition", activityDefinitionSlug],
         });
         toast.success(t("activity_definition_created_successfully"));
-        navigate(`/facility/${facilityId}/settings/activity_definitions`);
+        navigate(`/facility/${facilityId}/settings/activity_definitions`, {
+          replace: true,
+        });
       },
     });
 
@@ -380,6 +383,9 @@ function ActivityDefinitionFormContent({
         toast.success(t("activity_definition_updated_successfully"));
         navigate(
           `/facility/${facilityId}/settings/activity_definitions/${activityDefinition.slug}`,
+          {
+            replace: true,
+          },
         );
       },
     });
@@ -1065,17 +1071,7 @@ function ActivityDefinitionFormContent({
             </div>
 
             <div className="flex justify-end space-x-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/settings/activity_definitions`,
-                  )
-                }
-              >
-                {t("cancel")}
-              </Button>
+              <BackButton variant="outline">{t("cancel")}</BackButton>
               <Button type="submit" disabled={isPending}>
                 {isPending
                   ? isEditMode

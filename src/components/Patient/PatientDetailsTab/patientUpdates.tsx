@@ -1,4 +1,4 @@
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -8,8 +8,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
-
-import useAppHistory from "@/hooks/useAppHistory";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -22,7 +20,6 @@ export const Updates = (props: PatientProps) => {
   const patientId = patientData.id;
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
-  const { goBack } = useAppHistory();
   const {
     canViewPatientQuestionnaireResponses,
     canSubmitPatientQuestionnaireResponses,
@@ -31,7 +28,7 @@ export const Updates = (props: PatientProps) => {
   useEffect(() => {
     if (!canViewPatientQuestionnaireResponses) {
       toast.error(t("no_permission_to_view_page"));
-      goBack(
+      navigate(
         facilityId
           ? `/facility/${facilityId}/patient/${patientId}`
           : `/patient/${patientId}`,

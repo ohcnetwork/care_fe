@@ -22,8 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import CriticalActionConfirmationDialog from "@/components/Common/CriticalActionConfirmationDialog";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
+import BackButton from "@/components/Common/BackButton";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import {
   PAYMENT_RECONCILIATION_METHOD_MAP,
@@ -60,7 +59,6 @@ export function PaymentReconciliationShow({
   paymentReconciliationId: string;
 }) {
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
   const queryClient = useQueryClient();
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
@@ -522,17 +520,13 @@ export function PaymentReconciliationShow({
                       />
                     </>
                   )}
-                <Button
+                <BackButton
                   className="w-full flex items-center relative"
                   variant="outline"
-                  onClick={() =>
-                    goBack(`/facility/${facilityId}/billing/payments`)
-                  }
-                  data-shortcut-id="go-back"
                 >
                   <ArrowLeft className="size-4" />
                   {t("back_to_payments")}
-                </Button>
+                </BackButton>
                 <Button variant="outline" className="w-full" asChild>
                   <Link
                     href={`/facility/${facilityId}/billing/account/${payment.account?.id}`}

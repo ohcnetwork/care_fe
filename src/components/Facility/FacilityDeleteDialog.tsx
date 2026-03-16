@@ -9,8 +9,6 @@ import { buttonVariants } from "@/components/ui/button";
 
 import CriticalActionConfirmationDialog from "@/components/Common/CriticalActionConfirmationDialog";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
 import mutate from "@/Utils/request/mutate";
 import facilityApi from "@/types/facility/facilityApi";
 
@@ -27,7 +25,6 @@ const FacilityDeleteDialog = ({
   trigger,
 }: FacilityDeleteDialogProps) => {
   const { t } = useTranslation();
-  const { goBack, history } = useAppHistory();
   const queryClient = useQueryClient();
 
   const [open, setOpen] = useState(false);
@@ -53,17 +50,7 @@ const FacilityDeleteDialog = ({
       });
 
       setOpen(false);
-
-      if (history.length > 1) {
-        const prevPath = history[1];
-        if (prevPath.startsWith("/facility/")) {
-          navigate("/");
-        } else {
-          goBack("/");
-        }
-      } else {
-        navigate("/");
-      }
+      navigate("/");
     },
     onError: () => {
       setOpen(false);

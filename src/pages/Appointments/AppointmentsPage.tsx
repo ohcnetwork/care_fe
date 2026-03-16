@@ -57,7 +57,6 @@ import {
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
 
-import useAppHistory from "@/hooks/useAppHistory";
 import useFilters, { FilterState } from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
@@ -208,7 +207,6 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
     .filter(Boolean) as TagConfig[];
 
   const { hasPermission } = usePermissions();
-  const { goBack } = useAppHistory();
 
   const { canViewAppointments } = getPermissions(
     hasPermission,
@@ -315,7 +313,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
   useEffect(() => {
     if (!isFacilityLoading && !canViewAppointments && !facility) {
       toast.error(t("no_permission_to_view_page"));
-      goBack("/");
+      navigate("/");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canViewAppointments, facility, isFacilityLoading]);

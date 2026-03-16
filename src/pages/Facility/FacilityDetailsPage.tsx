@@ -4,7 +4,6 @@ import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Markdown } from "@/components/ui/markdown";
 
@@ -14,12 +13,12 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import useAppHistory from "@/hooks/useAppHistory";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 
+import BackButton from "@/components/Common/BackButton";
 import { FeatureBadge } from "./Utils";
 import { UserCard } from "./components/UserCard";
 
@@ -29,7 +28,6 @@ interface Props {
 
 export function FacilityDetailsPage({ id }: Props) {
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
   const { data: facilityResponse, isLoading } = useQuery({
     queryKey: ["facility", id],
     queryFn: query(publicFacilityApi.getAny, {
@@ -85,13 +83,9 @@ export function FacilityDetailsPage({ id }: Props) {
           <h2 className="text-xl font-semibold mb-4">
             {t("facility_not_found")}
           </h2>
-          <Button
-            variant="outline"
-            className="border border-secondary-400"
-            onClick={() => goBack("/facilities")}
-          >
+          <BackButton variant="outline" className="border border-secondary-400">
             {t("back_to_facilities")}
-          </Button>
+          </BackButton>
         </Card>
       </div>
     );
@@ -100,14 +94,10 @@ export function FacilityDetailsPage({ id }: Props) {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center pb-4">
-        <Button
-          variant="outline"
-          className="border border-secondary-400"
-          onClick={() => goBack("/facilities")}
-        >
+        <BackButton variant="outline" className="border border-secondary-400">
           <CareIcon icon="l-arrow-left" className="size-4 mr-1" />
           <span className="text-sm underline">{t("back")}</span>
-        </Button>
+        </BackButton>
         <LoginHeader />
       </div>
       <Card className="overflow-hidden bg-white border border-gray-200">

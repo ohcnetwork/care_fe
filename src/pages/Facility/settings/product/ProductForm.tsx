@@ -144,13 +144,11 @@ export function ProductFormContent({
   slug,
   containerClassName,
   onSuccess = (product: ProductRead) =>
-    navigate(`/facility/${facilityId}/settings/product/${product.id}`),
+    navigate(`/facility/${facilityId}/settings/product/${product.id}`, {
+      replace: true,
+    }),
   onCancel = () => {
-    if (productId) {
-      navigate(`/facility/${facilityId}/settings/product/${productId}`);
-    } else {
-      navigate(`/facility/${facilityId}/settings/product`);
-    }
+    history.back();
   },
   disableButtons = false,
   enabled = true,

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -13,8 +13,6 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import { TimelineEncounterCard } from "@/components/Facility/EncounterCard";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
-
-import useAppHistory from "@/hooks/useAppHistory";
 
 import { getPermissions } from "@/common/Permissions";
 
@@ -40,7 +38,6 @@ const EncounterHistory = (props: PatientProps) => {
     hasPermission,
     patientData.permissions,
   );
-  const { goBack } = useAppHistory();
 
   const { data: encounterData, isLoading } = useQuery({
     queryKey: ["encounterHistory", patientId, qParams],
@@ -57,7 +54,7 @@ const EncounterHistory = (props: PatientProps) => {
   useEffect(() => {
     if (!canViewPatients) {
       toast.error(t("no_permission_to_view_page"));
-      goBack(`/facility/${facilityId}/patient/${patientId}`);
+      navigate(`/facility/${facilityId}/patient/${patientId}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canViewPatients]);
