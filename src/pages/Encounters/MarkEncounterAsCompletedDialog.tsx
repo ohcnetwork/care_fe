@@ -13,8 +13,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { buttonVariants } from "@/components/ui/button";
 
-import { PLUGIN_Component } from "@/PluginEngine";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { PLUGIN_Component } from "@/PluginEngine";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 export function MarkEncounterAsCompletedDialog(
   props: React.ComponentProps<typeof AlertDialog>,
@@ -49,6 +50,7 @@ export function MarkEncounterAsCompletedDialog(
             onClick={() => endEncounter(encounter, true)}
           >
             {t("mark_as_complete")}
+            <ShortcutBadge actionId="enter-action" />
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -430,7 +430,7 @@ export function EncounterCommandDialog({
     canWriteSelectedEncounter,
     canRestartSelectedEncounter,
     encounter.encounter_class,
-    encounter?.status,
+    encounter.status,
   ]);
 
   const findRecentActions = useCallback(

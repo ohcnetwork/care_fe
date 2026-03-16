@@ -1,4 +1,5 @@
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import TagBadge from "@/components/Tags/TagBadge";
@@ -170,6 +171,7 @@ export const SummaryPanelEncounterDetails = () => {
               >
                 <SquarePen className="size-3 text-gray-950" strokeWidth={1.5} />
                 <span className="text-gray-950">{t("update_encounter")}</span>
+                <ShortcutBadge actionId="update-encounter" />
               </Link>
             </Button>
           )}

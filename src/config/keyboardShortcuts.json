@@ -132,8 +132,6 @@
 
   "encounter": [
     { "key": "a", "action": "add-allergy", "description": "Add Allergy", "when": "always" },
-    { "key": "s", "action": "add-symptoms", "description": "Add Symptoms", "when": "always" },
-    { "key": "d", "action": "add-diagnosis", "description": "Add Diagnosis", "when": "always" },
     { "key": "r", "action": "add-service-request", "description": "Add Service Request", "when": "always" },
     { "key": "m", "action": "add-medication-request", "description": "Add Medication", "when": "always" },
     { "key": "f", "action": "add-questionnaire", "description": "New Questionnaire/Form", "when": "always" },
@@ -141,15 +139,6 @@
     { "key": "h", "action": "clinical-history", "description": "Clinical History", "when": "always" },
     { "key": "cmd+e", "action": "open-command-dialog", "description": "Open Command Dialog", "when": "always" },
     { "key": "ctrl+e", "action": "open-command-dialog", "description": "Open Command Dialog", "when": "always" },
-    { "key": "q 1", "action": "questionnaire-1", "description": "Questionnaire 1", "when": "always" },
-    { "key": "q 2", "action": "questionnaire-2", "description": "Questionnaire 2", "when": "always" },
-    { "key": "q 3", "action": "questionnaire-3", "description": "Questionnaire 3", "when": "always" },
-    { "key": "q 4", "action": "questionnaire-4", "description": "Questionnaire 4", "when": "always" },
-    { "key": "q 5", "action": "questionnaire-5", "description": "Questionnaire 5", "when": "always" },
-    { "key": "q 6", "action": "questionnaire-6", "description": "Questionnaire 6", "when": "always" },
-    { "key": "q 7", "action": "questionnaire-7", "description": "Questionnaire 7", "when": "always" },
-    { "key": "q 8", "action": "questionnaire-8", "description": "Questionnaire 8", "when": "always" },
-    { "key": "q 9", "action": "questionnaire-9", "description": "Questionnaire 9", "when": "always" },
     { "key": "shift+c", "action": "mark-as-completed", "description": "Mark as Completed", "when": "always" },
     { "key": "shift+d", "action": "dispense", "description": "Dispense Medication", "when": "always" }
   ]

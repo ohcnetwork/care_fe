@@ -136,11 +136,7 @@ export const FormDialog = ({
 
   return (
     <>
-      <div
-        className="flex"
-        onClick={() => setOpen(true)}
-        data-shortcut-id="add-questionnaire"
-      >
+      <div className="flex" onClick={() => setOpen(true)}>
         {trigger}
       </div>
       <CommandDialog

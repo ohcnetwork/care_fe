@@ -7,6 +7,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { PLUGIN_Component } from "@/PluginEngine";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { Account } from "./summary-panel-details-tab/account";
 import { DepartmentsAndTeams } from "./summary-panel-details-tab/department-and-team";
 import { DischargeDetails } from "./summary-panel-details-tab/discharge-summary";
@@ -54,11 +55,13 @@ export const SummaryPanelActionsTab = () => {
       label: t("dispense"),
       onClick: dispense,
       hideOnMobile: false,
+      shortcut: <ShortcutBadge actionId="dispense" />,
     },
   ] as const satisfies {
     label: string;
     onClick: () => void;
     hideOnMobile: boolean;
+    shortcut?: React.ReactNode;
   }[];
 
   return (
@@ -80,6 +83,7 @@ export const SummaryPanelActionsTab = () => {
             >
               <NotebookPen />
               {action.label}
+              {"shortcut" in action && action.shortcut}
             </Button>
           ))}
 
