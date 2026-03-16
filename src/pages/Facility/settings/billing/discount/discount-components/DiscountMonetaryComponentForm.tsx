@@ -307,6 +307,7 @@ export function DiscountMonetaryComponentForm({
               }
               availableMetrics={availableMetrics}
               onChange={handleConditionsChange}
+              facilityId={facility?.id}
             />
           </CardContent>
         </Card>

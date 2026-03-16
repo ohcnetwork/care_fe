@@ -52,7 +52,7 @@ export function GenericQRScanDialog({
   useEffect(() => {
     if (!open) {
       setInputValue("");
-      setScanning(autoStartScanning);
+      setScanning(false);
       setHasPermission(true);
     } else if (autoStartScanning) {
       setScanning(true);
