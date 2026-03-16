@@ -18,6 +18,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { OngoingQueueTokenCardsList } from "@/pages/Facility/queues/OngoingQueueTokenCard";
 import { usePreferredServicePointCategory } from "@/pages/Facility/queues/usePreferredServicePointCategory";
 import { getTokenQueueStatusCount } from "@/pages/Facility/queues/utils";
@@ -62,7 +67,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-between items-end gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start mt-2 gap-4">
         <div className="flex flex-col gap-2">
           <Label className="text-gray-950 text-sm font-medium">
             {t("search_patients")}
@@ -255,15 +260,20 @@ function InServiceColumnOptions({
 
   return (
     <div className="flex gap-1">
-      <CallNextPatientButton
-        subQueueId={subQueueId}
-        facilityId={facilityId}
-        queueId={queueId}
-        variant="ghost"
-        size="icon"
-      >
-        <Megaphone />
-      </CallNextPatientButton>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <CallNextPatientButton
+            subQueueId={subQueueId}
+            facilityId={facilityId}
+            queueId={queueId}
+            variant="ghost"
+            size="icon"
+          >
+            <Megaphone />
+          </CallNextPatientButton>
+        </TooltipTrigger>
+        <TooltipContent>{t("call_next_patient")}</TooltipContent>
+      </Tooltip>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

@@ -29,7 +29,7 @@ export function CreateDiscountCodeSheet() {
       pathParams: { facilityId },
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["facility", facility?.id] });
+      queryClient.invalidateQueries({ queryKey: ["facility", facilityId] });
       toast.success(t("discount_code_created"));
     },
   });
@@ -58,6 +58,7 @@ export function CreateDiscountCodeSheet() {
                 discount_codes: [...(facility.discount_codes ?? []), data],
                 discount_monetary_components:
                   facility.discount_monetary_components,
+                discount_configuration: facility.discount_configuration,
               });
             }}
           />

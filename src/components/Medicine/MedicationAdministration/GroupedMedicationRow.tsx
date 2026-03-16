@@ -20,8 +20,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
-import { formatDosage } from "@/components/Medicine/utils";
+import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
 
 import { MedicationAdministrationRead } from "@/types/emr/medicationAdministration/medicationAdministration";
 import {
@@ -96,7 +95,7 @@ const IndividualMedicationRow: React.FC<{
       {/* Medication details - indented */}
       <div
         className={cn(
-          "p-3 pl-12 border-t border-r border-gray-100 bg-gray-50",
+          "p-3 pl-12 border-t border-r border-gray-100 bg-gray-50 min-w-0",
           isInactive && "opacity-50",
         )}
       >
@@ -107,11 +106,13 @@ const IndividualMedicationRow: React.FC<{
               isInactive && medication.status === "ended" && "line-through",
             )}
           >
-            {formatDosage(medication.dosage_instruction[0])},{" "}
-            {
-              getFrequencyDisplay(medication.dosage_instruction[0]?.timing)
-                ?.meaning
-            }
+            {[
+              formatDosage(medication.dosage_instruction[0]),
+              formatFrequency(medication.dosage_instruction[0]),
+              medication.dosage_instruction[0]?.method?.display,
+            ]
+              .filter(Boolean)
+              .join(", ")}
           </span>
           <Badge
             variant={medication.status === "active" ? "green" : "secondary"}
@@ -120,6 +121,11 @@ const IndividualMedicationRow: React.FC<{
             {t(medication.status)}
           </Badge>
         </div>
+        {medication.note && (
+          <div className="text-xs text-gray-500 mt-0.5 italic wrap-break-word">
+            {medication.note}
+          </div>
+        )}
         <div className="text-xs text-gray-500 mt-0.5">
           {t("added_on")}:{" "}
           {format(
@@ -305,7 +311,7 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
               <div className="flex items-center gap-2 flex-wrap">
                 <span
                   className={cn(
-                    "font-semibold text-gray-900",
+                    "font-semibold text-gray-900 text-wrap break-all",
                     !group.hasActiveRequests && "line-through text-gray-500",
                   )}
                 >
@@ -319,19 +325,36 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
               </div>
 
               {/* Latest prescription dosage and frequency */}
-              {latestActiveRequest && (
-                <div className="text-sm text-gray-600 mt-0.5">
-                  {formatDosage(latestActiveRequest.dosage_instruction[0])}
-                  {getFrequencyDisplay(
-                    latestActiveRequest.dosage_instruction[0]?.timing,
-                  )?.meaning && <span className="text-gray-400"> · </span>}
-                  {
-                    getFrequencyDisplay(
-                      latestActiveRequest.dosage_instruction[0]?.timing,
-                    )?.meaning
-                  }
-                </div>
-              )}
+              {latestActiveRequest &&
+                (() => {
+                  const freq = formatFrequency(
+                    latestActiveRequest.dosage_instruction[0],
+                  );
+                  const method =
+                    latestActiveRequest.dosage_instruction[0]?.method;
+                  return (
+                    <>
+                      <div className="text-sm text-gray-600 mt-0.5 whitespace-pre-wrap">
+                        {formatDosage(
+                          latestActiveRequest.dosage_instruction[0],
+                        )}
+                        {freq && <span className="text-gray-400"> · </span>}
+                        {freq}
+                        {method && (
+                          <>
+                            <span className="text-gray-400"> · </span>
+                            {method.display}
+                          </>
+                        )}
+                      </div>
+                      {latestActiveRequest.note && (
+                        <div className="text-xs text-gray-500 mt-0.5 italic whitespace-pre-wrap">
+                          {latestActiveRequest.note}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
 
               {/* Status and route badges */}
               <div className="flex flex-wrap gap-1 mt-1">

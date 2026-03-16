@@ -225,7 +225,7 @@ export function LocationSelectorDialog({
             {locationList.map((location, index) => (
               <div
                 className="flex flex-row gap-1 items-center"
-                key={location?.id}
+                key={location.id}
               >
                 {location.has_children ? (
                   <Button

@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowUpRightSquare, Hash, PlusIcon } from "lucide-react";
+import { ArrowUpRightSquare, PlusIcon } from "lucide-react";
 import { navigate } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -169,7 +169,7 @@ export function AccountList({
       queryParams: {
         patient: patientId || qParams.patient_filter,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         status: qParams.status,
         billing_status: qParams.billing_status,
         created_date_after: qParams.created_date_after,
@@ -203,8 +203,8 @@ export function AccountList({
               isEdit={!!editingAccount}
             />
           )}
-          <div className="flex flex-col md:flex-row items-start gap-2">
-            <div className="w-full md:w-auto">
+          <div className="flex flex-wrap items-start gap-2">
+            <div className="w-full sm:w-auto sm:shrink-0">
               <PatientIdentifierFilter
                 onSelect={(patientId, patientName) =>
                   updateQuery({
@@ -218,21 +218,21 @@ export function AccountList({
                 patientName={qParams.patient_name}
               />
             </div>
-            <div className="flex flex-col sm:flex-row">
+            <div className="w-full sm:w-auto">
               <MultiFilter
                 selectedFilters={selectedFilters}
                 onFilterChange={handleFilterChange}
                 onOperationChange={handleOperationChange}
                 onClearAll={handleClearAll}
                 onClearFilter={handleClearFilter}
-                className="flex sm:flex-row flex-wrap sm:items-center"
+                className="w-full items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
                 triggerButtonClassName="self-start sm:self-center"
                 clearAllButtonClassName="self-center"
                 facilityId={facilityId}
               />
             </div>
           </div>
-          <div className="justify-end flex">
+          <div className="flex justify-end w-full">
             {patientId && canCreateAccount && (
               <Button
                 className="w-full sm:w-auto mt-2"
@@ -323,41 +323,18 @@ export function AccountList({
                     </span>
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      <TagAssignmentSheet
-                        entityType="account"
-                        entityId={account.id}
-                        facilityId={facilityId}
-                        currentTags={account.tags ?? []}
-                        onUpdate={() => {
-                          queryClient.invalidateQueries({
-                            queryKey: ["accounts", qParams],
-                          });
-                        }}
-                        patientId={account.patient.id}
-                        trigger={
-                          <Button
-                            variant="outline"
-                            size="xs"
-                            className="rounded-sm"
-                          >
-                            <Hash strokeWidth={1.5} />
-                            {account.tags && account.tags.length > 0
-                              ? t("manage_tags")
-                              : t("add_tags")}
-                          </Button>
-                        }
-                      />
-                      {account.tags?.map((tag) => (
-                        <Badge
-                          key={tag.id}
-                          variant="secondary"
-                          className="text-xs"
-                        >
-                          {tag.display}
-                        </Badge>
-                      ))}
-                    </div>
+                    <TagAssignmentSheet
+                      entityType="account"
+                      entityId={account.id}
+                      facilityId={facilityId}
+                      currentTags={account.tags ?? []}
+                      onUpdate={() => {
+                        queryClient.invalidateQueries({
+                          queryKey: ["accounts", qParams],
+                        });
+                      }}
+                      patientId={account.patient.id}
+                    />
                   </TableCell>
                   <TableCell className="whitespace-normal">
                     <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">

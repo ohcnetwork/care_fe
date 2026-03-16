@@ -21,8 +21,11 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
-import { formatDosage } from "@/components/Medicine/utils";
+import {
+  formatDosage,
+  formatDuration,
+  formatFrequency,
+} from "@/components/Medicine/utils";
 
 import { formatName } from "@/Utils/utils";
 import {
@@ -430,8 +433,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
         <div>
           <Label className="text-xs text-gray-500">{t("frequency")}</Label>
           <p className="font-medium">
-            {getFrequencyDisplay(medication.dosage_instruction[0]?.timing)
-              ?.meaning || "-"}
+            {formatFrequency(medication.dosage_instruction[0]) || "-"}
           </p>
         </div>
         <div>
@@ -443,10 +445,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
         <div>
           <Label className="text-xs text-gray-500">{t("duration")}</Label>
           <p className="font-medium">
-            {medication.dosage_instruction[0]?.timing?.repeat?.bounds_duration
-              ?.value || "-"}{" "}
-            {medication.dosage_instruction[0]?.timing?.repeat?.bounds_duration
-              ?.unit || ""}
+            {formatDuration(medication.dosage_instruction[0]) || "-"}
           </p>
         </div>
       </div>
@@ -492,7 +491,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                     >
                       {formatDosage(dosage)}
                     </span>
-                    {getFrequencyDisplay(dosage?.timing)?.meaning && (
+                    {formatFrequency(dosage) && (
                       <span
                         className={
                           isCurrentMedication
@@ -500,7 +499,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                             : "text-gray-400"
                         }
                       >
-                        · {getFrequencyDisplay(dosage?.timing)?.meaning}
+                        · {formatFrequency(dosage)}
                       </span>
                     )}
                   </div>
