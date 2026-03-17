@@ -1,19 +1,10 @@
-import { BLOOD_GROUP_CHOICES, GENDER_TYPES, GENDERS } from "@/common/constants";
-import BackButton from "@/components/Common/BackButton";
-import { DateTimeInput } from "@/components/Common/DateTimeInput";
-import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/Page";
-import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
-import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
+import { BLOOD_GROUP_CHOICES, GENDERS, GENDER_TYPES } from "@/common/constants";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import DateField from "@/components/ui/date-field";
 import {
   Form,
   FormControl,
@@ -23,9 +14,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { PhoneInput } from "@/components/ui/phone-input";
-import RadioInput from "@/components/ui/RadioInput";
 import {
   Select,
   SelectContent,
@@ -34,27 +22,46 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { useShortcutSubContext } from "@/context/ShortcutContext";
-import useAppHistory from "@/hooks/useAppHistory";
 import {
   ExtensionEntityType,
-  getCombinedExtensionProps,
   NamespacedExtensionData,
+  getCombinedExtensionProps,
   useEntityExtensions,
   useExtensionSchemas,
 } from "@/hooks/useExtensions";
-import { tzAwareDateTime } from "@/lib/validators";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
-import { PLUGIN_Component } from "@/PluginEngine";
 import {
   BloodGroupChoices,
   PatientIdentifierCreate,
   PatientRead,
 } from "@/types/emr/patient/patient";
-import patientApi from "@/types/emr/patient/patientApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { format, isBefore, isFuture, subYears } from "date-fns";
+import { ArrowLeft, CheckIcon } from "lucide-react";
+import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
+import { useEffect, useMemo, useState } from "react";
+import { UseFormReturn, useForm } from "react-hook-form";
+
+import BackButton from "@/components/Common/BackButton";
+import { DateTimeInput } from "@/components/Common/DateTimeInput";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import DateField from "@/components/ui/date-field";
+import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
+import RadioInput from "@/components/ui/RadioInput";
+import { Textarea } from "@/components/ui/textarea";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
+import useAppHistory from "@/hooks/useAppHistory";
+import { tzAwareDateTime } from "@/lib/validators";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
+import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
+import { PLUGIN_Component } from "@/PluginEngine";
+import patientApi from "@/types/emr/patient/patientApi";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { FacilityRead } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
@@ -67,14 +74,8 @@ import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { format, isBefore, isFuture, subYears } from "date-fns";
 import { TFunction } from "i18next";
 import { isValidPhoneNumber } from "libphonenumber-js";
-import { ArrowLeft, CheckIcon } from "lucide-react";
-import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
-import { useEffect, useMemo, useState } from "react";
-import { useForm, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -89,7 +90,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   useShortcutSubContext();
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
-  const { facility, facilityId } = useCurrentFacility();
+  const { facility, facilityId } = useCurrentFacilitySilently();
   const [{ phone_number, flow }] = useQueryParams<QParams>();
 
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
@@ -160,10 +161,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   });
 
   useEffect(() => {
-    if (!facility) {
-      return;
-    }
-
     if (!patientId && defaultGeoOrgId && !defaultGeoOrg) {
       return;
     }
@@ -172,21 +169,28 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
 
     // Default values for new patient
     if (!data) {
-      const getValue = ({ id }: { id: string }) => ({ config: id, value: "" });
-      form.setValue(
-        "required_identifiers",
-        getRequiredIdentifierConfigs(facility).map(getValue),
-      );
-      form.setValue(
-        "optional_identifiers",
-        getOptionalIdentifierConfigs(facility).map(getValue),
-      );
-      form.setValue(
-        "autogenerated_identifiers",
-        getAutogeneratedIdentifierConfigs(facility).map(getValue),
-      );
-      form.setValue("geo_organization", defaultGeoOrgId);
-      form.setValue("_selected_levels", [defaultGeoOrg!]);
+      if (facility) {
+        const getValue = ({ id }: { id: string }) => ({
+          config: id,
+          value: "",
+        });
+        form.setValue(
+          "required_identifiers",
+          getRequiredIdentifierConfigs(facility).map(getValue),
+        );
+        form.setValue(
+          "optional_identifiers",
+          getOptionalIdentifierConfigs(facility).map(getValue),
+        );
+        form.setValue(
+          "autogenerated_identifiers",
+          getAutogeneratedIdentifierConfigs(facility).map(getValue),
+        );
+      }
+      if (defaultGeoOrgId && defaultGeoOrg) {
+        form.setValue("geo_organization", defaultGeoOrgId);
+        form.setValue("_selected_levels", [defaultGeoOrg]);
+      }
       return;
     }
 
@@ -227,12 +231,15 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
       is_deceased: !!data.deceased_datetime,
       deceased_datetime: data.deceased_datetime || null,
 
-      required_identifiers:
-        getRequiredIdentifierConfigs(facility).map(getIdentifier),
-      optional_identifiers:
-        getOptionalIdentifierConfigs(facility).map(getIdentifier),
-      autogenerated_identifiers:
-        getAutogeneratedIdentifierConfigs(facility).map(getIdentifier),
+      required_identifiers: facility
+        ? getRequiredIdentifierConfigs(facility).map(getIdentifier)
+        : [],
+      optional_identifiers: facility
+        ? getOptionalIdentifierConfigs(facility).map(getIdentifier)
+        : [],
+      autogenerated_identifiers: facility
+        ? getAutogeneratedIdentifierConfigs(facility).map(getIdentifier)
+        : [],
 
       _selected_levels: [data.geo_organization],
 
@@ -312,10 +319,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   }
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!facility) {
-      return;
-    }
-
     const { extensions: formExtensions, ...restValues } = values;
     const cleanedExtensions = extensions.prepareForSubmit(
       formExtensions as NamespacedExtensionData,
@@ -347,14 +350,16 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
         ? restValues.deceased_datetime
         : null,
 
-      identifiers: getEditableIdentifiers(
-        [
-          ...restValues.required_identifiers,
-          ...restValues.optional_identifiers,
-          ...restValues.autogenerated_identifiers,
-        ],
-        facility,
-      ),
+      identifiers: facility
+        ? getEditableIdentifiers(
+            [
+              ...restValues.required_identifiers,
+              ...restValues.optional_identifiers,
+              ...restValues.autogenerated_identifiers,
+            ],
+            facility,
+          )
+        : [],
 
       extensions: cleanedExtensions,
     };
@@ -464,7 +469,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
         </Form>
       </div>
 
-      {showDuplicate && (
+      {showDuplicate && facility && (
         <DuplicatePatientDialog
           open={showDuplicate}
           patientList={duplicatePatients}
@@ -492,7 +497,7 @@ const PatientBasicsContent = ({
   isCreate: boolean;
 }) => {
   const { t } = useTranslation();
-  const { facilityId, facility } = useCurrentFacility();
+  const { facilityId, facility } = useCurrentFacilitySilently();
 
   const tagIds = form.watch("tags") || [];
   const selectedTags = useTagConfigs({ ids: tagIds, facilityId })
@@ -741,8 +746,8 @@ const PatientBasicsContent = ({
           />
         ))}
 
-      {/* Tag Selector (only for create) */}
-      {isCreate && (
+      {/* Tag Selector (only for create and when facility is available) */}
+      {facility && isCreate && (
         <FormField
           control={form.control}
           name="tags"
@@ -778,7 +783,7 @@ const AdditionalDetailsContent = ({
   form: UseFormReturn<z.infer<ReturnType<typeof getFormSchema>>>;
 }) => {
   const { t } = useTranslation();
-  const { facility } = useCurrentFacility();
+  const { facility } = useCurrentFacilitySilently();
   const {
     patientRegistration: { minGeoOrganizationLevelsRequired },
   } = careConfig;
@@ -1143,8 +1148,12 @@ const getFormSchema = (
 
 const getEditableIdentifiers = (
   identifiers: { config: string; value?: string | undefined }[],
-  facility: FacilityRead,
+  facility?: FacilityRead,
 ) => {
+  if (!facility) {
+    return [];
+  }
+
   return identifiers.filter((identifier) => {
     if (!identifier.value) {
       return false;

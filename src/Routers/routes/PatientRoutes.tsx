@@ -1,12 +1,10 @@
-import { Redirect } from "raviger";
 import { Suspense, lazy } from "react";
 
+import { AppRoutes } from "@/Routers/AppRouter";
 import Loading from "@/components/Common/Loading";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import PatientIndex from "@/components/Patient/PatientIndex";
 import { PatientProfile } from "@/components/Patient/PatientProfile";
-
-import { AppRoutes } from "@/Routers/AppRouter";
 import { PatientRegistration } from "@/components/Patient/PatientRegistration";
 import { ConsentDetailPage } from "@/pages/Encounters/ConsentDetail";
 import EncountersOverview from "@/pages/Encounters/EncountersOverview";
@@ -14,6 +12,7 @@ import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 import ClinicalHistoryPage from "@/pages/Patient/History";
 import PatientHome from "@/pages/Patient/PatientHome";
 import careConfig from "@careConfig";
+import { Redirect } from "raviger";
 
 const ExcalidrawEditor = lazy(
   () => import("@/components/Common/Drawings/ExcalidrawEditor"),
@@ -103,6 +102,7 @@ const PatientRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:id/update": ({ id }) => (
     <PatientRegistration patientId={id} />
   ),
+  "/patient/:id/update": ({ id }) => <PatientRegistration patientId={id} />,
   "/facility/:facilityId/patient/:patientId/drawings/new": ({ patientId }) => {
     return (
       <Suspense fallback={<Loading />}>
