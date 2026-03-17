@@ -24,6 +24,7 @@ import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
 
 import { PatientHeader } from "@/components/Patient/PatientHeader";
+import { useSidebarAutoCollapse } from "@/hooks/useSidebarAutoCollapse";
 import { PrescriptionSummary } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
@@ -39,6 +40,7 @@ interface Props {
 export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
   const { t } = useTranslation();
   const { locationId } = useCurrentLocation();
+  useSidebarAutoCollapse();
 
   const { qParams, updateQuery } = useFilters({
     disableCache: true,

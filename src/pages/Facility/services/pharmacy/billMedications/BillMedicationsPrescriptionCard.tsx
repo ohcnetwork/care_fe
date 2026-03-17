@@ -602,7 +602,7 @@ const MedicineLineItem = ({
       {/* Medicine */}
       <div
         className={cn(
-          "bg-white py-2 px-3 flex justify-between items-center",
+          "bg-white py-2 px-3 flex justify-between items-center space-x-2",
           !canDispense && "bg-gray-100",
         )}
       >
