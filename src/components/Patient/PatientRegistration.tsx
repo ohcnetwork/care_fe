@@ -1,10 +1,19 @@
-import { BLOOD_GROUP_CHOICES, GENDERS, GENDER_TYPES } from "@/common/constants";
+import { BLOOD_GROUP_CHOICES, GENDER_TYPES, GENDERS } from "@/common/constants";
+import BackButton from "@/components/Common/BackButton";
+import { DateTimeInput } from "@/components/Common/DateTimeInput";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import DateField from "@/components/ui/date-field";
 import {
   Form,
   FormControl,
@@ -14,6 +23,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
+import RadioInput from "@/components/ui/RadioInput";
 import {
   Select,
   SelectContent,
@@ -22,46 +34,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
+import useAppHistory from "@/hooks/useAppHistory";
 import {
   ExtensionEntityType,
-  NamespacedExtensionData,
   getCombinedExtensionProps,
+  NamespacedExtensionData,
   useEntityExtensions,
   useExtensionSchemas,
 } from "@/hooks/useExtensions";
+import { tzAwareDateTime } from "@/lib/validators";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
+import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
+import { PLUGIN_Component } from "@/PluginEngine";
 import {
   BloodGroupChoices,
   PatientIdentifierCreate,
   PatientRead,
 } from "@/types/emr/patient/patient";
-import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { format, isBefore, isFuture, subYears } from "date-fns";
-import { ArrowLeft, CheckIcon } from "lucide-react";
-import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
-import { useEffect, useMemo, useState } from "react";
-import { UseFormReturn, useForm } from "react-hook-form";
-
-import BackButton from "@/components/Common/BackButton";
-import { DateTimeInput } from "@/components/Common/DateTimeInput";
-import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/Page";
-import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
-import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import DateField from "@/components/ui/date-field";
-import { Input } from "@/components/ui/input";
-import { PhoneInput } from "@/components/ui/phone-input";
-import RadioInput from "@/components/ui/RadioInput";
-import { Textarea } from "@/components/ui/textarea";
-import { useShortcutSubContext } from "@/context/ShortcutContext";
-import useAppHistory from "@/hooks/useAppHistory";
-import { tzAwareDateTime } from "@/lib/validators";
-import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
-import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
-import { PLUGIN_Component } from "@/PluginEngine";
 import patientApi from "@/types/emr/patient/patientApi";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { FacilityRead } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
@@ -74,8 +67,14 @@ import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { format, isBefore, isFuture, subYears } from "date-fns";
 import { TFunction } from "i18next";
 import { isValidPhoneNumber } from "libphonenumber-js";
+import { ArrowLeft, CheckIcon } from "lucide-react";
+import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
+import { useEffect, useMemo, useState } from "react";
+import { useForm, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";

@@ -1,26 +1,30 @@
+import { useQueryClient } from "@tanstack/react-query";
+import dayjs from "dayjs";
+import { navigate } from "raviger";
+import { Fragment, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Button } from "@/components/ui/button";
+
+import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
+import { PatientProps } from "@/components/Patient/PatientDetailsTab";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
+
+import { getPermissions } from "@/common/Permissions";
+import { GENDER_TYPES } from "@/common/constants";
+
+import { PLUGIN_Component } from "@/PluginEngine";
+import { formatPatientAge } from "@/Utils/utils";
+import { formatPatientAddress } from "@/components/Patient/utils";
+import { usePermissions } from "@/context/PermissionContext";
 import {
   Organization,
   OrganizationParent,
   getOrgLabel,
 } from "@/types/organization/organization";
-import { Fragment, useState } from "react";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-import { GENDER_TYPES } from "@/common/constants";
-import { getPermissions } from "@/common/Permissions";
-import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
-import { PatientProps } from "@/components/Patient/PatientDetailsTab";
-import { formatPatientAddress } from "@/components/Patient/utils";
-import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
-import { Button } from "@/components/ui/button";
-import { usePermissions } from "@/context/PermissionContext";
-import { PLUGIN_Component } from "@/PluginEngine";
-import { formatPatientAge } from "@/Utils/utils";
-import { useQueryClient } from "@tanstack/react-query";
-import dayjs from "dayjs";
-import { navigate } from "raviger";
-import { useTranslation } from "react-i18next";
-import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 export const Demography = (props: PatientProps) => {
   const { patientData, facilityId } = props;
