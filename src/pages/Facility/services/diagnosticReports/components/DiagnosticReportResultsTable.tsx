@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 
 import { Separator } from "@/components/ui/separator";
-import { ConditionOperationSummaryShort } from "@/types/base/condition/condition";
+import { ConditionOperationSummary } from "@/types/base/condition/condition";
 import {
   Interpretation,
   QualifiedRange,
@@ -55,7 +55,7 @@ export function DiagnosticReportResultsTable({
           <div className="flex flex-row text-sm divide-x divide-gray-300 space-x-2">
             {qr.conditions?.map((c, ind) => (
               <span className="text-gray-900 pr-2" key={`condition-${ind}`}>
-                <ConditionOperationSummaryShort condition={c} />
+                <ConditionOperationSummary condition={c} shortDisplay={true} />
               </span>
             ))}
           </div>
