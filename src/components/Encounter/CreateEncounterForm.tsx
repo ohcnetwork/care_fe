@@ -43,7 +43,7 @@ import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
-import appointmentApi from "@/types/emr/appointment/appointmentApi";
+// FIXED: Correct path to the scheduling API
 import {
   ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_PRIORITY,
@@ -54,6 +54,7 @@ import {
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
+import appointmentApi from "@/types/scheduling/scheduleApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -91,7 +92,10 @@ export default function CreateEncounterForm({
 
   const { data: appointmentData } = useQuery({
     queryKey: ["appointment", appointment],
-    queryFn: query(appointmentApi.get, { pathParams: { id: appointment! } }),
+    // FIXED: Correct nesting for the retrieve method and add facilityId
+    queryFn: query(appointmentApi.appointments.retrieve, {
+      pathParams: { facilityId, id: appointment! },
+    }),
     enabled: !!appointment && isOpen,
   });
 
@@ -110,7 +114,9 @@ export default function CreateEncounterForm({
     tags: z.array(z.string()),
   });
 
-  const form = useForm({
+  type EncounterFormValues = z.infer<typeof encounterFormSchema>;
+
+  const form = useForm<EncounterFormValues>({
     resolver: zodResolver(encounterFormSchema),
     defaultValues: {
       status: defaultStatus,
@@ -122,20 +128,22 @@ export default function CreateEncounterForm({
     },
   });
 
+  const { setValue, control, handleSubmit, reset, watch } = form;
+
   useEffect(() => {
-    const departmentId =
-      appointmentData?.practitioner_performance?.[0]?.practitioner
-        ?.home_facility_organization;
-
-    if (departmentId) {
-      form.setValue("organizations", [departmentId]);
+    if (appointmentData?.resource_type === "practitioner") {
+      const departmentId = (appointmentData.resource as any).organizations?.[0]
+        ?.id;
+      if (departmentId) {
+        setValue("organizations", [departmentId]);
+      }
     }
-  }, [appointmentData, form]);
+  }, [appointmentData, setValue]);
 
-  const tagIds = form.watch("tags");
+  const tagIds = watch("tags");
   const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
   const selectedTags = tagQueries
-    .map((query) => query.data)
+    .map((q) => q.data)
     .filter(Boolean) as TagConfig[];
 
   const { mutate: createEncounter, isPending } = useMutation({
@@ -143,7 +151,7 @@ export default function CreateEncounterForm({
     onSuccess: (data: EncounterRead) => {
       toast.success(t("encounter_created"));
       setIsOpen(false);
-      form.reset();
+      reset();
       queryClient.invalidateQueries({ queryKey: ["encounters", patientId] });
       onSuccess?.(data);
       if (!disableRedirectOnSuccess) {
@@ -154,7 +162,7 @@ export default function CreateEncounterForm({
     },
   });
 
-  function onSubmit(data: z.infer<typeof encounterFormSchema>) {
+  function onSubmit(data: EncounterFormValues) {
     const encounterRequest: EncounterCreate = {
       ...data,
       patient: patientId,
@@ -174,7 +182,7 @@ export default function CreateEncounterForm({
       open={isOpen}
       onOpenChange={(open) => {
         setIsOpen(open);
-        if (!open) form.reset();
+        if (!open) reset();
       }}
     >
       <SheetTrigger asChild>
@@ -202,13 +210,10 @@ export default function CreateEncounterForm({
           </SheetDescription>
         </SheetHeader>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="mt-4 space-y-2"
-          >
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-2">
             <div className="space-y-5">
               <FormField
-                control={form.control}
+                control={control}
                 name="start_date"
                 render={({ field }) => {
                   const date = field.value ? new Date(field.value) : new Date();
@@ -253,7 +258,7 @@ export default function CreateEncounterForm({
                 }}
               />
               <FormField
-                control={form.control}
+                control={control}
                 name="encounter_class"
                 render={({ field }) => (
                   <FormItem>
@@ -291,7 +296,7 @@ export default function CreateEncounterForm({
                 )}
               />
               <FormField
-                control={form.control}
+                control={control}
                 name="status"
                 render={({ field }) => (
                   <FormItem>
@@ -324,11 +329,11 @@ export default function CreateEncounterForm({
               />
 
               <FormField
-                control={form.control}
+                control={control}
                 name="priority"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Priority</FormLabel>
+                    <FormLabel>{t("priority")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -352,7 +357,7 @@ export default function CreateEncounterForm({
                 )}
               />
               <FormField
-                control={form.control}
+                control={control}
                 name="tags"
                 render={({ field }) => (
                   <FormItem>
@@ -372,7 +377,7 @@ export default function CreateEncounterForm({
                 )}
               />
               <FormField
-                control={form.control}
+                control={control}
                 name="organizations"
                 render={({ field }) => (
                   <FormItem>
@@ -380,7 +385,7 @@ export default function CreateEncounterForm({
                       facilityId={facilityId}
                       value={field.value}
                       onChange={(value) => {
-                        form.setValue("organizations", value || []);
+                        setValue("organizations", value || []);
                       }}
                       favoriteList="encounter_departments"
                     />
@@ -394,7 +399,7 @@ export default function CreateEncounterForm({
                 type="button"
                 onClick={() => {
                   setIsOpen(false);
-                  form.reset();
+                  reset();
                 }}
                 className="border border-gray-300 bg-white text-gray-800 hover:bg-gray-100"
               >
@@ -403,7 +408,7 @@ export default function CreateEncounterForm({
               </Button>
               <Button
                 type="submit"
-                disabled={isPending || !form.watch("organizations").length}
+                disabled={isPending || !watch("organizations").length}
               >
                 {isPending ? t("creating") : t("create_encounter")}
                 <ShortcutBadge actionId="submit-action" className="bg-white" />
