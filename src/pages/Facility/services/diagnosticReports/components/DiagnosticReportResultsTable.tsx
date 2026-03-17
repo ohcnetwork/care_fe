@@ -20,6 +20,7 @@ import {
 import {
   ObservationComponent,
   ObservationRead,
+  ObservationReferenceRange,
 } from "@/types/emr/observation/observation";
 import { BaseObservationDefinitionSpec } from "@/types/emr/observationDefinition/observationDefinition";
 
@@ -90,12 +91,41 @@ export function DiagnosticReportResultsTable({
   const renderInterpretation = (interpretationValue: Interpretation) => {
     if (!interpretationValue) return "-";
 
-    const { display, color = "#000000" } = interpretationValue;
+    const { display, highlight = false, code } = interpretationValue;
     return (
       <div className="flex items-center gap-1">
-        <span style={{ color }}>{display}</span>
+        <span className={cn(highlight ? "font-bold" : "font-normal")}>
+          {code && code.display ? code.display : display}
+        </span>
       </div>
     );
+  };
+
+  const renderObservationReferenceRange = (
+    referenceRange: ObservationReferenceRange[],
+  ) => {
+    if (!referenceRange?.length) return "-";
+
+    return referenceRange.map((range, index) => {
+      let rangeText = "";
+      if (range.min != null && range.max != null) {
+        rangeText = `${range.min} - ${range.max}`;
+      } else if (range.min != null) {
+        rangeText = `> ${range.min}`;
+      } else if (range.max != null) {
+        rangeText = `< ${range.max}`;
+      }
+
+      const label = range.interpretation?.display;
+      if (!label && !rangeText) return null;
+
+      return (
+        <span key={`observation-reference-range-${index}`} className="block">
+          {label ? `${label}: ` : ""}
+          {rangeText}
+        </span>
+      );
+    });
   };
 
   const renderObservationComponents = (
@@ -106,13 +136,13 @@ export function DiagnosticReportResultsTable({
       const componentQualifiedRange = observationDefinition.component.find(
         (c) => c.code?.code === component.code?.code,
       )?.qualified_ranges;
+      const highlight = component.interpretation?.highlight ?? false;
       return (
         <TableRow
           key={component.code?.code}
           className={cn(
             "bg-gray-50/50 border-0 text-sm text-gray-950",
             index === components.length - 1 && "border-b",
-            component.interpretation && "font-semibold",
           )}
         >
           <TableCell className="pl-4 border-r border-b border-gray-300 whitespace-normal wrap-break-word align-top">
@@ -120,7 +150,12 @@ export function DiagnosticReportResultsTable({
             {component.code?.display}
           </TableCell>
           <TableCell className="border-r border-b border-gray-300 whitespace-normal wrap-break-word align-top">
-            <div className="whitespace-normal">
+            <div
+              className={cn(
+                "whitespace-normal",
+                highlight ? "font-bold" : "font-normal",
+              )}
+            >
               <span>{component.value.value}</span>
               {component.value.unit && (
                 <span className="text-gray-500 ml-1">
@@ -147,6 +182,7 @@ export function DiagnosticReportResultsTable({
   const renderObservation = (observation: ObservationRead) => {
     const hasComponents =
       observation.component && observation.component.length > 0;
+    const highlight = observation.interpretation?.highlight ?? false;
 
     return (
       <>
@@ -155,7 +191,6 @@ export function DiagnosticReportResultsTable({
           className={cn(
             "divide-x divide-gray-300 text-sm text-gray-950",
             hasComponents && "border-b-0",
-            observation.interpretation && "font-semibold",
           )}
         >
           <TableCell className="whitespace-normal wrap-break-word align-top">
@@ -164,7 +199,12 @@ export function DiagnosticReportResultsTable({
           </TableCell>
           <TableCell className="whitespace-normal wrap-break-word align-top">
             {!hasComponents && (
-              <div className="whitespace-normal">
+              <div
+                className={cn(
+                  "whitespace-normal",
+                  highlight ? "font-bold" : "font-normal",
+                )}
+              >
                 <span>{observation.value.value}</span>
                 {observation.value.unit && (
                   <span className="text-gray-500 ml-1">
@@ -178,10 +218,12 @@ export function DiagnosticReportResultsTable({
           {
             <TableCell className="whitespace-normal wrap-break-word align-top">
               {!hasComponents &&
-                observation.observation_definition &&
-                renderConditionsWithReferenceRange(
-                  observation.observation_definition.qualified_ranges,
-                )}
+                (observation.reference_range?.length
+                  ? renderObservationReferenceRange(observation.reference_range)
+                  : observation.observation_definition &&
+                    renderConditionsWithReferenceRange(
+                      observation.observation_definition.qualified_ranges,
+                    ))}
             </TableCell>
           }
           {showInterpretation && (
@@ -212,17 +254,17 @@ export function DiagnosticReportResultsTable({
       <Table className="border-collapse bg-white shadow-sm cursor-default table-fixed w-full">
         <TableHeader className="bg-gray-100">
           <TableRow className="divide-x-1 divide-gray-300">
-            <TableHead className="font-medium text-sm text-gray-700 w-[25%] align-top">
+            <TableHead className="font-medium text-sm text-gray-700 w-[25%] align-top pt-2">
               {t("test")}
             </TableHead>
-            <TableHead className="font-medium text-sm text-gray-700 w-[25%] align-top">
+            <TableHead className="font-medium text-sm text-gray-700 w-[25%] align-top pt-2">
               {t("result")}
             </TableHead>
-            <TableHead className="font-medium text-sm text-gray-700 w-[25%] whitespace-normal wrap-break-word align-top">
+            <TableHead className="font-medium text-sm text-gray-700 w-[25%] whitespace-normal wrap-break-word align-top pt-2">
               {t("reference_range")}
             </TableHead>
             {showInterpretation && (
-              <TableHead className="font-medium text-sm text-gray-700 w-[25%] whitespace-normal wrap-break-word align-top">
+              <TableHead className="font-medium text-sm text-gray-700 w-[25%] whitespace-normal wrap-break-word align-top pt-2">
                 {t("interpretation")}
               </TableHead>
             )}
