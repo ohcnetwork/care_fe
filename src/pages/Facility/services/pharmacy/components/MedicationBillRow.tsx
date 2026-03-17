@@ -136,7 +136,7 @@ export function MedicationBillRow({
           )}
         />
       </TableCell>
-      <TableCell className={cn(tableCellClass, "max-w-xs")}>
+      <TableCell className={cn(tableCellClass, "max-w-xl")}>
         <div
           className={cn(
             "flex items-center justify-between gap-2",
