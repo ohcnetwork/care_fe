@@ -146,8 +146,10 @@ export function getConditionDiscriminatorValue(
 
 export function ConditionOperationSummary({
   condition,
+  shortDisplay = false,
 }: {
   condition: Condition;
+  shortDisplay?: boolean;
 }) {
   const { t } = useTranslation();
   const conditionName = t(`condition_metric__${condition.metric}`);
@@ -178,60 +180,22 @@ export function ConditionOperationSummary({
         typeof condition.value === "object" && "value_type" in condition.value
           ? condition?.value.value_type
           : "";
-      return `${conditionName} is equal to ${valueDisplay} ${valueType}`;
+      return shortDisplay
+        ? `${valueDisplay} ${valueType}`
+        : `${conditionName} is equal to ${valueDisplay} ${valueType}`;
     }
     case ConditionOperation.in_range: {
       const valueType =
         "value_type" in condition.value ? condition?.value.value_type : "";
-      return `${conditionName} is in range ${condition.value.min} to ${condition.value.max} ${valueType}`;
+      return shortDisplay
+        ? `${condition.value.min} to ${condition.value.max} ${valueType}`
+        : `${conditionName} is in range ${condition.value.min} to ${condition.value.max} ${valueType}`;
     }
     case ConditionOperation.has_tag: {
       const tagDisplay = tags.map((tag) => tag.display).join(", ");
-      return `Has any of the following ${tagResource} tag(s): ${tagDisplay}`;
-    }
-  }
-}
-
-export function ConditionOperationSummaryShort({
-  condition,
-}: {
-  condition: Condition;
-}) {
-  const { t } = useTranslation();
-  const { tagIds } = extractTagInformation(condition.value, condition.metric);
-  const tags = useTagConfigs({
-    ids: tagIds,
-    disabled:
-      condition.operation !== ConditionOperation.has_tag || tagIds.length === 0,
-  })
-    .map(({ data }) => data)
-    .filter(Boolean) as TagConfig[];
-  switch (condition.operation) {
-    case ConditionOperation.equality: {
-      const value =
-        typeof condition.value === "object" && "value" in condition.value
-          ? condition.value.value
-          : condition.value;
-      let valueDisplay = String(value);
-      if (condition.metric === "patient_gender") {
-        valueDisplay = t(`GENDER__${value}`);
-      } else if (condition.metric === "encounter_class") {
-        valueDisplay = t(`encounter_class__${value}`);
-      }
-      const valueType =
-        typeof condition.value === "object" && "value_type" in condition.value
-          ? condition?.value.value_type
-          : "";
-      return `${valueDisplay} ${valueType}`;
-    }
-    case ConditionOperation.in_range: {
-      const valueType =
-        "value_type" in condition.value ? condition?.value.value_type : "";
-      return `${condition.value.min} to ${condition.value.max} ${valueType}`;
-    }
-    case ConditionOperation.has_tag: {
-      const tagDisplay = tags.map((tag) => tag.display).join(", ");
-      return `${tagDisplay}`;
+      return shortDisplay
+        ? `${tagDisplay}`
+        : `Has any of the following ${tagResource} tag(s): ${tagDisplay}`;
     }
   }
 }
