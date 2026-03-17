@@ -192,6 +192,50 @@ export function ConditionOperationSummary({
   }
 }
 
+export function ConditionOperationSummaryShort({
+  condition,
+}: {
+  condition: Condition;
+}) {
+  const { t } = useTranslation();
+  const { tagIds } = extractTagInformation(condition.value, condition.metric);
+  const tags = useTagConfigs({
+    ids: tagIds,
+    disabled:
+      condition.operation !== ConditionOperation.has_tag || tagIds.length === 0,
+  })
+    .map(({ data }) => data)
+    .filter(Boolean) as TagConfig[];
+  switch (condition.operation) {
+    case ConditionOperation.equality: {
+      const value =
+        typeof condition.value === "object" && "value" in condition.value
+          ? condition.value.value
+          : condition.value;
+      let valueDisplay = String(value);
+      if (condition.metric === "patient_gender") {
+        valueDisplay = t(`GENDER__${value}`);
+      } else if (condition.metric === "encounter_class") {
+        valueDisplay = t(`encounter_class__${value}`);
+      }
+      const valueType =
+        typeof condition.value === "object" && "value_type" in condition.value
+          ? condition?.value.value_type
+          : "";
+      return `${valueDisplay} ${valueType}`;
+    }
+    case ConditionOperation.in_range: {
+      const valueType =
+        "value_type" in condition.value ? condition?.value.value_type : "";
+      return `${condition.value.min} to ${condition.value.max} ${valueType}`;
+    }
+    case ConditionOperation.has_tag: {
+      const tagDisplay = tags.map((tag) => tag.display).join(", ");
+      return `${tagDisplay}`;
+    }
+  }
+}
+
 export function getConditionValue(
   metric: string,
   operation: ConditionOperation,

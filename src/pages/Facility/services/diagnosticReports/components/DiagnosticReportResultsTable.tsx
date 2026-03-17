@@ -11,13 +11,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
+import { Separator } from "@/components/ui/separator";
+import { ConditionOperationSummaryShort } from "@/types/base/condition/condition";
+import {
+  Interpretation,
+  QualifiedRange,
+} from "@/types/base/qualifiedRange/qualifiedRange";
 import {
   ObservationComponent,
   ObservationRead,
-  ObservationReferenceRange,
-  QuestionnaireSubmitResultValue,
 } from "@/types/emr/observation/observation";
+import { BaseObservationDefinitionSpec } from "@/types/emr/observationDefinition/observationDefinition";
 
 interface DiagnosticReportResultsTableProps {
   observations: ObservationRead[];
@@ -26,20 +30,8 @@ interface DiagnosticReportResultsTableProps {
 export function DiagnosticReportResultsTable({
   observations,
 }: DiagnosticReportResultsTableProps) {
-  const hasReferenceRange = observations.some(
-    (observation) =>
-      observation.reference_range && observation.reference_range.length > 0,
-  );
   const hasInterpretation = observations.some(
     (observation) => observation.interpretation?.display,
-  );
-  const hasComponentReferenceRange = observations.some(
-    (observation) =>
-      observation.component &&
-      observation.component.some(
-        (component) =>
-          component.reference_range && component.reference_range.length > 0,
-      ),
   );
   const hasComponentInterpretation = observations.some(
     (observation) =>
@@ -48,54 +40,51 @@ export function DiagnosticReportResultsTable({
         (component) => component.interpretation?.display,
       ),
   );
-  const showReferenceRange = hasReferenceRange || hasComponentReferenceRange;
   const showInterpretation = hasInterpretation || hasComponentInterpretation;
 
-  const renderReferenceRange = (
-    referenceRange: ObservationReferenceRange[],
-    value: QuestionnaireSubmitResultValue,
+  const renderConditionsWithReferenceRange = (
+    qualifiedRanges: QualifiedRange[],
   ) => {
-    if (!referenceRange || !referenceRange[0]) return "-";
-
-    const numericValue = value.value != null ? Number(value.value) : null;
-
-    const isApplicable = (r: ObservationReferenceRange) => {
-      if (numericValue === null || isNaN(numericValue)) return false;
-      if (r.min != null && numericValue < r.min) return false;
-      if (r.max != null && numericValue > r.max) return false;
-      return true;
-    };
-
-    const rows = referenceRange.map((r, i) => {
-      let rangeText = "";
-      if (r.min != null && r.max != null) {
-        rangeText = `${r.min} - ${r.max}`;
-      } else if (r.min != null) {
-        rangeText = `> ${r.min}`;
-      } else if (r.max != null) {
-        rangeText = `< ${r.max}`;
-      }
-      if (!rangeText && !r.interpretation?.display) return null;
-
-      const label = r.interpretation?.display;
-      const applicable = isApplicable(r);
-
+    if (!qualifiedRanges || qualifiedRanges.length === 0) return "-";
+    return qualifiedRanges.map((qr, ind) => {
       return (
-        <span key={i} className={applicable ? "font-bold text-gray-900" : ""}>
-          {label ? `${label}: ` : ""}
-          {rangeText}
-        </span>
+        <div
+          key={qr.id}
+          className="flex flex-col gap-1 text-sm text-gray-500 font-normal"
+        >
+          <div className="flex flex-row text-sm divide-x divide-gray-300 space-x-2">
+            {qr.conditions?.map((c, ind) => (
+              <span className="text-gray-900 pr-2" key={`condition-${ind}`}>
+                <ConditionOperationSummaryShort condition={c} />
+              </span>
+            ))}
+          </div>
+          {qr.ranges?.map((r, i) => {
+            let rangeText = "";
+            if (r.min != null && r.max != null) {
+              rangeText = `${r.min} - ${r.max}`;
+            } else if (r.min != null) {
+              rangeText = `> ${r.min}`;
+            } else if (r.max != null) {
+              rangeText = `< ${r.max}`;
+            }
+            if (!rangeText && !r.interpretation?.display) return null;
+
+            const label = r.interpretation?.display;
+
+            return (
+              <span key={i} className="text-gray-900 self-start ml-2">
+                {label ? `${label}: ` : ""}
+                {rangeText}
+              </span>
+            );
+          })}
+          {ind < qualifiedRanges.length - 1 && (
+            <Separator className="bg-gray-200 mb-2" />
+          )}
+        </div>
       );
     });
-
-    const validRows = rows.filter(Boolean);
-    if (!validRows.length) return "-";
-
-    return (
-      <div className="flex flex-col items-start gap-0.5 text-gray-500">
-        {validRows}
-      </div>
-    );
   };
 
   const renderInterpretation = (interpretationValue: Interpretation) => {
@@ -104,51 +93,55 @@ export function DiagnosticReportResultsTable({
     const { display, color = "#000000" } = interpretationValue;
     return (
       <div className="flex items-center gap-1">
-        <span className="capitalize" style={{ color }}>
-          {display}
-        </span>
+        <span style={{ color }}>{display}</span>
       </div>
     );
   };
 
-  const renderObservationComponents = (components: ObservationComponent[]) => {
-    return components.map((component, index) => (
-      <TableRow
-        key={component.code?.code}
-        className={cn(
-          "bg-gray-50/50 border-0 text-sm text-gray-950",
-          index === components.length - 1 && "border-b",
-          component.interpretation && "font-semibold",
-        )}
-      >
-        <TableCell className="pl-4 border-r border-b border-gray-300 whitespace-normal wrap-break-word">
-          <div className="w-2 h-px bg-gray-400" />
-          {component.code?.display}
-        </TableCell>
-        <TableCell className="border-r border-b border-gray-300 whitespace-normal wrap-break-word">
-          <div className="whitespace-normal">
-            <span>{component.value.value}</span>
-            {component.value.unit && (
-              <span className="text-gray-500 ml-1">
-                {component.value.unit.code || component.value.unit.display}
-              </span>
-            )}
-          </div>
-        </TableCell>
-        {showReferenceRange && (
+  const renderObservationComponents = (
+    components: ObservationComponent[],
+    observationDefinition: BaseObservationDefinitionSpec,
+  ) => {
+    return components.map((component, index) => {
+      const componentQualifiedRange = observationDefinition.component.find(
+        (c) => c.code?.code === component.code?.code,
+      )?.qualified_ranges;
+      return (
+        <TableRow
+          key={component.code?.code}
+          className={cn(
+            "bg-gray-50/50 border-0 text-sm text-gray-950",
+            index === components.length - 1 && "border-b",
+            component.interpretation && "font-semibold",
+          )}
+        >
+          <TableCell className="pl-4 border-r border-b border-gray-300 whitespace-normal wrap-break-word">
+            <div className="w-2 h-px bg-gray-400" />
+            {component.code?.display}
+          </TableCell>
           <TableCell className="border-r border-b border-gray-300 whitespace-normal wrap-break-word">
-            {component.reference_range &&
-              renderReferenceRange(component.reference_range, component.value)}
+            <div className="whitespace-normal">
+              <span>{component.value.value}</span>
+              {component.value.unit && (
+                <span className="text-gray-500 ml-1">
+                  {component.value.unit.code || component.value.unit.display}
+                </span>
+              )}
+            </div>
           </TableCell>
-        )}
-        {showInterpretation && (
-          <TableCell className="border-b border-gray-300 whitespace-normal wrap-break-word">
-            {component.interpretation &&
-              renderInterpretation(component.interpretation)}
+          <TableCell className="border-r border-b border-gray-300 whitespace-normal wrap-break-word">
+            {componentQualifiedRange &&
+              renderConditionsWithReferenceRange(componentQualifiedRange)}
           </TableCell>
-        )}
-      </TableRow>
-    ));
+          {showInterpretation && (
+            <TableCell className="border-b border-gray-300 whitespace-normal wrap-break-word">
+              {component.interpretation &&
+                renderInterpretation(component.interpretation)}
+            </TableCell>
+          )}
+        </TableRow>
+      );
+    });
   };
 
   const renderObservation = (observation: ObservationRead) => {
@@ -182,16 +175,15 @@ export function DiagnosticReportResultsTable({
               </div>
             )}
           </TableCell>
-          {showReferenceRange && (
+          {
             <TableCell className="whitespace-normal wrap-break-word">
               {!hasComponents &&
-                observation.reference_range &&
-                renderReferenceRange(
-                  observation.reference_range,
-                  observation.value,
+                observation.observation_definition &&
+                renderConditionsWithReferenceRange(
+                  observation.observation_definition.qualified_ranges,
                 )}
             </TableCell>
-          )}
+          }
           {showInterpretation && (
             <TableCell className="whitespace-normal wrap-break-word">
               {!hasComponents &&
@@ -202,7 +194,11 @@ export function DiagnosticReportResultsTable({
         </TableRow>
         {hasComponents &&
           observation.component &&
-          renderObservationComponents(observation.component)}
+          observation.observation_definition &&
+          renderObservationComponents(
+            observation.component,
+            observation.observation_definition,
+          )}
       </>
     );
   };
@@ -222,11 +218,9 @@ export function DiagnosticReportResultsTable({
             <TableHead className="font-medium text-sm text-gray-700 w-[25%]">
               {t("result")}
             </TableHead>
-            {showReferenceRange && (
-              <TableHead className="font-medium text-sm text-gray-700 w-[25%] whitespace-normal wrap-break-word">
-                {t("reference_range")}
-              </TableHead>
-            )}
+            <TableHead className="font-medium text-sm text-gray-700 w-[25%] whitespace-normal wrap-break-word">
+              {t("reference_range")}
+            </TableHead>
             {showInterpretation && (
               <TableHead className="font-medium text-sm text-gray-700 w-[25%] whitespace-normal wrap-break-word">
                 {t("interpretation")}
