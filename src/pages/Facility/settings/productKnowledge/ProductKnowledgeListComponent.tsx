@@ -70,11 +70,11 @@ function ProductKnowledgeCard({
                   {t(product.status)}
                 </Badge>
               </div>
-              <h3 className="font-medium text-gray-900 truncate text-lg">
+              <h3 className="font-medium text-gray-900 break-words leading-tight text-lg">
                 {product.name}
               </h3>
               {product.alternate_identifier && (
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-500 break-all">
                   {t("product_knowledge_alternate_identifier")}:{" "}
                   {product.alternate_identifier}
                 </p>
