@@ -17,6 +17,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
@@ -159,7 +160,7 @@ export default function AddChargeItemsBillingSheet({
         <SheetHeader className="px-4 py-4">
           <SheetTitle>{t("add_charge_items")}</SheetTitle>
         </SheetHeader>
-        <ScrollArea className="flex-1 pb-12 px-4 pt-0">
+        <ScrollArea className="flex-1 px-4 pt-0">
           <div className="mt-4 space-y-4">
             {selectedItems.length > 0 && (
               <div className="space-y-2">
@@ -373,31 +374,29 @@ export default function AddChargeItemsBillingSheet({
                 defaultOpen={open}
               />
             </div>
-
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={isPending}
-              >
-                {t("cancel")}
-                <ShortcutBadge actionId="cancel-action" />
-              </Button>
-              <Button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleSubmit();
-                }}
-                disabled={isPending || selectedItems.length === 0 || disabled}
-                className="flex flex-row items-center gap-2 justify-between"
-              >
-                {t("add_items")}
-                {open && <ShortcutBadge actionId="enter-action" />}
-              </Button>
-            </div>
           </div>
         </ScrollArea>
+        <SheetFooter className="p-4 border-t bg-background sm:space-x-0">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isPending}
+          >
+            {t("cancel")}
+            <ShortcutBadge actionId="cancel-action" />
+          </Button>
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleSubmit();
+            }}
+            disabled={isPending || selectedItems.length === 0 || disabled}
+          >
+            {t("add_items")}
+            {open && <ShortcutBadge actionId="enter-action" />}
+          </Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );
