@@ -582,18 +582,20 @@ export default function TemplateBuilder({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {Object.values(availableContexts).map((context) => (
-                            <SelectItem
-                              key={context.slug}
-                              value={context.slug}
-                              disabled={
-                                supportedContexts !== null &&
-                                !supportedContexts.includes(context.slug)
-                              }
-                            >
-                              {context.display_name}
-                            </SelectItem>
-                          ))}
+                          {Object.values(availableContexts)
+                            .filter(
+                              (context) =>
+                                supportedContexts === null ||
+                                supportedContexts.includes(context.slug),
+                            )
+                            .map((context) => (
+                              <SelectItem
+                                key={context.slug}
+                                value={context.slug}
+                              >
+                                {context.display_name}
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
