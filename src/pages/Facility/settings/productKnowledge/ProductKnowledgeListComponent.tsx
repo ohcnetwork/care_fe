@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { Input } from "@/components/ui/input";
+import { TooltipComponent } from "@/components/ui/tooltip";
 import {
   Table,
   TableBody,
@@ -122,13 +123,21 @@ function ProductKnowledgeTableRow({
           <div className="p-1 rounded bg-gray-100 text-gray-600">
             <CareIcon icon="l-folder" className="h-4 w-4" />
           </div>
-          <div>
-            <div className="font-medium text-gray-900">{product.name}</div>
-            {product.alternate_identifier && (
-              <div className="text-sm text-gray-500">
-                {t("product_knowledge_alternate_identifier")}:{" "}
-                {product.alternate_identifier}
+          <div className="min-w-0">
+            <TooltipComponent content={product.name}>
+              <div className="font-medium text-gray-900 truncate">
+                {product.name}
               </div>
+            </TooltipComponent>
+            {product.alternate_identifier && (
+              <TooltipComponent
+                content={`${t("product_knowledge_alternate_identifier")}: ${product.alternate_identifier}`}
+              >
+                <div className="text-sm text-gray-500 truncate">
+                  {t("product_knowledge_alternate_identifier")}:{" "}
+                  {product.alternate_identifier}
+                </div>
+              </TooltipComponent>
             )}
           </div>
         </div>
