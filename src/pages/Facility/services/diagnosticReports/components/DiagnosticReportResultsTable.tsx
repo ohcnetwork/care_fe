@@ -165,8 +165,10 @@ export function DiagnosticReportResultsTable({
             </div>
           </TableCell>
           <TableCell className="border-r border-b border-gray-300 whitespace-normal wrap-break-word align-top">
-            {componentQualifiedRange &&
-              renderConditionsWithReferenceRange(componentQualifiedRange)}
+            {component.reference_range?.length
+              ? renderObservationReferenceRange(component.reference_range)
+              : componentQualifiedRange &&
+                renderConditionsWithReferenceRange(componentQualifiedRange)}
           </TableCell>
           {showInterpretation && (
             <TableCell className="border-b border-gray-300 whitespace-normal wrap-break-word align-top">
