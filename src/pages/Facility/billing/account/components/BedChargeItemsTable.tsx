@@ -534,6 +534,25 @@ export function BedChargeItemsTable({
                             </TableRow>
                           );
 
+                          const noteText = item.note?.trim();
+                          const noteRow = noteText ? (
+                            <TableRow
+                              key={`${item.id}-note`}
+                              className="bg-muted/30 text-xs text-gray-500"
+                            >
+                              <TableCell className="pl-12"></TableCell>
+                              <TableCell className="text-gray-950">
+                                {t("note")}
+                              </TableCell>
+                              <TableCell
+                                colSpan={7}
+                                className="whitespace-pre-wrap break-words"
+                              >
+                                {noteText}
+                              </TableCell>
+                            </TableRow>
+                          ) : null;
+
                           const emptyRow = (
                             <TableRow
                               key={`${item.id}-empty`}
@@ -547,6 +566,7 @@ export function BedChargeItemsTable({
                             mainRow,
                             ...detailRows,
                             summaryRow,
+                            noteRow,
                             emptyRow,
                           ].filter(Boolean);
                         })),
