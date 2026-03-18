@@ -43,6 +43,7 @@ import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 // FIXED: Correct path to the scheduling API
 import {
   ENCOUNTER_CLASS_ICONS,
@@ -128,14 +129,15 @@ export default function CreateEncounterForm({
     },
   });
 
-  const { setValue, control, handleSubmit, reset, watch } = form;
+  const { control, handleSubmit, reset, watch } = form;
 
   useEffect(() => {
     // 1. Only run if the sheet is open and we have data
     if (!isOpen || !appointmentData) return;
 
-    const practitioner = (appointmentData as any)?.practitioner_performance?.[0]?.practitioner;
-    const departmentId = practitioner?.home_facility_organization;
+    const practitioner = (appointmentData as any).practitioner_performance?.[0]
+      ?.practitioner;
+    const departmentId = practitioner?.home_facility_organization?.id;
 
     // 2. Only pre-fill if the user hasn't touched the field yet (isDirty check)
     const isPristine = !form.getFieldState("organizations").isDirty;
@@ -394,8 +396,13 @@ export default function CreateEncounterForm({
                       value={field.value}
                       // FIX: Provide the full object so the name displays correctly in the UI
                       currentOrganizations={
-                        (appointmentData as any)?.practitioner_performance?.[0]?.practitioner?.home_facility_organization
-                          ? [(appointmentData as any).practitioner_performance[0].practitioner.home_facility_organization]
+                        (appointmentData as any).practitioner_performance?.[0]
+                          ?.practitioner?.home_facility_organization
+                          ? [
+                              (appointmentData as any)
+                                .practitioner_performance[0].practitioner
+                                .home_facility_organization as FacilityOrganizationRead,
+                            ]
                           : []
                       }
                       onChange={(value) => {
