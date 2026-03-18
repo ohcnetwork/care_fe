@@ -76,13 +76,7 @@ export default function UserSummaryTab({
   };
 
   const renderRoleOrganizationAccess = () => {
-    return (
-      <RoleOrgAccessSummary
-        memberships={userData.role_orgs || []}
-        canManage={canEditUser}
-        onManage={() => setShowEditUserSheet(true)}
-      />
-    );
+    return <RoleOrgAccessSummary memberships={userData.role_orgs || []} />;
   };
 
   return (

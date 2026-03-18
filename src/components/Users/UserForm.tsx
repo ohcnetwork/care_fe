@@ -43,7 +43,7 @@ import { RoleOrgAccessEditor } from "@/components/Users/UserRoleOrganizationAcce
 import { GENDERS, GENDER_TYPES, NAME_PREFIXES } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
-import query, { callApi } from "@/Utils/request/query";
+import query from "@/Utils/request/query";
 import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { Organization } from "@/types/organization/organization";
@@ -72,8 +72,6 @@ export default function UserForm({
   const queryClient = useQueryClient();
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
   const [isPasswordFieldFocused, setIsPasswordFieldFocused] = useState(false);
-  const [isSyncingRoleOrganizations, setIsSyncingRoleOrganizations] =
-    useState(false);
 
   const roleOrgSchema = z.object({
     organization: z.string().min(1, t("select_role_organization")),
@@ -106,13 +104,11 @@ export default function UserForm({
       gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
       prefix: z.string().optional(),
       suffix: z.string().optional(),
-      /* TODO: Userbase doesn't currently support these, neither does BE
-      but we will probably need these */
-      /* qualification: z.string().optional(),
-      doctor_experience_commenced_on: z.string().optional(),
-      doctor_medical_council_registration: z.string().optional(), */
       geo_organization: z.string().optional(),
-      role_orgs: z.array(roleOrgSchema).default([]),
+      // role_orgs only used in create mode
+      role_orgs: isEditMode
+        ? z.array(roleOrgSchema).optional()
+        : z.array(roleOrgSchema).default([]),
     })
     .refine(
       (data) => {
@@ -168,9 +164,13 @@ export default function UserForm({
       },
     )
     .refine(
-      (data) =>
-        new Set(data.role_orgs.map((entry) => entry.organization)).size ===
-        data.role_orgs.length,
+      (data) => {
+        if (isEditMode || !data.role_orgs?.length) return true;
+        return (
+          new Set(data.role_orgs.map((entry) => entry.organization)).size ===
+          data.role_orgs.length
+        );
+      },
       {
         message: t("each_role_organization_must_be_unique"),
         path: ["role_orgs"],
@@ -213,11 +213,6 @@ export default function UserForm({
         prefix: userData.prefix || "",
         suffix: userData.suffix || "",
         geo_organization: userData.geo_organization?.id,
-        role_orgs:
-          userData.role_orgs?.map((membership) => ({
-            organization: membership.organization.id,
-            role: membership.role.id,
-          })) || [],
       };
       form.reset(formData);
     }
@@ -225,7 +220,6 @@ export default function UserForm({
 
   const [isUsernameFieldFocused, setIsUsernameFieldFocused] = useState(false);
 
-  //const userType = form.watch("user_type");
   const usernameInput = form.watch("username") || "";
   const phoneNumber = form.watch("phone_number");
 
@@ -311,92 +305,7 @@ export default function UserForm({
     toast.error(t("something_went_wrong"));
   };
 
-  const syncRoleOrganizations = async (
-    userId: string,
-    nextRoleOrganizations: UserCreate["role_orgs"],
-  ) => {
-    if (!isEditMode || !userData) {
-      return;
-    }
-
-    const existingMemberships = userData.role_orgs || [];
-    const existingByOrganization = new Map(
-      existingMemberships.map((membership) => [
-        membership.organization.id,
-        membership,
-      ]),
-    );
-    const nextByOrganization = new Map(
-      nextRoleOrganizations.map((membership) => [
-        membership.organization,
-        membership,
-      ]),
-    );
-
-    setIsSyncingRoleOrganizations(true);
-    try {
-      await Promise.all(
-        existingMemberships
-          .filter(
-            (membership) => !nextByOrganization.has(membership.organization.id),
-          )
-          .map((membership) =>
-            callApi(organizationApi.removeUserRole, {
-              pathParams: {
-                id: membership.organization.id,
-                userRoleId: membership.id,
-              },
-            }),
-          ),
-      );
-
-      await Promise.all(
-        nextRoleOrganizations.flatMap((membership) => {
-          const existingMembership = existingByOrganization.get(
-            membership.organization,
-          );
-
-          if (!existingMembership) {
-            return [
-              callApi(organizationApi.assignUser, {
-                pathParams: { id: membership.organization },
-                body: {
-                  user: userId,
-                  role: membership.role,
-                },
-              }),
-            ];
-          }
-
-          if (existingMembership.role.id !== membership.role) {
-            return [
-              callApi(organizationApi.updateUserRole, {
-                pathParams: {
-                  id: membership.organization,
-                  userRoleId: existingMembership.id,
-                },
-                body: {
-                  user: userId,
-                  role: membership.role,
-                },
-              }),
-            ];
-          }
-
-          return [];
-        }),
-      );
-    } finally {
-      setIsSyncingRoleOrganizations(false);
-    }
-  };
-
   const onSubmit = async (data: UserFormValues) => {
-    const roleOrganizations = data.role_orgs.map((membership) => ({
-      organization: membership.organization,
-      role: membership.role,
-    }));
-
     if (isEditMode) {
       const updatePayload: UserUpdate = {
         first_name: data.first_name,
@@ -410,23 +319,18 @@ export default function UserForm({
 
       try {
         const updatedUser = await updateUser(updatePayload);
-        await syncRoleOrganizations(updatedUser.id, roleOrganizations);
         invalidateUserQueries(updatedUser.username);
         toast.success(t("user_updated_successfully"));
-        onSubmitSuccess?.(updatedUser, {
-          roleOrgIds: roleOrganizations.map(
-            (membership) => membership.organization,
-          ),
-        });
+        onSubmitSuccess?.(updatedUser);
       } catch (error) {
-        // Invalidate even on error so the form reloads fresh server state
-        // after a partial sync failure
-        if (existingUsername) {
-          invalidateUserQueries(existingUsername);
-        }
         handleRequestErrors(error);
       }
     } else {
+      const roleOrganizations = (data.role_orgs || []).map((membership) => ({
+        organization: membership.organization,
+        role: membership.role,
+      }));
+
       const createPayload: UserCreate = {
         username: data.username!,
         password:
@@ -507,8 +411,7 @@ export default function UserForm({
     );
   }, [form, isEditMode, org]);
 
-  const isSubmitting =
-    updatePending || createPending || isSyncingRoleOrganizations;
+  const isSubmitting = updatePending || createPending;
 
   return (
     <Form {...form}>
@@ -648,21 +551,19 @@ export default function UserForm({
               )}
             />
 
-            {!isEditMode && (
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel aria-required>{t("email")}</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder={t("email")} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel aria-required>{t("email")}</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder={t("email")} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {!isServiceAccount && (
               <FormField
@@ -869,19 +770,23 @@ export default function UserForm({
           />
         </div>
 
-        {/* TODO: Userbase doesn't currently support these, neither does BE
-        but we will probably need these */}
-        {/* {(userType === "doctor" || userType === "nurse") && (
+        {/* Role org assignments — only shown in create mode */}
+        {!isEditMode && (
           <FormField
             control={form.control}
-            name="qualification"
+            name="role_orgs"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("qualification")}</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder={t("qualification")}
-                    {...field}
+                  <RoleOrgAccessEditor
+                    value={field.value || []}
+                    onChange={(value) =>
+                      form.setValue("role_orgs", value, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      })
+                    }
+                    disabled={isLoadingUser || isSubmitting}
                   />
                 </FormControl>
                 <FormMessage />
@@ -889,68 +794,6 @@ export default function UserForm({
             )}
           />
         )}
-
-        {userType === "doctor" && (
-          <>
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="doctor_experience_commenced_on"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("years_of_experience")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder={t("years_of_experience")}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="doctor_medical_council_registration"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("medical_council_registration")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t("medical_council_registration")}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </>
-        )} */}
-        <FormField
-          control={form.control}
-          name="role_orgs"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <RoleOrgAccessEditor
-                  value={field.value || []}
-                  onChange={(value) =>
-                    form.setValue("role_orgs", value, {
-                      shouldDirty: true,
-                      shouldValidate: true,
-                    })
-                  }
-                  disabled={isLoadingUser || isSubmitting}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         <FormField
           control={form.control}
@@ -982,11 +825,9 @@ export default function UserForm({
           disabled={isLoadingUser || !form.formState.isDirty || isSubmitting}
         >
           {isSubmitting
-            ? isSyncingRoleOrganizations
-              ? t("saving")
-              : isEditMode
-                ? t("updating")
-                : t("creating")
+            ? isEditMode
+              ? t("updating")
+              : t("creating")
             : isEditMode
               ? t("update_user")
               : isServiceAccount
