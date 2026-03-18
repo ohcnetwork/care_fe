@@ -1,61 +1,57 @@
 import careConfig from "@careConfig";
+import { useQueries } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { QRCodeSVG } from "qrcode.react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
+import { Markdown } from "@/components/ui/markdown";
 
+import Loading from "@/components/Common/Loading";
 import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
-import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
-import { formatDosage, formatSig } from "@/components/Medicine/utils";
+import {
+  formatDosage,
+  formatDuration,
+  formatFrequency,
+  formatSig,
+} from "@/components/Medicine/utils";
 
+import query from "@/Utils/request/query";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { displayMedicationName } from "@/types/emr/medicationRequest/medicationRequest";
-import { PatientRead } from "@/types/emr/patient/patient";
-import { PrescriptionGroup } from "@/types/emr/prescription/prescription";
+import { PrescriptionRead } from "@/types/emr/prescription/prescription";
+import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
-import { QRCodeSVG } from "qrcode.react";
 
-interface DetailRowProps {
+export interface DetailRowProps {
   label: string;
   value?: string | null;
   isStrong?: boolean;
 }
 
-interface PrescriptionContentProps {
-  prescription: PrescriptionGroup;
-}
-
-const PrescriptionContent = ({ prescription }: PrescriptionContentProps) => {
-  const medications = prescription.requests;
+const PrescriptionContent = ({
+  prescription,
+}: {
+  prescription: PrescriptionRead;
+}) => {
+  const medications = prescription.medications;
   const { t } = useTranslation();
-
-  const medicationsWithProduct = medications.filter(
-    (med) => med.requested_product,
-  );
-
-  const medicationsWithoutProduct = medications.filter(
-    (med) => !med.requested_product,
-  );
 
   return (
     <div>
       {/* Prescription Symbol */}
-      <div className="text-2xl font-semibold mb-3 flex items-end gap-4">
+      <div className="text-xl font-semibold mb-3 flex items-end gap-4">
         <p>{t("℞")}</p>
         <p className="text-sm text-gray-600 font-semibold ">
-          {formatDateTime(
-            prescription.prescription?.created_date ||
-              medications[0].created_date,
-            "DD/MM/YYYY hh:mm A",
-          )}
+          {formatDateTime(prescription.created_date, "DD/MM/YYYY hh:mm A")}
         </p>
       </div>
+
       {/* Medications Table */}
-      {medicationsWithProduct && medicationsWithProduct.length > 0 && (
+      {medications && medications.length > 0 && (
         <div className="mt-4">
           <p className="text-base font-semibold mb-2">{t("medicines")}</p>
           <PrintTable
@@ -66,63 +62,37 @@ const PrescriptionContent = ({ prescription }: PrescriptionContentProps) => {
               { key: "duration" },
               { key: "instructions" },
             ]}
-            rows={medicationsWithProduct?.map((medication) => {
+            rows={medications?.map((medication) => {
               const instruction = medication.dosage_instruction[0];
-              const frequency = getFrequencyDisplay(instruction?.timing);
-              const dosage = formatDosage(instruction);
-              const duration = instruction?.timing?.repeat?.bounds_duration;
               const remarks = formatSig(instruction);
               const notes = medication.note;
+              const freqText = formatFrequency(instruction);
+              const additionalInstr =
+                instruction?.additional_instruction?.[0]?.display;
               return {
                 medicine: displayMedicationName(medication),
                 status: t(`medication_status_${medication.status}`),
-                dosage: dosage,
-                frequency: instruction?.as_needed_boolean
-                  ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})`
-                  : (frequency?.meaning ?? "-") +
-                    (instruction?.additional_instruction?.[0]?.display
-                      ? `, ${instruction.additional_instruction[0].display}`
-                      : ""),
-                duration: duration ? `${duration.value} ${duration.unit}` : "-",
-                instructions: `${remarks || "-"}${notes ? ` (${t("note")}: ${notes})` : ""}`,
+                dosage: formatDosage(instruction),
+                frequency:
+                  [freqText, additionalInstr].filter(Boolean).join(", ") || "-",
+                duration: formatDuration(instruction) || "-",
+                instructions: [remarks, notes].filter(Boolean).join("\n"),
               };
             })}
+            className="text-sm break-all font-semibold whitespace-break-spaces text-gray-950"
+            cellConfig={{
+              medicine: { className: "text-left" },
+            }}
           />
         </div>
       )}
-      {/* External Medications Table */}
-      {medicationsWithoutProduct && medicationsWithoutProduct.length > 0 && (
-        <div className="mt-4">
-          <p className="text-base font-semibold mb-2">{t("not_in_stock")}</p>
-          <PrintTable
-            headers={[
-              { key: "medicine" },
-              { key: "dosage" },
-              { key: "frequency" },
-              { key: "duration" },
-              { key: "instructions" },
-            ]}
-            rows={medicationsWithoutProduct?.map((medication) => {
-              const instruction = medication.dosage_instruction[0];
-              const frequency = getFrequencyDisplay(instruction?.timing);
-              const dosage = formatDosage(instruction);
-              const duration = instruction?.timing?.repeat?.bounds_duration;
-              const remarks = formatSig(instruction);
-              const notes = medication.note;
-              return {
-                medicine: displayMedicationName(medication),
-                status: t(`medication_status_${medication.status}`),
-                dosage: dosage,
-                frequency: instruction?.as_needed_boolean
-                  ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})`
-                  : (frequency?.meaning ?? "-") +
-                    (instruction?.additional_instruction?.[0]?.display
-                      ? `, ${instruction.additional_instruction[0].display}`
-                      : ""),
-                duration: duration ? `${duration.value} ${duration.unit}` : "-",
-                instructions: `${remarks || "-"}${notes ? ` (${t("note")}: ${notes})` : ""}`,
-              };
-            })}
+      {prescription?.note && (
+        <div className="mt-6 mb-6 text-sm text-gray-600">
+          <p className="font-semibold mb-1">{t("note")}</p>
+          <Markdown
+            content={prescription.note}
+            prose={false}
+            className="text-sm"
           />
         </div>
       )}
@@ -130,11 +100,8 @@ const PrescriptionContent = ({ prescription }: PrescriptionContentProps) => {
       <div className="w-full items-end mt-6 flex flex-row justify-end gap-1">
         <div className="text-right">
           <p className="text-sm text-gray-400">{t("prescribed_by")}</p>
-          <p className="text-sm text-gray-600 font-semibold">
-            {formatName(
-              prescription.prescription?.prescribed_by ||
-                medications[0].created_by,
-            )}
+          <p className="text-base text-gray-600 font-semibold">
+            {formatName(prescription.prescribed_by)}
           </p>
         </div>
       </div>
@@ -155,20 +122,64 @@ const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
 };
 
 interface PrescriptionPreviewProps {
-  encounter?: EncounterRead;
-  prescriptions: PrescriptionGroup[];
-  patient: PatientRead;
+  prescriptionIds: string[];
+  patientId: string;
+  facilityId: string;
 }
 
 export const PrescriptionPreview = ({
-  encounter,
-  prescriptions,
-  patient,
+  prescriptionIds,
+  patientId,
+  facilityId,
 }: PrescriptionPreviewProps) => {
   const { t } = useTranslation();
   const { facility } = useCurrentFacility();
 
-  if (!prescriptions?.length) {
+  const { prescriptions, isLoading } = useQueries({
+    queries: prescriptionIds.map((prescriptionId) => ({
+      queryKey: ["prescription", patientId, prescriptionId, facilityId],
+      queryFn: query(prescriptionApi.get, {
+        pathParams: {
+          patientId,
+          id: prescriptionId,
+        },
+        queryParams: { facility: facilityId },
+      }),
+    })),
+    combine: (results) => ({
+      prescriptions: results
+        .map((r) => r.data)
+        .filter((data): data is PrescriptionRead => !!data),
+      isLoading: results.some((r) => r.isLoading || r.isFetching),
+    }),
+  });
+
+  const hasMedications = prescriptions.some(
+    (prescription) =>
+      prescription.medications && prescription.medications.length > 0,
+  );
+
+  const displayDate =
+    prescriptions.length === 1 && prescriptions[0].encounter.period.start
+      ? format(
+          new Date(prescriptions[0].encounter.period.start),
+          "dd MMM yyyy, EEEE",
+        )
+      : null;
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (!prescriptions.length) {
+    return (
+      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
+        {t("no_prescriptions_found")}
+      </div>
+    );
+  }
+
+  if (!hasMedications) {
     return (
       <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
         {t("no_medications_found_for_this_encounter")}
@@ -176,12 +187,15 @@ export const PrescriptionPreview = ({
     );
   }
 
+  const patient = prescriptions[0].encounter.patient;
+
   return (
     <PrintPreview
       title={`${t("prescriptions")} - ${patient.name}`}
-      disabled={!prescriptions?.length}
+      autoPrint={{ enabled: hasMedications }}
+      disabled={!hasMedications}
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <div>
           {/* Header */}
           <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
@@ -221,7 +235,7 @@ export const PrescriptionPreview = ({
                 }
                 isStrong
               />
-              {encounter?.patient?.instance_identifiers
+              {patient.instance_identifiers
                 ?.filter(
                   ({ config }) =>
                     config.config.use === PatientIdentifierUse.official,
@@ -236,18 +250,9 @@ export const PrescriptionPreview = ({
                 ))}
             </div>
             <div className="space-y-1">
-              <DetailRow
-                label={t("date")}
-                value={
-                  encounter?.period?.start
-                    ? format(
-                        new Date(encounter.period.start),
-                        "dd MMM yyyy, EEEE",
-                      )
-                    : format(new Date(), "dd MMM yyyy, EEEE")
-                }
-                isStrong
-              />
+              {prescriptions.length === 1 && (
+                <DetailRow label={t("date")} value={displayDate} isStrong />
+              )}
               <DetailRow
                 label={t("mobile_number")}
                 value={patient && formatPhoneNumberIntl(patient.phone_number)}
@@ -256,15 +261,26 @@ export const PrescriptionPreview = ({
             </div>
           </div>
 
-          {prescriptions.map((groupedPrescription) => (
-            <PrescriptionContent
-              key={groupedPrescription.prescription?.id || "no-prescription"}
-              prescription={groupedPrescription}
-            />
+          {prescriptions.length > 1 && (
+            <div className="mb-4 text-sm text-gray-500 border-b pb-2">
+              {t("prescriptions_count", { count: prescriptions.length })}
+            </div>
+          )}
+
+          {prescriptions.map((prescription, index) => (
+            <div key={prescription.id}>
+              {index > 0 && (
+                <div className="border-t border-dashed border-gray-300 my-6" />
+              )}
+              <PrescriptionContent prescription={prescription} />
+            </div>
           ))}
 
           {/* Footer */}
-          <PrintFooter leftContent={t("computer_generated_prescription")} />
+          <PrintFooter
+            leftContent={t("computer_generated_prescription")}
+            className="text-sm"
+          />
         </div>
       </div>
     </PrintPreview>

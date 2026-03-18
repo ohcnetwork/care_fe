@@ -40,7 +40,7 @@ import {
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { isAppleDevice } from "@/Utils/utils";
+import { isIOSDevice } from "@/Utils/utils";
 
 interface TagConfigFormProps {
   configId?: string;
@@ -216,7 +216,7 @@ export default function TagConfigForm({
                   placeholder={t("enter_display_name")}
                   {...field}
                   disabled={isLoading}
-                  autoFocus={!isAppleDevice}
+                  autoFocus={!isIOSDevice}
                 />
               </FormControl>
               <FormMessage />

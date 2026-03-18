@@ -26,6 +26,17 @@ export interface MonetaryComponent {
   amount?: string | null;
   tax_included_amount?: string;
   conditions?: Condition[];
+  global_component?: boolean;
+}
+
+export enum DiscountApplicabilityOrder {
+  total_desc = "total_desc",
+  total_asc = "total_asc",
+}
+
+export interface DiscountConfiguration {
+  max_applicable: number;
+  applicability_order: DiscountApplicabilityOrder;
 }
 
 export interface MonetaryComponentRead extends MonetaryComponent {
@@ -167,7 +178,9 @@ export function getDiscountAmount(
 ): Decimal {
   const base = baseAmount ?? getBasePrice(priceComponents);
   const discounts = priceComponents.filter(
-    (c) => c.monetary_component_type === MonetaryComponentType.discount,
+    (c) =>
+      c.monetary_component_type === MonetaryComponentType.discount &&
+      c.conditions?.length === 0,
   );
 
   return discounts.reduce(

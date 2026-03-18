@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import duoToneIcons from "@/CAREUI/icons/DuoTonePaths.json";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +18,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+
+import ChargeItemDefinitionPopover from "@/components/Billing/ChargeItem/ChargeItemDefinitionPopover";
 
 import BackButton from "@/components/Common/BackButton";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
@@ -31,7 +34,13 @@ import {
   Status,
 } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ExternalLinkIcon } from "lucide-react";
+import { Link } from "raviger";
+
+type DuoToneIconName = keyof typeof duoToneIcons;
+
+const getIconName = (name: string): DuoToneIconName =>
+  `d-${name}` as DuoToneIconName;
 
 interface Props {
   facilityId: string;
@@ -266,7 +275,16 @@ export default function ActivityDefinitionView({
                     className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50"
                   >
                     <div className="space-y-2">
-                      <p className="font-medium">{specimen.title}</p>
+                      <div className="flex items-center gap-1">
+                        <p className="font-medium">{specimen.title}</p>
+                        <Link
+                          basePath="/"
+                          href={`/facility/${facilityId}/settings/specimen_definitions/${specimen.slug}`}
+                          className="flex items-center gap-1"
+                        >
+                          <ExternalLinkIcon className="size-3" />
+                        </Link>
+                      </div>
                       <p className="text-sm text-gray-600">
                         {specimen.description}
                       </p>
@@ -295,7 +313,16 @@ export default function ActivityDefinitionView({
                       className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50"
                     >
                       <div className="space-y-2">
-                        <p className="font-medium">{observation.title}</p>
+                        <div className="flex items-center gap-1">
+                          <p className="font-medium">{observation.title}</p>
+                          <Link
+                            basePath="/"
+                            href={`/facility/${facilityId}/settings/observation_definitions/${observation.slug}`}
+                            className="flex items-center gap-1"
+                          >
+                            <ExternalLinkIcon className="size-3" />
+                          </Link>
+                        </div>
                         <p className="text-sm text-gray-600">
                           {observation.description}
                         </p>
@@ -329,15 +356,26 @@ export default function ActivityDefinitionView({
                     className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50"
                   >
                     <div className="space-y-2">
-                      <p className="font-medium">{chargeItem.title}</p>
-                      <p className="text-sm text-gray-600">
-                        {chargeItem.description}
-                      </p>
-                      <Separator />
-                      <div className="pt-2">
-                        <p className="text-sm text-gray-500">{t("purpose")}</p>
-                        <p className="text-gray-700">{chargeItem.purpose}</p>
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-1">
+                          <p className="font-medium">{chargeItem.title}</p>
+                          <Link
+                            basePath="/"
+                            href={`/facility/${facilityId}/settings/charge_item_definitions/${chargeItem.slug}`}
+                            className="flex items-center gap-1"
+                          >
+                            <ExternalLinkIcon className="size-3" />
+                          </Link>
+                        </div>
+                        <ChargeItemDefinitionPopover
+                          chargeItemDefinition={chargeItem}
+                        />
                       </div>
+                      {chargeItem.description && (
+                        <p className="text-sm text-gray-600">
+                          {chargeItem.description}
+                        </p>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -356,15 +394,30 @@ export default function ActivityDefinitionView({
             </CardHeader>
             <CardContent>
               <div className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50">
-                <div className="space-y-2">
-                  <p className="font-medium">
-                    {definition.healthcare_service.name}
-                  </p>
-                  {definition.healthcare_service.extra_details && (
-                    <p className="text-sm text-gray-600">
-                      {definition.healthcare_service.extra_details}
+                <div className="flex items-start gap-3">
+                  <div className="shrink-0 flex items-center justify-center size-10 rounded-lg bg-primary-100 text-primary-700">
+                    <CareIcon
+                      icon={
+                        definition.healthcare_service.styling_metadata?.careIcon
+                          ? getIconName(
+                              definition.healthcare_service.styling_metadata
+                                .careIcon,
+                            )
+                          : "d-health-worker"
+                      }
+                      className="size-6"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-medium">
+                      {definition.healthcare_service.name}
                     </p>
-                  )}
+                    {definition.healthcare_service.extra_details && (
+                      <p className="text-sm text-gray-600">
+                        {definition.healthcare_service.extra_details}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -404,7 +457,7 @@ export default function ActivityDefinitionView({
         {definition.diagnostic_report_codes?.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>{t("diagnostic_report")}</CardTitle>
+              <CardTitle>{t("diagnostic_report", { count: 1 })}</CardTitle>
               <CardDescription>
                 {t("diagnostic_report_codes_description")}
               </CardDescription>

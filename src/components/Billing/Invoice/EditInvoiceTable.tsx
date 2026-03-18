@@ -1,11 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { ChevronDown, Plus, X } from "lucide-react";
+import { ChevronDown, FileText, Plus, X } from "lucide-react";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
+
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +25,11 @@ import {
   MonetaryDisplay,
 } from "@/components/ui/monetary-display";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -38,6 +45,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 
 import UserSelector from "@/components/Common/UserSelector";
 
@@ -87,6 +95,7 @@ const priceComponentSchema = z.object({
   factor: zodDecimal({ min: 0, max: 100 }).optional().nullable(),
   amount: zodDecimal({ min: 0 }).optional().nullable(),
   conditions: z.array(conditionSchema).optional(),
+  global_component: z.boolean().optional(),
 });
 
 const chargeItemBaseSchema = z.object({
@@ -103,6 +112,11 @@ const formSchema = z.object({
       title: z.string(),
       status: z.nativeEnum(ChargeItemStatus),
       description: z
+        .string()
+        .optional()
+        .nullable()
+        .transform((val) => (val === "" ? null : val)),
+      note: z
         .string()
         .optional()
         .nullable()
@@ -233,6 +247,7 @@ export function EditInvoiceTable({
           title: item.title,
           status: item.status as ChargeItemStatus,
           description: item.description || "",
+          note: item.note || "",
           baseAmount: round(baseComponent?.amount || "0"),
           quantity: round(item.quantity),
           taxComponents,
@@ -277,7 +292,8 @@ export function EditInvoiceTable({
           return hasAmount || hasFactor;
         }),
       ],
-      description: item.description || undefined,
+      description: item.description === null ? "" : item.description,
+      note: item.note === null ? "" : item.note,
       performer_actor: performers[item.id]?.id,
     }));
 
@@ -419,6 +435,9 @@ export function EditInvoiceTable({
     return <div>{t("no_charge_items_found")}</div>;
   }
 
+  const hasEditableItems = chargeItems.some(
+    (ci) => ci.charge_item_definition?.can_edit_charge_item !== false,
+  );
   const filteredDiscounts = globalDiscounts.filter(getDiscountComponentKey);
 
   return (
@@ -462,45 +481,48 @@ export function EditInvoiceTable({
                 <TableHead>
                   <div className="flex items-center justify-center gap-2">
                     {t("discounts")}
-                    {filteredDiscounts.length > 0 && chargeItems.length > 1 && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 px-2 text-xs"
-                          >
-                            {t("apply_to_all")}
-                            <ChevronDown className="h-3 w-3 ml-1" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {filteredDiscounts.map((discount) => {
-                            const key = getDiscountComponentKey(discount);
-                            return (
-                              <DropdownMenuItem
-                                key={key}
-                                onClick={() =>
-                                  key && handleApplyGlobalDiscount(key)
-                                }
-                              >
-                                {discount.code?.display} @{" "}
-                                <MonetaryDisplay {...discount} />
-                              </DropdownMenuItem>
-                            );
-                          })}
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={handleClearAllDiscounts}
-                            className="text-destructive"
-                          >
-                            {t("clear_all")}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
+                    {filteredDiscounts.length > 0 &&
+                      chargeItems.length > 1 &&
+                      hasEditableItems && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 px-2 text-xs"
+                            >
+                              {t("apply_to_all")}
+                              <ChevronDown className="h-3 w-3 ml-1" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {filteredDiscounts.map((discount) => {
+                              const key = getDiscountComponentKey(discount);
+                              return (
+                                <DropdownMenuItem
+                                  key={key}
+                                  onClick={() =>
+                                    key && handleApplyGlobalDiscount(key)
+                                  }
+                                >
+                                  {discount.code?.display} @{" "}
+                                  <MonetaryDisplay {...discount} />
+                                </DropdownMenuItem>
+                              );
+                            })}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={handleClearAllDiscounts}
+                              className="text-destructive"
+                            >
+                              {t("clear_all")}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                   </div>
                 </TableHead>
+                <TableHead className="w-16 text-center">{t("note")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -508,6 +530,9 @@ export function EditInvoiceTable({
                 const rowErrors = getRowErrors(
                   form.formState.errors.items?.[index],
                 );
+                const canEditRow =
+                  chargeItems[index]?.charge_item_definition
+                    ?.can_edit_charge_item !== false;
 
                 return (
                   <React.Fragment key={item.id}>
@@ -542,6 +567,7 @@ export function EditInvoiceTable({
                                     );
                                   }}
                                   placeholder="0.00"
+                                  disabled={!canEditRow}
                                 />
                               </FormControl>
                             </FormItem>
@@ -560,6 +586,7 @@ export function EditInvoiceTable({
                                   {...field}
                                   min="1"
                                   step="1"
+                                  disabled={!canEditRow}
                                 />
                               </FormControl>
                             </FormItem>
@@ -653,6 +680,7 @@ export function EditInvoiceTable({
                                                       value,
                                                     );
                                                   }}
+                                                  disabled={!canEditRow}
                                                 >
                                                   <SelectTrigger>
                                                     <SelectValue
@@ -710,7 +738,8 @@ export function EditInvoiceTable({
                                         control={form.control}
                                         name={`items.${index}.discounts.${discountIndex}`}
                                         render={() => {
-                                          const isDisabled = !discount?.code;
+                                          const isDisabled =
+                                            !canEditRow || !discount?.code;
                                           const isPercentage =
                                             discount &&
                                             isPercentageBased(discount);
@@ -752,7 +781,8 @@ export function EditInvoiceTable({
                                         control={form.control}
                                         name={`items.${index}.discounts.${discountIndex}`}
                                         render={() => {
-                                          const isDisabled = !discount?.code;
+                                          const isDisabled =
+                                            !canEditRow || !discount?.code;
                                           const isPercentage =
                                             discount &&
                                             isPercentageBased(discount);
@@ -798,6 +828,7 @@ export function EditInvoiceTable({
                                             discountIndex,
                                           )
                                         }
+                                        disabled={!canEditRow}
                                       >
                                         <X className="h-4 w-4" />
                                       </Button>
@@ -811,7 +842,7 @@ export function EditInvoiceTable({
                                   size="sm"
                                   className="w-full"
                                   onClick={() => handleAddDiscount(index)}
-                                  disabled={hasEmptyRow}
+                                  disabled={hasEmptyRow || !canEditRow}
                                 >
                                   <Plus className="h-4 w-4 mr-2" />
                                   {t("add_discount")}
@@ -821,10 +852,50 @@ export function EditInvoiceTable({
                           );
                         })()}
                       </TableCell>
+                      <TableCell className="text-center">
+                        <FormField
+                          control={form.control}
+                          name={`items.${index}.note`}
+                          render={({ field }) => (
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  aria-label={t("note")}
+                                  className={cn(
+                                    "bg-gray-100",
+                                    field.value && "bg-primary-100",
+                                  )}
+                                >
+                                  <FileText
+                                    className={cn(
+                                      "size-4",
+                                      field.value && "text-primary-600",
+                                    )}
+                                  />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="p-0" align="end">
+                                <Textarea
+                                  {...field}
+                                  value={field.value ?? ""}
+                                  onChange={(e) =>
+                                    field.onChange(e.target.value)
+                                  }
+                                  placeholder={t("add_notes")}
+                                  aria-label={t("note")}
+                                  disabled={!canEditRow}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          )}
+                        />
+                      </TableCell>
                     </TableRow>
                     {rowErrors.length > 0 && (
                       <TableRow className="bg-red-50 hover:bg-red-50">
-                        <TableCell colSpan={6} className="py-2">
+                        <TableCell colSpan={7} className="py-2">
                           <ul className="list-disc list-inside text-sm text-red-600 space-y-0.5">
                             {rowErrors.map((error, i) => (
                               <li key={i}>{error}</li>

@@ -9,6 +9,11 @@ export enum SupplyDeliveryStatus {
   entered_in_error = "entered_in_error",
 }
 
+export const ACTIVE_SUPPLY_DELIVERY_STATUSES = [
+  SupplyDeliveryStatus.in_progress,
+  SupplyDeliveryStatus.completed,
+] as const;
+
 export const SUPPLY_DELIVERY_STATUS_COLORS = {
   in_progress: "blue",
   completed: "green",
@@ -36,6 +41,7 @@ export interface SupplyDeliveryBase {
   status: SupplyDeliveryStatus;
   supplied_item_condition?: SupplyDeliveryCondition;
   supplied_item_type: SupplyDeliveryType;
+  total_purchase_price?: number;
 }
 
 export interface SupplyDeliveryCreate extends Omit<SupplyDeliveryBase, "id"> {

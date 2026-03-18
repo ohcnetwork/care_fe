@@ -1,5 +1,6 @@
 import { BatchSuccessResponse } from "@/types/base/batch/batch";
 import {
+  DiscountConfiguration,
   MonetaryComponent,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
@@ -16,6 +17,12 @@ export enum ChargeItemStatus {
   paid = "paid",
   entered_in_error = "entered_in_error",
 }
+
+export const EXCLUDED_CHARGE_ITEM_STATUSES = [
+  ChargeItemStatus.not_billable,
+  ChargeItemStatus.entered_in_error,
+  ChargeItemStatus.aborted,
+];
 
 export const CHARGE_ITEM_STATUS_COLORS = {
   // planned: "blue",
@@ -75,6 +82,7 @@ export interface ApplyChargeItemDefinitionRequest {
   service_resource?: ChargeItemServiceResource;
   service_resource_id?: string;
   performer_actor?: string;
+  account?: string;
 }
 
 export interface ApplyMultipleChargeItemDefinitionRequest {
@@ -91,12 +99,15 @@ export interface ChargeItemUpdate extends Omit<
 
 export interface ChargeItemRead extends ChargeItemBase {
   total_price_components: MonetaryComponent[];
+  discount_configuration: DiscountConfiguration | null;
   charge_item_definition: ChargeItemDefinitionBase;
   service_resource: ChargeItemServiceResource;
   service_resource_id?: string;
   performer_actor?: UserReadMinimal;
   created_date: string;
   modified_date: string;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
 }
 
 export interface ChargeItemBatchResponse {

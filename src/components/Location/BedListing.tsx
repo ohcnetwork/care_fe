@@ -12,8 +12,8 @@ import { LocationRead } from "@/types/location/location";
 
 interface BedListingProps {
   beds: LocationRead[];
-  selectedBed: string | null;
-  onBedSelect: (bedId: string) => void;
+  selectedBed: LocationRead | null;
+  onBedSelect: (bed: LocationRead) => void;
   onCheckStatus: (bed: LocationRead) => void;
 }
 
@@ -26,14 +26,17 @@ export function BedListing({
   if (beds.length === 0) return null;
   return (
     <RadioGroup
-      value={selectedBed || ""}
-      onValueChange={onBedSelect}
+      value={selectedBed?.id || ""}
+      onValueChange={(id) => {
+        const bed = beds.find((b) => b.id === id);
+        if (bed) onBedSelect(bed);
+      }}
       className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
     >
       {beds.map((bed) => {
-        const isAvailable = !bed.current_encounter;
+        const isAvailable = bed.operational_status === "U";
         const isDischargedBed = bed.current_encounter?.status === "discharged";
-        const isSelected = selectedBed === bed.id;
+        const isSelected = selectedBed?.id === bed.id;
         const isClickable = isAvailable || isDischargedBed;
 
         return (
@@ -51,7 +54,7 @@ export function BedListing({
             )}
             onClick={() => {
               if (isAvailable) {
-                onBedSelect(bed.id);
+                onBedSelect(bed);
               } else if (isDischargedBed) {
                 onCheckStatus(bed);
               }

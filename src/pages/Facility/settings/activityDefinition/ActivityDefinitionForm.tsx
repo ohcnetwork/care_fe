@@ -41,7 +41,7 @@ import { CodeSchema } from "@/types/base/code/code";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 
 import ObservationDefinitionForm from "@/pages/Facility/settings/observationDefinition/ObservationDefinitionForm";
-import { CreateSpecimenDefinition } from "@/pages/Facility/settings/specimen-definitions/CreateSpecimenDefinition";
+import SpecimenDefinitionForm from "@/pages/Facility/settings/specimen-definitions/SpecimenDefinitionForm";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import {
   ChargeItemDefinitionBase,
@@ -56,6 +56,7 @@ import {
   Status,
 } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
+import { ObservationDefinitionStatus } from "@/types/emr/observationDefinition/observationDefinition";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 import { SpecimenDefinitionStatus } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
@@ -229,6 +230,7 @@ function ActivityDefinitionFormContent({
             facility: facilityId,
             limit: 100,
             title: observationSearch,
+            status: ObservationDefinitionStatus.active,
           },
         },
       ),
@@ -255,6 +257,7 @@ function ActivityDefinitionFormContent({
               existingData.specimen_requirements?.map((s) => ({
                 value: s.slug,
                 label: s.title,
+                link: `/facility/${facilityId}/settings/specimen_definitions/${s.slug}`,
                 details: [
                   {
                     label: t("type"),
@@ -282,6 +285,7 @@ function ActivityDefinitionFormContent({
               existingData.observation_result_requirements?.map((obs) => ({
                 value: obs.slug,
                 label: obs.title,
+                link: `/facility/${facilityId}/settings/observation_definitions/${obs.slug}`,
                 details: [
                   {
                     label: t("category"),
@@ -756,6 +760,7 @@ function ActivityDefinitionFormContent({
                           specimenDefinitions?.results.map((spec) => ({
                             label: spec.title,
                             value: spec.slug,
+                            link: `/facility/${facilityId}/settings/specimen_definitions/${spec.slug}`,
                             details: [
                               {
                                 label: t("type"),
@@ -792,7 +797,7 @@ function ActivityDefinitionFormContent({
                         onSearch={setSpecimenSearch}
                         canCreate={true}
                         createForm={(onSuccess) => (
-                          <CreateSpecimenDefinition
+                          <SpecimenDefinitionForm
                             facilityId={facilityId}
                             onSuccess={onSuccess}
                           />
@@ -822,6 +827,7 @@ function ActivityDefinitionFormContent({
                           observationDefinitions?.results.map((obs) => ({
                             label: obs.title,
                             value: obs.slug,
+                            link: `/facility/${facilityId}/settings/observation_definitions/${obs.slug}`,
                             details: [
                               {
                                 label: t("category"),
@@ -978,7 +984,7 @@ function ActivityDefinitionFormContent({
               <div className="space-y-4">
                 <div>
                   <h2 className="text-base font-medium text-gray-900">
-                    {t("diagnostic_report")}
+                    {t("diagnostic_report", { count: 1 })}
                   </h2>
                   <p className="mt-0.5 text-sm text-gray-500">
                     {t("specify_diagnostic_report_codes")}

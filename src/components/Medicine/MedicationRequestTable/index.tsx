@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -12,10 +12,7 @@ import PrescriptionListSelector from "@/components/Medicine/PrescriptionListSele
 import PrescriptionView from "@/components/Medicine/PrescriptionView";
 import { MedicationStatementList } from "@/components/Patient/MedicationStatementList";
 
-import { Button } from "@/components/ui/button";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { PlusIcon, ReceiptTextIcon } from "lucide-react";
-import { Link } from "raviger";
 
 interface EmptyStateProps {
   searching?: boolean;
@@ -70,6 +67,10 @@ export default function MedicationRequestTable() {
     string | undefined
   >();
 
+  useEffect(() => {
+    setSelectedPrescriptionId(undefined);
+  }, [encounterId]);
+
   return (
     <div className="space-y-2 h-full">
       <Tabs defaultValue="prescriptions" className="h-full">
@@ -118,36 +119,15 @@ export default function MedicationRequestTable() {
               }}
             />
 
-            {selectedPrescriptionId ? (
-              <div className="flex-1 w-full h-full overflow-auto">
-                <PrescriptionView
-                  patientId={patientId}
-                  prescriptionId={selectedPrescriptionId}
-                  canWrite={canWrite}
-                  facilityId={facilityId}
-                  encounterId={encounterId}
-                />
-              </div>
-            ) : (
-              <div className="w-full flex-1 h-full flex items-center justify-center">
-                <div className="flex flex-col items-center">
-                  <ReceiptTextIcon className="text-gray-500" />
-                  <h3 className="font-medium">{t("no_prescriptions_found")}</h3>
-                  {canWrite && (
-                    <Button
-                      asChild
-                      variant="outline"
-                      className="text-gray-950 hover:text-gray-700 h-9 mt-2"
-                    >
-                      <Link href={`questionnaire/medication_request`}>
-                        <PlusIcon className="mr-2 size-4" />
-                        {t("create_prescription")}
-                      </Link>
-                    </Button>
-                  )}
-                </div>
-              </div>
-            )}
+            <div className="flex-1 w-full h-full overflow-auto">
+              <PrescriptionView
+                patientId={patientId}
+                prescriptionId={selectedPrescriptionId}
+                canWrite={canWrite}
+                facilityId={facilityId}
+                encounterId={encounterId}
+              />
+            </div>
           </div>
         </TabsContent>
 

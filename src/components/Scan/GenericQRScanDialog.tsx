@@ -23,6 +23,8 @@ interface GenericQRScanDialogProps {
   inputPlaceholder?: string;
   scanningMessage?: string;
   extractValue?: (rawValue: string) => string;
+  /** If true, starts scanning immediately when the dialog opens */
+  autoStartScanning?: boolean;
 }
 
 export function GenericQRScanDialog({
@@ -34,10 +36,11 @@ export function GenericQRScanDialog({
   inputPlaceholder,
   scanningMessage,
   extractValue,
+  autoStartScanning = false,
 }: GenericQRScanDialogProps) {
   const { t } = useTranslation();
   const [inputValue, setInputValue] = useState("");
-  const [scanning, setScanning] = useState(false);
+  const [scanning, setScanning] = useState(autoStartScanning);
   const [hasPermission, setHasPermission] = useState(true);
 
   // Default values
@@ -51,8 +54,10 @@ export function GenericQRScanDialog({
       setInputValue("");
       setScanning(false);
       setHasPermission(true);
+    } else if (autoStartScanning) {
+      setScanning(true);
     }
-  }, [open]);
+  }, [open, autoStartScanning]);
 
   // Helper function to extract value (can be customized per use case)
   function extractValueFromRaw(input: string): string {
@@ -75,9 +80,11 @@ export function GenericQRScanDialog({
   }
 
   function handleScanError() {
-    setScanning(false);
-    setHasPermission(false);
-    toast.error(t("camera_permission_denied"));
+    if (open) {
+      setScanning(false);
+      setHasPermission(false);
+      toast.error(t("camera_permission_denied"));
+    }
   }
 
   function handleContinue(scannedValue?: string) {

@@ -4,15 +4,6 @@ import { toast } from "sonner";
 
 import mutate from "@/Utils/request/mutate";
 import batchApi from "@/types/base/batch/batchApi";
-import locationApi from "@/types/location/locationApi";
-
-interface UnlinkLocationParams {
-  facilityId: string;
-  locationId: string;
-  associationId: string;
-  encounterId: string;
-  status: "active" | "planned";
-}
 
 export function useLocationMutations(encounterId: string) {
   const { t } = useTranslation();
@@ -81,37 +72,8 @@ export function useLocationMutations(encounterId: string) {
     },
   });
 
-  const unlinkLocation = useMutation({
-    mutationFn: ({
-      facilityId,
-      locationId,
-      associationId,
-      encounterId,
-    }: UnlinkLocationParams) => {
-      return mutate(locationApi.deleteAssociation, {
-        pathParams: {
-          facility_external_id: facilityId,
-          location_external_id: locationId,
-          external_id: associationId,
-        },
-      })({ encounter: encounterId, status: "completed" });
-    },
-    onSuccess: (_, variables) => {
-      if (variables.status === "active") {
-        toast.success(t("bed_active_removed_due_to_error"));
-      } else {
-        toast.success(t("bed_planned_cancelled"));
-      }
-      queryClient.invalidateQueries({ queryKey: ["encounter", encounterId] });
-    },
-    onError: () => {
-      toast.error(t("error_removing_bed_assignment"));
-    },
-  });
-
   return {
     executeBatch,
-    unlinkLocation,
-    isPending: executeBatch.isPending || unlinkLocation.isPending,
+    isPending: executeBatch.isPending,
   };
 }

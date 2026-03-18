@@ -9,17 +9,16 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import Loading from "@/components/Common/Loading";
 import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
+import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
 
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { DispenseOrderRead } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
-import {
-  MedicationDispenseRead,
-  MedicationDispenseStatus,
-} from "@/types/emr/medicationDispense/medicationDispense";
+import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+
 import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -83,20 +82,12 @@ const DispenseOrderContent = ({
               { key: "prepared_date" },
             ]}
             rows={dispenses.map((dispense) => {
-              const instruction = dispense.dosage_instruction[0] ?? {};
-              const frequency = instruction?.timing?.code;
-              const dosage = instruction?.dose_and_rate?.dose_quantity;
+              const instruction = dispense.dosage_instruction?.[0];
 
               return {
                 medicine: dispense.item.product.product_knowledge.name,
-                dosage: dosage ? `${dosage.value} ${dosage.unit.display}` : "-",
-                frequency: instruction?.as_needed_boolean
-                  ? `${t("as_needed_prn")} ${
-                      instruction?.as_needed_for?.display
-                        ? `(${instruction.as_needed_for.display})`
-                        : ""
-                    }`
-                  : frequency?.display || "-",
+                dosage: formatDosage(instruction) || "-",
+                frequency: formatFrequency(instruction) || "-",
                 quantity: round(dispense.quantity) || "-",
                 lot_batch_number:
                   dispense.item.product.batch?.lot_number || "-",
@@ -252,10 +243,9 @@ export const PrintDispenseOrder = ({
       queryParams: {
         order: dispenseOrderId,
         location: locationId,
-        status: MedicationDispenseStatus.completed,
       },
     }),
-    enabled: !!dispenseOrderId,
+    enabled: !!dispenseOrderId && !!locationId,
   });
 
   if (isLoadingOrder || isLoadingDispenses) {

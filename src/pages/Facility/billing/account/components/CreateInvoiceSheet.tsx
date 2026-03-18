@@ -24,6 +24,7 @@ interface CreateInvoiceSheetProps {
   locationId?: string;
   disableCreateChargeItems?: boolean;
   dispenseOrderId?: string;
+  skipNavigation?: boolean;
 }
 
 export function CreateInvoiceSheet({
@@ -38,6 +39,7 @@ export function CreateInvoiceSheet({
   locationId,
   disableCreateChargeItems = false,
   dispenseOrderId,
+  skipNavigation = false,
 }: CreateInvoiceSheetProps) {
   const { t } = useTranslation();
 
@@ -61,6 +63,7 @@ export function CreateInvoiceSheet({
             locationId={locationId}
             disableCreateChargeItems={disableCreateChargeItems}
             dispenseOrderId={dispenseOrderId}
+            skipNavigation={skipNavigation}
           />
         </div>
       </SheetContent>

@@ -12,7 +12,9 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import {
+  careTeamFilter,
   dateFilter,
+  departmentFilter,
   encounterStatusFilter,
   tagFilter,
 } from "@/components/ui/multi-filter/filterConfigs";
@@ -31,8 +33,17 @@ import {
   completedEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
-import { ChevronDown, Tags } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
+import { UserReadMinimal } from "@/types/user/user";
+import {
+  Building2,
+  Calendar,
+  ChevronDown,
+  MapPin,
+  Tags,
+  Users,
+} from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
@@ -41,26 +52,34 @@ import { cn } from "@/lib/utils";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { dateTimeQueryString } from "@/Utils/utils";
+import { dateTimeQueryString, formatName } from "@/Utils/utils";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { useAtom } from "jotai";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
+
+import { encounterHistoryFiltersAtom } from "@/atoms/encounterFilterAtom";
 
 interface EncounterCardProps {
   encounter: EncounterRead;
   isSelected: boolean;
   onSelect: (encounterId: string) => void;
+  facilityId?: string;
 }
 
 function EncounterCard({
   encounter,
   isSelected,
   onSelect,
+  facilityId,
 }: EncounterCardProps) {
   const { t } = useTranslation();
+  const isSameFacility = facilityId === encounter.facility.id;
+  const careTeam = encounter.care_team;
+  const additionalMembersCount = careTeam.length - 1;
 
-  return (
+  const cardContent = (
     <Card
       className={cn(
         "rounded-md relative cursor-pointer transition-colors w-full lg:w-80",
@@ -75,32 +94,35 @@ function EncounterCard({
       )}
       <CardContent className="flex flex-col px-4 py-3 gap-2">
         <div className="flex justify-between items-center">
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 min-w-0">
             <span className="text-base font-semibold">
               {t(`encounter_class__${encounter.encounter_class}`)}
             </span>
-            <span className="text-sm font-medium text-gray-700">
-              {encounter.facility.name}
+            <span className="text-sm font-medium text-gray-700 block truncate">
+              {isSameFacility && careTeam.length > 0 ? (
+                <span className="flex items-center gap-1">
+                  <span className="truncate">
+                    {formatName(careTeam[0].member)}
+                  </span>
+                  {additionalMembersCount > 0 && (
+                    <span className="text-xs text-gray-500 shrink-0">
+                      +{additionalMembersCount}
+                    </span>
+                  )}
+                </span>
+              ) : (
+                encounter.facility.name
+              )}
             </span>
             {encounter.tags.length > 0 && (
-              <HoverCard openDelay={150}>
-                <HoverCardTrigger className="hidden md:block">
-                  <div className="flex items-center py-1 pr-1 gap-2">
-                    <Tags className="size-4 text-gray-700" />
-                    <span className="text-sm text-gray-700 font-medium">
-                      {t("encounter_tag_count", {
-                        count: encounter.tags.length,
-                      })}
-                    </span>
-                  </div>
-                </HoverCardTrigger>
-                <HoverCardContent
-                  className="flex flex-col gap-2 p-4 border border-gray-200 rounded-md max-w-90 shadow-lg"
-                  side="right"
-                >
-                  <EncounterTagHoverCard encounter={encounter} />
-                </HoverCardContent>
-              </HoverCard>
+              <div className="hidden md:flex items-center py-1 pr-1 gap-2">
+                <Tags className="size-4 text-gray-700" />
+                <span className="text-sm text-gray-700 font-medium">
+                  {t("encounter_tag_count", {
+                    count: encounter.tags.length,
+                  })}
+                </span>
+              </div>
             )}
           </div>
           <div className="flex flex-col gap-1 pt-0.5 items-end">
@@ -138,8 +160,47 @@ function EncounterCard({
             ))}
           </div>
         )}
+        {isSameFacility && additionalMembersCount > 0 && (
+          <div className="md:hidden flex flex-col gap-1">
+            <span className="text-xs text-gray-500 font-medium">
+              {t("care_team")}:
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {careTeam.map((member, index) => (
+                <span
+                  key={`${member.member.id}-${index}`}
+                  className="text-sm text-gray-700 truncate max-w-32"
+                >
+                  {formatName(member.member)}
+                  {member.role.display && (
+                    <span className="text-xs text-gray-500">
+                      {" "}
+                      ({member.role.display})
+                    </span>
+                  )}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
+  );
+
+  return (
+    <HoverCard openDelay={200}>
+      <HoverCardTrigger asChild className="hidden md:block">
+        {cardContent}
+      </HoverCardTrigger>
+      <HoverCardContent
+        className="w-96 p-0 border border-gray-200 rounded-lg shadow-lg"
+        side="right"
+        align="start"
+      >
+        <EncounterDetailsHoverCard encounter={encounter} />
+      </HoverCardContent>
+      <div className="md:hidden">{cardContent}</div>
+    </HoverCard>
   );
 }
 
@@ -151,11 +212,54 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
 
-  const [status, setStatus] = useState<string>();
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
-  const [tagsBehavior, setTagsBehavior] = useState<string>("any");
-  const [dateFrom, setDateFrom] = useState<Date>();
-  const [dateTo, setDateTo] = useState<Date>();
+  // Use persisted filters from atom
+  const [filters, setFilters] = useAtom(encounterHistoryFiltersAtom);
+
+  // Memoize date objects from ISO strings
+  const dateFrom = useMemo(
+    () => (filters.dateFrom ? new Date(filters.dateFrom) : undefined),
+    [filters.dateFrom],
+  );
+  const dateTo = useMemo(
+    () => (filters.dateTo ? new Date(filters.dateTo) : undefined),
+    [filters.dateTo],
+  );
+
+  // Read directly from sessionStorage on mount to avoid Jotai hydration delay
+  const initialQueryParamsRef = useRef(() => {
+    try {
+      const stored = sessionStorage.getItem("encounter_history_filters");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const selectedTags = parsed.selectedTags ?? [];
+        return {
+          status: parsed.status ? [parsed.status] : undefined,
+          tags: selectedTags.length > 0 ? selectedTags : undefined,
+          tags_behavior: parsed.tagsBehavior || "any",
+          organization: parsed.selectedOrg ? [parsed.selectedOrg] : undefined,
+          care_team: parsed.selectedCareTeamMember
+            ? [parsed.selectedCareTeamMember]
+            : undefined,
+          created_date:
+            parsed.dateFrom && parsed.dateTo
+              ? { from: new Date(parsed.dateFrom), to: new Date(parsed.dateTo) }
+              : undefined,
+        };
+      }
+    } catch {
+      // Ignore parsing errors
+    }
+    return {};
+  });
+
+  // Compute initial params once
+  const initialQueryParams = useMemo(
+    () =>
+      typeof initialQueryParamsRef.current === "function"
+        ? initialQueryParamsRef.current()
+        : initialQueryParamsRef.current,
+    [],
+  );
 
   const {
     primaryEncounter,
@@ -182,11 +286,13 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
       "infinite-encounters",
       "past",
       patientId,
-      status,
-      selectedTagIds,
-      tagsBehavior,
-      dateFrom,
-      dateTo,
+      filters.status,
+      filters.selectedTags,
+      filters.tagsBehavior,
+      filters.selectedOrg?.id,
+      filters.selectedCareTeamMember?.username,
+      filters.dateFrom,
+      filters.dateTo,
     ],
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query(encounterApi.list, {
@@ -198,10 +304,16 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
               ? { patient_filter: patientId, facility: facilityId }
               : { patient: patientId }
             : { patient: patientId }),
-          ...(status && { status }),
-          ...(selectedTagIds.length > 0 && {
-            tags: selectedTagIds.join(","),
-            tags_behavior: tagsBehavior,
+          ...(filters.status && { status: filters.status }),
+          ...(filters.selectedTags?.length > 0 && {
+            tags: filters.selectedTags.map((t) => t.id).join(","),
+            tags_behavior: filters.tagsBehavior || "any",
+          }),
+          ...(filters.selectedOrg && {
+            organization: filters.selectedOrg.id,
+          }),
+          ...(filters.selectedCareTeamMember && {
+            care_team_user: filters.selectedCareTeamMember.username,
           }),
           ...(dateFrom && {
             created_date_after: dateTimeQueryString(dateFrom),
@@ -233,45 +345,63 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     }
   }, [inView, hasNextPage, fetchNextPage]);
 
-  const onFilterUpdate = (query: Record<string, unknown>) => {
-    for (const [key, value] of Object.entries(query)) {
-      const filterValue = value as
-        | string
-        | TagConfig[]
-        | { from: Date; to: Date };
-      switch (key) {
-        case "status":
-          setStatus(filterValue as string);
-          break;
-        case "tags":
-          setSelectedTagIds(
-            (filterValue as TagConfig[])?.map((tag) => tag.id) ?? [],
-          );
-          break;
-        case "tags_behavior":
-          setTagsBehavior(filterValue as string);
-          break;
-        case "created_date":
-          if (
-            filterValue &&
-            typeof filterValue === "object" &&
-            "from" in filterValue &&
-            "to" in filterValue
-          ) {
-            setDateFrom(filterValue.from as Date);
-            setDateTo(filterValue.to as Date);
-          } else {
-            setDateFrom(undefined);
-            setDateTo(undefined);
+  const onFilterUpdate = (updateQuery: Record<string, unknown>) => {
+    setFilters((prev) => {
+      const updates = { ...prev };
+      for (const [key, value] of Object.entries(updateQuery)) {
+        const filterValue = value as
+          | string
+          | TagConfig[]
+          | FacilityOrganizationRead
+          | UserReadMinimal
+          | { from: Date; to: Date }
+          | null
+          | undefined;
+        switch (key) {
+          case "status":
+            updates.status = (filterValue as string) || undefined;
+            break;
+          case "tags":
+            updates.selectedTags = (filterValue as TagConfig[]) ?? [];
+            break;
+          case "tags_behavior":
+            updates.tagsBehavior = (filterValue as string) || "any";
+            break;
+          case "organization":
+            updates.selectedOrg =
+              (filterValue as FacilityOrganizationRead) || undefined;
+            break;
+          case "care_team": {
+            // filterValue is a single UserReadMinimal (mode is "single")
+            updates.selectedCareTeamMember =
+              (filterValue as UserReadMinimal) || undefined;
+            break;
           }
-          break;
+          case "created_date":
+            if (
+              filterValue &&
+              typeof filterValue === "object" &&
+              "from" in filterValue &&
+              "to" in filterValue
+            ) {
+              updates.dateFrom = (filterValue.from as Date)?.toISOString();
+              updates.dateTo = (filterValue.to as Date)?.toISOString();
+            } else {
+              updates.dateFrom = undefined;
+              updates.dateTo = undefined;
+            }
+            break;
+        }
       }
-    }
+      return updates;
+    });
   };
 
-  const filters = [
+  const filterConfigs = [
     encounterStatusFilter("status"),
     tagFilter("tags", TagResource.ENCOUNTER),
+    departmentFilter("organization"),
+    careTeamFilter("care_team"),
     dateFilter("created_date"),
   ];
   const {
@@ -280,7 +410,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     handleOperationChange,
     handleClearAll,
     handleClearFilter,
-  } = useMultiFilterState(filters, onFilterUpdate);
+  } = useMultiFilterState(filterConfigs, onFilterUpdate, initialQueryParams);
 
   return (
     <div className="space-y-4 pt-2">
@@ -296,6 +426,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
               encounter={primaryEncounter}
               isSelected={primaryEncounterId === selectedEncounterId}
               onSelect={() => handleSelect(null)}
+              facilityId={facilityId}
             />
           </div>
         </div>
@@ -358,6 +489,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
                     encounter={encounter}
                     isSelected={encounter.id === selectedEncounterId}
                     onSelect={handleSelect}
+                    facilityId={facilityId}
                   />,
                 );
                 return acc;
@@ -430,19 +562,19 @@ const EncounterSheetTrigger = () => {
 
   return (
     <Card className="relative rounded-md cursor-pointer w-full lg:w-80 bg-white border-primary-600">
-      <CardContent className="flex flex-col px-3 py-2 gap-1">
+      <CardContent className="flex flex-col px-4 py-3 gap-2">
         <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
         <div className="flex justify-between items-start">
           <div className="flex flex-col items-start gap-1">
             <span className="text-base font-semibold">
               {t(`encounter_class__${encounter.encounter_class}`)}
             </span>
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-gray-700 truncate max-w-40">
               {encounter.facility.name}
             </span>
           </div>
-          <div className="flex gap-1 items-center justify-center">
-            <div className="flex flex-col gap-1 items-end ">
+          <div className="flex flex-col items-start">
+            <div className="flex items-center gap-1 -mt-2">
               <span className="text-sm text-gray-600 whitespace-nowrap">
                 {encounter.period.start && (
                   <span>
@@ -450,30 +582,32 @@ const EncounterSheetTrigger = () => {
                   </span>
                 )}
                 {encounter.period.end && encounter.period.start && (
-                  <span>{" - "}</span>
+                  <span> - </span>
                 )}
                 {encounter.period.end ? (
                   <span>
                     {format(new Date(encounter.period.end), "dd MMM")}
                   </span>
                 ) : (
-                  <span>
-                    {" - "}
-                    {t("ongoing")}
-                  </span>
+                  <span> - {t("ongoing")}</span>
                 )}
               </span>
-              <Badge
-                variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
-                size="sm"
-                className=" whitespace-nowrap"
+              <div
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "icon" }),
+                )}
+                aria-hidden="true"
               >
-                {t(`encounter_status__${encounter.status}`)}
-              </Badge>
+                <ChevronDown />
+              </div>
             </div>
-            <div className={buttonVariants({ variant: "ghost", size: "icon" })}>
-              <ChevronDown />
-            </div>
+            <Badge
+              variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
+              size="sm"
+              className="whitespace-nowrap"
+            >
+              {t(`encounter_status__${encounter.status}`)}
+            </Badge>
           </div>
         </div>
       </CardContent>
@@ -481,22 +615,153 @@ const EncounterSheetTrigger = () => {
   );
 };
 
-const EncounterTagHoverCard = ({ encounter }: { encounter: EncounterRead }) => {
+const EncounterDetailsHoverCard = ({
+  encounter,
+}: {
+  encounter: EncounterRead;
+}) => {
   const { t } = useTranslation();
+
   return (
-    <div className="flex flex-col gap-1">
-      <span className="text-sm text-gray-700 font-medium">
-        {t("encounter_tag_label", { count: encounter.tags.length })}:
-      </span>
-      <div className="flex flex-wrap gap-2">
-        {encounter.tags.length > 0 ? (
-          <>
-            {encounter.tags.map((tag) => (
-              <TagBadge key={tag.id} tag={tag} hierarchyDisplay />
-            ))}
-          </>
-        ) : (
-          <span className="text-sm text-gray-500">{t("no_tags")}</span>
+    <div className="flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-100">
+        <div className="flex flex-col gap-1">
+          <span className="text-base font-semibold">
+            {t(`encounter_class__${encounter.encounter_class}`)}
+          </span>
+          <Badge variant={ENCOUNTER_STATUS_COLORS[encounter.status]} size="sm">
+            {t(`encounter_status__${encounter.status}`)}
+          </Badge>
+        </div>
+        <div className="flex items-center gap-1 text-sm text-gray-600">
+          <Calendar className="size-4" />
+          <span>
+            {encounter.period.start && (
+              <span>
+                {format(new Date(encounter.period.start), "dd MMM yyyy")}
+              </span>
+            )}
+            {encounter.period.end ? (
+              <span>
+                {" - "}
+                {format(new Date(encounter.period.end), "dd MMM yyyy")}
+              </span>
+            ) : (
+              <span> - {t("ongoing")}</span>
+            )}
+          </span>
+        </div>
+      </div>
+
+      {/* Details */}
+      <div className="p-4 space-y-3">
+        {/* Facility */}
+        <div className="flex items-start gap-2">
+          <Building2 className="size-4 text-gray-500 mt-0.5" />
+          <div className="flex flex-col">
+            <span className="text-xs text-gray-500 font-medium">
+              {t("facility")}
+            </span>
+            <span className="text-sm text-gray-800 truncate max-w-72">
+              {encounter.facility.name}
+            </span>
+          </div>
+        </div>
+
+        {/* Location */}
+        {encounter.current_location && (
+          <div className="flex items-start gap-2">
+            <MapPin className="size-4 text-gray-500 mt-0.5" />
+            <div className="flex flex-col">
+              <span className="text-xs text-gray-500 font-medium">
+                {t("location")}
+              </span>
+              <span className="text-sm text-gray-800 truncate max-w-72">
+                {encounter.current_location.name}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Priority */}
+        {encounter.priority && (
+          <div className="flex items-start gap-2">
+            <div className="size-4" />
+            <div className="flex flex-col">
+              <span className="text-xs text-gray-500 font-medium">
+                {t("priority")}
+              </span>
+              <span className="text-sm text-gray-800">
+                {t(`encounter_priority__${encounter.priority}`)}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Care Team */}
+        {encounter.care_team.length > 0 && (
+          <div className="flex items-start gap-2">
+            <Users className="size-4 text-gray-500 mt-0.5" />
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-gray-500 font-medium">
+                {t("care_team")}
+              </span>
+              <div className="flex flex-col gap-1">
+                {encounter.care_team.map((member, index) => (
+                  <div
+                    key={`${member.member.id}-${index}`}
+                    className="flex items-center gap-2"
+                  >
+                    <span className="text-sm text-gray-800 truncate max-w-48">
+                      {formatName(member.member)}
+                    </span>
+                    {member.role.display && (
+                      <span className="text-xs text-gray-500 truncate max-w-24">
+                        ({member.role.display})
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tags */}
+        {encounter.tags.length > 0 && (
+          <div className="flex items-start gap-2">
+            <Tags className="size-4 text-gray-500 mt-0.5" />
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-gray-500 font-medium">
+                {t("tags")}
+              </span>
+              <div className="flex flex-wrap gap-1">
+                {encounter.tags.map((tag) => (
+                  <TagBadge key={tag.id} tag={tag} hierarchyDisplay />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Organizations/Departments */}
+        {encounter.organizations && encounter.organizations.length > 0 && (
+          <div className="flex items-start gap-2">
+            <div className="size-4" />
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-gray-500 font-medium">
+                {t("departments")}
+              </span>
+              <div className="flex flex-wrap gap-1">
+                {encounter.organizations.map((org) => (
+                  <Badge key={org.id} variant="outline" size="sm">
+                    {org.name}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
