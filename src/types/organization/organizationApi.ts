@@ -31,6 +31,12 @@ export default {
     TRes: Type<Organization>(),
     TBody: Type<OrganizationUpdate>(),
   },
+  manageManagingOrganization: {
+    path: "/api/v1/organization/{id}/managing_organization/",
+    method: HttpMethod.POST,
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{ organization: string; action: "add" | "remove" }>(),
+  },
   delete: {
     path: "/api/v1/organization/{id}/",
     method: HttpMethod.DELETE,

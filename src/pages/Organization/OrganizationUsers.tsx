@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 
@@ -16,6 +16,7 @@ import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
+import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
 import AddUserSheet from "./components/AddUserSheet";
@@ -41,6 +42,7 @@ export default function OrganizationUsers({
   });
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
+  const [organization, setOrganization] = useState<Organization | null>(null);
 
   const searchOptions = [
     {
@@ -59,18 +61,21 @@ export default function OrganizationUsers({
     },
   ];
 
-  const handleSearch = useCallback((key: string, value: string) => {
-    const searchParams = {
-      name: key === "username" ? value : "",
-      phone_number:
-        key === "phone_number"
-          ? isValidPhoneNumber(value)
-            ? value
-            : undefined
-          : undefined,
-    };
-    updateQuery(searchParams);
-  }, []);
+  const handleSearch = useCallback(
+    (key: string, value: string) => {
+      const searchParams = {
+        name: key === "username" ? value : "",
+        phone_number:
+          key === "phone_number"
+            ? isValidPhoneNumber(value)
+              ? value
+              : undefined
+            : undefined,
+      };
+      updateQuery(searchParams);
+    },
+    [updateQuery],
+  );
 
   const handleFieldChange = () => {
     updateQuery({
@@ -111,7 +116,11 @@ export default function OrganizationUsers({
 
   return (
     <>
-      <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
+      <OrganizationLayout
+        id={id}
+        navOrganizationId={navOrganizationId}
+        setOrganization={setOrganization}
+      >
         {({ orgPermissions }) => {
           const {
             canCreateUser,
@@ -142,8 +151,17 @@ export default function OrganizationUsers({
                       setOpen={(open) => {
                         updateQuery({ sheet: open ? "add" : "" });
                       }}
-                      onUserCreated={(user) => {
-                        updateQuery({ sheet: "link", username: user.username });
+                      onUserCreated={(user, meta) => {
+                        const skipLinkingCurrentOrganization =
+                          organization?.org_type === "role" &&
+                          !!meta?.roleOrgIds.includes(id);
+
+                        updateQuery({
+                          sheet: skipLinkingCurrentOrganization ? "" : "link",
+                          username: skipLinkingCurrentOrganization
+                            ? ""
+                            : user.username,
+                        });
                       }}
                       organizationId={id}
                       isServiceAccount={isServiceAccount}
