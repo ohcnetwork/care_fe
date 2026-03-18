@@ -1,15 +1,27 @@
-import { ExternalLink, Plus, ShieldCheck, Trash2 } from "lucide-react";
-import { Link } from "raviger";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader2, Plus, ShieldCheck, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 import { OrgSelect } from "@/components/Common/OrgSelect";
 import { RoleSelect } from "@/components/Common/RoleSelect";
 import { RoleBase, RoleContext } from "@/types/emr/role/role";
 import { Organization, OrgType } from "@/types/organization/organization";
+import organizationApi from "@/types/organization/organizationApi";
+import mutate from "@/Utils/request/mutate";
 
 export interface RoleOrgFormValue {
   organization: string;
@@ -147,13 +159,55 @@ export function RoleOrgAccessEditor({
 }
 
 interface RoleOrgAccessSummaryProps {
+  userId: string;
   memberships: RoleOrgMembership[];
+  canManage?: boolean;
 }
 
 export function RoleOrgAccessSummary({
+  userId,
   memberships,
+  canManage = false,
 }: RoleOrgAccessSummaryProps) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [newOrg, setNewOrg] = useState<Organization>();
+  const [newRole, setNewRole] = useState<RoleBase>();
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ["user"] });
+    queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+    queryClient.invalidateQueries({ queryKey: ["organizationUsers"] });
+  };
+
+  const { mutate: assignUser, isPending: isAssigning } = useMutation({
+    mutationFn: (params: { orgId: string; role: string }) =>
+      mutate(organizationApi.assignUser, {
+        pathParams: { id: params.orgId },
+        body: { user: userId, role: params.role },
+      })({ user: userId, role: params.role }),
+    onSuccess: () => {
+      invalidate();
+      toast.success(t("user_role_update_success"));
+      setNewOrg(undefined);
+      setNewRole(undefined);
+    },
+    onError: () => toast.error(t("something_went_wrong")),
+  });
+
+  const { mutate: removeRole, isPending: isRemoving } = useMutation({
+    mutationFn: (params: { orgId: string; userRoleId: string }) =>
+      mutate(organizationApi.removeUserRole, {
+        pathParams: { id: params.orgId, userRoleId: params.userRoleId },
+      })({}),
+    onSuccess: () => {
+      invalidate();
+      toast.success(t("user_removed_success"));
+    },
+    onError: () => toast.error(t("something_went_wrong")),
+  });
+
+  const isPending = isAssigning || isRemoving;
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white">
@@ -162,15 +216,108 @@ export function RoleOrgAccessSummary({
           <div className="flex size-6 items-center justify-center rounded bg-gray-100 text-gray-600">
             <ShieldCheck className="size-3.5" />
           </div>
-          <div>
-            <h3 className="text-sm font-semibold text-gray-900">
-              {t("role_organizations")}
-            </h3>
-            <p className="text-xs text-gray-500">
-              {t("role_organization_access_summary_description")}
-            </p>
-          </div>
+          <h3 className="text-sm font-semibold text-gray-900">
+            {t("role_organizations")}
+          </h3>
         </div>
+        {canManage && (
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm">
+                {t("manage_access")}
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>{t("role_organizations")}</SheetTitle>
+                <SheetDescription>
+                  {t("role_organization_access_summary_description")}
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-4 space-y-4">
+                {/* Existing assignments */}
+                {memberships.map((membership) => (
+                  <div
+                    key={membership.id}
+                    className="flex items-center gap-3 rounded-lg border border-gray-200 px-3 py-2.5"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-gray-900">
+                        {membership.organization.name}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {membership.role.name}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-7 shrink-0 text-gray-400 hover:text-red-600"
+                      onClick={() =>
+                        removeRole({
+                          orgId: membership.organization.id,
+                          userRoleId: membership.id,
+                        })
+                      }
+                      disabled={isPending}
+                    >
+                      {isRemoving ? (
+                        <Loader2 className="size-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="size-3.5" />
+                      )}
+                    </Button>
+                  </div>
+                ))}
+
+                {memberships.length === 0 && (
+                  <p className="py-4 text-center text-sm text-gray-400">
+                    {t("no_role_organizations_assigned")}
+                  </p>
+                )}
+
+                {/* Add new assignment */}
+                <div className="space-y-3 rounded-lg border border-dashed border-gray-300 bg-gray-50/50 p-3">
+                  <p className="text-xs font-medium text-gray-600">
+                    {t("add_access")}
+                  </p>
+                  <div className="space-y-2">
+                    <OrgSelect
+                      value={newOrg?.id}
+                      onChange={setNewOrg}
+                      orgType={OrgType.ROLE}
+                      placeholder={t("select_role_organization")}
+                      inputPlaceholder={t("search_organization")}
+                    />
+                    <RoleSelect
+                      value={newRole}
+                      onChange={setNewRole}
+                      context={RoleContext.ROLE_ORG}
+                      placeholder={t("select_designation")}
+                    />
+                    <Button
+                      className="w-full"
+                      size="sm"
+                      onClick={() => {
+                        if (newOrg && newRole) {
+                          assignUser({ orgId: newOrg.id, role: newRole.id });
+                        }
+                      }}
+                      disabled={isPending || !newOrg || !newRole}
+                    >
+                      {isAssigning ? (
+                        <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+                      ) : (
+                        <Plus className="mr-1.5 size-3.5" />
+                      )}
+                      {t("add_access")}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        )}
       </div>
 
       <div className="p-3">
@@ -181,10 +328,9 @@ export function RoleOrgAccessSummary({
         ) : (
           <div className="grid gap-2 md:grid-cols-2">
             {memberships.map((membership) => (
-              <Link
+              <div
                 key={membership.id}
-                href={`/organization/${membership.organization.id}/users`}
-                className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5 transition-colors hover:border-gray-300 hover:bg-gray-50/50"
+                className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-gray-900">
@@ -194,8 +340,7 @@ export function RoleOrgAccessSummary({
                     {membership.role.name}
                   </Badge>
                 </div>
-                <ExternalLink className="size-3.5 shrink-0 text-gray-400" />
-              </Link>
+              </div>
             ))}
           </div>
         )}

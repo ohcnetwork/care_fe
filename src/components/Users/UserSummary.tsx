@@ -76,7 +76,13 @@ export default function UserSummaryTab({
   };
 
   const renderRoleOrganizationAccess = () => {
-    return <RoleOrgAccessSummary memberships={userData.role_orgs || []} />;
+    return (
+      <RoleOrgAccessSummary
+        userId={userData.id}
+        memberships={userData.role_orgs || []}
+        canManage={canEditUser}
+      />
+    );
   };
 
   return (
