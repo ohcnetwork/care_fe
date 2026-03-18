@@ -1,4 +1,5 @@
-import { Plus, ShieldCheck, Trash2 } from "lucide-react";
+import { ExternalLink, Plus, ShieldCheck, Trash2 } from "lucide-react";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -147,14 +148,10 @@ export function RoleOrgAccessEditor({
 
 interface RoleOrgAccessSummaryProps {
   memberships: RoleOrgMembership[];
-  onManage?: () => void;
-  canManage?: boolean;
 }
 
 export function RoleOrgAccessSummary({
   memberships,
-  onManage,
-  canManage = false,
 }: RoleOrgAccessSummaryProps) {
   const { t } = useTranslation();
 
@@ -174,11 +171,6 @@ export function RoleOrgAccessSummary({
             </p>
           </div>
         </div>
-        {canManage && onManage && (
-          <Button type="button" variant="outline" size="sm" onClick={onManage}>
-            {t("manage_access")}
-          </Button>
-        )}
       </div>
 
       <div className="p-3">
@@ -189,22 +181,21 @@ export function RoleOrgAccessSummary({
         ) : (
           <div className="grid gap-2 md:grid-cols-2">
             {memberships.map((membership) => (
-              <div
+              <Link
                 key={membership.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5"
+                href={`/organization/${membership.organization.id}/users`}
+                className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5 transition-colors hover:border-gray-300 hover:bg-gray-50/50"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-gray-900">
                     {membership.organization.name}
                   </p>
-                  <p className="mt-0.5 text-xs text-gray-400">
-                    {t("role_organization")}
-                  </p>
+                  <Badge variant="secondary" className="mt-0.5 text-[10px]">
+                    {membership.role.name}
+                  </Badge>
                 </div>
-                <Badge variant="secondary" className="shrink-0">
-                  {membership.role.name}
-                </Badge>
-              </div>
+                <ExternalLink className="size-3.5 shrink-0 text-gray-400" />
+              </Link>
             ))}
           </div>
         )}
