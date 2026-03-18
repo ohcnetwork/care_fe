@@ -135,12 +135,10 @@ export default function TagConfigForm({
         priority: existingConfig.priority,
         status: existingConfig.status,
         resource: existingConfig.resource,
-        facility_organization: existingConfig.facility_organization
-          ? { id: existingConfig.facility_organization.id }
-          : undefined,
-        organization: existingConfig.organization
-          ? { id: existingConfig.organization.id }
-          : undefined,
+        facility_organization: extractOrgId(
+          existingConfig.facility_organization,
+        ),
+        organization: extractOrgId(existingConfig.organization),
       });
     }
   }, [existingConfig, isEditing, form]);

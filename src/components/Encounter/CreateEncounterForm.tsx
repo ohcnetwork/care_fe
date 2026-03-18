@@ -384,6 +384,16 @@ export default function CreateEncounterForm({
                     <FacilityOrganizationSelector
                       facilityId={facilityId}
                       value={field.value}
+                      currentOrganizations={
+                        (appointmentData as any)?.practitioner_performance?.[0]
+                          ?.practitioner?.home_facility_organization
+                          ? [
+                              (appointmentData as any)
+                                .practitioner_performance[0].practitioner
+                                .home_facility_organization,
+                            ]
+                          : []
+                      }
                       onChange={(value) => {
                         setValue("organizations", value || []);
                       }}
