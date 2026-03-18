@@ -176,6 +176,7 @@ export function RoleOrgAccessSummary({
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["user"] });
+    queryClient.invalidateQueries({ queryKey: ["getUserDetails"] });
     queryClient.invalidateQueries({ queryKey: ["currentUser"] });
     queryClient.invalidateQueries({ queryKey: ["organizationUsers"] });
   };
