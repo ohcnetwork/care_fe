@@ -1,6 +1,9 @@
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 import { Code } from "@/types/base/code/code";
-import { MonetaryComponentRead } from "@/types/base/monetaryComponent/monetaryComponent";
+import {
+  DiscountConfiguration,
+  MonetaryComponentRead,
+} from "@/types/base/monetaryComponent/monetaryComponent";
 import { UserReadMinimal } from "@/types/user/user";
 
 import { FacilityCreate, FacilityListRead, FacilityRead } from "./facility";
@@ -55,12 +58,13 @@ export default {
     }>(),
   },
   setMonetaryComponents: {
-    path: "/api/v1/facility/{facilityId}/set_monetary_codes/",
+    path: "/api/v1/facility/{facilityId}/set_monetary_config/",
     method: HttpMethod.POST,
     TRes: Type<FacilityRead>(),
     TBody: Type<{
       discount_codes: Code[];
       discount_monetary_components: MonetaryComponentRead[];
+      discount_configuration: DiscountConfiguration | null;
     }>(),
   },
   getUsers: {

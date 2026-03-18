@@ -25,6 +25,7 @@ import {
   OrganizationParent,
   getOrgLabel,
 } from "@/types/organization/organization";
+import careConfig from "@careConfig";
 
 export const Demography = (props: PatientProps) => {
   const { patientData, facilityId } = props;
@@ -144,7 +145,10 @@ export const Demography = (props: PatientProps) => {
   const data: Data[] = [
     {
       id: "general-info",
-      allowEdit: canWritePatient && !!props.facilityId,
+      allowEdit:
+        (canWritePatient ||
+          careConfig.patientRegistration.globalPatientEditAccessEnabled) &&
+        !!facilityId,
       details: [
         <PLUGIN_Component
           key="patient_details_tab__demography__general_info"
@@ -253,19 +257,31 @@ export const Demography = (props: PatientProps) => {
         <TagAssignmentSheet
           entityType="patient"
           entityId={patientId}
-          currentTags={patientData.instance_tags}
+          facilityId={facilityId}
+          currentTags={[
+            ...patientData.instance_tags,
+            ...patientData.facility_tags,
+          ]}
           onUpdate={() => {
             queryClient.invalidateQueries({
               queryKey: ["patient", patientId],
             });
           }}
           canWrite={canWritePatient}
+          trigger={
+            <Button variant="outline" disabled={false}>
+              <CareIcon icon="l-edit-alt" className="text-md pr-1" />
+              {t("edit")}
+            </Button>
+          }
         />
       ),
-      details: patientData.instance_tags.map((t) => ({
-        label: t.parent ? t.parent.display : t.display,
-        value: t.display,
-      })),
+      details: [...patientData.instance_tags, ...patientData.facility_tags].map(
+        (t) => ({
+          label: t.parent ? t.parent.display : t.display,
+          value: t.display,
+        }),
+      ),
     },
   ];
 

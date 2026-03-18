@@ -27,6 +27,7 @@ export interface PrescritionList extends Prescription {
   prescribed_by: UserReadMinimal;
   encounter: EncounterRead;
   created_date: string;
+  tags?: TagConfig[];
 }
 
 export interface PrescriptionRead extends Prescription {

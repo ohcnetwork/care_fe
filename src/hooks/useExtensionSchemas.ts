@@ -96,7 +96,8 @@ export function useExtensionSchemas(): UseExtensionSchemasReturn {
     queryFn: query(extensionsAPI.list),
     staleTime: 1000 * 60 * 60 * 24, // 24 hours
     meta: {
-      persist: true,
+      // Extensions are not expected to change frequently, so we can cache them in production.
+      persist: process.env.NODE_ENV === "production",
     },
   });
 

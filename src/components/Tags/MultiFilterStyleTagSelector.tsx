@@ -72,34 +72,35 @@ export function MultiFilterStyleTagSelector({
   const isMobile = useIsMobile();
   const { t } = useTranslation();
 
-  // Fetch top-level tags
+  // Fetch top-level tags (both instance and facility tags in one call)
   const { data: rootTags, isLoading: isLoadingRoot } = useQuery({
-    queryKey: ["tags", resource, search],
-    queryFn: query(tagConfigApi.list, {
+    queryKey: ["tags", resource, search, facilityId],
+    queryFn: query.debounced(tagConfigApi.list, {
       queryParams: {
         resource,
         status: "active",
         ...(search ? { display: search } : { parent_is_null: true }),
-        ...(facilityId ? { facility: facilityId } : {}),
+        ...(facilityId && { facility: facilityId }),
       },
     }),
     enabled: open || mobileDrawerOpen,
   });
 
-  // Fetch children for active group popover
+  // Fetch children for active group popover (both instance and facility tags in one call)
   const { data: childTags, isLoading: isLoadingChildren } = useQuery({
     queryKey: [
       "tags",
       resource,
       "parent",
       groupPopoverOpen || selectedGroup?.id,
+      facilityId,
     ],
     queryFn: query(tagConfigApi.list, {
       queryParams: {
         resource,
         parent: groupPopoverOpen || selectedGroup?.id,
         status: "active",
-        ...(facilityId ? { facility: facilityId } : {}),
+        ...(facilityId && { facility: facilityId }),
       },
     }),
     enabled:
@@ -208,26 +209,32 @@ export function MultiFilterStyleTagSelector({
     <Button
       variant="outline"
       className={cn(
-        "justify-between h-10",
-        selected.length > 0 && "border-blue-300 bg-blue-50",
+        "h-10",
+        selected.length > 0 && "border-blue-300 bg-blue-50 h-auto",
         className,
       )}
       disabled={disabled || isLoading}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 min-w-0 w-full">
         {isLoading ? (
           <Loader2 className="h-3 w-3 animate-spin" />
         ) : (
           <TagIcon className="h-3 w-3" />
         )}
-        <div className="flex gap-1 truncate">
+
+        <div className="flex gap-1 flex-wrap min-w-0 w-full overflow-hidden">
           {isLoading ? (
             <span>{t("updating_tags")}</span>
           ) : selected.length > 0 ? (
             selected.slice(0, 3).map((t) => (
               <Badge
                 key={t.id}
-                className="bg-blue-100 text-blue-900 border-blue-300"
+                className="
+  bg-blue-100 text-blue-900 border-blue-300
+  whitespace-normal
+  break-words
+  overflow-wrap-anywhere
+"
               >
                 {t.display}
               </Badge>
@@ -236,7 +243,7 @@ export function MultiFilterStyleTagSelector({
             <span>{t("add_tags")}</span>
           )}
           {selected.length > 3 && (
-            <Badge className="bg-gray-100 text-gray-900 border-gray-300">
+            <Badge className="bg-gray-100 text-gray-900 border-gray-300 shrink-0">
               +{selected.length - 3} {t("more")}
             </Badge>
           )}
