@@ -5,6 +5,8 @@ on:
     types:
       - submitted
 
+permissions: {}
+
 jobs:
   save-review-info:
     runs-on: ubuntu-latest
