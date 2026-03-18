@@ -131,14 +131,6 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                   </div>
                   <div>
                     <span className="text-sm text-gray-500">
-                      {t("user_type")}
-                    </span>
-                    <p className="text-sm font-medium">
-                      {selectedUser.user_type}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-gray-500">
                       {t("phone_number")}
                     </span>
                     <p className="text-sm font-medium truncate">
@@ -268,8 +260,8 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
                 </div>
               </div>
               <div className="text-sm ml-4">
-                <div className="text-gray-500">{t("user_type")}</div>
-                <div className="font-medium">{user.user_type}</div>
+                <div className="text-gray-500">{t("username")}</div>
+                <div className="font-medium">{user.username}</div>
               </div>
             </div>
             <ConfirmActionDialog

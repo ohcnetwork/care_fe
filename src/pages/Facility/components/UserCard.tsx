@@ -52,7 +52,7 @@ export function UserCard({ user, className, facilityId }: Props) {
               <h3 className="truncate text-xl font-semibold">
                 {formatName(user)}
               </h3>
-              <p className="text-sm text-gray-500">{user.user_type}</p>
+              <p className="text-sm text-gray-500">{user.username}</p>
             </div>
           </div>
         </div>

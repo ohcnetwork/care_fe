@@ -252,7 +252,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                       {formatName(userData)}
                     </h3>
                     <p className="text-sm text-gray-500 truncate">
-                      {userData.user_type}
+                      {userData.username}
                     </p>
 
                     {/* <p className="text-xs mt-4">Education: </p>

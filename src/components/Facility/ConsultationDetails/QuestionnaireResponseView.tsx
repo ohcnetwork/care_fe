@@ -67,10 +67,7 @@ export default function QuestionnaireResponseView({
               <Separator orientation="vertical" className="h-4" />
               <div className="flex items-center gap-2">
                 <CareIcon icon="l-user" className="size-4" />
-                <span>
-                  {formatName(formResponse.created_by)}
-                  {` (${formResponse.created_by?.user_type})`}
-                </span>
+                <span>{formatName(formResponse.created_by)}</span>
               </div>
             </div>
           </div>

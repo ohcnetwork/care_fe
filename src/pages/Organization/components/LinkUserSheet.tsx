@@ -162,16 +162,6 @@ export default function LinkUserSheet({
                   </div>
                   <div>
                     <span className="text-sm text-gray-500">
-                      {isServiceAccount
-                        ? t("service_account_type")
-                        : t("user_type")}
-                    </span>
-                    <p className="text-sm font-medium">
-                      {selectedUser.user_type}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-gray-500">
                       {t("phone_number")}
                     </span>
                     <p className="text-sm font-medium truncate">

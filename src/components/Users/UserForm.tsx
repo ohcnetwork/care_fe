@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import RoleOrgSelector from "@/components/Common/RoleOrgSelector";
 import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import {
@@ -71,13 +72,7 @@ export default function UserForm({
 
   const userFormSchema = z
     .object({
-      user_type: z.enum([
-        "doctor",
-        "nurse",
-        "staff",
-        "volunteer",
-        "administrator",
-      ]),
+      role_orgs: z.array(z.string()).optional(),
 
       username: isEditMode
         ? z.string().optional()
@@ -169,7 +164,7 @@ export default function UserForm({
   const form = useForm({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
-      user_type: "nurse",
+      role_orgs: [] as string[],
       username: "",
       password: "",
       c_password: "",
@@ -193,7 +188,6 @@ export default function UserForm({
   useEffect(() => {
     if (userData && isEditMode) {
       const formData: Partial<UserFormValues> = {
-        user_type: userData.user_type,
         first_name: userData.first_name,
         last_name: userData.last_name,
         phone_number: userData.phone_number || "",
@@ -207,7 +201,6 @@ export default function UserForm({
 
   const [isUsernameFieldFocused, setIsUsernameFieldFocused] = useState(false);
 
-  //const userType = form.watch("user_type");
   const usernameInput = form.watch("username") || "";
   const phoneNumber = form.watch("phone_number");
 
@@ -299,7 +292,6 @@ export default function UserForm({
   const onSubmit = async (data: UserFormValues) => {
     if (isEditMode) {
       const updatePayload: UserUpdate = {
-        user_type: data.user_type,
         username: data.username || existingUsername!,
         first_name: data.first_name,
         last_name: data.last_name,
@@ -312,7 +304,6 @@ export default function UserForm({
       updateUser(updatePayload);
     } else {
       const createPayload: UserCreate = {
-        user_type: data.user_type!,
         username: data.username!,
         password:
           data.password_setup_method === "immediate" && !isServiceAccount
@@ -327,6 +318,10 @@ export default function UserForm({
         gender: data.gender,
         geo_organization: data.geo_organization || undefined,
         is_service_account: isServiceAccount,
+        role_orgs:
+          data.role_orgs && data.role_orgs.length > 0
+            ? data.role_orgs
+            : undefined,
       };
       createUser(createPayload);
     }
@@ -360,39 +355,20 @@ export default function UserForm({
         {!isEditMode && (
           <FormField
             control={form.control}
-            name="user_type"
-            render={({ field }) => (
+            name="role_orgs"
+            render={() => (
               <FormItem>
-                <FormLabel aria-required>
-                  {isServiceAccount
-                    ? t("service_account_type")
-                    : t("user_type")}
-                </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger ref={field.ref}>
-                      <SelectValue
-                        placeholder={
-                          isServiceAccount
-                            ? t("select_service_account_type")
-                            : t("select_user_type")
-                        }
-                      />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="doctor">{t("doctor")}</SelectItem>
-                    <SelectItem value="nurse">{t("nurse")}</SelectItem>
-                    <SelectItem value="staff">{t("staff")}</SelectItem>
-                    <SelectItem value="volunteer">{t("volunteer")}</SelectItem>
-                    <SelectItem value="administrator">
-                      {t("administrator")}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <RoleOrgSelector
+                    value={form.watch("role_orgs") || null}
+                    onChange={(value) =>
+                      form.setValue("role_orgs", value || [], {
+                        shouldDirty: true,
+                      })
+                    }
+                    optional
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

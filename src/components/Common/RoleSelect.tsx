@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/popover";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
-import { RoleBase } from "@/types/emr/role/role";
+import { RoleBase, RoleContext } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
 import query from "@/Utils/request/query";
 
@@ -32,6 +32,7 @@ interface RoleSelectProps {
   onChange: (value: RoleBase) => void;
   disabled?: boolean;
   className?: string;
+  context?: RoleContext;
 }
 
 const PAGE_LIMIT = 10;
@@ -113,6 +114,7 @@ export function RoleSelect({
   onChange,
   disabled,
   className,
+  context,
 }: RoleSelectProps) {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
@@ -124,6 +126,7 @@ export function RoleSelect({
     limit: String(PAGE_LIMIT),
     offset: String(pageParam),
     name: searchTerm,
+    ...(context ? { context } : {}),
   });
 
   const {
@@ -133,7 +136,7 @@ export function RoleSelect({
     isFetchingNextPage,
     isFetching,
   } = useInfiniteQuery({
-    queryKey: ["roles", searchTerm],
+    queryKey: ["roles", searchTerm, context],
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query.debounced(roleApi.listRoles, {
         queryParams: getQueryParams(pageParam),

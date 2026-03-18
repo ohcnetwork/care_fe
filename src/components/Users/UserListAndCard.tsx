@@ -170,7 +170,7 @@ export const UserGrid = ({ users }: { users?: UserReadMinimal[] }) => {
           facility={facilityId}
           key={user.id}
           user={user}
-          roleName={user.user_type}
+          roleName={user.username}
         />
       ))}
     </div>
@@ -228,7 +228,7 @@ const UserListRow = ({ user }: { user: UserReadMinimal }) => {
         <UserStatusIndicator user={user} addPadding />
       </td>
       <td id="role" className="px-10 py-4 text-sm">
-        {user.user_type}
+        {user.username}
       </td>
       <td id="contact" className="px-4 py-4 text-sm whitespace-nowrap">
         {user.phone_number ? formatPhoneNumberIntl(user.phone_number) : "-"}

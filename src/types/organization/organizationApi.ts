@@ -79,4 +79,13 @@ export default {
     method: HttpMethod.GET,
     TRes: Type<Organization>(),
   },
+  manageManagingOrganization: {
+    path: "/api/v1/organization/{id}/managing_organization/",
+    method: HttpMethod.POST,
+    TRes: Type<Organization>(),
+    TBody: Type<{
+      action: "add" | "remove";
+      managing_organization: string;
+    }>(),
+  },
 };

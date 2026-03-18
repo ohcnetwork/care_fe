@@ -190,6 +190,7 @@ export default function RolesIndex() {
                     description: "",
                     permissions: [],
                     is_system: false,
+                    contexts: [],
                   });
                 }
               }}

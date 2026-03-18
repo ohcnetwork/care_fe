@@ -4,13 +4,6 @@ import { Permissions } from "@/types/emr/permission/permission";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
 
-export type UserType =
-  | "doctor"
-  | "nurse"
-  | "staff"
-  | "volunteer"
-  | "administrator";
-
 export interface UserBase {
   id: string;
   first_name: string;
@@ -19,7 +12,6 @@ export interface UserBase {
   phone_number: string;
   prefix?: string | null;
   suffix?: string | null;
-  user_type: UserType;
   gender: (typeof GENDER_TYPES)[number]["id"];
 }
 
@@ -66,6 +58,7 @@ export interface UserCreate extends UserUpdate {
   password?: string;
   email: string;
   is_service_account?: boolean;
+  role_orgs?: string[];
 }
 
 export interface GetServiceAccountsResponse {
