@@ -230,7 +230,7 @@ export function BedChargeItemsTable({
         status: qParams.status,
         service_resource: ChargeItemServiceResource.bed_association,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
     }),
   }) as {

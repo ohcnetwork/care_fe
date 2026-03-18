@@ -82,7 +82,7 @@ const Prescriptions = ({ patientId }: { patientId: string }) => {
           queryParams: {
             limit: 100,
             status: "active",
-            product_type: "medication",
+            medications_only: true,
             offset: String(pageParam),
           },
         })({ signal });
