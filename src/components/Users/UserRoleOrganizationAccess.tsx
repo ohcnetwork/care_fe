@@ -1,5 +1,4 @@
 import { Plus, ShieldCheck, Trash2 } from "lucide-react";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -39,13 +38,6 @@ export function RoleOrgAccessEditor({
   disabled = false,
 }: RoleOrgAccessEditorProps) {
   const { t } = useTranslation();
-
-  // Always ensure at least one row exists
-  useEffect(() => {
-    if (value.length === 0) {
-      onChange([{ ...EMPTY_ROLE_ORG }]);
-    }
-  }, [value.length, onChange]);
 
   const entries = value.length > 0 ? value : [{ ...EMPTY_ROLE_ORG }];
 

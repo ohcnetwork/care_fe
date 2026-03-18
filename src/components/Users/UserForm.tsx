@@ -192,7 +192,7 @@ export default function UserForm({
       prefix: "",
       suffix: "",
       password_setup_method: "immediate",
-      role_orgs: [],
+      role_orgs: [{ organization: "", role: "" }],
     },
   });
 
@@ -419,6 +419,11 @@ export default function UserForm({
           ),
         });
       } catch (error) {
+        // Invalidate even on error so the form reloads fresh server state
+        // after a partial sync failure
+        if (existingUsername) {
+          invalidateUserQueries(existingUsername);
+        }
         handleRequestErrors(error);
       }
     } else {
@@ -475,8 +480,8 @@ export default function UserForm({
 
   useEffect(() => {
     const levels: Organization[] = [];
-    if (isEditMode && userData && "geo_organization" in userData) {
-      levels.push(userData.geo_organization as Organization);
+    if (isEditMode && userData?.geo_organization) {
+      levels.push(userData.geo_organization);
       setSelectedLevels(levels);
     }
   }, [userData, isEditMode]);
