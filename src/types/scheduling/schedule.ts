@@ -17,7 +17,7 @@ import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareS
 import { LocationRead } from "@/types/location/location";
 import { buildLocationHierarchy } from "@/types/location/utils";
 import { TokenRead } from "@/types/tokens/token/token";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserRead, UserReadMinimal } from "@/types/user/user";
 
 export enum AvailabilitySlotType {
   Appointment = "appointment",
@@ -218,7 +218,7 @@ type LocationResource = {
 };
 
 type UserResource = {
-  resource: UserReadMinimal;
+  resource: UserRead;
   resource_type: SchedulableResourceType.Practitioner;
 };
 
