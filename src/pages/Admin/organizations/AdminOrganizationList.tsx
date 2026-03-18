@@ -375,7 +375,7 @@ function FlatOrgSidebar({
                     className={cn(
                       "w-full rounded-md px-3 py-2 text-left text-sm transition-colors",
                       isSelected
-                        ? "bg-primary-50 font-medium text-primary-900"
+                        ? "bg-primary-100 font-medium text-primary-900"
                         : "text-gray-700 hover:bg-gray-50",
                     )}
                   >
