@@ -12,10 +12,10 @@ export const DEFAULT_ROLE_CONTEXTS = [
 ];
 
 export const getRoleContextForOrganizationType = (orgType?: string) => {
-  if (!orgType) {
-    return undefined;
-  }
-  return orgType === "role" ? RoleContext.ROLE_ORG : RoleContext.GOVT_ORG;
+  if (!orgType) return undefined;
+  if (orgType === "role") return RoleContext.ROLE_ORG;
+  if (orgType === "team") return RoleContext.FACILITY;
+  return RoleContext.GOVT_ORG;
 };
 
 export const getRoleContextLabelKey = (context: RoleContext) =>

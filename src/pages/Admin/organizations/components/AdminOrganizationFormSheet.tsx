@@ -124,16 +124,16 @@ export default function AdminOrganizationFormSheet({
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    const parent = isRoleOrganizationPage ? undefined : parentId;
+    const parentOrgId = isRoleOrganizationPage ? undefined : parentId;
     const data = {
       name: values.name.trim(),
       description: values.description?.trim() || undefined,
       org_type: values.org_type,
-      parent,
+      parent_id: parentOrgId,
     };
 
     if (isEditMode) {
-      updateOrganization({ ...data, parent_id: parent });
+      updateOrganization(data);
     } else {
       createOrganization(data);
     }

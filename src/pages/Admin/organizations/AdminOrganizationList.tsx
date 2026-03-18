@@ -22,6 +22,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { OrgSelect } from "@/components/Common/OrgSelect";
 import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
@@ -127,6 +128,23 @@ export default function AdminOrganizationList({
               </p>
             </div>
             <AdminOrganizationFormSheet organizationType={organizationType} />
+          </div>
+
+          {/* Mobile org selector */}
+          <div className="md:hidden">
+            <OrgSelect
+              value={organizationId}
+              onChange={(selectedOrg) => {
+                if (selectedOrg) handleOrganizationSelect(selectedOrg);
+              }}
+              orgType={organizationType as OrgType}
+              placeholder={
+                isRoleOrg
+                  ? t("select_role_organization")
+                  : t("select_organization")
+              }
+              inputPlaceholder={t("search")}
+            />
           </div>
 
           <ResizablePanelGroup

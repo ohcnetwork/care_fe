@@ -64,7 +64,7 @@ export default function OrganizationUsers({
   const handleSearch = useCallback(
     (key: string, value: string) => {
       const searchParams = {
-        name: key === "username" ? value : "",
+        name: key === "username" ? value : undefined,
         phone_number:
           key === "phone_number"
             ? isValidPhoneNumber(value)
