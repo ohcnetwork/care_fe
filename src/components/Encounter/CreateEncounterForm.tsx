@@ -131,14 +131,22 @@ export default function CreateEncounterForm({
   const { setValue, control, handleSubmit, reset, watch } = form;
 
   useEffect(() => {
-    if (appointmentData?.resource_type === "practitioner") {
-      const departmentId = (appointmentData.resource as any).organizations?.[0]
-        ?.id;
-      if (departmentId) {
-        setValue("organizations", [departmentId]);
-      }
+    // 1. Only run if the sheet is open and we have data
+    if (!isOpen || !appointmentData) return;
+
+    const practitioner = (appointmentData as any)?.practitioner_performance?.[0]?.practitioner;
+    const departmentId = practitioner?.home_facility_organization;
+
+    // 2. Only pre-fill if the user hasn't touched the field yet (isDirty check)
+    const isPristine = !form.getFieldState("organizations").isDirty;
+
+    if (departmentId && isPristine) {
+      form.setValue("organizations", [departmentId], {
+        shouldDirty: false, // Keep it pristine so we know it's auto-filled
+        shouldValidate: true,
+      });
     }
-  }, [appointmentData, setValue]);
+  }, [appointmentData, form, isOpen]); // Added isOpen to dependencies
 
   const tagIds = watch("tags");
   const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
@@ -384,18 +392,15 @@ export default function CreateEncounterForm({
                     <FacilityOrganizationSelector
                       facilityId={facilityId}
                       value={field.value}
+                      // FIX: Provide the full object so the name displays correctly in the UI
                       currentOrganizations={
-                        (appointmentData as any)?.practitioner_performance?.[0]
-                          ?.practitioner?.home_facility_organization
-                          ? [
-                              (appointmentData as any)
-                                .practitioner_performance[0].practitioner
-                                .home_facility_organization,
-                            ]
+                        (appointmentData as any)?.practitioner_performance?.[0]?.practitioner?.home_facility_organization
+                          ? [(appointmentData as any).practitioner_performance[0].practitioner.home_facility_organization]
                           : []
                       }
                       onChange={(value) => {
-                        setValue("organizations", value || []);
+                        // FIX: Use field.onChange instead of form.setValue
+                        field.onChange(value ?? []);
                       }}
                       favoriteList="encounter_departments"
                     />

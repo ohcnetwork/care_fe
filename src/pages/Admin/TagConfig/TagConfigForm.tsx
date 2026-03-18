@@ -67,8 +67,8 @@ const getTagConfigSchema = (t: (key: string) => string) =>
     resource: z.nativeEnum(TagResource, {
       required_error: t("field_required"),
     }),
-    facility_organization: OrgSchema.optional(),
-    organization: OrgSchema.optional(),
+    facility_organization: OrgSchema.nullish(),
+    organization: OrgSchema.nullish(),
   });
 
 interface TagConfigFormProps {
