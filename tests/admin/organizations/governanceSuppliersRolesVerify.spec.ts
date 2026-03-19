@@ -12,6 +12,7 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
   const emptyStateText = "No Organizations Found";
 
   function getTypeHeadingPattern(type: OrganizationType) {
+    // Some seeded data/locales still use "Goverence", so keep this match backward compatible.
     return type === "govt"
       ? /gov(?:t|ernance|erence)/i
       : new RegExp(type.replace(/_/g, "\\s*"), "i");
@@ -37,6 +38,30 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
       waitUntil: "networkidle",
     });
   }
+
+  async function clickAndWaitForUrl(
+    page: Page,
+    urlPattern: RegExp,
+    clickAction: () => Promise<void>,
+  ) {
+    await Promise.all([
+      page.waitForURL(urlPattern, { waitUntil: "networkidle" }),
+      clickAction(),
+    ]);
+  }
+
+  test.beforeAll(async ({ browser }) => {
+    const context = await browser.newContext({
+      storageState: "tests/.auth/user.json",
+    });
+    const page = await context.newPage();
+    await navigateToOrganizationType(page, defaultTestType);
+    await expect(
+      getOrgCards(page, defaultTestType).first(),
+      `Expected at least one ${defaultTestType} organization card for this suite`,
+    ).toBeVisible();
+    await context.close();
+  });
 
   test("should navigate to organization type pages", async ({ page }) => {
     for (const type of organizationTypes) {
@@ -64,29 +89,40 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
 
         const cards = getOrgCards(page, type);
         const firstCard = cards.first();
-        const emptyState = page.getByText(emptyStateText);
-
-        await expect(firstCard.or(emptyState)).toBeVisible();
-        const hasCards = await firstCard.isVisible().catch(() => false);
-        if (hasCards) {
-          await expect(firstCard.getByRole("heading")).toBeVisible();
-          await expect(firstCard.locator('[data-slot="badge"]')).toBeVisible();
-          const seeDetailsLink = firstCard.getByRole("link", {
-            name: /see details/i,
-          });
-          await expect(seeDetailsLink).toBeVisible();
-          await seeDetailsLink.click();
-          await page.waitForLoadState("domcontentloaded");
-          await expect(page).toHaveURL(
-            new RegExp(`.*\\/admin\\/organizations\\/${type}\\/[^/]+$`),
-          );
-          await expect(page.locator('[data-slot="breadcrumb"]')).toBeVisible();
-          await navigateToOrganizationType(page, type);
-        } else {
-          await expect(emptyState).toBeVisible();
+        const cardCount = await cards.count();
+        if (cardCount === 0) {
+          // Some environments do not seed non-default org types.
+          // Skip card-level checks for that type to avoid environment-only CI failures.
+          return;
         }
+
+        await expect(firstCard).toBeVisible();
+        await expect(firstCard.getByRole("heading")).toBeVisible();
+        await expect(firstCard.locator('[data-slot="badge"]')).toBeVisible();
+        await expect(
+          firstCard.getByRole("link", { name: /see details/i }),
+        ).toBeVisible();
       });
     }
+  });
+
+  test("should navigate to organization detail using see details", async ({
+    page,
+  }) => {
+    await navigateToOrganizationType(page, defaultTestType);
+
+    const firstCard = getOrgCards(page, defaultTestType).first();
+    await expect(firstCard).toBeVisible();
+    const seeDetailsLink = firstCard.getByRole("link", {
+      name: /see details/i,
+    });
+    await expect(seeDetailsLink).toBeVisible();
+    await clickAndWaitForUrl(
+      page,
+      new RegExp(`.*\\/admin\\/organizations\\/${defaultTestType}\\/[^/]+$`),
+      () => seeDetailsLink.click(),
+    );
+    await expect(page.locator('[data-slot="breadcrumb"]')).toBeVisible();
   });
 
   test("should filter organizations by name when searching", async ({
@@ -95,41 +131,42 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
     await navigateToOrganizationType(page, defaultTestType);
 
     const initialCards = getOrgCards(page, defaultTestType);
+    await expect(
+      initialCards.nth(1),
+      `Expected at least two ${defaultTestType} organization cards for search filtering`,
+    ).toBeVisible();
     const initialCount = await initialCards.count();
     const searchInput = getSearchInput(page);
     await expect(searchInput).toBeVisible();
 
-    if (initialCount > 0) {
-      const firstCard = initialCards.first();
-      const firstOrgName = await firstCard
-        .getByRole("heading")
-        .textContent()
-        .then((t) => t?.trim())
-        .catch(() => null);
+    const firstCard = initialCards.first();
+    await expect(firstCard).toBeVisible();
+    const firstOrgName = (
+      await firstCard.getByRole("heading").first().innerText()
+    ).trim();
+    expect(firstOrgName.length).toBeGreaterThan(0);
 
-      if (firstOrgName) {
-        const partialName = firstOrgName.slice(0, 5);
-        await searchInput.fill(partialName);
-        await expect(
-          page.getByText(firstOrgName, { exact: false }).first(),
-        ).toBeVisible();
-        await expect(searchInput).toHaveValue(partialName);
-      }
-    }
+    await searchInput.fill(firstOrgName);
+    await expect(
+      page.getByText(firstOrgName, { exact: true }).first(),
+    ).toBeVisible();
+    const filteredCount = await getOrgCards(page, defaultTestType).count();
+    expect(filteredCount).toBeLessThan(initialCount);
+
+    await searchInput.clear();
+    await expect(getOrgCards(page, defaultTestType).first()).toBeVisible();
+  });
+
+  test("should show empty state when search has no matches", async ({
+    page,
+  }) => {
+    await navigateToOrganizationType(page, defaultTestType);
+    const searchInput = getSearchInput(page);
+    await expect(searchInput).toBeVisible();
 
     const searchTerm = `NonExistent_${faker.string.uuid()}`;
     await searchInput.fill(searchTerm);
     await expect(page.getByText(emptyStateText)).toBeVisible();
-    await expect(searchInput).toHaveValue(searchTerm);
-
-    await searchInput.clear();
-    if (initialCount > 0) {
-      const cardsAfterClear = getOrgCards(page, defaultTestType);
-      await expect(cardsAfterClear.first()).toBeVisible();
-      expect(await cardsAfterClear.count()).toBeGreaterThanOrEqual(
-        initialCount,
-      );
-    }
   });
 
   test("should expand and collapse organization tree", async ({ page }) => {
@@ -148,30 +185,27 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
     const expandButtons = treePanel
       .getByRole("button")
       .filter({ has: treePanel.locator("svg") });
-    if ((await expandButtons.count()) === 0) {
-      test.skip(true, "No expandable nodes in tree");
-      return;
-    }
+    expect(await expandButtons.count()).toBeGreaterThan(0);
 
     const expandBtn = expandButtons.first();
     await expect(expandBtn).toBeVisible();
-
-    const node = treePanel
-      .locator("div.space-y-1")
-      .filter({ has: expandBtn })
-      .first();
-    const childContainer = node.locator("div.pl-2").first();
-
-    await expect(childContainer).not.toBeVisible();
+    const treeNodes = treePanel.locator("div.space-y-1");
+    const beforeCount = await treeNodes.count();
     await expandBtn.click();
-    await expect(childContainer).toBeVisible();
+    await expect
+      .poll(() => treeNodes.count(), {
+        message: "Expected tree node count to increase after expand",
+      })
+      .toBeGreaterThan(beforeCount);
 
-    const childNodes = childContainer.locator("div.space-y-1");
-    expect(await childNodes.count()).toBeGreaterThan(0);
-    await expect(childNodes.first()).toBeVisible();
+    await expect(treeNodes.first()).toBeVisible();
 
     await expandBtn.click();
-    await expect(childContainer).not.toBeVisible();
+    await expect
+      .poll(() => treeNodes.count(), {
+        message: "Expected tree node count to return after collapse",
+      })
+      .toBe(beforeCount);
   });
 
   test("should navigate using breadcrumb when viewing child organization", async ({
@@ -180,42 +214,35 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
     await navigateToOrganizationType(page, defaultTestType);
 
     const organizationCards = getOrgCards(page, defaultTestType);
-    if ((await organizationCards.count()) === 0) {
-      test.skip(true, "No orgs to test");
-      return;
-    }
-
     const firstCard = organizationCards.first();
     await expect(firstCard).toBeVisible();
-    const orgName = await firstCard.getByRole("heading").textContent();
+    const orgName = (
+      await firstCard.getByRole("heading").first().innerText()
+    ).trim();
+    expect(orgName.length).toBeGreaterThan(0);
 
     const seeDetailsLink = firstCard.getByRole("link", {
       name: /see details/i,
     });
     await expect(seeDetailsLink).toBeVisible();
-    await seeDetailsLink.click();
-    await page.waitForLoadState("domcontentloaded");
+    await clickAndWaitForUrl(
+      page,
+      new RegExp(`.*\\/admin\\/organizations\\/${defaultTestType}\\/[^/]+$`),
+      () => seeDetailsLink.click(),
+    );
 
     const breadcrumb = page.locator('[data-slot="breadcrumb"]');
-    await breadcrumb.waitFor({ state: "visible" });
-    await expect(page).toHaveURL(
-      new RegExp(`.*\\/admin\\/organizations\\/${defaultTestType}\\/[^/]+$`),
-    );
     await expect(breadcrumb).toBeVisible();
     const organizationsLink = breadcrumb.getByRole("button", {
       name: /organizations/i,
     });
     await expect(organizationsLink).toBeVisible();
-    if (orgName) {
-      await expect(breadcrumb.getByText(orgName.trim())).toBeVisible();
-    }
+    await expect(breadcrumb.getByText(orgName)).toBeVisible();
 
-    await organizationsLink.click();
-    await page.goto(`/admin/organizations/${defaultTestType}`, {
-      waitUntil: "networkidle",
-    });
-    await expect(page).toHaveURL(
+    await clickAndWaitForUrl(
+      page,
       new RegExp(`.*\\/admin\\/organizations\\/${defaultTestType}$`),
+      () => organizationsLink.click(),
     );
     await expect(getSearchInput(page)).toBeVisible();
   });
@@ -226,21 +253,16 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
     await navigateToOrganizationType(page, defaultTestType);
 
     const organizationCards = getOrgCards(page, defaultTestType);
-    if ((await organizationCards.count()) === 0) {
-      test.skip(true, "No orgs to test create flow");
-      return;
-    }
-
     const firstCard = organizationCards.first();
     await expect(firstCard).toBeVisible();
     const seeDetailsLink = firstCard.getByRole("link", {
       name: /see details/i,
     });
     await expect(seeDetailsLink).toBeVisible();
-    await seeDetailsLink.click();
-    await page.waitForLoadState("domcontentloaded");
-    await expect(page).toHaveURL(
+    await clickAndWaitForUrl(
+      page,
       new RegExp(`.*\\/admin\\/organizations\\/${defaultTestType}\\/[^/]+$`),
+      () => seeDetailsLink.click(),
     );
 
     const addOrgButton = page.getByRole("button", {
@@ -257,10 +279,10 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
         name: /name/i,
       }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("dialog").getByRole("button", {
-        name: /create organization/i,
-      }),
-    ).toBeVisible();
+    const submitButton = page.getByRole("dialog").getByRole("button", {
+      name: /create organization/i,
+    });
+    await expect(submitButton).toBeVisible();
+    await expect(submitButton).toBeDisabled();
   });
 });
