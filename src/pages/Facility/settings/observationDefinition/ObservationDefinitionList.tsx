@@ -32,9 +32,9 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import {
   OBSERVATION_DEFINITION_CATEGORY,
-  OBSERVATION_DEFINITION_STATUS,
   OBSERVATION_DEFINITION_STATUS_COLORS,
   type ObservationDefinitionReadSpec,
+  ObservationDefinitionStatus,
 } from "@/types/emr/observationDefinition/observationDefinition";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 
@@ -161,7 +161,7 @@ export default function ObservationDefinitionList({
                 <FilterSelect
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
-                  options={OBSERVATION_DEFINITION_STATUS as unknown as string[]}
+                  options={Object.values(ObservationDefinitionStatus)}
                   label={t("status")}
                   onClear={() => updateQuery({ status: undefined })}
                 />
