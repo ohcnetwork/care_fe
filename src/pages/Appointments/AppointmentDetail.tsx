@@ -156,14 +156,14 @@ export default function AppointmentDetail(props: Props) {
     // If facility query failed (no access to facility)
     if (!facility) {
       toast.error(t("no_permission_to_view_page"));
-      navigate(`/`);
+      navigate(`/`, { replace: true });
       return;
     }
 
     // If facility is loaded but user doesn't have permission to view appointments
     if (facility && !canViewAppointments) {
       toast.error(t("no_permission_to_view_page"));
-      navigate(`/facility/${facility.id}/overview`);
+      navigate(`/facility/${facility.id}/overview`, { replace: true });
       return;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -17,13 +17,13 @@ export default function BackButton({
 }: BackButtonProps) {
   return (
     <Button
+      {...props}
       type="button"
       variant={variant}
       onClick={() => history.back()}
       className={className}
       size={size}
       disabled={disabled}
-      {...props}
     >
       {children}
     </Button>
