@@ -1,5 +1,4 @@
 import { LocalStorageKeys } from "@/common/constants";
-
 import { HttpMethod, QueryParams, Type } from "@/Utils/request/types";
 
 const VALID_METHODS = Object.values(HttpMethod);
@@ -18,6 +17,12 @@ export const API = <TResponse, TBody = undefined>(
 
   const method = trimmedRoute.slice(0, firstSpace) as HttpMethod;
   const path = trimmedRoute.slice(firstSpace + 1);
+
+  if (path.trim().includes(" ")) {
+    throw new Error(
+      `Invalid route format "${route}". Path must not contain spaces`,
+    );
+  }
 
   if (!VALID_METHODS.includes(method)) {
     throw new Error(`Invalid HTTP method: ${method}`);
@@ -81,7 +86,6 @@ export function makeHeaders(
 ) {
   const headers = new Headers(additionalHeaders);
 
-  // Don't set Content-Type for FormData - let browser set it with boundary
   if (!isFormData) {
     headers.set("Content-Type", "application/json");
   }
