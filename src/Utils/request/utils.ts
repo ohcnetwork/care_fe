@@ -5,7 +5,30 @@ import { HttpMethod, QueryParams, Type } from "@/Utils/request/types";
 export const API = <TResponse, TBody = undefined>(
   route: `${HttpMethod} ${string}`,
 ) => {
-  const [method, path] = route.split(" ") as [HttpMethod, string];
+  if (!route || typeof route !== "string") {
+    throw new Error("Route must be a non-empty string");
+  }
+
+  const parts = route.trim().split(" ");
+
+  if (parts.length !== 2) {
+    throw new Error(
+      `Invalid route format "${route}". Expected format: "METHOD /path"`,
+    );
+  }
+
+  const [method, path] = parts as [HttpMethod, string];
+
+  const validMethods: HttpMethod[] = ["GET", "POST", "PUT", "DELETE", "PATCH"];
+
+  if (!validMethods.includes(method)) {
+    throw new Error(`Invalid HTTP method: ${method}`);
+  }
+
+  if (!path || !path.startsWith("/")) {
+    throw new Error(`Invalid path "${path}". Must start with "/"`);
+  }
+
   return {
     path,
     method,
