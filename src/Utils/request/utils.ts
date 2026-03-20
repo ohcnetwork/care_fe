@@ -2,6 +2,8 @@ import { LocalStorageKeys } from "@/common/constants";
 
 import { HttpMethod, QueryParams, Type } from "@/Utils/request/types";
 
+const VALID_METHODS = Object.values(HttpMethod);
+
 export const API = <TResponse, TBody = undefined>(
   route: `${HttpMethod} ${string}`,
 ) => {
@@ -17,9 +19,7 @@ export const API = <TResponse, TBody = undefined>(
   const method = trimmedRoute.slice(0, firstSpace) as HttpMethod;
   const path = trimmedRoute.slice(firstSpace + 1);
 
-  const validMethods = Object.values(HttpMethod);
-
-  if (!validMethods.includes(method)) {
+  if (!VALID_METHODS.includes(method)) {
     throw new Error(`Invalid HTTP method: ${method}`);
   }
 
