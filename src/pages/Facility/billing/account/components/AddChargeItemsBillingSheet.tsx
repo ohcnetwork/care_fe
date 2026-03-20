@@ -156,12 +156,37 @@ export default function AddChargeItemsBillingSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-3xl p-0 flex flex-col">
+      <SheetContent className="w-full sm:max-w-3xl p-0 flex flex-col overflow-hidden">
         <SheetHeader className="px-4 py-4">
           <SheetTitle>{t("add_charge_items")}</SheetTitle>
         </SheetHeader>
-        <ScrollArea className="flex-1 px-4 pt-0">
-          <div className="mt-4 space-y-4">
+        <div className="px-4 pb-4 border-b">
+          <ResourceDefinitionCategoryPicker<ChargeItemDefinitionBase>
+            facilityId={facilityId}
+            value={selectedDefinition || undefined}
+            onValueChange={(selectedDef) => {
+              if (!selectedDef) {
+                setSelectedDefinition(null);
+                return;
+              }
+              setSelectedDefinition(selectedDef as ChargeItemDefinitionRead);
+            }}
+            placeholder={t("select_charge_item_definition")}
+            disabled={disabled}
+            className="w-full"
+            resourceType={ResourceCategoryResourceType.charge_item_definition}
+            listDefinitions={{
+              queryFn: chargeItemDefinitionApi.listChargeItemDefinition,
+              pathParams: { facilityId },
+              queryParams: { status: ChargeItemDefinitionStatus.active },
+            }}
+            translationBaseKey="charge_item_definition"
+            data-shortcut-id="keydown-action"
+            defaultOpen={open}
+          />
+        </div>
+        <ScrollArea className="min-h-0 flex-1 px-4">
+          <div className="py-4 space-y-4">
             {selectedItems.length > 0 && (
               <div className="space-y-2">
                 <h3 className="text-base font-medium">{t("selected_items")}</h3>
@@ -344,36 +369,6 @@ export default function AddChargeItemsBillingSheet({
                 )}
               </div>
             )}
-
-            <div className="space-y-2">
-              <ResourceDefinitionCategoryPicker<ChargeItemDefinitionBase>
-                facilityId={facilityId}
-                value={selectedDefinition || undefined}
-                onValueChange={(selectedDef) => {
-                  if (!selectedDef) {
-                    setSelectedDefinition(null);
-                    return;
-                  }
-                  setSelectedDefinition(
-                    selectedDef as ChargeItemDefinitionRead,
-                  );
-                }}
-                placeholder={t("select_charge_item_definition")}
-                disabled={disabled}
-                className="w-full"
-                resourceType={
-                  ResourceCategoryResourceType.charge_item_definition
-                }
-                listDefinitions={{
-                  queryFn: chargeItemDefinitionApi.listChargeItemDefinition,
-                  pathParams: { facilityId },
-                  queryParams: { status: ChargeItemDefinitionStatus.active },
-                }}
-                translationBaseKey="charge_item_definition"
-                data-shortcut-id="keydown-action"
-                defaultOpen={open}
-              />
-            </div>
           </div>
         </ScrollArea>
         <SheetFooter className="p-4 border-t bg-background sm:space-x-0">
