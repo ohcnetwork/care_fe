@@ -371,7 +371,7 @@ export default function AddChargeItemsBillingSheet({
             )}
           </div>
         </ScrollArea>
-        <SheetFooter className="p-4 border-t bg-background sm:space-x-0">
+        <SheetFooter className="p-4 border-t bg-background gap-2">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
