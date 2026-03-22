@@ -4,6 +4,7 @@ import OrganizationIndex from "@/pages/Organization/OrganizationIndex";
 import OrganizationPatients from "@/pages/Organization/OrganizationPatients";
 import OrganizationUsers from "@/pages/Organization/OrganizationUsers";
 import OrganizationView from "@/pages/Organization/OrganizationView";
+import ResponsibilityLanding from "@/pages/Organization/ResponsibilityLanding";
 
 const OrganizationRoutes: AppRoutes = {
   "/organization": () => <OrganizationIndex />,
@@ -46,10 +47,8 @@ const OrganizationRoutes: AppRoutes = {
   ),
 
   // Responsibility routes (role orgs with scoped context)
-  // Responsibilities are flat — no children, so land on users directly
-  "/responsibilities/:id": ({ id }) => (
-    <OrganizationUsers id={id} routeContext="responsibility" />
-  ),
+  // Landing page checks permissions: admins see users, members see patients
+  "/responsibilities/:id": ({ id }) => <ResponsibilityLanding id={id} />,
   "/responsibilities/:id/users": ({ id }) => (
     <OrganizationUsers id={id} routeContext="responsibility" />
   ),
