@@ -46,8 +46,9 @@ const OrganizationRoutes: AppRoutes = {
   ),
 
   // Responsibility routes (role orgs with scoped context)
+  // Responsibilities are flat — no children, so land on users directly
   "/responsibilities/:id": ({ id }) => (
-    <OrganizationView id={id} routeContext="responsibility" />
+    <OrganizationUsers id={id} routeContext="responsibility" />
   ),
   "/responsibilities/:id/users": ({ id }) => (
     <OrganizationUsers id={id} routeContext="responsibility" />

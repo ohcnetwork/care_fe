@@ -111,7 +111,11 @@ export default function OrganizationLayout({
         !isRoleOrg && hasPermission("can_view_organization", org.permissions),
     },
     {
-      url: `${baseUrl}/${id}/users`,
+      // For responsibilities, users is the landing page (no /users suffix)
+      url:
+        effectiveContext === "responsibility"
+          ? `${baseUrl}/${id}`
+          : `${baseUrl}/${id}/users`,
       name: t("users"),
       icon: <CareIcon icon="d-people" />,
       visibility: hasPermission("can_list_organization_users", org.permissions),
