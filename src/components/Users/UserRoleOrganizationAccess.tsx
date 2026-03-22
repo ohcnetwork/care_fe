@@ -17,10 +17,9 @@ import {
 } from "@/components/ui/sheet";
 
 import { AccessibleRoleOrgSelect } from "@/components/Common/AccessibleRoleOrgSelect";
-import { OrgSelect } from "@/components/Common/OrgSelect";
 import { RoleSelect } from "@/components/Common/RoleSelect";
 import { RoleBase, RoleContext } from "@/types/emr/role/role";
-import { Organization, OrgType } from "@/types/organization/organization";
+import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 import mutate from "@/Utils/request/mutate";
 
@@ -88,14 +87,13 @@ export function RoleOrgAccessEditor({
               <Label className="text-xs text-gray-500">
                 {t("role_organization")}
               </Label>
-              <OrgSelect
+              <AccessibleRoleOrgSelect
                 value={entry.organization || undefined}
                 onChange={(selectedOrganization) =>
                   updateEntry(index, {
                     organization: selectedOrganization?.id || "",
                   })
                 }
-                orgType={OrgType.ROLE}
                 placeholder={t("select_role_organization")}
                 inputPlaceholder={t("search_organization")}
                 disabled={disabled}
