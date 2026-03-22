@@ -89,12 +89,16 @@ export default function OrganizationLayout({
     return <div>{t("organization_not_found")}</div>;
   }
 
+  const isRoleOrg = org.org_type === OrgType.ROLE;
+
   const navItems: NavigationLink[] = [
     {
       url: `${baseUrl}/${id}`,
       name: t("organizations"),
       icon: <CareIcon icon="d-hospital" />,
-      visibility: hasPermission("can_view_organization", org.permissions),
+      // Role orgs are flat — no child organizations
+      visibility:
+        !isRoleOrg && hasPermission("can_view_organization", org.permissions),
     },
     {
       url: `${baseUrl}/${id}/users`,
@@ -120,7 +124,10 @@ export default function OrganizationLayout({
       url: `${baseUrl}/${id}/service_accounts`,
       name: t("service_accounts"),
       icon: <Bot className="size-4" />,
-      visibility: hasPermission("can_list_organization_users", org.permissions),
+      // Role orgs don't have service accounts
+      visibility:
+        !isRoleOrg &&
+        hasPermission("can_list_organization_users", org.permissions),
     },
     ...organizationTabs.map((tab) => ({
       url: `${baseUrl}/${id}/${tab.slug}`,
