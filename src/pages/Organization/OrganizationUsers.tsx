@@ -23,18 +23,22 @@ import AddUserSheet from "./components/AddUserSheet";
 import EditUserRoleSheet from "./components/EditUserRoleSheet";
 import EntityBadge from "./components/EntityBadge";
 import LinkUserSheet from "./components/LinkUserSheet";
-import OrganizationLayout from "./components/OrganizationLayout";
+import OrganizationLayout, {
+  type RouteContext,
+} from "./components/OrganizationLayout";
 
 interface Props {
   id: string;
   navOrganizationId?: string;
   isServiceAccount?: boolean;
+  routeContext?: RouteContext;
 }
 
 export default function OrganizationUsers({
   id,
   navOrganizationId,
   isServiceAccount = false,
+  routeContext,
 }: Props) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
@@ -120,6 +124,7 @@ export default function OrganizationUsers({
         id={id}
         navOrganizationId={navOrganizationId}
         setOrganization={setOrganization}
+        routeContext={routeContext}
       >
         {({ orgPermissions }) => {
           const {

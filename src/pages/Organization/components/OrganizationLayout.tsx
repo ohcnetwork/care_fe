@@ -39,12 +39,15 @@ import {
 import organizationApi from "@/types/organization/organizationApi";
 import { Bot } from "lucide-react";
 
+export type RouteContext = "responsibility" | "organization";
+
 interface Props {
   // NavOrganizationId is used to show the organization switcher in the sidebar, it may not the parent organization
   navOrganizationId?: string;
   id: string;
   children: (props: { orgPermissions: string[] }) => React.ReactNode;
   setOrganization?: (org: Organization) => void;
+  routeContext?: RouteContext;
 }
 
 export default function OrganizationLayout({
@@ -52,6 +55,7 @@ export default function OrganizationLayout({
   navOrganizationId,
   children,
   setOrganization,
+  routeContext,
 }: Props) {
   const path = usePath() || "";
   const { t } = useTranslation();
@@ -62,10 +66,6 @@ export default function OrganizationLayout({
   const organizationTabs = careApps.flatMap(
     (c) => (!c.isLoading && c.organizationTabs) || [],
   );
-
-  const baseUrl = navOrganizationId
-    ? `/organization/${navOrganizationId}/children`
-    : `/organization`;
 
   const { data: org, isLoading } = useQuery({
     queryKey: ["organization", id],
@@ -90,6 +90,16 @@ export default function OrganizationLayout({
   }
 
   const isRoleOrg = org.org_type === OrgType.ROLE;
+
+  // Determine route context from prop or org type
+  const effectiveContext: RouteContext =
+    routeContext || (isRoleOrg ? "responsibility" : "organization");
+
+  const baseUrl = navOrganizationId
+    ? `/organization/${navOrganizationId}/children`
+    : effectiveContext === "responsibility"
+      ? `/responsibilities`
+      : `/organization`;
 
   const navItems: NavigationLink[] = [
     {

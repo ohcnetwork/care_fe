@@ -49,14 +49,22 @@ export default function UserDashboard() {
   const organizations = user.organizations || [];
   const governance = organizations.filter((org) => org.org_type === "govt");
 
-  // Fetch accessible role organizations from dedicated API
+  // Fetch accessible role organizations from dedicated API (includes user's role per org)
   const { data: accessibleRoleOrgs, isLoading: isLoadingRoleOrgs } = useQuery({
     queryKey: ["accessibleRoleOrganizations", "dashboard"],
     queryFn: query(organizationApi.accessibleRoleOrganizations, {
       queryParams: {},
     }),
   });
-  const responsibilities = accessibleRoleOrgs?.results || [];
+  const responsibilityItems = accessibleRoleOrgs?.results || [];
+  // Extract organizations for tab items
+  const responsibilities = responsibilityItems.map((item) => item.organization);
+  // Map org ID → role name for showing designation on cards
+  const roleByOrgId = new Map(
+    responsibilityItems
+      .filter((item) => item.role)
+      .map((item) => [item.organization.id, item.role!.name]),
+  );
 
   const tabsData = [
     { id: DashboardTabs.TAB_FACILITIES, items: facilities },
@@ -246,34 +254,33 @@ export default function UserDashboard() {
                 tabItems={responsibilities}
                 description={t("dashboard_tab_associations")}
                 isLoading={isLoadingRoleOrgs}
-                renderChild={(association) => (
-                  <Link
-                    key={association.id}
-                    href={`/organization/${association.id}`}
-                  >
-                    <Card className="transition-all hover:shadow-md hover:border-primary/20 border-gray-200">
-                      <CardContent className="flex items-center gap-3 p-3 md:p-4">
-                        <Avatar
-                          name={association.name}
-                          className="size-12 md:size-14"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-medium truncate text-sm md:text-base">
-                            {association.name}
-                          </h3>
-                          <p className="text-xs md:text-sm text-gray-500 truncate">
-                            {"org_type" in association &&
-                              getOrgLabel(
-                                association.org_type,
-                                association.metadata,
-                              )}
-                          </p>
-                        </div>
-                        <ChevronRight className="size-4 md:size-5 text-gray-500" />
-                      </CardContent>
-                    </Card>
-                  </Link>
-                )}
+                renderChild={(association) => {
+                  const roleName = roleByOrgId.get(association.id);
+                  return (
+                    <Link
+                      key={association.id}
+                      href={`/responsibilities/${association.id}`}
+                    >
+                      <Card className="transition-all hover:shadow-md hover:border-primary/20 border-gray-200">
+                        <CardContent className="flex items-center gap-3 p-3 md:p-4">
+                          <Avatar
+                            name={association.name}
+                            className="size-12 md:size-14"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium truncate text-sm md:text-base">
+                              {association.name}
+                            </h3>
+                            <p className="text-xs md:text-sm text-gray-500 truncate">
+                              {roleName || t("responsibility")}
+                            </p>
+                          </div>
+                          <ChevronRight className="size-4 md:size-5 text-gray-500" />
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                }}
               />
             )}
 

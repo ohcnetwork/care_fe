@@ -44,6 +44,17 @@ const OrganizationRoutes: AppRoutes = {
       navOrganizationId={navOrganizationId}
     />
   ),
+
+  // Responsibility routes (role orgs with scoped context)
+  "/responsibilities/:id": ({ id }) => (
+    <OrganizationView id={id} routeContext="responsibility" />
+  ),
+  "/responsibilities/:id/users": ({ id }) => (
+    <OrganizationUsers id={id} routeContext="responsibility" />
+  ),
+  "/responsibilities/:id/patients": ({ id }) => (
+    <OrganizationPatients id={id} routeContext="responsibility" />
+  ),
 };
 
 export default OrganizationRoutes;

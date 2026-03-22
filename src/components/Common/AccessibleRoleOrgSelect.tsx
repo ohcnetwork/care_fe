@@ -45,21 +45,23 @@ export function AccessibleRoleOrgSelect({
     }),
   });
 
+  // Unwrap the nested response: { organization, role } → Organization
+  const searchOrgs =
+    searchResults?.results?.map((item) => item.organization) || [];
+
   // Fetch selected org if not in search results
   const { data: selectedData } = useQuery({
     queryKey: ["organizations", "role", value, "selected"],
     queryFn: query(organizationApi.get, {
       pathParams: { id: value! },
     }),
-    enabled:
-      !!value && !searchResults?.results?.some((org) => org.id === value),
+    enabled: !!value && !searchOrgs.some((org) => org.id === value),
   });
 
-  const searchOptions = searchResults?.results || [];
   const allOptions =
-    value && selectedData && !searchOptions.some((o) => o.id === value)
-      ? [...searchOptions, selectedData]
-      : searchOptions;
+    value && selectedData && !searchOrgs.some((o) => o.id === value)
+      ? [...searchOrgs, selectedData]
+      : searchOrgs;
 
   return (
     <Autocomplete
