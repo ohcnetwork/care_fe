@@ -365,7 +365,8 @@
     }
 
     /* Collapse everything else for single-print (only when multi-print is NOT also active) */
-    body:has(#single-print):not(:has(#multi-print)) *:not(#single-print):not(#single-print *) {
+    body:has(#single-print):not(:has(#multi-print))
+      *:not(#single-print):not(#single-print *) {
       height: 0 !important;
       min-height: 0 !important;
       max-height: 0 !important;
@@ -521,50 +522,6 @@
 
     .print-text-large {
       font-size: 14pt !important;
-    }
-  }
-
-  .App {
-    text-align: center;
-  }
-
-  .App-logo {
-    height: 10vmin;
-    pointer-events: none;
-    filter: brightness(80%);
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-      animation: App-logo-blink 1s linear infinite;
-    }
-  }
-
-  .App-header {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
-  }
-
-  @keyframes App-logo-blink {
-    0% {
-      opacity: 0;
-    }
-    25% {
-      opacity: 0.5;
-    }
-    50% {
-      opacity: 1;
-    }
-    75% {
-      opacity: 0.5;
-    }
-    100% {
-      opacity: 0;
     }
   }
 
