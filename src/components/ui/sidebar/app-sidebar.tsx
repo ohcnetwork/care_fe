@@ -27,6 +27,7 @@ import {
 import { OrgNav } from "@/components/ui/sidebar/org-nav";
 import { OrganizationSwitcher } from "@/components/ui/sidebar/organization-switcher";
 import { PatientNav } from "@/components/ui/sidebar/patient-nav";
+import { ResponsibilitySwitcher } from "@/components/ui/sidebar/responsibility-switcher";
 
 import { useRouteParams } from "@/hooks/useRouteParams";
 import { ServiceSwitcher } from "./facility/service/service-switcher";
@@ -57,6 +58,9 @@ export function AppSidebar({
   const { facilityId } = useRouteParams("/facility/:facilityId");
   const { locationId } = useRouteParams("/facility/:_/locations/:locationId");
   const { organizationId } = useRouteParams("/organization/:organizationId");
+  const { responsibilityId } = useRouteParams(
+    "/responsibilities/:responsibilityId",
+  );
   const { serviceId } = useRouteParams(
     "/facility/:facilityId/services/:serviceId",
   );
@@ -116,7 +120,10 @@ export function AppSidebar({
       className="group-data-[side=left]:border-r-0"
     >
       <SidebarHeader>
-        {selectedOrganization && hasOrganizations && (
+        {responsibilityId && (
+          <ResponsibilitySwitcher selectedResponsibilityId={responsibilityId} />
+        )}
+        {selectedOrganization && hasOrganizations && !responsibilityId && (
           <OrganizationSwitcher
             organizations={user?.organizations || []}
             selectedOrganization={selectedOrganization}
@@ -133,7 +140,8 @@ export function AppSidebar({
         {!locationId &&
           !serviceId &&
           !selectedFacility &&
-          !selectedOrganization && (
+          !selectedOrganization &&
+          !responsibilityId && (
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
