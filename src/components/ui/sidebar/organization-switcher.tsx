@@ -85,7 +85,7 @@ export function OrganizationSwitcher({
               asChild
               className={cn(
                 "gap-2 p-2",
-                org?.name === selectedOrganization?.name &&
+                org?.id === selectedOrganization?.id &&
                   "bg-primary-500 text-white focus:bg-primary-600 focus:text-white",
               )}
             >
