@@ -75,6 +75,11 @@ export default {
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<PatientRead>>(),
   },
+  accessibleRoleOrganizations: {
+    path: "/api/v1/organization/accessible_role_organizations/",
+    method: HttpMethod.GET,
+    TRes: Type<PaginatedResponse<Organization>>(),
+  },
   getPublicOrganizations: {
     path: "/api/v1/govt/organization/",
     method: HttpMethod.GET,

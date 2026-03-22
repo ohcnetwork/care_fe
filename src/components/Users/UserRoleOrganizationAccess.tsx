@@ -16,6 +16,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { AccessibleRoleOrgSelect } from "@/components/Common/AccessibleRoleOrgSelect";
 import { OrgSelect } from "@/components/Common/OrgSelect";
 import { RoleSelect } from "@/components/Common/RoleSelect";
 import { RoleBase, RoleContext } from "@/types/emr/role/role";
@@ -283,10 +284,9 @@ export function RoleOrgAccessSummary({
                     {t("add_access")}
                   </p>
                   <div className="space-y-2">
-                    <OrgSelect
+                    <AccessibleRoleOrgSelect
                       value={newOrg?.id}
                       onChange={setNewOrg}
-                      orgType={OrgType.ROLE}
                       placeholder={t("select_role_organization")}
                       inputPlaceholder={t("search_organization")}
                     />
