@@ -80,7 +80,6 @@ export default function UserSummaryTab({
       <RoleOrgAccessSummary
         userId={userData.id}
         memberships={userData.role_orgs || []}
-        canManage={canEditUser}
       />
     );
   };
