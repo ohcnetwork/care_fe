@@ -271,9 +271,11 @@ export default function UserDashboard() {
                             <h3 className="font-medium truncate text-sm md:text-base">
                               {association.name}
                             </h3>
-                            <p className="text-xs md:text-sm text-gray-500 truncate">
-                              {roleName || t("responsibility")}
-                            </p>
+                            {roleName && (
+                              <p className="text-xs md:text-sm text-gray-500 truncate">
+                                {roleName}
+                              </p>
+                            )}
                           </div>
                           <ChevronRight className="size-4 md:size-5 text-gray-500" />
                         </CardContent>
