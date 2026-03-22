@@ -260,9 +260,10 @@ export default function UserDashboard() {
                     <Link
                       key={association.id}
                       href={`/responsibilities/${association.id}`}
+                      className="h-full"
                     >
-                      <Card className="transition-all hover:shadow-md hover:border-primary/20 border-gray-200">
-                        <CardContent className="flex items-center gap-3 p-3 md:p-4">
+                      <Card className="h-full transition-all hover:shadow-md hover:border-primary/20 border-gray-200">
+                        <CardContent className="flex h-full items-center gap-3 p-3 md:p-4">
                           <Avatar
                             name={association.name}
                             className="size-12 md:size-14"
