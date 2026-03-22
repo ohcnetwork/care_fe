@@ -33,9 +33,15 @@ jobs:
       - name: Read PR number
         id: pr
         run: |
-          PR_NUMBER=$(cat build/pr-number.txt)
-          if ! [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
-            echo "Invalid PR number: $PR_NUMBER" && exit 1
+          PR_NUMBER="${{ github.event.workflow_run.pull_requests[0].number }}"
+          if ! [[ "$PR_NUMBER" =~ ^[1-9][0-9]*$ ]]; then
+            echo "Invalid PR number from workflow payload: $PR_NUMBER" >&2
+            exit 1
+          fi
+          ARTIFACT_PR="$(cat build/pr-number.txt || true)"
+          if [[ -n "$ARTIFACT_PR" && "$ARTIFACT_PR" != "$PR_NUMBER" ]]; then
+            echo "Artifact PR number mismatch (artifact=$ARTIFACT_PR, payload=$PR_NUMBER)" >&2
+            exit 1
           fi
           echo "number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
 
