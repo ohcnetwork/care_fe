@@ -1639,7 +1639,7 @@
   "danger_zone": "Danger Zone",
   "danger_zone_description": "These actions cannot be undone. Please proceed with caution.",
   "dashboard": "Dashboard",
-  "dashboard_tab_associations": "These are the professional or role-based groups - such as doctors, nurses, technicians, volunteers, or staff - that you are affiliated with.",
+  "dashboard_tab_associations": "These are the responsibilities - such as doctors, nurses, technicians, volunteers, or staff - that you are affiliated with.",
   "dashboard_tab_facilities": "These are the clinics, hospitals, or health centers you manage or belong to.",
   "dashboard_tab_governance": "These are the Local Self-Government (LSG) networks or groups you're affiliated with, including State, District, Block, Municipality, Corporation, Panchayat, and Ward-level governance bodies.",
   "data_collection_details": "Data collection details",

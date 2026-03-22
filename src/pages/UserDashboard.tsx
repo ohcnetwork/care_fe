@@ -25,7 +25,7 @@ import { Organization, getOrgLabel } from "@/types/organization/organization";
 
 enum DashboardTabs {
   TAB_FACILITIES = "Facilities",
-  TAB_ASSOCIATIONS = "Associations",
+  TAB_ASSOCIATIONS = "Responsibilities",
   TAB_GOVERNANCE = "Governance",
 }
 
