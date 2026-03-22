@@ -196,95 +196,99 @@ export default function OrganizationLayout({
         </div>
       )}
 
-      {/* Desktop Navigation */}
-      <div className="mt-4 min-w-0 hidden lg:block">
-        <Menubar className="w-full h-full overflow-x-auto">
-          {navItems
-            .filter((item) => item.visibility)
-            .map((item) => (
-              <MenubarMenu key={item.url}>
-                <MenubarTrigger
-                  className={`${
-                    path === item.url
-                      ? "font-medium text-primary-700 bg-gray-100"
-                      : "hover:text-primary-500 hover:bg-gray-100 text-gray-700"
-                  }`}
-                  asChild
-                >
-                  <Link href={item.url} className="cursor-pointer">
-                    <div className="mr-2">{item.icon}</div>
-                    {item.name}
-                  </Link>
-                </MenubarTrigger>
-              </MenubarMenu>
-            ))}
-        </Menubar>
-      </div>
-
-      {/* Mobile Navigation */}
-      <div className="mt-4">
-        <div className="block lg:hidden">
-          <DropdownMenu
-            open={isMobileMenuOpen}
-            onOpenChange={setIsMobileMenuOpen}
-          >
-            <DropdownMenuTrigger asChild className="py-2">
-              <Button
-                variant="outline"
-                className="w-full flex justify-between items-center py-3 px-4"
-              >
-                <div className="flex items-center py-2">
-                  {activeNavItem && (
-                    <div className="mr-2 size-5">{activeNavItem.icon}</div>
-                  )}
-                  <span className="font-medium text-base">
-                    {activeNavItem ? activeNavItem.name : t("navigation")}
-                  </span>
-                </div>
-                <CareIcon
-                  icon={isMobileMenuOpen ? "l-angle-up" : "l-angle-down"}
-                  className="ml-2 size-4"
-                />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              sideOffset={5}
-              className="w-[var(--radix-dropdown-menu-trigger-width)]"
-            >
-              {visibleNavItems.map((item) => (
-                <DropdownMenuItem
-                  key={item.url}
-                  className={cn(
-                    "flex justify-between items-center py-3",
-                    path === item.url
-                      ? "font-medium text-primary-700 bg-gray-100"
-                      : "text-gray-700",
-                  )}
-                  asChild
-                >
-                  <Link
-                    href={item.url}
-                    className="flex items-center w-full"
-                    onClick={() => setIsMobileMenuOpen(false)}
+      {/* Desktop Navigation — hide when only one tab visible */}
+      {visibleNavItems.length > 1 && (
+        <div className="mt-4 min-w-0 hidden lg:block">
+          <Menubar className="w-full h-full overflow-x-auto">
+            {navItems
+              .filter((item) => item.visibility)
+              .map((item) => (
+                <MenubarMenu key={item.url}>
+                  <MenubarTrigger
+                    className={`${
+                      path === item.url
+                        ? "font-medium text-primary-700 bg-gray-100"
+                        : "hover:text-primary-500 hover:bg-gray-100 text-gray-700"
+                    }`}
+                    asChild
                   >
-                    <div className="flex items-center text-base">
+                    <Link href={item.url} className="cursor-pointer">
                       <div className="mr-2">{item.icon}</div>
                       {item.name}
-                    </div>
-                    {path === item.url && (
-                      <DropdownMenuCheckboxItem
-                        checked
-                        className="pointer-events-none pr-1"
-                      />
-                    )}
-                  </Link>
-                </DropdownMenuItem>
+                    </Link>
+                  </MenubarTrigger>
+                </MenubarMenu>
               ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          </Menubar>
         </div>
-      </div>
+      )}
+
+      {/* Mobile Navigation */}
+      {visibleNavItems.length > 1 && (
+        <div className="mt-4">
+          <div className="block lg:hidden">
+            <DropdownMenu
+              open={isMobileMenuOpen}
+              onOpenChange={setIsMobileMenuOpen}
+            >
+              <DropdownMenuTrigger asChild className="py-2">
+                <Button
+                  variant="outline"
+                  className="w-full flex justify-between items-center py-3 px-4"
+                >
+                  <div className="flex items-center py-2">
+                    {activeNavItem && (
+                      <div className="mr-2 size-5">{activeNavItem.icon}</div>
+                    )}
+                    <span className="font-medium text-base">
+                      {activeNavItem ? activeNavItem.name : t("navigation")}
+                    </span>
+                  </div>
+                  <CareIcon
+                    icon={isMobileMenuOpen ? "l-angle-up" : "l-angle-down"}
+                    className="ml-2 size-4"
+                  />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                sideOffset={5}
+                className="w-[var(--radix-dropdown-menu-trigger-width)]"
+              >
+                {visibleNavItems.map((item) => (
+                  <DropdownMenuItem
+                    key={item.url}
+                    className={cn(
+                      "flex justify-between items-center py-3",
+                      path === item.url
+                        ? "font-medium text-primary-700 bg-gray-100"
+                        : "text-gray-700",
+                    )}
+                    asChild
+                  >
+                    <Link
+                      href={item.url}
+                      className="flex items-center w-full"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <div className="flex items-center text-base">
+                        <div className="mr-2">{item.icon}</div>
+                        {item.name}
+                      </div>
+                      {path === item.url && (
+                        <DropdownMenuCheckboxItem
+                          checked
+                          className="pointer-events-none pr-1"
+                        />
+                      )}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      )}
 
       {/* Page Content */}
       <div className="mt-4">
