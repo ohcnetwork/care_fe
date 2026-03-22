@@ -27,7 +27,10 @@ import {
 import { OrgNav } from "@/components/ui/sidebar/org-nav";
 import { OrganizationSwitcher } from "@/components/ui/sidebar/organization-switcher";
 import { PatientNav } from "@/components/ui/sidebar/patient-nav";
-import { ResponsibilitySwitcher } from "@/components/ui/sidebar/responsibility-switcher";
+import {
+  ResponsibilityNav,
+  ResponsibilitySwitcher,
+} from "@/components/ui/sidebar/responsibility-switcher";
 
 import { useRouteParams } from "@/hooks/useRouteParams";
 import { ServiceSwitcher } from "./facility/service/service-switcher";
@@ -174,7 +177,8 @@ export function AppSidebar({
           !selectedOrganization && (
             <FacilityNav selectedFacility={selectedFacility} />
           )}
-        {selectedOrganization && (
+        {responsibilityId && <ResponsibilityNav />}
+        {selectedOrganization && !responsibilityId && (
           <OrgNav organizations={user?.organizations || []} />
         )}
         {patientSidebar && <PatientNav />}

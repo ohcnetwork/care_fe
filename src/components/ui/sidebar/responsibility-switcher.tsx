@@ -20,6 +20,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { NavMain } from "@/components/ui/sidebar/nav-main";
 
 import query from "@/Utils/request/query";
 import organizationApi from "@/types/organization/organizationApi";
@@ -108,5 +109,25 @@ export function ResponsibilitySwitcher({ selectedResponsibilityId }: Props) {
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+export function ResponsibilityNav() {
+  const { data } = useQuery({
+    queryKey: ["accessibleRoleOrganizations", "sidebar"],
+    queryFn: query(organizationApi.accessibleRoleOrganizations, {
+      queryParams: {},
+    }),
+  });
+
+  const items = data?.results || [];
+
+  return (
+    <NavMain
+      links={items.map((item) => ({
+        name: item.organization.name,
+        url: `/responsibilities/${item.organization.id}`,
+      }))}
+    />
   );
 }
