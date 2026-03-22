@@ -26,16 +26,12 @@ export default function ResponsibilityLanding({ id }: Props) {
 
   const canListUsers =
     org?.permissions?.includes("can_list_organization_users") ?? false;
-  const canListPatients =
-    org?.permissions?.includes("can_list_patients") ?? false;
 
   useEffect(() => {
-    if (!isLoading && org) {
-      if (!canListUsers && canListPatients) {
-        navigate(`/responsibilities/${id}/patients`, { replace: true });
-      }
+    if (!isLoading && org && !canListUsers) {
+      navigate(`/responsibilities/${id}/patients`, { replace: true });
     }
-  }, [isLoading, org, canListUsers, canListPatients, id]);
+  }, [isLoading, org, canListUsers, id]);
 
   // While loading or if user can list users, show users page
   if (isLoading || canListUsers) {
