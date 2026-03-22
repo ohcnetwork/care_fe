@@ -163,11 +163,11 @@ export function LoadingAnimationSvg({ className }: { className?: string }) {
   const isFirstShow = React.useRef(true);
 
   const schedule = React.useCallback((fn: () => void, delay: number) => {
-    const id: ReturnType<typeof setTimeout> = setTimeout(() => {
-      timers.current = timers.current.filter((t) => t !== id);
+    const timerId: ReturnType<typeof setTimeout> = setTimeout(() => {
+      timers.current = timers.current.filter((t) => t !== timerId);
       fn();
     }, delay);
-    timers.current.push(id);
+    timers.current.push(timerId);
   }, []);
 
   const clearAllTimers = React.useCallback(() => {
@@ -201,7 +201,7 @@ export function LoadingAnimationSvg({ className }: { className?: string }) {
         Math.round(waveDuration * 0.45),
       );
 
-      groups.forEach(({ indices }, i) => {
+      groups.forEach(({ indices }, groupIndex) => {
         schedule(() => {
           if (!mounted.current) return;
           indices.forEach((idx) => {
@@ -304,7 +304,7 @@ export function LoadingAnimationSvg({ className }: { className?: string }) {
               );
             }
           });
-        }, i * WAVE_STEP_MS);
+        }, groupIndex * WAVE_STEP_MS);
       });
 
       schedule(
