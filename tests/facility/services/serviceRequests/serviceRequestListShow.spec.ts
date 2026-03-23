@@ -9,7 +9,6 @@ import { createServiceRequest } from "tests/facility/patient/encounter/serviceRe
 test.use({ storageState: "tests/.auth/user.json" });
 
 interface ServiceRequestRouteContext {
-  locationId: string;
   serviceRequestId: string;
 }
 
@@ -33,20 +32,17 @@ async function createServiceRequestAndGetRouteContext(
   await firstRow.getByRole("button", { name: /see details/i }).click();
 
   await expect(page).toHaveURL(
-    /\/facility\/[a-f0-9-]+\/locations\/[a-f0-9-]+\/service_requests\/[a-f0-9-]+$/i,
+    /\/facility\/[a-f0-9-]+\/service_requests\/[a-f0-9-]+$/i,
   );
 
-  const match = page
-    .url()
-    .match(/\/locations\/([a-f0-9-]+)\/service_requests\/([a-f0-9-]+)$/i);
+  const match = page.url().match(/\/service_requests\/([a-f0-9-]+)$/i);
 
   if (!match) {
-    throw new Error("Failed to extract locationId/serviceRequestId from URL");
+    throw new Error("Failed to extract serviceRequestId from URL");
   }
 
   return {
-    locationId: match[1],
-    serviceRequestId: match[2],
+    serviceRequestId: match[1],
   };
 }
 
@@ -60,11 +56,9 @@ test.describe("Facility Service Request List and Show", () => {
   test("location-scoped service request list loads and rows are visible", async ({
     page,
   }) => {
-    const routeContext = await createServiceRequestAndGetRouteContext(page);
+    await createServiceRequestAndGetRouteContext(page);
 
-    await page.goto(
-      `/facility/${facilityId}/locations/${routeContext.locationId}/service_requests`,
-    );
+    await page.goto(`/facility/${facilityId}/service_requests`);
 
     await expect(
       page.getByRole("heading", { name: /service requests/i }),
@@ -81,11 +75,9 @@ test.describe("Facility Service Request List and Show", () => {
   });
 
   test("status filter updates list state", async ({ page }) => {
-    const routeContext = await createServiceRequestAndGetRouteContext(page);
+    await createServiceRequestAndGetRouteContext(page);
 
-    await page.goto(
-      `/facility/${facilityId}/locations/${routeContext.locationId}/service_requests`,
-    );
+    await page.goto(`/facility/${facilityId}/service_requests`);
 
     await expect(page.getByRole("tab", { name: /active/i })).toBeVisible();
     await page.getByRole("tab", { name: /completed/i }).click();
@@ -109,9 +101,7 @@ test.describe("Facility Service Request List and Show", () => {
   }) => {
     const routeContext = await createServiceRequestAndGetRouteContext(page);
 
-    await page.goto(
-      `/facility/${facilityId}/locations/${routeContext.locationId}/service_requests`,
-    );
+    await page.goto(`/facility/${facilityId}/service_requests`);
 
     const firstListRow = page
       .locator('[data-slot="table-body"] [data-slot="table-row"]')
