@@ -157,7 +157,7 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
   async function selectDiscountByName(page: Page) {
     const searchInput = page.getByPlaceholder(/search for discount code/i);
     await expect(searchInput).toBeVisible({ timeout: 15000 });
-    await searchInput.fill(discountComponentName);
+    await searchInput.fill("");
 
     const scope = page
       .locator("[role='dialog'], [data-radix-popper-content-wrapper]")
@@ -165,34 +165,37 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
       .last();
     await expect(scope).toBeVisible({ timeout: 15000 });
 
-    const checkboxByName = scope.getByRole("checkbox", {
-      name: new RegExp(discountComponentName, "i"),
-    });
-    const hasNamedCheckbox = (await checkboxByName.count()) > 0;
-    if (hasNamedCheckbox) {
-      await expect(checkboxByName.first()).toBeVisible({ timeout: 15000 });
-      await checkboxByName.first().click();
-    } else {
-      const discountOption = scope.getByRole("option", {
-        name: new RegExp(discountComponentName, "i"),
-      });
-      const hasOption = (await discountOption.count()) > 0;
-      if (!hasOption)
-        throw new Error(
-          `Discount option not found for "${discountComponentName}" in selector`,
-        );
+    let matchedRow = scope
+      .getByRole("option")
+      .filter({ hasText: discountComponentName })
+      .first();
 
-      await expect(discountOption.first()).toBeVisible({ timeout: 15000 });
-      const discountCheckbox = discountOption.getByRole("checkbox").first();
-      const isCheckboxVisible = await discountCheckbox
-        .isVisible()
-        .catch(() => false);
-      if (isCheckboxVisible) {
-        await discountCheckbox.click();
-      } else {
-        await discountOption.first().click();
-      }
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const rowCount = await scope
+        .getByRole("option")
+        .filter({ hasText: discountComponentName })
+        .count();
+      if (rowCount > 0) break;
+      await page.waitForTimeout(800);
+      matchedRow = scope
+        .getByRole("option")
+        .filter({ hasText: discountComponentName })
+        .first();
     }
+
+    const hasMatchedRow = (await matchedRow.count()) > 0;
+    if (!hasMatchedRow)
+      throw new Error(
+        `Discount option not found for "${discountComponentName}" in selector`,
+      );
+
+    await expect(matchedRow).toBeVisible({ timeout: 15000 });
+
+    const discountCheckbox = matchedRow.getByRole("checkbox").first();
+    const hasCheckbox = (await discountCheckbox.count()) > 0;
+    if (hasCheckbox) await discountCheckbox.click();
+    else await matchedRow.click();
+
     await page.getByRole("button", { name: "Done" }).click();
   }
 
