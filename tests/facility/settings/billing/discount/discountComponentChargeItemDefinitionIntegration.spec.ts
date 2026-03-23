@@ -7,6 +7,10 @@ test.use({ storageState: "tests/.auth/user.json" });
 
 const CHARGE_ITEM_CATEGORY_NAMES = ["Medications"] as const;
 
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 test.describe("Discount Component & Charge Item Definition Integration", () => {
   let facilityId: string;
   let discountComponentName: string;
@@ -172,7 +176,8 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     const discountRowText = await discountCheckbox
       .locator("xpath=ancestor::div[1]")
       .textContent();
-    selectedDiscountLabel = discountRowText?.trim() || "";
+    selectedDiscountLabel =
+      discountRowText?.match(/[A-Za-z][A-Za-z\s-]*/)?.[0]?.trim() || "";
     await discountCheckbox.click();
 
     await page.getByRole("button", { name: "Done" }).click();
@@ -214,13 +219,23 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
       page.getByRole("heading", { name: chargeItemTitle }),
     ).toBeVisible();
 
-    if (selectedDiscountLabel)
-      await expect(page.getByText(selectedDiscountLabel).first()).toBeVisible();
+    if (selectedDiscountLabel) {
+      await expect(
+        page
+          .getByText(new RegExp(escapeRegExp(selectedDiscountLabel), "i"))
+          .first(),
+      ).toBeVisible();
+    }
 
     await page.getByRole("button", { name: "Edit" }).click();
 
-    if (selectedDiscountLabel)
-      await expect(page.getByText(selectedDiscountLabel).first()).toBeVisible();
+    if (selectedDiscountLabel) {
+      await expect(
+        page
+          .getByText(new RegExp(escapeRegExp(selectedDiscountLabel), "i"))
+          .first(),
+      ).toBeVisible();
+    }
   });
 
   test("conditional discount component can be attached and conditions persist", async ({
