@@ -69,7 +69,9 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
 
     const chargeItemName = faker.commerce.productName();
     chargeItemTitle = chargeItemName;
-    chargeItemSlug = chargeItemName.replace(/\s+/g, "-").slice(0, 25);
+    chargeItemSlug = `test-${chargeItemName.replace(/\s+/g, "-").toLowerCase()}`
+      .replace(/[^a-z0-9-]/g, "")
+      .slice(0, 25);
     basePrice = faker.commerce.price({ dec: 0 });
 
     await page.goto(
@@ -127,6 +129,7 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     await page.goto(
       `/facility/${facilityId}/settings/charge_item_definitions/`,
     );
+    await page.waitForLoadState("networkidle");
     await page.getByPlaceholder(/search/i).fill(categoryName);
     await page.getByRole("heading", { name: categoryName }).click();
   }
@@ -151,13 +154,28 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     ).toBeVisible({ timeout: 15000 });
   }
 
+  async function selectDiscountByName(page: Page) {
+    const searchInput = page.getByPlaceholder(/search for discount code/i);
+    await expect(searchInput).toBeVisible({ timeout: 15000 });
+    await searchInput.fill(discountComponentName);
+
+    const discountPopover = page
+      .locator("div")
+      .filter({ has: searchInput })
+      .filter({ hasText: discountComponentName });
+
+    const discountCheckbox = discountPopover.getByRole("checkbox").first();
+    await expect(discountCheckbox).toBeVisible({ timeout: 15000 });
+    await discountCheckbox.click();
+    await page.getByRole("button", { name: "Done" }).click();
+  }
+
   test("discount component appears in Add Discount and persists on view/edit", async ({
     page,
   }) => {
     await createDiscountComponent(page);
 
     await navigateToChargeItemCategory(page);
-    await page.reload();
     await expect(
       page.getByRole("button", { name: /add definition/i }),
     ).toBeVisible({ timeout: 15000 });
@@ -165,15 +183,7 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     await openCreateChargeItemDefinition(page);
 
     await openDiscountSelector(page);
-
-    const discountPopover = page
-      .locator("div")
-      .filter({ has: page.getByPlaceholder(/search for discount code/i) })
-      .filter({ has: page.getByRole("checkbox") });
-    const discountCheckbox = discountPopover.getByRole("checkbox").first();
-    await expect(discountCheckbox).toBeVisible({ timeout: 15000 });
-    await discountCheckbox.click();
-    await page.getByRole("button", { name: "Done" }).click();
+    await selectDiscountByName(page);
 
     await page.getByRole("button", { name: /create/i }).click();
 
@@ -196,11 +206,11 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
       page.getByRole("heading", { name: chargeItemTitle }),
     ).toBeVisible();
 
-    await expect(page.getByText(/discount/i).first()).toBeVisible();
+    await expect(page.getByText(discountComponentName).first()).toBeVisible();
 
     await page.getByRole("button", { name: "Edit" }).click();
 
-    await expect(page.getByText(/selected/i).first()).toBeVisible();
+    await expect(page.getByText(discountComponentName).first()).toBeVisible();
   });
 
   test("conditional discount component can be attached and conditions persist", async ({
@@ -209,7 +219,6 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     await createDiscountComponent(page, { withCondition: true });
 
     await navigateToChargeItemCategory(page);
-    await page.reload();
     await expect(
       page.getByRole("button", { name: /add definition/i }),
     ).toBeVisible({ timeout: 15000 });
@@ -217,15 +226,7 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     await openCreateChargeItemDefinition(page);
 
     await openDiscountSelector(page);
-
-    const discountPopover = page
-      .locator("div")
-      .filter({ has: page.getByPlaceholder(/search for discount code/i) })
-      .filter({ has: page.getByRole("checkbox") });
-    const discountCheckbox = discountPopover.getByRole("checkbox").first();
-    await expect(discountCheckbox).toBeVisible({ timeout: 15000 });
-    await discountCheckbox.click();
-    await page.getByRole("button", { name: "Done" }).click();
+    await selectDiscountByName(page);
 
     const switchElement = page.getByRole("switch", {
       name: "Use facility global value",
