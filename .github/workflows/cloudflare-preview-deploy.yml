@@ -6,7 +6,7 @@ on:
     types: [completed]
 
 concurrency:
-  group: cloudflare-preview-deploy-pr-${{ github.event.workflow_run.pull_requests[0].number }}
+  group: cloudflare-preview-deploy-${{ github.event.workflow_run.head_sha }}
   cancel-in-progress: true
 
 jobs:
