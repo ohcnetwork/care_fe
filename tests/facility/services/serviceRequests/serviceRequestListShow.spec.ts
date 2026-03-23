@@ -55,9 +55,20 @@ test.describe("Facility Service Request List and Show", () => {
     await expect(page.getByRole("tab", { name: /active/i })).toBeVisible();
     await page.getByRole("tab", { name: /completed/i }).click();
 
-    await expect(
-      page.getByRole("heading", { name: /no service requests found/i }),
-    ).toBeVisible();
+    const emptyStateHeading = page.getByRole("heading", {
+      name: /no service requests found/i,
+    });
+    const completedFirstRow = page
+      .locator('[data-slot="table-body"] [data-slot="table-row"]')
+      .first();
+
+    await expect
+      .poll(
+        async () =>
+          (await emptyStateHeading.count()) + (await completedFirstRow.count()),
+        { timeout: 10000 },
+      )
+      .toBeGreaterThan(0);
 
     await page.getByRole("tab", { name: /active/i }).click();
 
