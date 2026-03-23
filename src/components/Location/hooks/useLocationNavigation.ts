@@ -82,7 +82,6 @@ export function useLocationNavigation({
           parent: selectedLocation?.id,
           available: showAvailableOnly ? "true" : undefined,
           status: "active",
-          //...(!selectedLocation && searchTerm.trim() !== "" ? { mine: true } : {}),
         },
         signal,
       })({ signal });
