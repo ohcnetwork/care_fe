@@ -159,25 +159,39 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     await expect(searchInput).toBeVisible({ timeout: 15000 });
     await searchInput.fill(discountComponentName);
 
-    const dialog = page.getByRole("dialog").last();
-    const isDialogVisible = await dialog.isVisible().catch(() => false);
-    const popper = page.locator("[data-radix-popper-content-wrapper]").last();
-    const scope = isDialogVisible ? dialog : popper;
+    const scope = page
+      .locator("[role='dialog'], [data-radix-popper-content-wrapper]")
+      .filter({ has: searchInput })
+      .last();
     await expect(scope).toBeVisible({ timeout: 15000 });
 
-    const discountOption = scope.getByRole("option", {
+    const checkboxByName = scope.getByRole("checkbox", {
       name: new RegExp(discountComponentName, "i"),
     });
-    await expect(discountOption.first()).toBeVisible({ timeout: 15000 });
-
-    const discountCheckbox = discountOption.getByRole("checkbox").first();
-    const isCheckboxVisible = await discountCheckbox
-      .isVisible()
-      .catch(() => false);
-    if (isCheckboxVisible) {
-      await discountCheckbox.click();
+    const hasNamedCheckbox = (await checkboxByName.count()) > 0;
+    if (hasNamedCheckbox) {
+      await expect(checkboxByName.first()).toBeVisible({ timeout: 15000 });
+      await checkboxByName.first().click();
     } else {
-      await discountOption.first().click();
+      const discountOption = scope.getByRole("option", {
+        name: new RegExp(discountComponentName, "i"),
+      });
+      const hasOption = (await discountOption.count()) > 0;
+      if (!hasOption)
+        throw new Error(
+          `Discount option not found for "${discountComponentName}" in selector`,
+        );
+
+      await expect(discountOption.first()).toBeVisible({ timeout: 15000 });
+      const discountCheckbox = discountOption.getByRole("checkbox").first();
+      const isCheckboxVisible = await discountCheckbox
+        .isVisible()
+        .catch(() => false);
+      if (isCheckboxVisible) {
+        await discountCheckbox.click();
+      } else {
+        await discountOption.first().click();
+      }
     }
     await page.getByRole("button", { name: "Done" }).click();
   }
