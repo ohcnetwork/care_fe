@@ -166,18 +166,14 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
       .last();
     await expect(scope).toBeVisible({ timeout: 15000 });
 
-    const matchedRow = scope
-      .locator("div")
-      .filter({ has: scope.getByRole("checkbox") })
-      .first();
+    const discountCheckbox = scope.getByRole("checkbox").first();
+    await expect(discountCheckbox).toBeVisible({ timeout: 15000 });
 
-    await expect(matchedRow).toBeVisible({ timeout: 15000 });
-    selectedDiscountLabel = (await matchedRow.textContent())?.trim() || "";
-
-    const discountCheckbox = matchedRow.getByRole("checkbox").first();
-    const hasCheckbox = (await discountCheckbox.count()) > 0;
-    if (hasCheckbox) await discountCheckbox.click();
-    else await matchedRow.click();
+    const discountRowText = await discountCheckbox
+      .locator("xpath=ancestor::div[1]")
+      .textContent();
+    selectedDiscountLabel = discountRowText?.trim() || "";
+    await discountCheckbox.click();
 
     await page.getByRole("button", { name: "Done" }).click();
   }
