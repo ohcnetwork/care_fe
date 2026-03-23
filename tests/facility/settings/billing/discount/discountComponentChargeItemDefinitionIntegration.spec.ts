@@ -159,14 +159,26 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     await expect(searchInput).toBeVisible({ timeout: 15000 });
     await searchInput.fill(discountComponentName);
 
-    const discountPopover = page
-      .locator("div")
-      .filter({ has: searchInput })
-      .filter({ hasText: discountComponentName });
+    const dialog = page.getByRole("dialog").last();
+    const isDialogVisible = await dialog.isVisible().catch(() => false);
+    const popper = page.locator("[data-radix-popper-content-wrapper]").last();
+    const scope = isDialogVisible ? dialog : popper;
+    await expect(scope).toBeVisible({ timeout: 15000 });
 
-    const discountCheckbox = discountPopover.getByRole("checkbox").first();
-    await expect(discountCheckbox).toBeVisible({ timeout: 15000 });
-    await discountCheckbox.click();
+    const discountOption = scope.getByRole("option", {
+      name: new RegExp(discountComponentName, "i"),
+    });
+    await expect(discountOption.first()).toBeVisible({ timeout: 15000 });
+
+    const discountCheckbox = discountOption.getByRole("checkbox").first();
+    const isCheckboxVisible = await discountCheckbox
+      .isVisible()
+      .catch(() => false);
+    if (isCheckboxVisible) {
+      await discountCheckbox.click();
+    } else {
+      await discountOption.first().click();
+    }
     await page.getByRole("button", { name: "Done" }).click();
   }
 
