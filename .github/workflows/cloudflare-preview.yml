@@ -37,9 +37,6 @@ jobs:
           CI: ""
           NODE_OPTIONS: "--max_old_space_size=4096"
 
-      - name: Save PR metadata
-        run: echo "${{ github.event.pull_request.number }}" > ./build/pr-number.txt
-
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
