@@ -52,25 +52,17 @@ test.describe("Facility Service Request List and Show", () => {
   test("status filter updates list state", async ({ page }) => {
     await createServiceRequestAndOpenList(page);
 
-    await expect(page.getByRole("tab", { name: /active/i })).toBeVisible();
-    await page.getByRole("tab", { name: /completed/i }).click();
+    const activeTab = page.getByRole("tab", { name: /active/i });
+    const completedTab = page.getByRole("tab", { name: /completed/i });
 
-    const emptyStateHeading = page.getByRole("heading", {
-      name: /no service requests found/i,
-    });
-    const completedFirstRow = page
-      .locator('[data-slot="table-body"] [data-slot="table-row"]')
-      .first();
+    await expect(activeTab).toBeVisible();
+    await expect(completedTab).toBeVisible();
 
-    await expect
-      .poll(
-        async () =>
-          (await emptyStateHeading.count()) + (await completedFirstRow.count()),
-        { timeout: 10000 },
-      )
-      .toBeGreaterThan(0);
+    await completedTab.click();
+    await expect(completedTab).toHaveAttribute("data-state", "active");
 
-    await page.getByRole("tab", { name: /active/i }).click();
+    await activeTab.click();
+    await expect(activeTab).toHaveAttribute("data-state", "active");
 
     const firstListRow = page
       .locator('[data-slot="table-body"] [data-slot="table-row"]')
