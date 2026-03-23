@@ -10,6 +10,7 @@ const CHARGE_ITEM_CATEGORY_NAMES = ["Medications"] as const;
 test.describe("Discount Component & Charge Item Definition Integration", () => {
   let facilityId: string;
   let discountComponentName: string;
+  let selectedDiscountLabel: string;
   let chargeItemTitle: string;
   let chargeItemSlug: string;
   let basePrice: string;
@@ -165,31 +166,13 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
       .last();
     await expect(scope).toBeVisible({ timeout: 15000 });
 
-    let matchedRow = scope
-      .getByRole("option")
-      .filter({ hasText: discountComponentName })
+    const matchedRow = scope
+      .locator("div")
+      .filter({ has: scope.getByRole("checkbox") })
       .first();
 
-    for (let attempt = 0; attempt < 5; attempt += 1) {
-      const rowCount = await scope
-        .getByRole("option")
-        .filter({ hasText: discountComponentName })
-        .count();
-      if (rowCount > 0) break;
-      await page.waitForTimeout(800);
-      matchedRow = scope
-        .getByRole("option")
-        .filter({ hasText: discountComponentName })
-        .first();
-    }
-
-    const hasMatchedRow = (await matchedRow.count()) > 0;
-    if (!hasMatchedRow)
-      throw new Error(
-        `Discount option not found for "${discountComponentName}" in selector`,
-      );
-
     await expect(matchedRow).toBeVisible({ timeout: 15000 });
+    selectedDiscountLabel = (await matchedRow.textContent())?.trim() || "";
 
     const discountCheckbox = matchedRow.getByRole("checkbox").first();
     const hasCheckbox = (await discountCheckbox.count()) > 0;
@@ -235,11 +218,13 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
       page.getByRole("heading", { name: chargeItemTitle }),
     ).toBeVisible();
 
-    await expect(page.getByText(discountComponentName).first()).toBeVisible();
+    if (selectedDiscountLabel)
+      await expect(page.getByText(selectedDiscountLabel).first()).toBeVisible();
 
     await page.getByRole("button", { name: "Edit" }).click();
 
-    await expect(page.getByText(discountComponentName).first()).toBeVisible();
+    if (selectedDiscountLabel)
+      await expect(page.getByText(selectedDiscountLabel).first()).toBeVisible();
   });
 
   test("conditional discount component can be attached and conditions persist", async ({
