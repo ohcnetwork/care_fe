@@ -94,21 +94,10 @@ test.describe("Facility Service Request List and Show", () => {
       listRow.getByRole("button", { name: /see details/i }),
     ).toBeVisible();
 
-    const filtersTriggerByRole = page.getByRole("button", {
-      name: /filters/i,
-    });
-    const hasRoleBasedTrigger = (await filtersTriggerByRole.count()) > 0;
-    const filtersTrigger = hasRoleBasedTrigger
-      ? filtersTriggerByRole.first()
-      : page
-          .locator("button")
-          .filter({ hasText: /filters/i })
-          .first();
-    await expect(filtersTrigger).toBeVisible();
-    await filtersTrigger.click();
-    await expect(page.getByText(/activity definition/i)).toBeVisible();
-    await expect(page.getByText(/date/i).first()).toBeVisible();
-    await page.keyboard.press("Escape");
+    await expect(page.getByPlaceholder(/filter by identifier/i)).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /active|on hold|completed|draft/i }),
+    ).toBeVisible();
   });
 
   test("service request show page renders specimen workflow", async ({
