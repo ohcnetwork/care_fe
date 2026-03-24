@@ -19,7 +19,10 @@ async function createInvoiceAndGetId(
     .first()
     .click();
 
-  const createInvoiceButton = page.getByRole("button", {
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+
+  const createInvoiceButton = dialog.getByRole("button", {
     name: /create invoice/i,
   });
 
@@ -46,7 +49,7 @@ test.describe("Create Invoice", () => {
   let facilityId: string;
   let accountId: string;
 
-  test.beforeAll(() => {
+  test.beforeEach(() => {
     facilityId = getFacilityId();
     accountId = getAccountId();
   });
@@ -73,7 +76,7 @@ test.describe("Create Invoice", () => {
   });
 
   test("created invoice appears in account invoices tab", async ({ page }) => {
-    await createInvoiceAndGetId(page, facilityId, accountId);
+    const invoiceId = await createInvoiceAndGetId(page, facilityId, accountId);
 
     await page.goto(
       `/facility/${facilityId}/billing/account/${accountId}/invoices`,
@@ -83,13 +86,13 @@ test.describe("Create Invoice", () => {
     await expect(invoicesTable).toBeVisible();
 
     const invoiceLink = invoicesTable
-      .getByRole("row")
-      .nth(1)
-      .getByRole("link", { name: /see invoice/i });
+      .getByRole("link", { name: /see invoice/i })
+      .filter({ has: page.locator(`a[href*="${invoiceId}"]`) })
+      .first();
 
     await expect(invoiceLink).toBeVisible();
 
-    const invoiceRow = invoicesTable.getByRole("row").nth(1);
+    const invoiceRow = invoiceLink.locator("xpath=ancestor::tr[1]");
 
     await expect(invoiceRow).toBeVisible();
     await expect(
