@@ -105,19 +105,7 @@ export const ServicePointsDropDown = () => {
                 {t("assigned_service_points")}
               </DropdownMenuLabel>
               <div>
-                {isError ? (
-                  <div className="px-3 py-4 text-sm text-gray-600">
-                    {t("something_wrong")}
-                  </div>
-                ) : isEmpty ? (
-                  <div className="px-3 py-4">
-                    <p className="text-sm font-medium text-gray-950">
-                      {t("no_service_points_available")}
-                    </p>
-                    <p className="mt-1 text-sm text-gray-600">
-                      {t("no_service_points_found_description")}
-                    </p>
-                  </div>
+              {allServicePoints.map((subQueue) => {
                 ) : (
                   allServicePoints.map((subQueue) => {
                     const isSelected = assignedServicePointIds.includes(
