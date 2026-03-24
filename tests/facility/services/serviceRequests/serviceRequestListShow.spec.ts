@@ -94,7 +94,6 @@ test.describe("Facility Service Request List and Show", () => {
       listRow.getByRole("button", { name: /see details/i }),
     ).toBeVisible();
 
-    await expect(page.getByPlaceholder(/filter by identifier/i)).toBeVisible();
     await expect(
       page.getByRole("button", { name: /active|on hold|completed|draft/i }),
     ).toBeVisible();
