@@ -16,11 +16,19 @@ import { useQueueServicePoints } from "./useQueueServicePoints";
 export const ServicePointsDropDown = () => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const { assignedServicePointIds, allServicePoints, toggleServicePoint } =
-    useQueueServicePoints();
+  const {
+    assignedServicePointIds,
+    assignedServicePoints,
+    allServicePoints,
+    hasServicePoints,
+    isEmpty,
+    isError,
+    isLoading,
+    toggleServicePoint,
+  } = useQueueServicePoints();
   const defaultServicePoints = useBreakpoints({ default: 2, sm: 6 });
 
-  if (!allServicePoints) {
+  if (isLoading) {
     return (
       <div className="flex">
         <Skeleton className="h-11 w-40 rounded-r-none rounded-l-md" />
@@ -29,23 +37,25 @@ export const ServicePointsDropDown = () => {
     );
   }
 
-  const activeServicePointCount = allServicePoints.filter((subQueue) =>
-    assignedServicePointIds.includes(subQueue.id),
-  ).length;
+  const activeServicePointCount = assignedServicePoints.length;
+  const isTriggerDisabled = !hasServicePoints || isError;
 
   return (
     <div className="flex">
       <div className="flex gap-1 rounded-r-none border border-r-0 border-gray-300 rounded-l-md p-1.5 bg-white items-center justify-center">
-        {assignedServicePointIds.length === 0 ? (
+        {isError ? (
+          <span className="text-sm font-medium">{t("something_wrong")}</span>
+        ) : isEmpty ? (
+          <span className="text-sm font-medium">
+            {t("no_service_points_available")}
+          </span>
+        ) : assignedServicePointIds.length === 0 ? (
           <span className="text-sm font-medium">
             {t("assign_service_points")}
           </span>
         ) : (
           <div className="flex gap-1 items-center justify-center">
-            {allServicePoints
-              .filter((subQueue) =>
-                assignedServicePointIds.includes(subQueue.id),
-              )
+            {assignedServicePoints
               .slice(0, defaultServicePoints)
               .map((subQueue) => {
                 return (
@@ -71,11 +81,16 @@ export const ServicePointsDropDown = () => {
           </div>
         )}
       </div>
-      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenu
+        open={isTriggerDisabled ? false : isOpen}
+        onOpenChange={(open) => setIsOpen(isTriggerDisabled ? false : open)}
+      >
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
             className="rounded-l-none w-10 h-11 border border-gray-300 bg-white"
+            aria-label={t("assign_service_points")}
+            disabled={isTriggerDisabled}
           >
             <ChevronDownIcon />
           </Button>
@@ -90,32 +105,50 @@ export const ServicePointsDropDown = () => {
                 {t("assigned_service_points")}
               </DropdownMenuLabel>
               <div>
-                {allServicePoints.map((subQueue) => {
-                  const isSelected = assignedServicePointIds.includes(
-                    subQueue.id,
-                  );
-                  return (
-                    <div
-                      key={subQueue.id}
-                      className="flex items-center justify-between rounded-sm w-full p-1 hover:bg-gray-100 cursor-pointer"
-                      onClick={() => {
-                        toggleServicePoint(subQueue.id, !isSelected);
-                      }}
-                    >
-                      <div className="flex items-center space-x-3 p-1">
-                        <Checkbox
-                          checked={isSelected}
-                          onCheckedChange={(checked) =>
-                            toggleServicePoint(subQueue.id, checked as boolean)
-                          }
-                        />
-                        <span className="text-sm font-medium">
-                          {subQueue.name}
-                        </span>
+                {isError ? (
+                  <div className="px-3 py-4 text-sm text-gray-600">
+                    {t("something_wrong")}
+                  </div>
+                ) : isEmpty ? (
+                  <div className="px-3 py-4">
+                    <p className="text-sm font-medium text-gray-950">
+                      {t("no_service_points_available")}
+                    </p>
+                    <p className="mt-1 text-sm text-gray-600">
+                      {t("no_service_points_found_description")}
+                    </p>
+                  </div>
+                ) : (
+                  allServicePoints.map((subQueue) => {
+                    const isSelected = assignedServicePointIds.includes(
+                      subQueue.id,
+                    );
+                    return (
+                      <div
+                        key={subQueue.id}
+                        className="flex items-center justify-between rounded-sm w-full p-1 hover:bg-gray-100 cursor-pointer"
+                        onClick={() => {
+                          toggleServicePoint(subQueue.id, !isSelected);
+                        }}
+                      >
+                        <div className="flex items-center space-x-3 p-1">
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={(checked) =>
+                              toggleServicePoint(
+                                subQueue.id,
+                                checked as boolean,
+                              )
+                            }
+                          />
+                          <span className="text-sm font-medium">
+                            {subQueue.name}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </div>
             </div>
             <div className="border-t border-gray-200 w-full pt-3 pb-1 px-1">

@@ -19,8 +19,12 @@ export function useQueueServicePoints() {
   const [assignedServicePoints, setAssignedServicePoints] = useAtom(atom);
   const servicPointKey = `${resourceType}:${resourceId}`;
 
-  const { data: subQueues } = useQuery({
-    queryKey: ["servicePoints", facilityId],
+  const {
+    data: subQueues,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["servicePoints", facilityId, resourceType, resourceId],
     queryFn: query(tokenSubQueueApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
@@ -32,29 +36,42 @@ export function useQueueServicePoints() {
     }),
   });
 
-  const allServicePoints = subQueues?.results;
+  const allServicePoints = subQueues?.results ?? [];
+  const allServicePointIds = allServicePoints.map((subQueue) => subQueue.id);
+  const availableServicePointIds = new Set(allServicePointIds);
 
   const assignedServicePointIds =
-    assignedServicePoints[servicPointKey] ??
-    allServicePoints?.map((subQueue) => subQueue.id) ??
-    [];
+    assignedServicePoints[servicPointKey] ?? allServicePointIds;
+
+  const normalizedAssignedServicePointIds = assignedServicePointIds.filter(
+    (id) => availableServicePointIds.has(id),
+  );
+
+  const normalizedAssignedServicePointIdSet = new Set(
+    normalizedAssignedServicePointIds,
+  );
+  const normalizedAssignedServicePoints = allServicePoints.filter(({ id }) =>
+    normalizedAssignedServicePointIdSet.has(id),
+  );
+  const hasServicePoints = allServicePoints.length > 0;
 
   return {
     allServicePoints,
-    assignedServicePointIds,
-    assignedServicePoints:
-      allServicePoints?.filter(({ id }) =>
-        assignedServicePointIds.includes(id),
-      ) ?? [],
+    assignedServicePointIds: normalizedAssignedServicePointIds,
+    assignedServicePoints: normalizedAssignedServicePoints,
+    hasServicePoints,
+    isLoading,
+    isError,
+    isEmpty: !isLoading && !isError && !hasServicePoints,
 
     toggleServicePoint: (subQueueId: string, checked: boolean) => {
-      const updated = new Set([...assignedServicePointIds]);
+      const updated = new Set(normalizedAssignedServicePointIds);
       updated[checked ? "add" : "delete"](subQueueId);
 
       setAssignedServicePoints({
         ...assignedServicePoints,
         [servicPointKey]:
-          updated.size !== allServicePoints?.length ? [...updated] : undefined,
+          updated.size !== allServicePoints.length ? [...updated] : undefined,
       });
     },
   } as const;

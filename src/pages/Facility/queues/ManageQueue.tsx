@@ -24,6 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Label } from "@/components/ui/label";
 import { NavTabs } from "@/components/ui/nav-tabs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -196,7 +197,11 @@ export function ManageQueuePage({
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  aria-label={t("settings")}
+                >
                   <SettingsIcon />
                 </Button>
               </DropdownMenuTrigger>
@@ -339,26 +344,14 @@ function ManageServicePointsDialog({
 } & React.ComponentProps<typeof Dialog>) {
   const { t } = useTranslation();
 
-  const { allServicePoints, assignedServicePointIds, toggleServicePoint } =
-    useQueueServicePoints();
-
-  if (!allServicePoints) {
-    return (
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <Skeleton className="h-6 w-48" />
-        </DialogHeader>
-        <div className="space-y-2">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="flex items-center space-x-3 p-3">
-              <Skeleton className="size-4 rounded" />
-              <Skeleton className="h-4 flex-1" />
-            </div>
-          ))}
-        </div>
-      </DialogContent>
-    );
-  }
+  const {
+    allServicePoints,
+    assignedServicePointIds,
+    isEmpty,
+    isError,
+    isLoading,
+    toggleServicePoint,
+  } = useQueueServicePoints();
 
   return (
     <Dialog {...props}>
@@ -367,30 +360,51 @@ function ManageServicePointsDialog({
         <DialogHeader>
           <DialogTitle>{t("assigned_service_points")}</DialogTitle>
         </DialogHeader>
-        <div>
-          {allServicePoints.map((subQueue) => {
-            const isSelected = assignedServicePointIds.includes(subQueue.id);
-            return (
-              <div
-                key={subQueue.id}
-                className="flex items-center justify-between rounded-sm w-full p-3 hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  toggleServicePoint(subQueue.id, !isSelected);
-                }}
-              >
-                <div className="flex items-center space-x-3">
-                  <Checkbox
-                    checked={isSelected}
-                    onCheckedChange={(checked) =>
-                      toggleServicePoint(subQueue.id, checked as boolean)
-                    }
-                  />
-                  <span className="text-sm font-medium">{subQueue.name}</span>
-                </div>
+        {isLoading ? (
+          <div className="space-y-2">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex items-center space-x-3 p-3">
+                <Skeleton className="size-4 rounded" />
+                <Skeleton className="h-4 flex-1" />
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        ) : isError ? (
+          <div className="py-4 text-sm text-gray-600">
+            {t("something_wrong")}
+          </div>
+        ) : isEmpty ? (
+          <EmptyState
+            title={t("no_service_points_available")}
+            description={t("no_service_points_found_description")}
+            className="border-gray-200 shadow-none"
+          />
+        ) : (
+          <div>
+            {allServicePoints.map((subQueue) => {
+              const isSelected = assignedServicePointIds.includes(subQueue.id);
+              return (
+                <div
+                  key={subQueue.id}
+                  className="flex items-center justify-between rounded-sm w-full p-3 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    toggleServicePoint(subQueue.id, !isSelected);
+                  }}
+                >
+                  <div className="flex items-center space-x-3">
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={(checked) =>
+                        toggleServicePoint(subQueue.id, checked as boolean)
+                      }
+                    />
+                    <span className="text-sm font-medium">{subQueue.name}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
