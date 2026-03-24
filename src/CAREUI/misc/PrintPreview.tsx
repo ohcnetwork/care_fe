@@ -172,7 +172,7 @@ function FacilityPrintLayout({
   const pageStyle = buildPageStyle(printTemplate);
 
   return (
-    <>
+    <div className="flex flex-col min-h-[calc(100vh-80px)] print:min-h-[100vh]">
       {pageStyle && <style>{pageStyle}</style>}
       {headerImage?.url ? (
         <div className="flex justify-between items-start mb-4 pb-2">
@@ -209,9 +209,9 @@ function FacilityPrintLayout({
           />
         </div>
       )}
-      {children}
+      <div className="flex-1">{children}</div>
       {footerImage?.url && (
-        <div className="mt-4 pt-2">
+        <div className="mt-auto pt-2">
           <img
             src={footerImage.url}
             alt="Footer"
@@ -224,6 +224,6 @@ function FacilityPrintLayout({
           />
         </div>
       )}
-    </>
+    </div>
   );
 }

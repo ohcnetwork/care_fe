@@ -57,7 +57,7 @@ export function CreateDispenseSheet({
   const handleDirectDispense = () => {
     if (!preselectedPatient) return;
     navigate(
-      `/facility/${facilityId}/patients/verify?${new URLSearchParams({
+      `/facility/${facilityId}/patients/home?${new URLSearchParams({
         phone_number: preselectedPatient.phone_number,
         year_of_birth: preselectedPatient.year_of_birth?.toString() || "",
         partial_id: preselectedPatient.id.slice(0, 5),
@@ -99,7 +99,7 @@ export function CreateDispenseSheet({
     setIsOpen(false);
     resetState();
     navigate(
-      `/facility/${facilityId}/patients/verify?${new URLSearchParams({
+      `/facility/${facilityId}/patients/home?${new URLSearchParams({
         phone_number: selectedPatient.phone_number,
         year_of_birth:
           ("year_of_birth" in selectedPatient &&
