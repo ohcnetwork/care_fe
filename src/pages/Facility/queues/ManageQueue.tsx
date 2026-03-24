@@ -135,6 +135,7 @@ export function ManageQueuePage({
               }
               size="icon"
               variant="ghost"
+              aria-label={t("back")}
             >
               <ChevronLeft />
             </BackButton>
@@ -196,7 +197,7 @@ export function ManageQueuePage({
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" aria-label={t("settings")}>
                   <SettingsIcon />
                 </Button>
               </DropdownMenuTrigger>

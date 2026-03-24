@@ -622,7 +622,7 @@ function AppointmentColumn(props: {
         {props.statusGroup.statuses.length > 1 && (
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" aria-label={t("open_filters")}>
                 <FilterIcon className="size-4" />
               </Button>
             </PopoverTrigger>
@@ -667,7 +667,12 @@ function AppointmentColumn(props: {
                 className="bg-white"
               >
                 {t(status)}
-                <Button variant="ghost" size="icon" className="size-6 -mr-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-6 -mr-2"
+                  aria-label={t("remove_filter")}
+                >
                   <CareIcon icon="l-times" />
                 </Button>
               </Badge>

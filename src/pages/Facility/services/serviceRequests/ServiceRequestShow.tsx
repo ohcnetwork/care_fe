@@ -485,7 +485,11 @@ export default function ServiceRequestShow({
                   </MultiQRCodePrintSheet>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={t("open_menu")}
+                      >
                         <MoreVertical className="size-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -558,6 +562,7 @@ export default function ServiceRequestShow({
                   variant="ghost"
                   size="icon"
                   onClick={() => setSelectedSpecimenDefinition(null)}
+                  aria-label={t("back")}
                 >
                   <CareIcon icon="l-arrow-left" className="size-4" />
                 </Button>
@@ -583,7 +588,11 @@ export default function ServiceRequestShow({
                 <h2 className="text-xl font-semibold">{t("test_results")}</h2>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={t("open_menu")}
+                    >
                       <MoreVertical className="size-4" />
                     </Button>
                   </DropdownMenuTrigger>
