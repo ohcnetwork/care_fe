@@ -311,7 +311,7 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
               <div className="flex items-center gap-2 flex-wrap">
                 <span
                   className={cn(
-                    "font-semibold text-gray-900",
+                    "font-semibold text-gray-900 text-wrap break-all",
                     !group.hasActiveRequests && "line-through text-gray-500",
                   )}
                 >
