@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, MoreVertical, PrinterIcon } from "lucide-react";
+import { ArrowLeft, CheckIcon, MoreVertical, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -7,19 +7,15 @@ import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 
 import { ChargeItemsSection } from "@/components/Billing/ChargeItems/ChargeItemsSection";
 
@@ -54,6 +51,13 @@ import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenD
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Classification } from "@/types/emr/activityDefinition/activityDefinition";
 import { DiagnosticReportForm } from "./components/DiagnosticReportForm";
 import { DiagnosticReportReview } from "./components/DiagnosticReportReview";
@@ -91,6 +95,8 @@ export default function ServiceRequestShow({
 
   const [isPrintingAllQRCodes, setIsPrintingAllQRCodes] = useState(false);
   const [isQRCodeSheetOpen, setIsQRCodeSheetOpen] = useState(false);
+  const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false);
+  const [completionNote, setCompletionNote] = useState("");
   const [selectedSpecimenDefinition, setSelectedSpecimenDefinition] =
     useState<SpecimenDefinitionRead | null>(null);
 
@@ -154,12 +160,16 @@ export default function ServiceRequestShow({
     },
   });
 
-  const { mutate: completeServiceRequest } = useMutation({
-    mutationFn: mutate(serviceRequestApi.completeServiceRequest, {
+  const {
+    mutate: completeServiceRequest,
+    isPending: isCompletingServiceRequest,
+  } = useMutation({
+    mutationFn: mutate(serviceRequestApi.updateServiceRequest, {
       pathParams: { facilityId, serviceRequestId },
     }),
     onSuccess: () => {
       toast.success(t("service_request_completed"));
+      setIsCompleteDialogOpen(false);
       queryClient.invalidateQueries({
         queryKey: ["serviceRequest", facilityId, serviceRequestId],
       });
@@ -318,10 +328,16 @@ export default function ServiceRequestShow({
   const canMarkAsComplete =
     isFinal ||
     CLASSIFICATIONS_CAN_BE_MARKED_AS_COMPLETE.includes(request.category);
+  const canShowCompleteCta =
+    !disableEdit &&
+    (!request?.activity_definition?.diagnostic_report_codes ||
+      canMarkAsComplete);
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50 relative">
-      <div className="flex-1 p-4 max-w-6xl">
+      <div
+        className={`flex-1 p-4 max-w-6xl ${canShowCompleteCta ? "pb-28" : ""}`}
+      >
         <div className="space-y-6">
           <div className="flex items-center justify-between gap-2">
             <Button
@@ -335,42 +351,9 @@ export default function ServiceRequestShow({
             </Button>
 
             <div className="flex items-end gap-2">
-              {(!request?.activity_definition?.diagnostic_report_codes ||
-                canMarkAsComplete) && (
+              {canShowCompleteCta && (
                 <div className="flex items-center gap-2">
                   <>
-                    {!disableEdit && (
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="font-semibold border border-gray-400"
-                          >
-                            {t("mark_as_complete")}
-                            <ShortcutBadge actionId="mark-as-complete" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              {t("confirm_completion")}
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              {t("service_request_completion_confirmation")}
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => completeServiceRequest({})}
-                            >
-                              {t("confirm")}
-                              <ShortcutBadge actionId="enter-action" />
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    )}
                     {isFinal && (
                       <Button
                         variant="primary"
@@ -646,6 +629,139 @@ export default function ServiceRequestShow({
         <div className="flex-1 p-2 min-w-90 md:max-w-90 mx-auto">
           <WorkflowProgress request={request} variant="card" />
         </div>
+      )}
+
+      {canShowCompleteCta && (
+        <>
+          <div className="fixed bottom-0 inset-x-0 z-40 border-t bg-white border-gray-300 p-2">
+            <div className="flex w-full items-center justify-between px-4 py-3 gap-2 bg-white">
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-gray-900">
+                  {t("complete_service_request")}
+                </p>
+                <p className="text-xs text-gray-600">
+                  {t("complete_service_request_help_text")}
+                </p>
+              </div>
+              <Button
+                variant="primary"
+                className="font-semibold shrink-0"
+                onClick={() => {
+                  setCompletionNote(request.note ?? "");
+                  setIsCompleteDialogOpen(true);
+                }}
+                disabled={isCompletingServiceRequest}
+              >
+                {t("mark_as_complete")}
+                <ShortcutBadge actionId="mark-as-complete" />
+              </Button>
+            </div>
+          </div>
+
+          {isMobile ? (
+            <Sheet
+              open={isCompleteDialogOpen}
+              onOpenChange={(open) => {
+                if (!isCompletingServiceRequest) setIsCompleteDialogOpen(open);
+              }}
+            >
+              <SheetContent side="bottom">
+                <SheetHeader>
+                  <SheetTitle>{t("add_completion_note")}</SheetTitle>
+                  <SheetDescription>
+                    {t("service_request_completion_note_description")}
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-gray-900">
+                    {t("completion_note")}
+                  </p>
+                  <Textarea
+                    value={completionNote}
+                    onChange={(e) => setCompletionNote(e.target.value)}
+                    placeholder={t("enter_note")}
+                    className="min-h-14"
+                  />
+                </div>
+                <div className="flex flex-row items-start justify-start gap-2 pt-2">
+                  <Button
+                    variant="primary"
+                    onClick={() =>
+                      completeServiceRequest({
+                        status: Status.completed,
+                        note: completionNote.trim() || null,
+                      })
+                    }
+                    disabled={isCompletingServiceRequest}
+                  >
+                    <CheckIcon className="size-4" />
+                    {isCompletingServiceRequest
+                      ? t("updating")
+                      : `${t("save")} & ${t("complete")}`}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsCompleteDialogOpen(false)}
+                    disabled={isCompletingServiceRequest}
+                  >
+                    {t("cancel")}
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
+          ) : (
+            <Dialog
+              open={isCompleteDialogOpen}
+              onOpenChange={(open) => {
+                if (!isCompletingServiceRequest) setIsCompleteDialogOpen(open);
+              }}
+            >
+              <DialogContent className="sm:max-w-lg shadow-lg border-white/20 border-5">
+                <DialogHeader>
+                  <DialogTitle>{t("add_completion_note")}</DialogTitle>
+                  <DialogDescription>
+                    {t("service_request_completion_note_description")}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-gray-900">
+                    {t("completion_note")}
+                  </p>
+                  <Textarea
+                    value={completionNote}
+                    onChange={(e) => setCompletionNote(e.target.value)}
+                    placeholder={t("enter_note")}
+                    className="min-h-14"
+                  />
+                </div>
+                <div className="flex flex-row items-start justify-start gap-2">
+                  <Button
+                    variant="primary"
+                    onClick={() =>
+                      completeServiceRequest({
+                        status: Status.completed,
+                        note: completionNote.trim() || null,
+                      })
+                    }
+                    disabled={isCompletingServiceRequest}
+                  >
+                    <CheckIcon className="size-4" />
+                    {isCompletingServiceRequest
+                      ? t("updating")
+                      : `${t("save")} & ${t("complete")}`}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsCompleteDialogOpen(false)}
+                    disabled={isCompletingServiceRequest}
+                  >
+                    {t("cancel")}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+        </>
       )}
     </div>
   );
