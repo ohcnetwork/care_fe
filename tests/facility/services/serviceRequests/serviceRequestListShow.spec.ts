@@ -94,7 +94,10 @@ test.describe("Facility Service Request List and Show", () => {
       listRow.getByRole("button", { name: /see details/i }),
     ).toBeVisible();
 
-    const filtersTrigger = page.getByRole("button", { name: /filters/i });
+    const filtersTrigger = page
+      .locator('[data-slot="dropdown-menu-trigger"]')
+      .filter({ hasText: /filters/i })
+      .first();
     await expect(filtersTrigger).toBeVisible();
     await filtersTrigger.click();
     await expect(page.getByText(/activity definition/i)).toBeVisible();
