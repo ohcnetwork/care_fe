@@ -1,3 +1,5 @@
+import careConfig from "@careConfig";
+
 import { GENDER_TYPES, GENDERS } from "@/common/constants";
 import { QualifiedRange } from "@/types/base/qualifiedRange/qualifiedRange";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
@@ -8,7 +10,6 @@ import { z } from "zod";
 export enum ConditionOperation {
   equality = "equality",
   in_range = "in_range",
-  intersects_any = "intersects_any",
   has_tag = "has_tag",
 }
 
@@ -128,12 +129,27 @@ export const conditionSchema = z.discriminatedUnion("_conditionType", [
     }),
     _conditionType: z.literal("patient_tag_has_tag"),
   }),
+  z.object({
+    metric: z.literal("encounter_class"),
+    operation: z.literal(ConditionOperation.equality),
+    value: z.enum(careConfig.encounterClasses),
+    _conditionType: z.literal("encounter_class_equality"),
+  }),
 ]) as z.ZodType<ConditionForm>;
+
+export function getConditionDiscriminatorValue(
+  metric: string,
+  operation: ConditionOperation,
+) {
+  return `${metric}_${operation}`;
+}
 
 export function ConditionOperationSummary({
   condition,
+  shortDisplay = false,
 }: {
   condition: Condition;
+  shortDisplay?: boolean;
 }) {
   const { t } = useTranslation();
   const conditionName = t(`condition_metric__${condition.metric}`);
@@ -154,24 +170,32 @@ export function ConditionOperationSummary({
         typeof condition.value === "object" && "value" in condition.value
           ? condition.value.value
           : condition.value;
-      let valueDisplay = typeof value === "string" ? value : value;
+      let valueDisplay = String(value);
       if (condition.metric === "patient_gender") {
         valueDisplay = t(`GENDER__${value}`);
+      } else if (condition.metric === "encounter_class") {
+        valueDisplay = t(`encounter_class__${value}`);
       }
       const valueType =
         typeof condition.value === "object" && "value_type" in condition.value
           ? condition?.value.value_type
           : "";
-      return `${conditionName} is equal to ${valueDisplay} ${valueType}`;
+      return shortDisplay
+        ? `${valueDisplay} ${valueType}`
+        : `${conditionName} is equal to ${valueDisplay} ${valueType}`;
     }
     case ConditionOperation.in_range: {
       const valueType =
         "value_type" in condition.value ? condition?.value.value_type : "";
-      return `${conditionName} is in range ${condition.value.min} to ${condition.value.max} ${valueType}`;
+      return shortDisplay
+        ? `${condition.value.min} to ${condition.value.max} ${valueType}`
+        : `${conditionName} is in range ${condition.value.min} to ${condition.value.max} ${valueType}`;
     }
     case ConditionOperation.has_tag: {
       const tagDisplay = tags.map((tag) => tag.display).join(", ");
-      return `Has any of the following ${tagResource} tag(s): ${tagDisplay}`;
+      return shortDisplay
+        ? `${tagDisplay}`
+        : `Has any of the following ${tagResource} tag(s): ${tagDisplay}`;
     }
   }
 }
@@ -193,6 +217,9 @@ export function getConditionValue(
         break;
       } else if (metric === "patient_gender") {
         conditionValue = GENDER_TYPES[0].id;
+        break;
+      } else if (metric === "encounter_class") {
+        conditionValue = careConfig.encounterClasses[0];
         break;
       }
       conditionValue = "";
@@ -260,7 +287,7 @@ export const removeConditionType = (
 ): QualifiedRange[] => {
   return qualifiedRanges.map((range) => ({
     ...range,
-    conditions: range.conditions.map((condition) => ({
+    conditions: range.conditions?.map((condition) => ({
       ...stripConditionType(condition as ConditionForm),
     })),
   }));

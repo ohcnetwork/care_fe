@@ -1,91 +1,59 @@
 import { useQuery } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
 
 import Loading from "@/components/Common/Loading";
 import { PrescriptionPreview } from "@/components/Prescription/PrescriptionPreview";
 
 import query from "@/Utils/request/query";
-import encounterApi from "@/types/emr/encounter/encounterApi";
-import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
-import patientApi from "@/types/emr/patient/patientApi";
-import { groupMedicationsByPrescription } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
+import { useTranslation } from "react-i18next";
 
-export const PrintPrescription = (props: {
+interface PrintPrescriptionProps {
   facilityId: string;
-  encounterId?: string;
   patientId: string;
+  encounterId?: string;
   prescriptionId?: string;
-}) => {
-  const { facilityId, encounterId, patientId, prescriptionId } = props;
+}
+
+export const PrintPrescription = ({
+  facilityId,
+  patientId,
+  encounterId,
+  prescriptionId,
+}: PrintPrescriptionProps) => {
   const { t } = useTranslation();
 
-  const { data: prescription, isLoading } = useQuery({
-    queryKey: ["prescription", patientId, prescriptionId],
-    queryFn: query(prescriptionApi.get, {
-      pathParams: { patientId, id: prescriptionId! },
-      queryParams: { facility: facilityId },
-    }),
-    enabled: !!prescriptionId,
-  });
+  const { data: encounterPrescriptions, isLoading: isLoadingEncounter } =
+    useQuery({
+      queryKey: ["prescriptions-list", patientId, encounterId, facilityId],
+      queryFn: query.paginated(prescriptionApi.list, {
+        pathParams: { patientId: patientId! },
+        queryParams: { encounter: encounterId, facility: facilityId },
+        pageSize: 100,
+      }),
+      enabled: !!encounterId && !!patientId && !!facilityId,
+    });
 
-  const { data: encounter } = useQuery({
-    queryKey: ["encounter", encounterId],
-    queryFn: query(encounterApi.get, {
-      pathParams: { id: encounterId || prescription?.encounter?.id || "" },
-      queryParams: { facility: facilityId },
-    }),
-    enabled: !!encounterId || !!prescription?.encounter?.id,
-  });
-
-  const { data: patient, isLoading: patientLoading } = useQuery({
-    queryKey: ["patient", patientId],
-    queryFn: query(patientApi.get, {
-      pathParams: { id: patientId || "" },
-    }),
-    enabled: !!patientId,
-  });
-
-  const { data: activeMedications, isLoading: medicationLoading } = useQuery({
-    queryKey: ["medication_requests_active", patientId],
-    queryFn: query.paginated(medicationRequestApi.list, {
-      pathParams: { patientId: patientId },
-      queryParams: {
-        encounter: encounterId,
-        status: ["active", "on_hold", "draft", "unknown"].join(","),
-        facility: facilityId,
-      },
-      pageSize: 100,
-    }),
-    enabled: !!patientId && !!encounterId && !!facilityId && !prescriptionId,
-  });
-
-  if (patientLoading || isLoading || medicationLoading) return <Loading />;
-
-  if (
-    (!encounter && !prescription) ||
-    !patient ||
-    (!prescriptionId && !activeMedications?.results?.length) ||
-    (prescriptionId && !prescription)
-  ) {
-    return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
-        {t("no_medications_found_for_this_encounter")}
-      </div>
-    );
+  if (!prescriptionId && !encounterId) {
+    return <div>{t("encounter_not_found")}</div>;
   }
 
-  const groupedByPrescription = groupMedicationsByPrescription(
-    prescription
-      ? prescription.medications || []
-      : activeMedications?.results || [],
-  );
+  if (encounterId && isLoadingEncounter) {
+    return <Loading />;
+  }
+
+  const resolvedPrescriptionIds = prescriptionId
+    ? [prescriptionId]
+    : (encounterPrescriptions?.results?.map((p) => p.id) ?? []);
+
+  if (resolvedPrescriptionIds.length === 0) {
+    return <div>{t("no_prescriptions_found")}</div>;
+  }
 
   return (
     <PrescriptionPreview
-      encounter={encounter}
-      prescriptions={groupedByPrescription}
-      patient={patient}
+      prescriptionIds={resolvedPrescriptionIds}
+      patientId={patientId}
+      facilityId={facilityId}
     />
   );
 };

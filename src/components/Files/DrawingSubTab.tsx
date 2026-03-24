@@ -192,7 +192,7 @@ export const DrawingPage = ({
         name: qParams.name,
         associating_id: associatingId,
         limit: resultsPerPage,
-        offset: (qParams.page - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
     }),
     enabled: canAccess,

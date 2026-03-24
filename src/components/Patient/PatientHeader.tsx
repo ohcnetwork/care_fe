@@ -1,5 +1,6 @@
 import { Trans, useTranslation } from "react-i18next";
 
+import { PatientTagsDisplay } from "@/components/Patient/PatientTagsDisplay";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
@@ -10,28 +11,23 @@ import {
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
-import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import dayjs from "dayjs";
 
 export function PatientHeader({
   patient,
   facilityId,
-  actions,
   className,
   isPatientPage = false,
 }: {
   patient: PatientRead | PublicPatientRead | PatientListRead;
   facilityId?: string;
-  actions?: React.ReactNode;
   className?: string;
   isPatientPage?: boolean;
 }) {
-  const { t } = useTranslation();
-
   return (
-    <Card
+    <div
       className={cn(
-        "p-2 rounded-none shadow-none border-none md:p-4 flex flex-col md:flex-row md:justify-between bg-transparent gap-6",
+        "p-2 rounded-none shadow-none border-none flex flex-col md:flex-row md:justify-between bg-transparent gap-6",
         className,
       )}
     >
@@ -58,31 +54,10 @@ export function PatientHeader({
                   </span>
                 </div>
               ))}
-          {"instance_tags" in patient && patient.instance_tags.length > 0 && (
-            <div className="flex flex-col gap-1 items-start">
-              <span className="text-xs text-gray-700">
-                {t("patient_tags")}:
-              </span>
-              <div className="flex flex-wrap gap-2 text-sm whitespace-nowrap">
-                <>
-                  {patient.instance_tags.map((tag) => (
-                    <Badge
-                      key={tag.id}
-                      variant="secondary"
-                      className="capitalize"
-                      title={tag.description}
-                    >
-                      {getTagHierarchyDisplay(tag)}
-                    </Badge>
-                  ))}
-                </>
-              </div>
-            </div>
-          )}
+          <PatientTagsDisplay patient={patient} className="text-xs flex-1" />
         </div>
       </div>
-      {actions}
-    </Card>
+    </div>
   );
 }
 

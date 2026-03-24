@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRightSquare, EditIcon, PlusIcon } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowUpRightSquare, PlusIcon } from "lucide-react";
 import { navigate } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -16,6 +16,7 @@ import {
   accountBillingStatusFilter,
   accountStatusFilter,
   dateFilter,
+  tagFilter,
 } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
@@ -36,8 +37,12 @@ import {
   TableRow,
 } from "@/components/Common/Table";
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
+import { getPermissions } from "@/common/Permissions";
+import { usePermissions } from "@/context/PermissionContext";
 import useFilters from "@/hooks/useFilters";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 
 import {
   ACCOUNT_BILLING_STATUS_COLORS,
@@ -45,9 +50,12 @@ import {
   type AccountRead,
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import query from "@/Utils/request/query";
 import { dateTimeQueryString } from "@/Utils/utils";
 
+import { isPositive } from "@/Utils/decimal";
 import AccountSheet from "./AccountSheet";
 
 function formatDate(date?: string) {
@@ -73,6 +81,7 @@ export function AccountList({
   className?: string;
 }) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [sheetOpen, setSheetOpen] = React.useState(false);
   const [editingAccount, setEditingAccount] =
     React.useState<AccountRead | null>(null);
@@ -82,17 +91,35 @@ export function AccountList({
     defaultQueryParams: { status: "active" },
   });
 
+  const { facility } = useCurrentFacility();
+  const { hasPermission } = usePermissions();
+
+  const { canCreateAccount } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
+  );
+
+  const tagIds = qParams.tags?.split(",") || [];
+  const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
+  const selectedTags = tagQueries
+    .map((query) => query.data)
+    .filter(Boolean) as TagConfig[];
+
   const { created_date_after, created_date_before } = qParams;
 
   const filters = [
     accountStatusFilter("status"),
     dateFilter("created_date", t("period"), longDateRangeOptions, false),
     accountBillingStatusFilter("billing_status"),
+    tagFilter("tags", TagResource.ACCOUNT, "multi", "tags"),
   ];
 
   const onFilterUpdate = (query: Record<string, unknown>) => {
     for (const [key, value] of Object.entries(query)) {
       switch (key) {
+        case "tags":
+          query.tags = (value as TagConfig[])?.map((tag) => tag.id).join(",");
+          break;
         case "created_date":
           {
             const dateRange = value as FilterDateRange;
@@ -132,6 +159,7 @@ export function AccountList({
     billing_status: qParams.billing_status
       ? [qParams.billing_status]
       : undefined,
+    tags: selectedTags,
   });
 
   const { data: response, isLoading } = useQuery({
@@ -141,11 +169,13 @@ export function AccountList({
       queryParams: {
         patient: patientId || qParams.patient_filter,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         status: qParams.status,
         billing_status: qParams.billing_status,
         created_date_after: qParams.created_date_after,
         created_date_before: qParams.created_date_before,
+        tags: qParams.tags,
+        tags_behavior: qParams.tags_behavior,
       },
     }),
   });
@@ -160,19 +190,21 @@ export function AccountList({
     >
       <div className={cn("mx-auto", !hideTitleOnPage && "mt-2")}>
         <div className="mb-4">
-          <AccountSheet
-            open={sheetOpen}
-            onOpenChange={(open) => {
-              setSheetOpen(open);
-              if (!open) setEditingAccount(null);
-            }}
-            facilityId={facilityId}
-            patientId={patientId}
-            initialValues={editingAccount ? editingAccount : undefined}
-            isEdit={!!editingAccount}
-          />
-          <div className="flex flex-col md:flex-row items-start gap-2">
-            <div className="w-full md:w-auto">
+          {patientId && (
+            <AccountSheet
+              open={sheetOpen}
+              onOpenChange={(open) => {
+                setSheetOpen(open);
+                if (!open) setEditingAccount(null);
+              }}
+              facilityId={facilityId}
+              patientId={patientId}
+              initialValues={editingAccount ? editingAccount : undefined}
+              isEdit={!!editingAccount}
+            />
+          )}
+          <div className="flex flex-wrap items-start gap-2">
+            <div className="w-full sm:w-auto sm:shrink-0">
               <PatientIdentifierFilter
                 onSelect={(patientId, patientName) =>
                   updateQuery({
@@ -186,22 +218,22 @@ export function AccountList({
                 patientName={qParams.patient_name}
               />
             </div>
-            <div className="flex flex-col sm:flex-row">
+            <div className="w-full sm:w-auto">
               <MultiFilter
                 selectedFilters={selectedFilters}
                 onFilterChange={handleFilterChange}
                 onOperationChange={handleOperationChange}
                 onClearAll={handleClearAll}
                 onClearFilter={handleClearFilter}
-                className="flex sm:flex-row flex-wrap sm:items-center"
+                className="w-full items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
                 triggerButtonClassName="self-start sm:self-center"
                 clearAllButtonClassName="self-center"
                 facilityId={facilityId}
               />
             </div>
           </div>
-          <div className="justify-end flex">
-            {patientId && (
+          <div className="flex justify-end w-full">
+            {patientId && canCreateAccount && (
               <Button
                 className="w-full sm:w-auto mt-2"
                 onClick={() => setSheetOpen(true)}
@@ -226,9 +258,11 @@ export function AccountList({
               <TableRow>
                 <TableHead>{t("account")}</TableHead>
                 <TableHead>{t("balance")}</TableHead>
+                <TableHead>{t("billable")}</TableHead>
                 <TableHead>{t("account_status")}</TableHead>
                 <TableHead>{t("billing_status")}</TableHead>
                 <TableHead>{t("period")}</TableHead>
+                <TableHead>{t("tags_proper")}</TableHead>
                 <TableHead>{t("action")}</TableHead>
               </TableRow>
             </TableHeader>
@@ -239,11 +273,11 @@ export function AccountList({
                     <div className="flex items-center gap-3">
                       <Avatar name={account.name} className="size-8 shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <div className="text-base font-semibold leading-6 break-words">
+                        <div className="text-base font-semibold leading-6 wrap-break-word">
                           {account.name}
                         </div>
                         {!hidePatientName && (
-                          <div className="flex items-center gap-1 text-sm text-gray-600 break-words">
+                          <div className="flex items-center gap-1 text-sm text-gray-600 wrap-break-word">
                             {account.patient.name}
                           </div>
                         )}
@@ -253,12 +287,17 @@ export function AccountList({
                   <TableCell
                     className={cn(
                       "border-x p-3 text-base font-medium leading-6",
-                      Number(account.total_balance) > 0
+                      isPositive(account.total_balance)
                         ? "text-gray-950"
                         : "text-green-700 italic",
                     )}
                   >
                     <MonetaryDisplay amount={account.total_balance} />
+                  </TableCell>
+                  <TableCell className="text-base font-medium leading-6 text-gray-950">
+                    <MonetaryDisplay
+                      amount={account.total_billable_charge_items}
+                    />
                   </TableCell>
                   <TableCell>
                     <Badge variant={ACCOUNT_STATUS_COLORS[account.status]}>
@@ -283,20 +322,22 @@ export function AccountList({
                         ` - ${formatDate(account.service_period?.end)}`}
                     </span>
                   </TableCell>
+                  <TableCell>
+                    <TagAssignmentSheet
+                      entityType="account"
+                      entityId={account.id}
+                      facilityId={facilityId}
+                      currentTags={account.tags ?? []}
+                      onUpdate={() => {
+                        queryClient.invalidateQueries({
+                          queryKey: ["accounts", qParams],
+                        });
+                      }}
+                      patientId={account.patient.id}
+                    />
+                  </TableCell>
                   <TableCell className="whitespace-normal">
                     <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="font-semibold"
-                        onClick={() => {
-                          setEditingAccount(account);
-                          setSheetOpen(true);
-                        }}
-                      >
-                        <EditIcon strokeWidth={1.5} />
-                        <span className="underline">{t("edit")}</span>
-                      </Button>
                       <Button
                         variant="outline"
                         size="sm"

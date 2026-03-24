@@ -43,6 +43,7 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   calculateSlotDuration,
   formatAvailabilityTime,
@@ -82,7 +83,7 @@ export default function EditScheduleTemplateSheet({
       <SheetTrigger asChild>
         {trigger || <Button variant="outline" size="sm"></Button>}
       </SheetTrigger>
-      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-[32rem]">
+      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-128">
         <SheetHeader>
           <SheetTitle>{t("edit_schedule_template")}</SheetTitle>
           <SheetDescription className="sr-only">
@@ -156,6 +157,7 @@ const ScheduleTemplateEditor = ({
       valid_to: z.date({
         required_error: t("field_required"),
       }),
+      is_public: z.boolean(),
     })
     .refine(
       (data) => !dayjs(data.valid_to).isBefore(dayjs(data.valid_from), "day"),
@@ -171,6 +173,7 @@ const ScheduleTemplateEditor = ({
       name: template.name,
       valid_from: new Date(template.valid_from),
       valid_to: new Date(template.valid_to),
+      is_public: template.is_public,
     },
   });
 
@@ -179,7 +182,7 @@ const ScheduleTemplateEditor = ({
       pathParams: { facilityId, id: template.id },
     }),
     onSuccess: () => {
-      toast.success("Schedule template updated successfully");
+      toast.success(t("schedule_template_updated_successfully"));
       queryClient.invalidateQueries({
         queryKey: ["schedule", facilityId, { resourceType, resourceId }],
       });
@@ -205,6 +208,7 @@ const ScheduleTemplateEditor = ({
       name: values.name,
       valid_from: dateQueryString(values.valid_from),
       valid_to: dateQueryString(values.valid_to),
+      is_public: values.is_public,
     });
   }
 
@@ -262,6 +266,34 @@ const ScheduleTemplateEditor = ({
               )}
             />
           </div>
+
+          <FormField
+            control={form.control}
+            name="is_public"
+            render={({ field }) => (
+              <FormItem className="space-y-2">
+                <div className="flex flex-row items-center gap-2">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormLabel className="text-sm">
+                    {t("make_template_public")}
+                  </FormLabel>
+                </div>
+                {template.is_public && !field.value && (
+                  <Callout variant="warning" badge="Note">
+                    <p className="text-sm">
+                      {t("template_visibility_change_warning")}
+                    </p>
+                  </Callout>
+                )}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <div className="flex justify-end gap-2">
             <Button

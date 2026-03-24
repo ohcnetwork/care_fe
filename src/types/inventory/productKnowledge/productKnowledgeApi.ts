@@ -1,5 +1,4 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 import {
   ProductKnowledgeBase,
   ProductKnowledgeCreate,
@@ -12,7 +11,6 @@ export default {
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<ProductKnowledgeBase>>(),
     defaultQueryParams: {
-      ordering: "-created_date",
       include_instance: true,
     },
   },

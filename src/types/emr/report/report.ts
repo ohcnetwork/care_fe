@@ -33,6 +33,7 @@ export interface ReportGenerateCreate {
   output_format: string;
   options: string;
   force: boolean;
+  status_check?: boolean;
 }
 
 export interface ReportDownloadRead {
@@ -45,4 +46,10 @@ export interface ReportArchiveRead {
   detail: string;
   archived_datetime: string;
   archived_by: string;
+}
+
+export enum ReportType {
+  DISCHARGE_SUMMARY = "discharge_summary",
+  PATIENT_SUMMARY = "patient_summary",
+  ACCOUNT_REPORT = "account_report",
 }

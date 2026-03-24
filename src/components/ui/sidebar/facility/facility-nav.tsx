@@ -32,6 +32,7 @@ function generateFacilityLinks(
     canListTemplate: boolean;
   },
   pluginLinks: NavigationLink[],
+  pluginBillingLinks: NavigationLink[],
 ) {
   if (!selectedFacility) return [];
 
@@ -119,6 +120,10 @@ function generateFacilityLinks(
           name: t("payments"),
           url: `${baseUrl}/billing/payments`,
         },
+        ...pluginBillingLinks.map((l) => ({
+          ...l,
+          url: `${baseUrl}${l.url}`,
+        })),
       ],
     },
     {
@@ -209,9 +214,13 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const careApps = useCareApps();
-  const pluginNavItems = careApps
-    .filter((c) => !!c.navItems)
-    .flatMap((c) => c.navItems) as NavigationLink[];
+  const pluginNavItems = careApps.flatMap((c) =>
+    !c.isLoading && c.navItems ? c.navItems : [],
+  ) as NavigationLink[];
+
+  const pluginBillingNavItems = careApps.flatMap((c) =>
+    !c.isLoading && c.billingNavItems ? c.billingNavItems : [],
+  ) as NavigationLink[];
 
   const { facility } = useCurrentFacility();
 
@@ -240,6 +249,7 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
         t,
         permissions,
         pluginNavItems,
+        pluginBillingNavItems,
       )}
     />
   );

@@ -102,7 +102,7 @@ export function ObservationHistorySheet({
                       <div>
                         <p className="text-gray-500">{t("interpretation")}</p>
                         <p className="capitalize">
-                          {observation.interpretation || "-"}
+                          {observation.interpretation?.display || "-"}
                         </p>
                       </div>
                       <div>

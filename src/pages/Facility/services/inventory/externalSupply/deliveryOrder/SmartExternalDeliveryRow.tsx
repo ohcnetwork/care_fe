@@ -1,12 +1,13 @@
 import { format } from "date-fns";
-import { ChevronDown, Plus } from "lucide-react";
-import { useState } from "react";
+import { ChevronDown, Plus, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Command,
@@ -31,13 +32,19 @@ import { TableCell, TableRow } from "@/components/ui/table";
 
 import { cn } from "@/lib/utils";
 
+import { add, isPositive, round } from "@/Utils/decimal";
 import { MonetaryComponentSelector } from "@/components/Billing/MonetaryComponentSelector";
 import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPicker";
+import { SchemaField } from "@/components/Extensions/SchemaField";
 import { CURRENCY_SYMBOL } from "@/components/ui/monetary-display";
+import { ProcessedExtension } from "@/hooks/useExtensions";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
-import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import {
+  MonetaryComponent,
+  MonetaryComponentType,
+} from "@/types/base/monetaryComponent/monetaryComponent";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ProductRead } from "@/types/inventory/product/product";
 
@@ -50,6 +57,11 @@ interface Props {
   informationalCodes: Code[];
   autoOpenProductSelect?: boolean;
   onProductSelectOpened?: () => void;
+  /** All processed extensions with owner and schema info */
+  processedExtensions: ProcessedExtension[];
+  /** Location ID for fetching inventory (origin location for internal transfers) */
+  locationId?: string;
+  onRemove?: () => void;
 }
 
 export function SmartExternalDeliveryRow({
@@ -58,16 +70,32 @@ export function SmartExternalDeliveryRow({
   informationalCodes,
   autoOpenProductSelect = false,
   onProductSelectOpened,
+  processedExtensions,
+  locationId,
+  onRemove,
 }: Props) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
   const [batchSelectorOpen, setBatchSelectorOpen] = useState(false);
+
+  // Filter extensions that have fields to render
+  const extensionsWithFields = useMemo(
+    () =>
+      processedExtensions.filter(
+        ({ fieldMetadata }) => fieldMetadata.length > 0,
+      ),
+    [processedExtensions],
+  );
 
   const {
     productKnowledge,
     suppliedItem,
     batchNumber,
     unitPrice,
+    purchasePrice,
+    totalPurchasePrice,
+    packQuantity,
+    packSize,
     taxComponents,
     discountComponents,
     informationalComponents,
@@ -77,6 +105,7 @@ export function SmartExternalDeliveryRow({
     isCreatingNew,
     isLoadingProducts,
     products,
+    inventoryByProductId,
     availableTaxes,
     availableDiscounts,
     setField,
@@ -84,7 +113,7 @@ export function SmartExternalDeliveryRow({
     markAsEdited,
     fillFromProduct,
     updateInformationalComponent,
-  } = useDeliveryRowItem({ form, index });
+  } = useDeliveryRowItem({ form, index, locationId });
 
   const handleProductSelect = (product: ProductRead) => {
     fillFromProduct(product);
@@ -196,42 +225,97 @@ export function SmartExternalDeliveryRow({
                     <CommandEmpty>{t("type_batch_number")}</CommandEmpty>
                   )
                 ) : (
-                  <CommandGroup heading={t("existing_batches")}>
-                    {products
-                      .filter(
-                        (p) =>
-                          !batchNumber ||
-                          p.batch?.lot_number
-                            ?.toLowerCase()
-                            .includes(batchNumber.toLowerCase()),
-                      )
-                      .map((product) => (
-                        <CommandItem
-                          key={product.id}
-                          value={product.id}
-                          onSelect={() => handleProductSelect(product)}
-                          className="cursor-pointer"
-                        >
-                          <div className="flex w-full items-center justify-between">
-                            <div className="flex flex-col">
-                              <span className="font-medium">
-                                #{product.batch?.lot_number || "N/A"}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {t("expiry_short")}:{" "}
-                                {getExpirationDisplay(product)}
-                              </span>
-                            </div>
-                            {suppliedItem?.id === product.id && (
-                              <CareIcon
-                                icon="l-check"
-                                className="size-4 text-green-600"
-                              />
+                  (() => {
+                    const filteredProducts = products.filter(
+                      (p) =>
+                        !batchNumber ||
+                        p.batch?.lot_number
+                          ?.toLowerCase()
+                          .includes(batchNumber.toLowerCase()),
+                    );
+                    const totalNetContent =
+                      locationId && filteredProducts.length > 0
+                        ? add(
+                            ...filteredProducts.map(
+                              (p) =>
+                                inventoryByProductId.get(p.id)?.net_content ||
+                                "0",
+                            ),
+                          )
+                        : null;
+                    const unit =
+                      productKnowledge?.base_unit?.display || t("units");
+
+                    return (
+                      <CommandGroup
+                        heading={
+                          <span className="flex items-center justify-between w-full">
+                            <span>{t("existing_batches")}</span>
+                            {totalNetContent !== null && (
+                              <Badge
+                                variant={
+                                  isPositive(totalNetContent)
+                                    ? "primary"
+                                    : "secondary"
+                                }
+                                className="text-xs ml-2"
+                              >
+                                {round(totalNetContent)} {unit}
+                              </Badge>
                             )}
-                          </div>
-                        </CommandItem>
-                      ))}
-                  </CommandGroup>
+                          </span>
+                        }
+                      >
+                        {filteredProducts.map((product) => {
+                          const inventory = inventoryByProductId.get(
+                            product.id,
+                          );
+                          const netContent = inventory?.net_content;
+
+                          return (
+                            <CommandItem
+                              key={product.id}
+                              value={product.id}
+                              onSelect={() => handleProductSelect(product)}
+                              className="cursor-pointer"
+                            >
+                              <div className="flex w-full items-center justify-between">
+                                <div className="flex flex-col">
+                                  <span className="font-medium">
+                                    #{product.batch?.lot_number || "N/A"}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {t("expiry_short")}:{" "}
+                                    {getExpirationDisplay(product)}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {locationId && netContent !== undefined && (
+                                    <Badge
+                                      variant={
+                                        isPositive(netContent)
+                                          ? "primary"
+                                          : "destructive"
+                                      }
+                                      className="text-xs"
+                                    >
+                                      {round(netContent)} {unit}
+                                    </Badge>
+                                  )}
+                                  {suppliedItem?.id === product.id && (
+                                    <CareIcon
+                                      icon="l-check"
+                                      className="size-4 text-green-600"
+                                    />
+                                  )}
+                                </div>
+                              </div>
+                            </CommandItem>
+                          );
+                        })}
+                      </CommandGroup>
+                    );
+                  })()
                 )}
               </CommandList>
             </Command>
@@ -281,6 +365,19 @@ export function SmartExternalDeliveryRow({
             value={chargeItemCategory}
             onValueChange={(category) => {
               setField("charge_item_category", category?.slug || "");
+
+              // Auto-apply configured monetary components from category
+              if (category?.configured_monetary_components) {
+                const taxes = category.configured_monetary_components.filter(
+                  (c): c is MonetaryComponent =>
+                    c.monetary_component_type === MonetaryComponentType.tax,
+                );
+                setField("tax_components", taxes);
+              } else {
+                // Clear components when category is cleared
+                setField("tax_components", []);
+              }
+              markAsEdited();
             }}
             placeholder={t("select_category")}
             className="w-full min-w-[140px]"
@@ -292,7 +389,63 @@ export function SmartExternalDeliveryRow({
         )}
       </TableCell>
 
-      {/* Base Price */}
+      {/* Pack Size */}
+      <TableCell className="align-top p-2">
+        <Input
+          type="number"
+          min={1}
+          value={packSize || ""}
+          placeholder="0"
+          onChange={(e) => {
+            const value = parseInt(e.target.value) || undefined;
+            setField("supplied_item_pack_size", value);
+            markAsEdited();
+          }}
+          disabled={!productKnowledge}
+          className="w-20"
+        />
+      </TableCell>
+
+      {/* Pack Quantity */}
+      <TableCell className="align-top p-2">
+        <Input
+          type="number"
+          min={1}
+          value={packQuantity || ""}
+          placeholder="0"
+          onChange={(e) => {
+            const value = parseInt(e.target.value) || undefined;
+            setField("supplied_item_pack_quantity", value);
+          }}
+          disabled={!productKnowledge}
+          className="w-[7rem]"
+        />
+      </TableCell>
+
+      {/* Quantity */}
+      <TableCell className="align-top p-2">
+        <FormField
+          control={form.control}
+          name={`items.${index}.supplied_item_quantity`}
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  type="number"
+                  min={1}
+                  {...field}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  className="w-32"
+                  disabled
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </TableCell>
+
+      {/* Item Price */}
       <TableCell className="align-top p-2!">
         <div className="flex flex-col gap-1">
           <div className="flex items-center">
@@ -306,12 +459,12 @@ export function SmartExternalDeliveryRow({
               value={unitPrice || ""}
               placeholder="0"
               onChange={(e) => {
-                setField("unit_price", parseFloat(e.target.value) || 0);
+                setField("unit_price", e.target.value);
                 markAsEdited();
               }}
               disabled={!productKnowledge || isTaxInclusive}
               className={cn(
-                "w-[90px] text-right",
+                "w-[90px]",
                 isTaxInclusive && "bg-gray-100 text-gray-600",
               )}
             />
@@ -357,33 +510,47 @@ export function SmartExternalDeliveryRow({
                   );
                 }}
                 disabled={!productKnowledge}
-                className="w-[90px] text-right"
+                className="w-[90px]"
               />
             </div>
           </TableCell>
         );
       })}
 
-      {/* Quantity */}
+      {/* Purchase Price (auto-calculated: tpr / pack_quantity) */}
       <TableCell className="align-top p-2">
-        <FormField
-          control={form.control}
-          name={`items.${index}.supplied_item_quantity`}
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input
-                  type="number"
-                  min={1}
-                  {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value))}
-                  className="w-full min-w-[70px]"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="flex items-center">
+          <span className="text-xs text-gray-500 mr-1">{CURRENCY_SYMBOL}</span>
+          <Input
+            type="number"
+            min={0}
+            step="0.01"
+            value={purchasePrice || ""}
+            placeholder="0"
+            disabled
+            className="w-[90px] bg-gray-100 text-gray-600"
+          />
+        </div>
+      </TableCell>
+
+      {/* Total Purchase Price (user-entered) */}
+      <TableCell className="align-top p-2">
+        <div className="flex items-center">
+          <span className="text-xs text-gray-500 mr-1">{CURRENCY_SYMBOL}</span>
+          <Input
+            type="number"
+            min={0}
+            step="0.01"
+            value={totalPurchasePrice || ""}
+            placeholder="0"
+            onChange={(e) => {
+              setField("total_purchase_price", e.target.value || undefined);
+              markAsEdited();
+            }}
+            disabled={!productKnowledge}
+            className="w-[100px]"
+          />
+        </div>
       </TableCell>
 
       {/* Taxes */}
@@ -412,6 +579,47 @@ export function SmartExternalDeliveryRow({
             displayMode="short"
           />
         </span>
+      </TableCell>
+
+      {/* Extension Fields - each field in its own column, name-namespaced */}
+      {extensionsWithFields.flatMap(
+        ({ config, fieldMetadata, conditionalRules }) =>
+          fieldMetadata.map((fieldMeta) => (
+            <TableCell
+              key={`${config.name}-${fieldMeta.name}`}
+              className="align-top"
+            >
+              <SchemaField
+                metadata={{
+                  ...fieldMeta,
+                  label: "",
+                  description: undefined,
+                  required: false, // Hide asterisk - shown in table header
+                }}
+                control={form.control}
+                basePath={`items.${index}.extensions.${config.name}`}
+                className="min-w-[100px] [&_input]:h-9 gap-0"
+                conditionalRules={conditionalRules}
+              />
+              {fieldMeta.description && (
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  {fieldMeta.description}
+                </p>
+              )}
+            </TableCell>
+          )),
+      )}
+
+      <TableCell>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={onRemove}
+          aria-label={t("remove")}
+        >
+          <Trash2 className="size-4" />
+        </Button>
       </TableCell>
     </TableRow>
   );

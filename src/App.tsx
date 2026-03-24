@@ -5,7 +5,9 @@ import { Suspense, useEffect } from "react";
 
 import { Toaster } from "@/components/ui/sonner";
 
+import { AppUpdateNotifier } from "@/components/Common/AppUpdateNotifier";
 import Loading from "@/components/Common/Loading";
+import ProductionWarningBanner from "@/components/Common/ProductionWarningBanner";
 
 import Integrations from "@/Integrations";
 import PluginEngine from "@/PluginEngine";
@@ -33,6 +35,7 @@ const App = () => {
 
   return (
     <>
+      <ProductionWarningBanner />
       <QueryClientProvider client={queryClient}>
         <ScrollToTop />
         <Suspense fallback={<Loading />}>
@@ -55,7 +58,9 @@ const App = () => {
                   // For `richColors` to work, pass at-least an empty object.
                   // Refer: https://github.com/shadcn-ui/ui/issues/2234.
                   toastOptions={{}}
+                  closeButton
                 />
+                <AppUpdateNotifier />
               </PluginEngine>
             </ShortcutProvider>
           </PubSubProvider>

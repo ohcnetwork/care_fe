@@ -12,7 +12,7 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import SessionExpired from "@/components/ErrorPages/SessionExpired";
 
 import useAuthUser from "@/hooks/useAuthUser";
-import { usePluginRoutes } from "@/hooks/useCareApps";
+import { useOrganizationRoutes, usePluginRoutes } from "@/hooks/useCareApps";
 import useSidebarState from "@/hooks/useSidebarState";
 
 import ConsultationRoutes from "@/Routers/routes/ConsultationRoutes";
@@ -48,6 +48,8 @@ const PATHS_WITHOUT_SIDEBAR = [
   /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/purchase_orders\/[^/]+\/edit$/,
   /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/deliveries\/[^/]+$/,
   /^\/facility\/[^/]+\/queues\/[^/]+\/tokens\/[^/]+$/,
+  // Questionnaire form routes
+  /^\/facility\/[^/]+\/patient\/[^/]+\/encounter\/[^/]+\/questionnaire(\/[^/]+)?$/,
 ];
 
 export type RouteParams<T extends string> =
@@ -89,6 +91,7 @@ const AdminRouter: AppRoutes = {
 
 export default function AppRouter() {
   const pluginRoutes = usePluginRoutes();
+  const organizationRoutes = useOrganizationRoutes();
   let routes = Routes;
 
   useRedirect("/user", "/users");
@@ -96,6 +99,7 @@ export default function AppRouter() {
   // Merge in Plugin Routes
   routes = {
     ...pluginRoutes,
+    ...organizationRoutes,
     ...routes,
   };
 

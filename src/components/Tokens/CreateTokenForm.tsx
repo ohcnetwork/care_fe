@@ -131,14 +131,13 @@ export default function CreateTokenForm({
     }),
     onSuccess: (data: TokenRead) => {
       toast.success(t("token_created"));
-      setIsOpen(false);
-      form.reset();
+      handleOpenChange(false);
       queryClient.invalidateQueries({
         queryKey: ["tokens", patient?.id, facilityId],
       });
       onSuccess?.();
       if (!disableRedirectOnSuccess) {
-        navigate(`/facility/${facilityId}/patients/verify`, {
+        navigate(`/facility/${facilityId}/patients/home`, {
           query: {
             phone_number: patient?.phone_number,
             year_of_birth: patient?.year_of_birth?.toString() ?? "",

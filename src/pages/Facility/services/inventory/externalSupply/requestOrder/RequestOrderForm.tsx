@@ -143,7 +143,7 @@ export default function RequestOrderForm({
     queryFn: query.debounced(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
-        search: searchDeliveryFrom,
+        name: searchDeliveryFrom,
         limit: 100,
         mode: "kind",
         ordering: "sort_index",

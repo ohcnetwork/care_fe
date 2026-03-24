@@ -31,6 +31,8 @@ interface QuestionRendererProps {
   encounterId?: string;
   facilityId?: string;
   patientId: string;
+  questionnaireId?: string;
+  questionnaireSlug?: string;
 }
 
 export function QuestionRenderer({
@@ -44,6 +46,8 @@ export function QuestionRenderer({
   encounterId,
   facilityId,
   patientId,
+  questionnaireId,
+  questionnaireSlug,
 }: QuestionRendererProps) {
   const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const isPreview = encounterId === "preview";
@@ -83,6 +87,8 @@ export function QuestionRenderer({
               disabled={disabled || isPreview}
               activeGroupId={activeGroupId}
               patientId={patientId}
+              questionnaireId={questionnaireId}
+              questionnaireSlug={questionnaireSlug}
             />
           </div>
         </div>

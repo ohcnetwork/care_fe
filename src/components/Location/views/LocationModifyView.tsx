@@ -94,7 +94,7 @@ export function LocationModifyView({
           handleCancelEdit={() =>
             setSheetState((prev) => ({ ...prev, screen: "assign" }))
           }
-          handleConfirmEdit={() => onConfirmTime()}
+          handleConfirmEdit={(location) => onConfirmTime(location)}
           isPending={isPending}
           title={
             isEditingCurrentLocation

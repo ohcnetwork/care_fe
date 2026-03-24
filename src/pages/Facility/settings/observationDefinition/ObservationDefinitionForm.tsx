@@ -44,7 +44,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { CodeSchema } from "@/types/base/code/code";
-import { removeConditionType } from "@/types/base/condition/condition";
+import {
+  getConditionDiscriminatorValue,
+  removeConditionType,
+} from "@/types/base/condition/condition";
 import {
   InterpretationType,
   QualifiedRange,
@@ -53,7 +56,7 @@ import {
 import {
   ObservationDefinitionCategory,
   ObservationDefinitionCreate,
-  type ObservationDefinitionRead,
+  ObservationDefinitionRead,
   ObservationDefinitionStatus,
   ObservationDefinitionUpdate,
   QuestionType,
@@ -205,13 +208,17 @@ function ObservationDefinitionFormContent({
             component:
               existingData.component?.map((c) => ({
                 ...c,
+                permitted_unit: c.permitted_unit ?? undefined,
                 qualified_ranges:
                   c.qualified_ranges?.map((range, index) => ({
                     ...range,
                     id: index,
-                    conditions: range?.conditions.map((condition) => ({
+                    conditions: range?.conditions?.map((condition) => ({
                       ...condition,
-                      _conditionType: `${condition.metric}_${condition.operation}`,
+                      _conditionType: getConditionDiscriminatorValue(
+                        condition.metric,
+                        condition.operation,
+                      ),
                     })),
                     _interpretation_type:
                       range?.ranges?.length > 0
@@ -223,9 +230,12 @@ function ObservationDefinitionFormContent({
               existingData.qualified_ranges?.map((range, index) => ({
                 ...range,
                 id: index,
-                conditions: range?.conditions.map((condition) => ({
+                conditions: range?.conditions?.map((condition) => ({
                   ...condition,
-                  _conditionType: `${condition.metric}_${condition.operation}`,
+                  _conditionType: getConditionDiscriminatorValue(
+                    condition.metric,
+                    condition.operation,
+                  ),
                 })),
                 _interpretation_type:
                   range?.ranges?.length > 0
@@ -320,6 +330,7 @@ function ObservationDefinitionFormContent({
       component: data.component?.map((c) => ({
         ...c,
         qualified_ranges: removeConditionType(c.qualified_ranges || []),
+        permitted_unit: c.permitted_unit ?? undefined,
       })),
     };
     if (isEditMode && observationSlug) {
@@ -616,6 +627,7 @@ function ObservationDefinitionFormContent({
                 const ranges = form.getValues("qualified_ranges") || [];
                 qualifiedRangesRef.current = JSON.parse(JSON.stringify(ranges));
               }}
+              facilityId={facilityId}
             />
 
             {/* Additional Details Section */}
@@ -719,40 +731,16 @@ function ObservationDefinitionFormContent({
             {/* Components Section */}
             <div className="rounded-lg border border-gray-200 bg-white p-4">
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-base font-medium text-gray-900">
-                      {t("components")}{" "}
-                      <span className="text-sm font-normal text-gray-500">
-                        {t("optional")}
-                      </span>
-                    </h2>
-                    <p className="mt-0.5 text-sm text-gray-500">
-                      {t("observation_components_description")}
-                    </p>
-                  </div>
-                  {(form.watch("component") ?? [])?.length > 0 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const currentComponents =
-                          form.getValues("component") || [];
-                        form.setValue("component", [
-                          ...currentComponents,
-                          {
-                            code: { code: "", display: "", system: "" },
-                            permitted_data_type: QuestionType.quantity,
-                            qualified_ranges: [],
-                          },
-                        ]);
-                      }}
-                    >
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      {t("add_component")}
-                    </Button>
-                  )}
+                <div>
+                  <h2 className="text-base font-medium text-gray-900">
+                    {t("components")}{" "}
+                    <span className="text-sm font-normal text-gray-500">
+                      {t("optional")}
+                    </span>
+                  </h2>
+                  <p className="mt-0.5 text-sm text-gray-500">
+                    {t("observation_components_description")}
+                  </p>
                 </div>
 
                 {(form.watch("component") ?? [])?.length === 0 ? (
@@ -789,7 +777,7 @@ function ObservationDefinitionFormContent({
                     {(form.watch("component") ?? []).map((_, index) => (
                       <div
                         key={index}
-                        className="relative rounded-lg border border-gray-200 bg-white p-4"
+                        className="relative rounded-lg border border-gray-200 bg-gray-50 p-4"
                       >
                         <div className="absolute right-3 top-3">
                           <Button
@@ -940,10 +928,31 @@ function ObservationDefinitionFormContent({
                                 JSON.stringify(ranges),
                               );
                             }}
+                            facilityId={facilityId}
                           />
                         </div>
                       </div>
                     ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        const currentComponents =
+                          form.getValues("component") || [];
+                        form.setValue("component", [
+                          ...currentComponents,
+                          {
+                            code: { code: "", display: "", system: "" },
+                            permitted_data_type: QuestionType.quantity,
+                            qualified_ranges: [],
+                          },
+                        ]);
+                      }}
+                    >
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      {t("add_component")}
+                    </Button>
                   </div>
                 )}
               </div>

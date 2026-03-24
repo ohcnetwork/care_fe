@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { useMediaStream } from "@/hooks/useMediaStream";
@@ -114,7 +114,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       clearTimeout(timer);
       stopStream();
     };
-  }, [open]);
+  }, [open, cameraFacingMode]);
 
   const handleClose = () => {
     setPreviewImage(null);
@@ -129,6 +129,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
         side="bottom"
         className="[&>button:first-of-type]:hidden h-[100vh] w-full p-0"
       >
+        <SheetTitle className="sr-only">{t("camera")}</SheetTitle>
         <div className="relative h-full">
           {!previewImage ? (
             <div className="h-full">
@@ -148,97 +149,106 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
 
               <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center mb-4 h-20">
                 <div className="flex items-center justify-between gap-8">
-                  {isLaptopScreen ? (
-                    videoDevices.length > 1 ? (
-                      <DropdownMenu
-                        open={showCameraSelector}
-                        onOpenChange={setShowCameraSelector}
-                      >
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="secondary"
-                            className="rounded-full size-13"
+                  {cameraPermission !== "denied" && (
+                    <>
+                      {isLaptopScreen ? (
+                        videoDevices.length > 1 ? (
+                          <DropdownMenu
+                            open={showCameraSelector}
+                            onOpenChange={setShowCameraSelector}
                           >
-                            <SwitchCamera className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-full" align="start">
-                          <DropdownMenuLabel className="flex items-center gap-2 text-md font-medium">
-                            <SwitchCamera className="size-4" />
-                            {t("select_camera")}
-                          </DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <div className="space-y-2 p-3">
-                            {videoDevices.map((camera) => (
-                              <div
-                                key={camera.deviceId}
-                                className={`p-3 rounded-lg border cursor-pointer transition-all hover:bg-gray-50 ${
-                                  selectedDeviceId === camera.deviceId
-                                    ? "border-green-500 bg-green-50"
-                                    : "border-gray-200"
-                                }`}
-                                onClick={() => {
-                                  setSelectedDeviceId(camera.deviceId);
-                                  setShowCameraSelector(!showCameraSelector);
-                                }}
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="secondary"
+                                className="rounded-full size-13"
                               >
-                                <div className="flex items-center gap-3">
-                                  <CareIcon
-                                    icon="l-camera"
-                                    className="size-4"
-                                  />
-                                  <div className="flex-1">
-                                    <div className="font-medium text-sm">
-                                      {camera.label}
+                                <SwitchCamera className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              className="w-full"
+                              align="start"
+                            >
+                              <DropdownMenuLabel className="flex items-center gap-2 text-md font-medium">
+                                <SwitchCamera className="size-4" />
+                                {t("select_camera")}
+                              </DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <div className="space-y-2 p-3">
+                                {videoDevices.map((camera) => (
+                                  <div
+                                    key={camera.deviceId}
+                                    className={`p-3 rounded-lg border cursor-pointer transition-all hover:bg-gray-50 ${
+                                      selectedDeviceId === camera.deviceId
+                                        ? "border-green-500 bg-green-50"
+                                        : "border-gray-200"
+                                    }`}
+                                    onClick={() => {
+                                      setSelectedDeviceId(camera.deviceId);
+                                      setShowCameraSelector(
+                                        !showCameraSelector,
+                                      );
+                                    }}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <CareIcon
+                                        icon="l-camera"
+                                        className="size-4"
+                                      />
+                                      <div className="flex-1">
+                                        <div className="font-medium text-sm">
+                                          {camera.label}
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <Badge
+                                          variant={
+                                            selectedDeviceId === camera.deviceId
+                                              ? "primary"
+                                              : "outline"
+                                          }
+                                          className="text-xs"
+                                        >
+                                          {selectedDeviceId === camera.deviceId
+                                            ? t("selected")
+                                            : camera.kind === "videoinput"
+                                              ? t("built_in")
+                                              : t("external")}
+                                        </Badge>
+                                        {selectedDeviceId ===
+                                          camera.deviceId && (
+                                          <div className="size-2 bg-green-500 rounded-full" />
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
-                                  <div className="flex items-center gap-2">
-                                    <Badge
-                                      variant={
-                                        selectedDeviceId === camera.deviceId
-                                          ? "primary"
-                                          : "outline"
-                                      }
-                                      className="text-xs"
-                                    >
-                                      {selectedDeviceId === camera.deviceId
-                                        ? t("selected")
-                                        : camera.kind === "videoinput"
-                                          ? t("built_in")
-                                          : t("external")}
-                                    </Badge>
-                                    {selectedDeviceId === camera.deviceId && (
-                                      <div className="size-2 bg-green-500 rounded-full" />
-                                    )}
-                                  </div>
-                                </div>
+                                ))}
                               </div>
-                            ))}
-                          </div>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    ) : null
-                  ) : (
-                    <Button
-                      variant="secondary"
-                      onClick={handleSwitchCamera}
-                      className="rounded-full size-12"
-                    >
-                      <SwitchCamera className="size-4" />
-                    </Button>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        ) : null
+                      ) : (
+                        <Button
+                          variant="secondary"
+                          onClick={handleSwitchCamera}
+                          className="rounded-full size-12"
+                        >
+                          <SwitchCamera className="size-4" />
+                        </Button>
+                      )}
+
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          captureImage();
+                          setPreview?.(true);
+                        }}
+                        className="bg-white rounded-full size-18 flex items-center justify-center cursor-pointer [&_svg]:px-0 !p-0"
+                      >
+                        <div className="size-16 rounded-full bg-white border-2 border-black flex items-center justify-center"></div>
+                      </Button>
+                    </>
                   )}
-
-                  <Button
-                    variant="secondary"
-                    onClick={() => {
-                      captureImage();
-                      setPreview?.(true);
-                    }}
-                    className="bg-white rounded-full size-18 flex items-center justify-center cursor-pointer [&_svg]:px-0 !p-0"
-                  >
-                    <div className="size-16 rounded-full bg-white border-2 border-black flex items-center justify-center"></div>
-                  </Button>
-
                   <Button
                     variant="secondary"
                     onClick={handleClose}

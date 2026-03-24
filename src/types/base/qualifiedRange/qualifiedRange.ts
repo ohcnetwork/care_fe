@@ -1,17 +1,19 @@
+import { Code } from "@/types/base/code/code";
 import { Condition, conditionSchema } from "@/types/base/condition/condition";
+import { round, zodDecimal } from "@/Utils/decimal";
 import { t } from "i18next";
 import { z } from "zod";
 
 export interface Interpretation {
   display: string;
-  icon?: string;
-  color?: string;
+  highlight?: boolean;
+  code?: Code;
 }
 
 export interface NumericRange {
   interpretation: Interpretation;
-  min?: number;
-  max?: number;
+  min?: string;
+  max?: string;
 }
 
 export interface CustomValueSet {
@@ -27,7 +29,9 @@ export enum InterpretationType {
 export interface QualifiedRange {
   // used for local state management
   id?: number;
-  conditions: Condition[];
+  title?: string;
+  default_interpretation?: Interpretation;
+  conditions?: Condition[];
   ranges: NumericRange[];
   normal_coded_value_set?: string;
   critical_coded_value_set?: string;
@@ -38,19 +42,27 @@ export interface QualifiedRange {
 //To do: Translations not being loaded for playwright tests, need to debug and fix
 const interpretationSchema = z.object({
   display: z.string().min(1, "Display is required"),
-  icon: z.string().optional(),
-  color: z.string().optional(),
+  highlight: z.boolean().optional(),
+  code: z.object({ code: z.string(), display: z.string() }).optional(),
+});
+
+const defaultInterpretationSchema = z.object({
+  display: z.string(),
+  highlight: z.boolean().optional(),
+  code: z.object({ code: z.string(), display: z.string() }).optional(),
 });
 export const qualifiedRangeSchema = z.array(
   z
     .object({
-      conditions: z.array(conditionSchema),
+      title: z.string().optional(),
+      default_interpretation: defaultInterpretationSchema.optional(),
+      conditions: z.array(conditionSchema).optional(),
       ranges: z.array(
         z
           .object({
             interpretation: interpretationSchema,
-            min: z.number().optional(),
-            max: z.number().optional(),
+            min: zodDecimal().optional(),
+            max: zodDecimal().optional(),
           })
           .refine(
             (data) => {
@@ -66,7 +78,7 @@ export const qualifiedRangeSchema = z.array(
             (data) => {
               // Only validate if both min and max exist
               if (data.min === undefined || data.max === undefined) return true;
-              return data.min <= data.max;
+              return Number(data.min) <= Number(data.max);
             },
             {
               message: t("min_less_max_error"),
@@ -134,13 +146,13 @@ export const getRangeSummary = (range: NumericRange) => {
   if (!range.min) {
     return t("observation_interpretation_range_max_only", {
       display: range.interpretation.display,
-      max: range.max,
+      max: round(range.max!),
     });
   }
   if (!range.max) {
     return t("observation_interpretation_range_min_only", {
       display: range.interpretation.display,
-      min: range.min,
+      min: round(range.min),
     });
   }
   return t("observation_interpretation_range_between", {

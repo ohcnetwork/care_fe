@@ -1,5 +1,4 @@
-import { HttpMethod, Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 import { Organization } from "@/types/organization/organization";
 
 import {
@@ -83,6 +82,22 @@ export default {
     method: HttpMethod.POST,
     TBody: Type<QuestionnaireTagSet>(),
     TRes: Type<void>(),
+  },
+
+  addFavorite: {
+    path: "/api/v1/questionnaire/{slug}/add_favorite/",
+    method: HttpMethod.POST,
+    TRes: Type<QuestionnaireRead>(),
+  },
+  removeFavorite: {
+    path: "/api/v1/questionnaire/{slug}/remove_favorite/",
+    method: HttpMethod.POST,
+    TRes: Type<QuestionnaireRead>(),
+  },
+  listFavorites: {
+    path: "/api/v1/questionnaire/favorite_lists/",
+    method: HttpMethod.GET,
+    TRes: Type<string[]>(),
   },
 
   tags: {

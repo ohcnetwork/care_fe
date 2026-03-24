@@ -31,6 +31,7 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import { valuesOf } from "@/Utils/utils";
+
 import {
   OBSERVATION_DEFINITION_STATUS_COLORS,
   ObservationDefinitionCategory,
@@ -103,7 +104,7 @@ export default function ObservationDefinitionList({
       queryParams: {
         facility: facilityId,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         title: qParams.search,
         status: qParams.status,
         category: qParams.category,

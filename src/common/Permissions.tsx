@@ -78,6 +78,9 @@ export const PERMISSION_RESCHEDULE_APPOINTMENT = "can_reschedule_booking";
 export const PERMISSION_CREATE_USER = "can_create_user";
 export const PERMISSION_LIST_USER = "can_list_user";
 
+// Service Account Permissions
+export const PERMISSION_CREATE_SERVICE_ACCOUNT = "can_create_service_account";
+
 // Template Permissions
 export const PERMISSION_LIST_TEMPLATE = "can_read_template";
 export const PERMISSION_WRITE_TEMPLATE = "can_write_template";
@@ -105,6 +108,15 @@ export const PERMISSION_READ_HEALTHCARE_SERVICE = "can_read_healthcare_service";
 // Resource Category Permissions
 export const PERMISSION_WRITE_RESOURCE_CATEGORY = "can_write_resource_category";
 export const PERMISSION_READ_RESOURCE_CATEGORY = "can_read_resource_category";
+
+// Account Permissions
+export const PERMISSION_CREATE_ACCOUNT = "can_create_account";
+export const PERMISSION_UPDATE_ACCOUNT = "can_update_account";
+export const PERMISSION_READ_ACCOUNT = "can_read_account";
+
+// Invoice Permissions
+export const PERMISSION_MANAGE_LOCKED_INVOICE =
+  "can_manage_locked_invoice_in_facility";
 
 export interface Permissions {
   // Patient Permissions
@@ -217,6 +229,10 @@ export interface Permissions {
   /** Permission slug: "can_list_user" */
   canListUsers: boolean;
 
+  // Service Account Permissions
+  /** Permission slug: "can_create_service_account" */
+  canCreateServiceAccount: boolean;
+
   // Template Permissions
   /** Permission slug: "can_list_template" */
   canListTemplate: boolean;
@@ -253,6 +269,16 @@ export interface Permissions {
   canWriteResourceCategory: boolean;
   /** Permission slug: "can_read_resource_category" */
   canReadResourceCategory: boolean;
+
+  /** Permission slug: "can_create_account" */
+  canCreateAccount: boolean;
+  /** Permission slug: "can_update_account" */
+  canUpdateAccount: boolean;
+  /** Permission slug: "can_read_account" */
+  canReadAccount: boolean;
+
+  /** Permission slug: "can_manage_locked_invoice_in_facility" */
+  canManageLockedInvoice: boolean;
 }
 
 export type HasPermissionFn = (
@@ -415,6 +441,12 @@ export function getPermissions(
     // Currently listed, but not used in BE
     canListUsers: hasPermission(PERMISSION_LIST_USER, permissions),
 
+    // Service Account
+    canCreateServiceAccount: hasPermission(
+      PERMISSION_CREATE_SERVICE_ACCOUNT,
+      permissions,
+    ),
+
     // Template
     canListTemplate: hasPermission(PERMISSION_LIST_TEMPLATE, permissions),
     canWriteTemplate: hasPermission(PERMISSION_WRITE_TEMPLATE, permissions),
@@ -463,6 +495,17 @@ export function getPermissions(
     ),
     canReadResourceCategory: hasPermission(
       PERMISSION_READ_RESOURCE_CATEGORY,
+      permissions,
+    ),
+
+    // Account
+    canCreateAccount: hasPermission(PERMISSION_CREATE_ACCOUNT, permissions),
+    canUpdateAccount: hasPermission(PERMISSION_UPDATE_ACCOUNT, permissions),
+    canReadAccount: hasPermission(PERMISSION_READ_ACCOUNT, permissions),
+
+    // Invoice
+    canManageLockedInvoice: hasPermission(
+      PERMISSION_MANAGE_LOCKED_INVOICE,
       permissions,
     ),
   };

@@ -42,7 +42,11 @@ interface StructuredTypeConfig<T extends BaseRecord> {
   type: string;
   displayFields: DisplayField<T>[];
   queryKey: string[];
-  queryFn: (limit: number, offset: number) => Promise<PaginatedResponse<any>>;
+  queryFn: (
+    limit: number,
+    offset: number,
+    signal: AbortSignal,
+  ) => Promise<PaginatedResponse<any>>;
   converter?: (item: any) => T;
   expandableFields?: DisplayField<T>[];
 }
@@ -169,7 +173,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
       state.currentOffset[activeType],
       ...(structuredTypes.find((st) => st.type === activeType)?.queryKey || []),
     ],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const activeTypeConfig = structuredTypes.find(
         (st) => st.type === activeType,
       );
@@ -177,6 +181,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
       const response = await activeTypeConfig.queryFn(
         LIMIT,
         state.currentOffset[activeType] || 0,
+        signal,
       );
       const results = activeTypeConfig.converter
         ? response.results.map(activeTypeConfig.converter)
@@ -342,7 +347,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" className="border-gray-400 flex ml-auto">
+        <Button variant="outline" className="h-8 rounded-md px-3 text-xs gap-2">
           <Clock className="size-4" />
           <span className="font-semibold">
             {buttonLabel || t("view_history")}

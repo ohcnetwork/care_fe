@@ -36,7 +36,7 @@ export type QuestionnaireSubmitResultValue = {
 // Based on backend Component
 export interface ObservationComponent {
   value: QuestionnaireSubmitResultValue;
-  interpretation?: string | null;
+  interpretation?: Interpretation;
   reference_range?: ObservationReferenceRange[];
   code?: Code | null;
   note?: string;
@@ -65,7 +65,7 @@ export interface ObservationBase {
   body_site?: Code | null; // ValueSetBoundCoding<...>
   method?: Code | null; // ValueSetBoundCoding<...>
   reference_range?: ObservationReferenceRange[];
-  interpretation?: string | null;
+  interpretation?: Interpretation;
   parent?: string | null; // UUID4 | null
   questionnaire_response?: string | null; // UUID4 | null
   component?: ObservationComponent[];

@@ -23,12 +23,30 @@ export function handleHttpError(error: Error) {
     return;
   }
 
+  if (contentTooLarge(error)) {
+    toast.error(t("file_too_large"));
+    return;
+  }
+
   if (isSessionExpired(cause)) {
     handleSessionExpired();
     return;
   }
 
   if (isBadRequest(error)) {
+    if (Array.isArray(cause)) {
+      let handled = false;
+      for (const obj of cause) {
+        const errs = obj.errors;
+        if (isPydanticError(errs)) {
+          handled = true;
+          handlePydanticErrors(errs);
+          continue;
+        }
+      }
+      if (handled) return;
+    }
+
     const errs = cause?.errors;
     if (isPydanticError(errs)) {
       handlePydanticErrors(errs);
@@ -68,6 +86,10 @@ function isBadRequest(error: HTTPError) {
 
 function isNotFound(error: HTTPError) {
   return error.status === 404;
+}
+
+function contentTooLarge(error: HTTPError) {
+  return error.status === 413;
 }
 
 type PydanticError = {

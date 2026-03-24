@@ -52,6 +52,7 @@ import {
 import specimenApi from "@/types/emr/specimen/specimenApi";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
 
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import { DiagnosticReportForm } from "./components/DiagnosticReportForm";
 import { DiagnosticReportReview } from "./components/DiagnosticReportReview";
@@ -325,49 +326,56 @@ export default function ServiceRequestShow({
                 request?.diagnostic_reports?.[0]?.status ===
                   DiagnosticReportStatus.final) && (
                 <div className="flex items-center gap-2">
-                  {!disableEdit && (
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="font-semibold border border-gray-400"
-                        >
-                          {t("mark_as_complete")}
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            {t("confirm_completion")}
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            {t("service_request_completion_confirmation")}
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => completeServiceRequest({})}
-                          >
-                            {t("confirm")}
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  )}
                   {request?.diagnostic_reports?.[0]?.status ===
                     DiagnosticReportStatus.final && (
-                    <Button
-                      variant="primary"
-                      className="font-semibold"
-                      onClick={() =>
-                        navigate(
-                          `/facility/${facilityId}/patient/${request.encounter.patient.id}/diagnostic_reports/${request.diagnostic_reports[0].id}`,
-                        )
-                      }
-                    >
-                      {t("view_report")}
-                    </Button>
+                    <>
+                      {!disableEdit && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="font-semibold border border-gray-400"
+                            >
+                              {t("mark_as_complete")}
+                              <ShortcutBadge actionId="mark-as-complete" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                {t("confirm_completion")}
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                {t("service_request_completion_confirmation")}
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>
+                                {t("cancel")}
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => completeServiceRequest({})}
+                              >
+                                {t("confirm")}
+                                <ShortcutBadge actionId="enter-action" />
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                      <Button
+                        variant="primary"
+                        className="font-semibold"
+                        onClick={() =>
+                          navigate(
+                            `/facility/${facilityId}/patient/${request.encounter.patient.id}/diagnostic_reports/${request.diagnostic_reports[0].id}`,
+                          )
+                        }
+                      >
+                        {t("view_report")}
+                        <ShortcutBadge actionId="view-report" />
+                      </Button>
+                    </>
                   )}
                 </div>
               )}
@@ -444,6 +452,7 @@ export default function ServiceRequestShow({
               sourceUrl={`/facility/${facilityId}${locationId ? `/locations/${locationId}` : ""}/service_requests/${serviceRequestId}`}
               patientId={request.encounter.patient.id}
               viewOnly={disableEdit}
+              disableCreateChargeItems
             />
           </div>
 
@@ -456,6 +465,7 @@ export default function ServiceRequestShow({
                     specimens={getActiveAndDraftSpecimens(request?.specimens)}
                     open={isQRCodeSheetOpen}
                     onOpenChange={setIsQRCodeSheetOpen}
+                    isLoading={isPrintingAllQRCodes}
                   >
                     <Button
                       variant="outline"

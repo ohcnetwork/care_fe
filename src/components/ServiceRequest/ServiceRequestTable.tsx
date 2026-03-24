@@ -1,5 +1,4 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { Hash } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -18,6 +17,8 @@ import {
 
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
+import { LocationNode } from "@/components/Location/LocationTree";
+import { cn } from "@/lib/utils";
 import {
   SERVICE_REQUEST_PRIORITY_COLORS,
   SERVICE_REQUEST_STATUS_COLORS,
@@ -29,6 +30,7 @@ interface ServiceRequestTableProps {
   facilityId: string;
   locationId?: string;
   showPatientInfo?: boolean;
+  onPatientClick?: (request: ServiceRequestReadSpec) => void;
 }
 
 export default function ServiceRequestTable({
@@ -36,6 +38,7 @@ export default function ServiceRequestTable({
   facilityId,
   locationId,
   showPatientInfo = true,
+  onPatientClick,
 }: ServiceRequestTableProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -54,17 +57,28 @@ export default function ServiceRequestTable({
           <TableRow className="divide-gray-200">
             {showPatientInfo && <TableHead>{t("patient_name")}</TableHead>}
             <TableHead>{t("service_type")}</TableHead>
-            <TableHead>{t("status")}</TableHead>
-            <TableHead>{t("priority")}</TableHead>
+            <TableHead>
+              {t("status")}/{t("priority")}
+            </TableHead>
             <TableHead>{t("tags", { count: 2 })}</TableHead>
+            <TableHead>{t("location")}</TableHead>
             <TableHead>{t("actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="bg-white">
           {requests.map((request) => (
-            <TableRow key={request.id} className="divide-x divide-gray-200">
+            <TableRow
+              key={request.id}
+              className="divide-x divide-gray-200 group"
+            >
               {showPatientInfo && (
-                <TableCell className="font-medium">
+                <TableCell
+                  className={cn(
+                    "font-medium",
+                    onPatientClick && "group-hover:underline cursor-pointer",
+                  )}
+                  onClick={() => onPatientClick?.(request)}
+                >
                   <div className="font-semibold text-gray-900">
                     {request.encounter.patient.name}
                   </div>
@@ -83,12 +97,10 @@ export default function ServiceRequestTable({
                   )}
                 </div>
               </TableCell>
-              <TableCell>
+              <TableCell className="flex flex-col gap-1">
                 <Badge variant={SERVICE_REQUEST_STATUS_COLORS[request.status]}>
                   {t(request.status)}
                 </Badge>
-              </TableCell>
-              <TableCell>
                 <Badge
                   variant={SERVICE_REQUEST_PRIORITY_COLORS[request.priority]}
                 >
@@ -96,35 +108,27 @@ export default function ServiceRequestTable({
                 </Badge>
               </TableCell>
               <TableCell>
-                <div className="flex flex-wrap gap-1">
-                  {request.tags.map((tag) => (
-                    <Badge key={tag.id} variant="secondary" className="text-xs">
-                      {tag.display}
-                    </Badge>
-                  ))}
-                  <TagAssignmentSheet
-                    entityType="service_request"
-                    entityId={request.id}
-                    facilityId={facilityId}
-                    currentTags={request.tags ?? []}
-                    onUpdate={() => {
-                      queryClient.invalidateQueries({
-                        queryKey: ["serviceRequests", facilityId],
-                      });
-                    }}
-                    patientId={request.encounter.patient.id}
-                    trigger={
-                      request.tags && request.tags.length > 0 ? (
-                        <Button variant="outline" size="xs">
-                          <Hash className="size-3" /> {t("tags")}
-                        </Button>
-                      ) : (
-                        <Button variant="outline" size="xs">
-                          <Hash className="size-3" /> {t("add_tags")}
-                        </Button>
-                      )
-                    }
-                  />
+                <TagAssignmentSheet
+                  entityType="service_request"
+                  entityId={request.id}
+                  facilityId={facilityId}
+                  currentTags={request.tags ?? []}
+                  onUpdate={() => {
+                    queryClient.invalidateQueries({
+                      queryKey: ["serviceRequests", facilityId],
+                    });
+                  }}
+                  patientId={request.encounter.patient.id}
+                />
+              </TableCell>
+              <TableCell>
+                <div className="text-xs text-gray-500">
+                  {request.encounter.current_location && (
+                    <LocationNode
+                      location={request.encounter.current_location}
+                      isLast={true}
+                    />
+                  )}
                 </div>
               </TableCell>
               <TableCell className="text-left">

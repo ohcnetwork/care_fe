@@ -64,10 +64,12 @@ interface LeftPanelProps {
   patientId: string;
   canAccess: boolean;
   responseId?: string;
-  selectedQuestionnaireTitle: string;
-  questionnaireId?: string;
-  setSelectedQuestionnaireTitle: (title: string) => void;
-  setQueryParams: (params: any) => void;
+  questionnaireTitle: string;
+  questionnaireSlug?: string;
+  handleQuestionnaireChange: (
+    questionnaireSlug?: string,
+    questionnaireTitle?: string,
+  ) => void;
   onResponseClick: (response: QuestionnaireResponse) => void;
 }
 
@@ -76,10 +78,9 @@ function LeftPanel({
   patientId,
   canAccess,
   responseId,
-  selectedQuestionnaireTitle,
-  questionnaireId,
-  setSelectedQuestionnaireTitle,
-  setQueryParams,
+  questionnaireTitle,
+  questionnaireSlug,
+  handleQuestionnaireChange,
   onResponseClick,
 }: LeftPanelProps) {
   const { t } = useTranslation();
@@ -89,12 +90,11 @@ function LeftPanel({
       <div className="relative w-full pb-2">
         <QuestionnaireSearch
           placeholder={
-            questionnaireId ? selectedQuestionnaireTitle : t("select_forms")
+            questionnaireSlug ? questionnaireTitle : t("select_forms")
           }
           subjectType="encounter"
           onSelect={(q) => {
-            setQueryParams({ questionnaireId: q.id });
-            setSelectedQuestionnaireTitle(q.title);
+            handleQuestionnaireChange(q.slug, q.title);
           }}
           trigger={
             <Button
@@ -104,27 +104,24 @@ function LeftPanel({
             >
               <div className="flex justify-start items-center gap-2 text-primary-800 flex-1">
                 <span className="text-left whitespace-normal break-words">
-                  {questionnaireId
-                    ? selectedQuestionnaireTitle
-                    : t("select_forms")}
+                  {questionnaireSlug ? questionnaireTitle : t("select_forms")}
                 </span>
               </div>
               <div className="flex items-center gap-1 flex-shrink-0 ml-2">
-                {questionnaireId && (
+                {questionnaireSlug && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setQueryParams({});
-                      setSelectedQuestionnaireTitle("");
+                      handleQuestionnaireChange();
                     }}
                     className="h-5 w-5 p-0 hover:bg-gray-100"
                   >
                     <X className="size-4" />
                   </Button>
                 )}
-                {!questionnaireId && (
+                {!questionnaireSlug && (
                   <ChevronDown className="size-4 flex-shrink-0" />
                 )}
               </div>
@@ -137,13 +134,13 @@ function LeftPanel({
           encounterId={encounterId}
           patientId={patientId}
           canAccess={canAccess}
-          questionnaireId={questionnaireId}
+          questionnaireSlug={questionnaireSlug}
           renderItem={(response: QuestionnaireResponse) => (
             <LeftCard
               response={response}
               isActive={responseId === response.id}
               onClick={() => onResponseClick(response)}
-              showTitle={!questionnaireId}
+              showTitle={!questionnaireSlug}
             />
           )}
         />
@@ -165,14 +162,13 @@ export const EncounterResponsesTab = ({
 }: EncounterResponsesTabProps) => {
   const { t } = useTranslation();
   const [qParams, setQueryParams] = useQueryParams<{
-    questionnaireId?: string;
+    questionnaireSlug?: string;
+    questionnaireTitle?: string;
     responseId?: string;
   }>();
 
-  const { questionnaireId, responseId } = qParams;
+  const { questionnaireSlug, questionnaireTitle, responseId } = qParams;
 
-  const [selectedQuestionnaireTitle, setSelectedQuestionnaireTitle] =
-    useState<string>("");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const isMobile = useBreakpoints({ default: true, md: false });
 
@@ -180,6 +176,22 @@ export const EncounterResponsesTab = ({
     setQueryParams({ ...qParams, responseId: response.id });
     window.location.hash = `#response-${response.id}`;
     if (isMobile) setIsDrawerOpen(false);
+  };
+
+  const handleQuestionnaireChange = (
+    questionnaireSlug?: string,
+    questionnaireTitle?: string,
+  ) => {
+    if (questionnaireSlug && questionnaireTitle) {
+      setQueryParams({ ...qParams, questionnaireSlug, questionnaireTitle });
+    } else {
+      const {
+        questionnaireSlug: _questionnaireSlug,
+        questionnaireTitle: _questionnaireTitle,
+        ...rest
+      } = qParams;
+      setQueryParams(rest);
+    }
   };
 
   return (
@@ -190,10 +202,9 @@ export const EncounterResponsesTab = ({
           patientId={patientId}
           canAccess={canAccess}
           responseId={responseId}
-          questionnaireId={questionnaireId}
-          selectedQuestionnaireTitle={selectedQuestionnaireTitle}
-          setSelectedQuestionnaireTitle={setSelectedQuestionnaireTitle}
-          setQueryParams={setQueryParams}
+          questionnaireSlug={questionnaireSlug}
+          questionnaireTitle={questionnaireTitle || ""}
+          handleQuestionnaireChange={handleQuestionnaireChange}
           onResponseClick={handleResponseClick}
         />
       </div>
@@ -217,12 +228,9 @@ export const EncounterResponsesTab = ({
                     patientId={patientId}
                     canAccess={canAccess}
                     responseId={responseId}
-                    questionnaireId={questionnaireId}
-                    selectedQuestionnaireTitle={selectedQuestionnaireTitle}
-                    setSelectedQuestionnaireTitle={
-                      setSelectedQuestionnaireTitle
-                    }
-                    setQueryParams={setQueryParams}
+                    questionnaireSlug={questionnaireSlug}
+                    questionnaireTitle={questionnaireTitle || ""}
+                    handleQuestionnaireChange={handleQuestionnaireChange}
                     onResponseClick={handleResponseClick}
                   />
                 </div>
@@ -232,13 +240,13 @@ export const EncounterResponsesTab = ({
         </div>
       )}
       <div className="flex-1 h-full overflow-y-auto">
-        <ScrollArea key={questionnaireId} className="h-full">
+        <ScrollArea key={questionnaireSlug} className="h-full">
           <div className="space-y-4 p-3 overflow-anchor-auto">
             <QuestionnaireResponsesList
               encounterId={encounterId}
               patientId={patientId}
               canAccess={canAccess}
-              questionnaireId={questionnaireId}
+              questionnaireSlug={questionnaireSlug}
               renderItem={(response: QuestionnaireResponse) => {
                 return (
                   <div
@@ -254,12 +262,14 @@ export const EncounterResponsesTab = ({
                     >
                       <ResponseCard
                         item={response}
-                        showTitle={!questionnaireId}
-                        onTitleClick={(qid) => {
-                          setQueryParams({ questionnaireId: qid });
-                          setSelectedQuestionnaireTitle(
-                            response.questionnaire?.title || "",
-                          );
+                        patientId={patientId}
+                        showTitle={!questionnaireSlug}
+                        onTitleClick={() => {
+                          setQueryParams({
+                            ...qParams,
+                            questionnaireSlug: response.questionnaire?.slug,
+                            questionnaireTitle: response.questionnaire?.title,
+                          });
                         }}
                       />
                     </Card>
