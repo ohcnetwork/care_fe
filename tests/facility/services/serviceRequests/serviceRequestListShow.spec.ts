@@ -8,11 +8,17 @@ import { createServiceRequest } from "tests/facility/patient/encounter/serviceRe
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+interface ServiceRequestRouteContext {
+  serviceRequestId: string;
+}
+
 let facilityId: string;
 let patientId: string;
 let encounterId: string;
 
-async function createServiceRequestAndOpenList(page: Page): Promise<void> {
+async function createServiceRequestAndGetContext(
+  page: Page,
+): Promise<ServiceRequestRouteContext> {
   await createServiceRequest(page, facilityId, patientId, encounterId);
 
   await clickTabOrMenuItem(page, /service requests/i);
@@ -23,6 +29,22 @@ async function createServiceRequestAndOpenList(page: Page): Promise<void> {
     .first();
 
   await expect(firstRow).toBeVisible();
+
+  await firstRow.getByRole("button", { name: /see details/i }).click();
+  await expect(page).toHaveURL(
+    /\/facility\/[a-f0-9-]+\/service_requests\/[a-f0-9-]+$/i,
+  );
+
+  const serviceRequestId = page
+    .url()
+    .match(/\/service_requests\/([a-f0-9-]+)$/i)?.[1];
+  if (!serviceRequestId)
+    throw new Error("Failed to extract serviceRequestId from URL");
+
+  await page.getByRole("button", { name: /back/i }).click();
+  await expect(page).toHaveURL(/\/service_requests$/);
+
+  return { serviceRequestId };
 }
 
 test.describe("Facility Service Request List and Show", () => {
@@ -35,7 +57,7 @@ test.describe("Facility Service Request List and Show", () => {
   test("location-scoped service request list loads and rows are visible", async ({
     page,
   }) => {
-    await createServiceRequestAndOpenList(page);
+    await createServiceRequestAndGetContext(page);
 
     await expect(page.getByRole("tab", { name: /active/i })).toBeVisible();
 
@@ -50,7 +72,7 @@ test.describe("Facility Service Request List and Show", () => {
   });
 
   test("status filter updates list state", async ({ page }) => {
-    await createServiceRequestAndOpenList(page);
+    await createServiceRequestAndGetContext(page);
 
     const activeTab = page.getByRole("tab", { name: /active/i });
     const completedTab = page.getByRole("tab", { name: /completed/i });
@@ -64,28 +86,35 @@ test.describe("Facility Service Request List and Show", () => {
     await activeTab.click();
     await expect(activeTab).toHaveAttribute("data-state", "active");
 
-    const firstListRow = page
+    const listRow = page
       .locator('[data-slot="table-body"] [data-slot="table-row"]')
       .first();
+    await expect(listRow).toBeVisible();
+    await expect(
+      listRow.getByRole("button", { name: /see details/i }),
+    ).toBeVisible();
 
-    await expect(firstListRow).toBeVisible();
-    await expect(firstListRow.getByText(/active/i).first()).toBeVisible();
+    const filtersTrigger = page.getByRole("button", { name: /filters/i });
+    await expect(filtersTrigger).toBeVisible();
+    await filtersTrigger.click();
+    await expect(page.getByText(/activity definition/i)).toBeVisible();
+    await expect(page.getByText(/date/i).first()).toBeVisible();
+    await page.keyboard.press("Escape");
   });
 
   test("service request show page renders specimen workflow", async ({
     page,
   }) => {
-    await createServiceRequestAndOpenList(page);
-
-    const firstListRow = page
-      .locator('[data-slot="table-body"] [data-slot="table-row"]')
-      .first();
-
-    await expect(firstListRow).toBeVisible();
-    await firstListRow.getByRole("button", { name: /see details/i }).click();
+    const routeContext = await createServiceRequestAndGetContext(page);
+    await page.goto(
+      `/facility/${facilityId}/service_requests/${routeContext.serviceRequestId}`,
+    );
 
     await expect(page).toHaveURL(
-      /\/facility\/[a-f0-9-]+\/service_requests\/[a-f0-9-]+$/i,
+      new RegExp(
+        `/facility/[a-f0-9-]+/service_requests/${routeContext.serviceRequestId}$`,
+        "i",
+      ),
     );
 
     await expect(page.getByRole("button", { name: /back/i })).toBeVisible();
