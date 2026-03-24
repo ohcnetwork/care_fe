@@ -2,7 +2,7 @@ import Loading from "@/components/Common/Loading";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
-import { Redirect } from "raviger";
+import { Redirect, useFullPath } from "raviger";
 
 const TokenEncounterRedirect = ({
   facilityId,
@@ -13,6 +13,7 @@ const TokenEncounterRedirect = ({
   tokenId: string;
   queueId: string;
 }) => {
+  const sourceUrl = useFullPath();
   const { data: token, isLoading: isTokenLoading } = useQuery({
     queryKey: ["token", tokenId],
     queryFn: query(tokenApi.get, {
@@ -52,6 +53,9 @@ const TokenEncounterRedirect = ({
           flow: "queue",
           year_of_birth: token.patient.year_of_birth?.toString() || "",
           partial_id: token.patient.id.slice(0, 5),
+          source_url: sourceUrl,
+          queue_id: token.queue.id,
+          token_id: token.id,
         }).toString()}`}
       />
     );

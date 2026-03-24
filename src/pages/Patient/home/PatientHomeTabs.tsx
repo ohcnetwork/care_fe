@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { BookingsList } from "@/pages/Appointments/BookAppointment/BookingsList";
 import { EncounterListRead } from "@/types/emr/encounter/encounter";
 import { FacilityRead } from "@/types/facility/facility";
+import { useQueryParams } from "raviger";
 import PatientHomeEncounters from "./PatientHomeEncounters";
 
 interface PatientHomeTabsProps {
@@ -34,6 +35,9 @@ export default function PatientHomeTabs({
 }: PatientHomeTabsProps) {
   const { t } = useTranslation();
   const isTab = useBreakpoints({ default: true, lg: false });
+  const [{ token_id }] = useQueryParams<{
+    token_id?: string;
+  }>();
 
   const tabs = [
     { id: "encounters", label: t("encounters"), alwaysVisible: true },
@@ -94,7 +98,11 @@ export default function PatientHomeTabs({
         )}
 
         {activeTab === "tokens" && canListTokens && isTab && (
-          <PatientTokensList patientId={patientId} facility={facility} />
+          <PatientTokensList
+            patientId={patientId}
+            facility={facility}
+            tokenId={token_id}
+          />
         )}
       </div>
     </div>

@@ -6,20 +6,23 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
+  ArrowLeft,
   ArrowRight,
   SquareActivity,
   Stethoscope,
   Ticket,
   Wallet,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { pharmacyDispenseServiceAtom } from "@/atoms/pharmacy";
 import { getPermissions } from "@/common/Permissions";
+import BackButton from "@/components/Common/BackButton";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
 import CreateTokenForm from "@/components/Tokens/CreateTokenForm";
 import PatientTokensList from "@/components/Tokens/PatientTokensList";
+import TokenViewModal from "@/components/Tokens/TokenViewModal";
 import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
@@ -44,17 +47,31 @@ interface QParams {
   partial_id: string;
   flow?: "queue" | "dispense";
   action?: "schedule" | "create_encounter";
+  source_url?: string;
+  token_id?: string;
+  queue_id?: string;
 }
 
 export default function PatientHome() {
   useShortcutSubContext("facility:patient:home");
   const { t } = useTranslation();
-  const [{ phone_number, year_of_birth, partial_id, flow, action }] =
-    useQueryParams<QParams>();
+  const [
+    {
+      phone_number,
+      year_of_birth,
+      partial_id,
+      flow,
+      action,
+      source_url,
+      token_id,
+      queue_id,
+    },
+  ] = useQueryParams<QParams>();
   const queryClient = useQueryClient();
 
   const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
+  const [showTokenModal, setShowTokenModal] = useState(false);
 
   const pharmacyDispenseService = useAtomValue(
     pharmacyDispenseServiceAtom(facilityId),
@@ -67,6 +84,12 @@ export default function PatientHome() {
 
   const { hasPermission } = usePermissions();
   const isTab = useBreakpoints({ default: true, lg: false });
+  const isFromQueue = (() => {
+    if (!source_url) return false;
+    const queueUrlPattern =
+      /\/facility\/[a-f0-9-]+\/queue\/[a-f0-9-]+\/token\/[a-f0-9-]+/;
+    return queueUrlPattern.test(source_url);
+  })();
 
   const {
     canViewAppointments,
@@ -94,6 +117,12 @@ export default function PatientHome() {
     enabled: !!(partial_id && (year_of_birth || phone_number)),
   });
 
+  useEffect(() => {
+    if (isFromQueue && token_id && patientData) {
+      setShowTokenModal(true);
+    }
+  }, [isFromQueue, token_id, patientData]);
+
   if (isVerifyingPatient || !facility) {
     return (
       <div className="space-y-4 md:max-w-5xl mx-auto">
@@ -113,6 +142,12 @@ export default function PatientHome() {
         </Alert>
       ) : patientData ? (
         <div className="space-y-6 md:max-w-5xl mx-auto">
+          {isFromQueue && queue_id && (
+            <BackButton>
+              <ArrowLeft />
+              {t("queue")}
+            </BackButton>
+          )}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="space-y-6 lg:col-span-2">
               <div className="">
@@ -159,7 +194,7 @@ export default function PatientHome() {
                     patientId={patientData.id}
                     facilityId={facilityId}
                     patientName={patientData.name}
-                    defaultOpen={isQueueFlow || action === "create_encounter"}
+                    defaultOpen={!isQueueFlow || action === "create_encounter"}
                     trigger={
                       <QuickAction
                         icon={<SquareActivity className="text-orange-500" />}
@@ -257,10 +292,20 @@ export default function PatientHome() {
                 <PatientTokensList
                   patientId={patientData.id}
                   facility={facility}
+                  tokenId={token_id}
                 />
               )}
             </div>
           </div>
+          {isFromQueue && token_id && queue_id && (
+            <TokenViewModal
+              open={showTokenModal}
+              onOpenChange={setShowTokenModal}
+              facility={facility}
+              queueId={queue_id}
+              tokenId={token_id}
+            />
+          )}
         </div>
       ) : (
         isError && (

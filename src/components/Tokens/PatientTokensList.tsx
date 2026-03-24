@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -11,9 +11,12 @@ import {
 } from "@/components/ui/collapsible";
 import { DatePicker } from "@/components/ui/date-picker";
 
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
+import { AssignToServicePointDialog } from "@/pages/Facility/queues/AssignToServicePointDialog";
 import { TokenCard } from "@/pages/Facility/queues/TokenCard";
+import { getTokenStatus } from "@/pages/Facility/queues/utils";
 import { FacilityRead } from "@/types/facility/facility";
 import { formatScheduleResourceName } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
@@ -21,29 +24,44 @@ import {
   renderTokenNumber,
   TOKEN_STATUS_COLORS,
   TokenRetrieve,
+  TokenStatus,
 } from "@/types/tokens/token/token";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
-import { ChevronsDownUp, ChevronsUpDown, TicketIcon } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronsDownUp,
+  ChevronsUpDown,
+  TicketIcon,
+} from "lucide-react";
 
 interface PatientTokensListProps {
   patientId: string;
   facility: FacilityRead;
+  tokenId?: string;
 }
 
 export default function PatientTokensList({
   patientId,
   facility,
+  tokenId,
 }: PatientTokensListProps) {
   const { t } = useTranslation();
   const [expandedTokens, setExpandedTokens] = useState<Set<string>>(new Set());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [showServicepointDialog, setShowServicepointDialog] = useState(false);
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
       setSelectedDate(date);
     }
   };
+
+  useEffect(() => {
+    if (tokenId) {
+      setExpandedTokens(new Set([tokenId]));
+    }
+  }, [tokenId]);
 
   const { data, isLoading } = useQuery({
     queryKey: ["tokens", patientId, facility.id, selectedDate],
@@ -120,7 +138,11 @@ export default function PatientTokensList({
         />
       )}
 
-      {tokens.map((token) => {
+      {[
+        // ordered by selected token first, then by created date
+        ...tokens.filter((token) => token.id === tokenId),
+        ...tokens.filter((token) => token.id !== tokenId),
+      ].map((token) => {
         const isExpanded = expandedTokens.has(token.id);
 
         return (
@@ -161,7 +183,7 @@ export default function PatientTokensList({
                       variant={TOKEN_STATUS_COLORS[token.status]}
                       className="px-1.5 rounded-sm ml-2 whitespace-nowrap flex-shrink-0"
                     >
-                      {t(token.status.toLowerCase())}
+                      {getTokenStatus({ token, t })}
                     </Badge>
                     {isExpanded ? (
                       <ChevronsDownUp className="size-4 shrink-0" />
@@ -176,7 +198,7 @@ export default function PatientTokensList({
                 <CardContent className="p-1 bg-gray-100 border-gray-100 rounded-md">
                   <div
                     id={`print-token-${token.id}`}
-                    className="print:block print:w-[400px] print:border print:rounded-md"
+                    className="flex flex-col gap-2 print:block print:w-[400px] print:border print:rounded-md"
                   >
                     <TokenCard
                       showlogo={false}
@@ -184,6 +206,27 @@ export default function PatientTokensList({
                       facility={facility}
                       id={`token-card-${token.id}`}
                       className="rounded-md border-none shadow-xs hover:shadow-xs hover:scale-none"
+                    />
+                    {tokenId && token.status === TokenStatus.CREATED && (
+                      <div className="flex justify-center items-center bg-white p-2 rounded-md mb-1 shadow-xs animate-in slide-in-from-top-2 duration-700">
+                        <Button
+                          variant="outline_primary"
+                          className="w-full flex items-center justify-center gap-2 font-semibold"
+                          onClick={() => setShowServicepointDialog(true)}
+                        >
+                          {t("mark_as_in_service")}
+                          <ArrowRight className="size-4 animate-arrow-slide" />
+                        </Button>
+                      </div>
+                    )}
+                    <AssignToServicePointDialog
+                      open={showServicepointDialog}
+                      onOpenChange={setShowServicepointDialog}
+                      token={token}
+                      status={TokenStatus.CREATED}
+                      facilityId={facility.id}
+                      resourceType={token.resource_type}
+                      resourceId={token.resource.id}
                     />
                   </div>
                 </CardContent>
