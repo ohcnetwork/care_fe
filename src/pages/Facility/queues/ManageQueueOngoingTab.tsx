@@ -58,7 +58,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
     facilityId,
   });
   const [qParams, setQueryParams] = useQueryParams();
-  const { autoRefresh, search, patient_filter, patient_name } = qParams;
+  const { autoRefresh, search, patient, patient_name } = qParams;
   const { data: summary } = useQuery({
     queryKey: ["token-queue-summary", facilityId, queueId],
     queryFn: query(tokenQueueApi.summary, {
@@ -95,20 +95,20 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
                 if (patientId && patientName) {
                   setQueryParams(
                     {
-                      patient_filter: patientId,
+                      patient: patientId,
                       patient_name: patientName,
                     },
                     { overwrite: false, replace: true },
                   );
                 } else {
-                  delete qParams.patient_filter;
+                  delete qParams.patient;
                   delete qParams.patient_name;
                   setQueryParams(qParams, { replace: true });
                 }
               }}
               placeholder={t("filter_by_identifier")}
               className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
-              patientId={patient_filter}
+              patientId={patient}
               patientName={patient_name}
             />
           </div>
@@ -131,7 +131,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
               sub_queue_is_null: true,
               status: TokenStatus.CREATED,
               patient_name: search || "",
-              patient_filter: patient_filter,
+              patient: patient,
             }}
             emptyState={
               <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-10 border border-gray-100">
