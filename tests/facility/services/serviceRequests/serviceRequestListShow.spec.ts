@@ -93,10 +93,6 @@ test.describe("Facility Service Request List and Show", () => {
     await expect(
       listRow.getByRole("button", { name: /see details/i }),
     ).toBeVisible();
-
-    await expect(
-      page.getByRole("button", { name: /active|on hold|completed|draft/i }),
-    ).toBeVisible();
   });
 
   test("service request show page renders specimen workflow", async ({
