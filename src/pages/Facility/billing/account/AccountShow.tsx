@@ -155,7 +155,7 @@ export function AccountShow({
     "2xl": 12,
   });
 
-  const isBillingClosed = !!(account && isAccountBillingClosed(account));
+  const isBillingClosed = !!account && isAccountBillingClosed(account);
 
   useEffect(() => {
     if (account) {
@@ -342,9 +342,9 @@ export function AccountShow({
           facilityId={facilityId}
           className="flex-1 p-0 bg-transparent shadow-none"
         />
-        <div className="flex gap-2">
-          <div className="hidden lg:flex gap-2">
-            {isAccountBillableAndActive && (
+        {isAccountBillableAndActive && (
+          <div className="flex gap-2">
+            <div className="hidden lg:flex gap-2">
               <Button
                 variant="ghost"
                 className="text-gray-950 gap-1 flex flex-row items-center justify-between"
@@ -359,8 +359,6 @@ export function AccountShow({
                 <span className="underline">{t("settle_close")}</span>
                 <ShortcutBadge actionId="settle-close-account" />
               </Button>
-            )}
-            {isAccountBillableAndActive && (
               <>
                 <Button
                   variant="outline"
@@ -416,10 +414,8 @@ export function AccountShow({
                   </DropdownMenu>
                 </div>
               </>
-            )}
-          </div>
+            </div>
 
-          {isAccountBillableAndActive && (
             <div className="lg:hidden w-full flex justify-end gap-2">
               <Button
                 variant="outline"
@@ -485,8 +481,8 @@ export function AccountShow({
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </Card>
       <div className="bg-gray-100 p-3 space-y-4 rounded-lg">
         <div className="bg-gray-100 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
