@@ -455,19 +455,17 @@ export function AccountShow({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  {isAccountBillableAndActive && (
-                    <DropdownMenuItem
-                      onClick={() =>
-                        setCloseAccountStatus({
-                          ...closeAccountStatus,
-                          sheetOpen: true,
-                        })
-                      }
-                    >
-                      {t("settle_close")}
-                      <ShortcutBadge actionId="settle-close-account" />
-                    </DropdownMenuItem>
-                  )}
+                  <DropdownMenuItem
+                    onClick={() =>
+                      setCloseAccountStatus({
+                        ...closeAccountStatus,
+                        sheetOpen: true,
+                      })
+                    }
+                  >
+                    {t("settle_close")}
+                    <ShortcutBadge actionId="settle-close-account" />
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() =>
                       setPaymentSheet({
