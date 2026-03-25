@@ -249,11 +249,11 @@ const AppointmentEncounterHeaderActions = ({
   return (
     <div
       className={cn(
-        "w-full sm:w-auto space-x-2 text-center",
+        "w-full sm:w-auto space-x-2 flex items-center",
         appointment.token && "sm:border-l-2 sm:pl-2",
       )}
     >
-      <span className="text-sm text-black pr-2">
+      <span className="text-sm text-black">
         {t("how_do_you_to_finish_this_visit")}
       </span>
       <Button
@@ -267,7 +267,7 @@ const AppointmentEncounterHeaderActions = ({
           ? t("mark_for_discharge")
           : t("complete")}
       </Button>
-      {encounter.appointment?.status !== AppointmentStatus.FULFILLED && (
+      {encounter.status !== EncounterStatus.COMPLETED && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost">
@@ -275,17 +275,37 @@ const AppointmentEncounterHeaderActions = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="min-w-[59px]" align="end">
+            {encounter.appointment?.status !== AppointmentStatus.FULFILLED && (
+              <DropdownMenuItem
+                className="p-2.5"
+                onClick={() => completeAppointment()}
+                disabled={isPending}
+              >
+                <div className="flex flex-col items-start">
+                  <span className="text-sm font-medium text-black">
+                    {t("close_appointment")}
+                  </span>
+                  <p className="text-xs text-gray-700">
+                    {t("close_appointment_description")}
+                  </p>
+                </div>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               className="p-2.5"
-              onClick={() => completeAppointment()}
+              onClick={() => completeEverything()}
               disabled={isPending}
             >
               <div className="flex flex-col items-start">
                 <span className="text-sm font-medium text-black">
-                  {t("close_appointment")}
+                  {encounterRequiresDischarge(encounter)
+                    ? t("mark_for_discharge")
+                    : t("mark_as_complete")}
                 </span>
                 <p className="text-xs text-gray-700">
-                  {t("close_appointment_description")}
+                  {encounterRequiresDischarge(encounter)
+                    ? t("mark_for_discharge_description")
+                    : t("mark_as_complete_description")}
                 </p>
               </div>
             </DropdownMenuItem>
