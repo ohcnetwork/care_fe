@@ -175,7 +175,7 @@ export function EncounterDetails({
               : undefined
           }
         />
-        {encounter?.patient?.instance_identifiers
+        {patient?.instance_identifiers
           ?.filter(
             ({ config }) => config.config.use === PatientIdentifierUse.official,
           )
@@ -186,11 +186,8 @@ export function EncounterDetails({
               value={identifier.value}
             />
           ))}
-        {encounter?.patient?.address && (
-          <DetailRow
-            label={t("address")}
-            value={encounter?.patient?.address}
-          />
+        {patient?.address && (
+          <DetailRow label={t("address")} value={patient.address} />
         )}
       </div>
       <div className="space-y-2">
@@ -218,7 +215,6 @@ export function EncounterDetails({
             label={t("location")}
             value={encounter.current_location.name}
           />
-        )}
         )}
       </div>
     </div>
