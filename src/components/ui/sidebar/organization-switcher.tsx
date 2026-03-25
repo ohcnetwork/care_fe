@@ -77,19 +77,21 @@ export function OrganizationSwitcher({
         </DropdownMenuItem>
         <DropdownMenuLabel>{t("organizations")}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {organizations.map((org) => (
-          <DropdownMenuItem
-            key={org.id}
-            asChild
-            className={cn(
-              "gap-2 p-2",
-              org?.name === selectedOrganization?.name &&
-                "bg-primary-500 text-white focus:bg-primary-600 focus:text-white",
-            )}
-          >
-            <Link href={`/organization/${org.id}`}>{org.name}</Link>
-          </DropdownMenuItem>
-        ))}
+        {organizations
+          .filter((org) => org.org_type === "govt")
+          .map((org) => (
+            <DropdownMenuItem
+              key={org.id}
+              asChild
+              className={cn(
+                "gap-2 p-2",
+                org?.id === selectedOrganization?.id &&
+                  "bg-primary-500 text-white focus:bg-primary-600 focus:text-white",
+              )}
+            >
+              <Link href={`/organization/${org.id}`}>{org.name}</Link>
+            </DropdownMenuItem>
+          ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
