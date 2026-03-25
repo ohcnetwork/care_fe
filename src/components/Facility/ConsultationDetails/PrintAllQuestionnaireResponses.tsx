@@ -215,9 +215,10 @@ export function EncounterDetails({
         )}
         {encounter?.current_location && (
           <DetailRow
-            label={`${t("location")}`}
-            value={encounter?.current_location?.name}
+            label={t("location")}
+            value={encounter.current_location.name}
           />
+        )}
         )}
       </div>
     </div>
