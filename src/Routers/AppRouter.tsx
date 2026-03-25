@@ -29,6 +29,7 @@ import { ShortcutCommandDialog } from "@/components/Facility/ShortcutCommandDial
 import { Button } from "@/components/ui/button";
 import { PermissionProvider } from "@/context/PermissionContext";
 import { useShortcuts } from "@/context/ShortcutContext";
+import { LicensesPage } from "@/pages/Licenses/Licenses";
 import UserDashboard from "@/pages/UserDashboard";
 
 // List of paths and patterns where the sidebar should be hidden
@@ -81,6 +82,7 @@ const Routes: AppRoutes = {
   "/session-expired": () => <SessionExpired />,
   "/not-found": () => <ErrorPage />,
   "/icons": () => <IconIndex />,
+  "/licenses": () => <LicensesPage />,
 
   // Only include the icon route in development environment
   ...(import.meta.env.PROD ? { "/icons": () => <IconIndex /> } : {}),
