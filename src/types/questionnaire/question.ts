@@ -163,6 +163,10 @@ export interface Question {
   questions?: Question[];
   formula?: string;
   templates?: TemplateConfig[];
+  /** The minimum value allowed for this question used for  client-side validation. */
+  min?: number;
+  /** The maximum value allowed for this question used for client-side validation. */
+  max?: number;
 }
 
 export const findQuestionById = (

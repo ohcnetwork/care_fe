@@ -6260,6 +6260,8 @@
   "validation_failed": "Validation failed",
   "value": "Value",
   "value_already_selected": "Value already selected",
+  "value_must_be_at_least": "Value must be at least",
+  "value_must_be_at_most": "Value must be at most",
   "value_set": "Value Set",
   "value_set_search_placeholder": "Type to search and select from the list",
   "value_sets": "Value Sets",

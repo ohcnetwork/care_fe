@@ -777,6 +777,41 @@ export function QuestionnaireForm({
             firstErrorId = firstErrorId ? firstErrorId : q.id;
           }
         }
+        if (
+          (q.type === "integer" ||
+            q.type === "decimal" ||
+            q.type === "quantity") &&
+          isQuestionEnabled(q, form.responses)
+        ) {
+          const response = form.responses.find((r) => r.question_id === q.id);
+          const val = response?.values?.[0]?.value;
+
+          if (val !== undefined && val !== null && val !== "") {
+            const numValue = Number(val);
+
+            // check min
+            if (q.min !== undefined && numValue < q.min) {
+              errors.push({
+                question_id: q.id,
+                error: `${t("value_must_be_at_least")} ${q.min}`,
+                type: "validation_error",
+                msg: `${t("value_must_be_at_least")} ${q.min}`,
+              });
+              firstErrorId = firstErrorId ? firstErrorId : q.id;
+            }
+
+            // check max
+            if (q.max !== undefined && numValue > q.max) {
+              errors.push({
+                question_id: q.id,
+                error: `${t("value_must_be_at_most")} ${q.max}`,
+                type: "validation_error",
+                msg: `${t("value_must_be_at_most")} ${q.max}`,
+              });
+              firstErrorId = firstErrorId ? firstErrorId : q.id;
+            }
+          }
+        }
 
         if (
           q.type === "structured" &&
