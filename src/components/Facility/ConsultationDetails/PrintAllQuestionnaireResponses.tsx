@@ -188,7 +188,7 @@ export function EncounterDetails({
           ))}
         {encounter?.patient?.address && (
           <DetailRow
-            label={`${t("address")}`}
+            label={t("address")}
             value={encounter?.patient?.address}
           />
         )}
