@@ -10,7 +10,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { Input } from "@/components/ui/input";
-import { TooltipComponent } from "@/components/ui/tooltip";
 import {
   Table,
   TableBody,
@@ -19,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -47,16 +47,16 @@ function ProductKnowledgeCard({
   const { t } = useTranslation();
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-shadow overflow-hidden">
       <CardContent className="p-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-          <div className="flex items-start space-x-3">
+          <div className="flex items-start space-x-3 min-w-0 w-full sm:w-auto">
             <div className="flex-shrink-0">
               <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
                 <CareIcon icon="l-folder" className="h-5 w-5" />
               </div>
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 overflow-hidden">
               <div className="flex items-center space-x-2 mb-1">
                 <Badge
                   variant={PRODUCT_KNOWLEDGE_TYPE_COLORS[product.product_type]}
@@ -71,7 +71,10 @@ function ProductKnowledgeCard({
                   {t(product.status)}
                 </Badge>
               </div>
-              <h3 className="font-medium text-gray-900 truncate text-lg">
+              <h3
+                className="font-medium text-gray-900 truncate text-lg"
+                title={product.name}
+              >
                 {product.name}
               </h3>
               {product.alternate_identifier && (
@@ -112,7 +115,7 @@ function ProductKnowledgeTableRow({
   return (
     <TableRow className="hover:bg-gray-50 cursor-pointer">
       <TableCell
-        className="font-medium cursor-pointer"
+        className="font-medium cursor-pointer max-w-40"
         onClick={() =>
           navigate(
             `/facility/${facilityId}/settings/product_knowledge/${product.slug}`,
@@ -222,7 +225,7 @@ export function ProductKnowledgeList({
   return (
     <div>
       {/* Header with filters and view toggle */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+      <div className="flex flex-col flex-wrap sm:flex-row gap-4 mb-6">
         {/* Search */}
         <div className="relative w-full sm:w-auto">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
