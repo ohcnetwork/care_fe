@@ -114,6 +114,7 @@ export function useEncounterShortcuts() {
       "add-questionnaire": () => {
         document.dispatchEvent(new CustomEvent("open-forms-dialog"));
       },
+      "mark-as-complete": () => actions.markAsCompleted(true),
       "mark-as-completed": () => actions.markAsCompleted(),
       plots: () => navigate(buildEncounterUrl("/plots")),
       observations: () => navigate(buildEncounterUrl("/observations")),

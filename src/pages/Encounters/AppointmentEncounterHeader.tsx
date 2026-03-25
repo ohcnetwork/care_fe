@@ -254,7 +254,11 @@ const AppointmentEncounterHeaderActions = ({
       )}
     >
       <span className="text-sm text-black">
-        {t("how_do_you_to_finish_this_visit")}
+        {encounter.appointment?.status !== AppointmentStatus.FULFILLED && (
+          <span className="text-sm text-black">
+            {t("how_do_you_to_finish_this_visit")}
+          </span>
+        )}
       </span>
       <Button
         variant="outline"

@@ -53,7 +53,7 @@ type EncounterContextType = {
 
   actions: {
     assignLocation: () => void;
-    markAsCompleted: () => void;
+    markAsCompleted: (completeEverything?: boolean) => void;
     viewLocationHistory: () => void;
     manageCareTeam: () => void;
     manageDepartments: () => void;
@@ -187,6 +187,7 @@ export function EncounterProvider({
   const [activeAction, setActiveAction] = useState<EncounterAction | null>(
     null,
   );
+  const [completeEverything, setCompleteEverything] = useState(false);
 
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -237,7 +238,7 @@ export function EncounterProvider({
         canReadClinicalData,
         canWriteClinicalData,
         actions: {
-          markAsCompleted: () => {
+          markAsCompleted: (completeEverythingToMark = false) => {
             if (!selectedEncounter) {
               toast.error(t("encounter_not_found"));
               return;
@@ -248,6 +249,7 @@ export function EncounterProvider({
               );
               return;
             }
+            setCompleteEverything(completeEverythingToMark);
             setActiveAction(EncounterAction.MarkAsCompleted);
           },
           assignLocation: () => {
@@ -282,8 +284,10 @@ export function EncounterProvider({
             open={activeAction === EncounterAction.MarkAsCompleted}
             onOpenChange={(open) => {
               setActiveAction(open ? EncounterAction.MarkAsCompleted : null);
+              if (!open) setCompleteEverything(false);
             }}
             encounter={selectedEncounter}
+            completeEverythingToMark={completeEverything}
           />
           <LocationSheet
             open={

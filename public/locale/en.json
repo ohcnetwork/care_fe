@@ -3238,6 +3238,7 @@
   "mark_care_complete": "Mark Care Complete",
   "mark_complete": "Mark Complete",
   "mark_encounter_as_complete_confirmation": "Are you sure you would like to mark this encounter as complete?",
+  "mark_everything_as_complete_description": "This action will close Appointment, Token and Encounter",
   "mark_for_discharge": "Mark for discharge",
   "mark_for_discharge_description": "Navigate to Discharge Disposition",
   "mark_inactive": "Mark Inactive",
