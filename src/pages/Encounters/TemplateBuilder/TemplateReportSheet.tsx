@@ -50,7 +50,7 @@ export default function TemplateReportSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-lg">
+      <SheetContent className="w-full sm:max-w-lg overflow-auto">
         <SheetHeader>
           <SheetTitle className="flex flex-col sm:flex-row justify-between mt-4">
             <span>{t("available_templates")}</span>
