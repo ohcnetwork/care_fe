@@ -139,7 +139,7 @@ const DetailRow = ({
 }) => {
   return (
     <div className="flex">
-      <span className={`text-gray-600 w-32`}>{label}</span>
+      <span className="text-gray-600 w-32">{label}</span>
       <span className="text-gray-600">: </span>
       <span
         className={`ml-1 whitespace-pre-wrap ${isStrong ? "font-semibold" : ""}`}
