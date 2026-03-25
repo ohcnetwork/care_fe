@@ -1248,7 +1248,11 @@ export function ConditionComponent<
             const metric = metrics?.find((m) => m.name === condition.metric);
             if (!metric) return null;
             return (
-              <div key={index} className="flex gap-2 p-2.5 items-start">
+              <div
+                key={index}
+                className="flex gap-2 p-2.5 items-center"
+                title={`Condition ${index + 1}`}
+              >
                 <div className="flex flex-col sm:flex-row gap-2 flex-1 min-w-0">
                   <FormField
                     control={form.control}
@@ -1296,7 +1300,7 @@ export function ConditionComponent<
                               );
                             }}
                           >
-                            <SelectTrigger className="h-8 text-xs max-w-40">
+                            <SelectTrigger className="h-8 text-xs w-full">
                               <SelectValue
                                 placeholder={t("select_an_operation")}
                               />
@@ -1537,7 +1541,11 @@ function NumericRangeComponent<TFieldValues extends FieldValues = FieldValues>({
           {ranges.map((range, index) => {
             const { min, max } = range;
             return (
-              <div key={index} className="flex gap-2 p-2.5 items-start">
+              <div
+                key={index}
+                className="flex gap-2 p-2.5 items-center"
+                title={`Range ${index + 1}`}
+              >
                 <div className="flex flex-col gap-1.5 flex-1 min-w-0">
                   {range?.interpretation && (
                     <InterpretationComponent
