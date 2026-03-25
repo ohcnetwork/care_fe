@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -26,30 +26,39 @@ import {
   TokenRetrieve,
   TokenStatus,
 } from "@/types/tokens/token/token";
+import tokenApi from "@/types/tokens/token/tokenApi";
+import { TokenSubQueueStatus } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
+import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
+import { useMutation } from "@tanstack/react-query";
 import {
   ArrowRight,
   ChevronsDownUp,
   ChevronsUpDown,
   TicketIcon,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface PatientTokensListProps {
   patientId: string;
   facility: FacilityRead;
   tokenId?: string;
+  queueId?: string;
 }
 
 export default function PatientTokensList({
   patientId,
   facility,
   tokenId,
+  queueId,
 }: PatientTokensListProps) {
   const { t } = useTranslation();
   const [expandedTokens, setExpandedTokens] = useState<Set<string>>(new Set());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showServicepointDialog, setShowServicepointDialog] = useState(false);
+  const queryClient = useQueryClient();
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
@@ -63,6 +72,55 @@ export default function PatientTokensList({
     }
   }, [tokenId]);
 
+  const { data: token } = useQuery({
+    queryKey: ["token", facility.id, queueId, tokenId],
+    queryFn: query(tokenApi.get, {
+      pathParams: {
+        facility_id: facility.id,
+        queue_id: queueId ?? "",
+        id: tokenId ?? "",
+      },
+    }),
+    enabled: !!queueId && !!tokenId,
+  });
+
+  const { data: subQueues } = useQuery({
+    queryKey: ["servicePoints", facility.id],
+    queryFn: query(tokenSubQueueApi.list, {
+      pathParams: { facility_id: facility.id },
+      queryParams: {
+        resource_type: token?.resource_type,
+        resource_id: token?.resource.id,
+        limit: 100, // We are assuming that a resource will not have more than 100 sub-queues
+        status: TokenSubQueueStatus.ACTIVE,
+      },
+    }),
+    enabled: !!token,
+  });
+
+  const { mutate: updateToken, isPending } = useMutation({
+    mutationFn: mutate(tokenApi.update, {
+      pathParams: {
+        facility_id: facility.id,
+        queue_id: token?.queue.id ?? "",
+        id: token?.id ?? "",
+      },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["infinite-tokens", facility.id, token?.queue.id ?? ""],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["tokens", token?.patient?.id, facility.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["token-queue-summary", facility.id, token?.queue.id ?? ""],
+      });
+      toast.success(t("token_assigned_to_service_point"));
+      setShowServicepointDialog(false);
+    },
+  });
+
   const { data, isLoading } = useQuery({
     queryKey: ["tokens", patientId, facility.id, selectedDate],
     queryFn: query(scheduleApis.appointments.get_tokens, {
@@ -74,6 +132,8 @@ export default function PatientTokensList({
       },
     }),
   });
+
+  const isOnlyOneSubQueue = subQueues?.results?.length === 1;
 
   const tokens = data?.results || [];
 
@@ -212,22 +272,33 @@ export default function PatientTokensList({
                         <Button
                           variant="outline_primary"
                           className="w-full flex items-center justify-center gap-2 font-semibold"
-                          onClick={() => setShowServicepointDialog(true)}
+                          onClick={() => {
+                            if (isOnlyOneSubQueue) {
+                              updateToken({
+                                status: TokenStatus.IN_PROGRESS,
+                                sub_queue: subQueues?.results?.[0]?.id,
+                                note: token.note,
+                              });
+                            } else {
+                              setShowServicepointDialog(true);
+                            }
+                          }}
                         >
                           {t("mark_as_in_service")}
                           <ArrowRight className="size-4 animate-arrow-slide" />
                         </Button>
                       </div>
                     )}
-                    <AssignToServicePointDialog
-                      open={showServicepointDialog}
-                      onOpenChange={setShowServicepointDialog}
-                      token={token}
-                      status={TokenStatus.CREATED}
-                      facilityId={facility.id}
-                      resourceType={token.resource_type}
-                      resourceId={token.resource.id}
-                    />
+                    {!isOnlyOneSubQueue && (
+                      <AssignToServicePointDialog
+                        open={showServicepointDialog}
+                        onOpenChange={setShowServicepointDialog}
+                        token={token}
+                        subQueues={subQueues?.results ?? []}
+                        onUpdate={updateToken}
+                        isPending={isPending}
+                      />
+                    )}
                   </div>
                 </CardContent>
               </CollapsibleContent>

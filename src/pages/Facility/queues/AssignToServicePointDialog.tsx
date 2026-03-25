@@ -9,49 +9,41 @@ import {
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
-import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import {
   renderTokenNumber,
   TokenRead,
   TokenStatus,
+  TokenUpdate,
 } from "@/types/tokens/token/token";
-import tokenApi from "@/types/tokens/token/tokenApi";
 import { TokenCategoryRead } from "@/types/tokens/tokenCategory/tokenCategory";
-import { TokenSubQueueStatus } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
-import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { TokenSubQueueRead } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
 import { UserCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 export const AssignToServicePointDialog = ({
   open,
   onOpenChange,
-  facilityId,
-  resourceType,
-  resourceId,
   token,
-  status,
   preferredServicePointCategories,
+  subQueues,
+  onUpdate,
+  isPending,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  facilityId: string;
-  resourceType: SchedulableResourceType;
-  resourceId: string;
+
   token: TokenRead;
-  status: TokenStatus;
   preferredServicePointCategories?:
     | {
         [k: string]: TokenCategoryRead | undefined;
       }
     | undefined;
+  subQueues: TokenSubQueueRead[];
+  onUpdate: (data: TokenUpdate) => void;
+  isPending: boolean;
 }) => {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
 
   const [selectedSubQueueId, setSelectedSubQueueId] = useState<string>(
     token.sub_queue?.id ?? "",
@@ -63,47 +55,11 @@ export const AssignToServicePointDialog = ({
     }
   }, [open, token.sub_queue?.id]);
 
-  const { data: subQueues } = useQuery({
-    queryKey: ["servicePoints", facilityId],
-    queryFn: query(tokenSubQueueApi.list, {
-      pathParams: { facility_id: facilityId },
-      queryParams: {
-        resource_type: resourceType,
-        resource_id: resourceId,
-        limit: 100, // We are assuming that a resource will not have more than 100 sub-queues
-        status: TokenSubQueueStatus.ACTIVE,
-      },
-    }),
-  });
-
-  const { mutate: updateToken, isPending } = useMutation({
-    mutationFn: mutate(tokenApi.update, {
-      pathParams: {
-        facility_id: facilityId,
-        queue_id: token.queue.id,
-        id: token.id,
-      },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["infinite-tokens", facilityId, token?.queue.id],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["tokens", token?.patient?.id, facilityId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["token-queue-summary", facilityId, token?.queue.id],
-      });
-      toast.success(t("token_assigned_to_service_point"));
-      onOpenChange(false);
-    },
-  });
-
   const handleConfirm = () => {
     if (selectedSubQueueId) {
-      updateToken({
+      onUpdate({
         sub_queue: selectedSubQueueId,
-        status: status,
+        status: TokenStatus.IN_PROGRESS,
         note: token.note,
       });
     }
@@ -125,7 +81,7 @@ export const AssignToServicePointDialog = ({
           value={selectedSubQueueId}
           onValueChange={setSelectedSubQueueId}
         >
-          {subQueues?.results.map((subQueue) => (
+          {subQueues.map((subQueue) => (
             <div
               key={subQueue.id}
               className={cn(
@@ -153,7 +109,7 @@ export const AssignToServicePointDialog = ({
               )}
             </div>
           ))}
-          {subQueues?.results.length === 0 && (
+          {subQueues.length === 0 && (
             <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
               <RadioGroupItem value="none" id="none" disabled />
               <label
@@ -172,9 +128,7 @@ export const AssignToServicePointDialog = ({
             disabled={!selectedSubQueueId || isPending}
           >
             <UserCheck className="size-4 mr-2" />
-            {status === TokenStatus.IN_PROGRESS
-              ? t("mark_as_in_service")
-              : t("call_patient")}
+            {t("mark_as_in_service")}
           </Button>
         </div>
       </DialogContent>

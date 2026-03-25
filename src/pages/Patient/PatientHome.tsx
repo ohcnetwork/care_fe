@@ -47,7 +47,6 @@ interface QParams {
   partial_id: string;
   flow?: "queue" | "dispense";
   action?: "schedule" | "create_encounter";
-  source_url?: string;
   token_id?: string;
   queue_id?: string;
 }
@@ -62,7 +61,6 @@ export default function PatientHome() {
       partial_id,
       flow,
       action,
-      source_url,
       token_id,
       queue_id,
     },
@@ -84,12 +82,6 @@ export default function PatientHome() {
 
   const { hasPermission } = usePermissions();
   const isTab = useBreakpoints({ default: true, lg: false });
-  const isFromQueue = (() => {
-    if (!source_url) return false;
-    const queueUrlPattern =
-      /\/facility\/[a-f0-9-]+\/queue\/[a-f0-9-]+\/token\/[a-f0-9-]+/;
-    return queueUrlPattern.test(source_url);
-  })();
 
   const {
     canViewAppointments,
@@ -118,10 +110,10 @@ export default function PatientHome() {
   });
 
   useEffect(() => {
-    if (isFromQueue && token_id && patientData) {
+    if (isQueueFlow && token_id && patientData) {
       setShowTokenModal(true);
     }
-  }, [isFromQueue, token_id, patientData]);
+  }, [isQueueFlow, token_id, patientData]);
 
   if (isVerifyingPatient || !facility) {
     return (
@@ -142,7 +134,7 @@ export default function PatientHome() {
         </Alert>
       ) : patientData ? (
         <div className="space-y-6 md:max-w-5xl mx-auto">
-          {isFromQueue && queue_id && (
+          {isQueueFlow && queue_id && (
             <BackButton>
               <ArrowLeft />
               {t("queue")}
@@ -194,7 +186,7 @@ export default function PatientHome() {
                     patientId={patientData.id}
                     facilityId={facilityId}
                     patientName={patientData.name}
-                    defaultOpen={!isQueueFlow || action === "create_encounter"}
+                    defaultOpen={action === "create_encounter"}
                     trigger={
                       <QuickAction
                         icon={<SquareActivity className="text-orange-500" />}
@@ -293,11 +285,12 @@ export default function PatientHome() {
                   patientId={patientData.id}
                   facility={facility}
                   tokenId={token_id}
+                  queueId={queue_id}
                 />
               )}
             </div>
           </div>
-          {isFromQueue && token_id && queue_id && (
+          {isQueueFlow && token_id && queue_id && (
             <TokenViewModal
               open={showTokenModal}
               onOpenChange={setShowTokenModal}

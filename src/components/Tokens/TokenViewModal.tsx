@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -18,8 +18,12 @@ import {
   TokenStatus,
 } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
+import { TokenSubQueueStatus } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
+import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface TokenViewModalProps {
   open: boolean;
@@ -38,6 +42,7 @@ export default function TokenViewModal({
 }: TokenViewModalProps) {
   const { t } = useTranslation();
   const [showServicepointDialog, setShowServicepointDialog] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: token, isLoading } = useQuery({
     queryKey: ["token", facility.id, queueId, tokenId],
@@ -48,7 +53,47 @@ export default function TokenViewModal({
         id: tokenId,
       },
     }),
+    enabled: !!queueId && !!tokenId,
   });
+
+  const { data: subQueues } = useQuery({
+    queryKey: ["servicePoints", facility.id],
+    queryFn: query(tokenSubQueueApi.list, {
+      pathParams: { facility_id: facility.id },
+      queryParams: {
+        resource_type: token?.resource_type,
+        resource_id: token?.resource.id,
+        limit: 100, // We are assuming that a resource will not have more than 100 sub-queues
+        status: TokenSubQueueStatus.ACTIVE,
+      },
+    }),
+    enabled: !!token,
+  });
+
+  const { mutate: updateToken, isPending } = useMutation({
+    mutationFn: mutate(tokenApi.update, {
+      pathParams: {
+        facility_id: facility.id,
+        queue_id: token?.queue.id ?? "",
+        id: token?.id ?? "",
+      },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["infinite-tokens", facility.id, token?.queue.id ?? ""],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["tokens", token?.patient?.id, facility.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["token-queue-summary", facility.id, token?.queue.id ?? ""],
+      });
+      toast.success(t("token_assigned_to_service_point"));
+      setShowServicepointDialog(false);
+    },
+  });
+
+  const isOnlyOneSubQueue = subQueues?.results?.length === 1;
 
   if (isLoading || !token) {
     return null;
@@ -93,7 +138,15 @@ export default function TokenViewModal({
                   variant="primary"
                   className="w-full flex items-center justify-center gap-2 font-semibold"
                   onClick={() => {
-                    setShowServicepointDialog(true);
+                    if (isOnlyOneSubQueue) {
+                      updateToken({
+                        status: TokenStatus.IN_PROGRESS,
+                        sub_queue: subQueues?.results?.[0]?.id,
+                        note: token.note,
+                      });
+                    } else {
+                      setShowServicepointDialog(true);
+                    }
                     onOpenChange(false);
                   }}
                 >
@@ -105,15 +158,14 @@ export default function TokenViewModal({
         </DialogContent>
       </Dialog>
 
-      {token && (
+      {token && !isOnlyOneSubQueue && (
         <AssignToServicePointDialog
           open={showServicepointDialog}
           onOpenChange={setShowServicepointDialog}
           token={token}
-          status={TokenStatus.IN_PROGRESS}
-          facilityId={facility.id}
-          resourceType={token.resource_type}
-          resourceId={token.resource.id}
+          subQueues={subQueues?.results ?? []}
+          onUpdate={updateToken}
+          isPending={isPending}
         />
       )}
     </>
