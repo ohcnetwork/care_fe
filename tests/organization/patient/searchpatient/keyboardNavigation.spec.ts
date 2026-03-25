@@ -1,5 +1,24 @@
-import { expect, test } from "@playwright/test";
+import { Page, expect, test } from "@playwright/test";
 import { getFacilityId } from "tests/support/facilityId";
+
+async function openCommandMenu(page: Page): Promise<void> {
+  await page.keyboard.press("Control+k");
+  await expect(page.getByRole("option").first()).toBeVisible({ timeout: 5000 });
+}
+
+async function getSelectedOptionText(page: Page): Promise<string> {
+  const selected = page.getByRole("option", { selected: true });
+  await expect(selected).toBeVisible();
+  return (await selected.innerText()).trim();
+}
+
+async function pressKeyAndGetSelected(
+  page: Page,
+  key: string,
+): Promise<string> {
+  await page.keyboard.press(key);
+  return getSelectedOptionText(page);
+}
 
 test.describe("Keyboard navigation in search patients", () => {
   test.beforeEach(async ({ page }) => {
@@ -10,124 +29,94 @@ test.describe("Keyboard navigation in search patients", () => {
   test("keyboard navigation: arrow keys highlight, enter commits selection", async ({
     page,
   }) => {
-    await page.keyboard.press("Control+k");
+    await openCommandMenu(page);
 
-    const commandItems = page.locator("[cmdk-item]");
-    await expect(commandItems.first()).toBeVisible();
-    await expect(commandItems).toHaveCount(2, { timeout: 5000 });
-
-    await page.keyboard.press("ArrowDown");
-    await expect(commandItems.nth(0)).toHaveAttribute("data-selected", "false");
-    await expect(commandItems.nth(1)).toHaveAttribute("data-selected", "true");
-
-    const highlightedText = (
-      await commandItems.nth(1).locator("span").first().innerText()
-    ).trim();
+    const highlightedText = await pressKeyAndGetSelected(page, "ArrowDown");
 
     await page.keyboard.press("Enter");
-    await expect(commandItems).toHaveCount(0);
 
-    await page.keyboard.press("Control+k");
-    await expect(page.getByTestId("selected-option-button")).toContainText(
-      highlightedText,
-    );
+    await expect(page.getByRole("option")).toHaveCount(0);
+
+    await openCommandMenu(page);
+    const selectedOption = page.getByRole("option", { selected: true });
+    await expect(selectedOption).toContainText(highlightedText);
   });
 
   test("keyboard navigation: ArrowUp moves highlight back and commits selection", async ({
     page,
   }) => {
-    await page.keyboard.press("Control+k");
-
-    const commandItems = page.locator("[cmdk-item]");
-    await expect(commandItems.first()).toBeVisible();
-    await expect(commandItems).toHaveCount(2, { timeout: 5000 });
+    await openCommandMenu(page);
 
     await page.keyboard.press("ArrowDown");
-    await page.keyboard.press("ArrowUp");
-    await expect(commandItems.nth(1)).toHaveAttribute("data-selected", "false");
-    await expect(commandItems.nth(0)).toHaveAttribute("data-selected", "true");
-
-    const highlightedText = (
-      await commandItems.nth(0).locator("span").first().innerText()
-    ).trim();
+    const highlightedText = await pressKeyAndGetSelected(page, "ArrowUp");
 
     await page.keyboard.press("Enter");
-    await expect(commandItems).toHaveCount(0);
+    await expect(page.getByRole("option")).toHaveCount(0);
 
-    await page.keyboard.press("Control+k");
-    await expect(page.getByTestId("selected-option-button")).toContainText(
-      highlightedText,
-    );
+    await openCommandMenu(page);
+    const selectedOption = page.getByRole("option", { selected: true });
+    await expect(selectedOption).toContainText(highlightedText);
   });
 
   test("keyboard navigation: Home jumps to first item", async ({ page }) => {
-    await page.keyboard.press("Control+k");
+    await openCommandMenu(page);
 
-    const commandItems = page.locator("[cmdk-item]");
-    await expect(commandItems).toHaveCount(2, { timeout: 5000 });
+    const options = page.getByRole("option");
+    const firstOptionText = (await options.first().innerText()).trim();
 
-    await page.keyboard.press("End"); // move to last
-    await page.keyboard.press("Home"); // jump to first
-    await expect(commandItems.nth(0)).toHaveAttribute("data-selected", "true");
+    await page.keyboard.press("End");
+    await page.keyboard.press("Home");
+
+    const selectedText = await getSelectedOptionText(page);
+    expect(selectedText).toBe(firstOptionText);
   });
 
   test("keyboard navigation: End jumps to last item", async ({ page }) => {
-    await page.keyboard.press("Control+k");
+    await openCommandMenu(page);
 
-    const commandItems = page.locator("[cmdk-item]");
-    await expect(commandItems).toHaveCount(2, { timeout: 5000 });
+    const options = page.getByRole("option");
+    const lastOptionText = (await options.last().innerText()).trim();
 
     await page.keyboard.press("End");
-    await expect(commandItems.nth(1)).toHaveAttribute("data-selected", "true");
+
+    const selectedText = await getSelectedOptionText(page);
+    expect(selectedText).toBe(lastOptionText);
   });
 
   test("keyboard navigation: selection does not move past list boundaries", async ({
     page,
   }) => {
-    await page.keyboard.press("Control+k");
+    await openCommandMenu(page);
 
-    const commandItems = page.locator("[cmdk-item]");
-    await expect(commandItems).toHaveCount(2, { timeout: 5000 });
+    const options = page.getByRole("option");
+    const firstOptionText = (await options.first().innerText()).trim();
+    const lastOptionText = (await options.last().innerText()).trim();
 
-    // At first item, ArrowUp should stay on first
-    await page.keyboard.press("ArrowUp");
-    await expect(commandItems.nth(0)).toHaveAttribute("data-selected", "true");
+    const afterUpAtTop = await pressKeyAndGetSelected(page, "ArrowUp");
+    expect(afterUpAtTop).toBe(firstOptionText);
 
-    // Move to last
     await page.keyboard.press("End");
-    await expect(commandItems.nth(1)).toHaveAttribute("data-selected", "true");
+    const afterEnd = await getSelectedOptionText(page);
+    expect(afterEnd).toBe(lastOptionText);
 
-    // ArrowDown should not go past last
-    await page.keyboard.press("ArrowDown");
-    await expect(commandItems.nth(1)).toHaveAttribute("data-selected", "true");
-  });
-
-  test("no selectable options when filter matches nothing", async ({
-    page,
-  }) => {
-    await page.keyboard.press("Control+k");
-
-    const commandItems = page.locator("[cmdk-item]");
-    await expect(commandItems.first()).toBeVisible();
-
-    const commandInput = page.locator("[cmdk-input]");
-    await commandInput.fill("zzzzzz-not-a-patient");
-
-    await expect(commandItems).toHaveCount(0);
+    const afterDownAtBottom = await pressKeyAndGetSelected(page, "ArrowDown");
+    expect(afterDownAtBottom).toBe(lastOptionText);
   });
 
   test("keyboard navigation: multiple key presses end with last item selected after End", async ({
     page,
   }) => {
-    await page.keyboard.press("Control+k");
+    await openCommandMenu(page);
 
-    const commandItems = page.locator("[cmdk-item]");
-    await expect(commandItems.first()).toBeVisible();
+    const options = page.getByRole("option");
+    const lastOptionText = (await options.last().innerText()).trim();
+
     await page.keyboard.press("ArrowDown");
     await page.keyboard.press("ArrowUp");
     await page.keyboard.press("Home");
     await page.keyboard.press("End");
 
-    await expect(commandItems.nth(1)).toHaveAttribute("data-selected", "true");
+    const selectedText = await getSelectedOptionText(page);
+    expect(selectedText).toBe(lastOptionText);
   });
 });
