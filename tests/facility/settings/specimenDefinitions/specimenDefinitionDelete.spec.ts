@@ -72,7 +72,9 @@ test.describe("Specimen Definitions Delete", () => {
 
     // Filter by retired status
     await page.getByRole("combobox").filter({ hasText: "Status" }).click();
-    await page.getByRole("option", { name: DELETED_STATUS }).click();
+    await page
+      .getByRole("option", { name: DELETED_STATUS, exact: true })
+      .click();
 
     // Wait for filter to apply
     await expect(page).toHaveURL(/status=retired/);
