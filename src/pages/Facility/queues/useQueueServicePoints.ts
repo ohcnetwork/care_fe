@@ -19,11 +19,7 @@ export function useQueueServicePoints() {
   const [assignedServicePoints, setAssignedServicePoints] = useAtom(atom);
   const servicPointKey = `${resourceType}:${resourceId}`;
 
-  const {
-    data: subQueues,
-    isLoading,
-    isError,
-  } = useQuery({
+  const { data: subQueues, isLoading } = useQuery({
     queryKey: ["servicePoints", facilityId, resourceType, resourceId],
     queryFn: query(tokenSubQueueApi.list, {
       pathParams: { facility_id: facilityId },
@@ -53,16 +49,12 @@ export function useQueueServicePoints() {
   const normalizedAssignedServicePoints = allServicePoints.filter(({ id }) =>
     normalizedAssignedServicePointIdSet.has(id),
   );
-  const hasServicePoints = allServicePoints.length > 0;
 
   return {
     allServicePoints,
     assignedServicePointIds: normalizedAssignedServicePointIds,
     assignedServicePoints: normalizedAssignedServicePoints,
-    hasServicePoints,
     isLoading,
-    isError,
-    isEmpty: !isLoading && !isError && !hasServicePoints,
 
     toggleServicePoint: (subQueueId: string, checked: boolean) => {
       const updated = new Set(normalizedAssignedServicePointIds);

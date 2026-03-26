@@ -347,11 +347,10 @@ function ManageServicePointsDialog({
   const {
     allServicePoints,
     assignedServicePointIds,
-    isEmpty,
-    isError,
     isLoading,
     toggleServicePoint,
   } = useQueueServicePoints();
+  const isEmpty = allServicePoints.length === 0;
 
   return (
     <Dialog {...props}>
@@ -368,10 +367,6 @@ function ManageServicePointsDialog({
                 <Skeleton className="h-4 flex-1" />
               </div>
             ))}
-          </div>
-        ) : isError ? (
-          <div className="py-4 text-sm text-gray-600">
-            {t("something_wrong")}
           </div>
         ) : isEmpty ? (
           <EmptyState

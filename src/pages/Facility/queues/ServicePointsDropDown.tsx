@@ -20,9 +20,6 @@ export const ServicePointsDropDown = () => {
     assignedServicePointIds,
     assignedServicePoints,
     allServicePoints,
-    hasServicePoints,
-    isEmpty,
-    isError,
     isLoading,
     toggleServicePoint,
   } = useQueueServicePoints();
@@ -38,14 +35,14 @@ export const ServicePointsDropDown = () => {
   }
 
   const activeServicePointCount = assignedServicePoints.length;
-  const isTriggerDisabled = !hasServicePoints || isError;
+  const hasServicePoints = allServicePoints.length > 0;
+  const isEmpty = !hasServicePoints;
+  const isTriggerDisabled = !hasServicePoints;
 
   return (
     <div className="flex">
       <div className="flex gap-1 rounded-r-none border border-r-0 border-gray-300 rounded-l-md p-1.5 bg-white items-center justify-center">
-        {isError ? (
-          <span className="text-sm font-medium">{t("something_wrong")}</span>
-        ) : isEmpty ? (
+        {isEmpty ? (
           <span className="text-sm font-medium">
             {t("no_service_points_available")}
           </span>
@@ -105,50 +102,32 @@ export const ServicePointsDropDown = () => {
                 {t("assigned_service_points")}
               </DropdownMenuLabel>
               <div>
-                {isError ? (
-                  <div className="px-3 py-4 text-sm text-gray-600">
-                    {t("something_wrong")}
-                  </div>
-                ) : isEmpty ? (
-                  <div className="px-3 py-4">
-                    <p className="text-sm font-medium text-gray-950">
-                      {t("no_service_points_available")}
-                    </p>
-                    <p className="mt-1 text-sm text-gray-600">
-                      {t("no_service_points_found_description")}
-                    </p>
-                  </div>
-                ) : (
-                  allServicePoints.map((subQueue) => {
-                    const isSelected = assignedServicePointIds.includes(
-                      subQueue.id,
-                    );
-                    return (
-                      <div
-                        key={subQueue.id}
-                        className="flex items-center justify-between rounded-sm w-full p-1 hover:bg-gray-100 cursor-pointer"
-                        onClick={() => {
-                          toggleServicePoint(subQueue.id, !isSelected);
-                        }}
-                      >
-                        <div className="flex items-center space-x-3 p-1">
-                          <Checkbox
-                            checked={isSelected}
-                            onCheckedChange={(checked) =>
-                              toggleServicePoint(
-                                subQueue.id,
-                                checked as boolean,
-                              )
-                            }
-                          />
-                          <span className="text-sm font-medium">
-                            {subQueue.name}
-                          </span>
-                        </div>
+                {allServicePoints.map((subQueue) => {
+                  const isSelected = assignedServicePointIds.includes(
+                    subQueue.id,
+                  );
+                  return (
+                    <div
+                      key={subQueue.id}
+                      className="flex items-center justify-between rounded-sm w-full p-1 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => {
+                        toggleServicePoint(subQueue.id, !isSelected);
+                      }}
+                    >
+                      <div className="flex items-center space-x-3 p-1">
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={(checked) =>
+                            toggleServicePoint(subQueue.id, checked as boolean)
+                          }
+                        />
+                        <span className="text-sm font-medium">
+                          {subQueue.name}
+                        </span>
                       </div>
-                    );
-                  })
-                )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
             <div className="border-t border-gray-200 w-full pt-3 pb-1 px-1">
