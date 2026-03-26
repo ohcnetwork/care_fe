@@ -40,25 +40,25 @@ const App = () => {
         <Suspense fallback={<Loading />}>
           <PubSubProvider>
             <ShortcutProvider>
-              <PluginEngine>
-                <AuthUserProvider
-                  unauthorized={<Routers.PublicRouter />}
-                  otpAuthorized={<Routers.PatientRouter />}
-                >
+              <AuthUserProvider
+                unauthorized={<Routers.PublicRouter />}
+                otpAuthorized={<Routers.PatientRouter />}
+              >
+                <PluginEngine>
                   <Routers.AppRouter />
-                </AuthUserProvider>
-                <Toaster
-                  position="top-center"
-                  theme="light"
-                  richColors
-                  expand
-                  // For `richColors` to work, pass at-least an empty object.
-                  // Refer: https://github.com/shadcn-ui/ui/issues/2234.
-                  toastOptions={{}}
-                  closeButton
-                />
-                <AppUpdateNotifier />
-              </PluginEngine>
+                </PluginEngine>
+              </AuthUserProvider>
+              <Toaster
+                position="top-center"
+                theme="light"
+                richColors
+                expand
+                // For `richColors` to work, pass at-least an empty object.
+                // Refer: https://github.com/shadcn-ui/ui/issues/2234.
+                toastOptions={{}}
+                closeButton
+              />
+              <AppUpdateNotifier />
             </ShortcutProvider>
           </PubSubProvider>
         </Suspense>
