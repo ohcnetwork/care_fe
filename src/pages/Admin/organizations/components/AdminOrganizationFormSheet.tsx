@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -51,6 +52,7 @@ export default function AdminOrganizationFormSheet({
   const { t } = useTranslation();
 
   const isEditMode = !!org;
+  const isRoleOrganizationPage = organizationType === OrgType.ROLE;
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
@@ -86,7 +88,7 @@ export default function AdminOrganizationFormSheet({
         org_type: organizationType as OrgType,
       });
     }
-  }, [isEditMode, org, open, organizationType]);
+  }, [form, isEditMode, org, open, organizationType]);
 
   const { mutate: createOrganization, isPending: isCreating } = useMutation({
     mutationFn: (body: OrganizationCreate) =>
@@ -122,15 +124,16 @@ export default function AdminOrganizationFormSheet({
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
+    const parentOrgId = isRoleOrganizationPage ? undefined : parentId;
     const data = {
       name: values.name.trim(),
       description: values.description?.trim() || undefined,
       org_type: values.org_type,
-      parent: parentId,
+      parent_id: parentOrgId,
     };
 
     if (isEditMode) {
-      updateOrganization({ ...data, parent_id: parentId });
+      updateOrganization(data);
     } else {
       createOrganization(data);
     }
@@ -143,26 +146,36 @@ export default function AdminOrganizationFormSheet({
       <SheetTrigger asChild>
         {isEditMode ? (
           <Button variant="white" size="sm" className="font-semibold">
-            {t("edit")}
+            {isRoleOrganizationPage ? t("edit_role_organization") : t("edit")}
           </Button>
         ) : (
           <Button className="w-full md:w-auto">
             <CareIcon icon="l-plus" className="mr-2 size-4" />
-            {t("add_organization")}
+            {isRoleOrganizationPage
+              ? t("create_role_organization")
+              : t("add_organization")}
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="overflow-y-auto sm:max-w-xl">
         <SheetHeader>
           <SheetTitle>
-            {isEditMode
-              ? t("edit_department_team")
-              : t("create_department_team")}
+            {isRoleOrganizationPage
+              ? isEditMode
+                ? t("edit_role_organization")
+                : t("create_role_organization")
+              : isEditMode
+                ? t("edit_department_team")
+                : t("create_department_team")}
           </SheetTitle>
           <SheetDescription>
-            {isEditMode
-              ? t("edit_department_team_description")
-              : t("create_department_team_description")}
+            {isRoleOrganizationPage
+              ? isEditMode
+                ? t("edit_role_organization_description")
+                : t("create_role_organization_description")
+              : isEditMode
+                ? t("edit_department_team_description")
+                : t("create_department_team_description")}
           </SheetDescription>
         </SheetHeader>
         <Form {...form}>
@@ -170,6 +183,20 @@ export default function AdminOrganizationFormSheet({
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-6 py-4"
           >
+            {isRoleOrganizationPage && (
+              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                <div className="flex items-center gap-2 text-gray-600">
+                  <ShieldCheck className="size-4" />
+                  <span className="text-xs font-semibold uppercase tracking-wider">
+                    {t("role_organization_record")}
+                  </span>
+                </div>
+                <p className="mt-2 text-sm text-gray-500">
+                  {t("role_organization_record_description")}
+                </p>
+              </div>
+            )}
+
             <FormField
               control={form.control}
               name="name"
@@ -179,7 +206,11 @@ export default function AdminOrganizationFormSheet({
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder={t("enter_department_team_name")}
+                      placeholder={
+                        isRoleOrganizationPage
+                          ? t("enter_role_organization_name")
+                          : t("enter_department_team_name")
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -196,7 +227,11 @@ export default function AdminOrganizationFormSheet({
                   <FormControl>
                     <Textarea
                       {...field}
-                      placeholder={t("enter_department_team_description")}
+                      placeholder={
+                        isRoleOrganizationPage
+                          ? t("enter_role_organization_description")
+                          : t("enter_department_team_description")
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -213,9 +248,13 @@ export default function AdminOrganizationFormSheet({
                 ? isEditMode
                   ? t("updating")
                   : t("creating")
-                : isEditMode
-                  ? t("update_organization")
-                  : t("create_organization")}
+                : isRoleOrganizationPage
+                  ? isEditMode
+                    ? t("update_role_organization")
+                    : t("create_role_organization")
+                  : isEditMode
+                    ? t("update_organization")
+                    : t("create_organization")}
             </Button>
           </form>
         </Form>
