@@ -48,19 +48,19 @@ const App = () => {
                 >
                   <PluginEngine>
                     <Routers.AppRouter />
-                    <Toaster
-                      position="top-center"
-                      theme="light"
-                      richColors
-                      expand
-                      // For `richColors` to work, pass at-least an empty object.
-                      // Refer: https://github.com/shadcn-ui/ui/issues/2234.
-                      toastOptions={{}}
-                      closeButton
-                    />
                   </PluginEngine>
                 </AuthUserProvider>
               </HistoryAPIProvider>
+              <Toaster
+                position="top-center"
+                theme="light"
+                richColors
+                expand
+                // For `richColors` to work, pass at-least an empty object.
+                // Refer: https://github.com/shadcn-ui/ui/issues/2234.
+                toastOptions={{}}
+                closeButton
+              />
               <AppUpdateNotifier />
             </ShortcutProvider>
           </PubSubProvider>
