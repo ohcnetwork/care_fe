@@ -38,6 +38,7 @@ interface Props {
   title?: string;
   closeOnSelect?: boolean;
   mobileTrigger?: React.ReactNode;
+  align?: "center" | "start" | "end";
 }
 
 export default function ValueSetSelect({
@@ -53,6 +54,7 @@ export default function ValueSetSelect({
   showCode = false,
   title,
   mobileTrigger,
+  align = "start",
   ...props
 }: Props & ButtonProps) {
   const { t } = useTranslation();
@@ -181,7 +183,7 @@ export default function ValueSetSelect({
             <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="transition-all w-150 p-0" align="start">
+        <PopoverContent className="transition-all w-150 p-0" align={align}>
           <ValueSetSearchContent
             system={system}
             onSelect={(selected) => {

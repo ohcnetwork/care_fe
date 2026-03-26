@@ -1,4 +1,5 @@
 import { GENDER_TYPES } from "@/common/constants";
+import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 import {
   AlertDialog,
@@ -34,6 +35,7 @@ import {
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { Code } from "@/types/base/code/code";
 import {
   AgeOperationEqualityValue,
   AgeOperationInRangeValue,
@@ -290,7 +292,9 @@ export function ObservationInterpretation<
         : undefined,
     };
     setEditedRange(rangeToEdit);
-    setSelectedInterpretationType(rangeToEdit._interpretation_type);
+    setSelectedInterpretationType(
+      rangeToEdit._interpretation_type ?? InterpretationType.ranges,
+    );
 
     // Clear highlighting for this range when user starts editing
     if (recentlyChangedRanges.has(index)) {
@@ -1367,6 +1371,7 @@ function InterpretationComponent<
     setInterpretation({
       ...interpretation,
       display: value,
+      code: undefined,
     });
   };
 
@@ -1377,35 +1382,63 @@ function InterpretationComponent<
     });
   };
 
+  const handleCodeChange = (value: Code) => {
+    setInterpretation({
+      ...interpretation,
+      display: "",
+      code: value,
+    });
+  };
+
   return (
-    <div className="flex items-center gap-2 w-full">
-      {!disableDisplay && (
-        <FormField
-          control={form.control}
-          name={`${fieldName}.display` as any}
-          render={({ field }) => (
-            <FormItem className="flex-1">
-              <FormControl>
-                <Input
-                  {...field}
-                  value={interpretation.display}
-                  placeholder={t("display")}
-                  className="h-8 text-xs"
-                  onChange={(e) => handleDisplayChange(e.target.value)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
-      <label className="inline-flex items-center gap-1.5 cursor-pointer shrink-0">
-        <Switch
-          checked={interpretation.highlight ?? false}
-          onCheckedChange={handleHighlightChange}
-        />
-        <Highlighter className="size-3 text-gray-400" />
-      </label>
+    <div className="flex flex-col gap-2 mb-1">
+      <div className="flex sm:flex-row flex-col sm:items-center gap-2 w-full">
+        {!disableDisplay && (
+          <div className="flex sm:flex-row flex-col flex-1 gap-2 justify-between">
+            <FormField
+              control={form.control}
+              name={`${fieldName}.display` as any}
+              render={({ field }) => (
+                <FormItem className="flex-3 shrink-0">
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={interpretation.display}
+                      placeholder={t("display")}
+                      className="h-8 text-xs"
+                      onChange={(e) => handleDisplayChange(e.target.value)}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <span className="text-xs text-gray-500 self-center">{t("or")}</span>
+            <div className="sm:w-70 w-full shrink-0">
+              <ValueSetSelect
+                system="system-observation-interpretation"
+                value={interpretation.code}
+                onSelect={(value) => handleCodeChange(value)}
+                placeholder={t("code")}
+                className="h-8 text-xs w-full"
+                align="end"
+              />
+            </div>
+          </div>
+        )}
+        <label className="inline-flex items-center gap-1.5 cursor-pointer shrink-0">
+          <Switch
+            checked={interpretation.highlight ?? false}
+            onCheckedChange={handleHighlightChange}
+          />
+          <Highlighter className="size-3 text-gray-400" />
+        </label>
+      </div>
+      <FormMessage>
+        {form.getFieldState(`${fieldName}.display` as any, form.formState).error
+          ?.message ||
+          form.getFieldState(`${fieldName}.code` as any, form.formState).error
+            ?.message}
+      </FormMessage>
     </div>
   );
 }
@@ -1567,7 +1600,6 @@ function NumericRangeComponent<TFieldValues extends FieldValues = FieldValues>({
                               }
                             />
                           </FormControl>
-                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -1589,11 +1621,20 @@ function NumericRangeComponent<TFieldValues extends FieldValues = FieldValues>({
                               }
                             />
                           </FormControl>
-                          <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
+                  <FormMessage>
+                    {form.getFieldState(
+                      `${fieldName}.ranges.${index}.min` as any,
+                      form.formState,
+                    ).error?.message ||
+                      form.getFieldState(
+                        `${fieldName}.ranges.${index}.max` as any,
+                        form.formState,
+                      ).error?.message}
+                  </FormMessage>
                 </div>
                 <Button
                   variant="ghost"

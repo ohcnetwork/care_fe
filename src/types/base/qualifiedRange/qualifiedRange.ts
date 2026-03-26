@@ -1,4 +1,4 @@
-import { Code } from "@/types/base/code/code";
+import { Code, CodeSchema } from "@/types/base/code/code";
 import { Condition, conditionSchema } from "@/types/base/condition/condition";
 import { round, zodDecimal } from "@/Utils/decimal";
 import { t } from "i18next";
@@ -40,16 +40,29 @@ export interface QualifiedRange {
   _interpretation_type: InterpretationType;
 }
 //To do: Translations not being loaded for playwright tests, need to debug and fix
-const interpretationSchema = z.object({
-  display: z.string().min(1, "Display is required"),
-  highlight: z.boolean().optional(),
-  code: z.object({ code: z.string(), display: z.string() }).optional(),
-});
+const interpretationSchema = z
+  .object({
+    display: z.string().optional(),
+    highlight: z.boolean().optional(),
+    code: CodeSchema.optional(),
+  })
+  .refine(
+    (data) => {
+      return (
+        (data.display !== undefined && data.display !== "") ||
+        data.code !== undefined
+      );
+    },
+    {
+      message: "Either display or code is required",
+      path: ["display"],
+    },
+  );
 
 const defaultInterpretationSchema = z.object({
   display: z.string(),
   highlight: z.boolean().optional(),
-  code: z.object({ code: z.string(), display: z.string() }).optional(),
+  code: CodeSchema.optional(),
 });
 export const qualifiedRangeSchema = z.array(
   z
