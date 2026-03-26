@@ -13,6 +13,7 @@ import {
   ServiceRequestReadSpec,
 } from "@/types/emr/serviceRequest/serviceRequest";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
+import { format } from "date-fns";
 
 function formatSpecimenRequirements(
   specimens: SpecimenDefinitionRead[],
@@ -174,6 +175,16 @@ export function ServiceRequestDetails({
                 </div>
                 <div className="text-sm text-gray-950">
                   {request.patient_instruction}
+                </div>
+              </div>
+            )}
+            {request.occurance && (
+              <div>
+                <div className="text-sm text-gray-600 mb-1">
+                  {t("occurrence")}
+                </div>
+                <div className="font-semibold text-gray-700">
+                  {format(request.occurance, "PPP")}
                 </div>
               </div>
             )}

@@ -37,7 +37,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { add } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
+import { dateQueryString, formatName } from "@/Utils/utils";
 import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { getBasePrice } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
@@ -61,6 +61,7 @@ import { Decimal } from "decimal.js";
 
 import { AddToTemplateDialog } from "@/components/Questionnaire/AddToTemplateDialog";
 import { filterStructuredQuestionnaireSlugs } from "@/components/Questionnaire/data/StructuredFormData";
+import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
 
 export function buildServiceRequestForTemplate(
   serviceRequest: ServiceRequestApplyActivityDefinitionSpec,
@@ -388,6 +389,21 @@ function ServiceRequestForm({
                   onChange={(e) => onUpdate?.({ note: e.target.value })}
                   disabled={disabled}
                   placeholder={t("add_notes")}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>{t("occurrence")}</Label>
+                <CombinedDatePicker
+                  value={
+                    serviceRequest.service_request.occurance
+                      ? new Date(serviceRequest.service_request.occurance)
+                      : undefined
+                  }
+                  onChange={(date) =>
+                    onUpdate?.({ occurance: dateQueryString(date) })
+                  }
+                  disabled={disabled}
                 />
               </div>
             </div>
