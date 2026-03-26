@@ -160,14 +160,16 @@ export const Demography = (props: PatientProps) => {
   const extensionInformation: Data = {
     id: "additional-details",
     allowEdit: true,
-    details: extensionFields.map((field) => {
-      const value = getExtensionValue(
-        patientData.extensions as NamespacedExtensionData,
-        field.extensionName,
-        field.name,
-      );
-      return { label: field.label, value: value as string };
-    }),
+    details: extensionFields
+      .map((field) => {
+        const value = getExtensionValue(
+          patientData.extensions as NamespacedExtensionData,
+          field.extensionName,
+          field.name,
+        );
+        return { label: field.label, value: value as string };
+      })
+      .filter((field) => field.value !== undefined && field.value !== ""),
   };
 
   const data: Data[] = [
