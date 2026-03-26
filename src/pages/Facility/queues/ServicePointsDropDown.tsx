@@ -103,19 +103,19 @@ export const ServicePointsDropDown = () => {
               </DropdownMenuLabel>
               <div>
                 {allServicePoints.map((subQueue) => {
+                  const checkboxId = `sp-dropdown-${subQueue.id}`;
                   const isSelected = assignedServicePointIds.includes(
                     subQueue.id,
                   );
                   return (
-                    <div
+                    <label
                       key={subQueue.id}
+                      htmlFor={checkboxId}
                       className="flex items-center justify-between rounded-sm w-full p-1 hover:bg-gray-100 cursor-pointer"
-                      onClick={() => {
-                        toggleServicePoint(subQueue.id, !isSelected);
-                      }}
                     >
                       <div className="flex items-center space-x-3 p-1">
                         <Checkbox
+                          id={checkboxId}
                           checked={isSelected}
                           onCheckedChange={(checked) =>
                             toggleServicePoint(subQueue.id, checked as boolean)
@@ -125,7 +125,7 @@ export const ServicePointsDropDown = () => {
                           {subQueue.name}
                         </span>
                       </div>
-                    </div>
+                    </label>
                   );
                 })}
               </div>
