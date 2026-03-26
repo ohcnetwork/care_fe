@@ -191,7 +191,8 @@ export function LandingPage() {
             </span>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-2">
-            <div className="relative w-full sm:w-9/12" data-search-container>
+            <div className="relative w-full sm:w-[67%]" data-search-container>
+              {/* Changing from sm:w-9/12 (75%) to 67% to accomodate search button */}
               <div className="rounded-lg border border-gray-200 hover:shadow-lg transition-shadow">
                 <div className="flex items-center px-2 bg-white rounded-lg">
                   <CareIcon icon="l-search" className="size-5 text-gray-400" />
@@ -256,11 +257,13 @@ export function LandingPage() {
             {/* Search Button */}
             <Button
               variant="primary_gradient"
-              className="w-full sm:w-3/12"
+              className="w-full text-sm sm:flex-1 sm:text-xs"
+              /* Using text-sm so it does not default to text-xs, retains original size in mobile mode */
               onClick={handleSearch}
               disabled={!selectedOrganization}
             >
-              <span className="bg-linear-to-b from-white/15 to-transparent"></span>
+              <span className="absolute inset-0 bg-linear-to-b from-white/15 to-transparent"></span>
+              {/* Used absolute inset-0 for fixing alignment issues */}
               {t("search_button")}
             </Button>
           </div>
