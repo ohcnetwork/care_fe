@@ -191,7 +191,7 @@ export function LandingPage() {
             </span>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-2">
-            <div className="relative w-full sm:w-[67%]" data-search-container>
+            <div className="relative w-full sm:w-2/3" data-search-container>
               {/* Changing from sm:w-9/12 (75%) to 67% to accomodate search button */}
               <div className="rounded-lg border border-gray-200 hover:shadow-lg transition-shadow">
                 <div className="flex items-center px-2 bg-white rounded-lg">
@@ -262,7 +262,10 @@ export function LandingPage() {
               onClick={handleSearch}
               disabled={!selectedOrganization}
             >
-              <span className="absolute inset-0 bg-linear-to-b from-white/15 to-transparent"></span>
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 bg-linear-to-b from-white/15 to-transparent"
+              ></span>
               {/* Used absolute inset-0 for fixing alignment issues */}
               {t("search_button")}
             </Button>
