@@ -17,7 +17,7 @@ export function useQueueServicePoints() {
   const { resourceType, resourceId, facilityId } =
     useScheduleResourceFromPath();
   const [assignedServicePoints, setAssignedServicePoints] = useAtom(atom);
-  const servicPointKey = `${resourceType}:${resourceId}`;
+  const servicePointKey = `${resourceType}:${resourceId}`;
 
   const { data: subQueues, isLoading } = useQuery({
     queryKey: ["servicePoints", facilityId, resourceType, resourceId],
@@ -37,7 +37,7 @@ export function useQueueServicePoints() {
   const availableServicePointIds = new Set(allServicePointIds);
 
   const assignedServicePointIds =
-    assignedServicePoints[servicPointKey] ?? allServicePointIds;
+    assignedServicePoints[servicePointKey] ?? allServicePointIds;
 
   const normalizedAssignedServicePointIds = assignedServicePointIds.filter(
     (id) => availableServicePointIds.has(id),
@@ -62,7 +62,7 @@ export function useQueueServicePoints() {
 
       setAssignedServicePoints({
         ...assignedServicePoints,
-        [servicPointKey]:
+        [servicePointKey]:
           updated.size !== allServicePoints.length ? [...updated] : undefined,
       });
     },
