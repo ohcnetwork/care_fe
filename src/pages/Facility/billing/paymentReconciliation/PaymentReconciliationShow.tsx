@@ -22,7 +22,6 @@ import { Separator } from "@/components/ui/separator";
 import CriticalActionConfirmationDialog from "@/components/Common/CriticalActionConfirmationDialog";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
-import BackButton from "@/components/Common/BackButton";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import {
   PAYMENT_RECONCILIATION_METHOD_MAP,
@@ -34,7 +33,7 @@ import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paym
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatName, formatPatientAge } from "@/Utils/utils";
+import { formatName, formatPatientAge, goBack } from "@/Utils/utils";
 
 // Helper for friendly display of enum values
 function humanize(str: string): string {
@@ -520,13 +519,17 @@ export function PaymentReconciliationShow({
                       />
                     </>
                   )}
-                <BackButton
+                <Button
                   className="w-full flex items-center relative"
                   variant="outline"
+                  onClick={() =>
+                    goBack(`/facility/${facilityId}/billing/payments`)
+                  }
+                  data-shortcut-id="go-back"
                 >
                   <ArrowLeft className="size-4" />
                   {t("back_to_payments")}
-                </BackButton>
+                </Button>
                 <Button variant="outline" className="w-full" asChild>
                   <Link
                     href={`/facility/${facilityId}/billing/account/${payment.account?.id}`}

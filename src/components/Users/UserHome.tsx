@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -18,7 +18,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
-import { formatName, keysOf } from "@/Utils/utils";
+import { formatName, goBack, keysOf } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import facilityApi from "@/types/facility/facilityApi";
 import userApi from "@/types/user/userApi";
@@ -70,7 +70,7 @@ export default function UserHome(props: UserHomeProps) {
   );
 
   if (isError) {
-    navigate("/");
+    goBack("/");
   }
 
   if (isLoading || !userData) {

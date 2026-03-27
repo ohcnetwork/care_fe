@@ -81,6 +81,7 @@ import {
   dateQueryString,
   formatDateTime,
   formatPatientAge,
+  goBack,
 } from "@/Utils/utils";
 
 import { booleanFromString } from "@/common/utils";
@@ -313,7 +314,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
   useEffect(() => {
     if (!isFacilityLoading && !canViewAppointments && !facility) {
       toast.error(t("no_permission_to_view_page"));
-      navigate("/");
+      goBack("/");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canViewAppointments, facility, isFacilityLoading]);

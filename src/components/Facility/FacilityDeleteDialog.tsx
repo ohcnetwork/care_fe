@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash2Icon } from "lucide-react";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -9,8 +8,9 @@ import { buttonVariants } from "@/components/ui/button";
 
 import CriticalActionConfirmationDialog from "@/components/Common/CriticalActionConfirmationDialog";
 
-import mutate from "@/Utils/request/mutate";
 import facilityApi from "@/types/facility/facilityApi";
+import mutate from "@/Utils/request/mutate";
+import { goBack } from "@/Utils/utils";
 
 interface FacilityDeleteDialogProps {
   facility: {
@@ -50,7 +50,7 @@ const FacilityDeleteDialog = ({
       });
 
       setOpen(false);
-      navigate("/");
+      goBack("/");
     },
     onError: () => {
       setOpen(false);

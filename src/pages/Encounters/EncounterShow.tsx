@@ -40,7 +40,7 @@ import {
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { LocationTypeIcons } from "@/types/location/location";
-import { entriesOf } from "@/Utils/utils";
+import { entriesOf, goBack } from "@/Utils/utils";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -105,7 +105,7 @@ export const EncounterShow = (props: Props) => {
   useEffect(() => {
     if (!isPrimaryEncounterLoading && !isPatientLoading && !canAccess) {
       toast.error(t("permission_denied_encounter"));
-      navigate("/");
+      goBack("/");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPrimaryEncounterLoading, isPatientLoading]);

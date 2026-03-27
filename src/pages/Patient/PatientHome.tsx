@@ -16,7 +16,6 @@ import { useState } from "react";
 
 import { pharmacyDispenseServiceAtom } from "@/atoms/pharmacy";
 import { getPermissions } from "@/common/Permissions";
-import BackButton from "@/components/Common/BackButton";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
 import CreateTokenForm from "@/components/Tokens/CreateTokenForm";
@@ -33,6 +32,7 @@ import PatientHomeTabs from "@/pages/Patient/home/PatientHomeTabs";
 import { PLUGIN_Component } from "@/PluginEngine";
 import patientApi from "@/types/emr/patient/patientApi";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 import careConfig from "@careConfig";
 import { useAtomValue } from "jotai";
 import { Link, navigate, useQueryParams } from "raviger";
@@ -271,9 +271,13 @@ export default function PatientHome() {
               <p className="text-sm text-gray-500 mb-6">
                 {t("please_enter_correct_birth_year")}
               </p>
-              <BackButton variant="primary_gradient" className="gap-3 group">
+              <Button
+                variant={"primary_gradient"}
+                className="gap-3 group"
+                onClick={() => goBack(`/facility/${facilityId}/patients`)}
+              >
                 {t("go_back")}
-              </BackButton>
+              </Button>
             </div>
           </div>
         )

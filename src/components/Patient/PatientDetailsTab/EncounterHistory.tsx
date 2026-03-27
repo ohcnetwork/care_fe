@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
+import { useQueryParams } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -18,6 +18,7 @@ import { getPermissions } from "@/common/Permissions";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 import { TimelineWrapper } from "@/components/Common/TimelineWrapper";
 import { EmptyState } from "@/components/ui/empty-state";
 import { usePermissions } from "@/context/PermissionContext";
@@ -54,7 +55,7 @@ const EncounterHistory = (props: PatientProps) => {
   useEffect(() => {
     if (!canViewPatients) {
       toast.error(t("no_permission_to_view_page"));
-      navigate(`/facility/${facilityId}/patient/${patientId}`);
+      goBack(`/facility/${facilityId}/patient/${patientId}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canViewPatients]);

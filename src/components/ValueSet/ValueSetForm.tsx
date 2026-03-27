@@ -33,9 +33,8 @@ import {
   ValueSetRead,
   ValueSetStatus,
 } from "@/types/valueSet/valueSet";
-import { valuesOf } from "@/Utils/utils";
+import { goBack, valuesOf } from "@/Utils/utils";
 
-import BackButton from "@/components/Common/BackButton";
 import { generateSlug } from "@/Utils/utils";
 import { CodingField } from "./CodingField";
 import { ValueSetPreview } from "./ValueSetPreview";
@@ -504,9 +503,14 @@ export function ValueSetForm({
           </div>
         )}
         <div className="flex gap-2 w-full justify-end">
-          <BackButton variant="outline" size="sm" disabled={isSubmitting}>
+          <Button
+            variant="outline"
+            disabled={isSubmitting}
+            type="button"
+            onClick={() => goBack("/admin/valuesets")}
+          >
             {t("cancel")}
-          </BackButton>
+          </Button>
 
           <Button
             variant="primary"

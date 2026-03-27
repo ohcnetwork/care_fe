@@ -23,8 +23,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { dateQueryString, formatName } from "@/Utils/utils";
-import BackButton from "@/components/Common/BackButton";
+import { dateQueryString, formatName, goBack } from "@/Utils/utils";
 import { TokenSlotButton } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
@@ -227,9 +226,13 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     <div className="flex flex-col">
       <div className="container mx-auto px-4 py-8">
         <div className="flex px-2 pb-4 justify-start">
-          <BackButton>
+          <Button
+            variant="outline"
+            className="border border-secondary-400"
+            onClick={() => goBack(`/facility/${facilityId}`)}
+          >
             <span className="text-sm underline">{t("back")}</span>
-          </BackButton>
+          </Button>
         </div>
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="sm:w-1/3">

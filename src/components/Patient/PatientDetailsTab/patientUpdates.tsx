@@ -1,4 +1,4 @@
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -13,6 +13,7 @@ import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 
+import { goBack } from "@/Utils/utils";
 import { PatientProps } from ".";
 
 export const Updates = (props: PatientProps) => {
@@ -28,7 +29,7 @@ export const Updates = (props: PatientProps) => {
   useEffect(() => {
     if (!canViewPatientQuestionnaireResponses) {
       toast.error(t("no_permission_to_view_page"));
-      navigate(
+      goBack(
         facilityId
           ? `/facility/${facilityId}/patient/${patientId}`
           : `/patient/${patientId}`,

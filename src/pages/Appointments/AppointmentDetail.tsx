@@ -49,7 +49,7 @@ import {
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatName, getReadableDuration } from "@/Utils/utils";
+import { formatName, getReadableDuration, goBack } from "@/Utils/utils";
 import {
   AvatarIcon,
   CalendarIcon,
@@ -156,14 +156,14 @@ export default function AppointmentDetail(props: Props) {
     // If facility query failed (no access to facility)
     if (!facility) {
       toast.error(t("no_permission_to_view_page"));
-      navigate(`/`, { replace: true });
+      goBack("/");
       return;
     }
 
     // If facility is loaded but user doesn't have permission to view appointments
     if (facility && !canViewAppointments) {
       toast.error(t("no_permission_to_view_page"));
-      navigate(`/facility/${facility.id}/overview`, { replace: true });
+      goBack(`/facility/${facility.id}/overview`);
       return;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

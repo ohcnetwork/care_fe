@@ -1,6 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
 import { SkullIcon, Trash2Icon } from "lucide-react";
-import { navigate } from "raviger";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -9,9 +8,10 @@ import { buttonVariants } from "@/components/ui/button";
 
 import CriticalActionConfirmationDialog from "@/components/Common/CriticalActionConfirmationDialog";
 
-import mutate from "@/Utils/request/mutate";
 import { UserBase } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
+import mutate from "@/Utils/request/mutate";
+import { goBack } from "@/Utils/utils";
 
 interface ConfirmDialogProps {
   user: UserBase;
@@ -33,7 +33,7 @@ const UserDeleteDialog = (props: ConfirmDialogProps) => {
     onSuccess: () => {
       toast.success(t("user_deleted_successfully"));
       setOpen(false);
-      navigate("/");
+      goBack("/");
     },
     onError: () => {
       setOpen(false);

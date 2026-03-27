@@ -18,7 +18,8 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 
-import BackButton from "@/components/Common/BackButton";
+import { goBack } from "@/Utils/utils";
+import { Button } from "@/components/ui/button";
 import { FeatureBadge } from "./Utils";
 import { UserCard } from "./components/UserCard";
 
@@ -83,9 +84,13 @@ export function FacilityDetailsPage({ id }: Props) {
           <h2 className="text-xl font-semibold mb-4">
             {t("facility_not_found")}
           </h2>
-          <BackButton variant="outline" className="border border-secondary-400">
+          <Button
+            variant="outline"
+            className="border border-secondary-400"
+            onClick={() => goBack("/facilities")}
+          >
             {t("back_to_facilities")}
-          </BackButton>
+          </Button>
         </Card>
       </div>
     );
@@ -94,10 +99,14 @@ export function FacilityDetailsPage({ id }: Props) {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center pb-4">
-        <BackButton variant="outline" className="border border-secondary-400">
+        <Button
+          variant="outline"
+          className="border border-secondary-400"
+          onClick={() => goBack("/facilities")}
+        >
           <CareIcon icon="l-arrow-left" className="size-4 mr-1" />
           <span className="text-sm underline">{t("back")}</span>
-        </BackButton>
+        </Button>
         <LoginHeader />
       </div>
       <Card className="overflow-hidden bg-white border border-gray-200">

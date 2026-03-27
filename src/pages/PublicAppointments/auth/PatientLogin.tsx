@@ -32,9 +32,10 @@ import CircularProgress from "@/components/Common/CircularProgress";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
-import mutate from "@/Utils/request/mutate";
 import { LoginByOtpResponse, TokenData } from "@/types/otp/otp";
 import otpApi from "@/types/otp/otpApi";
+import mutate from "@/Utils/request/mutate";
+import { goBack } from "@/Utils/utils";
 
 const FormSchema = z.object({
   pin: z.string().min(5, {
@@ -241,7 +242,7 @@ export default function PatientLogin({
         className="border border-secondary-400"
         onClick={() =>
           page === "send"
-            ? navigate(`/facility/${facilityId}`)
+            ? goBack(`/facility/${facilityId}`)
             : navigate(
                 `/facility/${facilityId}/appointments/${staffId}/otp/send`,
               )
