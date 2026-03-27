@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { cn } from "@/lib/utils";
 import {
   renderTokenNumber,
   TokenRead,
@@ -84,10 +83,7 @@ export const AssignToServicePointDialog = ({
           {subQueues.map((subQueue) => (
             <div
               key={subQueue.id}
-              className={cn(
-                "flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer",
-                subQueue.id === token.sub_queue?.id && "hidden",
-              )}
+              className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
               onClick={() => setSelectedSubQueueId(subQueue.id)}
             >
               <RadioGroupItem
