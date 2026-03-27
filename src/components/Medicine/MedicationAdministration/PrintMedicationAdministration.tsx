@@ -21,6 +21,7 @@ import Loading from "@/components/Common/Loading";
 import PrintFooter from "@/components/Common/PrintFooter";
 import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
 
+import useCurrentFacilitySilently from "@/pages/Facility/utils/useCurrentFacility";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { MedicationAdministrationRead } from "@/types/emr/medicationAdministration/medicationAdministration";
 import medicationAdministrationApi from "@/types/emr/medicationAdministration/medicationAdministrationApi";
@@ -29,6 +30,7 @@ import {
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import query from "@/Utils/request/query";
 import {
   formatName,
@@ -67,6 +69,7 @@ export const PrintMedicationAdministration = (props: {
 }) => {
   const { facilityId, encounterId, patientId } = props;
   const { t } = useTranslation();
+  const { facility } = useCurrentFacilitySilently();
 
   const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId],
@@ -237,6 +240,8 @@ export const PrintMedicationAdministration = (props: {
     <PrintPreview
       title={`${t("drug_chart")} - ${encounter?.patient.name}`}
       disabled={!hasData}
+      facility={facility}
+      templateSlug={PrintTemplateType.medication_administration}
     >
       {/* Print Options - hidden when printing */}
       <div className="print:hidden mb-4 p-3 bg-gray-50 rounded-lg border flex items-center gap-6 flex-wrap">

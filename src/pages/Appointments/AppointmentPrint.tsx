@@ -69,7 +69,11 @@ export default function AppointmentPrint(props: Props) {
 
   if (isLoading || !appointment || !facility) {
     return (
-      <PrintPreview title={t("appointment_details")} disabled>
+      <PrintPreview
+        title={t("appointment_details")}
+        disabled
+        templateSlug={PrintTemplateType.appointment}
+      >
         <div className="flex items-center justify-center py-8">
           <div className="text-center">
             <div className="text-lg font-semibold">{t("loading")}</div>
@@ -87,7 +91,6 @@ export default function AppointmentPrint(props: Props) {
   return (
     <PrintPreview
       title={t("appointment_details")}
-      autoPrint={{ enabled: true }}
       facility={facility}
       templateSlug={PrintTemplateType.appointment}
     >

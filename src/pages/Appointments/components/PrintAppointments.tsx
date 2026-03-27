@@ -1,4 +1,4 @@
-import careConfig from "@careConfig";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useQueryParams } from "raviger";
@@ -27,6 +27,7 @@ import {
 } from "@/Utils/utils";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import {
   PatientIdentifier,
   PatientIdentifierUse,
@@ -51,6 +52,7 @@ export function PrintAppointments({
   resourceId,
 }: PrintAppointmentsProps) {
   const { t } = useTranslation();
+  const { facility } = useCurrentFacility();
   const [qParams] = useQueryParams();
   const [selectedPatient, setSelectedPatient] = useState<PatientRead | null>(
     null,
@@ -131,22 +133,18 @@ export function PrintAppointments({
           </label>
         </div>
       </div>
-      <PrintPreview title={t("appointments")}>
-        <div className="py-8 max-w-4xl mx-auto">
-          {/* Header with Facility Name and Logo */}
-          <div className="flex justify-between items-start pb-6 border-b border-gray-200">
-            <div className="space-y-4 break-all">
-              <h1 className="text-3xl font-semibold">{t("appointments")}</h1>
-            </div>
-            <img
-              src={careConfig.mainLogo?.dark}
-              alt="Care Logo"
-              className="h-10 w-auto object-contain ml-6"
-            />
-          </div>
+      <PrintPreview
+        title={t("appointments")}
+        facility={facility}
+        templateSlug={PrintTemplateType.appointments}
+      >
+        <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold pb-2 border-b border-gray-200">
+          {t("appointments")}
+        </h2>
 
+        <div>
           {/* Filter Summary */}
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="mt-3 grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-6">
             <div className="space-y-1 text-sm">
               {qParams.date_from && qParams.date_to && (
                 <p className="text-gray-600">

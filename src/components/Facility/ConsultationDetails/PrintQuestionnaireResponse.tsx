@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
@@ -10,8 +9,10 @@ import {
 } from "@/components/Facility/ConsultationDetails/PrintAllQuestionnaireResponses";
 
 import query from "@/Utils/request/query";
+import useCurrentFacilitySilently from "@/pages/Facility/utils/useCurrentFacility";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import questionnaireResponseApi from "@/types/questionnaire/questionnaireResponseApi";
 
 type PrintQuestionnaireResponseProps = {
@@ -28,6 +29,7 @@ export function PrintQuestionnaireResponse({
   facilityId,
 }: PrintQuestionnaireResponseProps) {
   const { t } = useTranslation();
+  const { facility } = useCurrentFacilitySilently();
 
   const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId, facilityId],
@@ -66,23 +68,15 @@ export function PrintQuestionnaireResponse({
     <PrintPreview
       title={t("questionnaire_response_logs")}
       disabled={!questionnaireResponse}
+      facility={facility}
+      templateSlug={PrintTemplateType.questionnaire_response_logs}
     >
       <div className="max-w-5xl mx-auto">
         <div>
-          <div className="flex flex-col sm:flex-row print:flex-row justify-between items-center print:items-start sm:items-start mb-4 pb-2 border-b border-gray-200">
-            <img
-              src={careConfig.mainLogo?.dark}
-              alt="Care Logo"
-              className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2 print:order-2"
-            />
-            <div className="text-center sm:text-left sm:order-1 print:text-left">
-              <h1 className="text-3xl font-semibold">
-                {encounter?.facility?.name ?? patient?.name}
-              </h1>
-              <h2 className="text-gray-500 uppercase text-sm tracking-wide mt-1 font-semibold">
-                {t("questionnaire_response_logs")}
-              </h2>
-            </div>
+          <div className="text-center sm:text-left sm:order-1 print:text-left mb-4 pb-2 border-b border-gray-200">
+            <h2 className="text-gray-500 uppercase text-sm tracking-wide mt-1 font-semibold">
+              {t("questionnaire_response_logs")}
+            </h2>
           </div>
 
           <EncounterDetails

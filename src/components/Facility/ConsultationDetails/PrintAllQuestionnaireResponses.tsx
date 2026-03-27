@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useMemo } from "react";
@@ -13,10 +12,12 @@ import { Separator } from "@/components/ui/separator";
 
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
@@ -36,6 +37,7 @@ export function PrintAllQuestionnaireResponses({
   facilityId,
 }: PrintAllQuestionnaireResponsesProps) {
   const { t } = useTranslation();
+  const { facility } = useCurrentFacilitySilently();
 
   const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId, facilityId],
@@ -81,23 +83,15 @@ export function PrintAllQuestionnaireResponses({
     <PrintPreview
       title={t("questionnaire_response_logs")}
       disabled={!questionnaireResponses?.results?.length}
+      facility={facility}
+      templateSlug={PrintTemplateType.questionnaire_response_logs}
     >
       <div className="md:p-2 max-w-4xl mx-auto">
         <div>
-          <div className="flex flex-col sm:flex-row print:flex-row justify-between items-center print:items-start sm:items-start mb-4 pb-2 border-b border-gray-200">
-            <img
-              src={careConfig.mainLogo?.dark}
-              alt="Care Logo"
-              className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2 print:order-2"
-            />
-            <div className="text-center sm:text-left sm:order-1 print:text-left">
-              <h1 className="text-3xl font-semibold">
-                {encounter?.facility?.name ?? patient?.name}
-              </h1>
-              <h2 className="text-gray-500 uppercase text-sm tracking-wide mt-1 font-semibold">
-                {t("questionnaire_response_logs")}
-              </h2>
-            </div>
+          <div className="text-center sm:text-left sm:order-1 print:text-left mb-2 pb-2 border-b border-gray-200">
+            <h2 className="text-gray-500 uppercase text-sm tracking-wide mt-1 font-semibold">
+              {t("questionnaire_response_logs")}
+            </h2>
           </div>
 
           <EncounterDetails
