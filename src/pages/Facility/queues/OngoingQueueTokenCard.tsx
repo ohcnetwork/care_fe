@@ -83,14 +83,12 @@ export function OngoingQueueTokenCard({
   return (
     <ContextMenu>
       <ContextMenuTrigger ref={contextMenuTriggerRef}>
-        <Link
+        <div
           className={cn(
             "relative flex flex-col gap-2 md:gap-2 items-start justify-between bg-gray-50 rounded-lg shadow hover:shadow-md transition-all duration-300 ease-in-out",
             token?.status === TokenStatus.IN_PROGRESS &&
               "border border-primary-500",
           )}
-          basePath="/"
-          href={`/facility/${facilityId}/queue/${token?.queue.id}/token/${token?.id}`}
         >
           <div className="flex flex-col gap-2 sm:flex-row items-center justify-between w-full px-3 pt-3">
             <div className="w-full flex justify-between items-center">
@@ -184,7 +182,7 @@ export function OngoingQueueTokenCard({
                 />
               </div>
             )}
-        </Link>
+        </div>
       </ContextMenuTrigger>
       {token && (
         <>
