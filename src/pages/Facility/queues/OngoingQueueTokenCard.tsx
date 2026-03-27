@@ -8,7 +8,6 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { CancelTokenDialog } from "@/pages/Facility/queues/CancelTokenDialog";
@@ -86,51 +85,61 @@ export function OngoingQueueTokenCard({
       <ContextMenuTrigger ref={contextMenuTriggerRef}>
         <Link
           className={cn(
-            "relative flex flex-col gap-2 md:gap-3 items-start justify-between bg-gray-50 rounded-lg shadow hover:shadow-md transition-all duration-300 ease-in-out mx-1",
+            "relative flex flex-col gap-2 md:gap-2 items-start justify-between bg-gray-50 rounded-lg shadow hover:shadow-md transition-all duration-300 ease-in-out",
             token?.status === TokenStatus.IN_PROGRESS &&
               "border border-primary-500",
           )}
           basePath="/"
           href={`/facility/${facilityId}/queue/${token?.queue.id}/token/${token?.id}`}
         >
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-1 items-center justify-between w-full p-3">
-            <div className="w-full">
+          <div className="flex flex-col gap-2 sm:flex-row items-center justify-between w-full px-3 pt-3">
+            <div className="w-full flex justify-between items-center">
               {token ? (
-                <div className="flex flex-col justify-between">
-                  <span className="font-semibold flex items-center gap-1">
-                    {token.patient
-                      ? token.patient.name
-                      : renderTokenNumber(token)}
-                  </span>
-                  {token.patient && (
-                    <div className="flex flex-col gap-1 mt-1">
+                <>
+                  <div className="flex flex-col">
+                    <span className="font-semibold flex items-center gap-1 text-gray-950">
+                      {token.patient
+                        ? token.patient.name
+                        : renderTokenNumber(token)}
+                    </span>
+                    {token.patient && (
                       <span className="text-xs text-gray-700">
                         {formatPatientAge(token.patient, true)},{" "}
                         {t(`GENDER__${token.patient.gender}`)}
                       </span>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
+                  <Button variant="outline" asChild>
+                    <Link
+                      basePath="/"
+                      href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
+                    >
+                      {t("encounter")}
+                    </Link>
+                  </Button>
+                </>
               ) : (
                 <Skeleton className="h-4 w-36 my-2" />
               )}
             </div>
-            <>
+            <div className="flex w-full md:w-auto items-center gap-3 mt-1">
               {token ? (
-                <div className="flex flex-row gap-1 items-center justify-between w-full">
-                  <div className="flex gap-2 items-center justify-center p-1 bg-gray-100 border border-gray-200 rounded-lg">
-                    <Badge
-                      variant={
-                        QUEUE_TOKEN_STATUS_COLORS[getQueueTokenStatus(token)]
-                      }
-                      className="h-2 w-2 rounded-full p-0 border"
-                    />
+                <>
+                  <div className="flex gap-2 items-center justify-center p-1 bg-gray-100 border border-gray-200 rounded-lg mb-1">
+                    <div className="flex items-center gap-1">
+                      <Badge
+                        variant={
+                          QUEUE_TOKEN_STATUS_COLORS[getQueueTokenStatus(token)]
+                        }
+                        className="h-2 w-2 rounded-full p-0 border ml-1"
+                      />
 
-                    <span className="text-base font-medium text-black">
-                      {t(`token_status__${getQueueTokenStatus(token)}`)}:
-                    </span>
+                      <span className="text-base font-medium text-black">
+                        {t(`token_status__${getQueueTokenStatus(token)}`)}:
+                      </span>
+                    </div>
 
-                    <span className="text-lg font-bold text-black">
+                    <span className="text-lg font-bold text-black pr-1">
                       {renderTokenNumber(token)}
                     </span>
                   </div>
@@ -139,10 +148,8 @@ export function OngoingQueueTokenCard({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-full rounded-r-lg"
                       onClick={(e) => {
                         e.preventDefault();
-                        e.stopPropagation();
                         const rect = e.currentTarget.getBoundingClientRect();
                         const x = rect.left + rect.width / 2;
                         const y = rect.bottom;
@@ -159,25 +166,24 @@ export function OngoingQueueTokenCard({
                       <MoreHorizontal className="size-4" />
                     </Button>
                   </div>
-                </div>
+                </>
               ) : (
                 <Skeleton className="h-12 w-20" />
               )}
-            </>
+            </div>
           </div>
-          {token && token.patient && (
-            <>
-              <Separator orientation="horizontal" />
-              <div className="pb-2 px-1">
+          {token &&
+            token.patient &&
+            (token.patient.instance_tags?.length > 0 ||
+              token.patient.facility_tags?.length > 0) && (
+              <div className="pb-2 px-3">
                 <PatientTagsDisplay
                   patient={token.patient}
                   className="text-xs flex-1"
-                  badgeSize="xs"
                   showLabel={false}
                 />
               </div>
-            </>
-          )}
+            )}
         </Link>
       </ContextMenuTrigger>
       {token && (

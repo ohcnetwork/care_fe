@@ -15,14 +15,12 @@ interface PatientTagsDisplayProps {
   patient: PublicPatientRead | PatientListRead | PatientRead;
   showLabel?: boolean;
   className?: string;
-  badgeSize?: "xs" | "sm" | "md";
 }
 
 export const PatientTagsDisplay = ({
   patient,
   showLabel = true,
   className,
-  badgeSize = "sm",
 }: PatientTagsDisplayProps) => {
   const { t } = useTranslation();
 
@@ -55,7 +53,6 @@ export const PatientTagsDisplay = ({
             variant="secondary"
             className="capitalize"
             title={tag.description}
-            size={badgeSize}
           >
             {getTagHierarchyDisplay(tag)}
           </Badge>
