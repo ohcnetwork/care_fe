@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -31,7 +31,6 @@ import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
-import { useMutation } from "@tanstack/react-query";
 import {
   ArrowRight,
   ChevronsDownUp,
@@ -258,38 +257,29 @@ export default function PatientTokensList({
                       id={`token-card-${token.id}`}
                       className="rounded-md border-none shadow-xs hover:shadow-xs hover:scale-none"
                     />
-                    {tokenId && token.status === TokenStatus.CREATED && (
-                      <div className="flex justify-center items-center bg-white p-2 rounded-md mb-1 shadow-xs animate-in slide-in-from-top-2 duration-700">
-                        <Button
-                          variant="outline_primary"
-                          className="w-full flex items-center justify-center gap-2 font-semibold"
-                          onClick={() => {
-                            if (isOnlyOneSubQueue) {
-                              updateToken({
-                                status: TokenStatus.IN_PROGRESS,
-                                sub_queue: assignedServicePoints[0]?.id,
-                                note: token.note,
-                              });
-                            } else {
-                              setShowServicepointDialog(true);
-                            }
-                          }}
-                        >
-                          {t("mark_as_in_service")}
-                          <ArrowRight className="size-4 animate-arrow-slide" />
-                        </Button>
-                      </div>
-                    )}
-                    {!isOnlyOneSubQueue && (
-                      <AssignToServicePointDialog
-                        open={showServicepointDialog}
-                        onOpenChange={setShowServicepointDialog}
-                        token={token}
-                        subQueues={assignedServicePoints}
-                        onUpdate={updateToken}
-                        isPending={isPending}
-                      />
-                    )}
+                    {tokenId === token.id &&
+                      token.status === TokenStatus.CREATED && (
+                        <div className="flex justify-center items-center bg-white p-2 rounded-md mb-1 shadow-xs animate-in slide-in-from-top-2 duration-700">
+                          <Button
+                            variant="outline_primary"
+                            className="w-full flex items-center justify-center gap-2 font-semibold"
+                            onClick={() => {
+                              if (isOnlyOneSubQueue) {
+                                updateToken({
+                                  status: TokenStatus.IN_PROGRESS,
+                                  sub_queue: assignedServicePoints[0]?.id,
+                                  note: token.note,
+                                });
+                              } else {
+                                setShowServicepointDialog(true);
+                              }
+                            }}
+                          >
+                            {t("mark_as_in_service")}
+                            <ArrowRight className="size-4 animate-arrow-slide" />
+                          </Button>
+                        </div>
+                      )}
                   </div>
                 </CardContent>
               </CollapsibleContent>
@@ -297,6 +287,16 @@ export default function PatientTokensList({
           </Collapsible>
         );
       })}
+      {token && !isOnlyOneSubQueue && (
+        <AssignToServicePointDialog
+          open={showServicepointDialog}
+          onOpenChange={setShowServicepointDialog}
+          token={token}
+          subQueues={assignedServicePoints}
+          onUpdate={updateToken}
+          isPending={isPending}
+        />
+      )}
     </div>
   );
 }

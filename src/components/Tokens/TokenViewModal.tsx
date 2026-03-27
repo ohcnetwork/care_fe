@@ -79,6 +79,7 @@ export default function TokenViewModal({
       });
       toast.success(t("token_assigned_to_service_point"));
       setShowServicepointDialog(false);
+      onOpenChange(false);
     },
   });
 
@@ -134,9 +135,9 @@ export default function TokenViewModal({
                         note: token.note,
                       });
                     } else {
+                      onOpenChange(false);
                       setShowServicepointDialog(true);
                     }
-                    onOpenChange(false);
                   }}
                 >
                   {t("mark_as_in_service")}

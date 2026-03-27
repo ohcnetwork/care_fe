@@ -109,17 +109,6 @@ export const AssignToServicePointDialog = ({
               )}
             </div>
           ))}
-          {subQueues.length === 0 && (
-            <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-              <RadioGroupItem value="none" id="none" disabled />
-              <label
-                htmlFor="none"
-                className="flex-1 text-sm font-medium cursor-pointer"
-              >
-                {t("no_service_points_available")}
-              </label>
-            </div>
-          )}
         </RadioGroup>
         <div className="flex">
           <Button
