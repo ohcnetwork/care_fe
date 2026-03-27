@@ -24,7 +24,8 @@ import {
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
 import { LocationTypeIcons } from "@/types/location/location";
-import { formatDateTime, formatPatientAge } from "@/Utils/utils";
+import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import { Stethoscope } from "lucide-react";
 
 export interface EncounterInfoCardProps {
   encounter: EncounterListRead | EncounterRead;
@@ -99,11 +100,24 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
                   const LocationIcon =
                     LocationTypeIcons[encounter.current_location.form];
                   return (
-                    <LocationIcon className="size-3 text-gray-500 flex-shrink-0" />
+                    <LocationIcon className="size-3 text-gray-500 shrink-0" />
                   );
                 })()}
                 <span className="text-xs font-medium text-gray-700 truncate">
                   {encounter.current_location.name}
+                </span>
+              </div>
+            </>
+          )}
+
+          {/* Primary Doctor */}
+          {encounter.care_team?.[0] && (
+            <>
+              <span className="text-gray-300">|</span>
+              <div className="flex items-center gap-1 min-w-0">
+                <Stethoscope className="size-3 text-gray-500 shrink-0" />
+                <span className="text-xs font-medium text-gray-700 truncate">
+                  {formatName(encounter.care_team[0].member)}
                 </span>
               </div>
             </>
