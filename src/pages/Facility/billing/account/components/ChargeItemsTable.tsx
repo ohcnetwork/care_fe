@@ -653,6 +653,37 @@ export function ChargeItemsTable({
                   </TableRow>
                 );
 
+                // Get the note text if it exists
+                let noteText = "";
+                if (item.note) {
+                  noteText = item.note.trim();
+                }
+
+                // Create note row only if there's text
+                let noteRow = null;
+                if (noteText) {
+                  noteRow = (
+                    <TableRow
+                      key={item.id + "-note"}
+                      className="text-xs text-gray-500"
+                    >
+                      <TableCell></TableCell>
+                      <TableCell></TableCell>
+                      <TableCell>{t("note")}</TableCell>
+                      <TableCell></TableCell>
+                      <TableCell className="p-3 break-words">
+                        {noteText}
+                      </TableCell>
+                      <TableCell></TableCell>
+                      <TableCell></TableCell>
+                      <TableCell></TableCell>
+                      <TableCell></TableCell>
+                      <TableCell></TableCell>
+                      <TableCell></TableCell>
+                    </TableRow>
+                  );
+                }
+
                 const emptyRow = (
                   <TableRow key={`${item.id}-empty`} className="bg-muted">
                     <TableCell colSpan={11}></TableCell>
@@ -664,6 +695,7 @@ export function ChargeItemsTable({
                   mrpRow,
                   ...detailRows,
                   summaryRow,
+                  noteRow,
                   emptyRow,
                 ].filter(Boolean);
               })}
