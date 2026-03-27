@@ -11,13 +11,13 @@ import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
 import { ChevronDownIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useQueueServicePoints } from "./useQueueServicePoints";
+import { useQueueServicePointsFromPath } from "./useQueueServicePoints";
 
 export const ServicePointsDropDown = () => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const { assignedServicePointIds, allServicePoints, toggleServicePoint } =
-    useQueueServicePoints();
+    useQueueServicePointsFromPath();
   const defaultServicePoints = useBreakpoints({ default: 2, sm: 6 });
 
   if (!allServicePoints) {

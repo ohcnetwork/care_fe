@@ -4,10 +4,9 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-// import { AssignToServicePointDialog } from "@/pages/Facility/queues/AssignToServicePointDialog";
-import { TokenCard } from "@/pages/Facility/queues/TokenCard";
-// import { getTokenStatus } from "@/pages/Facility/queues/utils";
 import { AssignToServicePointDialog } from "@/pages/Facility/queues/AssignToServicePointDialog";
+import { TokenCard } from "@/pages/Facility/queues/TokenCard";
+import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePoints";
 import { getTokenStatus } from "@/pages/Facility/queues/utils";
 import { FacilityRead } from "@/types/facility/facility";
 import { formatScheduleResourceName } from "@/types/scheduling/schedule";
@@ -18,8 +17,6 @@ import {
   TokenStatus,
 } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
-import { TokenSubQueueStatus } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
-import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useState } from "react";
@@ -56,18 +53,10 @@ export default function TokenViewModal({
     enabled: !!queueId && !!tokenId,
   });
 
-  const { data: subQueues } = useQuery({
-    queryKey: ["servicePoints", facility.id],
-    queryFn: query(tokenSubQueueApi.list, {
-      pathParams: { facility_id: facility.id },
-      queryParams: {
-        resource_type: token?.resource_type,
-        resource_id: token?.resource.id,
-        limit: 100, // We are assuming that a resource will not have more than 100 sub-queues
-        status: TokenSubQueueStatus.ACTIVE,
-      },
-    }),
-    enabled: !!token,
+  const { assignedServicePoints } = useQueueServicePoints({
+    facilityId: facility.id,
+    resourceType: token?.resource_type,
+    resourceId: token?.resource.id,
   });
 
   const { mutate: updateToken, isPending } = useMutation({
@@ -93,7 +82,7 @@ export default function TokenViewModal({
     },
   });
 
-  const isOnlyOneSubQueue = subQueues?.results?.length === 1;
+  const isOnlyOneSubQueue = assignedServicePoints.length === 1;
 
   if (isLoading || !token) {
     return null;
@@ -141,7 +130,7 @@ export default function TokenViewModal({
                     if (isOnlyOneSubQueue) {
                       updateToken({
                         status: TokenStatus.IN_PROGRESS,
-                        sub_queue: subQueues?.results?.[0]?.id,
+                        sub_queue: assignedServicePoints[0]?.id,
                         note: token.note,
                       });
                     } else {
@@ -163,7 +152,7 @@ export default function TokenViewModal({
           open={showServicepointDialog}
           onOpenChange={setShowServicepointDialog}
           token={token}
-          subQueues={subQueues?.results ?? []}
+          subQueues={assignedServicePoints}
           onUpdate={updateToken}
           isPending={isPending}
         />

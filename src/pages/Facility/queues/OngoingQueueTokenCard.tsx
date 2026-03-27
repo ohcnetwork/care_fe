@@ -10,7 +10,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { CancelTokenDialog } from "@/pages/Facility/queues/CancelTokenDialog";
-import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePoints";
+import { useQueueServicePointsFromPath } from "@/pages/Facility/queues/useQueueServicePoints";
 import {
   getQueueTokenStatus,
   QUEUE_TOKEN_STATUS_COLORS,
@@ -52,7 +52,7 @@ export function OngoingQueueTokenCard({
   const { t } = useTranslation();
   const contextMenuTriggerRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
-  const { assignedServicePoints } = useQueueServicePoints();
+  const { assignedServicePoints } = useQueueServicePointsFromPath();
 
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 

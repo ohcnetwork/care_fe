@@ -37,7 +37,7 @@ import {
 import { ManageQueueFinishedTab } from "@/pages/Facility/queues/ManageQueueFinishedTab";
 import { ManageQueueOngoingTab } from "@/pages/Facility/queues/ManageQueueOngoingTab";
 import QueueFormSheet from "@/pages/Facility/queues/QueueFormSheet";
-import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePoints";
+import { useQueueServicePointsFromPath } from "@/pages/Facility/queues/useQueueServicePoints";
 import {
   formatScheduleResourceName,
   SchedulableResourceType,
@@ -340,7 +340,7 @@ function ManageServicePointsDialog({
   const { t } = useTranslation();
 
   const { allServicePoints, assignedServicePointIds, toggleServicePoint } =
-    useQueueServicePoints();
+    useQueueServicePointsFromPath();
 
   if (!allServicePoints) {
     return (
