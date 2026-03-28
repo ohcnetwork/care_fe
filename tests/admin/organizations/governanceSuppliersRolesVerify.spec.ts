@@ -22,8 +22,10 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
     return page.getByRole("textbox", { name: searchInputName });
   }
 
-  function getOrgCards(page: Page, _type: OrganizationType) {
+  function getOrgCards(page: Page, type: OrganizationType) {
     return page
+      .getByRole("heading", { name: getTypeHeadingPattern(type) })
+      .locator("../..")
       .locator('[data-slot="card"]')
       .filter({ hasNot: page.getByText(emptyStateText) });
   }
@@ -56,7 +58,7 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
     await navigateToOrganizationType(page, defaultTestType);
     await expect(
       getOrgCards(page, defaultTestType).first(),
-      `Expected at least one ${defaultTestType} org card — check seed data`,
+      `Expected at least one ${defaultTestType} organization card for this suite`,
     ).toBeVisible();
     await context.close();
   });
@@ -69,7 +71,9 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
           new RegExp(`.*\\/admin\\/organizations\\/${type}$`),
         );
         await expect(
-          page.locator("h3").filter({ hasText: getTypeHeadingPattern(type) }),
+          page.getByRole("heading", {
+            name: getTypeHeadingPattern(type),
+          }),
         ).toBeVisible();
         await expect(getSearchInput(page)).toBeVisible();
       });
@@ -87,7 +91,8 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
         const firstCard = cards.first();
         const cardCount = await cards.count();
         if (cardCount === 0) {
-          // non-default types may not be seeded in all envs
+          // Some environments do not seed non-default org types.
+          // Skip card-level checks for that type to avoid environment-only CI failures.
           return;
         }
 
@@ -126,13 +131,11 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
     await navigateToOrganizationType(page, defaultTestType);
 
     const initialCards = getOrgCards(page, defaultTestType);
+    await expect(
+      initialCards.nth(1),
+      `Expected at least two ${defaultTestType} organization cards for search filtering`,
+    ).toBeVisible();
     const initialCount = await initialCards.count();
-
-    if (initialCount < 2) {
-      test.skip(true, "needs at least 2 orgs to test filtering");
-      return;
-    }
-
     const searchInput = getSearchInput(page);
     await expect(searchInput).toBeVisible();
 
@@ -182,12 +185,7 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
     const expandButtons = treePanel
       .getByRole("button")
       .filter({ has: treePanel.locator("svg") });
-
-    const expandCount = await expandButtons.count();
-    if (expandCount === 0) {
-      test.skip(true, "no orgs with children in this env");
-      return;
-    }
+    expect(await expandButtons.count()).toBeGreaterThan(0);
 
     const expandBtn = expandButtons.first();
     await expect(expandBtn).toBeVisible();
