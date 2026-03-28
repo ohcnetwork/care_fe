@@ -74,7 +74,7 @@ export function FacilitySwitcher({
                 asChild
                 className={cn(
                   "gap-2 p-2",
-                  facility.name === selectedFacility?.name &&
+                  facility.id === selectedFacility?.id &&
                     "bg-primary-500 text-white focus:bg-primary-600 focus:text-white",
                 )}
               >
