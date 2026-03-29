@@ -12,10 +12,9 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
   const emptyStateText = "No Organizations Found";
 
   function getTypeHeadingPattern(type: OrganizationType) {
-    // Some seeded data/locales still use "Goverence", so keep this match backward compatible.
-    return type === "govt"
-      ? /gov(?:t|ernance|erence)/i
-      : new RegExp(type.replace(/_/g, "\\s*"), "i");
+    if (type === "govt") return /gov(?:t|ernance|erence)/i;
+    if (type === "product_supplier") return /^suppliers$/i;
+    return /^role$/i;
   }
 
   function getSearchInput(page: Page) {
@@ -89,19 +88,17 @@ test.describe("Governance, Suppliers, and Roles Organization List UI and Navigat
 
         const cards = getOrgCards(page, type);
         const firstCard = cards.first();
-        const cardCount = await cards.count();
-        if (cardCount === 0) {
-          // Some environments do not seed non-default org types.
-          // Skip card-level checks for that type to avoid environment-only CI failures.
-          return;
-        }
+        const emptyState = page.getByText(emptyStateText);
 
-        await expect(firstCard).toBeVisible();
-        await expect(firstCard.getByRole("heading")).toBeVisible();
-        await expect(firstCard.locator('[data-slot="badge"]')).toBeVisible();
-        await expect(
-          firstCard.getByRole("link", { name: /see details/i }),
-        ).toBeVisible();
+        await expect(firstCard.or(emptyState)).toBeVisible();
+        const hasCards = await firstCard.isVisible().catch(() => false);
+        if (hasCards) {
+          await expect(firstCard.getByRole("heading")).toBeVisible();
+          await expect(firstCard.locator('[data-slot="badge"]')).toBeVisible();
+          await expect(
+            firstCard.getByRole("link", { name: /see details/i }),
+          ).toBeVisible();
+        }
       });
     }
   });
