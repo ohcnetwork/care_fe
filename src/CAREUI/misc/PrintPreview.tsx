@@ -42,9 +42,10 @@ export default function PrintPreview(props: Props) {
   const { t } = useTranslation();
   useShortcutSubContext();
 
-  const autoPrintPreference = props.facility?.print_templates?.find(
-    (t) => t.slug === (props.templateSlug ?? "default"),
-  )?.print_setup?.auto_print;
+  const autoPrintPreference = props.facility
+    ? resolvePrintTemplate(props.facility, props.templateSlug)?.print_setup
+        ?.auto_print
+    : undefined;
 
   const { isPrinting } = useAutoPrint({
     ...props.autoPrint,
@@ -169,6 +170,7 @@ function FacilityPrintLayout({
   const printTemplate = resolvePrintTemplate(facility, templateSlug);
   const headerImage = printTemplate?.branding?.header_image;
   const footerImage = printTemplate?.branding?.footer_image;
+  const logo = printTemplate?.branding?.logo;
   const pageStyle = buildPageStyle(printTemplate);
 
   return (
@@ -203,9 +205,17 @@ function FacilityPrintLayout({
             )}
           </div>
           <img
-            src={careConfig.mainLogo?.dark}
-            alt="Care Logo"
+            src={logo?.url ?? careConfig.mainLogo?.dark}
+            alt={logo?.url ? "Logo" : "Care Logo"}
             className="h-8 w-auto object-contain mb-2 sm:mb-0"
+            style={
+              logo?.url
+                ? {
+                    ...(logo.width ? { width: `${logo.width}px` } : {}),
+                    ...(logo.height ? { height: `${logo.height}px` } : {}),
+                  }
+                : undefined
+            }
           />
         </div>
       )}
