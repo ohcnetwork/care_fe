@@ -144,7 +144,8 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
           {t("back")}
         </BackButton>
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          {/* LEFT SIDE */}
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold">{product.name}</h1>
@@ -152,23 +153,28 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
                 {t(product.status)}
               </Badge>
             </div>
+
             {isCodePresent(product.code) && (
               <p className="mt-1 text-sm text-gray-600">
                 {product.code.system} | {product.code.code}
               </p>
             )}
           </div>
-          <div className="flex gap-2">
+
+          {/* RIGHT SIDE (BUTTONS) */}
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             {product.status !== ProductKnowledgeStatus.retired && (
               <Button
                 variant="outline"
                 onClick={() => setShowDeleteDialog(true)}
                 disabled={isDeleting}
+                className="w-full sm:w-auto"
               >
                 <CareIcon icon="l-trash" className="mr-2 size-4" />
                 {isDeleting ? t("deleting") : t("delete")}
               </Button>
             )}
+
             <Button
               variant="outline"
               onClick={() =>
@@ -176,6 +182,7 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
                   `/facility/${facilityId}/settings/product_knowledge/${product.slug}/edit`,
                 )
               }
+              className="w-full sm:w-auto"
             >
               <CareIcon icon="l-pen" className="mr-2 size-4" />
               {t("edit")}
