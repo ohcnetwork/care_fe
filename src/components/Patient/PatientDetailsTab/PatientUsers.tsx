@@ -29,7 +29,7 @@ import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import patientApi from "@/types/emr/patient/patientApi";
-import { RoleBase } from "@/types/emr/role/role";
+import { RoleBase, RoleContext } from "@/types/emr/role/role";
 import { UserReadMinimal } from "@/types/user/user";
 
 import { PatientProps } from ".";
@@ -155,7 +155,11 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                   {t("select_role")}
                 </label>
                 <div>
-                  <RoleSelect value={selectedRole} onChange={setSelectedRole} />
+                  <RoleSelect
+                    value={selectedRole}
+                    onChange={setSelectedRole}
+                    context={RoleContext.FACILITY}
+                  />
                 </div>
               </div>
 

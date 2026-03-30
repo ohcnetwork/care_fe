@@ -1,14 +1,16 @@
+import { CheckedState } from "@radix-ui/react-checkbox";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { EyeIcon } from "lucide-react";
+import { ArrowRightLeft, EyeIcon } from "lucide-react";
 import { Link } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { EmptyState } from "@/components/ui/empty-state";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
@@ -60,6 +62,7 @@ import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paym
 import { LocationRead } from "@/types/location/location";
 import { UserReadMinimal } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
+import ChangePaymentAccountSheet from "./ChangePaymentAccountSheet";
 
 const typeMap: Record<PaymentReconciliationType, string> = {
   payment: "Payment",
@@ -77,16 +80,20 @@ const SORT_OPTIONS = {
 export default function PaymentsData({
   facilityId,
   accountId,
+  patientId,
   hideAccountColumn = false,
 }: {
   facilityId: string;
   accountId?: string;
+  patientId?: string;
   hideAccountColumn?: boolean;
 }) {
   const { t } = useTranslation();
   const [createdBy, setCreatedBy] = useState<UserReadMinimal | undefined>(
     undefined,
   );
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [isChangeAccountOpen, setIsChangeAccountOpen] = useState(false);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: RESULTS_PER_PAGE_LIMIT,
     disableCache: true,
@@ -125,7 +132,7 @@ export default function PaymentsData({
       queryParams: {
         account: accountId,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         status: qParams.status,
         created_date_after: qParams.created_date_after
           ? dateTimeQueryString(new Date(qParams.created_date_after))
@@ -142,7 +149,47 @@ export default function PaymentsData({
     }),
   });
 
-  const payments = (response?.results as PaymentReconciliationRead[]) || [];
+  const payments = useMemo(
+    () => (response?.results as PaymentReconciliationRead[]) || [],
+    [response?.results],
+  );
+
+  const selectedPayments = payments.filter((p) => selectedItems.has(p.id));
+
+  useEffect(() => {
+    if (!payments.length) {
+      if (selectedItems.size > 0) {
+        setSelectedItems(new Set());
+      }
+      return;
+    }
+
+    const validIds = new Set(payments.map((payment) => payment.id));
+    setSelectedItems((prev) => {
+      const next = new Set([...prev].filter((id) => validIds.has(id)));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [payments, selectedItems.size]);
+
+  const handleSelectItem = (id: string, checked: boolean) => {
+    setSelectedItems((prev) => {
+      const next = new Set(prev);
+      if (checked) {
+        next.add(id);
+      } else {
+        next.delete(id);
+      }
+      return next;
+    });
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedItems(new Set(payments.map((p) => p.id)));
+    } else {
+      setSelectedItems(new Set());
+    }
+  };
 
   const filters = [
     paymentStatusFilter("status"),
@@ -230,6 +277,13 @@ export default function PaymentsData({
                   created_by_username: user.username,
                 });
               }}
+              onClear={() => {
+                setCreatedBy(undefined);
+                updateQuery({
+                  created_by: undefined,
+                  created_by_username: undefined,
+                });
+              }}
               placeholder={t("filter_by_user")}
               facilityId={facilityId}
             />
@@ -268,6 +322,28 @@ export default function PaymentsData({
           </Select>
         </div>
       </div>
+      {selectedItems.size > 0 && payments?.length && patientId && accountId && (
+        <div className="mb-4 flex items-center gap-3 rounded-md border bg-primary/5 border-primary/20 p-3">
+          <span className="text-sm font-medium">
+            {selectedItems.size} {t("items_selected")}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsChangeAccountOpen(true)}
+          >
+            <ArrowRightLeft className="size-4 mr-2" />
+            {t("change_account")}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSelectedItems(new Set())}
+          >
+            {t("clear_selection")}
+          </Button>
+        </div>
+      )}
       {isLoading ? (
         <TableSkeleton count={3} />
       ) : !payments?.length ? (
@@ -283,6 +359,20 @@ export default function PaymentsData({
           <Table>
             <TableHeader>
               <TableRow>
+                {patientId && accountId && (
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={
+                        !!payments?.length &&
+                        payments.every((p) => selectedItems.has(p.id))
+                      }
+                      onCheckedChange={(checked: CheckedState) =>
+                        handleSelectAll(checked === true)
+                      }
+                      aria-label={t("select_all")}
+                    />
+                  </TableHead>
+                )}
                 {!hideAccountColumn && <TableHead>{t("account")}</TableHead>}
                 <TableHead>{t("date")}</TableHead>
                 <TableHead>{t("invoice")}</TableHead>
@@ -296,7 +386,23 @@ export default function PaymentsData({
             </TableHeader>
             <TableBody>
               {payments.map((payment) => (
-                <TableRow key={payment.id}>
+                <TableRow
+                  key={payment.id}
+                  className={
+                    selectedItems.has(payment.id) ? "bg-primary/5" : ""
+                  }
+                >
+                  {patientId && accountId && (
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedItems.has(payment.id)}
+                        onCheckedChange={(checked: CheckedState) =>
+                          handleSelectItem(payment.id, checked === true)
+                        }
+                        aria-label={t("select_item")}
+                      />
+                    </TableCell>
+                  )}
                   {!hideAccountColumn && (
                     <TableCell>
                       <Button variant="link" asChild>
@@ -382,6 +488,18 @@ export default function PaymentsData({
         </div>
       )}
       {response && <Pagination totalCount={response.count} />}
+
+      {patientId && accountId && (
+        <ChangePaymentAccountSheet
+          open={isChangeAccountOpen}
+          onOpenChange={setIsChangeAccountOpen}
+          facilityId={facilityId}
+          patientId={patientId}
+          currentAccountId={accountId}
+          payments={selectedPayments}
+          onSuccess={() => setSelectedItems(new Set())}
+        />
+      )}
     </>
   );
 }

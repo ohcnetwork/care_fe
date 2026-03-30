@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { startOfDay } from "date-fns";
 import { ArrowUpRightSquare } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -63,17 +62,6 @@ export default function MedicationDispenseHistory({
     disableCache: true,
   });
   const [selectedDispenses, setSelectedDispenses] = useState<string[]>([]);
-
-  // Set default filters on mount (today's date and current user)
-  useEffect(() => {
-    const today = dateQueryString(startOfDay(new Date()));
-    if (!qParams.created_date_after && !qParams.created_date_before) {
-      updateQuery({
-        created_date_after: today,
-        created_date_before: today,
-      });
-    }
-  }, []);
 
   // Clear selections when patient filter changes
   useEffect(() => {
@@ -153,7 +141,7 @@ export default function MedicationDispenseHistory({
             ? "completed,entered_in_error,abandoned"
             : "draft,in_progress",
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         created_by: qParams.created_by,
         created_date_after: qParams.created_date_after,
         created_date_before: qParams.created_date_before,

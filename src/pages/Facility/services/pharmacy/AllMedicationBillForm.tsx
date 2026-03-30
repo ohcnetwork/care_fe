@@ -11,6 +11,7 @@ import Page from "@/components/Common/Page";
 import { SubstitutionSheet } from "@/components/Medication/SubstitutionSheet";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 
+import NoActiveAccountWarningDialog from "@/pages/Facility/billing/account/components/NoActiveAccountWarningDialog";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { AddMedicationSheet } from "@/pages/Facility/services/pharmacy/components/AddMedicationSheet";
 import { DispensedItemsSheet } from "@/pages/Facility/services/pharmacy/components/DispensedItemsSheet";
@@ -102,6 +103,10 @@ export default function AllMedicationBillForm({ patientId }: Props) {
 
   return (
     <Page title={t("bill_medications")} hideTitleOnPage={true} isInsidePage>
+      <NoActiveAccountWarningDialog
+        patientId={patientId}
+        facilityId={facilityId}
+      />
       <div className="md:max-w-[88vw] mx-auto">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between flex-wrap gap-2">

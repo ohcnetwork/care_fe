@@ -26,6 +26,17 @@ export interface MonetaryComponent {
   amount?: string | null;
   tax_included_amount?: string;
   conditions?: Condition[];
+  global_component?: boolean;
+}
+
+export enum DiscountApplicabilityOrder {
+  total_desc = "total_desc",
+  total_asc = "total_asc",
+}
+
+export interface DiscountConfiguration {
+  max_applicable: number;
+  applicability_order: DiscountApplicabilityOrder;
 }
 
 export interface MonetaryComponentRead extends MonetaryComponent {

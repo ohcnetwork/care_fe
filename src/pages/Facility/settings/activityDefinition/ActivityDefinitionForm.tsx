@@ -41,7 +41,7 @@ import { CodeSchema } from "@/types/base/code/code";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 
 import ObservationDefinitionForm from "@/pages/Facility/settings/observationDefinition/ObservationDefinitionForm";
-import { CreateSpecimenDefinition } from "@/pages/Facility/settings/specimen-definitions/CreateSpecimenDefinition";
+import SpecimenDefinitionForm from "@/pages/Facility/settings/specimen-definitions/SpecimenDefinitionForm";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import {
   ChargeItemDefinitionBase,
@@ -56,6 +56,7 @@ import {
   Status,
 } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
+import { ObservationDefinitionStatus } from "@/types/emr/observationDefinition/observationDefinition";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 import { SpecimenDefinitionStatus } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
@@ -229,6 +230,7 @@ function ActivityDefinitionFormContent({
             facility: facilityId,
             limit: 100,
             title: observationSearch,
+            status: ObservationDefinitionStatus.active,
           },
         },
       ),
@@ -795,7 +797,7 @@ function ActivityDefinitionFormContent({
                         onSearch={setSpecimenSearch}
                         canCreate={true}
                         createForm={(onSuccess) => (
-                          <CreateSpecimenDefinition
+                          <SpecimenDefinitionForm
                             facilityId={facilityId}
                             onSuccess={onSuccess}
                           />

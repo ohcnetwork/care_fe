@@ -132,7 +132,7 @@ export function ServiceSelectorDialog({
       pathParams: { facilityId },
       queryParams: {
         limit: resultsPerPage,
-        offset: ((currentPage ?? 1) - 1) * resultsPerPage,
+        offset: ((currentPage || 1) - 1) * resultsPerPage,
         ...(searchValue && { name: searchValue }),
       },
     }),

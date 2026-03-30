@@ -17,6 +17,7 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
 import { DiscountCodeSettings } from "@/pages/Facility/settings/billing/discount/discount-codes/DiscountCodeSettings";
 import { DiscountComponentSettings } from "@/pages/Facility/settings/billing/discount/discount-components/DiscountComponentSettings";
+import { DiscountConfigurationSettings } from "@/pages/Facility/settings/billing/discount/discount-configuration/DiscountConfigurationSettings";
 import { TaxCodeSettings } from "@/pages/Facility/settings/billing/tax/tax-codes/TaxCodeSettings";
 import { TaxComponentSettings } from "@/pages/Facility/settings/billing/tax/tax-components/TaxComponentSettings";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -34,6 +35,7 @@ export function BillingSettingsLayout() {
     "/": () => <Redirect to={`${basePath}/discount_codes`} />,
     "/discount_components": () => <DiscountComponentSettings />,
     "/discount_codes": () => <DiscountCodeSettings />,
+    "/discount_configuration": () => <DiscountConfigurationSettings />,
     "/tax_codes": () => <TaxCodeSettings />,
     "/tax_components": () => <TaxComponentSettings />,
     "/informational_codes": () => <InformationalCodeSettings />,
@@ -57,6 +59,10 @@ export function BillingSettingsLayout() {
         {
           title: t("discount_components"),
           href: "/discount_components",
+        },
+        {
+          title: t("discount_configuration"),
+          href: "/discount_configuration",
         },
       ],
     },
