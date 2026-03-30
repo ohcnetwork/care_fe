@@ -142,6 +142,9 @@ const TokenCard = ({
                       </div>
                       <Separator />
                       <div>
+                        <p className="text-sm font-semibold text-gray-900">
+                          {appointment.token_slot.availability.name}
+                        </p>
                         <p className="text-sm font-semibold text-gray-600 flex gap-2">
                           <span className="text-sm font-semibold text-gray-600">
                             {formatDate(
