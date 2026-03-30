@@ -1,4 +1,5 @@
 import { NavigationLink } from "@/components/ui/sidebar/nav-main";
+import type { OverrideCondition } from "@/lib/override";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import { DeviceDetail } from "@/types/device/device";
@@ -11,7 +12,7 @@ import {
 import { FacilityRead } from "@/types/facility/facility";
 import { PlugConfigMeta } from "@/types/plugConfig";
 import { UserReadMinimal } from "@/types/user/user";
-import { LazyExoticComponent, ReactNode } from "react";
+import { ComponentType, LazyExoticComponent, ReactNode } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
 import { pluginMap } from "./pluginMap";
@@ -131,6 +132,23 @@ export type PluginDeviceManifest = {
   encounterOverview?: React.FC<{ encounter: EncounterRead }>;
 };
 
+/**
+ * Plugin override definition for replacing registered components
+ */
+export type PluginOverride = {
+  /** The key of the component to override (must be registered with register()) */
+  component: string;
+  /** The replacement component */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  replacement: ComponentType<any> | LazyExoticComponent<ComponentType<any>>;
+  /** Optional conditions for when this override applies */
+  condition?: OverrideCondition;
+  /** Priority (higher = takes precedence, default 0) */
+  priority?: number;
+  /** Description for debugging */
+  description?: string;
+};
+
 type SupportedPluginExtensions =
   | "DoctorConnectButtons"
   | "PatientExternalRegistration";
@@ -150,6 +168,8 @@ export type PluginManifest = {
     LazyComponent<React.FC<PluginEncounterTabProps>>
   >;
   devices?: readonly PluginDeviceManifest[];
+  /** Component overrides provided by this plugin */
+  overrides?: readonly PluginOverride[];
 };
 
 export type PluginManifestWithMeta = PluginManifest & {

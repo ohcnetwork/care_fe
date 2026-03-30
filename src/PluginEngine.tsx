@@ -10,13 +10,15 @@ import {
   __federation_method_setRemote as setFederationRemote,
   __federation_method_unwrapDefault as unwrapModule,
 } from "__federation__";
-import React, { Suspense, useEffect, useMemo } from "react";
+import React, { Suspense, useEffect, useMemo, useRef } from "react";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import Loading from "@/components/Common/Loading";
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
+import { addOverride } from "@/lib/override";
 import { PlugConfig, PlugConfigMeta } from "@/types/plugConfig";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
+import { mergePlugConfigs } from "@/Utils/plugConfig";
 import query from "@/Utils/request/query";
 import { deepFreeze } from "@/Utils/utils";
 import { t } from "i18next";
@@ -63,17 +65,25 @@ export default function PluginEngine({
   // Fetch enabled plugins from the backend API
   const { data: enabledPlugins } = useQuery({
     queryKey: ["enabled-plugins"],
-    queryFn: query(plugConfigApi.list),
+    queryFn: query(plugConfigApi.list, {
+      silent: (response) => response.status === 401 || response.status === 403,
+    }),
+    retry: false,
   });
 
+  const resolvedPlugins = useMemo(
+    () => mergePlugConfigs(enabledPlugins?.configs ?? []),
+    [enabledPlugins?.configs],
+  );
+
   const pluginsQuery = useQueries({
-    queries: (enabledPlugins?.configs ?? []).map((config) => ({
+    queries: resolvedPlugins.map((config) => ({
       queryKey: ["plugin-manifest", config.slug],
       queryFn: () => getPluginManifest(config),
     })),
     combine: (queries) =>
       queries.map(({ data, isLoading }, i) => {
-        const config = (enabledPlugins?.configs ?? [])[i];
+        const config = resolvedPlugins[i];
 
         if (isLoading) {
           return { ...config, isLoading: true as const };
@@ -98,6 +108,37 @@ export default function PluginEngine({
   useEffect(() => {
     window.__CARE_PLUGIN_RUNTIME__ = deepFreeze({ meta: pluginMeta });
   }, [pluginMeta]);
+
+  // Register plugin overrides
+  const overrideCleanupRef = useRef<(() => void)[]>([]);
+
+  useEffect(() => {
+    // Clean up previous overrides
+    overrideCleanupRef.current.forEach((cleanup) => cleanup());
+    overrideCleanupRef.current = [];
+
+    // Register new overrides from all loaded plugins
+    for (const plugin of pluginsQuery) {
+      if (plugin.isLoading || !plugin.overrides) continue;
+
+      for (const override of plugin.overrides) {
+        const cleanup = addOverride(override.component, {
+          component: override.replacement,
+          condition: override.condition,
+          priority: override.priority,
+          description:
+            override.description ?? `Override from plugin: ${plugin.plugin}`,
+        });
+        overrideCleanupRef.current.push(cleanup);
+      }
+    }
+
+    // Cleanup on unmount
+    return () => {
+      overrideCleanupRef.current.forEach((cleanup) => cleanup());
+      overrideCleanupRef.current = [];
+    };
+  }, [pluginsQuery]);
 
   return (
     <Suspense fallback={<Loading />}>

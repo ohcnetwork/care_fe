@@ -18,6 +18,7 @@ import { displayCareConsoleArt } from "@/Utils/consoleArt";
 import queryClient from "@/Utils/request/queryClient";
 
 import { ShortcutProvider } from "@/context/ShortcutContext";
+import { OverrideProvider } from "@/lib/override";
 import { PubSubProvider } from "./Utils/pubsubContext";
 
 const ScrollToTop = () => {
@@ -43,12 +44,14 @@ const App = () => {
             <ShortcutProvider>
               <PluginEngine>
                 <HistoryAPIProvider>
-                  <AuthUserProvider
-                    unauthorized={<Routers.PublicRouter />}
-                    otpAuthorized={<Routers.PatientRouter />}
-                  >
-                    <Routers.AppRouter />
-                  </AuthUserProvider>
+                  <OverrideProvider>
+                    <AuthUserProvider
+                      unauthorized={<Routers.PublicRouter />}
+                      otpAuthorized={<Routers.PatientRouter />}
+                    >
+                      <Routers.AppRouter />
+                    </AuthUserProvider>
+                  </OverrideProvider>
                 </HistoryAPIProvider>
                 <Toaster
                   position="top-center"

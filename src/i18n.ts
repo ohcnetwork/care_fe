@@ -1,5 +1,6 @@
 import { PlugConfig } from "@/types/plugConfig";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
+import { mergePlugConfigs } from "@/Utils/plugConfig";
 import { callApi } from "@/Utils/request/query";
 import careConfig from "@careConfig";
 import i18n from "i18next";
@@ -50,13 +51,13 @@ export async function initI18n() {
     const response = await callApi(plugConfigApi.list, {
       silent: true,
     });
-    pluginConfigs = response.configs || [];
+    pluginConfigs = mergePlugConfigs(response.configs || []);
   } catch (error) {
     console.warn(
       "Failed to fetch plugin configurations for i18n namespaces:",
       error,
     );
-    pluginConfigs = [];
+    pluginConfigs = mergePlugConfigs();
   }
 
   const pluginNamespaces = pluginConfigs

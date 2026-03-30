@@ -17,6 +17,7 @@ import {
 } from "@/Utils/keyboardShortcutComponents";
 
 import { useEncounterShortcutDisplays } from "@/hooks/useEncounterShortcuts";
+import { register } from "@/lib/override";
 import { FormDialog } from "./FormsDialog";
 
 export const QuickActions = (props: React.ComponentProps<"div">) => {
@@ -61,7 +62,9 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
   );
 };
 
-export function QuickAction({
+export const QuickAction = register("QuickAction", QuickActionBase);
+
+function QuickActionBase({
   icon,
   title,
   shortcut,

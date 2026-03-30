@@ -12,9 +12,11 @@ import { Textarea } from "@/components/ui/textarea";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Loading from "@/components/Common/Loading";
 
+import { Badge } from "@/components/ui/badge";
+import plugConfigApi from "@/types/plugConfig/plugConfigApi";
+import { getBuildTimePlugConfigs } from "@/Utils/plugConfig";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import plugConfigApi from "@/types/plugConfig/plugConfigApi";
 
 interface Props {
   slug: string;
@@ -23,13 +25,17 @@ interface Props {
 export function PlugConfigEdit({ slug }: Props) {
   const navigate = useNavigate();
   const isNew = slug === "new";
+  const buildTimeConfig = getBuildTimePlugConfigs().find(
+    (config) => config.slug === slug,
+  );
+  const isReadOnly = !isNew && !!buildTimeConfig;
   const { t } = useTranslation();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { data: existingConfig, isLoading } = useQuery({
     queryKey: ["plug-config", slug],
     queryFn: query(plugConfigApi.get, { pathParams: { slug } }),
-    enabled: !isNew,
+    enabled: !isNew && !isReadOnly,
   });
 
   const [config, setConfig] = useState({
@@ -38,13 +44,21 @@ export function PlugConfigEdit({ slug }: Props) {
   });
 
   useEffect(() => {
+    if (buildTimeConfig) {
+      setConfig({
+        slug: buildTimeConfig.slug,
+        meta: JSON.stringify(buildTimeConfig.meta, null, 2),
+      });
+      return;
+    }
+
     if (existingConfig) {
       setConfig({
         slug: existingConfig.slug,
         meta: JSON.stringify(existingConfig.meta, null, 2),
       });
     }
-  }, [existingConfig]);
+  }, [buildTimeConfig, existingConfig]);
 
   const { mutate: upsertConfig } = useMutation({
     mutationFn: isNew
@@ -62,6 +76,11 @@ export function PlugConfigEdit({ slug }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isReadOnly) {
+      return;
+    }
+
     const meta = JSON.parse(config.meta);
     const configPayload = { ...config, meta };
     upsertConfig(configPayload);
@@ -78,10 +97,18 @@ export function PlugConfigEdit({ slug }: Props) {
   return (
     <div className="p-4">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">
-          {isNew ? t("create_new_config") : t("edit_config")}
-        </h1>
-        {!isNew && (
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold">
+            {isNew ? t("create_new_config") : t("edit_config")}
+          </h1>
+          {isReadOnly && (
+            <>
+              <Badge variant="secondary">{t("built_in")}</Badge>
+              <Badge variant="outline">{t("read_only")}</Badge>
+            </>
+          )}
+        </div>
+        {!isNew && !isReadOnly && (
           <Button
             variant="destructive"
             onClick={() => setShowDeleteDialog(true)}
@@ -100,6 +127,7 @@ export function PlugConfigEdit({ slug }: Props) {
             onChange={(e) =>
               setConfig((prev) => ({ ...prev, slug: e.target.value }))
             }
+            readOnly={isReadOnly}
             required
           />
         </div>
@@ -112,11 +140,12 @@ export function PlugConfigEdit({ slug }: Props) {
             onChange={(e) =>
               setConfig((prev) => ({ ...prev, meta: e.target.value }))
             }
+            readOnly={isReadOnly}
             rows={10}
           />
         </div>
         <div className="flex gap-2">
-          <Button type="submit">{t("save")}</Button>
+          {!isReadOnly && <Button type="submit">{t("save")}</Button>}
           <Button
             type="button"
             variant="outline"
