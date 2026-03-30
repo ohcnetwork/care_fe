@@ -1,5 +1,6 @@
 import { Trans, useTranslation } from "react-i18next";
 
+import { PatientTagsDisplay } from "@/components/Patient/PatientTagsDisplay";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
@@ -53,6 +54,7 @@ export function PatientHeader({
                   </span>
                 </div>
               ))}
+          <PatientTagsDisplay patient={patient} className="text-xs flex-1" />
         </div>
       </div>
     </div>

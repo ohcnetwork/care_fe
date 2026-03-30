@@ -84,7 +84,12 @@ export default function PatientHome() {
   } = useQuery({
     queryKey: ["patient-verify", phone_number, year_of_birth, partial_id],
     queryFn: query(patientApi.searchRetrieve, {
-      body: { phone_number: phone_number ?? "", year_of_birth, partial_id },
+      body: {
+        phone_number: phone_number ?? "",
+        year_of_birth,
+        partial_id,
+        facility: facilityId,
+      },
     }),
     enabled: !!(partial_id && (year_of_birth || phone_number)),
   });

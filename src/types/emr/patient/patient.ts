@@ -90,6 +90,7 @@ export interface PatientSearchRetrieveRequest {
   phone_number: string;
   year_of_birth: string;
   partial_id: string;
+  facility?: string;
 }
 
 export function getPartialId(patient: PartialPatientModel | PatientListRead) {
