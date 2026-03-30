@@ -36,6 +36,7 @@ export function PlugConfigEdit({ slug }: Props) {
     slug: "",
     meta: `{}`,
   });
+  const [metaError, setMetaError] = useState<string | null>(null);
 
   useEffect(() => {
     if (existingConfig) {
@@ -62,7 +63,13 @@ export function PlugConfigEdit({ slug }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const meta = JSON.parse(config.meta);
+    let meta;
+    try {
+      meta = JSON.parse(config.meta);
+    } catch {
+      setMetaError(t("invalid_json"));
+      return;
+    }
     const configPayload = { ...config, meta };
     upsertConfig(configPayload);
   };
@@ -109,11 +116,15 @@ export function PlugConfigEdit({ slug }: Props) {
           </label>
           <Textarea
             value={config.meta}
-            onChange={(e) =>
-              setConfig((prev) => ({ ...prev, meta: e.target.value }))
-            }
+            onChange={(e) => {
+              setMetaError(null);
+              setConfig((prev) => ({ ...prev, meta: e.target.value }));
+            }}
             rows={10}
           />
+          {metaError && (
+            <p className="mt-1 text-sm text-red-500">{metaError}</p>
+          )}
         </div>
         <div className="flex gap-2">
           <Button type="submit">{t("save")}</Button>
