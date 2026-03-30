@@ -96,9 +96,9 @@ export default function AppointmentPrint(props: Props) {
     >
       <div className="max-w-7xl mx-auto text-sm">
         {/* Token and Charge Items Side by Side */}
-        <div className="flex space-x-2">
+        <div className="flex gap-2 justify-evenly">
           {/* Token Card */}
-          <div className="flex justify-center w-3/5">
+          <div className="flex w-auto">
             <TokenCard
               appointment={appointment}
               token={appointment.token ?? undefined}
@@ -108,7 +108,7 @@ export default function AppointmentPrint(props: Props) {
 
           {/* Charge Items */}
           {hasChargeItems && (
-            <div className="flex justify-center w-2/5">
+            <div className="flex-1">
               <div className="p-2 border border-gray-200 bg-gray-100 w-full h-full rounded-xl flex flex-col">
                 <div className="flex flex-row items-center justify-between px-1">
                   <p className="font-semibold text-sm">{t("charges")}</p>
