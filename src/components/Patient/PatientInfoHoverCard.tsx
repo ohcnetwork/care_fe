@@ -42,8 +42,19 @@ export const PatientInfoHoverCard = ({
           <div className="size-12">
             <Avatar name={patient.name} />
           </div>
-          <div className="flex flex-col">
+          <div className="flex items-center gap-2">
             <h5 className="text-lg font-semibold">{patient.name}</h5>
+            <Button variant="ghost" asChild>
+              <Link
+                href={
+                  facilityId
+                    ? `/facility/${facilityId}/patient/${patient.id}`
+                    : `/patient/${patient.id}`
+                }
+              >
+                {t("edit")}
+              </Link>
+            </Button>
             <span className="text-gray-700 text-sm font-medium">
               {formatPatientAge(patient, true)},{" "}
               {t(`GENDER__${patient.gender}`)}
