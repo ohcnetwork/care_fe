@@ -22,58 +22,42 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import query from "@/Utils/request/query";
+import { Separator } from "@/components/ui/separator";
+import { useSidebar } from "@/components/ui/sidebar";
 
-import { HealthcareServiceReadSpec } from "@/types/emr/healthcareService/healthcareService";
-import healthcareServiceApi from "@/types/emr/healthcareService/healthcareServiceApi";
-import { PatientRead } from "@/types/emr/patient";
+import PaginationComponent from "@/components/Common/Pagination";
+
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
+
+import query from "@/Utils/request/query";
+import { TooltipComponent } from "@/components/ui/tooltip";
+import useCurrentService from "@/pages/Facility/services/utils/useCurrentService";
+import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
+import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 
 export function ServiceSwitcher() {
   const { t } = useTranslation();
-  const [selectedService, setSelectedService] =
-    useState<HealthcareServiceReadSpec | null>(null);
-  const path = usePath();
-  const pathParts = path.split("/");
-  const fallbackUrl = `/${pathParts[1]}`;
+  const { facilityId, service } = useCurrentService();
+  const { state } = useSidebar();
+  const [selectedService, setSelectedService] = useState<
+    HealthcareServiceReadSpec | undefined
+  >(undefined);
   const [openDialog, setOpenDialog] = useState(false);
-  const facilityId = pathParts[3];
 
-  const { data: services, isLoading } = useQuery({
-    queryKey: ["my-services", facilityId],
-    queryFn: query.debounced(healthcareServiceApi.list, {
-      pathParams: { facility: facilityId },
-      queryParams: { mode: "my_services" },
-    }),
-  });
-
-  const service = services?.results.find(
-    (service) => service.id === pathParts[5],
-  );
+  const fallbackUrl = `/facility/${facilityId}/overview`;
 
   useEffect(() => {
-    if (service) {
-      setSelectedService(service);
-    }
+    setSelectedService(service as HealthcareServiceReadSpec);
   }, [service]);
 
-  useKeyboardShortcut(
-    ["Ctrl", "Alt", "s"],
-    () => {
-      setOpenDialog((open) => !open);
-    },
-    {
-      overrideSystem: false,
-      ignoreInputFields: true,
-    },
-  );
-
-  if (isLoading) {
-    return <Loader2 className="animate-spin" />;
-  }
-
-  if (!services?.results.length) {
+  if (state === "collapsed") {
     return (
-      <Button variant="ghost" onClick={() => navigate(fallbackUrl)}>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => navigate(fallbackUrl)}
+        className="w-8 h-8"
+      >
         <CareIcon icon="l-home-alt" />
       </Button>
     );
@@ -100,22 +84,24 @@ export function ServiceSwitcher() {
             className="w-full flex items-center justify-between gap-3 py-6 px-2 rounded-md bg-white border border-gray-200"
             onClick={() => setOpenDialog(true)}
           >
-            <div className="flex min-w-0 flex-1 items-center gap-2 text-left">
+            <div className="flex min-w-0 items-center gap-2">
               <MapPinIcon className="size-5 shrink-0 text-green-600" />
-              <div className="flex min-w-0 flex-col items-start">
-                <span className="text-xs text-gray-500">
-                  {t("current_service")}
-                </span>
-                <span
-                  className="w-full truncate text-sm font-medium text-gray-900"
-                  title={selectedService?.name}
-                >
-                  {selectedService?.name}
-                </span>
+              <div className="min-w-0 flex-1">
+                <TooltipComponent content={selectedService?.name}>
+                  <div className="flex min-w-0 flex-col items-start">
+                    <span className="text-xs text-gray-500">
+                      {t("current_service")}
+                    </span>
+                    <span className="w-full truncate text-sm font-medium text-gray-900">
+                      {selectedService?.name}
+                    </span>
+                  </div>
+                </TooltipComponent>
               </div>
             </div>
-            <CareIcon icon="l-angle-down" />
+            <CareIcon icon="l-sort" />
           </Button>
+          <Separator className="mt-4" />
         </div>
       </div>
     </Fragment>
@@ -128,73 +114,58 @@ export function ServiceSelectorDialog({
   setService,
   open,
   setOpen,
-  patient,
+  navigateUrl,
 }: {
   facilityId: string;
-  service: HealthcareServiceReadSpec | null;
-  setService: (service: HealthcareServiceReadSpec | null) => void;
+  service: HealthcareServiceReadSpec | undefined;
+  setService: (service: HealthcareServiceReadSpec | undefined) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
-  patient?: PatientRead;
+  navigateUrl?: (service: HealthcareServiceReadSpec) => string;
 }) {
+  const { t } = useTranslation();
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 15;
+  const resultsPerPage = RESULTS_PER_PAGE_LIMIT;
   const path = usePath();
-  const { t } = useTranslation();
-  const pathParts = path.split("/");
-  const facilityRootPath = `/${pathParts[1]}/${pathParts[2]}/${facilityId}`;
-
-  const handleSelect = (service: HealthcareServiceReadSpec) => {
-    setService(service);
-    navigate(
-      patient
-        ? `${facilityRootPath}/service/${service.id}/patients/${patient.id}`
-        : `${facilityRootPath}/service/${service.id}`,
-    );
-    setOpen(false);
-  };
+  const subPath =
+    path?.match(/\/facility\/[^/]+\/services\/[^/]+\/(.*)/)?.[1] || "";
 
   const { data: services, isLoading } = useQuery({
-    queryKey: ["my-services", facilityId],
-    queryFn: query.debounced(healthcareServiceApi.list, {
-      pathParams: { facility: facilityId },
+    queryKey: ["healthcareServices", facilityId, currentPage, searchValue],
+    queryFn: query.debounced(healthcareServiceApi.listHealthcareService, {
+      pathParams: { facilityId },
       queryParams: {
-        mode: "my_services",
-        limit: pageSize,
-        offset: (currentPage - 1) * pageSize,
-        search_text: searchValue || undefined,
+        limit: resultsPerPage,
+        offset: ((currentPage || 1) - 1) * resultsPerPage,
+        ...(searchValue && { name: searchValue }),
       },
     }),
+    enabled: open,
   });
 
-  useEffect(() => {
-    if (!open) {
-      setSearchValue("");
-      setCurrentPage(1);
+  const handleSelect = (newService: HealthcareServiceReadSpec) => {
+    const oldServiceId = service?.id;
+    setService(newService);
+    setOpen(false);
+    setSearchValue("");
+    setCurrentPage(1);
+    if (newService.id !== oldServiceId) {
+      if (navigateUrl) {
+        navigate(navigateUrl(newService));
+      } else {
+        navigate(
+          `/facility/${facilityId}/services/${newService.id}/${subPath}`,
+        );
+      }
     }
-  }, [open]);
+  };
 
-  useEffect(() => {
-    if (searchValue) {
-      setCurrentPage(1);
+  useKeyboardShortcut(["Shift", "Enter"], () => {
+    if (service) {
+      handleSelect(service);
     }
-  }, [searchValue]);
-
-  useKeyboardShortcut(
-    ["Ctrl", "Alt", "s"],
-    () => {
-      if (!open) return;
-      setOpen(false);
-    },
-    {
-      overrideSystem: false,
-      ignoreInputFields: true,
-    },
-  );
-
-  const totalCount = services?.count || 0;
-  const totalPages = Math.ceil(totalCount / pageSize);
+  });
 
   const getCurrentService = () => {
     if (!service) return <></>;
@@ -220,54 +191,55 @@ export function ServiceSelectorDialog({
         <DialogHeader>
           <DialogTitle>{getCurrentService()}</DialogTitle>
         </DialogHeader>
-        <Command shouldFilter={false}>
-          <CommandInput
-            placeholder={t("search_services")}
-            value={searchValue}
-            onValueChange={setSearchValue}
-          />
-          <CommandList>
-            <CommandEmpty>{t("no_results_found")}</CommandEmpty>
-            <CommandGroup>
-              {isLoading ? (
-                <div className="flex items-center justify-center p-4">
-                  <Loader2 className="size-4 animate-spin" />
-                </div>
-              ) : (
-                services?.results.map((service) => (
+        <Command className="pt-3 pb-2" shouldFilter={false}>
+          <div className="border border-gray-200">
+            <CommandInput
+              className="border-0 ring-0"
+              placeholder={t("search")}
+              onValueChange={(value) => {
+                setSearchValue(value);
+                setCurrentPage(1);
+              }}
+              value={searchValue}
+            />
+            <CommandList
+              className="max-h-[calc(100vh-30rem)]"
+              onWheel={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <CommandEmpty>
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-6">
+                    <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+                    <span className="ml-2 text-sm text-gray-500">
+                      {t("loading")}
+                    </span>
+                  </div>
+                ) : (
+                  t("no_services_found")
+                )}
+              </CommandEmpty>
+              <CommandGroup>
+                {services?.results.map((service) => (
                   <ServiceCommandItem
                     key={service.id}
                     service={service}
                     handleSelect={handleSelect}
                   />
-                ))
-              )}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between pt-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((page) => page - 1)}
-              disabled={currentPage === 1}
-            >
-              {t("previous")}
-            </Button>
-            <span className="text-sm text-gray-500">
-              {currentPage} / {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((page) => page + 1)}
-              disabled={currentPage === totalPages}
-            >
-              {t("next")}
-            </Button>
+                ))}
+              </CommandGroup>
+            </CommandList>
           </div>
-        )}
+        </Command>
+        <div className="flex w-full justify-center mt-4">
+          <PaginationComponent
+            cPage={currentPage}
+            defaultPerPage={resultsPerPage}
+            data={{ totalCount: services?.count || 0 }}
+            onChange={(page: number) => setCurrentPage(page)}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );
