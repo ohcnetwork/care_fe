@@ -29,12 +29,6 @@
       ]
     ],
     [
-      "./pluginMap",
-      [
-        "src/pluginTypes.ts"
-      ]
-    ],
-    [
       "@/supportedBrowsers",
       [
         "src/components/ErrorPages/BrowserWarning.tsx"

@@ -1,5 +1,6 @@
 import { PlugConfig } from "@/types/plugConfig";
 import careConfig from "@careConfig";
+import { localDevPluginConfigs } from "virtual:care-local-plugins";
 
 export type PlugConfigSource = "api" | "build";
 
@@ -9,12 +10,29 @@ export interface ResolvedPlugConfig extends PlugConfig {
 }
 
 export const getBuildTimePlugConfigs = (): ResolvedPlugConfig[] => {
-  return careConfig.careApps.map((plugin) => ({
-    slug: plugin.name,
-    meta: { ...plugin },
-    source: "build",
-    isReadOnly: true,
-  }));
+  const configs = new Map<string, ResolvedPlugConfig>();
+
+  for (const plugin of careConfig.careApps) {
+    configs.set(plugin.name, {
+      slug: plugin.name,
+      meta: { ...plugin },
+      source: "build",
+      isReadOnly: true,
+    });
+  }
+
+  for (const plugin of localDevPluginConfigs) {
+    configs.set(plugin.slug, {
+      slug: plugin.slug,
+      meta: { ...plugin.meta },
+      source: "build",
+      isReadOnly: true,
+    });
+  }
+
+  return Array.from(configs.values()).sort((left, right) =>
+    left.slug.localeCompare(right.slug),
+  );
 };
 
 export const mergePlugConfigs = (

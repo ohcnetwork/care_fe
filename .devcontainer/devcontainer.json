@@ -8,7 +8,7 @@
 
   // Lifecycle commands — all run in bash (Bookworm default)
   "waitFor": "onCreateCommand",
-  "onCreateCommand": "npm install --no-audit --no-fund && npm run postinstall && npm run setup",
+  "onCreateCommand": "npm install --no-audit --no-fund && npm run postinstall",
   "postCreateCommand": "echo '✅ CARE Frontend ready — run: npm run dev'",
   "postAttachCommand": {
     "dev-server": "npm run dev"

@@ -23,9 +23,19 @@ import query from "@/Utils/request/query";
 import { deepFreeze } from "@/Utils/utils";
 import { t } from "i18next";
 import { Loader2Icon } from "lucide-react";
+import { localDevPluginManifests } from "virtual:care-local-plugins";
 import { z } from "zod";
 
 const getPluginManifest = async (config: PlugConfig) => {
+  const localManifest = localDevPluginManifests[config.slug];
+
+  if (localManifest) {
+    return {
+      ...localManifest,
+      meta: config.meta,
+    } as PluginManifestWithMeta;
+  }
+
   if (
     !config.meta.url ||
     !z.string().url().safeParse(config.meta.url).success

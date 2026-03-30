@@ -15,7 +15,6 @@ import { UserReadMinimal } from "@/types/user/user";
 import { ComponentType, LazyExoticComponent, ReactNode } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
-import { pluginMap } from "./pluginMap";
 import { AppRoutes } from "./Routers/AppRouter";
 
 export type DoctorConnectButtonComponentType = React.FC<{
@@ -175,5 +174,3 @@ export type PluginManifest = {
 export type PluginManifestWithMeta = PluginManifest & {
   meta: PlugConfigMeta;
 };
-
-export { pluginMap };

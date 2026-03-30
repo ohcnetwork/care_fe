@@ -67,7 +67,6 @@ test-results.json
 
 # Care Apps
 /apps/*
-src/pluginMap.ts
 /apps_backup/*
 
 # Federation Temp files

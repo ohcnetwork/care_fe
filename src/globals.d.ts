@@ -16,3 +16,11 @@ declare module "__federation__" {
   ) => void;
   export const __federation_method_unwrapDefault: <T>(module: T) => T;
 }
+
+declare module "virtual:care-local-plugins" {
+  import type { PluginManifest } from "@/pluginTypes";
+  import type { PlugConfig } from "@/types/plugConfig";
+
+  export const localDevPluginConfigs: PlugConfig[];
+  export const localDevPluginManifests: Record<string, PluginManifest>;
+}

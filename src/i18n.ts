@@ -32,6 +32,10 @@ const namespaceToUrl = (namespace: string) => {
     (config) => config.meta?.name === namespace || config.slug === namespace,
   );
 
+  if (typeof pluginConfig?.meta?.localPath === "string") {
+    return pluginConfig.meta.localPath;
+  }
+
   if (
     pluginConfig?.meta?.url &&
     z.string().url().safeParse(pluginConfig.meta.url).success

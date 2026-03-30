@@ -18,7 +18,8 @@ Build-time plugin identity:
 - Each entry is expected in the form `org/repo` or `org/repo@host/path/to/remoteEntry.js`.
 - If `@host/path` is omitted, CARE defaults to GitHub Pages: `https://{org}.github.io/{repo}`.
 - If the host contains `localhost`, CARE prefixes it with `http://`; otherwise it prefixes it with `https://`.
-- Example for local testing: `ohcnetwork/care_hello_fe@localhost:4173/assets/remoteEntry.js`.
+- In host dev mode, CARE auto-discovers valid local plugin apps from `apps/*/src/manifest.tsx` and loads them directly through the host Vite graph.
+- Example remote entry for non-hosted local testing or preview flows: `ohcnetwork/care_hello_fe@localhost:4173/assets/remoteEntry.js`.
 
 Merge behavior:
 
@@ -59,9 +60,8 @@ Testing guidance:
 - If a plugin should always be present during tests, add it to `REACT_ENABLED_APPS` so it becomes a build-time base plugin.
 - If a test needs backend-managed plugin metadata only, seed the `plug_config` API response.
 - If both sources define the same plugin slug, the frontend keeps the plugin enabled as a build-time plugin and merges API-only metadata keys with the build-time metadata.
-- For local testing with the sample hello-world plugin in `apps/care_hello_fe`, a working entry is `ohcnetwork/care_hello_fe@localhost:4173/assets/remoteEntry.js`.
-- To run the sample plugin locally, start it from `apps/care_hello_fe` with `npm run dev`.
-- The plugin dev command runs a preview server backed by the generated `dist` output while `vite build --watch` keeps `assets/remoteEntry.js` and the rest of the plugin bundle up to date on `http://localhost:4173`.
+- For local host development with the sample hello-world plugin in `apps/care_hello_fe`, start the main app with `npm run dev`. CARE auto-enables local plugins discovered under `apps/` and serves their `public/` assets from the host dev server.
+- For remote-style testing or preview flows, a working entry remains `ohcnetwork/care_hello_fe@localhost:4173/assets/remoteEntry.js`, and the sample plugin can still be run from `apps/care_hello_fe` with `npm run dev`.
 
 Host-to-plugin data sharing via `window` globals (set in `src/index.tsx`):
 
