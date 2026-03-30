@@ -94,6 +94,7 @@ export default function AuthUserProvider({
   const { mutateAsync: signIn, isPending: isAuthenticating } = useMutation({
     mutationFn: mutate(authApi.login),
     onSuccess: async (data: LoginResponse) => {
+      queryClient.invalidateQueries({ queryKey: ["enabled-plugins"] });
       if (isMFAResponse(data)) {
         localStorage.setItem("mfa_temp_token", data.temp_token);
         const redirectURL = getRedirectURL();
