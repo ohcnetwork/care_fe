@@ -430,6 +430,9 @@ export const PrintChargeItems = (props: {
             </p>
           ) : (
             <div className="bg-white">
+              {hideHeader && preserveHeaderSpace && (
+                <div className="mb-4 pb-2 border-b border-gray-200 h-20" />
+              )}
               <table className="w-full border-collapse">
                 <tbody>
                   <tr>
