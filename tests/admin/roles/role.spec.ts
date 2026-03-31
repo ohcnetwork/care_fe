@@ -96,7 +96,7 @@ test.describe("Admin Roles Management", () => {
 
     // verify five random permissions are checked
     await page.getByRole("button", { name: "Actions" }).click();
-    await page.getByRole("menuitem", { name: "Edit" }).click();
+    await page.getByRole("menuitem", { name: /Edit/i }).click();
     for (const permission of randomPermissions) {
       await page.getByPlaceholder("Search permissions").fill(permission);
       await page
@@ -117,8 +117,8 @@ test.describe("Admin Roles Management", () => {
     // edit role name
     const updatedRoleName = `${roleName} - updated`;
     await page.getByRole("textbox", { name: /Search Roles/i }).fill(roleName);
-    await page.getByRole("button", { name: "Actions" }).click();
-    await page.getByRole("menuitem", { name: "Edit" }).click();
+    await page.getByRole("button", { name: "Actions" }).first().click();
+    await page.getByRole("menuitem", { name: /Edit/i }).click();
     await page.getByPlaceholder("Enter role name").fill(updatedRoleName);
 
     await page.getByPlaceholder("Search permissions").fill(uncheckedPermission);
@@ -142,7 +142,7 @@ test.describe("Admin Roles Management", () => {
 
     // verify unchecked permission
     await page.getByRole("button", { name: "Actions" }).click();
-    await page.getByRole("menuitem", { name: "Edit" }).click();
+    await page.getByRole("menuitem", { name: /Edit/i }).click();
     await page.getByPlaceholder("Search permissions").fill(uncheckedPermission);
     await page
       .getByRole("button", { name: "Select All" })
@@ -163,7 +163,7 @@ test.describe("Admin Roles Management", () => {
 
     await page.getByRole("textbox", { name: /Search Roles/i }).fill(roleName);
     await page.getByRole("button", { name: "Actions" }).click();
-    await page.getByRole("menuitem", { name: "Clone" }).click();
+    await page.getByRole("menuitem", { name: /Clone/i }).click();
     await page.getByRole("button", { name: /Create Role/i }).click();
 
     // verify toast message
@@ -179,7 +179,7 @@ test.describe("Admin Roles Management", () => {
 
     // verify three random permissions are checked
     await page.getByRole("button", { name: "Actions" }).click();
-    await page.getByRole("menuitem", { name: "Edit" }).click();
+    await page.getByRole("menuitem", { name: /Edit/i }).click();
     for (const permission of randomPermissions) {
       await page.getByPlaceholder("Search permissions").fill(permission);
       await page

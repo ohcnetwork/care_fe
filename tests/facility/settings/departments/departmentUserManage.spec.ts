@@ -9,7 +9,7 @@ test.describe("Department User Management", () => {
 
   const testUsers = ["care-doctor", "care-volunteer"];
 
-  const testRoles = ["Doctor", "Staff", "Administrator"];
+  const testRoles = ["Doctor", "Staff", "Facility Admin"];
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
