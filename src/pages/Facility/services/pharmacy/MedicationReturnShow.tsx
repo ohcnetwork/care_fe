@@ -45,6 +45,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { AddMedicationReturnItemForm } from "@/pages/Facility/services/pharmacy/components/AddMedicationReturnItemForm";
 import { MedicationReturnItemsTable } from "@/pages/Facility/services/pharmacy/components/MedicationReturnItemsTable";
+import batchApi from "@/types/base/batch/batchApi";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
@@ -61,6 +62,7 @@ import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryAp
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { HttpMethod } from "@/Utils/request/types";
 
 interface Props {
   facilityId: string;
@@ -84,9 +86,11 @@ export default function MedicationReturnShow({
   const [deliveryOrderStatusDialog, setDeliveryOrderStatusDialog] = useState<{
     open: boolean;
     status: DeliveryOrderStatus | null;
+    updateStock: boolean;
   }>({
     open: false,
     status: null,
+    updateStock: false,
   });
   const [{ dispenseOrderIds: dispenseOrderIdsParam }] = useQueryParams<{
     dispenseOrderIds?: string;
@@ -157,6 +161,21 @@ export default function MedicationReturnShow({
     },
   });
 
+  const { mutate: cancelDeliveryOrder, isPending: _isCancelling } = useMutation(
+    {
+      mutationFn: mutate(batchApi.batchRequest),
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["medicationReturns", deliveryOrderId],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["supplyDeliveries", deliveryOrderId],
+        });
+        toast.success(t("delivery_order_cancelled_successfully"));
+      },
+    },
+  );
+
   const { data: medicationDispenses } = useQueries({
     queries: dispenseOrderIds.map((orderId) => ({
       queryKey: ["medication_dispense", orderId, locationId],
@@ -183,16 +202,49 @@ export default function MedicationReturnShow({
     });
   }
 
-  function handleUpdateDeliveryOrderStatus(status: DeliveryOrderStatus) {
+  function handleUpdateDeliveryOrderStatus(
+    status: DeliveryOrderStatus,
+    updateStock: boolean,
+  ) {
     if (!deliveryOrder) return;
-
-    updateDeliveryOrder({
-      ...deliveryOrder,
-      status,
-      supplier: deliveryOrder.supplier?.id || undefined,
-      origin: deliveryOrder.origin?.id || undefined,
-      destination: deliveryOrder.destination.id,
-    });
+    if (updateStock) {
+      cancelDeliveryOrder({
+        requests: [
+          {
+            url: `/api/v1/supply_delivery/upsert/`,
+            method: HttpMethod.POST,
+            reference_id: `supply_delivery_${deliveryOrderId}`,
+            body: {
+              datapoints: supplyDeliveries?.results.map((delivery) => ({
+                ...delivery,
+                id: delivery.id,
+                status: SupplyDeliveryStatus.entered_in_error,
+              })),
+            },
+          },
+          {
+            url: `/api/v1/facility/${facilityId}/order/delivery/${deliveryOrderId}/`,
+            method: HttpMethod.PUT,
+            reference_id: `delivery_order_${deliveryOrderId}`,
+            body: {
+              ...deliveryOrder,
+              status,
+              supplier: deliveryOrder.supplier?.id || undefined,
+              origin: deliveryOrder.origin?.id || undefined,
+              destination: deliveryOrder.destination.id,
+            },
+          },
+        ],
+      });
+    } else {
+      updateDeliveryOrder({
+        ...deliveryOrder,
+        status,
+        supplier: deliveryOrder.supplier?.id || undefined,
+        origin: deliveryOrder.origin?.id || undefined,
+        destination: deliveryOrder.destination.id,
+      });
+    }
   }
 
   function handleMarkAsAbandoned() {
@@ -377,7 +429,10 @@ export default function MedicationReturnShow({
             {deliveryOrder.status === DeliveryOrderStatus.draft && (
               <Button
                 onClick={() =>
-                  handleUpdateDeliveryOrderStatus(DeliveryOrderStatus.pending)
+                  handleUpdateDeliveryOrderStatus(
+                    DeliveryOrderStatus.pending,
+                    false,
+                  )
                 }
                 disabled={isUpdating || supplyDeliveries?.results.length === 0}
               >
@@ -388,7 +443,10 @@ export default function MedicationReturnShow({
             {deliveryOrder.status === DeliveryOrderStatus.pending && (
               <Button
                 onClick={() =>
-                  handleUpdateDeliveryOrderStatus(DeliveryOrderStatus.completed)
+                  handleUpdateDeliveryOrderStatus(
+                    DeliveryOrderStatus.completed,
+                    false,
+                  )
                 }
                 disabled={isUpdating || selectedDeliveries.length !== 0}
               >
@@ -397,7 +455,8 @@ export default function MedicationReturnShow({
               </Button>
             )}
 
-            {deliveryOrder.status === DeliveryOrderStatus.draft && (
+            {(deliveryOrder.status === DeliveryOrderStatus.draft ||
+              deliveryOrder.status === DeliveryOrderStatus.pending) && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="icon">
@@ -412,6 +471,9 @@ export default function MedicationReturnShow({
                         setDeliveryOrderStatusDialog({
                           open: true,
                           status: DeliveryOrderStatus.entered_in_error,
+                          updateStock:
+                            deliveryOrder.status ===
+                            DeliveryOrderStatus.pending,
                         })
                       }
                       disabled={isUpdating}
@@ -428,6 +490,9 @@ export default function MedicationReturnShow({
                         setDeliveryOrderStatusDialog({
                           open: true,
                           status: DeliveryOrderStatus.abandoned,
+                          updateStock:
+                            deliveryOrder.status ===
+                            DeliveryOrderStatus.pending,
                         })
                       }
                       disabled={isUpdating}
@@ -823,9 +888,16 @@ export default function MedicationReturnShow({
           variant="destructive"
           onConfirm={() => {
             if (deliveryOrderStatusDialog.status) {
-              handleUpdateDeliveryOrderStatus(deliveryOrderStatusDialog.status);
+              handleUpdateDeliveryOrderStatus(
+                deliveryOrderStatusDialog.status,
+                deliveryOrderStatusDialog.updateStock,
+              );
             }
-            setDeliveryOrderStatusDialog({ open: false, status: null });
+            setDeliveryOrderStatusDialog({
+              open: false,
+              status: null,
+              updateStock: false,
+            });
           }}
           disabled={isUpdating}
         />

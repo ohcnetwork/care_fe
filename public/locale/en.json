@@ -1734,6 +1734,7 @@
   "delivery_conditions": "Delivery conditions",
   "delivery_details": "Delivery Details",
   "delivery_order": "Delivery Order",
+  "delivery_order_cancelled_successfully": "Delivery order cancelled successfully",
   "delivery_order_details": "Delivery Order Details",
   "delivery_order_not_found": "Delivery order not found",
   "delivery_orders": "Delivery Orders",
