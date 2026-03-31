@@ -6,7 +6,7 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import { Badge } from "@/components/ui/badge";
 
 import Loading from "@/components/Common/Loading";
-import useCurrentFacilitySilently from "@/pages/Facility/utils/useCurrentFacility";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { getResourceRequestCategoryEnum } from "@/types/resourceRequest/resourceRequest";
 import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
