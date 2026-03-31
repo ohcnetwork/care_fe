@@ -276,7 +276,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                 </Button>
               )}
 
-              <div className="flex h-[50vh] md:h-[70vh] w-full items-center justify-center overflow-hidden rounded-lg border border-secondary-200">
+              <div className="flex flex-1 w-full items-center justify-center overflow-hidden rounded-lg border border-secondary-200">
                 {file_state.isImage ? (
                   <TransformWrapper
                     ref={transformRef}
@@ -366,7 +366,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                     sandbox=""
                     title={t("source_file")}
                     src={fileUrl}
-                    className="h-[50vh] md:h-[70vh] w-full"
+                    className="h-full w-full"
                   />
                 ) : (
                   <div className="flex h-full w-full flex-col items-center justify-center">
@@ -492,7 +492,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
             </div>
           </>
         ) : (
-          <div className="flex h-[50vh] md:h-[70vh] items-center justify-center">
+          <div className="flex flex-1 items-center justify-center">
             <CircularProgress />
           </div>
         )}
