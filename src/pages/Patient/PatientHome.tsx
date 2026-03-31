@@ -75,6 +75,7 @@ export default function PatientHome() {
     canListEncounters,
     canWriteToken,
     canListTokens,
+    canWritePatient,
   } = getPermissions(hasPermission, facility?.permissions ?? []);
 
   const {
@@ -135,6 +136,7 @@ export default function PatientHome() {
                       ],
                     });
                   }}
+                  canWritePatient={canWritePatient}
                 >
                   <PLUGIN_Component
                     __name="PatientInfoCardActions"

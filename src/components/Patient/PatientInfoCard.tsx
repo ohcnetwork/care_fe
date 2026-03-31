@@ -16,7 +16,7 @@ import {
 } from "@/types/emr/tagConfig/tagConfig";
 import { SettingsIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
-
+import { useNavigate } from "react-router-dom";
 export const PatientInfoCard = ({
   patient,
   tags,
@@ -25,6 +25,7 @@ export const PatientInfoCard = ({
   children,
   tagEntityType,
   tagEntityId,
+  canWritePatient,
 }: {
   patient: PublicPatientRead | PatientListRead | PatientRead;
   tags: TagConfig[];
@@ -33,15 +34,30 @@ export const PatientInfoCard = ({
   children?: React.ReactNode;
   tagEntityType: TagEntityType;
   tagEntityId: string;
+  canWritePatient: boolean;
 }) => {
   const { t } = useTranslation();
-
+  const navigate = useNavigate();
   return (
     <>
       <Card className="bg-white shadow-sm rounded-md">
         <CardHeader className="pb-4 flex flex-col sm:flex-row sm:items-center justify-between px-2">
-          <div className="space-y-4">
+          <div className="flex items-center gap-3">
             <PatientHoverCard patient={patient} facilityId={facilityId} />
+
+            {canWritePatient && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  navigate(
+                    `/facility/${facilityId}/patient/${patient.id}/update`,
+                  )
+                }
+              >
+                {t("edit")}
+              </Button>
+            )}
           </div>
           {children}
         </CardHeader>
