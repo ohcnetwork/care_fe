@@ -373,31 +373,30 @@ export default function AddChargeItemsBillingSheet({
                 defaultOpen={open}
               />
             </div>
-
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={isPending}
-              >
-                {t("cancel")}
-                <ShortcutBadge actionId="cancel-action" />
-              </Button>
-              <Button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleSubmit();
-                }}
-                disabled={isPending || selectedItems.length === 0 || disabled}
-                className="flex flex-row items-center gap-2 justify-between"
-              >
-                {t("add_items")}
-                {open && <ShortcutBadge actionId="enter-action" />}
-              </Button>
-            </div>
           </div>
         </ScrollArea>
+        <div className="sticky bottom-0 bg-white p-4 border-t flex justify-end gap-2 z-10">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isPending}
+          >
+            {t("cancel")}
+            <ShortcutBadge actionId="cancel-action" />
+          </Button>
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleSubmit();
+            }}
+            disabled={isPending || selectedItems.length === 0 || disabled}
+            className="flex flex-row items-center gap-2 justify-between"
+          >
+            {t("add_items")}
+            {open && <ShortcutBadge actionId="enter-action" />}
+          </Button>
+        </div>
       </SheetContent>
     </Sheet>
   );
