@@ -1,18 +1,13 @@
 import { t } from "i18next";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
+import FileUploadDropdown from "@/components/Files/FileUploadDropdown";
 
 import useFileUpload from "@/hooks/useFileUpload";
 
@@ -106,7 +101,6 @@ export function FilesQuestion(props: FilesQuestionProps) {
     props;
 
   const { t } = useTranslation();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const values =
     (questionnaireResponse.values?.[0]?.value as FileUploadQuestion[]) || [];
@@ -136,9 +130,6 @@ export function FilesQuestion(props: FilesQuestionProps) {
   });
 
   useEffect(() => {
-    if (fileUpload.files.length > 0) {
-      setDropdownOpen(false);
-    }
     (async () => {
       updateQuestionnaireResponseCB(
         [
@@ -195,56 +186,11 @@ export function FilesQuestion(props: FilesQuestionProps) {
           </Button>
         </div>
       ))}
-      <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
-        <DropdownMenuTrigger asChild>
-          <Button variant={"secondary"} className="border border-secondary-300">
-            <CareIcon icon="l-file-upload-alt" />
-            {t("add_files")}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="w-[calc(100vw-2.5rem)] sm:w-full"
-        >
-          <DropdownMenuItem
-            className="flex flex-row items-center"
-            onSelect={(e) => {
-              e.preventDefault();
-            }}
-          >
-            <Label
-              htmlFor="file_upload_encounter"
-              className="flex items-center w-full text-primary-900 hover:text-black py-1 font-medium"
-            >
-              <CareIcon icon="l-file-upload-alt" />
-              <span>{t("choose_file")}</span>
-            </Label>
-            {fileUpload.Input({ className: "hidden" })}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onSelect={() => {
-              fileUpload.handleCameraCapture();
-              setDropdownOpen(false);
-            }}
-            className="flex items-center text-primary-900 font-medium"
-            aria-label={t("open_camera")}
-          >
-            <CareIcon icon="l-camera" />
-            <span>{t("open_camera")}</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onSelect={() => {
-              fileUpload.handleAudioCapture();
-              setDropdownOpen(false);
-            }}
-            className="flex items-center text-primary-900 font-medium"
-            aria-label={t("record")}
-          >
-            <CareIcon icon="l-microphone" />
-            <span>{t("record")}</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <FileUploadDropdown
+        fileUpload={fileUpload}
+        buttonVariant="secondary"
+        buttonClassName="border border-secondary-300"
+      />
       {fileUpload.Dialogues}
     </div>
   );
