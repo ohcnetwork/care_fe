@@ -18,7 +18,9 @@ test.describe("Charge Item Definition Creation", () => {
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
-    const chargeItemName = faker.commerce.productName();
+    // Add a random number to the charge item name to avoid conflicts when searching
+    const chargeItemName =
+      faker.commerce.productName() + " " + faker.string.numeric(3);
     title = chargeItemName;
     slug = chargeItemName.replace(/\s+/g, "-").slice(0, 25);
     basePrice = faker.commerce.price({ dec: 0 });
