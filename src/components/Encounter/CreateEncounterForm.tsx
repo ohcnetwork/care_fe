@@ -103,7 +103,7 @@ export default function CreateEncounterForm({
     })
     .refine(
       (data) =>
-        data.status === EncounterStatus.PLANNED ||
+        data.status !== EncounterStatus.PLANNED &&
         new Date(data.start_date) <= new Date(),
       {
         message: t("encounter_future_date_restriction"),
