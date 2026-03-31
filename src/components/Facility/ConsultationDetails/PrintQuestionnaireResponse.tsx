@@ -9,7 +9,7 @@ import {
 } from "@/components/Facility/ConsultationDetails/PrintAllQuestionnaireResponses";
 
 import query from "@/Utils/request/query";
-import useCurrentFacilitySilently from "@/pages/Facility/utils/useCurrentFacility";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
@@ -31,7 +31,7 @@ export function PrintQuestionnaireResponse({
   const { t } = useTranslation();
   const { facility } = useCurrentFacilitySilently();
 
-  const { data: encounter } = useQuery({
+  const { data: encounter, isLoading: isLoadingEncounter } = useQuery({
     queryKey: ["encounter", encounterId, facilityId],
     queryFn: query(encounterApi.get, {
       pathParams: { id: encounterId! },
@@ -40,7 +40,7 @@ export function PrintQuestionnaireResponse({
     enabled: !!(encounterId && facilityId),
   });
 
-  const { data: patient } = useQuery({
+  const { data: patient, isLoading: isLoadingPatient } = useQuery({
     queryKey: ["patient", patientId],
     queryFn: query(patientApi.get, {
       pathParams: {
@@ -67,7 +67,9 @@ export function PrintQuestionnaireResponse({
   return (
     <PrintPreview
       title={t("questionnaire_response_logs")}
-      disabled={!questionnaireResponse}
+      disabled={
+        !questionnaireResponse || isLoadingEncounter || isLoadingPatient
+      }
       facility={facility}
       templateSlug={PrintTemplateType.questionnaire_response_logs}
     >

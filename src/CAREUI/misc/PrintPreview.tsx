@@ -55,6 +55,7 @@ export default function PrintPreview(props: Props) {
   const printSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setImagesReady(false);
     const node = printSectionRef.current;
     if (!node || props.disabled) return;
 

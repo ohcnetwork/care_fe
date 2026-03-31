@@ -133,7 +133,7 @@ export const PrintChargeItems = (props: {
   const showStatusLabel = `${t("show_status")}`;
   const groupByParentCategoryLabel = `${t("group_by_parent_category")}`;
 
-  const { data: account } = useQuery({
+  const { data: account, isLoading: isLoadingAccount } = useQuery({
     queryKey: ["account", accountId],
     queryFn: query(accountApi.retrieveAccount, {
       pathParams: { facilityId, accountId },
@@ -415,13 +415,15 @@ export const PrintChargeItems = (props: {
       </div>
       <PrintPreview
         title={t("charge_items")}
-        disabled={isLoading || isLoadingPayments}
+        disabled={isLoading || isLoadingPayments || isLoadingAccount}
         className="print:pt-0"
         facility={facility}
         templateSlug={PrintTemplateType.charge_items}
         hideFacilityHeader={hideHeader}
       >
-        <DisablingCover disabled={isLoading || isLoadingPayments}>
+        <DisablingCover
+          disabled={isLoading || isLoadingPayments || isLoadingAccount}
+        >
           {summaryMode && hasUnissuedChargeItems ? (
             <p className="mt-2 text-xs text-red-600">
               {t("unissued_charge_items_summary_warning")}
