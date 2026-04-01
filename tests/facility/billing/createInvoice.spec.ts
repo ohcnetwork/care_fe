@@ -6,12 +6,15 @@ test.use({ storageState: "tests/.auth/user.json" });
 
 async function ensureSubmitInvoiceEnabled(page: Page) {
   const submitButton = page
-    .getByRole("button", { name: /create invoice/i })
-    .last();
-  for (let attempt = 0; attempt < 20; attempt += 1) {
-    if (await submitButton.isEnabled().catch(() => false)) return submitButton;
-    await page.waitForTimeout(300);
-  }
+    .locator('button[type="submit"]')
+    .filter({ hasText: /create invoice/i })
+    .first();
+  await expect(submitButton).toBeVisible();
+
+  await expect(submitButton)
+    .toBeEnabled({ timeout: 6000 })
+    .catch(() => null);
+  if (await submitButton.isEnabled().catch(() => false)) return submitButton;
 
   const commandItem = page.locator('[data-slot="command-item"]').first();
   if (!(await commandItem.isVisible().catch(() => false))) {
@@ -34,12 +37,8 @@ async function ensureSubmitInvoiceEnabled(page: Page) {
     await page.keyboard.press("Enter");
   }
 
-  for (let attempt = 0; attempt < 40; attempt += 1) {
-    if (await submitButton.isEnabled().catch(() => false)) return submitButton;
-    await page.waitForTimeout(500);
-  }
-
-  throw new Error("Create invoice submit button did not become enabled");
+  await expect(submitButton).toBeEnabled({ timeout: 15000 });
+  return submitButton;
 }
 
 async function createInvoiceAndGetId(
