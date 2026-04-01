@@ -95,7 +95,7 @@ test.describe("Edit Patient Prescription", () => {
       ]);
       await page
         .getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2} (AM|PM)$/)
-        .first()
+        .last()
         .click();
       const table = page.getByRole("table");
       await expect(table).toBeVisible({ timeout: 10000 });
@@ -137,7 +137,7 @@ test.describe("Edit Patient Prescription", () => {
       ]);
       await page
         .getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2} (AM|PM)$/)
-        .first()
+        .last()
         .click();
       await page.getByText(/Show \d+ Inactive Medications?/i).click();
       const table = page.getByRole("table");
