@@ -184,11 +184,9 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                     )}
                   >
                     <span>{round(inventory.net_content)}</span>
-                    {inventory.product.product_knowledge.base_unit.display && (
-                      <span className="text-sm self-center">
-                        {inventory.product.product_knowledge.base_unit.display}
-                      </span>
-                    )}
+                    <span className="text-sm self-center">
+                      {inventory.product.product_knowledge.base_unit.display}
+                    </span>
                   </TableCell>
                   <TableCell className="font-medium">
                     <Badge variant={ACCOUNT_STATUS_COLORS[inventory.status]}>
