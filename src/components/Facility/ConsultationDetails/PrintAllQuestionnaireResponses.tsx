@@ -206,7 +206,7 @@ export function EncounterDetails({
         />
         {encounter?.care_team?.[0] && (
           <DetailRow
-            label={t("doctor")}
+            label={t("consultant")}
             value={formatName(encounter.care_team[0].member)}
           />
         )}
