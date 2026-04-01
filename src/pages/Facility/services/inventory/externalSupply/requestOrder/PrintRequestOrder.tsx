@@ -10,6 +10,7 @@ import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
 
 import { Badge } from "@/components/ui/badge";
+import { getCompletedDeliveryQuantity } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   REQUEST_ORDER_STATUS_COLORS,
@@ -19,7 +20,7 @@ import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { SupplyRequestRead } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
-import { add, round, subtract } from "@/Utils/decimal";
+import { abs, add, isNegative, max, round, subtract } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import Decimal from "decimal.js";
 
@@ -81,13 +82,20 @@ const RequestOrderContent = ({
             rows={supplyRequests.map((request) => {
               const dispatched =
                 dispatchedQuantities[request.item.id] || new Decimal(0);
-              const remaining = subtract(request.quantity, dispatched);
+              const subtractedQuantity = subtract(request.quantity, dispatched);
+              const remaining = round(max(0, subtractedQuantity));
+
+              const remainingText = isNegative(subtractedQuantity)
+                ? `${remaining} (${t("extra_supplied_quantity", {
+                    quantity: round(abs(subtractedQuantity)),
+                  })})`
+                : remaining;
 
               return {
                 product: request.item.name || "-",
                 quantity: String(round(request.quantity)),
                 dispatched_quantity: String(round(dispatched)),
-                remaining_quantity: String(round(remaining)),
+                remaining_quantity: remainingText,
                 status: t(request.status),
               };
             })}
@@ -258,7 +266,7 @@ export const PrintRequestOrder = ({
         if (productId) {
           acc[productId] = add(
             acc[productId] || 0,
-            delivery.supplied_item_quantity,
+            getCompletedDeliveryQuantity(delivery),
           );
         }
         return acc;

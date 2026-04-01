@@ -35,6 +35,20 @@ export const STATUS_COLORS = {
 } as const;
 
 // Utility Functions
+
+export function getDosageFromInstruction(
+  instruction: MedicationRequestRead["dosage_instruction"][number] | undefined,
+) {
+  return {
+    site: instruction?.site,
+    route: instruction?.route,
+    method: instruction?.method,
+    dose: instruction?.dose_and_rate?.dose_quantity && {
+      value: instruction.dose_and_rate.dose_quantity.value,
+      unit: instruction.dose_and_rate.dose_quantity.unit,
+    },
+  };
+}
 export function createMedicationAdministrationRequest(
   medication: MedicationRequestRead,
   encounterId: string,
@@ -56,17 +70,19 @@ export function createMedicationAdministrationRequest(
     occurrence_period_end: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
     note: "",
     status: "completed",
-    dosage: {
-      site: medication.dosage_instruction[0]?.site,
-      route: medication.dosage_instruction[0]?.route,
-      method: medication.dosage_instruction[0]?.method,
-      dose: medication.dosage_instruction[0]?.dose_and_rate?.dose_quantity && {
-        value:
-          medication.dosage_instruction[0]?.dose_and_rate?.dose_quantity?.value,
-        unit: medication.dosage_instruction[0]?.dose_and_rate?.dose_quantity
-          ?.unit,
-      },
-    },
+    // Default administration dosage from the first instruction
+    dosage: (() => {
+      const primaryInstruction = medication.dosage_instruction[0];
+      return {
+        site: primaryInstruction?.site,
+        route: primaryInstruction?.route,
+        method: primaryInstruction?.method,
+        dose: primaryInstruction?.dose_and_rate?.dose_quantity && {
+          value: primaryInstruction.dose_and_rate.dose_quantity.value,
+          unit: primaryInstruction.dose_and_rate.dose_quantity.unit,
+        },
+      };
+    })(),
   };
 }
 
@@ -172,15 +188,15 @@ export function groupMedicationsByProduct(
       group.hasActiveRequests = true;
     }
 
-    // Check for PRN
-    if (medication.dosage_instruction[0]?.as_needed_boolean) {
-      group.hasPRN = true;
-    }
-
-    // Collect unique routes
-    const route = medication.dosage_instruction[0]?.route?.display;
-    if (route && !group.routes.includes(route)) {
-      group.routes.push(route);
+    // Check for PRN and collect unique routes across all instructions
+    for (const di of medication.dosage_instruction) {
+      if (di.as_needed_boolean) {
+        group.hasPRN = true;
+      }
+      const route = di.route?.display;
+      if (route && !group.routes.includes(route)) {
+        group.routes.push(route);
+      }
     }
   });
 

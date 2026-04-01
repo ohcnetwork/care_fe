@@ -785,6 +785,7 @@ export function ChargeItemDefinitionForm({
               showConditionsEditor
               availableMetrics={availableMetrics}
               className={minimal ? "w-full" : ""}
+              facilityId={facilityId}
             />
 
             {/* Price Summary */}

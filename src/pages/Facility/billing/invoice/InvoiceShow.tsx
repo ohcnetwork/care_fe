@@ -149,6 +149,7 @@ export function InvoiceShow({
         phone_number: patient?.phone_number ?? "",
         year_of_birth: patient?.year_of_birth?.toString() ?? "",
         partial_id: patient ? getPartialId(patient) : "",
+        facility: facilityId,
       },
     }),
     enabled: !!patient,
@@ -392,11 +393,7 @@ export function InvoiceShow({
       <div className="space-y-8 relative">
         <div className="flex items-start justify-between flex-col sm:flex-row gap-4 sm:items-center border-b-3 border-double pb-4">
           <div className="flex gap-3 sm:gap-6 flex-col md:flex-row">
-            <BackButton
-              variant="link"
-              className="px-0 justify-start"
-              to={`/facility/${facilityId}/billing/account/${invoice.account.id}`}
-            >
+            <BackButton variant="link" className="px-0 justify-start">
               <ChevronLeft />
               <span>{t("back")}</span>
             </BackButton>
@@ -406,7 +403,7 @@ export function InvoiceShow({
                 {t("patient_name")}
               </label>
               <Link
-                href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
+                href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
                   {
                     phone_number: invoice.account.patient.phone_number,
                     year_of_birth:
