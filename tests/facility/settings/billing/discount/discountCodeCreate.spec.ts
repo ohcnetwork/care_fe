@@ -13,52 +13,46 @@ test.describe("Discount Code Settings", () => {
     await page.goto(
       `/facility/${facilityId}/settings/billing/discount_configuration`,
     );
+    await page.waitForLoadState("networkidle");
 
     // Enter edit mode
     const editButton = page.getByRole("button", { name: /edit/i });
-    await expect(editButton).toBeVisible({ timeout: 15000 });
+    await expect(editButton).toBeVisible();
     await editButton.click();
 
     // Set a simple, valid configuration using the real labels
     const maxApplicableInput = page.getByLabel(/maximum applicable discounts/i);
-    await expect(maxApplicableInput).toBeVisible({ timeout: 15000 });
+    await expect(maxApplicableInput).toBeVisible();
     await maxApplicableInput.fill("0"); // 0 = no limit
 
     const applicabilityOrderTrigger = page.getByLabel(/applicability order/i);
-    await expect(applicabilityOrderTrigger).toBeVisible({ timeout: 15000 });
+    await expect(applicabilityOrderTrigger).toBeVisible();
     await applicabilityOrderTrigger.click();
 
     const totalDescOption = page.getByRole("option", {
       name: /highest value first/i,
     });
-    await expect(totalDescOption).toBeVisible({ timeout: 15000 });
+    await expect(totalDescOption).toBeVisible();
     await totalDescOption.click();
 
     const saveButton = page.getByRole("button", { name: /save/i });
-    await expect(saveButton).toBeVisible({ timeout: 15000 });
+    await expect(saveButton).toBeVisible();
     await saveButton.click();
+    await page.waitForLoadState("networkidle");
 
     await expect(
       page.getByText(/discount configuration saved successfully/i),
     ).toBeVisible();
   }
 
-  test.beforeAll(async ({ browser }) => {
+  test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
-    const context = await browser.newContext({
-      storageState: "tests/.auth/user.json",
-    });
-    const page = await context.newPage();
 
     await ensureDiscountConfiguration(page);
-
-    await context.close();
-  });
-
-  test.beforeEach(async ({ page }) => {
     discountName = faker.commerce.productName();
     discountCode = discountName.replace(/\s+/g, "-").slice(0, 20).toLowerCase();
     await page.goto(`/facility/${facilityId}/settings/billing/discount_codes`);
+    await page.waitForLoadState("networkidle");
 
     await expect(
       page.getByRole("button", { name: /create discount code/i }),
@@ -72,9 +66,12 @@ test.describe("Discount Code Settings", () => {
 
     await page.getByRole("button", { name: /save/i }).click();
 
-    await expect(
-      page.getByText(/this field is required/i).last(),
-    ).toBeVisible();
+    const codeField = page.getByRole("textbox", { name: /code/i });
+    const codeFieldContainer = page.locator("div").filter({ has: codeField });
+
+    await expect(codeFieldContainer.getByText(/^code$/i)).toBeVisible();
+    await expect(codeField).toHaveAttribute("aria-invalid", "true");
+    await expect(codeFieldContainer.getByText(/required/i)).toBeVisible();
   });
 
   test("create discount code and search", async ({ page }) => {
