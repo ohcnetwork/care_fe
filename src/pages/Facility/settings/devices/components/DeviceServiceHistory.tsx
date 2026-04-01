@@ -54,7 +54,7 @@ export default function DeviceServiceHistory({
     queryFn: query(deviceApi.serviceHistory.list, {
       queryParams: {
         limit: RESULTS_PER_PAGE_LIMIT,
-        offset: ((qParams.page ?? 1) - 1) * RESULTS_PER_PAGE_LIMIT,
+        offset: ((qParams.page || 1) - 1) * RESULTS_PER_PAGE_LIMIT,
       },
       pathParams: {
         facilityId,
@@ -146,7 +146,7 @@ export default function DeviceServiceHistory({
                 )}
               >
                 <PaginationComponent
-                  cPage={qParams.page ?? 1}
+                  cPage={qParams.page || 1}
                   defaultPerPage={RESULTS_PER_PAGE_LIMIT}
                   data={{ totalCount: serviceHistory?.count ?? 0 }}
                   onChange={(page) => setQueryParams({ page })}

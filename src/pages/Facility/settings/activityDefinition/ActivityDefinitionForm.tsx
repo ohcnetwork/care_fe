@@ -41,7 +41,7 @@ import { CodeSchema } from "@/types/base/code/code";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 
 import ObservationDefinitionForm from "@/pages/Facility/settings/observationDefinition/ObservationDefinitionForm";
-import { CreateSpecimenDefinition } from "@/pages/Facility/settings/specimen-definitions/CreateSpecimenDefinition";
+import SpecimenDefinitionForm from "@/pages/Facility/settings/specimen-definitions/SpecimenDefinitionForm";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import {
   ChargeItemDefinitionBase,
@@ -56,6 +56,7 @@ import {
   Status,
 } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
+import { ObservationDefinitionStatus } from "@/types/emr/observationDefinition/observationDefinition";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 import { SpecimenDefinitionStatus } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
@@ -229,6 +230,7 @@ function ActivityDefinitionFormContent({
             facility: facilityId,
             limit: 100,
             title: observationSearch,
+            status: ObservationDefinitionStatus.active,
           },
         },
       ),
@@ -412,6 +414,16 @@ function ActivityDefinitionFormContent({
       );
     }
   }
+
+  const handleCancel = () => {
+    if (categorySlug) {
+      navigate(
+        `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
+      );
+    } else {
+      navigate(`/facility/${facilityId}/settings/activity_definitions`);
+    }
+  };
 
   return (
     <Page
@@ -794,10 +806,11 @@ function ActivityDefinitionFormContent({
                         placeholder={t("select_specimen_requirements")}
                         onSearch={setSpecimenSearch}
                         canCreate={true}
-                        createForm={(onSuccess) => (
-                          <CreateSpecimenDefinition
+                        createForm={(onSuccess, onCancel) => (
+                          <SpecimenDefinitionForm
                             facilityId={facilityId}
                             onSuccess={onSuccess}
+                            onCancel={onCancel}
                           />
                         )}
                       />
@@ -857,11 +870,12 @@ function ActivityDefinitionFormContent({
                         placeholder={t("select_observation_requirements")}
                         onSearch={setObservationSearch}
                         canCreate={true}
-                        createForm={(onSuccess) => (
+                        createForm={(onSuccess, onCancel) => (
                           <div className="py-2">
                             <ObservationDefinitionForm
                               facilityId={facilityId}
                               onSuccess={onSuccess}
+                              onCancel={onCancel}
                             />
                           </div>
                         )}
@@ -1065,15 +1079,7 @@ function ActivityDefinitionFormContent({
             </div>
 
             <div className="flex justify-end space-x-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/settings/activity_definitions`,
-                  )
-                }
-              >
+              <Button type="button" variant="outline" onClick={handleCancel}>
                 {t("cancel")}
               </Button>
               <Button type="submit" disabled={isPending}>
