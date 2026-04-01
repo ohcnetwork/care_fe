@@ -25,6 +25,7 @@ export const EncounterTags = () => {
           <TagAssignmentSheet
             entityType="encounter"
             entityId={encounter.id}
+            facilityId={encounter.facility.id}
             currentTags={encounter.tags}
             onUpdate={() => {
               queryClient.invalidateQueries({
