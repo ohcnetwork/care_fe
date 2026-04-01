@@ -122,11 +122,11 @@ test.describe("Create Invoice", () => {
     await expect(invoicesTable).toBeVisible();
 
     const invoiceLink = invoicesTable
-      .getByRole("link", { name: /see invoice/i })
-      .filter({ has: page.locator(`a[href*="${invoiceId}"]`) })
+      .locator(`a[href*="/billing/invoices/${invoiceId}"]`)
       .first();
 
     await expect(invoiceLink).toBeVisible();
+    await expect(invoiceLink).toContainText(/see invoice/i);
 
     const invoiceRow = invoiceLink.locator("xpath=ancestor::tr[1]");
 
