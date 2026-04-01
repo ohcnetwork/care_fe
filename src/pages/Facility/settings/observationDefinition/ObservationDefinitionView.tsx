@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import { cn } from "@/lib/utils";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -67,56 +68,33 @@ function ObservationInterpretationDisplay({
 
   const getInterpretationSummary = (range: QualifiedRange) => {
     const rangeCount = range.ranges?.length || 0;
+    const conditionCount = range.conditions?.length || 0;
     const valuesetCount = range.valueset_interpretation?.length || 0;
 
-    const operationSummary = range.conditions
-      ?.slice(0, 2)
-      .map((condition, conditionIndex) => (
-        <span
-          key={`condition-${conditionIndex}`}
-          className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded"
-        >
-          <ConditionOperationSummary condition={condition} />
-        </span>
-      ));
-
-    const rangeSummary = range.ranges
-      ?.slice(0, 2)
-      .map((rangeItem, rangeIndex) => (
-        <span
-          key={`range-${rangeIndex}`}
-          className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-800"
-        >
-          {getRangeSummary(rangeItem)}
-        </span>
-      ));
-
-    const valuesetSummary = range.valueset_interpretation
-      ?.slice(0, 2)
-      .map((valueset, valuesetIndex) => (
-        <span
-          key={`valueset-${valuesetIndex}`}
-          className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded"
-          style={{
-            backgroundColor: valueset.interpretation.color || undefined,
-          }}
-        >
-          {getValuesetSummary(valueset)}
-        </span>
-      ));
-
     return (
-      <div className="space-y-3">
-        {range.conditions && range.conditions.length > 0 && (
-          <div>
-            <p className="text-xs font-medium text-gray-500 mb-1">
+      <div className="space-y-2">
+        {conditionCount > 0 && (
+          <div className="flex gap-2 text-xs">
+            <span className="text-gray-500 shrink-0 w-20">
               {t("conditions")}
-            </p>
-            <div className="flex flex-wrap gap-1">
-              {operationSummary}
-              {range.conditions.length > 2 && (
-                <span className="text-xs text-gray-500">
-                  +{range.conditions.length - 2} {t("more")}
+            </span>
+            <div className="min-w-0 space-y-1">
+              {range.conditions
+                ?.slice(0, 2)
+                .map((condition, conditionIndex) => (
+                  <div
+                    key={`condition-${conditionIndex}`}
+                    className="text-gray-700"
+                  >
+                    <ConditionOperationSummary
+                      condition={condition}
+                      shortDisplay
+                    />
+                  </div>
+                ))}
+              {conditionCount > 2 && (
+                <span className="text-gray-400">
+                  +{conditionCount - 2} {t("more")}
                 </span>
               )}
             </div>
@@ -124,30 +102,49 @@ function ObservationInterpretationDisplay({
         )}
 
         {rangeCount > 0 && (
-          <div>
-            <p className="text-xs font-medium text-gray-500 mb-1">
-              {t("ranges")}
-            </p>
-            <div className="flex flex-wrap gap-1">
-              {rangeSummary}
-              {rangeCount > 2 && (
-                <span className="text-xs text-gray-500">
-                  +{rangeCount - 2} {t("more")}
-                </span>
-              )}
+          <div className="flex gap-2 text-xs">
+            <span className="text-gray-500 shrink-0 w-20">{t("ranges")}</span>
+            <div className="min-w-0 space-y-1">
+              {range.ranges.map((rangeItem, rangeIndex) => (
+                <div
+                  key={`range-${rangeIndex}`}
+                  className={cn(
+                    "text-gray-700 whitespace-normal break-words",
+                    rangeItem.interpretation.highlight
+                      ? "font-semibold"
+                      : "font-normal",
+                  )}
+                >
+                  {getRangeSummary(rangeItem)}
+                </div>
+              ))}
             </div>
           </div>
         )}
 
         {valuesetCount > 0 && (
-          <div>
-            <p className="text-xs font-medium text-gray-500 mb-1">
+          <div className="flex gap-2 text-xs">
+            <span className="text-gray-500 shrink-0 w-20">
               {t("value_sets")}
-            </p>
-            <div className="flex flex-wrap gap-1">
-              {valuesetSummary}
+            </span>
+            <div className="min-w-0 space-y-1">
+              {range.valueset_interpretation
+                ?.slice(0, 2)
+                .map((valueset, valuesetIndex) => (
+                  <div
+                    key={`valueset-${valuesetIndex}`}
+                    className={cn(
+                      "text-gray-700 whitespace-normal break-words",
+                      valueset.interpretation.highlight
+                        ? "font-semibold"
+                        : "font-normal",
+                    )}
+                  >
+                    {getValuesetSummary(valueset)}
+                  </div>
+                ))}
               {valuesetCount > 2 && (
-                <span className="text-xs text-gray-500">
+                <span className="text-gray-400">
                   +{valuesetCount - 2} {t("more")}
                 </span>
               )}
@@ -159,13 +156,22 @@ function ObservationInterpretationDisplay({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {qualifiedRanges.map((range, index) => (
-        <div key={index} className="p-3 rounded-lg border bg-gray-50/50">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">
+        <div
+          key={index}
+          className="p-2.5 sm:p-3 rounded-lg border bg-gray-50/50"
+        >
+          <div className="flex items-center justify-between mb-2 gap-2">
+            <span className="text-sm font-medium text-gray-700 min-w-0 truncate">
               {t("interpretation")} #{index + 1}
+              {range.title ? ` — ${range.title}` : ""}
             </span>
+            {range.default_interpretation && (
+              <Badge variant="outline" className="text-[10px] shrink-0">
+                {t("default_interpretation")} {t("enabled")}
+              </Badge>
+            )}
           </div>
           {getInterpretationSummary(range)}
         </div>

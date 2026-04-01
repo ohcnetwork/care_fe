@@ -103,7 +103,7 @@ import {
   validateFields,
 } from "@/types/questionnaire/validation";
 import { UserReadMinimal } from "@/types/user/user";
-import { round } from "@/Utils/decimal";
+import { isPositive, round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
@@ -220,10 +220,21 @@ const MEDICATION_REQUEST_FIELDS = {
     validate: (value: unknown) => {
       const dosageInstruction =
         value as MedicationRequestCreate["dosage_instruction"][0];
-      return !!(
-        dosageInstruction?.dose_and_rate?.dose_quantity ||
-        dosageInstruction?.dose_and_rate?.dose_range
-      );
+      const doseAndRate = dosageInstruction?.dose_and_rate;
+      const doseQuantityValue = doseAndRate?.dose_quantity?.value;
+      const doseRange = doseAndRate?.dose_range;
+
+      if (doseQuantityValue != null) {
+        return isPositive(doseQuantityValue);
+      }
+
+      if (doseRange) {
+        const low = doseRange.low?.value;
+        const high = doseRange.high?.value;
+        return isPositive(low ?? "0") && isPositive(high ?? "0");
+      }
+
+      return false;
     },
   },
   FREQUENCY: {
@@ -1216,7 +1227,7 @@ export function MedicationRequestQuestion({
                                     <div className="flex-1 min-w-0 mr-2">
                                       <CardTitle
                                         className={cn(
-                                          "text-base text-gray-950 wrap-break-word",
+                                          "text-base text-gray-950 break-all",
                                           isInactive &&
                                             medication.status !== "ended" &&
                                             "line-through",
