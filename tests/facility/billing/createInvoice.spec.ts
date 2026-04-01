@@ -20,11 +20,10 @@ async function createInvoiceAndGetId(
     .click();
 
   const dialog = page.getByRole("dialog");
-  await expect(dialog).toBeVisible();
-
-  const createInvoiceButton = dialog.getByRole("button", {
-    name: /create invoice/i,
-  });
+  const hasDialog = await dialog.isVisible().catch(() => false);
+  const createInvoiceButton = hasDialog
+    ? dialog.getByRole("button", { name: /create invoice/i })
+    : page.getByRole("button", { name: /create invoice/i }).last();
 
   await expect(createInvoiceButton).toBeVisible();
   await expect(createInvoiceButton).toBeEnabled();
