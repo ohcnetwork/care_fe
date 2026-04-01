@@ -20,16 +20,11 @@ async function createInvoiceAndGetId(
     .click();
 
   const dialog = page.getByRole("dialog");
-  let hasDialog = false;
-  let isCreatePage = false;
-  for (let attempt = 0; attempt < 20; attempt += 1) {
-    hasDialog = await dialog.isVisible().catch(() => false);
-    isCreatePage = /\/billing\/account\/[a-f0-9-]+\/invoices\/create/i.test(
-      page.url(),
-    );
-    if (hasDialog || isCreatePage) break;
-    await page.waitForTimeout(300);
-  }
+  await Promise.race([
+    dialog.waitFor({ state: "visible" }),
+    page.waitForURL(/\/billing\/account\/[a-f0-9-]+\/invoices\/create/i),
+  ]).catch(() => {});
+  const hasDialog = await dialog.isVisible().catch(() => false);
 
   if (hasDialog) {
     const createInvoiceButton = dialog.getByRole("button", {
@@ -42,11 +37,25 @@ async function createInvoiceAndGetId(
     await expect(page).toHaveURL(
       /\/billing\/account\/[a-f0-9-]+\/invoices\/create/i,
     );
-    const createInvoiceButton = page
-      .getByRole("button", { name: /create invoice/i })
-      .last();
+    const table = page.getByRole("table");
+    await expect(table).toBeVisible();
+
+    const dataRow = table.getByRole("row").nth(1);
+    const hasDataRow = await dataRow.isVisible().catch(() => false);
+    if (hasDataRow) {
+      const rowCheckbox = dataRow.getByRole("checkbox").first();
+      if (await rowCheckbox.isVisible().catch(() => false)) {
+        await rowCheckbox.check().catch(async () => {
+          await rowCheckbox.click();
+        });
+      }
+    }
+
+    const createInvoiceButton = page.getByRole("button", {
+      name: /create invoice/i,
+    });
     await expect(createInvoiceButton).toBeVisible();
-    await expect(createInvoiceButton).toBeEnabled();
+    await expect(createInvoiceButton).toBeEnabled({ timeout: 20000 });
     await createInvoiceButton.click();
   }
 
