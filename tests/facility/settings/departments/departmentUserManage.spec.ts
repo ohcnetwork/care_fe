@@ -78,7 +78,8 @@ test.describe("Department User Management", () => {
   }
 
   async function updateRole(page: Page, newRole: string) {
-    await page.getByRole("combobox").click();
+    await page.getByRole("combobox").filter({ hasText: "Select Role" }).click();
+    await page.getByPlaceholder("Search Roles").fill(newRole);
     await page.getByRole("option", { name: newRole }).first().click();
     await page.getByRole("button", { name: "Update Role" }).click();
   }

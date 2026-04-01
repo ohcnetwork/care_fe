@@ -4,6 +4,7 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+const USER_TYPES = ["Doctor", "Nurse", "Staff", "Volunteer", "Administrator"];
 const GENDERS = ["Male", "Female", "Non Binary", "Transgender"];
 const ROLES = ["Nurse", "Doctor", "Staff"];
 
@@ -34,6 +35,7 @@ test.describe("User Management in Departments", () => {
     });
 
     await test.step("Fill and submit user creation form", async () => {
+      const userType = faker.helpers.arrayElement(USER_TYPES);
       const gender = faker.helpers.arrayElement(GENDERS);
       await page.getByRole("textbox", { name: "First Name *" }).fill(firstName);
       await page.getByRole("textbox", { name: "Last Name *" }).fill(lastName);
@@ -50,6 +52,19 @@ test.describe("User Management in Departments", () => {
         .fill(phoneNumber);
       await page.getByRole("combobox", { name: "Gender *" }).click();
       await page.getByRole("option", { name: gender, exact: true }).click();
+
+      await page
+        .getByRole("combobox")
+        .filter({ hasText: "Select organization" })
+        .click();
+      await page.getByPlaceholder("Search organization").fill(userType);
+      await page.getByRole("option", { name: userType }).click();
+      await page
+        .getByRole("combobox")
+        .filter({ hasText: "Select designation" })
+        .click();
+      await page.getByPlaceholder("Search Roles").fill("Member");
+      await page.getByRole("option", { name: "Member" }).click();
 
       const createButton = page.getByRole("button", { name: "Create User" });
       await createButton.click();
