@@ -41,7 +41,7 @@ export default function FacilityOrganizationList({
     Set<string>
   >(new Set([]));
 
-  const { facility, facilityId } = useCurrentFacility();
+  const { facilityId } = useCurrentFacility();
 
   const { data: org } = useQuery({
     queryKey: ["facilityOrganization", organizationId],
@@ -248,14 +248,14 @@ export default function FacilityOrganizationList({
                     <FacilityOrganizationUsers
                       id={organizationId}
                       facilityId={facilityId}
-                      permissions={facility?.permissions ?? []}
+                      permissions={org?.permissions ?? []}
                       isServiceAccount={currentTab === "service_accounts"}
                     />
                   ) : (
                     <FacilityOrganizationView
                       id={organizationId}
                       facilityId={facilityId}
-                      permissions={facility?.permissions ?? []}
+                      permissions={org?.permissions ?? []}
                     />
                   )}
                 </div>
