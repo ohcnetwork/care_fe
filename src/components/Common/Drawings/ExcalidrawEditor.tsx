@@ -31,9 +31,10 @@ import { Input } from "@/components/ui/input";
 
 import Loading from "@/components/Common/Loading";
 
+import metaArtifactApi from "@/types/metaArtifact/metaArtifactApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import metaArtifactApi from "@/types/metaArtifact/metaArtifactApi";
+import { goBack } from "@/Utils/utils";
 
 type Props = {
   associatingId: string;
@@ -62,7 +63,7 @@ export default function ExcalidrawEditor({
       queryClient.invalidateQueries({
         queryKey: ["drawing", drawingId, associatingId],
       });
-      history.back();
+      goBack();
     },
   });
 
@@ -116,7 +117,7 @@ export default function ExcalidrawEditor({
     if (isDirty) {
       setIsAlertOpen(true);
     } else {
-      history.back();
+      goBack();
     }
   };
 
@@ -145,7 +146,7 @@ export default function ExcalidrawEditor({
               className="bg-red-500 text-gray-50 shadow-xs hover:bg-red-500/90"
               onClick={() => {
                 setIsAlertOpen(false);
-                history.back();
+                goBack();
               }}
             >
               {t("discard_changes")}

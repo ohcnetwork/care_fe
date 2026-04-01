@@ -62,7 +62,7 @@ import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
+import { dateQueryString, goBack } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -289,7 +289,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     }),
     onSuccess: () => {
       toast.success(t("patient_update_success"));
-      history.back();
+      goBack();
     },
   });
 

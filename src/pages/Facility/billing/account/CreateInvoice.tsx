@@ -76,7 +76,7 @@ import { UserReadMinimal } from "@/types/user/user";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { formatDateTime, formatName } from "@/Utils/utils";
+import { formatDateTime, formatName, goBack } from "@/Utils/utils";
 
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
 import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
@@ -922,7 +922,7 @@ export function CreateInvoicePage({
                   if (onCancel) {
                     onCancel();
                   } else {
-                    history.back();
+                    goBack();
                   }
                 }}
                 disabled={createMutation.isPending}

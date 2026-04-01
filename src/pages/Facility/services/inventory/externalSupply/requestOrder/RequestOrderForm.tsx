@@ -60,6 +60,7 @@ import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { goBack } from "@/Utils/utils";
 
 const createRequestOrderFormSchema = (
   t: (key: string) => string,
@@ -555,7 +556,7 @@ export default function RequestOrderForm({
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => history.back()}
+                    onClick={() => goBack()}
                   >
                     {t("cancel")}
                     <ShortcutBadge actionId="cancel-action" />

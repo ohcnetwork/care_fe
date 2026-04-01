@@ -11,6 +11,7 @@ import Loading from "@/components/Common/Loading";
 import query from "@/Utils/request/query";
 import deviceApi from "@/types/device/deviceApi";
 
+import { goBack } from "@/Utils/utils";
 import DeviceForm from "./components/DeviceForm";
 import DeviceTypeIcon from "./components/DeviceTypeIcon";
 
@@ -49,7 +50,7 @@ export default function UpdateDevice({ facilityId, deviceId }: Props) {
             device={device}
             onSuccess={() => {
               toast.success(t("device_updated"));
-              history.back();
+              goBack();
             }}
           />
         </div>

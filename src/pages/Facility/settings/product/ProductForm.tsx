@@ -62,6 +62,7 @@ import {
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 const formSchema = z.object({
   status: z.nativeEnum(ProductStatusOptions),
   product_knowledge: z.string().min(1, "Product Knowledge is required"),
@@ -148,7 +149,7 @@ export function ProductFormContent({
       replace: true,
     }),
   onCancel = () => {
-    history.back();
+    goBack();
   },
   disableButtons = false,
   enabled = true,

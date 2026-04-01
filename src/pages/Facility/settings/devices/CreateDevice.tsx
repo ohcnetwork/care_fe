@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 
 import DeviceForm from "@/pages/Facility/settings/devices/components/DeviceForm";
 
+import { goBack } from "@/Utils/utils";
 import DeviceTypeIcon from "./components/DeviceTypeIcon";
 
 interface Props {
@@ -35,7 +36,7 @@ export default function CreateDevice({ facilityId }: Props) {
           facilityId={facilityId}
           onSuccess={() => {
             toast.success(t("device_registered"));
-            history.back();
+            goBack();
           }}
         />
       </div>

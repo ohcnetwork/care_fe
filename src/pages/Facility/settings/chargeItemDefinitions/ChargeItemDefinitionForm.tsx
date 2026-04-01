@@ -65,7 +65,7 @@ import facilityApi from "@/types/facility/facilityApi";
 import { round, zodDecimal } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { generateSlug } from "@/Utils/utils";
+import { generateSlug, goBack } from "@/Utils/utils";
 
 interface ChargeItemDefinitionFormProps {
   facilityId: string;
@@ -98,7 +98,7 @@ export function ChargeItemDefinitionForm({
     }
   },
   onCancel = () => {
-    history.back();
+    goBack();
   },
 }: ChargeItemDefinitionFormProps) {
   const { t } = useTranslation();
