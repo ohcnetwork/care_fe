@@ -1,7 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import TokenCardWithButton from "@/components/Tokens/TokenCardWithButton";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
@@ -10,13 +11,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { DatePicker } from "@/components/ui/date-picker";
-
-import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
-import { AssignToServicePointDialog } from "@/pages/Facility/queues/AssignToServicePointDialog";
-import { TokenCard } from "@/pages/Facility/queues/TokenCard";
-import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePoints";
 import { getTokenStatus } from "@/pages/Facility/queues/utils";
 import { FacilityRead } from "@/types/facility/facility";
 import { formatScheduleResourceName } from "@/types/scheduling/schedule";
@@ -24,20 +20,10 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 import {
   renderTokenNumber,
   TOKEN_STATUS_COLORS,
-  TokenRetrieve,
-  TokenStatus,
 } from "@/types/tokens/token/token";
-import tokenApi from "@/types/tokens/token/tokenApi";
-import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
-import {
-  ArrowRight,
-  ChevronsDownUp,
-  ChevronsUpDown,
-  TicketIcon,
-} from "lucide-react";
-import { toast } from "sonner";
+import { ChevronsDownUp, ChevronsUpDown, TicketIcon } from "lucide-react";
 
 interface PatientTokensListProps {
   patientId: string;
@@ -50,13 +36,11 @@ export default function PatientTokensList({
   patientId,
   facility,
   tokenId,
-  queueId,
+  queueId: _queueId,
 }: PatientTokensListProps) {
   const { t } = useTranslation();
   const [expandedTokens, setExpandedTokens] = useState<Set<string>>(new Set());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [showServicepointDialog, setShowServicepointDialog] = useState(false);
-  const queryClient = useQueryClient();
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
@@ -70,47 +54,6 @@ export default function PatientTokensList({
     }
   }, [tokenId]);
 
-  const { data: token } = useQuery({
-    queryKey: ["token", facility.id, queueId, tokenId],
-    queryFn: query(tokenApi.get, {
-      pathParams: {
-        facility_id: facility.id,
-        queue_id: queueId ?? "",
-        id: tokenId ?? "",
-      },
-    }),
-    enabled: !!queueId && !!tokenId,
-  });
-
-  const { assignedServicePoints } = useQueueServicePoints({
-    facilityId: facility.id,
-    resourceType: token?.resource_type,
-    resourceId: token?.resource.id,
-  });
-
-  const { mutate: updateToken, isPending } = useMutation({
-    mutationFn: mutate(tokenApi.update, {
-      pathParams: {
-        facility_id: facility.id,
-        queue_id: token?.queue.id ?? "",
-        id: token?.id ?? "",
-      },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["infinite-tokens", facility.id, token?.queue.id ?? ""],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["tokens", token?.patient?.id, facility.id],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["token-queue-summary", facility.id, token?.queue.id ?? ""],
-      });
-      toast.success(t("token_assigned_to_service_point"));
-      setShowServicepointDialog(false);
-    },
-  });
-
   const { data, isLoading } = useQuery({
     queryKey: ["tokens", patientId, facility.id, selectedDate],
     queryFn: query(scheduleApis.appointments.get_tokens, {
@@ -122,8 +65,6 @@ export default function PatientTokensList({
       },
     }),
   });
-
-  const isOnlyOneSubQueue = assignedServicePoints.length === 1;
 
   const tokens = data?.results || [];
 
@@ -231,7 +172,7 @@ export default function PatientTokensList({
                     </div>
                     <Badge
                       variant={TOKEN_STATUS_COLORS[token.status]}
-                      className="px-1.5 rounded-sm ml-2 whitespace-nowrap flex-shrink-0"
+                      className="px-1.5 rounded-sm ml-2 whitespace-nowrap shrink-0"
                     >
                       {getTokenStatus({ token, t })}
                     </Badge>
@@ -248,38 +189,15 @@ export default function PatientTokensList({
                 <CardContent className="p-1 bg-gray-100 border-gray-100 rounded-md">
                   <div
                     id={`print-token-${token.id}`}
-                    className="flex flex-col gap-2 print:block print:w-[400px] print:border print:rounded-md"
+                    className="print:block print:w-[400px] print:border print:rounded-md flex flex-col gap-2"
                   >
-                    <TokenCard
-                      showlogo={false}
-                      token={token as TokenRetrieve}
+                    <TokenCardWithButton
+                      token={token}
                       facility={facility}
-                      id={`token-card-${token.id}`}
-                      className="rounded-md border-none shadow-xs hover:shadow-xs hover:scale-none"
+                      showMarkInServiceButton={tokenId === token.id}
+                      showButtonArrow
+                      cardClassName="rounded-md border-none shadow-xs hover:shadow-xs hover:scale-none"
                     />
-                    {tokenId === token.id &&
-                      token.status === TokenStatus.CREATED && (
-                        <div className="flex justify-center items-center bg-white p-2 rounded-md mb-1 shadow-xs animate-in slide-in-from-top-2 duration-700">
-                          <Button
-                            variant="outline_primary"
-                            className="w-full flex items-center justify-center gap-2 font-semibold"
-                            onClick={() => {
-                              if (isOnlyOneSubQueue) {
-                                updateToken({
-                                  status: TokenStatus.IN_PROGRESS,
-                                  sub_queue: assignedServicePoints[0]?.id,
-                                  note: token.note,
-                                });
-                              } else {
-                                setShowServicepointDialog(true);
-                              }
-                            }}
-                          >
-                            {t("mark_as_in_service")}
-                            <ArrowRight className="size-4 animate-arrow-slide" />
-                          </Button>
-                        </div>
-                      )}
                   </div>
                 </CardContent>
               </CollapsibleContent>
@@ -287,16 +205,6 @@ export default function PatientTokensList({
           </Collapsible>
         );
       })}
-      {token && !isOnlyOneSubQueue && (
-        <AssignToServicePointDialog
-          open={showServicepointDialog}
-          onOpenChange={setShowServicepointDialog}
-          token={token}
-          subQueues={assignedServicePoints}
-          onUpdate={updateToken}
-          isPending={isPending}
-        />
-      )}
     </div>
   );
 }
