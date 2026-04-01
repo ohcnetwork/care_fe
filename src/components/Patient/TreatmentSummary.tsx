@@ -1,8 +1,9 @@
 import {
   formatDosage,
   formatDuration,
-  formatFrequency,
+  formatFrequencyWithInstructions,
   formatSig,
+  joinInstructionTexts,
 } from "@/components/Medicine/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
@@ -544,26 +545,34 @@ export default function TreatmentSummary({
                       { key: "duration" },
                       { key: "instructions" },
                     ]}
+                    classNameCell="whitespace-pre-line"
                     rows={medications?.results.map((medication) => {
-                      const instruction = medication.dosage_instruction[0];
-                      const additionalInstructions =
-                        instruction?.additional_instruction
-                          ?.map((item) => item.display)
-                          .filter(Boolean)
-                          .join(", ");
-                      const remarks = formatSig(instruction);
-                      const notes = medication.note;
-                      const freqText = formatFrequency(instruction);
+                      const instructions = medication.dosage_instruction;
                       return {
                         medicine: displayMedicationName(medication),
                         status: t(`medication_status__${medication.status}`),
-                        dosage: formatDosage(instruction),
-                        frequency:
-                          [freqText, additionalInstructions]
+                        dosage: joinInstructionTexts(
+                          instructions,
+                          formatDosage,
+                        ),
+                        frequency: joinInstructionTexts(
+                          instructions,
+                          formatFrequencyWithInstructions,
+                        ),
+                        duration: joinInstructionTexts(
+                          instructions,
+                          formatDuration,
+                        ),
+                        instructions: joinInstructionTexts(instructions, (di) =>
+                          [
+                            formatSig(di) || "-",
+                            medication.note
+                              ? `(${t("note")}: ${medication.note})`
+                              : "",
+                          ]
                             .filter(Boolean)
-                            .join(", ") || "-",
-                        duration: formatDuration(instruction) || "-",
-                        instructions: `${remarks || "-"}${notes ? ` (${t("note")}: ${notes})` : ""}`,
+                            .join(" "),
+                        ),
                       };
                     })}
                   />

@@ -60,8 +60,6 @@ test.describe("User Creation", () => {
     });
 
     await test.step("Fill user details", async () => {
-      await page.getByRole("combobox", { name: "User Type" }).click();
-      await page.getByRole("option", { name: "Doctor" }).click();
       await page.getByRole("textbox", { name: "First Name" }).fill(firstName);
       await page.getByRole("textbox", { name: "Last Name" }).fill(lastName);
       await page.getByRole("textbox", { name: "Username" }).fill(username);
@@ -73,6 +71,21 @@ test.describe("User Creation", () => {
         .fill(phoneNumber);
       await page.getByRole("combobox", { name: "Gender" }).click();
       await page.getByRole("option", { name: gender, exact: true }).click();
+    });
+
+    await test.step("Add Responsibilities", async () => {
+      await page
+        .getByRole("combobox")
+        .filter({ hasText: "Select organization" })
+        .click();
+      await page.getByPlaceholder("Search organization").fill("Nurse");
+      await page.getByRole("option", { name: "Nurse" }).click();
+      await page
+        .getByRole("combobox")
+        .filter({ hasText: "Select designation" })
+        .click();
+      await page.getByPlaceholder("Search Roles").fill("Member");
+      await page.getByRole("option", { name: "Member" }).click();
     });
 
     await test.step("Submit user creation", async () => {

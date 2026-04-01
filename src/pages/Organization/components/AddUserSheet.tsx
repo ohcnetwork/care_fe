@@ -19,7 +19,10 @@ import { UserReadMinimal } from "@/types/user/user";
 interface AddUserSheetProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  onUserCreated?: (user: UserReadMinimal) => void;
+  onUserCreated?: (
+    user: UserReadMinimal,
+    meta?: { roleOrgIds: string[] },
+  ) => void;
   organizationId?: string;
   isServiceAccount?: boolean;
 }
@@ -55,9 +58,9 @@ export default function AddUserSheet({
         </SheetHeader>
         <div className="mt-6">
           <UserForm
-            onSubmitSuccess={(user) => {
+            onSubmitSuccess={(user, meta) => {
               setOpen(false);
-              onUserCreated?.(user);
+              onUserCreated?.(user, meta);
             }}
             organizationId={organizationId}
             isServiceAccount={isServiceAccount}
