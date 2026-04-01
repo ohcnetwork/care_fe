@@ -303,15 +303,24 @@ export function MedicationBillRow({
               </div>
             </div>
             {field.medication ? (
-              <div>
-                <div className="text-sm text-gray-700 font-medium flex items-center gap-1">
-                  {formatDosage(field.dosageInstructions?.[0])} ×{" "}
-                  {formatFrequency(field.dosageInstructions?.[0])} ×{" "}
-                  {formatDuration(field.dosageInstructions?.[0]) || "-"} ={" "}
-                  <span className="text-gray-700 font-semibold text-sm">
-                    {formatTotalUnits(field.dosageInstructions, t("units"))}
-                  </span>
-                </div>
+              <div className="text-sm text-gray-700 font-medium">
+                {field.dosageInstructions?.map((di, idx) => {
+                  const line = [
+                    formatDosage(di),
+                    formatFrequency(di),
+                    formatDuration(di) || "-",
+                  ]
+                    .filter(Boolean)
+                    .join(" × ");
+                  return (
+                    <div key={idx} className="flex items-center gap-1">
+                      {line}
+                    </div>
+                  );
+                })}
+                <span className="text-gray-700 font-semibold text-sm">
+                  = {formatTotalUnits(field.dosageInstructions, t("units"))}
+                </span>
               </div>
             ) : (
               <div
