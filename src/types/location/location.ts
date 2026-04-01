@@ -42,6 +42,7 @@ export interface LocationDetail extends LocationBase {
   organizations: FacilityOrganizationRead[];
   sort_index: number;
   system_availability_status: SystemAvailabilityStatus;
+  permissions: string[];
 }
 
 export interface LocationRead extends LocationBase {

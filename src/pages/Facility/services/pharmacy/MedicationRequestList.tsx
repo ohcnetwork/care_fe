@@ -6,7 +6,7 @@ import {
   ReceiptTextIcon,
 } from "lucide-react";
 import { Link, navigate } from "raviger";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -36,6 +36,7 @@ import {
 import useFilters from "@/hooks/useFilters";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import { getPermissions } from "@/common/Permissions";
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import {
@@ -48,8 +49,11 @@ import {
   FilterDateRange,
   longDateRangeOptions,
 } from "@/components/ui/multi-filter/utils/Utils";
+import { usePermissions } from "@/context/PermissionContext";
+import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { CreateDispenseSheet } from "@/pages/Facility/services/pharmacy/CreateDispenseSheet";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_CLASSES_COLORS,
@@ -84,6 +88,7 @@ export default function MedicationRequestList({
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { facility } = useCurrentFacility();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
     cacheBlacklist: ["patient_external_id", "patient_name"],
@@ -98,6 +103,19 @@ export default function MedicationRequestList({
   const selectedTags = tagQueries
     .map((query) => query.data)
     .filter(Boolean) as TagConfig[];
+  const { hasPermission } = usePermissions();
+  const { canViewAsPharmacist } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
+  );
+  const { goBack } = useAppHistory();
+
+  useEffect(() => {
+    if (!canViewAsPharmacist) {
+      toast.error(t("no_permission_to_view_page"));
+      goBack(`/facility/${facilityId}/locations/${locationId}`);
+    }
+  }, [canViewAsPharmacist]);
 
   // Create filter configurations
   const filters = useMemo(

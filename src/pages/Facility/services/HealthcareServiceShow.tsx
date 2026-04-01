@@ -16,7 +16,10 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
 import { pharmacyDispenseServiceAtom } from "@/atoms/pharmacy";
+import { getPermissions } from "@/common/Permissions";
 import BackButton from "@/components/Common/BackButton";
+import { usePermissions } from "@/context/PermissionContext";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { InternalType } from "@/types/healthcareService/healthcareService";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 import { useAtom } from "jotai";
@@ -110,7 +113,7 @@ export default function HealthcareServiceShow({
   serviceId: string;
 }) {
   const { t } = useTranslation();
-
+  const { facility } = useCurrentFacility();
   const { data: service, isLoading } = useQuery({
     queryKey: ["healthcareService", serviceId],
     queryFn: query(healthcareServiceApi.retrieveHealthcareService, {
@@ -120,6 +123,17 @@ export default function HealthcareServiceShow({
       },
     }),
   });
+
+  const { hasPermission } = usePermissions();
+  const { canViewSchedule, canViewAppointments, canListTokens } =
+    getPermissions(hasPermission, service?.permissions ?? []);
+  const {
+    canViewSchedule: canViewScheduleForFacility,
+    canViewAppointments: canViewAppointmentsForFacility,
+    canListTokens: canListTokensForFacility,
+  } = getPermissions(hasPermission, facility?.root_org_permissions ?? []);
+
+  const hasManagingOrganization = !!service?.managing_organization?.id;
 
   return (
     <div className="container px-4 mx-auto max-w-4xl space-y-6">
@@ -136,42 +150,53 @@ export default function HealthcareServiceShow({
               description: t("schedule_information"),
               icon: Calendar,
               href: `/schedule`,
+              visibility: hasManagingOrganization
+                ? canViewSchedule
+                : canViewScheduleForFacility,
             },
             {
               title: t("appointments"),
               description: t("view_appointments"),
               icon: CalendarDays,
               href: `/appointments`,
+              visibility: hasManagingOrganization
+                ? canViewAppointments
+                : canViewAppointmentsForFacility,
             },
             {
               title: t("queues"),
               description: t("manage_token_queues_for_facility"),
               icon: Logs,
               href: `/queues`,
+              visibility: hasManagingOrganization
+                ? canListTokens
+                : canListTokensForFacility,
             },
-          ].map((shortcut) => (
-            <Link
-              key={shortcut.href}
-              href={shortcut.href}
-              className="block h-full transition-all duration-200 hover:ring-2 ring-primary-400 rounded-lg ring-offset-2"
-            >
-              <Card className="h-full border-0 shadow rounded-lg p-3">
-                <CardContent className="p-0 flex flex-row items-center h-full gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <shortcut.icon className="size-5 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base">
-                      {shortcut.title}
-                    </CardTitle>
-                    <CardDescription className="text-gray-500 text-xs">
-                      {shortcut.description}
-                    </CardDescription>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+          ]
+            .filter((shortcut) => shortcut.visibility)
+            .map((shortcut) => (
+              <Link
+                key={shortcut.href}
+                href={shortcut.href}
+                className="block h-full transition-all duration-200 hover:ring-2 ring-primary-400 rounded-lg ring-offset-2"
+              >
+                <Card className="h-full border-0 shadow rounded-lg p-3">
+                  <CardContent className="p-0 flex flex-row items-center h-full gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <shortcut.icon className="size-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">
+                        {shortcut.title}
+                      </CardTitle>
+                      <CardDescription className="text-gray-500 text-xs">
+                        {shortcut.description}
+                      </CardDescription>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
         </div>
       </div>
 

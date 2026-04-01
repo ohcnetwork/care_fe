@@ -118,6 +118,22 @@ export const PERMISSION_READ_ACCOUNT = "can_read_account";
 export const PERMISSION_MANAGE_LOCKED_INVOICE =
   "can_manage_locked_invoice_in_facility";
 
+// Service Request Permissions
+export const PERMISSION_READ_SERVICE_REQUEST = "can_read_service_request";
+
+// Pharmacy Permissions
+export const PERMISSION_VIEW_AS_PHARMACIST = "is_pharmacist";
+
+// Inventory Permissions
+export const PERMISSION_READ_INVENTORY = "can_read_inventory_item";
+
+// Supply Delivery Permissions
+export const PERMISSION_READ_SUPPLY_DELIVERY = "can_read_supply_delivery";
+export const PERMISSION_WRITE_SUPPLY_DELIVERY = "can_write_supply_delivery";
+
+// Supply Request Permissions
+export const PERMISSION_READ_SUPPLY_REQUEST = "can_read_supply_request";
+export const PERMISSION_WRITE_SUPPLY_REQUEST = "can_write_supply_request";
 export interface Permissions {
   // Patient Permissions
   /** Permission slug: "can_create_patient" */
@@ -279,6 +295,25 @@ export interface Permissions {
 
   /** Permission slug: "can_manage_locked_invoice_in_facility" */
   canManageLockedInvoice: boolean;
+
+  /** Permission slug: "can_read_service_request" */
+  canReadServiceRequest: boolean;
+
+  /** Permission slug: "is_pharmacist" */
+  canViewAsPharmacist: boolean;
+
+  /** Permission slug: "can_read_inventory_item" */
+  canReadInventory: boolean;
+
+  /** Permission slug: "can_read_supply_delivery" */
+  canReadSupplyDelivery: boolean;
+  /** Permission slug: "can_write_supply_delivery" */
+  canWriteSupplyDelivery: boolean;
+
+  /** Permission slug: "can_read_supply_request" */
+  canReadSupplyRequest: boolean;
+  /** Permission slug: "can_write_supply_request" */
+  canWriteSupplyRequest: boolean;
 }
 
 export type HasPermissionFn = (
@@ -506,6 +541,40 @@ export function getPermissions(
     // Invoice
     canManageLockedInvoice: hasPermission(
       PERMISSION_MANAGE_LOCKED_INVOICE,
+      permissions,
+    ),
+
+    // Service Request
+    canReadServiceRequest: hasPermission(
+      PERMISSION_READ_SERVICE_REQUEST,
+      permissions,
+    ),
+
+    // Medication Request
+    canViewAsPharmacist: hasPermission(
+      PERMISSION_VIEW_AS_PHARMACIST,
+      permissions,
+    ),
+
+    // Inventory
+    canReadInventory: hasPermission(PERMISSION_READ_INVENTORY, permissions),
+
+    // Supply Delivery
+    canReadSupplyDelivery: hasPermission(
+      PERMISSION_READ_SUPPLY_DELIVERY,
+      permissions,
+    ),
+    canWriteSupplyDelivery: hasPermission(
+      PERMISSION_WRITE_SUPPLY_DELIVERY,
+      permissions,
+    ),
+    // Supply Request
+    canReadSupplyRequest: hasPermission(
+      PERMISSION_READ_SUPPLY_REQUEST,
+      permissions,
+    ),
+    canWriteSupplyRequest: hasPermission(
+      PERMISSION_WRITE_SUPPLY_REQUEST,
       permissions,
     ),
   };

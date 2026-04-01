@@ -41,4 +41,5 @@ export interface HealthcareServiceReadSpec extends BaseHealthcareServiceSpec {
   version?: number;
   locations: LocationRead[];
   managing_organization: FacilityOrganizationRead | null;
+  permissions: string[];
 }
