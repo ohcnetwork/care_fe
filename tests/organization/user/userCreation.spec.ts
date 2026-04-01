@@ -60,8 +60,6 @@ test.describe("User Creation", () => {
     });
 
     await test.step("Fill user details", async () => {
-      await page.getByRole("combobox", { name: "User Type" }).click();
-      await page.getByRole("option", { name: "Doctor" }).click();
       await page.getByRole("textbox", { name: "First Name" }).fill(firstName);
       await page.getByRole("textbox", { name: "Last Name" }).fill(lastName);
       await page.getByRole("textbox", { name: "Username" }).fill(username);
