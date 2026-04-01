@@ -108,28 +108,17 @@ export function UserCard(props: UserCardProps) {
                 {user.username}
               </span>
             </div>
-            <div
-              className={cn(
-                "mt-4 -ml-12 sm:ml-0 grid grid-cols-2 gap-2 text-sm",
-                isServiceAccount && "ml-0",
-              )}
-            >
-              <div className="flex flex-col">
-                <div className="text-gray-500">{t("role")}</div>
-                <div className="flex items-center">
-                  <div className="font-medium truncate">{roleName}</div>
-                  {editRoleAction}
-                </div>
+            {(roleName || editRoleAction) && (
+              <div
+                className={cn(
+                  "mt-2 -ml-12 sm:ml-0 flex items-center gap-1.5 text-sm",
+                  isServiceAccount && "ml-0",
+                )}
+              >
+                {roleName && <span className="text-gray-500">{roleName}</span>}
+                {editRoleAction}
               </div>
-              <div>
-                <div className="text-gray-500">{t("phone_number")}</div>
-                <div className="font-medium truncate">
-                  {user.phone_number
-                    ? formatPhoneNumberIntl(user.phone_number)
-                    : "-"}
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
         <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-gray-50 flex justify-end gap-2">
