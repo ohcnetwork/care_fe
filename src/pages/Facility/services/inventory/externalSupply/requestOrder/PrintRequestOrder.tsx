@@ -9,6 +9,7 @@ import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
 
 import { Badge } from "@/components/ui/badge";
+import { getCompletedDeliveryQuantity } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
 import {
@@ -244,7 +245,7 @@ export const PrintRequestOrder = ({
         if (productId) {
           acc[productId] = add(
             acc[productId] || 0,
-            delivery.supplied_item_quantity,
+            getCompletedDeliveryQuantity(delivery),
           );
         }
         return acc;

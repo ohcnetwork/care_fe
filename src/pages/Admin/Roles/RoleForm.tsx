@@ -234,14 +234,14 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
               );
             };
             return (
-              <FormItem className="flex flex-col min-h-80">
+              <FormItem className="flex min-h-80 flex-col">
                 <div className="flex items-center justify-between">
                   <FormLabel aria-required>{t("permissions")}</FormLabel>
                   <span className="text-xs text-gray-400">
                     {selectedPermissions.length} {t("selected")}
                   </span>
                 </div>
-                <div className="flex flex-col min-h-80 rounded-lg border border-gray-200 bg-white">
+                <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-gray-200 bg-white">
                   <div className="space-y-2 border-b border-gray-100 p-3">
                     <div className="flex gap-2">
                       <Button
@@ -281,6 +281,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
                       <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-400" />
                       <Input
                         placeholder={t("search_permissions")}
+                        aria-label={t("search_permissions")}
                         value={searchPermission}
                         onChange={(e) => setSearchPermission(e.target.value)}
                         className="h-8 pl-8 text-sm"
@@ -288,7 +289,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
                     </div>
                   </div>
 
-                  <div className="flex-1 overflow-auto p-2">
+                  <div className="min-h-0 flex-1 overflow-auto p-2">
                     <div className="space-y-1">
                       {permissions.map((permission) => {
                         const checked = field.value.includes(permission.slug);

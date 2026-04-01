@@ -73,6 +73,21 @@ test.describe("User Creation", () => {
       await page.getByRole("option", { name: gender, exact: true }).click();
     });
 
+    await test.step("Add Responsibilities", async () => {
+      await page
+        .getByRole("combobox")
+        .filter({ hasText: "Select organization" })
+        .click();
+      await page.getByPlaceholder("Search organization").fill("Nurse");
+      await page.getByRole("option", { name: "Nurse" }).click();
+      await page
+        .getByRole("combobox")
+        .filter({ hasText: "Select designation" })
+        .click();
+      await page.getByPlaceholder("Search Roles").fill("Member");
+      await page.getByRole("option", { name: "Member" }).click();
+    });
+
     await test.step("Submit user creation", async () => {
       const createUserResponse = page.waitForResponse(
         (response) =>
