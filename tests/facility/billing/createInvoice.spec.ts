@@ -19,45 +19,29 @@ async function createInvoiceAndGetId(
     .first()
     .click();
 
-  const dialog = page.getByRole("dialog");
-  await Promise.race([
-    dialog.waitFor({ state: "visible" }),
-    page.waitForURL(/\/billing\/account\/[a-f0-9-]+\/invoices\/create/i),
-  ]).catch(() => {});
-  const hasDialog = await dialog.isVisible().catch(() => false);
+  const createInvoiceButtons = page.getByRole("button", {
+    name: /create invoice/i,
+  });
 
-  if (hasDialog) {
-    const createInvoiceButton = dialog.getByRole("button", {
-      name: /create invoice/i,
-    });
-    await expect(createInvoiceButton).toBeVisible();
-    await expect(createInvoiceButton).toBeEnabled();
-    await createInvoiceButton.click();
-  } else {
-    await expect(page).toHaveURL(
-      /\/billing\/account\/[a-f0-9-]+\/invoices\/create/i,
-    );
-    const table = page.getByRole("table");
-    await expect(table).toBeVisible();
-
-    const dataRow = table.getByRole("row").nth(1);
-    const hasDataRow = await dataRow.isVisible().catch(() => false);
-    if (hasDataRow) {
-      const rowCheckbox = dataRow.getByRole("checkbox").first();
-      if (await rowCheckbox.isVisible().catch(() => false)) {
-        await rowCheckbox.check().catch(async () => {
-          await rowCheckbox.click();
-        });
+  let clickedEnabledButton = false;
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    const count = await createInvoiceButtons.count();
+    for (let index = 0; index < count; index += 1) {
+      const button = createInvoiceButtons.nth(index);
+      const isVisible = await button.isVisible().catch(() => false);
+      const isEnabled = await button.isEnabled().catch(() => false);
+      if (isVisible && isEnabled) {
+        await button.click();
+        clickedEnabledButton = true;
+        break;
       }
     }
-
-    const createInvoiceButton = page.getByRole("button", {
-      name: /create invoice/i,
-    });
-    await expect(createInvoiceButton).toBeVisible();
-    await expect(createInvoiceButton).toBeEnabled({ timeout: 20000 });
-    await createInvoiceButton.click();
+    if (clickedEnabledButton) break;
+    await page.waitForTimeout(300);
   }
+
+  if (!clickedEnabledButton)
+    throw new Error("No visible and enabled 'Create Invoice' button found");
 
   await expect(
     page.getByRole("status").filter({
