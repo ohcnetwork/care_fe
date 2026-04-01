@@ -20,14 +20,35 @@ async function createInvoiceAndGetId(
     .click();
 
   const dialog = page.getByRole("dialog");
-  const hasDialog = await dialog.isVisible().catch(() => false);
-  const createInvoiceButton = hasDialog
-    ? dialog.getByRole("button", { name: /create invoice/i })
-    : page.getByRole("button", { name: /create invoice/i }).last();
+  let hasDialog = false;
+  let isCreatePage = false;
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    hasDialog = await dialog.isVisible().catch(() => false);
+    isCreatePage = /\/billing\/account\/[a-f0-9-]+\/invoices\/create/i.test(
+      page.url(),
+    );
+    if (hasDialog || isCreatePage) break;
+    await page.waitForTimeout(300);
+  }
 
-  await expect(createInvoiceButton).toBeVisible();
-  await expect(createInvoiceButton).toBeEnabled();
-  await createInvoiceButton.click();
+  if (hasDialog) {
+    const createInvoiceButton = dialog.getByRole("button", {
+      name: /create invoice/i,
+    });
+    await expect(createInvoiceButton).toBeVisible();
+    await expect(createInvoiceButton).toBeEnabled();
+    await createInvoiceButton.click();
+  } else {
+    await expect(page).toHaveURL(
+      /\/billing\/account\/[a-f0-9-]+\/invoices\/create/i,
+    );
+    const createInvoiceButton = page
+      .getByRole("button", { name: /create invoice/i })
+      .last();
+    await expect(createInvoiceButton).toBeVisible();
+    await expect(createInvoiceButton).toBeEnabled();
+    await createInvoiceButton.click();
+  }
 
   await expect(
     page.getByRole("status").filter({
