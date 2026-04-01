@@ -1,44 +1,61 @@
 import { useQuery } from "@tanstack/react-query";
+import {
+  Copy,
+  Lock,
+  MoreVertical,
+  Pencil,
+  Search,
+  ShieldCheck,
+} from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 import Page from "@/components/Common/Page";
-import {
-  CardGridSkeleton,
-  TableSkeleton,
-} from "@/components/Common/SkeletonLoading";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
-import { useSidebar } from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
 import RoleForm from "@/pages/Admin/Roles/RoleForm";
-import { RoleRead } from "@/types/emr/role/role";
+import {
+  DEFAULT_ROLE_CONTEXTS,
+  RoleContext,
+  RoleRead,
+  getRoleContextLabelKey,
+} from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
+
+type ContextFilter = "all" | RoleContext;
+
+const CONTEXT_FILTERS: ContextFilter[] = [
+  "all",
+  RoleContext.FACILITY,
+  RoleContext.GOVT_ORG,
+  RoleContext.ROLE_ORG,
+];
 
 function RoleCard({
   role,
@@ -50,62 +67,107 @@ function RoleCard({
   onClone: (role: RoleRead) => void;
 }) {
   const { t } = useTranslation();
+  const isSystem = role.is_system;
+
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="mb-4 flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 mb-3">
-              <h3
-                className="font-medium text-gray-900 mb-2 truncate"
-                title={role.name}
-              >
-                {role.name}
-              </h3>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onClone(role)}
-                >
-                  <CareIcon icon="l-copy" className="size-4" />
-                  {t("clone")}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onEdit(role)}
-                >
-                  <CareIcon icon="l-edit" className="size-4" />
-                  {t("edit")}
-                </Button>
-              </div>
-            </div>
-            {role.description && (
-              <div className="text-sm text-gray-600 mb-3">
-                {role.description}
-              </div>
-            )}
-            <div className="flex flex-wrap gap-1">
-              {role.permissions.slice(0, 3).map((permission) => (
-                <Badge
-                  key={permission.slug}
-                  variant="secondary"
-                  className="text-xs"
-                >
-                  {permission.name}
-                </Badge>
-              ))}
-              {role.permissions.length > 3 && (
-                <Badge variant="outline" className="text-xs">
-                  +{role.permissions.length - 3} {t("more")}
-                </Badge>
+    <div
+      className={cn(
+        "relative rounded-lg border bg-white p-4 transition-all",
+        isSystem
+          ? "border-gray-100 bg-gray-50/50"
+          : "border-gray-200 hover:border-gray-300 hover:shadow-sm",
+      )}
+    >
+      {/* Header: name + actions */}
+      <div className="flex items-start gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            {isSystem && <Lock className="size-3 shrink-0 text-gray-400" />}
+            <h3
+              className={cn(
+                "truncate text-sm font-semibold",
+                isSystem ? "text-gray-600" : "text-gray-900",
               )}
-            </div>
+              title={role.name}
+            >
+              {role.name}
+            </h3>
           </div>
+
+          {role.description && (
+            <p
+              className={cn(
+                "mt-1 line-clamp-2 text-xs",
+                isSystem ? "text-gray-400" : "text-gray-500",
+              )}
+            >
+              {role.description}
+            </p>
+          )}
         </div>
-      </CardContent>
-    </Card>
+
+        <div className="flex shrink-0 items-center gap-1">
+          {isSystem && (
+            <Badge
+              variant="outline"
+              className="border-gray-200 bg-gray-100 text-[10px] text-gray-500"
+            >
+              {t("system")}
+            </Badge>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-7 text-gray-400 hover:text-gray-700"
+              >
+                <MoreVertical className="size-3.5" />
+                <span className="sr-only">{t("actions")}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {!isSystem && (
+                <DropdownMenuItem onClick={() => onEdit(role)}>
+                  <Pencil className="mr-2 size-3.5" />
+                  {t("edit")}
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem onClick={() => onClone(role)}>
+                <Copy className="mr-2 size-3.5" />
+                {t("clone")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      {/* Footer: contexts + permission count */}
+      <div className="mt-3 flex items-center justify-between gap-2 border-t border-gray-100 pt-2.5">
+        <div className="flex flex-wrap gap-1">
+          {role.contexts.map((context) => (
+            <Badge
+              key={context}
+              variant="outline"
+              className={cn(
+                "border-gray-200 text-[10px] font-normal",
+                isSystem ? "bg-gray-50 text-gray-400" : "text-gray-500",
+              )}
+            >
+              {t(getRoleContextLabelKey(context))}
+            </Badge>
+          ))}
+        </div>
+        <span
+          className={cn(
+            "shrink-0 text-[11px] tabular-nums",
+            isSystem ? "text-gray-400" : "text-gray-500",
+          )}
+        >
+          {role.permissions.length} {t("permissions").toLowerCase()}
+        </span>
+      </div>
+    </div>
   );
 }
 
@@ -115,227 +177,167 @@ export default function RolesIndex() {
     limit: 15,
     disableCache: true,
   });
-  const { open: isSidebarOpen } = useSidebar();
 
   const [selectedRole, setSelectedRole] = React.useState<RoleRead | null>(null);
-  const [mode, setMode] = React.useState<"add" | "edit" | "clone">("add");
+  const [contextFilter, setContextFilter] =
+    React.useState<ContextFilter>("all");
 
   const { data: rolesResponse, isLoading: rolesLoading } = useQuery({
-    queryKey: ["roles", qParams],
+    queryKey: ["roles", qParams, contextFilter],
     queryFn: query.debounced(roleApi.listRoles, {
       queryParams: {
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         name: qParams.search,
+        context: contextFilter === "all" ? undefined : contextFilter,
       },
     }),
   });
 
   const roles = rolesResponse?.results || [];
+  const isEditMode = selectedRole !== null && selectedRole.id !== "";
 
   const handleEdit = (role: RoleRead) => {
+    if (role.is_system) return;
     setSelectedRole(role);
-    setMode("edit");
   };
 
   const handleClone = (role: RoleRead) => {
-    // Create a new role object without the ID to trigger create mode
     setSelectedRole({
       ...role,
       id: "",
       name: `${role.name} (Copy)`,
+      is_system: false,
     });
-    setMode("clone");
-  };
-
-  const handleAdd = () => {
-    setSelectedRole(null);
-    setMode("add");
   };
 
   const handleSheetClose = () => {
     setSelectedRole(null);
-    setMode("add");
+  };
+
+  const getContextFilterLabel = (filter: ContextFilter) => {
+    if (filter === "all") return t("all");
+    return t(getRoleContextLabelKey(filter));
   };
 
   return (
-    <Page
-      title={t("roles")}
-      hideTitleOnPage
-      className={cn(
-        "w-full overflow-y-auto",
-        isSidebarOpen
-          ? "md:max-w-[calc(100vw-20rem)]"
-          : "md:max-w-[calc(100vw-5rem)]",
-      )}
-    >
-      <div className="container mx-auto">
-        <div className="mb-4">
-          <h1 className="text-2xl font-bold text-gray-700">{t("roles")}</h1>
-          <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-gray-600 text-sm">
-                {t("manage_roles_and_permissions")}
-              </p>
-            </div>
-            <Sheet
-              open={!!selectedRole}
-              onOpenChange={(open) => {
-                if (!open) {
-                  setSelectedRole(null);
-                } else {
-                  setSelectedRole({
-                    id: "",
-                    name: "",
-                    description: "",
-                    permissions: [],
-                    is_system: false,
-                  });
-                }
-              }}
-            >
-              <SheetTrigger asChild>
-                <Button onClick={handleAdd} className="w-full md:w-auto">
-                  <CareIcon icon="l-plus" />
-                  {t("add_role")}
-                </Button>
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>
-                    {mode === "edit"
-                      ? t("edit_role")
-                      : mode === "clone"
-                        ? t("clone_role")
-                        : t("add_role")}
-                  </SheetTitle>
-                </SheetHeader>
-                <div className="mt-6 overflow-auto pr-2">
-                  <RoleForm role={selectedRole} onSuccess={handleSheetClose} />
-                </div>
-              </SheetContent>
-            </Sheet>
+    <Page title={t("roles")} hideTitleOnPage>
+      <div className="space-y-4">
+        {/* Header */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">{t("roles")}</h1>
+            <p className="text-sm text-gray-500">
+              {t("manage_roles_and_permissions")}
+            </p>
           </div>
 
-          <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
-            <div className="w-full md:w-auto">
-              <div className="relative w-full md:w-auto">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                  <CareIcon icon="l-search" className="size-5" />
-                </span>
-                <Input
-                  placeholder={t("search_roles")}
-                  value={qParams.search || ""}
-                  onChange={(e) =>
-                    updateQuery({ search: e.target.value || undefined })
-                  }
-                  className="w-full md:w-[300px] pl-10"
-                />
+          <Sheet
+            open={selectedRole !== null}
+            onOpenChange={(open) => {
+              if (!open) {
+                setSelectedRole(null);
+              } else {
+                setSelectedRole({
+                  id: "",
+                  name: "",
+                  description: "",
+                  permissions: [],
+                  is_system: false,
+                  contexts: [...DEFAULT_ROLE_CONTEXTS],
+                });
+              }
+            }}
+          >
+            <SheetTrigger asChild>
+              <Button>
+                <CareIcon icon="l-plus" />
+                {t("add_role")}
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>
+                  {isEditMode ? t("edit_role") : t("add_role")}
+                </SheetTitle>
+                <SheetDescription>
+                  {isEditMode
+                    ? t("edit_role_description")
+                    : t("add_role_description")}
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-4 overflow-auto pr-2">
+                <RoleForm role={selectedRole} onSuccess={handleSheetClose} />
               </div>
-            </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+
+        {/* Search + Context Filters */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative w-full sm:max-w-sm">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
+            <Input
+              placeholder={t("search_roles")}
+              value={qParams.search || ""}
+              onChange={(e) =>
+                updateQuery({
+                  search: e.target.value || undefined,
+                  page: undefined,
+                })
+              }
+              className="pl-9"
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-1.5">
+            {CONTEXT_FILTERS.map((filter) => (
+              <button
+                key={filter}
+                type="button"
+                onClick={() => {
+                  setContextFilter(filter);
+                  updateQuery({ page: undefined });
+                }}
+                className={cn(
+                  "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                  contextFilter === filter
+                    ? "border-primary-200 bg-primary-50 text-primary-700"
+                    : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50",
+                )}
+              >
+                {getContextFilterLabel(filter)}
+              </button>
+            ))}
           </div>
         </div>
 
+        {/* Role Grid */}
         {rolesLoading ? (
-          <>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 md:hidden">
-              <CardGridSkeleton count={4} />
-            </div>
-            <div className="hidden md:block">
-              <TableSkeleton count={5} />
-            </div>
-          </>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <CardGridSkeleton count={6} />
+          </div>
         ) : roles.length === 0 ? (
           <EmptyState
-            icon={<CareIcon icon="l-user" className="text-primary size-6" />}
+            icon={<ShieldCheck className="size-6 text-primary-600" />}
             title={t("no_roles_found")}
             description={t("adjust_role_filters")}
           />
         ) : (
-          <>
-            {/* Mobile Card View */}
-            <div className="flex flex-col gap-4 md:hidden">
-              {roles.map((role: RoleRead) => (
-                <RoleCard
-                  key={role.id}
-                  role={role}
-                  onEdit={handleEdit}
-                  onClone={handleClone}
-                />
-              ))}
-            </div>
-            {/* Desktop Table View */}
-            <div className="hidden md:block">
-              <div className="rounded-lg border">
-                <Table>
-                  <TableHeader className="bg-gray-100">
-                    <TableRow>
-                      <TableHead>{t("name")}</TableHead>
-                      <TableHead>{t("description")}</TableHead>
-                      <TableHead>{t("permissions")}</TableHead>
-                      <TableHead>{t("actions")}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody className="bg-white">
-                    {roles.map((role: RoleRead) => (
-                      <TableRow key={role.id} className="divide-x">
-                        <TableCell className="font-medium max-w-48">
-                          <div className="truncate" title={role.name}>
-                            {role.name}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-gray-600 max-w-80 whitespace-normal">
-                          {role.description ? role.description : "-"}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {role.permissions.slice(0, 3).map((permission) => (
-                              <Badge
-                                key={permission.slug}
-                                variant="secondary"
-                                className="text-xs"
-                              >
-                                {permission.name}
-                              </Badge>
-                            ))}
-                            {role.permissions.length > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{role.permissions.length - 3} more
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleClone(role)}
-                            >
-                              <CareIcon icon="l-copy" className="size-4" />
-                              {t("clone")}
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleEdit(role)}
-                            >
-                              <CareIcon icon="l-edit" className="size-4" />
-                              {t("edit")}
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-          </>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {roles.map((role: RoleRead) => (
+              <RoleCard
+                key={role.id}
+                role={role}
+                onEdit={handleEdit}
+                onClone={handleClone}
+              />
+            ))}
+          </div>
         )}
 
         {rolesResponse && rolesResponse.count > resultsPerPage && (
-          <div className="mt-4 flex justify-center">
+          <div className="flex justify-center">
             <Pagination totalCount={rolesResponse.count} />
           </div>
         )}
