@@ -9,7 +9,7 @@ test.describe("Department User Management", () => {
 
   const testUsers = ["care-doctor", "care-volunteer"];
 
-  const testRoles = ["Doctor", "Staff", "Admin"];
+  const testRoles = ["Doctor", "Staff", "Facility Admin"];
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
@@ -43,6 +43,7 @@ test.describe("Department User Management", () => {
 
   async function selectRole(page: Page, role: string) {
     await page.getByRole("combobox").filter({ hasText: "Select Role" }).click();
+    await page.getByPlaceholder("Search Roles").fill(role);
     await page.getByRole("option", { name: role }).first().click();
   }
 
