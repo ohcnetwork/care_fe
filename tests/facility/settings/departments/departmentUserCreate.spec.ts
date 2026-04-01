@@ -4,7 +4,6 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-const USER_TYPES = ["Doctor", "Nurse", "Staff", "Volunteer", "Administrator"];
 const GENDERS = ["Male", "Female", "Non Binary", "Transgender"];
 const ROLES = ["Nurse", "Doctor", "Staff"];
 
@@ -35,10 +34,7 @@ test.describe("User Management in Departments", () => {
     });
 
     await test.step("Fill and submit user creation form", async () => {
-      const userType = faker.helpers.arrayElement(USER_TYPES);
       const gender = faker.helpers.arrayElement(GENDERS);
-      await page.getByRole("combobox", { name: "User Type *" }).click();
-      await page.getByRole("option", { name: userType }).click();
       await page.getByRole("textbox", { name: "First Name *" }).fill(firstName);
       await page.getByRole("textbox", { name: "Last Name *" }).fill(lastName);
       await page.getByRole("textbox", { name: "Username" }).fill(username);
@@ -95,9 +91,6 @@ test.describe("User Management in Departments", () => {
     await expect(
       page.getByRole("heading", { name: "Add New User" }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("combobox", { name: "User Type *" }),
-    ).toHaveText("Nurse");
     await expect(
       page.getByRole("radio", { name: "Set password now" }),
     ).toBeChecked();
