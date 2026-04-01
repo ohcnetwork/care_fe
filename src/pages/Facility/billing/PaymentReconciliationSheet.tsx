@@ -642,7 +642,7 @@ export function PaymentReconciliationSheet({
                         <Input {...field} value={field.value || ""} />
                       </FormControl>
                       <FormDescription className="text-gray-700 italic -mt-1.5">
-                        {!isCashPayment && t("reference_number_description")}
+                        {t("reference_number_description")}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
