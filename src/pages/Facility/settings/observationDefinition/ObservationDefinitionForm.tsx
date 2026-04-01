@@ -55,9 +55,9 @@ import {
 } from "@/types/base/qualifiedRange/qualifiedRange";
 import {
   OBSERVATION_DEFINITION_CATEGORY,
-  OBSERVATION_DEFINITION_STATUS,
   type ObservationDefinitionCreateSpec,
   type ObservationDefinitionReadSpec,
+  ObservationDefinitionStatus,
   ObservationDefinitionUpdateSpec,
   QuestionType,
 } from "@/types/emr/observationDefinition/observationDefinition";
@@ -71,10 +71,12 @@ export default function ObservationDefinitionForm({
   facilityId,
   observationSlug,
   onSuccess,
+  onCancel,
 }: {
   facilityId: string;
   observationSlug?: string;
   onSuccess?: () => void;
+  onCancel?: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -114,6 +116,7 @@ export default function ObservationDefinitionForm({
       observationSlug={observationSlug}
       existingData={existingData}
       onSuccess={onSuccess}
+      onCancel={onCancel}
     />
   );
 }
@@ -124,11 +127,14 @@ function ObservationDefinitionFormContent({
   existingData,
   onSuccess = () =>
     navigate(`/facility/${facilityId}/settings/observation_definitions`),
+  onCancel = () =>
+    navigate(`/facility/${facilityId}/settings/observation_definitions`),
 }: {
   facilityId: string;
   observationSlug?: string;
   existingData?: ObservationDefinitionReadSpec;
   onSuccess?: () => void;
+  onCancel?: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -140,7 +146,7 @@ function ObservationDefinitionFormContent({
         .min(5, t("character_count_validation", { min: 5, max: 25 }))
         .max(25, t("character_count_validation", { min: 5, max: 25 })),
       description: z.string().min(1, t("field_required")),
-      status: z.enum(OBSERVATION_DEFINITION_STATUS),
+      status: z.nativeEnum(ObservationDefinitionStatus),
       category: z.enum(
         OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]],
       ),
@@ -243,7 +249,7 @@ function ObservationDefinitionFormContent({
               })) || [],
           }
         : {
-            status: "active",
+            status: ObservationDefinitionStatus.active,
             component: [],
             body_site: null,
             method: null,
@@ -496,11 +502,13 @@ function ObservationDefinitionFormContent({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {OBSERVATION_DEFINITION_STATUS.map((status) => (
-                              <SelectItem key={status} value={status}>
-                                {t(status)}
-                              </SelectItem>
-                            ))}
+                            {Object.values(ObservationDefinitionStatus).map(
+                              (status) => (
+                                <SelectItem key={status} value={status}>
+                                  {t(status)}
+                                </SelectItem>
+                              ),
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -623,6 +631,7 @@ function ObservationDefinitionFormContent({
                 const ranges = form.getValues("qualified_ranges") || [];
                 qualifiedRangesRef.current = JSON.parse(JSON.stringify(ranges));
               }}
+              facilityId={facilityId}
             />
 
             {/* Additional Details Section */}
@@ -924,6 +933,7 @@ function ObservationDefinitionFormContent({
                                 JSON.stringify(ranges),
                               );
                             }}
+                            facilityId={facilityId}
                           />
                         </div>
                       </div>
@@ -955,15 +965,7 @@ function ObservationDefinitionFormContent({
             </div>
 
             <div className="flex justify-end space-x-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/settings/observation_definitions`,
-                  )
-                }
-              >
+              <Button type="button" variant="outline" onClick={onCancel}>
                 {t("cancel")}
               </Button>
               <Button type="submit" disabled={isPending}>
