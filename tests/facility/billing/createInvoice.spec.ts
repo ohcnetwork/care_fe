@@ -4,6 +4,38 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+async function ensureSubmitInvoiceEnabled(page: Page) {
+  const submitButton = page
+    .getByRole("button", { name: /create invoice/i })
+    .last();
+  if (await submitButton.isEnabled().catch(() => false)) return submitButton;
+
+  const definitionPicker = page
+    .getByRole("button", { name: /select charge item definition/i })
+    .first();
+  await expect(definitionPicker).toBeVisible();
+  await definitionPicker.click();
+
+  const firstOption = page.getByRole("option").first();
+  if (await firstOption.isVisible().catch(() => false)) {
+    await firstOption.click();
+  } else {
+    const commandItem = page.locator('[data-slot="command-item"]').first();
+    await expect(commandItem).toBeVisible();
+    await commandItem.click();
+  }
+
+  const confirmButton = page.getByRole("button", { name: /confirm/i }).first();
+  if (await confirmButton.isVisible().catch(() => false)) {
+    await confirmButton.click();
+  } else {
+    await page.keyboard.press("Enter");
+  }
+
+  await expect(submitButton).toBeEnabled({ timeout: 20000 });
+  return submitButton;
+}
+
 async function createInvoiceAndGetId(
   page: Page,
   facilityId: string,
@@ -19,29 +51,9 @@ async function createInvoiceAndGetId(
     .first()
     .click();
 
-  const createInvoiceButtons = page.getByRole("button", {
-    name: /create invoice/i,
-  });
-
-  let clickedEnabledButton = false;
-  for (let attempt = 0; attempt < 30; attempt += 1) {
-    const count = await createInvoiceButtons.count();
-    for (let index = 0; index < count; index += 1) {
-      const button = createInvoiceButtons.nth(index);
-      const isVisible = await button.isVisible().catch(() => false);
-      const isEnabled = await button.isEnabled().catch(() => false);
-      if (isVisible && isEnabled) {
-        await button.click();
-        clickedEnabledButton = true;
-        break;
-      }
-    }
-    if (clickedEnabledButton) break;
-    await page.waitForTimeout(300);
-  }
-
-  if (!clickedEnabledButton)
-    throw new Error("No visible and enabled 'Create Invoice' button found");
+  await page.waitForURL(/\/billing\/account\/[a-f0-9-]+\/invoices\/create/i);
+  const submitButton = await ensureSubmitInvoiceEnabled(page);
+  await submitButton.click();
 
   await expect(
     page.getByRole("status").filter({
