@@ -44,6 +44,8 @@ function PDFRenderer({ fileUrl }: { fileUrl: string }) {
               pageNumber={index + 1}
               width={Math.min(window.innerWidth * 0.9, 600)}
               scale={1.2}
+              renderTextLayer={false}
+              renderAnnotationLayer={false}
             />
           ))}
         </div>

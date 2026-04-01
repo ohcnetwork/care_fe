@@ -17,6 +17,7 @@ import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
+import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
@@ -130,7 +131,7 @@ export function PrintAllQuestionnaireResponses({
 const DetailRow = ({
   label,
   value,
-  isStrong = false,
+  isStrong = true,
 }: {
   label: string;
   value?: string | null;
@@ -138,9 +139,11 @@ const DetailRow = ({
 }) => {
   return (
     <div className="flex">
-      <span className="text-gray-600 w-20">{label}</span>
+      <span className="text-gray-600 w-32">{label}</span>
       <span className="text-gray-600">: </span>
-      <span className={`ml-1 ${isStrong ? "font-semibold" : ""}`}>
+      <span
+        className={`ml-1 whitespace-pre-wrap ${isStrong ? "font-semibold" : ""}`}
+      >
         {value || "-"}
       </span>
     </div>
@@ -171,8 +174,21 @@ export function EncounterDetails({
               ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
               : undefined
           }
-          isStrong
         />
+        {patient?.instance_identifiers
+          ?.filter(
+            ({ config }) => config.config.use === PatientIdentifierUse.official,
+          )
+          .map((identifier) => (
+            <DetailRow
+              key={identifier.config.id}
+              label={identifier.config.config.display}
+              value={identifier.value}
+            />
+          ))}
+        {patient?.address && (
+          <DetailRow label={t("address")} value={patient.address} />
+        )}
       </div>
       <div className="space-y-2">
         <DetailRow
@@ -187,8 +203,19 @@ export function EncounterDetails({
         <DetailRow
           label={t("mobile_number")}
           value={formatPhoneNumberIntl(patient.phone_number)}
-          isStrong
         />
+        {encounter?.care_team?.[0] && (
+          <DetailRow
+            label={t("consultant")}
+            value={formatName(encounter.care_team[0].member)}
+          />
+        )}
+        {encounter?.current_location && (
+          <DetailRow
+            label={t("location")}
+            value={encounter.current_location.name}
+          />
+        )}
       </div>
     </div>
   );

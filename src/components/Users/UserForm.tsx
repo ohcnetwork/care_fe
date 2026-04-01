@@ -192,7 +192,7 @@ export default function UserForm({
       prefix: "",
       suffix: "",
       password_setup_method: "immediate",
-      role_orgs: [{ organization: "", role: "" }],
+      role_orgs: [],
     },
   });
 
