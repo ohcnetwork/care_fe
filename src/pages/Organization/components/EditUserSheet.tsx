@@ -16,7 +16,10 @@ interface EditUserSheetProps {
   existingUsername: string;
   open: boolean;
   setOpen: (open: boolean) => void;
-  onUserUpdated?: (user: UserReadMinimal) => void;
+  onUserUpdated?: (
+    user: UserReadMinimal,
+    meta?: { roleOrgIds: string[] },
+  ) => void;
 }
 
 export default function EditUserSheet({
@@ -35,9 +38,9 @@ export default function EditUserSheet({
         </SheetHeader>
         <div className="mt-6">
           <UserForm
-            onSubmitSuccess={(user) => {
+            onSubmitSuccess={(user, meta) => {
               setOpen(false);
-              onUserUpdated?.(user);
+              onUserUpdated?.(user, meta);
             }}
             existingUsername={existingUsername}
           />

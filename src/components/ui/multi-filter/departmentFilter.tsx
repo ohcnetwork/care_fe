@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Building, ChevronRight, Loader2 } from "lucide-react";
+import { ChevronRight, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import useKeyboardShortcut from "use-keyboard-shortcut";
@@ -7,33 +7,43 @@ import useKeyboardShortcut from "use-keyboard-shortcut";
 import { cn } from "@/lib/utils";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 
 import query from "@/Utils/request/query";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
+import { Button } from "@/components/ui/button";
 import FilterHeader from "./filterHeader";
 import { COLOR_PALETTE, FilterConfig, FilterDateRange } from "./utils/Utils";
+
+const getColorForOrg = (id: string) => {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  }
+  return COLOR_PALETTE[hash % COLOR_PALETTE.length];
+};
 
 function TreeViewItem({
   org,
   selectedOrgs,
   onOrgToggle,
-  getColorForOrg,
   level = 0,
   facilityId,
 }: {
   org: FacilityOrganizationRead;
   selectedOrgs: FacilityOrganizationRead[];
   onOrgToggle: (org: FacilityOrganizationRead) => void;
-  getColorForOrg: (orgId: string, index: number) => string;
   level?: number;
   facilityId: string;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const { data: children } = useQuery({
+  const { data: children, isLoading: loadingChildren } = useQuery({
     queryKey: ["facilityOrganizations", facilityId, "parent", org.id],
     queryFn: query(facilityOrganizationApi.list, {
       pathParams: { facilityId },
@@ -41,41 +51,50 @@ function TreeViewItem({
         parent: org.id,
       },
     }),
-    enabled: org.has_children && expanded,
+    enabled: org.has_children && (level === 0 || expanded),
   });
 
   const isSelected = selectedOrgs.some((o) => o.id === org.id);
   const hasChildren = org.has_children;
+  const hasActiveChildren = (children?.results?.length ?? 0) > 0;
+
+  if (level === 0 && hasChildren && !loadingChildren && !hasActiveChildren) {
+    return null;
+  }
 
   return (
     <div>
       <DropdownMenuItem
         onSelect={(e) => {
           e.preventDefault();
-          if (hasChildren) {
-            setExpanded(!expanded);
-          }
           onOrgToggle(org);
         }}
         className="flex items-center gap-2 px-2 py-1 cursor-pointer"
         style={{ paddingLeft: `${level * 16 + 8}px` }}
       >
-        <div className="flex items-center gap-2 flex-1">
-          <Checkbox checked={isSelected} className="h-4 w-4" />
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <Checkbox
+            checked={isSelected}
+            className="data-[state=checked]:border-primary-700 text-white shrink-0"
+          />
           <div
-            className={cn(
-              "h-3 w-3 rounded-full shrink-0 border",
-              getColorForOrg(org.id, 0),
-            )}
+            className={cn("size-3 rounded-full border", getColorForOrg(org.id))}
           />
           <span className="text-sm truncate flex-1">{org.name}</span>
           {hasChildren && (
-            <ChevronRight
-              className={cn(
-                "h-3 w-3 transition-transform",
-                expanded && "rotate-90",
-              )}
-            />
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpanded(!expanded);
+              }}
+              className="w-12 justify-center -mr-2"
+            >
+              <ChevronRight
+                className={cn("transition-transform", expanded && "rotate-90")}
+              />
+            </Button>
           )}
         </div>
       </DropdownMenuItem>
@@ -87,7 +106,6 @@ function TreeViewItem({
               org={childOrg}
               selectedOrgs={selectedOrgs}
               onOrgToggle={onOrgToggle}
-              getColorForOrg={getColorForOrg}
               level={level + 1}
               facilityId={facilityId}
             />
@@ -112,40 +130,32 @@ function DepartmentFilterDropdown({
   const [search, setSearch] = useState("");
   const { t } = useTranslation();
 
-  // Fetch root-level organizations
+  // Fetch root-level organizations (or search all when searching)
   const { data: rootOrgs, isLoading } = useQuery({
     queryKey: ["facilityOrganizations", facilityId, "root", search],
-    queryFn: query(facilityOrganizationApi.list, {
+    queryFn: query.debounced(facilityOrganizationApi.list, {
       pathParams: { facilityId },
       queryParams: {
-        parent: "",
-        ...(search ? { name: search } : {}),
+        name: search || undefined,
+        parent: search ? undefined : "",
       },
     }),
     enabled: !!facilityId,
   });
 
-  const getColorForOrg = (orgId: string, index: number) => {
-    return COLOR_PALETTE[index % COLOR_PALETTE.length];
-  };
-
   const handleOrgToggle = (org: FacilityOrganizationRead) => {
     const isSelected = selectedOrgs.some((o) => o.id === org.id);
     if (isSelected) {
-      // Deselect if already selected
       onOrgsChange([]);
     } else {
-      // Single selection - replace any existing selection
       onOrgsChange([org]);
     }
   };
 
-  const filteredOrgs =
-    rootOrgs?.results?.filter((org) =>
-      org.name.toLowerCase().includes(search.toLowerCase()),
-    ) || [];
+  const filteredOrgs = rootOrgs?.results || [];
+  const isSearching = !!search;
 
-  // Separate orgs into selected and non-selected
+  // Non-selected orgs for the available section
   const nonSelectedOrgs = filteredOrgs.filter(
     (org) => !selectedOrgs.some((o) => o.id === org.id),
   );
@@ -173,33 +183,57 @@ function DepartmentFilterDropdown({
       </div>
       <div className="p-3 max-h-[30vh] overflow-y-auto">
         {/* Selected Departments */}
-        {selectedOrgs.length > 0 && (
-          <>
-            <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
-              {t("selected_departments")}
-            </div>
-            {selectedOrgs.map((org) => (
-              <DropdownMenuItem
-                key={org.id}
-                onSelect={(e) => {
-                  e.preventDefault();
-                  handleOrgToggle(org);
-                }}
-                className="flex items-center gap-2 px-2 py-1 cursor-pointer"
-              >
-                <Checkbox
-                  checked={true}
-                  className="data-[state=checked]:border-primary-700 text-white"
-                />
-                <div className="flex items-center gap-2 max-w-xs truncate">
-                  <Building className="h-3 w-3 text-gray-600" />
-                  <span className="text-sm truncate">{org.name}</span>
+        {(() => {
+          const filteredSelectedOrgs = selectedOrgs.filter(
+            (org) =>
+              !isSearching ||
+              org.name.toLowerCase().includes(search.toLowerCase()) ||
+              org.parent?.name.toLowerCase().includes(search.toLowerCase()),
+          );
+          return (
+            filteredSelectedOrgs.length > 0 && (
+              <>
+                <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  {t("selected_departments")}
                 </div>
-              </DropdownMenuItem>
-            ))}
-            <div className="my-2 border-t border-gray-200" />
-          </>
-        )}
+                {filteredSelectedOrgs.map((org) => (
+                  <DropdownMenuItem
+                    key={org.id}
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      handleOrgToggle(org);
+                    }}
+                    className="flex items-center gap-2 px-2 py-1 cursor-pointer"
+                  >
+                    <Checkbox
+                      checked={true}
+                      className="data-[state=checked]:border-primary-700 text-white shrink-0"
+                    />
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <div
+                        className={cn(
+                          "size-3 rounded-full shrink-0 border",
+                          getColorForOrg(org.id),
+                        )}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <span className="text-sm truncate block">
+                          {org.name}
+                        </span>
+                        {org.parent && org.parent.name && (
+                          <span className="text-xs text-gray-400 truncate block">
+                            {org.parent.name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+              </>
+            )
+          );
+        })()}
 
         {/* Available Departments */}
         {nonSelectedOrgs.length > 0 && (
@@ -207,16 +241,51 @@ function DepartmentFilterDropdown({
             <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
               {t("available_departments")}
             </div>
-            {nonSelectedOrgs.map((org) => (
-              <TreeViewItem
-                key={org.id}
-                org={org}
-                selectedOrgs={selectedOrgs}
-                onOrgToggle={handleOrgToggle}
-                getColorForOrg={getColorForOrg}
-                facilityId={facilityId}
-              />
-            ))}
+            {nonSelectedOrgs.map((org) =>
+              org.has_children && !isSearching ? (
+                <TreeViewItem
+                  key={org.id}
+                  org={org}
+                  selectedOrgs={selectedOrgs}
+                  onOrgToggle={handleOrgToggle}
+                  facilityId={facilityId}
+                />
+              ) : (
+                <DropdownMenuItem
+                  key={org.id}
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    handleOrgToggle(org);
+                  }}
+                  className="flex items-center gap-2 px-2 py-1 cursor-pointer"
+                >
+                  <Checkbox
+                    checked={selectedOrgs.some((o) => o.id === org.id)}
+                    className="data-[state=checked]:border-primary-700 text-white shrink-0"
+                  />
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div
+                      className={cn(
+                        "size-3 rounded-full shrink-0 border",
+                        getColorForOrg(org.id),
+                      )}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <span className="text-sm truncate block">{org.name}</span>
+                      {org.parent &&
+                        org.parent.name &&
+                        (isSearching ||
+                          (org.parent.org_type !== "root" &&
+                            org.parent.level_cache > 0)) && (
+                          <span className="text-xs text-gray-400 truncate block">
+                            {org.parent.name}
+                          </span>
+                        )}
+                    </div>
+                  </div>
+                </DropdownMenuItem>
+              ),
+            )}
           </>
         )}
 
@@ -283,17 +352,14 @@ export const SelectedDepartmentBadge = ({
 }: {
   selected: FacilityOrganizationRead[];
 }) => {
-  const firstColor = COLOR_PALETTE[0];
-
   if (selected.length === 0) return null;
 
   const org = selected[0];
+  const color = getColorForOrg(org.id);
 
   return (
     <div className="flex items-center gap-2 min-w-0 shrink-0">
-      <span
-        className={cn(firstColor, "rounded-full w-2 h-2 border shrink-0")}
-      />
+      <span className={cn(color, "rounded-full size-2 border shrink-0")} />
       <span className="text-sm whitespace-nowrap truncate max-w-[150px]">
         {org.name}
       </span>
