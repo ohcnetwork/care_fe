@@ -51,7 +51,6 @@ interface RoleCommandContentProps {
 }
 
 function RoleCommandContent({
-  searchTerm,
   setSearchTerm,
   rolesList,
   isFetching,
@@ -67,7 +66,6 @@ function RoleCommandContent({
     <Command>
       <CommandInput
         placeholder={t("search_roles")}
-        value={searchTerm}
         onValueChange={setSearchTerm}
         className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
         autoFocus
@@ -207,7 +205,7 @@ export function RoleSelect({
               isFetchingNextPage={isFetchingNextPage}
               value={selectedRole}
               onChange={onChange}
-              setOpen={setOpen}
+              setOpen={handleOpenChange}
               ref={ref}
             />
           </div>
@@ -228,7 +226,7 @@ export function RoleSelect({
           isFetchingNextPage={isFetchingNextPage}
           value={selectedRole}
           onChange={onChange}
-          setOpen={setOpen}
+          setOpen={handleOpenChange}
           ref={ref}
         />
       </PopoverContent>
