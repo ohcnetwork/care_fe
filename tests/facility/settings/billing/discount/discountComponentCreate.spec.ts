@@ -72,22 +72,22 @@ test.describe("Discount Component Settings", () => {
       .getByRole("button", { name: /create discount component/i })
       .click();
 
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible();
-    const discountValueInput = dialog.getByRole("spinbutton").first();
+    const sheet = page.locator('[data-slot="sheet-content"]');
+    await expect(sheet).toBeVisible();
+    const discountValueInput = sheet.getByRole("spinbutton").first();
     await expect(discountValueInput).toBeVisible();
     await discountValueInput.fill(discountValue);
 
-    await dialog.getByRole("button", { name: /save/i }).click();
+    await sheet.getByRole("button", { name: /save/i }).click();
 
-    const nameField = dialog.getByRole("textbox", { name: /name/i });
-    const nameFieldContainer = dialog
-      .locator('[data-slot="form-item"]')
-      .filter({ has: nameField });
+    const nameField = sheet.getByLabel(/^name$/i);
+    const nameFieldError = nameField
+      .locator('xpath=ancestor::div[@data-slot="form-item"][1]')
+      .locator('[data-slot="form-message"]');
+
     await expect(nameField).toHaveAttribute("aria-invalid", "true");
-    await expect(
-      nameFieldContainer.getByText(/this field is required/i),
-    ).toBeVisible();
+    await expect(nameFieldError).toBeVisible();
+    await expect(nameFieldError).toHaveText(/required/i);
   });
 
   test("create discount component and search", async ({ page }) => {
