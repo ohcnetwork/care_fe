@@ -58,7 +58,7 @@ interface RequirementsSelectorProps {
   onSearch?: (query: string) => void;
   customSelector?: React.ReactNode;
   canCreate?: boolean;
-  createForm?: (onSuccess: () => void) => React.ReactNode;
+  createForm?: (onSuccess: () => void, onCancel: () => void) => React.ReactNode;
   allowDuplicate?: boolean;
   triggerBtnClassName?: string;
 }
@@ -147,7 +147,7 @@ interface RequirementsContentProps {
   canCreate?: boolean;
   isCreateSheetOpen: boolean;
   setIsCreateSheetOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  createForm?: (onSuccess: () => void) => React.ReactNode;
+  createForm?: (onSuccess: () => void, onCancel: () => void) => React.ReactNode;
   allowDuplicate?: boolean;
   removeItem: (index: number) => void;
   addOption: (option: RequirementItem) => void;
@@ -204,7 +204,10 @@ function RequirementsContent({
               className="flex h-full w-full flex-col overflow-y-auto md:max-w-[600px] lg:max-w-[800px]"
             >
               <div className="flex-1 overflow-y-auto py-6">
-                {createForm?.(() => setIsCreateSheetOpen(false))}
+                {createForm?.(
+                  () => setIsCreateSheetOpen(false),
+                  () => setIsCreateSheetOpen(false),
+                )}
               </div>
             </SheetContent>
           </Sheet>
