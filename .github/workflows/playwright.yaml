@@ -3,7 +3,8 @@ name: Playwright Tests
 # This workflow runs Playwright E2E tests with backend integration
 # - Triggers on push to main branches and PRs
 # - Uses path filtering to skip unnecessary runs
-# - Runs tests in parallel using 3 shards
+# - Runs tests in parallel using shards
+# - Caches Docker images and Playwright browsers
 # - Provides detailed test reports as artifacts
 
 on:
@@ -50,10 +51,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Checkout 📥
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -89,24 +88,38 @@ jobs:
         shard: [1, 2, 3]
 
     steps:
-      - name: Checkout 📥
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set backend branch
         id: backend-branch
-        run: echo "branch=develop" >> $GITHUB_OUTPUT
+        run: echo "branch=develop" >> "$GITHUB_OUTPUT"
 
-      - name: Checkout care 📥
+      - name: Checkout care
         uses: actions/checkout@v4
         with:
           repository: ohcnetwork/care
           path: care
           ref: ${{ steps.backend-branch.outputs.branch }}
-          fetch-depth: 0
 
-      - name: Start care docker containers 🐳
+      - name: Cache Docker images
+        id: docker-cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/docker-cache
+          key: ${{ runner.os }}-docker-care-${{ hashFiles('care/docker/dev.Dockerfile', 'care/Pipfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-docker-care-
+
+      - name: Load cached Docker images
+        run: |
+          if [ -d /tmp/docker-cache ]; then
+            for f in /tmp/docker-cache/*.tar; do
+              docker load -i "$f" 2>/dev/null || true
+            done
+          fi
+
+      - name: Start care docker containers
         run: |
           cd care
           echo DISABLE_RATELIMIT=True >> docker/.local.env
@@ -116,6 +129,18 @@ jobs:
           cd ..
         env:
           JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
+
+      - name: Save Docker images to cache
+        if: steps.docker-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p /tmp/docker-cache
+          # Only cache images used by the CARE backend services (not base images)
+          docker compose -f care/docker-compose.local.yaml config --images 2>/dev/null | while read -r img; do
+            filename=$(echo "$img" | tr '/:' '_')
+            if [ ! -f "/tmp/docker-cache/${filename}.tar" ]; then
+              docker save -o "/tmp/docker-cache/${filename}.tar" "$img" 2>/dev/null || true
+            fi
+          done
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -139,7 +164,7 @@ jobs:
             echo "::error::Build directory not found. Cache restoration may have failed."
             exit 1
           fi
-          echo "Build directory verified ✓"
+          echo "Build directory verified"
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -153,10 +178,15 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      - name: Run setup tests (serial)
+        run: npx playwright test --project=setup --workers=1
+        env:
+          NODE_ENV: production
+          REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
+
       - name: Run Playwright tests (Shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }})
         id: test
-        run: |
-          npx playwright test --shard=${{ matrix.shard }}/${{ env.TEST_SHARDS }}
+        run: npx playwright test --project=chromium --workers=4 --shard=${{ matrix.shard }}/${{ env.TEST_SHARDS }}
         env:
           NODE_ENV: production
           REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
@@ -193,9 +223,9 @@ jobs:
         id: skipped
         run: |
           if [ "${{ needs.changes.outputs.tests }}" != "true" ]; then
-            echo "skipped=true" >> $GITHUB_OUTPUT
+            echo "skipped=true" >> "$GITHUB_OUTPUT"
           else
-            echo "skipped=false" >> $GITHUB_OUTPUT
+            echo "skipped=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Generate skipped comment
@@ -245,26 +275,26 @@ jobs:
                 SHARD_PASSED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "passed")] | length' "$dir/test-results.json")
                 SHARD_FAILED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "failed" or .results[-1].status == "timedOut" or .results[-1].status == "interrupted")] | length' "$dir/test-results.json")
                 SHARD_SKIPPED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "skipped")] | length' "$dir/test-results.json")
-                
+
                 TOTAL_TESTS=$((TOTAL_TESTS + SHARD_TOTAL))
                 PASSED_TESTS=$((PASSED_TESTS + SHARD_PASSED))
                 FAILED_TESTS=$((FAILED_TESTS + SHARD_FAILED))
                 SKIPPED_TESTS=$((SKIPPED_TESTS + SHARD_SKIPPED))
-                
+
                 echo "  Shard stats: Total=$SHARD_TOTAL, Passed=$SHARD_PASSED, Failed=$SHARD_FAILED, Skipped=$SHARD_SKIPPED"
               fi
             fi
           done
 
-          echo "total=$TOTAL_TESTS" >> $GITHUB_OUTPUT
-          echo "passed=$PASSED_TESTS" >> $GITHUB_OUTPUT
-          echo "failed=$FAILED_TESTS" >> $GITHUB_OUTPUT
-          echo "skipped=$SKIPPED_TESTS" >> $GITHUB_OUTPUT
+          echo "total=$TOTAL_TESTS" >> "$GITHUB_OUTPUT"
+          echo "passed=$PASSED_TESTS" >> "$GITHUB_OUTPUT"
+          echo "failed=$FAILED_TESTS" >> "$GITHUB_OUTPUT"
+          echo "skipped=$SKIPPED_TESTS" >> "$GITHUB_OUTPUT"
 
           if [ $FAILED_TESTS -gt 0 ]; then
-            echo "status=❌ Failed" >> $GITHUB_OUTPUT
+            echo "status=❌ Failed" >> "$GITHUB_OUTPUT"
           else
-            echo "status=✅ Passed" >> $GITHUB_OUTPUT
+            echo "status=✅ Passed" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Upload final report
