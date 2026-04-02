@@ -287,7 +287,6 @@ interface ResourceCategoryListProps<
   children?: React.ReactNode;
   itemSearchConfig?: ItemSearchConfig<T>;
   emptyStateTitle?: string;
-  emptyStateDescription?: string;
 }
 
 export function ResourceCategoryList<
@@ -307,7 +306,6 @@ export function ResourceCategoryList<
   children,
   itemSearchConfig,
   emptyStateTitle,
-  emptyStateDescription,
 }: ResourceCategoryListProps<T>) {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
@@ -485,7 +483,7 @@ export function ResourceCategoryList<
           description={
             qParams.searchCategory
               ? t("try_different_search_terms")
-              : (emptyStateDescription ?? t("create_your_first_category"))
+              : t("create_your_first_category")
           }
         />
       ) : (
