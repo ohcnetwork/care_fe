@@ -102,9 +102,15 @@ export default function CreateEncounterForm({
       tags: z.array(z.string()),
     })
     .refine(
-      (data) =>
-        data.status !== EncounterStatus.PLANNED &&
-        new Date(data.start_date) <= new Date(),
+      (data) => {
+        if (
+          data.status !== EncounterStatus.PLANNED &&
+          new Date(data.start_date) > new Date()
+        ) {
+          return false;
+        }
+        return true;
+      },
       {
         message: t("encounter_future_date_restriction"),
         path: ["start_date"],
@@ -275,7 +281,7 @@ export default function CreateEncounterForm({
                               <div className="text-sm font-bold">
                                 {t(`encounter_class__${value}`)}
                               </div>
-                              <div className="whitespace-normal break-words text-center text-xs text-gray-500">
+                              <div className="whitespace-normal wrap-break-word text-center text-xs text-gray-500">
                                 {t(`encounter_class_description__${value}`)}
                               </div>
                             </div>
