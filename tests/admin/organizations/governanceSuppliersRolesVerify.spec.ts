@@ -209,7 +209,9 @@ test.describe("Admin organization lists", () => {
     await expect(treePanel.locator("div.space-y-1").first()).toBeVisible();
 
     // Chevron expand only exists when API reports has_children (see AdminOrganizationNavbar).
-    const expandButtons = treePanel.locator("button:has(svg)");
+    const expandButtons = treePanel
+      .getByRole("button")
+      .filter({ has: treePanel.locator("svg") });
     if ((await expandButtons.count()) === 0) {
       test.skip(
         true,
