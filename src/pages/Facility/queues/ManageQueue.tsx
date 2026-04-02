@@ -135,7 +135,6 @@ export function ManageQueuePage({
               }
               size="icon"
               variant="ghost"
-              aria-label={t("back")}
             >
               <ChevronLeft />
             </BackButton>

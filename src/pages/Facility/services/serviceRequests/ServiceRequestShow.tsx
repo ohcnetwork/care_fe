@@ -562,7 +562,7 @@ export default function ServiceRequestShow({
                   variant="ghost"
                   size="icon"
                   onClick={() => setSelectedSpecimenDefinition(null)}
-                  aria-label={t("back")}
+                  aria-label={t("cancel_collection")}
                 >
                   <CareIcon icon="l-arrow-left" className="size-4" />
                 </Button>

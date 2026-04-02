@@ -1,4 +1,5 @@
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
@@ -14,6 +15,7 @@ export default function BackButton({
   fallbackUrl,
   ...props
 }: BackButtonProps) {
+  const { t } = useTranslation();
   const { history } = useAppHistory();
 
   to ??= history[1] ?? fallbackUrl;
@@ -23,7 +25,13 @@ export default function BackButton({
   }
 
   return (
-    <Button variant="outline" data-shortcut-id="go-back" asChild {...props}>
+    <Button
+      variant="outline"
+      data-shortcut-id="go-back"
+      asChild
+      aria-label={t("back")}
+      {...props}
+    >
       <Link basePath="/" href={to}>
         {props.children}
       </Link>

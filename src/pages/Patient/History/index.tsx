@@ -106,7 +106,7 @@ export function ClinicalHistoryPage({
               variant="outline"
               onClick={handleClose}
               size="icon"
-              aria-label={t("back")}
+              aria-label={sourceUrl ? t("back_to_encounter") : t("back_to_patient")}
             >
               <ArrowLeftIcon />
             </Button>

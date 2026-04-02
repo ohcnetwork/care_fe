@@ -207,7 +207,7 @@ export default function AppointmentDetail(props: Props) {
     <Page title={t("appointment_details")} hideTitleOnPage>
       <div className="container mx-auto max-w-7xl mt-4">
         <div className="flex gap-2 items-center mb-2">
-          <BackButton size="icon" variant="ghost" aria-label={t("back")}>
+          <BackButton size="icon" variant="ghost">
             <ChevronLeft />
           </BackButton>
           <h4 className="font-semibold text-gray-800">
