@@ -51,9 +51,8 @@ function adminOrgDetailUrlRegex(type: OrganizationType) {
 }
 
 async function gotoOrgTypeList(page: Page, type: OrganizationType) {
-  await page.goto(`/admin/organizations/${type}`, {
-    waitUntil: "networkidle",
-  });
+  await page.goto(`/admin/organizations/${type}`);
+  await expect(searchInput(page, type)).toBeVisible();
 }
 
 async function clickAndWaitForUrl(
@@ -61,10 +60,8 @@ async function clickAndWaitForUrl(
   urlPattern: RegExp,
   clickAction: () => Promise<void>,
 ) {
-  await Promise.all([
-    page.waitForURL(urlPattern, { waitUntil: "networkidle" }),
-    clickAction(),
-  ]);
+  await Promise.all([page.waitForURL(urlPattern), clickAction()]);
+  await expect(firstResizablePanel(page)).toBeVisible();
 }
 
 function seeDetailsLinkInCard(card: Locator) {
@@ -167,7 +164,15 @@ test.describe("Admin organization lists", () => {
       await expect(
         page.getByText(firstOrgName, { exact: true }).first(),
       ).toBeVisible();
-      expect(await govtOrgCards(page).count()).toBeLessThan(initialCount);
+      const filteredCards = govtOrgCards(page);
+      const filteredCount = await filteredCards.count();
+      expect(filteredCount).toBeGreaterThan(0);
+      for (let i = 0; i < filteredCount; i += 1) {
+        const headingText = (
+          await filteredCards.nth(i).getByRole("heading").first().innerText()
+        ).trim();
+        expect(headingText.toLowerCase()).toContain(firstOrgName.toLowerCase());
+      }
       await input.clear();
       await expect(govtOrgCards(page).first()).toBeVisible();
       return;
