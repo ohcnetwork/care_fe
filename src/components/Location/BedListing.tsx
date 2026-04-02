@@ -47,8 +47,11 @@ export function BedListing({
         const isSelected = selectedBed?.id === bed.id;
         const isClickable = isAvailable || isDischargedBed;
         const segments = buildLocationPath(bed);
-        const fullPath = segments.join(" › ");
-        const shortPath = segments.slice(-2).join(" › ");
+        const fullPath = segments.map((s) => s.name).join(" › ");
+        const shortPath = segments
+          .map((s) => s.name)
+          .slice(-2)
+          .join(" › ");
 
         return (
           <div
