@@ -23,7 +23,7 @@ import UserSelector from "@/components/Common/UserSelector";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import { RoleBase } from "@/types/emr/role/role";
+import { RoleBase, RoleContext } from "@/types/emr/role/role";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 import { UserReadMinimal } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
@@ -198,7 +198,11 @@ export default function LinkFacilityUserSheet({
                   {t("select_role")}
                 </label>
                 <div>
-                  <RoleSelect value={selectedRole} onChange={setSelectedRole} />
+                  <RoleSelect
+                    value={selectedRole}
+                    onChange={setSelectedRole}
+                    context={RoleContext.FACILITY}
+                  />
                 </div>
               </div>
 

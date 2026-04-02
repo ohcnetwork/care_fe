@@ -137,7 +137,7 @@ export function LocationNavigation({
           onLocationClick={(location) => onLocationClick(location)}
         />
 
-        {selectedLocation && (
+        {(selectedLocation || searchTerm.trim() !== "") && (
           <div className="space-y-2 mt-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold mt-2">{t("beds")}</h2>
@@ -168,6 +168,7 @@ export function LocationNavigation({
               selectedBed={selectedBed}
               onBedSelect={onBedSelect}
               onCheckStatus={onCheckBedStatus}
+              showParent={!selectedLocation && searchTerm.trim() !== ""}
             />
           </div>
         )}

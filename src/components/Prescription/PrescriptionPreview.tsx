@@ -14,8 +14,9 @@ import PrintTable from "@/components/Common/PrintTable";
 import {
   formatDosage,
   formatDuration,
-  formatFrequency,
+  formatFrequencyWithInstructions,
   formatSig,
+  joinInstructionTexts,
 } from "@/components/Medicine/utils";
 
 import query from "@/Utils/request/query";
@@ -63,20 +64,19 @@ const PrescriptionContent = ({
               { key: "instructions" },
             ]}
             rows={medications?.map((medication) => {
-              const instruction = medication.dosage_instruction[0];
-              const remarks = formatSig(instruction);
-              const notes = medication.note;
-              const freqText = formatFrequency(instruction);
-              const additionalInstr =
-                instruction?.additional_instruction?.[0]?.display;
+              const instructions = medication.dosage_instruction;
               return {
                 medicine: displayMedicationName(medication),
                 status: t(`medication_status_${medication.status}`),
-                dosage: formatDosage(instruction),
-                frequency:
-                  [freqText, additionalInstr].filter(Boolean).join(", ") || "-",
-                duration: formatDuration(instruction) || "-",
-                instructions: [remarks, notes].filter(Boolean).join("\n"),
+                dosage: joinInstructionTexts(instructions, formatDosage),
+                frequency: joinInstructionTexts(
+                  instructions,
+                  formatFrequencyWithInstructions,
+                ),
+                duration: joinInstructionTexts(instructions, formatDuration),
+                instructions: joinInstructionTexts(instructions, (di) =>
+                  [formatSig(di), medication.note].filter(Boolean).join("\n"),
+                ),
               };
             })}
             className="text-sm break-all font-semibold whitespace-break-spaces text-gray-950"

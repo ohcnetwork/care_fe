@@ -21,7 +21,7 @@ test.describe("Encounter Drawing Management", () => {
 
   async function navigateToEncounterDrawings(page: Page) {
     // Open the first available encounter
-    await page.getByRole("button", { name: "View Encounter" }).first().click();
+    await page.getByText("View Encounter").first().click();
 
     // Navigate to Files tab and then Drawings tab
     await page.getByRole("tab", { name: "Files" }).click();

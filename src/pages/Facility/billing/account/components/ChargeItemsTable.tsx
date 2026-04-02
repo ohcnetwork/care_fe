@@ -109,11 +109,13 @@ export interface ChargeItemsTableProps {
   facilityId: string;
   accountId: string;
   patientId: string;
+  canAddChargeItems?: boolean;
 }
 export function ChargeItemsTable({
   facilityId,
   accountId,
   patientId,
+  canAddChargeItems = true,
 }: ChargeItemsTableProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -359,23 +361,27 @@ export function ChargeItemsTable({
             {t("print_charge_items")}
             <ShortcutBadge actionId="print-button" />
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => setIsQuickAddOpen(true)}
-            className="w-full sm:w-auto bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 hover:border-amber-300 hover:from-amber-100 hover:to-orange-100"
-          >
-            <Zap className="size-4 mr-2 text-amber-500" />
-            {t("quick_add")}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => setIsAddChargeItemsOpen(true)}
-            className="w-full sm:w-auto"
-          >
-            <PlusIcon className="size-4 mr-2" />
-            {t("add_charge_items")}
-            <ShortcutBadge actionId="add-charge-item" />
-          </Button>
+          {canAddChargeItems && (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => setIsQuickAddOpen(true)}
+                className="w-full sm:w-auto bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 hover:border-amber-300 hover:from-amber-100 hover:to-orange-100"
+              >
+                <Zap className="size-4 mr-2 text-amber-500" />
+                {t("quick_add")}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setIsAddChargeItemsOpen(true)}
+                className="w-full sm:w-auto"
+              >
+                <PlusIcon className="size-4 mr-2" />
+                {t("add_charge_items")}
+                <ShortcutBadge actionId="add-charge-item" />
+              </Button>
+            </>
+          )}
         </div>
       </div>
       <div className="mb-4">

@@ -59,7 +59,8 @@ function TreeViewItem({
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
-  const { data: children } = useQuery({
+  const isRootLevel = tag.has_children;
+  const { data: children, isLoading: loadingChildren } = useQuery({
     queryKey: ["tags", resource, "parent", tag.id],
     queryFn: query(tagConfigApi.list, {
       queryParams: {
@@ -69,15 +70,19 @@ function TreeViewItem({
         facility: facilityId,
       },
     }),
-    enabled: tag.has_children && expanded,
+    enabled: tag.has_children && (level === 0 || expanded),
   });
 
   const isSelected = selectedTags.some((t) => t.id === tag.id);
-  const isRootLevel = tag.has_children;
+  const hasActiveChildren = (children?.results?.length ?? 0) > 0;
   const allChildrenSelected =
     children?.results?.every((childTag: TagConfig) =>
       selectedTags.some((t) => t.id === childTag.id),
     ) ?? false;
+
+  if (isRootLevel && !loadingChildren && !hasActiveChildren) {
+    return null;
+  }
 
   return (
     <div>
@@ -173,14 +178,14 @@ function TagFilterDropdown({
 
   // Fetch root-level tags
   const { data: rootTags, isLoading } = useQuery({
-    queryKey: ["tags", resource, search],
-    queryFn: query(tagConfigApi.list, {
+    queryKey: ["tags", resource, search, facilityId],
+    queryFn: query.debounced(tagConfigApi.list, {
       queryParams: {
         resource,
-        parent_is_null: true,
         status: "active",
-        ...(facilityId ? { facility: facilityId } : {}),
-        ...(search ? { search } : {}),
+        facility: facilityId,
+        display: search || undefined,
+        parent_is_null: search ? undefined : true,
       },
     }),
     enabled: true,
@@ -199,15 +204,13 @@ function TagFilterDropdown({
     }
   };
 
-  const filteredTags =
-    rootTags?.results?.filter((tag) =>
-      tag.display.toLowerCase().includes(search.toLowerCase()),
-    ) || [];
+  const filteredTags = rootTags?.results || [];
+  const isSearching = !!search;
 
   // Separate tags into groups
   const rootLevelGroupTags = filteredTags.filter((tag) => tag.has_children);
   const nonSelectedRootLevelTags = filteredTags.filter(
-    (tag) => !tag.has_children && !selectedTags.some((t) => t.id === tag.id),
+    (tag) => !selectedTags.some((t) => t.id === tag.id) && !tag.has_children,
   );
 
   const [hasOpenSubmenu, setHasOpenSubmenu] = useState(false);
@@ -237,57 +240,67 @@ function TagFilterDropdown({
       </div>
       <div className="p-3 max-h-[30vh] overflow-y-auto">
         {/* Selected Tags */}
-        {selectedTags.length > 0 && (
-          <>
-            <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
-              {t("selected_tags")}
-            </div>
-            {selectedTags.map((tag, index) => (
-              <DropdownMenuItem
-                key={tag.id}
-                onSelect={(e) => {
-                  e.preventDefault();
-                  handleTagToggle(tag);
-                }}
-                className="flex items-center gap-2 px-2 py-1 cursor-pointer"
-              >
-                <Checkbox
-                  checked={true}
-                  className="data-[state=checked]:border-primary-700 text-white"
-                />
-                <div className="flex items-center gap-2 max-w-xs truncate">
-                  {tag.parent && (
-                    <Component
-                      className="h-3 w-3 text-black/80"
-                      strokeWidth={1.25}
-                    />
-                  )}
-                  <span className="text-sm flex flex-row items-center gap-1 min-w-0">
-                    {tag.parent && (
-                      <span className="flex gap-1 items-center shrink-0">
-                        <span className="text-gray-700 truncate">
-                          {tag.parent.display}
-                        </span>
-                        <ChevronRight className="h-3 w-3 shrink-0" />
-                      </span>
-                    )}
-                    <div
-                      className={cn(
-                        "h-3 w-3 rounded-full shrink-0 border",
-                        getColorForTag(tag.id, index),
-                      )}
-                    />
-                    <span className="truncate">{tag.display}</span>
-                  </span>
+        {(() => {
+          const filteredSelectedTags = selectedTags.filter(
+            (tag) =>
+              !isSearching ||
+              tag.display.toLowerCase().includes(search.toLowerCase()) ||
+              tag.parent?.display.toLowerCase().includes(search.toLowerCase()),
+          );
+          return (
+            filteredSelectedTags.length > 0 && (
+              <>
+                <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  {t("selected_tags")}
                 </div>
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-          </>
-        )}
+                {filteredSelectedTags.map((tag, index) => (
+                  <DropdownMenuItem
+                    key={tag.id}
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      handleTagToggle(tag);
+                    }}
+                    className="flex items-center gap-2 px-2 py-1 cursor-pointer"
+                  >
+                    <Checkbox
+                      checked={true}
+                      className="data-[state=checked]:border-primary-700 text-white"
+                    />
+                    <div className="flex items-center gap-2 max-w-xs truncate">
+                      {tag.parent && (
+                        <Component
+                          className="h-3 w-3 text-black/80"
+                          strokeWidth={1.25}
+                        />
+                      )}
+                      <span className="text-sm flex flex-row items-center gap-1 min-w-0">
+                        {tag.parent && (
+                          <span className="flex gap-1 items-center shrink-0">
+                            <span className="text-gray-700 truncate">
+                              {tag.parent.display}
+                            </span>
+                            <ChevronRight className="h-3 w-3 shrink-0" />
+                          </span>
+                        )}
+                        <div
+                          className={cn(
+                            "h-3 w-3 rounded-full shrink-0 border",
+                            getColorForTag(tag.id, index),
+                          )}
+                        />
+                        <span className="truncate">{tag.display}</span>
+                      </span>
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+              </>
+            )
+          );
+        })()}
 
         {/* Groups */}
-        {rootLevelGroupTags.length > 0 && (
+        {rootLevelGroupTags.length > 0 && !isSearching && (
           <>
             <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
               {t("tag_groups")}
@@ -347,7 +360,17 @@ function TagFilterDropdown({
                       getColorForTag(tag.id, index),
                     )}
                   />
-                  <span className="text-sm truncate">{tag.display}</span>
+                  <span className="text-sm flex flex-row items-center gap-1 min-w-0 truncate">
+                    {tag.parent && (
+                      <>
+                        <span className="text-gray-400 shrink-0">
+                          {tag.parent.display}
+                        </span>
+                        <ChevronRight className="size-4 shrink-0" />
+                      </>
+                    )}
+                    <span className="truncate">{tag.display}</span>
+                  </span>
                 </div>
               </DropdownMenuItem>
             ))}
@@ -390,13 +413,13 @@ function GroupSubmenu({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { data: children, isLoading: loadingChildren } = useQuery({
-    queryKey: ["tags", resource, "parent", group.id],
+    queryKey: ["tags", resource, "parent", group.id, facilityId],
     queryFn: query(tagConfigApi.list, {
       queryParams: {
         resource,
         parent: group.id,
         status: "active",
-        ...(facilityId ? { facility: facilityId } : {}),
+        facility: facilityId,
       },
     }),
     enabled: true,
@@ -412,10 +435,15 @@ function GroupSubmenu({
     }
   }, [open, onSubMenuOpen]);
 
+  const hasActiveChildren = (children?.results?.length ?? 0) > 0;
   const allChildrenSelected =
     children?.results?.every((childTag: TagConfig) =>
       selectedTags.some((t) => t.id === childTag.id),
     ) ?? false;
+
+  if (!loadingChildren && !hasActiveChildren) {
+    return null;
+  }
 
   return (
     <DropdownMenuSub
