@@ -16,48 +16,42 @@ test.describe("Discount Component Settings", () => {
     await page.goto(
       `/facility/${facilityId}/settings/billing/discount_configuration`,
     );
+    await page.waitForLoadState("networkidle");
 
     // Enter edit mode
     const editButton = page.getByRole("button", { name: /edit/i });
-    await expect(editButton).toBeVisible({ timeout: 15000 });
+    await expect(editButton).toBeVisible();
     await editButton.click();
 
     const maxApplicableInput = page.getByLabel(/maximum applicable discounts/i);
-    await expect(maxApplicableInput).toBeVisible({ timeout: 15000 });
+    await expect(maxApplicableInput).toBeVisible();
     await maxApplicableInput.fill("0"); // 0 = no limit
 
     const applicabilityOrderTrigger = page.getByLabel(/applicability order/i);
-    await expect(applicabilityOrderTrigger).toBeVisible({ timeout: 15000 });
+    await expect(applicabilityOrderTrigger).toBeVisible();
     await applicabilityOrderTrigger.click();
 
     const totalDescOption = page.getByRole("option", {
       name: /highest value first/i,
     });
-    await expect(totalDescOption).toBeVisible({ timeout: 15000 });
+    await expect(totalDescOption).toBeVisible();
     await totalDescOption.click();
 
     const saveButton = page.getByRole("button", { name: /save/i });
-    await expect(saveButton).toBeVisible({ timeout: 15000 });
+    await expect(saveButton).toBeVisible();
     await saveButton.click();
+
+    await page.waitForLoadState("networkidle");
 
     await expect(
       page.getByText(/discount configuration saved successfully/i),
     ).toBeVisible();
   }
 
-  test.beforeAll(async ({ browser }) => {
+  test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
-    const context = await browser.newContext({
-      storageState: "tests/.auth/user.json",
-    });
-    const page = await context.newPage();
-
     await ensureDiscountConfiguration(page);
 
-    await context.close();
-  });
-
-  test.beforeEach(async ({ page }) => {
     componentName = faker.commerce.productName();
     discountValue = faker.number.int({ min: 1, max: 100 }).toString();
     conditionMin = faker.number.int({ min: 50, max: 80 }).toString();
@@ -66,6 +60,7 @@ test.describe("Discount Component Settings", () => {
     await page.goto(
       `/facility/${facilityId}/settings/billing/discount_components`,
     );
+    await page.waitForLoadState("networkidle");
 
     await expect(
       page.getByRole("button", { name: /create discount component/i }),
@@ -78,15 +73,19 @@ test.describe("Discount Component Settings", () => {
       .click();
 
     const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible({ timeout: 15000 });
+    await expect(dialog).toBeVisible();
     const discountValueInput = dialog.getByRole("spinbutton").first();
-    await expect(discountValueInput).toBeVisible({ timeout: 15000 });
+    await expect(discountValueInput).toBeVisible();
     await discountValueInput.fill(discountValue);
 
-    const saveButton = page.getByRole("button", { name: /save/i });
-    await saveButton.click();
+    await dialog.getByRole("button", { name: /save/i }).click();
 
-    await expect(page.getByText(/this field is required/i)).toBeVisible();
+    const nameField = dialog.getByRole("textbox", { name: /name/i });
+    const nameFieldContainer = page.locator("div").filter({ has: nameField });
+    await expect(nameField).toHaveAttribute("aria-invalid", "true");
+    await expect(
+      nameFieldContainer.getByText(/this field is required/i),
+    ).toBeVisible();
   });
 
   test("create discount component and search", async ({ page }) => {
@@ -95,14 +94,14 @@ test.describe("Discount Component Settings", () => {
       .click();
 
     const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible({ timeout: 15000 });
+    await expect(dialog).toBeVisible();
     await dialog.getByRole("textbox", { name: /name/i }).fill(componentName);
 
     const discountValueInput = dialog.getByRole("spinbutton").first();
-    await expect(discountValueInput).toBeVisible({ timeout: 15000 });
+    await expect(discountValueInput).toBeVisible();
     await discountValueInput.fill(discountValue);
 
-    await page.getByRole("button", { name: /save/i }).click();
+    await dialog.getByRole("button", { name: /save/i }).click();
 
     await expect(page.getByText(/discount component created/i)).toBeVisible();
 
@@ -128,31 +127,31 @@ test.describe("Discount Component Settings", () => {
       .click();
 
     const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible({ timeout: 15000 });
+    await expect(dialog).toBeVisible();
     await dialog
       .getByRole("textbox", { name: /name/i })
       .fill(`${componentName} with condition`);
 
     const discountValueInput = dialog.getByRole("spinbutton").first();
-    await expect(discountValueInput).toBeVisible({ timeout: 15000 });
+    await expect(discountValueInput).toBeVisible();
     await discountValueInput.fill(discountValue);
 
-    await page.getByRole("button", { name: /add condition/i }).click();
+    await dialog.getByRole("button", { name: /add condition/i }).click();
 
-    await page
+    await dialog
       .getByRole("combobox")
       .filter({ hasText: /^Metric|Encounter/ })
       .click();
     await page.getByRole("option", { name: "Patient Age" }).click();
 
-    await page.getByRole("combobox").filter({ hasText: "In range" }).click();
+    await dialog.getByRole("combobox").filter({ hasText: "In range" }).click();
     await page.getByRole("option", { name: "In range" }).click();
 
-    await page.getByPlaceholder("Min").fill(conditionMin);
-    await page.getByPlaceholder("Max").fill(conditionMax);
-    await page.getByRole("button", { name: /^add$/i }).click();
+    await dialog.getByPlaceholder("Min").fill(conditionMin);
+    await dialog.getByPlaceholder("Max").fill(conditionMax);
+    await dialog.getByRole("button", { name: /^add$/i }).click();
 
-    await page.getByRole("button", { name: /save/i }).click();
+    await dialog.getByRole("button", { name: /save/i }).click();
 
     await expect(page.getByText(/discount component created/i)).toBeVisible();
 
