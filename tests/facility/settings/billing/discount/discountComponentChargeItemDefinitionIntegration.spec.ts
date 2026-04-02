@@ -24,49 +24,43 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     await page.goto(
       `/facility/${facilityId}/settings/billing/discount_configuration`,
     );
+    await page.waitForLoadState("networkidle");
 
     // Enter edit mode
     const editButton = page.getByRole("button", { name: /edit/i });
-    await expect(editButton).toBeVisible({ timeout: 15000 });
+    await expect(editButton).toBeVisible();
     await editButton.click();
 
     // Set a simple, valid configuration using the real labels
     const maxApplicableInput = page.getByLabel(/maximum applicable discounts/i);
-    await expect(maxApplicableInput).toBeVisible({ timeout: 15000 });
+    await expect(maxApplicableInput).toBeVisible();
     await maxApplicableInput.fill("0"); // 0 = no limit
 
     const applicabilityOrderTrigger = page.getByLabel(/applicability order/i);
-    await expect(applicabilityOrderTrigger).toBeVisible({ timeout: 15000 });
+    await expect(applicabilityOrderTrigger).toBeVisible();
     await applicabilityOrderTrigger.click();
 
     const totalDescOption = page.getByRole("option", {
       name: /highest value first/i,
     });
-    await expect(totalDescOption).toBeVisible({ timeout: 15000 });
+    await expect(totalDescOption).toBeVisible();
     await totalDescOption.click();
 
     const saveButton = page.getByRole("button", { name: /save/i });
-    await expect(saveButton).toBeVisible({ timeout: 15000 });
+    await expect(saveButton).toBeVisible();
     await saveButton.click();
+
+    await page.waitForLoadState("networkidle");
 
     await expect(
       page.getByText(/discount configuration saved successfully/i),
     ).toBeVisible();
   }
 
-  test.beforeAll(async ({ browser }) => {
+  test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
-    const context = await browser.newContext({
-      storageState: "tests/.auth/user.json",
-    });
-    const page = await context.newPage();
-
     await ensureDiscountConfiguration(page);
 
-    await context.close();
-  });
-
-  test.beforeEach(async ({ page }) => {
     categoryName = faker.helpers.arrayElement([...CHARGE_ITEM_CATEGORY_NAMES]);
 
     const discountName = faker.commerce.productName();
@@ -82,6 +76,7 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     await page.goto(
       `/facility/${facilityId}/settings/billing/discount_components`,
     );
+    await page.waitForLoadState("networkidle");
 
     await expect(
       page.getByRole("button", { name: /create discount component/i }),
@@ -99,33 +94,36 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
       .click();
 
     const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible({ timeout: 15000 });
+    await expect(dialog).toBeVisible();
     await dialog
       .getByRole("textbox", { name: /name/i })
       .fill(discountComponentName);
 
     const discountValueInput = dialog.getByRole("spinbutton").first();
-    await expect(discountValueInput).toBeVisible({ timeout: 15000 });
+    await expect(discountValueInput).toBeVisible();
     await discountValueInput.fill("10");
 
     if (withCondition) {
-      await page.getByRole("button", { name: /add condition/i }).click();
+      await dialog.getByRole("button", { name: /add condition/i }).click();
 
-      await page
+      await dialog
         .getByRole("combobox")
         .filter({ hasText: /^Metric|Encounter/ })
         .click();
       await page.getByRole("option", { name: "Patient Age" }).click();
 
-      await page.getByRole("combobox").filter({ hasText: "In range" }).click();
+      await dialog
+        .getByRole("combobox")
+        .filter({ hasText: "In range" })
+        .click();
       await page.getByRole("option", { name: "In range" }).click();
 
-      await page.getByPlaceholder("Min").fill("60");
-      await page.getByPlaceholder("Max").fill("120");
-      await page.getByRole("button", { name: /^add$/i }).click();
+      await dialog.getByPlaceholder("Min").fill("60");
+      await dialog.getByPlaceholder("Max").fill("120");
+      await dialog.getByRole("button", { name: /^add$/i }).click();
     }
 
-    await page.getByRole("button", { name: /save/i }).click();
+    await dialog.getByRole("button", { name: /save/i }).click();
 
     await expect(page.getByText(/discount component created/i)).toBeVisible();
   }
@@ -156,22 +154,22 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
 
     await expect(
       page.getByPlaceholder(/search for discount code/i),
-    ).toBeVisible({ timeout: 15000 });
+    ).toBeVisible();
   }
 
   async function selectDiscountByName(page: Page) {
     const searchInput = page.getByPlaceholder(/search for discount code/i);
-    await expect(searchInput).toBeVisible({ timeout: 15000 });
+    await expect(searchInput).toBeVisible();
     await searchInput.fill("");
 
     const scope = page
       .locator("[role='dialog'], [data-radix-popper-content-wrapper]")
       .filter({ has: searchInput })
       .last();
-    await expect(scope).toBeVisible({ timeout: 15000 });
+    await expect(scope).toBeVisible();
 
     const discountCheckbox = scope.getByRole("checkbox").first();
-    await expect(discountCheckbox).toBeVisible({ timeout: 15000 });
+    await expect(discountCheckbox).toBeVisible();
 
     const discountRowText = await discountCheckbox
       .locator("xpath=ancestor::div[1]")
@@ -191,7 +189,7 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     await navigateToChargeItemCategory(page);
     await expect(
       page.getByRole("button", { name: /add definition/i }),
-    ).toBeVisible({ timeout: 15000 });
+    ).toBeVisible();
 
     await openCreateChargeItemDefinition(page);
 
@@ -246,7 +244,7 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     await navigateToChargeItemCategory(page);
     await expect(
       page.getByRole("button", { name: /add definition/i }),
-    ).toBeVisible({ timeout: 15000 });
+    ).toBeVisible();
 
     await openCreateChargeItemDefinition(page);
 
