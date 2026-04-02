@@ -152,7 +152,6 @@ export const PractitionerSelector = ({
     queryFn: query(scheduleApi.appointments.availableUsers, {
       pathParams: { facilityId },
       queryParams: {
-        limit: 10,
         ...(showAllOrgs
           ? {}
           : {
