@@ -59,6 +59,7 @@ interface AddMultipleChargeItemsSheetProps {
   onChargeItemsAdded: () => void;
   disabled?: boolean;
   resourceSubType?: ResourceCategorySubType;
+  accountId: string;
 }
 
 interface ApplyChargeItemDefinitionRequestWithObject extends ApplyChargeItemDefinitionRequest {
@@ -77,6 +78,7 @@ export default function AddMultipleChargeItemsSheet({
   onChargeItemsAdded,
   disabled,
   resourceSubType,
+  accountId,
 }: AddMultipleChargeItemsSheetProps) {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
@@ -171,7 +173,7 @@ export default function AddMultipleChargeItemsSheet({
           charge_item_definition_object: _discard,
           performer_actor_object: _discardPerformer,
           ...charge_item
-        }) => charge_item,
+        }) => ({ ...charge_item, account: accountId }),
       ),
     });
   };
