@@ -81,7 +81,9 @@ test.describe("Discount Component Settings", () => {
     await dialog.getByRole("button", { name: /save/i }).click();
 
     const nameField = dialog.getByRole("textbox", { name: /name/i });
-    const nameFieldContainer = page.locator("div").filter({ has: nameField });
+    const nameFieldContainer = dialog
+      .locator('[data-slot="form-item"]')
+      .filter({ has: nameField });
     await expect(nameField).toHaveAttribute("aria-invalid", "true");
     await expect(
       nameFieldContainer.getByText(/this field is required/i),
