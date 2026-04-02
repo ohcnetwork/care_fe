@@ -129,7 +129,7 @@ export const PrintMedicationAdministration = (props: {
         med.requested_product?.name ||
         med.medication?.display ||
         "Unknown Medication";
-      const isPRN = med.dosage_instruction[0]?.as_needed_boolean || false;
+      const isPRN = med.dosage_instruction.some((di) => di.as_needed_boolean);
       const isActive = ACTIVE_MEDICATION_STATUSES.includes(
         med.status as (typeof ACTIVE_MEDICATION_STATUSES)[number],
       );
@@ -437,12 +437,7 @@ const DrugChartTable = ({
           {groups.map((group) => {
             // Get the latest active request for display
             const latestRequest = group.requests[0];
-            const dosage = latestRequest.dosage_instruction[0];
-            const doseText = formatDosage(dosage);
-            const routeText = dosage?.route?.display;
-            const frequencyText = isPRN
-              ? t("as_needed")
-              : formatFrequency(dosage);
+            const instructions = latestRequest.dosage_instruction;
 
             return (
               <tr key={group.productId} className={cn(isPRN && "bg-pink-50")}>
@@ -450,11 +445,29 @@ const DrugChartTable = ({
                   <div className="font-bold text-[11px] leading-tight text-wrap break-all">
                     {group.productName}
                   </div>
-                  <div className="text-[9px] text-gray-600 mt-0.5 leading-snug">
-                    {[doseText, routeText, frequencyText]
+                  {instructions.map((di, idx) => {
+                    const doseText = formatDosage(di);
+                    const routeText = di.route?.display;
+                    const frequencyText = isPRN
+                      ? t("as_needed")
+                      : formatFrequency(di);
+                    const summary = [doseText, routeText, frequencyText]
                       .filter(Boolean)
-                      .join(" · ")}
-                  </div>
+                      .join(" · ");
+                    return summary ? (
+                      <div
+                        key={idx}
+                        className={cn(
+                          "text-[9px] text-gray-600 leading-snug",
+                          idx === 0 && "mt-0.5",
+                          idx > 0 &&
+                            "mt-0.5 pt-0.5 border-t border-dashed border-gray-300",
+                        )}
+                      >
+                        {summary}
+                      </div>
+                    ) : null;
+                  })}
                   {group.requests.length > 1 && (
                     <div className="text-[8px] text-gray-400 mt-0.5">
                       ({group.requests.length} {t("orders")})

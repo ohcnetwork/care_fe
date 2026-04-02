@@ -18,13 +18,7 @@ const DOSAGE_UNITS = [
   "count",
 ];
 
-const DURATION_UNITS = [
-  { value: "d", label: "days" },
-  { value: "h", label: "hours" },
-  { value: "wk", label: "weeks" },
-  { value: "mo", label: "months" },
-  { value: "a", label: "years" },
-];
+const DURATION_UNITS = ["days", "hours", "weeks", "months", "years"];
 
 const INTENT_OPTIONS = [
   "proposal",
@@ -106,10 +100,8 @@ test.describe("Medication Request Questionnaire", () => {
   let medicationName: string;
   let dosageQuantity: number;
   let dosageUnit: string;
-  let durationLabel: string;
   let durationUnit: string;
   let duration: number;
-  let durationData: { value: string; label: string };
   let frequencyData: { input: string; display: string };
 
   test.beforeEach(async ({ page }) => {
@@ -120,9 +112,7 @@ test.describe("Medication Request Questionnaire", () => {
     dosageQuantity = faker.number.int(INT_MAX);
     dosageUnit = faker.helpers.arrayElement(DOSAGE_UNITS);
     frequencyData = faker.helpers.arrayElement(frequencies);
-    durationData = faker.helpers.arrayElement(DURATION_UNITS);
-    durationLabel = durationData.label;
-    durationUnit = durationData.value;
+    durationUnit = faker.helpers.arrayElement(DURATION_UNITS);
     duration = faker.number.int({ min: 1, max: INT_MAX });
 
     questionnaireUrl = `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request`;
@@ -167,10 +157,10 @@ test.describe("Medication Request Questionnaire", () => {
     await page.getByRole("combobox", { name: "1 day" }).click();
     await page
       .getByPlaceholder("Type eg. 5 days, 2 weeks")
-      .fill(`${duration} ${durationLabel}`);
+      .fill(`${duration} ${durationUnit}`);
 
     await page
-      .getByRole("option", { name: `${duration} ${durationLabel}` })
+      .getByRole("option", { name: `${duration} ${durationUnit}` })
       .click();
 
     // Select random additional instruction - target only enabled button
@@ -284,10 +274,10 @@ test.describe("Medication Request Questionnaire", () => {
     await page.getByRole("combobox", { name: "1 day" }).click();
     await page
       .getByPlaceholder("Type eg. 5 days, 2 weeks")
-      .fill(`${duration} ${durationLabel}`);
+      .fill(`${duration} ${durationUnit}`);
 
     await page
-      .getByRole("option", { name: `${duration} ${durationLabel}` })
+      .getByRole("option", { name: `${duration} ${durationUnit}` })
       .click();
 
     await page.getByRole("button", { name: "Submit" }).click();
@@ -330,9 +320,7 @@ test.describe("Medication Request Questionnaire", () => {
 
     await page.getByRole("button", { name: "Submit" }).click();
 
-    await expect(
-      page.getByText("Dosage*+This field is required"),
-    ).toBeVisible();
+    await expect(page.getByText("Dosage*This field is required")).toBeVisible();
 
     await expect(page.getByText("Frequency*eg. 1-0-1This field")).toBeVisible();
   });
