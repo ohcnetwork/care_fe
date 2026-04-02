@@ -51,7 +51,7 @@ export const ServicePointsDropDown = () => {
                 return (
                   <div
                     key={subQueue.id}
-                    className="flex sm:w-20 w-full items-center justify-center gap-1 border border-gray-300 py-0.5 px-1.5 rounded-sm bg-gray-50 whitespace-nowrap"
+                    className="flex sm:w-auto w-full items-center justify-center gap-1 border border-gray-300 py-0.5 px-1.5 rounded-sm bg-gray-50 whitespace-nowrap"
                   >
                     <div className="bg-primary-200 border border-primary-500 w-2 h-2 rounded-full" />
                     <span className="text-sm text-gray-950 font-medium truncate">
