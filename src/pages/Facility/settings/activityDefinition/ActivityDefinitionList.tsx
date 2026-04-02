@@ -47,7 +47,6 @@ export default function ActivityDefinitionList({
         createItemLabel={t("add_activity_definition")}
         createItemIcon="l-plus"
         emptyStateTitle={t("no_activity_definition_categories_found")}
-        emptyStateDescription={t("create_your_first_category")}
         itemSearchConfig={{
           listItems: {
             queryFn: activityDefinitionApi.listActivityDefinition,
