@@ -18,7 +18,7 @@ export const ServicePointsDropDown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { assignedServicePointIds, allServicePoints, toggleServicePoint } =
     useQueueServicePoints();
-  const defaultServicePoints = useBreakpoints({ default: 4, sm: 6 });
+  const defaultServicePoints = useBreakpoints({ default: 4, sm: 2, lg: 4 });
 
   if (!allServicePoints) {
     return (
@@ -35,13 +35,13 @@ export const ServicePointsDropDown = () => {
 
   return (
     <div className="flex">
-      <div className="flex w-full sm:w-auto gap-1 rounded-r-none border border-r-0 border-gray-300 rounded-l-md p-1 bg-white">
+      <div className="flex w-full gap-1 rounded-r-none border border-r-0 border-gray-300 rounded-l-md p-1 bg-white">
         {assignedServicePointIds.length === 0 ? (
           <span className="text-sm font-medium">
             {t("assign_service_points")}
           </span>
         ) : (
-          <div className="flex gap-1 items-center justify-center">
+          <div className="flex flex-col xl:flex-row gap-1 items-center justify-center w-full">
             {allServicePoints
               .filter((subQueue) =>
                 assignedServicePointIds.includes(subQueue.id),
@@ -51,7 +51,7 @@ export const ServicePointsDropDown = () => {
                 return (
                   <div
                     key={subQueue.id}
-                    className="flex w-48 items-center justify-center gap-1 border border-gray-300 py-0.5 px-1.5 rounded-sm bg-gray-50 whitespace-nowrap"
+                    className="flex sm:w-48 w-full items-center justify-center gap-1 border border-gray-300 py-0.5 px-1.5 rounded-sm bg-gray-50 whitespace-nowrap"
                   >
                     <div className="bg-primary-200 border border-primary-500 w-2 h-2 rounded-full" />
                     <span className="text-sm text-gray-950 font-medium truncate">
