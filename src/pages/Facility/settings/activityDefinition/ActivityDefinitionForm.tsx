@@ -415,6 +415,16 @@ function ActivityDefinitionFormContent({
     }
   }
 
+  const handleCancel = () => {
+    if (categorySlug) {
+      navigate(
+        `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
+      );
+    } else {
+      navigate(`/facility/${facilityId}/settings/activity_definitions`);
+    }
+  };
+
   return (
     <Page
       title={
@@ -796,10 +806,11 @@ function ActivityDefinitionFormContent({
                         placeholder={t("select_specimen_requirements")}
                         onSearch={setSpecimenSearch}
                         canCreate={true}
-                        createForm={(onSuccess) => (
+                        createForm={(onSuccess, onCancel) => (
                           <SpecimenDefinitionForm
                             facilityId={facilityId}
                             onSuccess={onSuccess}
+                            onCancel={onCancel}
                           />
                         )}
                       />
@@ -859,11 +870,12 @@ function ActivityDefinitionFormContent({
                         placeholder={t("select_observation_requirements")}
                         onSearch={setObservationSearch}
                         canCreate={true}
-                        createForm={(onSuccess) => (
+                        createForm={(onSuccess, onCancel) => (
                           <div className="py-2">
                             <ObservationDefinitionForm
                               facilityId={facilityId}
                               onSuccess={onSuccess}
+                              onCancel={onCancel}
                             />
                           </div>
                         )}
@@ -1067,15 +1079,7 @@ function ActivityDefinitionFormContent({
             </div>
 
             <div className="flex justify-end space-x-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/settings/activity_definitions`,
-                  )
-                }
-              >
+              <Button type="button" variant="outline" onClick={handleCancel}>
                 {t("cancel")}
               </Button>
               <Button type="submit" disabled={isPending}>
