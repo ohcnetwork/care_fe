@@ -23,12 +23,15 @@ export default function ProductionWarningBanner() {
   }
 
   return (
-    <div className="sticky top-0 z-50 flex items-center justify-between gap-2 bg-red-600 px-4 py-2 text-white shadow-lg">
-      <div className="flex items-center gap-2">
-        <AlertTriangleIcon className="h-5 w-5 shrink-0 animate-pulse" />
-        <span className="text-sm font-semibold">
-          {t("production_warning_banner")}
-        </span>
+    <div className="pointer-events-none fixed inset-x-0 top-20 md:top-4 z-50 flex justify-center mx-2">
+      <div className="pointer-events-auto group relative animate-pulse">
+        <div className="absolute -inset-1 rounded-full bg-red-500 opacity-50 blur-sm" />
+        <div className="relative flex items-center gap-2 rounded-full bg-red-600 px-4 py-2 text-white sm:shadow-lg ring-2 ring-red-400 transition-all hover:scale-105 hover:shadow-xl">
+          <AlertTriangleIcon className="h-4 w-4 shrink-0 animate-pulse" />
+          <span className="text-xs font-bold tracking-wide">
+            {t("production_warning_banner")}
+          </span>
+        </div>
       </div>
     </div>
   );

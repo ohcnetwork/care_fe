@@ -29,7 +29,8 @@ export type XUIInputControl =
   | "switch"
   | "date"
   | "datetime"
-  | "autocomplete";
+  | "autocomplete"
+  | "computed";
 
 export type XUIControl = XUILayoutControl | XUIInputControl;
 

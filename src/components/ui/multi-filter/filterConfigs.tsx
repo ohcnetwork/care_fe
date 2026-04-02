@@ -67,7 +67,12 @@ import {
   ENCOUNTER_PRIORITY_FILTER_COLORS,
   ENCOUNTER_STATUS_FILTER_COLORS,
 } from "@/types/emr/encounter/encounter";
+import {
+  REQUEST_ORDER_PRIORITY_COLORS,
+  RequestOrderPriority,
+} from "@/types/inventory/requestOrder/requestOrder";
 import careConfig from "@careConfig";
+import { Zap } from "lucide-react";
 export const encounterStatusFilter = (
   key: string = "encounter_status",
   mode: FilterMode = "single",
@@ -634,5 +639,43 @@ export const createdByFilter = (
       },
       getOperations: () => [{ label: "is" }],
       mode,
+    },
+  );
+
+export const inventoryPriorityFilter = (
+  key: string = "priority",
+  mode: FilterMode = "single",
+  customOperations?: Operation[],
+  label?: string,
+) =>
+  createFilterConfig(
+    key,
+    label ? t(label) : t("priority"),
+    "command",
+    Object.values(RequestOrderPriority).map((value) => ({
+      value: value,
+      label: t(value),
+      color: getVariantColorClasses(REQUEST_ORDER_PRIORITY_COLORS[value]),
+    })),
+    {
+      renderSelected: (selected: FilterValues) => {
+        const selectedPriority = selected as string[];
+        if (typeof selectedPriority[0] === "string") {
+          const option = selectedPriority[0];
+          const color =
+            REQUEST_ORDER_PRIORITY_COLORS[option as RequestOrderPriority];
+          return (
+            <GenericSelectedBadge
+              selectedValue={option}
+              selectedLength={selectedPriority.length}
+              variant={color}
+            />
+          );
+        }
+        return <></>;
+      },
+      getOperations: () => customOperations || [{ label: "is" }],
+      mode,
+      icon: <Zap className="size-4" />,
     },
   );
