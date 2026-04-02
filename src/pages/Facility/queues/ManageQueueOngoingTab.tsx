@@ -43,7 +43,7 @@ import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ServicePointsDropDown } from "./ServicePointsDropDown";
-import { useQueueServicePointsFromPath } from "./useQueueServicePoints";
+import { useQueueServicePoints } from "./useQueueServicePoints";
 
 interface Props {
   facilityId: string;
@@ -52,8 +52,12 @@ interface Props {
 
 export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
   const { t } = useTranslation();
-
-  const { assignedServicePoints } = useQueueServicePointsFromPath();
+  const { resourceType, resourceId } = useScheduleResourceFromPath();
+  const { assignedServicePoints } = useQueueServicePoints({
+    facilityId,
+    resourceType,
+    resourceId,
+  });
   const { preferredServicePointCategories } = usePreferredServicePointCategory({
     facilityId,
   });

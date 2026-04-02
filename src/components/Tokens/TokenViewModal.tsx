@@ -72,7 +72,7 @@ export default function TokenViewModal({
                 cardClassName="hover:scale-none"
                 tokenActions={false}
                 onSuccess={() => onOpenChange(false)}
-                onOpenDialogForServicePoint={() => onOpenChange(false)}
+                onOpenDialogForServicePoint={() => onOpenChange(true)}
               />
             </div>
           </div>

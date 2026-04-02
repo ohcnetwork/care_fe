@@ -1,3 +1,4 @@
+import { useScheduleResourceFromPath } from "@/components/Schedule/useScheduleResource";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +11,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { CancelTokenDialog } from "@/pages/Facility/queues/CancelTokenDialog";
-import { useQueueServicePointsFromPath } from "@/pages/Facility/queues/useQueueServicePoints";
+import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePoints";
 import {
   getQueueTokenStatus,
   QUEUE_TOKEN_STATUS_COLORS,
@@ -52,7 +53,12 @@ export function OngoingQueueTokenCard({
   const { t } = useTranslation();
   const contextMenuTriggerRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
-  const { assignedServicePoints } = useQueueServicePointsFromPath();
+  const { resourceType, resourceId } = useScheduleResourceFromPath();
+  const { assignedServicePoints } = useQueueServicePoints({
+    facilityId,
+    resourceType,
+    resourceId,
+  });
 
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 

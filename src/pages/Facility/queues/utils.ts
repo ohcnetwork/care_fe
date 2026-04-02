@@ -83,7 +83,7 @@ export function useToken({
   facilityId: string;
   queueId: string;
   tokenId: string;
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
   const { data: token } = useQuery({

@@ -1,3 +1,4 @@
+import { useScheduleResourceFromPath } from "@/components/Schedule/useScheduleResource";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -11,13 +12,19 @@ import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
 import { ChevronDownIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useQueueServicePointsFromPath } from "./useQueueServicePoints";
+import { useQueueServicePoints } from "./useQueueServicePoints";
 
 export const ServicePointsDropDown = () => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const { resourceType, resourceId, facilityId } =
+    useScheduleResourceFromPath();
   const { assignedServicePointIds, allServicePoints, toggleServicePoint } =
-    useQueueServicePointsFromPath();
+    useQueueServicePoints({
+      facilityId,
+      resourceType,
+      resourceId,
+    });
   const defaultServicePoints = useBreakpoints({ default: 2, sm: 6 });
 
   if (!allServicePoints) {

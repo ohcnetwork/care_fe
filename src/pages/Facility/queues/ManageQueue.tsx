@@ -6,6 +6,7 @@ import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon
 import {
   resourceTypeToResourcePathSlug,
   useScheduleResource,
+  useScheduleResourceFromPath,
 } from "@/components/Schedule/useScheduleResource";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,7 +38,7 @@ import {
 import { ManageQueueFinishedTab } from "@/pages/Facility/queues/ManageQueueFinishedTab";
 import { ManageQueueOngoingTab } from "@/pages/Facility/queues/ManageQueueOngoingTab";
 import QueueFormSheet from "@/pages/Facility/queues/QueueFormSheet";
-import { useQueueServicePointsFromPath } from "@/pages/Facility/queues/useQueueServicePoints";
+import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePoints";
 import {
   formatScheduleResourceName,
   SchedulableResourceType,
@@ -338,9 +339,14 @@ function ManageServicePointsDialog({
   trigger: React.ReactNode;
 } & React.ComponentProps<typeof Dialog>) {
   const { t } = useTranslation();
-
+  const { resourceType, resourceId, facilityId } =
+    useScheduleResourceFromPath();
   const { allServicePoints, assignedServicePointIds, toggleServicePoint } =
-    useQueueServicePointsFromPath();
+    useQueueServicePoints({
+      facilityId,
+      resourceType,
+      resourceId,
+    });
 
   if (!allServicePoints) {
     return (
