@@ -86,7 +86,6 @@ function OccupiedBedSheet({ location, facilityId }: OccupiedBedSheetProps) {
             <EncounterInfoCard
               encounter={firstAssociation.encounter}
               facilityId={facilityId}
-              disableHover={true}
             />
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
