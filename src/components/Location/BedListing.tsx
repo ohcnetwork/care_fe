@@ -1,6 +1,11 @@
 import { cn } from "@/lib/utils";
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import {
   BedAvailableSelected,
@@ -9,12 +14,14 @@ import {
   BedUnavailableUnselected,
 } from "@/CAREUI/icons/CustomIcons";
 import { LocationRead } from "@/types/location/location";
+import { buildLocationHierarchy } from "@/types/location/utils";
 
 interface BedListingProps {
   beds: LocationRead[];
   selectedBed: LocationRead | null;
   onBedSelect: (bed: LocationRead) => void;
   onCheckStatus: (bed: LocationRead) => void;
+  showParent?: boolean;
 }
 
 export function BedListing({
@@ -22,6 +29,7 @@ export function BedListing({
   selectedBed,
   onBedSelect,
   onCheckStatus,
+  showParent = false,
 }: BedListingProps) {
   if (beds.length === 0) return null;
   return (
@@ -31,13 +39,16 @@ export function BedListing({
         const bed = beds.find((b) => b.id === id);
         if (bed) onBedSelect(bed);
       }}
-      className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+      className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
     >
       {beds.map((bed) => {
         const isAvailable = bed.operational_status === "U";
         const isDischargedBed = bed.current_encounter?.status === "discharged";
         const isSelected = selectedBed?.id === bed.id;
         const isClickable = isAvailable || isDischargedBed;
+        const segments = buildLocationHierarchy(bed);
+        const fullPath = segments.join(" › ");
+        const shortPath = segments.slice(-2).join(" › ");
 
         return (
           <div
@@ -84,6 +95,16 @@ export function BedListing({
                 )}
               </div>
               <p className="text-xs text-center font-medium mt-2">{bed.name}</p>
+              {showParent && segments.length > 1 && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="text-xs mt-1 text-gray-400 truncate max-w-full cursor-default">
+                      {shortPath}
+                    </p>
+                  </TooltipTrigger>
+                  <TooltipContent>{fullPath}</TooltipContent>
+                </Tooltip>
+              )}
             </div>
           </div>
         );

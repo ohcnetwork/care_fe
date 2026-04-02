@@ -6,11 +6,17 @@ import { expectToast } from "tests/helper/ui";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+const DEFAULT_ROLE_CONTEXTS = [
+  "Facility",
+  "Government Organization",
+  "Responsibility",
+];
 async function createRole(
   page: Page,
   roleName: string,
   description?: string,
   permissions?: string[],
+  contexts: string[] = DEFAULT_ROLE_CONTEXTS,
 ) {
   await page.getByRole("button", { name: /Add Role/i }).click();
   await page.getByPlaceholder("Enter role name").fill(roleName);
@@ -20,6 +26,17 @@ async function createRole(
   await page
     .getByRole("button", { name: "Select All" })
     .waitFor({ state: "visible" });
+
+  for (const context of contexts) {
+    const contextElement = page.getByRole("checkbox", {
+      name: context,
+      exact: true,
+    });
+    if (await contextElement.isChecked()) {
+      continue;
+    }
+    await contextElement.click();
+  }
 
   if (permissions) {
     for (const permission of permissions) {
@@ -38,6 +55,7 @@ async function createRole(
 
   // verify toast message
   await expectToast(page, "Role created successfully");
+  await page.getByRole("button", { name: "Close toast" }).click();
 }
 
 test.describe("Admin Roles Management", () => {
@@ -54,9 +72,14 @@ test.describe("Admin Roles Management", () => {
     await expect(
       getFieldErrorMessage(page.getByPlaceholder("Enter role name")),
     ).toContainText("This field is required");
-    await expect(
-      page.getByText("At least one permission is required"),
-    ).toBeVisible();
+    const permissionsError = page
+      .locator('[data-slot="form-item"]')
+      .filter({ has: page.getByText("Permissions") })
+      .locator('[data-slot="form-message"]');
+    await permissionsError.scrollIntoViewIfNeeded();
+    await expect(permissionsError).toContainText(
+      "At least one permission is required",
+    );
   });
 
   test("creates a role with all permissions and verifies assigned permissions", async ({
