@@ -161,6 +161,73 @@ const slug = expectedSlug(name); // lowercase, hyphens, max 25 chars
 const nonExistent = faker.string.uuid();
 ```
 
+## Shadcn UI `data-slot` Selectors
+
+This project uses **shadcn/ui** as its primary component library. Almost every shadcn component renders a `data-slot` attribute on its DOM element, providing stable, semantic selectors for testing. There are **175+ unique `data-slot` values** across the UI components.
+
+**When to use `data-slot`**: When role-based selectors (`getByRole`, `getByText`, `getByLabel`) are not sufficient — for example, targeting a specific structural part of a component like a card, table body, badge, form message, or command input.
+
+### Commonly Used `data-slot` Values in Tests
+
+```typescript
+// Tables
+page.locator('[data-slot="table-body"]')               // Table body container
+page.locator('[data-slot="table-row"]')                 // Individual table row
+
+// Cards
+page.locator('[data-slot="card"]')                      // Card container
+page.locator('[data-slot="card-title"]')                // Card title
+
+// Badges
+page.locator('[data-slot="badge"]')                     // Badge element
+
+// Forms
+page.locator('[data-slot="form-item"]')                 // Form field wrapper
+page.locator('[data-slot="form-message"]')              // Validation error message
+page.locator('[data-slot="form-label"]')                // Form field label
+
+// Command (search/select dropdowns)
+page.locator('[data-slot="command-input"]')             // Search input in Command component
+page.locator('[data-slot="command-item"]')              // Selectable option in Command
+
+// Popover / Sheet / Dialog
+page.locator('[data-slot="popover-trigger"]')           // Popover trigger button
+page.locator('[data-slot="sheet-content"]')             // Sheet panel content
+page.locator('[data-slot="sheet-title"]')               // Sheet title
+
+// Other common slots
+page.locator('[data-slot="button"]')                    // Button element
+page.locator('[data-slot="textarea"]')                  // Textarea element
+page.locator('[data-slot="select-value"]')              // Selected value display
+page.locator('[data-slot="collapsible"]')               // Collapsible container
+page.locator('[data-slot="collapsible-trigger"]')       // Collapsible toggle
+page.locator('[data-slot="dropdown-menu-trigger"]')     // Dropdown menu trigger
+```
+
+### Combining `data-slot` with Other Selectors
+
+```typescript
+// Find a card by its title text
+page.locator('[data-slot="card"]').filter({
+  has: page.locator('[data-slot="card-title"]', { hasText: "Patient Info" }),
+});
+
+// Find a badge with specific text inside a table row
+page.locator('[data-slot="table-row"]')
+  .filter({ hasText: "John Doe" })
+  .locator('[data-slot="badge"]')
+  .filter({ hasText: "Active" });
+
+// Get error message for a specific form field
+fieldLocator.locator("..").locator('[data-slot="form-message"]');
+```
+
+### Priority Order for Selectors
+
+1. **Role-based** (`getByRole`, `getByLabel`, `getByPlaceholder`, `getByText`) — always prefer these
+2. **`data-slot` attribute** — use when role-based selectors are insufficient or ambiguous
+3. **CSS selectors** — last resort, avoid when possible
+
 ## Form Interactions
 
 ### Text Input
@@ -505,7 +572,7 @@ import { BODY_SITES, KNOWN_USERNAMES } from "tests/helper/commonConstants";
 4. **Not awaiting helpers** — All helper functions are async. Must use `await`.
 5. **Forgetting `test.use({ storageState })`** — Tests will fail with auth errors. Always set it.
 6. **Not using `test.step()`** — Makes test reports hard to read. Always wrap logical steps.
-7. **Using CSS selectors instead of roles** — Always prefer `getByRole()`, `getByText()`, `getByLabel()`, `getByPlaceholder()` over CSS selectors.
+7. **Using CSS selectors instead of roles** — Always prefer `getByRole()`, `getByText()`, `getByLabel()`, `getByPlaceholder()` over CSS selectors. When role-based selectors are not sufficient, use `data-slot` attribute selectors (e.g., `[data-slot="table-body"]`, `[data-slot="badge"]`) since shadcn/ui components expose these on nearly every element.
 8. **Not using `scrollIntoViewIfNeeded()`** — Elements may be off-screen. Use when clicking elements that might be scrolled out of view.
 9. **Forgetting `.catch(() => false)` for `isVisible()` checks** — Can throw if element doesn't exist at all. Wrap in catch.
 10. **Not waiting for async operations** — Use `waitForTimeout()` after debounced searches, and `waitFor({ state: "visible" })` before clicking.
