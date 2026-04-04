@@ -172,10 +172,7 @@ function MedicationTable({ medications }: MedicationTableProps) {
         </TableHeader>
         <TableBody>
           {medications.map((medication) => {
-            const instruction = medication.dosage_instruction?.[0];
-
-            const dosageText = formatDosage(instruction) || null;
-            const frequencyText = formatFrequency(instruction);
+            const instructions = medication.dosage_instruction ?? [];
 
             const batchNumber = medication.item.product.batch?.lot_number;
             const expiryDate = medication.item.product.expiration_date;
@@ -187,13 +184,16 @@ function MedicationTable({ medications }: MedicationTableProps) {
                     <span className="text-gray-900 font-medium">
                       {medication.item.product.product_knowledge.name}
                     </span>
-                    {(dosageText || frequencyText) && (
-                      <span className="text-sm text-gray-500">
-                        {[dosageText, frequencyText]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </span>
-                    )}
+                    {instructions.map((di, idx) => {
+                      const text = [formatDosage(di), formatFrequency(di)]
+                        .filter(Boolean)
+                        .join(" · ");
+                      return text ? (
+                        <span key={idx} className="text-sm text-gray-500">
+                          {text}
+                        </span>
+                      ) : null;
+                    })}
                     {(batchNumber || expiryDate) && (
                       <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
                         {batchNumber && (
