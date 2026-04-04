@@ -41,7 +41,37 @@ Before writing any test, determine what needs testing:
 - Any **existing tests** in the same directory — to follow established patterns
 - The **helper utilities** (`tests/helper/ui.ts`, `tests/helper/error.ts`) — to use existing helpers
 
-### 3. Write Tests Following Repository Conventions
+### 3. Validate Page Structure Using Playwright MCP Browser
+
+Before writing tests, **use the Playwright MCP browser tools** to navigate to the actual pages and inspect the live DOM. This ensures your selectors are correct and match the real rendered output.
+
+**Validation workflow:**
+
+1. **Navigate** to the page under test using `browser_navigate` (e.g., `http://localhost:4000/facility/...`)
+2. **Take a snapshot** using `browser_snapshot` to get the full accessibility tree — this shows all roles, names, and `data-slot` attributes available on the page
+3. **Verify selectors** — confirm that `getByRole()`, `getByText()`, and `data-slot` selectors you plan to use actually exist in the snapshot
+4. **Interact with the page** using `browser_click`, `browser_type`, `browser_fill_form` to simulate the user flow and verify each step works
+5. **Check form validation** — submit empty/invalid forms and snapshot the result to see exact error message text and structure
+6. **Verify navigation** — confirm that clicking buttons/links leads to the expected pages
+
+**When to use Playwright MCP browser tools:**
+
+- **Always** before writing a new test file — to discover the correct selectors
+- **When debugging** a failing test — to see the actual page state
+- **When unsure** about a selector, label, or role — snapshot the page and check
+- **After writing tests** — run the test with bash and if it fails, use the browser to investigate why
+
+**Example validation flow:**
+
+```
+1. browser_navigate → http://localhost:4000/login
+2. browser_snapshot → see the login form structure, find exact role names
+3. browser_fill_form → fill username/password fields
+4. browser_click → click the login button
+5. browser_snapshot → verify redirect to dashboard
+```
+
+### 4. Write Tests Following Repository Conventions
 
 Follow every convention described below exactly. Do not deviate from the established patterns.
 
@@ -637,6 +667,54 @@ npx playwright test --ui
 # Show last report
 npx playwright show-report
 ```
+
+## Validating Tests with Playwright MCP Browser
+
+You have access to **Playwright MCP browser tools** that let you interact with the running application directly. Use these to validate your selectors, verify page structure, and debug tests.
+
+### Available Playwright MCP Tools
+
+| Tool | Purpose |
+|------|---------|
+| `browser_navigate` | Navigate to a URL (e.g., `http://localhost:4000/facility/...`) |
+| `browser_snapshot` | Get accessibility tree — shows all roles, names, `data-slot` attributes |
+| `browser_click` | Click an element by its ref from the snapshot |
+| `browser_type` | Type text into an input field |
+| `browser_fill_form` | Fill multiple form fields at once |
+| `browser_hover` | Hover over an element (to trigger tooltips, dropdowns) |
+| `browser_select_option` | Select from a dropdown |
+| `browser_press_key` | Press keyboard keys (Enter, Escape, Tab, etc.) |
+| `browser_take_screenshot` | Take a visual screenshot for debugging |
+| `browser_wait_for` | Wait for text to appear/disappear |
+
+### Validation Checklist
+
+After writing tests, validate them:
+
+1. **Run the test** with bash:
+   ```bash
+   npx playwright test tests/path/to/your.spec.ts --reporter=line
+   ```
+
+2. **If the test fails**, use browser tools to investigate:
+   - `browser_navigate` to the failing page
+   - `browser_snapshot` to see the actual DOM structure
+   - Compare snapshot output with your test selectors
+   - Check if elements have the expected roles, names, and `data-slot` attributes
+
+3. **Fix selectors** based on what the snapshot reveals, then re-run the test
+
+4. **Repeat** until all tests pass
+
+### Using Snapshots to Discover Selectors
+
+The `browser_snapshot` tool returns the accessibility tree, which maps directly to Playwright's role-based selectors:
+
+- A snapshot entry like `textbox "Name"` → `page.getByRole("textbox", { name: "Name" })`
+- A snapshot entry like `button "Save"` → `page.getByRole("button", { name: "Save" })`
+- A snapshot entry with `data-slot="table-body"` → `page.locator('[data-slot="table-body"]')`
+
+This is the most reliable way to determine correct selectors — **never guess selectors, always verify with a snapshot**.
 
 ## Configuration Reference
 
