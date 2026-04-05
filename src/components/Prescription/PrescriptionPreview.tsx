@@ -13,7 +13,7 @@ import PrintTable from "@/components/Common/PrintTable";
 import {
   formatDosage,
   formatDuration,
-  formatFrequency,
+  formatFrequencyWithInstructions,
   formatSig,
 } from "@/components/Medicine/utils";
 
@@ -62,27 +62,27 @@ const PrescriptionContent = ({
               { key: "duration" },
               { key: "instructions" },
             ]}
-            rows={medications?.map((medication) => {
-              const instruction = medication.dosage_instruction[0];
-              const remarks = formatSig(instruction);
-              const notes = medication.note;
-              const freqText = formatFrequency(instruction);
-              const additionalInstr =
-                instruction?.additional_instruction?.[0]?.display;
-              return {
-                medicine: displayMedicationName(medication),
-                status: t(`medication_status_${medication.status}`),
-                dosage: formatDosage(instruction),
-                frequency:
-                  [freqText, additionalInstr].filter(Boolean).join(", ") || "-",
-                duration: formatDuration(instruction) || "-",
-                instructions: [remarks, notes].filter(Boolean).join("\n"),
-              };
+            rows={medications.flatMap((medication) => {
+              const instructions = medication.dosage_instruction;
+              const isMulti = instructions.length > 1;
+              return instructions.map((di, idx) => ({
+                _groupedRow:
+                  isMulti && idx < instructions.length - 1 ? "true" : undefined,
+                medicine: idx === 0 ? displayMedicationName(medication) : "",
+                dosage: formatDosage(di) || "-",
+                frequency: formatFrequencyWithInstructions(di) || "-",
+                duration: formatDuration(di) || "-",
+                instructions: [formatSig(di), idx === 0 ? medication.note : ""]
+                  .filter(Boolean)
+                  .join("\n"),
+              }));
             })}
-            className="text-sm break-all font-semibold whitespace-break-spaces text-gray-950"
+            className="text-sm break-words font-semibold whitespace-break-spaces text-gray-950"
             cellConfig={{
               medicine: { className: "text-left" },
+              frequency: { className: "text-left" },
             }}
+            rowClassName={(row) => (row._groupedRow ? "border-b-0" : undefined)}
           />
         </div>
       )}
