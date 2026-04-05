@@ -95,17 +95,30 @@ jobs:
       github.event.workflow_run.conclusion == 'success'
 
     steps:
+      - name: Check for review artifact
+        id: check-artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ARTIFACT_NAME=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}/artifacts" \
+            --jq '.artifacts[] | select(.name == "review-info") | .name')
+          if [[ -n "$ARTIFACT_NAME" ]]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "No review-info artifact found — expected for non-changes_requested reviews"
+          fi
+
       - name: Download review info
-        id: download
+        if: steps.check-artifact.outputs.exists == 'true'
         uses: actions/download-artifact@v4
-        continue-on-error: true
         with:
           name: review-info
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
 
       - name: Read and validate review info
-        if: steps.download.outcome == 'success'
+        if: steps.check-artifact.outputs.exists == 'true'
         id: review
         run: |
           PR_NUMBER=$(cat pr_number.txt)
@@ -125,7 +138,7 @@ jobs:
           echo "review_state=$REVIEW_STATE" >> $GITHUB_OUTPUT
 
       - name: Generate token
-        if: steps.download.outcome == 'success' && steps.review.outputs.review_state == 'changes_requested'
+        if: steps.check-artifact.outputs.exists == 'true' && steps.review.outputs.review_state == 'changes_requested'
         id: generate-token
         uses: actions/create-github-app-token@v2
         with:
@@ -133,7 +146,7 @@ jobs:
           private-key: ${{ secrets.APP_PEM }}
 
       - name: Handle Review Changes Requested
-        if: steps.download.outcome == 'success' && steps.review.outputs.review_state == 'changes_requested'
+        if: steps.check-artifact.outputs.exists == 'true' && steps.review.outputs.review_state == 'changes_requested'
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
           PR_NUMBER: ${{ steps.review.outputs.pr_number }}
