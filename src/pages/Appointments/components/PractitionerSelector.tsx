@@ -90,7 +90,7 @@ export const PractitionerSelector = ({
 
   // Fetch root organizations - default to user's departments only
   const { data: organizationsResponse } = useQuery({
-    queryKey: ["facilityOrganizations", facilityId, showAllOrgs],
+    queryKey: ["facilityOrganizations", facilityId, showAllOrgs, searchQuery],
     queryFn: query(
       showAllOrgs
         ? facilityOrganizationApi.list
@@ -98,7 +98,8 @@ export const PractitionerSelector = ({
       {
         pathParams: { facilityId },
         queryParams: {
-          parent: "",
+          name: searchQuery,
+          ...(searchQuery ? {} : { parent: "" }),
           active: true,
           limit: 100,
         },
@@ -316,7 +317,7 @@ export const PractitionerSelector = ({
             </div>
           </div>
 
-          <Command className="border-0">
+          <Command className="border-0" shouldFilter={false}>
             <div className="px-3 py-2 border-b">
               <div className="relative">
                 <CommandInput
@@ -517,7 +518,8 @@ export const PractitionerSelector = ({
           {/* Sidebar Content */}
           <div className="flex-1 overflow-y-auto max-h-[400px]">
             {/* Show child organizations if current org has children */}
-            {childOrganizations?.results?.length ? (
+            {childOrganizations?.results?.length &&
+            childOrganizations.results.length > 0 ? (
               <div className="p-2">
                 <h3 className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
                   {t("departments")}
@@ -552,95 +554,90 @@ export const PractitionerSelector = ({
                   </div>
                 ))}
               </div>
-            ) : (
-              /* Show users if current org has no children or is a leaf organization */
-              <div className="p-2">
-                {isLoadingOrganizationUsers ? (
-                  <div className="p-6 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <div className="space-y-1 flex-1">
-                        <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse" />
-                        <div className="h-3 w-1/2 bg-gray-200 rounded animate-pulse" />
-                      </div>
+            ) : null}
+            {/* Show users for current organization */}
+            <div className="p-2">
+              {isLoadingOrganizationUsers ? (
+                <div className="p-6 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <div className="space-y-1 flex-1">
+                      <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse" />
+                      <div className="h-3 w-1/2 bg-gray-200 rounded animate-pulse" />
                     </div>
                   </div>
-                ) : organizationUsers?.users?.length ? (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <h3 className="px-2 py-1 text-sm font-medium text-gray-500 uppercase tracking-wide">
-                        {t("practitioners")}
-                      </h3>
-                      {multiple && (
-                        <div className="max-h-[400px] overflow-y-auto space-x-1">
+                </div>
+              ) : organizationUsers?.users?.length ? (
+                <>
+                  <div className="flex items-center justify-between">
+                    <h3 className="px-2 py-1 text-sm font-medium text-gray-500 uppercase tracking-wide">
+                      {t("practitioners")}
+                    </h3>
+                    {multiple && (
+                      <div className="max-h-[400px] overflow-y-auto space-x-1">
+                        <Button
+                          variant="outline"
+                          size="xs"
+                          onClick={() => {
+                            handleSelectAll(
+                              organizationUsers.users as NonEmptyArray<UserReadMinimal>,
+                            );
+                          }}
+                        >
+                          {t("select_all")}
+                        </Button>
+                        {selected.filter((s) =>
+                          organizationUsers.users.some((u) => u.id === s.id),
+                        ).length > 1 && (
                           <Button
                             variant="outline"
                             size="xs"
-                            onClick={() => {
-                              handleSelectAll(
-                                organizationUsers.users as NonEmptyArray<UserReadMinimal>,
-                              );
-                            }}
+                            onClick={() =>
+                              clearOrganizationUsers(organizationUsers)
+                            }
                           >
-                            {t("select_all")}
+                            {t("clear_all")}
                           </Button>
-                          {selected.filter((s) =>
-                            organizationUsers.users.some((u) => u.id === s.id),
-                          ).length > 1 && (
-                            <Button
-                              variant="outline"
-                              size="xs"
-                              onClick={() =>
-                                clearOrganizationUsers(organizationUsers)
-                              }
-                            >
-                              {t("clear_all")}
-                            </Button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    {organizationUsers.users.map((user) => {
-                      const isSelected = selected?.some(
-                        (s) => s.id === user.id,
-                      );
-
-                      return (
-                        <div
-                          key={user.id}
-                          className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
-                          onClick={() => !isSelected && handleUserSelect(user)}
-                        >
-                          <Avatar
-                            imageUrl={user.profile_picture_url}
-                            name={formatName(user, true)}
-                            className="size-8 rounded-full"
-                          />
-                          <div className="flex flex-col min-w-0 flex-1">
-                            <span
-                              className="truncate text-sm font-medium"
-                              title={formatName(user)}
-                            >
-                              {formatName(user)}
-                            </span>
-                          </div>
-                          {isSelected && (
-                            <CheckIcon className="h-4 w-4 text-gray-700" />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </>
-                ) : (
-                  <div className="p-6 text-center text-gray-500">
-                    <Building2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <div className="text-sm">
-                      {t("no_users_in_organization")}
-                    </div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            )}
+                  {organizationUsers.users.map((user) => {
+                    const isSelected = selected?.some((s) => s.id === user.id);
+
+                    return (
+                      <div
+                        key={user.id}
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
+                        onClick={() => !isSelected && handleUserSelect(user)}
+                      >
+                        <Avatar
+                          imageUrl={user.profile_picture_url}
+                          name={formatName(user, true)}
+                          className="size-8 rounded-full"
+                        />
+                        <div className="flex flex-col min-w-0 flex-1">
+                          <span
+                            className="truncate text-sm font-medium"
+                            title={formatName(user)}
+                          >
+                            {formatName(user)}
+                          </span>
+                        </div>
+                        {isSelected && (
+                          <CheckIcon className="h-4 w-4 text-gray-700" />
+                        )}
+                      </div>
+                    );
+                  })}
+                </>
+              ) : (
+                <div className="p-6 text-center text-gray-500">
+                  <Building2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <div className="text-sm">{t("no_users_in_organization")}</div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

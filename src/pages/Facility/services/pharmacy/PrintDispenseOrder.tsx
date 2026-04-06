@@ -9,7 +9,11 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import Loading from "@/components/Common/Loading";
 import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
-import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
+import {
+  formatDosage,
+  formatFrequency,
+  joinInstructionTexts,
+} from "@/components/Medicine/utils";
 
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { DispenseOrderRead } from "@/types/emr/dispenseOrder/dispenseOrder";
@@ -81,13 +85,14 @@ const DispenseOrderContent = ({
               { key: "expiry_date" },
               { key: "prepared_date" },
             ]}
+            classNameCell="whitespace-pre-line"
             rows={dispenses.map((dispense) => {
-              const instruction = dispense.dosage_instruction?.[0];
+              const instructions = dispense.dosage_instruction ?? [];
 
               return {
                 medicine: dispense.item.product.product_knowledge.name,
-                dosage: formatDosage(instruction) || "-",
-                frequency: formatFrequency(instruction) || "-",
+                dosage: joinInstructionTexts(instructions, formatDosage),
+                frequency: joinInstructionTexts(instructions, formatFrequency),
                 quantity: round(dispense.quantity) || "-",
                 lot_batch_number:
                   dispense.item.product.batch?.lot_number || "-",

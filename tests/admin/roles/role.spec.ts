@@ -6,11 +6,17 @@ import { expectToast } from "tests/helper/ui";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+const DEFAULT_ROLE_CONTEXTS = [
+  "Facility",
+  "Government Organization",
+  "Responsibility",
+];
 async function createRole(
   page: Page,
   roleName: string,
   description?: string,
   permissions?: string[],
+  contexts: string[] = DEFAULT_ROLE_CONTEXTS,
 ) {
   await page.getByRole("button", { name: /Add Role/i }).click();
   await page.getByPlaceholder("Enter role name").fill(roleName);
@@ -20,6 +26,17 @@ async function createRole(
   await page
     .getByRole("button", { name: "Select All" })
     .waitFor({ state: "visible" });
+
+  for (const context of contexts) {
+    const contextElement = page.getByRole("checkbox", {
+      name: context,
+      exact: true,
+    });
+    if (await contextElement.isChecked()) {
+      continue;
+    }
+    await contextElement.click();
+  }
 
   if (permissions) {
     for (const permission of permissions) {
@@ -38,6 +55,7 @@ async function createRole(
 
   // verify toast message
   await expectToast(page, "Role created successfully");
+  await page.getByRole("button", { name: "Close toast" }).click();
 }
 
 test.describe("Admin Roles Management", () => {
@@ -54,9 +72,14 @@ test.describe("Admin Roles Management", () => {
     await expect(
       getFieldErrorMessage(page.getByPlaceholder("Enter role name")),
     ).toContainText("This field is required");
-    await expect(
-      getFieldErrorMessage(page.locator('div[data-slot="card"]')),
-    ).toContainText("At least one permission is required");
+    const permissionsError = page
+      .locator('[data-slot="form-item"]')
+      .filter({ has: page.getByText("Permissions") })
+      .locator('[data-slot="form-message"]');
+    await permissionsError.scrollIntoViewIfNeeded();
+    await expect(permissionsError).toContainText(
+      "At least one permission is required",
+    );
   });
 
   test("creates a role with all permissions and verifies assigned permissions", async ({
@@ -66,14 +89,14 @@ test.describe("Admin Roles Management", () => {
     const description = faker.lorem.sentence();
     const randomPermissions = faker.helpers.arrayElements(permissions, 5);
     await createRole(page, roleName, description);
-    const tableBody = page.locator('[data-slot="table-body"]');
 
     // verify role in the list
     await page.getByRole("textbox", { name: /Search Roles/i }).fill(roleName);
-    await expect(tableBody).toContainText(roleName);
+    await expect(page.getByRole("heading", { name: roleName })).toBeVisible();
 
     // verify five random permissions are checked
-    await page.getByRole("button", { name: /Edit/i }).click();
+    await page.getByRole("button", { name: "Actions" }).click();
+    await page.getByRole("menuitem", { name: /Edit/i }).click();
     for (const permission of randomPermissions) {
       await page.getByPlaceholder("Search permissions").fill(permission);
       await page
@@ -90,12 +113,12 @@ test.describe("Admin Roles Management", () => {
     const description = faker.lorem.sentence();
     const uncheckedPermission = faker.helpers.arrayElement(permissions);
     await createRole(page, roleName, description);
-    const tableBody = page.locator('[data-slot="table-body"]');
 
     // edit role name
     const updatedRoleName = `${roleName} - updated`;
     await page.getByRole("textbox", { name: /Search Roles/i }).fill(roleName);
-    await page.getByRole("button", { name: /Edit/i }).first().click();
+    await page.getByRole("button", { name: "Actions" }).first().click();
+    await page.getByRole("menuitem", { name: /Edit/i }).click();
     await page.getByPlaceholder("Enter role name").fill(updatedRoleName);
 
     await page.getByPlaceholder("Search permissions").fill(uncheckedPermission);
@@ -113,10 +136,13 @@ test.describe("Admin Roles Management", () => {
     await page
       .getByRole("textbox", { name: /Search Roles/i })
       .fill(updatedRoleName);
-    await expect(tableBody).toContainText(updatedRoleName);
+    await expect(
+      page.getByRole("heading", { name: updatedRoleName }),
+    ).toBeVisible();
 
     // verify unchecked permission
-    await page.getByRole("button", { name: /Edit/i }).click();
+    await page.getByRole("button", { name: "Actions" }).click();
+    await page.getByRole("menuitem", { name: /Edit/i }).click();
     await page.getByPlaceholder("Search permissions").fill(uncheckedPermission);
     await page
       .getByRole("button", { name: "Select All" })
@@ -133,11 +159,11 @@ test.describe("Admin Roles Management", () => {
     const description = faker.lorem.sentence();
     const randomPermissions = faker.helpers.arrayElements(permissions, 3);
     const clonedRoleName = `${roleName} (Copy)`;
-    const tableBody = page.locator('[data-slot="table-body"]');
     await createRole(page, roleName, description, randomPermissions);
 
     await page.getByRole("textbox", { name: /Search Roles/i }).fill(roleName);
-    await page.getByRole("button", { name: /Clone/i }).click();
+    await page.getByRole("button", { name: "Actions" }).click();
+    await page.getByRole("menuitem", { name: /Clone/i }).click();
     await page.getByRole("button", { name: /Create Role/i }).click();
 
     // verify toast message
@@ -147,10 +173,13 @@ test.describe("Admin Roles Management", () => {
     await page
       .getByRole("textbox", { name: /Search Roles/i })
       .fill(clonedRoleName);
-    await expect(tableBody).toContainText(clonedRoleName);
+    await expect(
+      page.getByRole("heading", { name: clonedRoleName }),
+    ).toBeVisible();
 
     // verify three random permissions are checked
-    await page.getByRole("button", { name: /Edit/i }).click();
+    await page.getByRole("button", { name: "Actions" }).click();
+    await page.getByRole("menuitem", { name: /Edit/i }).click();
     for (const permission of randomPermissions) {
       await page.getByPlaceholder("Search permissions").fill(permission);
       await page
