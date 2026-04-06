@@ -27,6 +27,7 @@ test.describe("activity definition deletion", () => {
       page.getByRole("heading", { name: createdAD.title }),
     ).toBeVisible();
 
+    await page.waitForLoadState("networkidle");
     await page.getByRole("button", { name: /delete/i }).click();
 
     const dialog = page.getByRole("alertdialog");

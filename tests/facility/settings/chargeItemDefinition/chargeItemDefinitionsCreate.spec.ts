@@ -164,12 +164,15 @@ test.describe("Charge Item Definition Creation", () => {
     await page.getByRole("textbox", { name: /search/i }).fill(title);
     await expect(page.getByRole("table").getByText(title)).toBeVisible();
     await page.getByRole("link", { name: "View" }).click();
+    await page.waitForLoadState("networkidle");
     await expect(page.getByRole("heading", { name: title })).toBeVisible();
     await expect(page.getByText(description)).toBeVisible();
     await expect(page.getByText(purpose).last()).toBeVisible();
     await expect(page.getByText(url)).toBeVisible();
-    await expect(page.getByText(mrp)).toBeVisible();
-    await expect(page.getByText(purchasePrice)).toBeVisible();
+    await expect(page.getByText(`₹${Number(mrp).toFixed(2)}`)).toBeVisible();
+    await expect(
+      page.getByText(`₹${Number(purchasePrice).toFixed(2)}`),
+    ).toBeVisible();
     await expect(page.getByText("9.00%")).toBeVisible();
     await expect(page.getByText("6.00%")).toBeVisible();
     await expect(
