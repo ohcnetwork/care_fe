@@ -87,9 +87,43 @@ async function addBillableChargeItemOnCreateInvoicePage(
     timeout: 30_000,
   });
 
-  const definitionPicker = page
-    .getByRole("combobox")
-    .filter({ hasText: /add charges/i });
+  const urlMatch = page
+    .url()
+    .match(
+      /\/facility\/([^/]+)\/billing\/account\/([a-f0-9-]+)\/invoices\/create/i,
+    );
+  if (!urlMatch) {
+    throw new Error(`Expected create invoice URL, got: ${page.url()}`);
+  }
+  const [, facilityIdFromUrl, accountIdFromUrl] = urlMatch;
+
+  // Inline charge picker mounts only after account (with patient) loads—charge
+  // items query can finish first and show the table while account is still in flight.
+  await page
+    .waitForResponse(
+      (r) => {
+        if (r.request().method() !== "GET" || r.status() !== 200) return false;
+        try {
+          const p = new URL(r.url()).pathname;
+          return (
+            p ===
+            `/api/v1/facility/${facilityIdFromUrl}/account/${accountIdFromUrl}/`
+          );
+        } catch {
+          return false;
+        }
+      },
+      { timeout: 15_000 },
+    )
+    .catch(() => {});
+
+  const invoiceForm = page
+    .locator('[data-slot="table-body"]')
+    .first()
+    .locator("xpath=ancestor::form[1]");
+  const definitionPicker = invoiceForm
+    .locator('button[role="combobox"]')
+    .first();
   await expect(definitionPicker).toBeVisible({ timeout: 30_000 });
   await selectChargeDefinitionForCreateInvoice(page, definitionPicker, {
     navigateCategories: ["Medications"],
