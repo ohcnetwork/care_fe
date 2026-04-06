@@ -63,7 +63,13 @@ test.describe("Charge Item Definition Creation", () => {
     ).toBeVisible();
 
     // Verify in edit view
+    const searchResponse = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/charge_item_definition/") &&
+        resp.request().method() === "GET",
+    );
     await page.getByRole("textbox", { name: /search/i }).fill(title);
+    await searchResponse;
     await expect(page.getByRole("table").getByText(title)).toBeVisible();
 
     await page.getByRole("link", { name: "View" }).click();
@@ -162,7 +168,13 @@ test.describe("Charge Item Definition Creation", () => {
     ).toBeVisible();
 
     // Verify all fields
+    const searchResponse = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/charge_item_definition/") &&
+        resp.request().method() === "GET",
+    );
     await page.getByRole("textbox", { name: /search/i }).fill(title);
+    await searchResponse;
     await expect(page.getByRole("table").getByText(title)).toBeVisible();
     await page.getByRole("link", { name: "View" }).click();
     await page.waitForURL("**/charge_item_definitions/**");
