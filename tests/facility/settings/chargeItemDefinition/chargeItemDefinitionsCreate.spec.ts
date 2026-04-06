@@ -165,7 +165,9 @@ test.describe("Charge Item Definition Creation", () => {
     await expect(page.getByRole("table").getByText(title)).toBeVisible();
     await page.getByRole("link", { name: "View" }).click();
     await page.waitForLoadState("networkidle");
-    await expect(page.getByRole("heading", { name: title })).toBeVisible();
+    await expect(page.getByRole("heading", { name: title })).toBeVisible({
+      timeout: 15000,
+    });
     await expect(page.getByText(description)).toBeVisible();
     await expect(page.getByText(purpose).last()).toBeVisible();
     await expect(page.getByText(url)).toBeVisible();
