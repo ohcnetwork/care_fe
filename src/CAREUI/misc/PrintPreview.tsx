@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import {
-  PinchZoomScrollContainer,
+  FitToWidthScrollContainer,
   ZoomProvider,
   ZoomTransform,
 } from "@/CAREUI/interactive/Zoom";
@@ -143,15 +143,12 @@ export default function PrintPreview(props: Props) {
       >
         {isMobile ? (
           <div className="mt-4 print:max-w-none">
-            <PinchZoomScrollContainer
-              className="max-h-[65vh] w-[95vw] mx-2 rounded-md shadow-2xl"
-              contentClassName="bg-white p-6 text-sm min-w-[800px]"
+            <FitToWidthScrollContainer
+              className="w-[95vw] mx-2 shadow-2xl"
+              contentClassName="bg-white p-4 text-sm min-w-[800px]"
             >
               {printContent}
-            </PinchZoomScrollContainer>
-            <p className="mt-2 text-center text-xs text-muted-foreground print:hidden">
-              {t("pinch_to_zoom_scroll_to_pan")}
-            </p>
+            </FitToWidthScrollContainer>
           </div>
         ) : (
           <div className="mx-auto my-4 max-w-[95vw] print:max-w-none sm:my-8">
@@ -183,7 +180,7 @@ function StatusWatermark({ watermark }: { watermark: WatermarkProps }) {
       {/* Print: fixed so the browser stamps it on every page (absolute on iOS where fixed print is broken) */}
       <div
         className={cn(
-          "hidden print:flex",
+          "print:flex",
           isIOSDevice ? "absolute" : "fixed",
           "inset-0 flex items-center justify-center select-none pointer-events-none z-10",
         )}
@@ -309,7 +306,7 @@ function FacilityPrintLayout({
           <img
             src={headerImage.url}
             alt="Custom Header"
-            className="flex-1 h-auto object-contain"
+            className="flex-1 h-auto object-contain max-w-3xl"
             style={
               headerImage.height
                 ? { maxHeight: `${headerImage.height}px` }
