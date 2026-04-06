@@ -71,10 +71,12 @@ export default function ObservationDefinitionForm({
   facilityId,
   observationSlug,
   onSuccess,
+  onCancel,
 }: {
   facilityId: string;
   observationSlug?: string;
   onSuccess?: () => void;
+  onCancel?: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -114,6 +116,7 @@ export default function ObservationDefinitionForm({
       observationSlug={observationSlug}
       existingData={existingData}
       onSuccess={onSuccess}
+      onCancel={onCancel}
     />
   );
 }
@@ -124,11 +127,14 @@ function ObservationDefinitionFormContent({
   existingData,
   onSuccess = () =>
     navigate(`/facility/${facilityId}/settings/observation_definitions`),
+  onCancel = () =>
+    navigate(`/facility/${facilityId}/settings/observation_definitions`),
 }: {
   facilityId: string;
   observationSlug?: string;
   existingData?: ObservationDefinitionReadSpec;
   onSuccess?: () => void;
+  onCancel?: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -959,15 +965,7 @@ function ObservationDefinitionFormContent({
             </div>
 
             <div className="flex justify-end space-x-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/settings/observation_definitions`,
-                  )
-                }
-              >
+              <Button type="button" variant="outline" onClick={onCancel}>
                 {t("cancel")}
               </Button>
               <Button type="submit" disabled={isPending}>

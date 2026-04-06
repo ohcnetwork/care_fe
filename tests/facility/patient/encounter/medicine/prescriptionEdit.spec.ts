@@ -93,10 +93,11 @@ test.describe("Edit Patient Prescription", () => {
             resp.status() === 200,
         ),
       ]);
-      await page
+      const prescriptionDate = page
         .getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2} (AM|PM)$/)
-        .first()
-        .click();
+        .first();
+      await expect(prescriptionDate).toBeVisible({ timeout: 10000 });
+      await prescriptionDate.click();
       const table = page.getByRole("table");
       await expect(table).toBeVisible({ timeout: 10000 });
       await expect(table).toContainText(medicineName);
@@ -135,10 +136,11 @@ test.describe("Edit Patient Prescription", () => {
             resp.status() === 200,
         ),
       ]);
-      await page
+      const prescriptionDate = page
         .getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2} (AM|PM)$/)
-        .first()
-        .click();
+        .first();
+      await expect(prescriptionDate).toBeVisible({ timeout: 10000 });
+      await prescriptionDate.click();
       await page.getByText(/Show \d+ Inactive Medications?/i).click();
       const table = page.getByRole("table");
       await expect(table).toContainText(medicineName);
