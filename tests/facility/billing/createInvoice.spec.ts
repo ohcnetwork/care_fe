@@ -83,12 +83,9 @@ async function addBillableChargeItemOnCreateInvoicePage(
   page: Page,
   chargeItemTitle: string,
 ) {
-  const chargeItemsTable = page
-    .locator('[data-slot="table-container"]')
-    .filter({
-      has: page.getByRole("columnheader", { name: /^items$/i }),
-    });
-  await expect(chargeItemsTable).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator('[data-slot="table-body"]').first()).toBeVisible({
+    timeout: 30_000,
+  });
 
   const definitionPicker = page
     .getByRole("combobox")
