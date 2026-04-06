@@ -54,13 +54,13 @@ test.describe("Charge Item Definition Edit operations", () => {
 
     await expect(
       page.locator("li[data-sonner-toast]").getByText(/updated successfully/i),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
 
     await page
       .getByRole("textbox", { name: /Search/i })
       .fill(title + " - edited");
     await expect(
       page.getByRole("table").getByText(title + " - edited"),
-    ).toBeVisible({ timeout: 15000 });
+    ).toBeVisible();
   });
 });

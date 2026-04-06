@@ -53,7 +53,7 @@ test.describe("Department User Management", () => {
         .locator("li[data-sonner-toast]")
         .getByText("User added to organization successfully")
         .first(),
-    ).toBeVisible({ timeout: 15000 });
+    ).toBeVisible();
     await page.getByRole("button", { name: "Add to Organization" }).click();
     await toastVisible;
   }

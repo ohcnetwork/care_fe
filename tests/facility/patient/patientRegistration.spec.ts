@@ -115,7 +115,7 @@ async function submitRegistration(page: Page) {
       page
         .locator("li[data-sonner-toast]")
         .getByText(/patient registered successfully/i),
-    ).toBeVisible({ timeout: 30000 });
+    ).toBeVisible();
     await page.getByRole("button", { name: /register patient/i }).click();
     await toastVisible;
   });

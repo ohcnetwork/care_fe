@@ -113,7 +113,6 @@ test.describe("Product Knowledge Creation", () => {
     await expect(page.getByRole("table").getByText(name)).toBeVisible();
 
     await page.getByRole("link", { name: "View" }).first().click();
-    await page.waitForLoadState("networkidle");
     await expect(page.getByRole("heading").getByText(name)).toBeVisible();
 
     await page.getByRole("button", { name: "Edit" }).first().click();
@@ -159,7 +158,6 @@ test.describe("Product Knowledge Creation", () => {
 
     // View and verify all details
     await page.getByRole("link", { name: "View" }).first().click();
-    await page.waitForLoadState("networkidle");
     await expect(page.getByRole("heading").getByText(name)).toBeVisible();
     await expect(page.getByText(altNames)).toBeVisible();
     await expect(page.getByText(storageGuidelines)).toBeVisible();

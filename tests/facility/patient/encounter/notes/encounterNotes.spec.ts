@@ -116,9 +116,7 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     // Wait for notes to load by checking for the "New" button
     await expect(
       page.getByRole("button", { name: "New", exact: true }),
-    ).toBeVisible({
-      timeout: 10000,
-    });
+    ).toBeVisible();
   });
 
   test("should support multi-user messaging in same thread", async ({
@@ -155,20 +153,20 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     // Wait for notes UI to load
     await expect(
       userBPage.getByRole("button", { name: "New", exact: true }),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
 
     // Reload to ensure we fetch the latest threads (thread was just created by User A)
     await userBPage.reload();
     await userBPage.getByRole("tab", { name: "Notes" }).click();
     await expect(
       userBPage.getByRole("button", { name: "New", exact: true }),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
 
     // Wait for the thread created by User A to appear in User B's view
     const threadButton = userBPage
       .getByRole("button")
       .filter({ hasText: threadTitle });
-    await expect(threadButton).toBeVisible({ timeout: 15000 });
+    await expect(threadButton).toBeVisible();
 
     // Select the thread created by User A
     await threadButton.click();

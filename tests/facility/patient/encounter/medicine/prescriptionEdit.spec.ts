@@ -142,11 +142,11 @@ test.describe("Edit Patient Prescription", () => {
       const prescriptionDate = page
         .getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2} (AM|PM)$/)
         .first();
-      await expect(prescriptionDate).toBeVisible({ timeout: 10000 });
+      await expect(prescriptionDate).toBeVisible();
       await prescriptionDate.click();
       await expect(
         page.getByText(/Show \d+ Inactive Medications?/i),
-      ).toBeVisible({ timeout: 15000 });
+      ).toBeVisible();
       await page.getByText(/Show \d+ Inactive Medications?/i).click();
       const table = page.getByRole("table");
       await expect(table).toContainText(medicineName);

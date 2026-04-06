@@ -75,14 +75,12 @@ test.describe("Facility Image Settings", () => {
     await page.getByRole("button", { name: "Cancel" }).click();
 
     // Wait for dialog to fully close
-    await page.waitForTimeout(500);
+    await expect(page.getByRole("dialog")).toBeHidden();
 
     // Reopen and verify state was reset
     await page.getByRole("button", { name: "Edit Cover Photo" }).click();
 
-    await expect(page.getByText("Drag & drop image to upload")).toBeVisible({
-      timeout: 15000,
-    });
+    await expect(page.getByText("Drag & drop image to upload")).toBeVisible();
     await expect(page.getByText("No image found.")).toBeVisible();
 
     await page.getByRole("button", { name: "Cancel" }).click();

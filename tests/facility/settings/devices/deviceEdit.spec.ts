@@ -180,12 +180,8 @@ test.describe("Facility Device Edit", () => {
     await expect(page.getByText("Device updated successfully")).toBeVisible();
 
     // Verify updated fields are displayed
-    await expect(page.getByText(newUserFriendlyName)).toBeVisible({
-      timeout: 10000,
-    });
-    await expect(page.getByText(newManufacturer)).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.getByText(newUserFriendlyName)).toBeVisible();
+    await expect(page.getByText(newManufacturer)).toBeVisible();
   });
 
   test("Cancel editing and verify no changes are saved", async ({ page }) => {

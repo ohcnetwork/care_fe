@@ -92,10 +92,11 @@ test.describe("Product Knowledge Edit operations", () => {
         .first()
         .fill("30");
     }
-    await page.getByRole("button", { name: /update/i }).click();
-    await expect(
+    const toastVisible = expect(
       page.locator("li[data-sonner-toast]").getByText(/updated successfully/i),
-    ).toBeVisible({ timeout: 15000 });
+    ).toBeVisible();
+    await page.getByRole("button", { name: /update/i }).click();
+    await toastVisible;
 
     await expect(page.getByRole("heading").getByText(name)).toBeVisible();
     await page.getByRole("link", { name: "Back" }).click();
