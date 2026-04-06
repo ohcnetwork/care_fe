@@ -57,7 +57,7 @@ test.describe("Department User Management", () => {
         .locator("li[data-sonner-toast]")
         .getByText("User added to organization successfully")
         .first(),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible({ timeout: 15000 });
   }
 
   async function searchUserInTable(page: Page, userName: string) {

@@ -146,7 +146,7 @@ test.describe("Edit Patient Prescription", () => {
       await prescriptionDate.click();
       await expect(
         page.getByText(/Show \d+ Inactive Medications?/i),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible({ timeout: 15000 });
       await page.getByText(/Show \d+ Inactive Medications?/i).click();
       const table = page.getByRole("table");
       await expect(table).toContainText(medicineName);

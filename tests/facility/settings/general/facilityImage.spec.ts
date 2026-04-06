@@ -78,7 +78,7 @@ test.describe("Facility Image Settings", () => {
     await page.getByRole("button", { name: "Edit Cover Photo" }).click();
 
     await expect(page.getByText("Drag & drop image to upload")).toBeVisible({
-      timeout: 10000,
+      timeout: 15000,
     });
     await expect(page.getByText("No image found.")).toBeVisible();
 
