@@ -152,6 +152,11 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     await userBPage.goto(encounterUrl);
     await userBPage.getByRole("tab", { name: "Notes" }).click();
 
+    // Wait for notes section to load
+    await expect(
+      userBPage.getByRole("button", { name: "New", exact: true }),
+    ).toBeVisible({ timeout: 10000 });
+
     // Select the thread created by User A
     await userBPage
       .getByRole("button")

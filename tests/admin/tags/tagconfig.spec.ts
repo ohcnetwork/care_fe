@@ -54,9 +54,9 @@ test.describe("Tag Configuration Management", () => {
 
   test("should display existing tag configurations", async ({ page }) => {
     // Verify the tag config table is visible
-    await expect(page.locator(".rounded-md.overflow-x-auto")).toBeVisible();
+    await expect(page.getByRole("table")).toBeVisible();
 
-    // Verify table headers are present (adjust based on actual table structure)
+    // Verify table headers are present
     await expect(page.locator("thead")).toBeVisible();
 
     // Verify table body is present
