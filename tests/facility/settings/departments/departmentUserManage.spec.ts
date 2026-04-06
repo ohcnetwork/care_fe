@@ -48,15 +48,15 @@ test.describe("Department User Management", () => {
   }
 
   async function submitAddUser(page: Page) {
-    await Promise.all([
-      page.waitForResponse(
-        (resp) =>
-          resp.url().includes("/organization/") &&
-          resp.request().method() === "POST" &&
-          resp.status() === 200,
-      ),
-      page.getByRole("button", { name: "Add to Organization" }).click(),
-    ]);
+    const responsePromise = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/organizations/") &&
+        resp.url().includes("/users/") &&
+        resp.request().method() === "POST" &&
+        resp.ok(),
+    );
+    await page.getByRole("button", { name: "Add to Organization" }).click();
+    await responsePromise;
   }
 
   async function searchUserInTable(page: Page, userName: string) {
