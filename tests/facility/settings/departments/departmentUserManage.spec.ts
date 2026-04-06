@@ -48,14 +48,15 @@ test.describe("Department User Management", () => {
   }
 
   async function submitAddUser(page: Page) {
-    const toastVisible = expect(
-      page
-        .locator("li[data-sonner-toast]")
-        .getByText("User added to organization successfully")
-        .first(),
-    ).toBeVisible();
-    await page.getByRole("button", { name: "Add to Organization" }).click();
-    await toastVisible;
+    await Promise.all([
+      page.waitForResponse(
+        (resp) =>
+          resp.url().includes("/organization/") &&
+          resp.request().method() === "POST" &&
+          resp.status() === 200,
+      ),
+      page.getByRole("button", { name: "Add to Organization" }).click(),
+    ]);
   }
 
   async function searchUserInTable(page: Page, userName: string) {

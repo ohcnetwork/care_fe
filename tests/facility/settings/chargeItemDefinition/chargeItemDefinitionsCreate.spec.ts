@@ -67,6 +67,7 @@ test.describe("Charge Item Definition Creation", () => {
     await expect(page.getByRole("table").getByText(title)).toBeVisible();
 
     await page.getByRole("link", { name: "View" }).click();
+    await page.waitForURL("**/charge_item_definitions/**");
     await expect(page.getByRole("heading", { name: title })).toBeVisible();
 
     await page.getByRole("button", { name: "Edit" }).first().click();
@@ -164,6 +165,7 @@ test.describe("Charge Item Definition Creation", () => {
     await page.getByRole("textbox", { name: /search/i }).fill(title);
     await expect(page.getByRole("table").getByText(title)).toBeVisible();
     await page.getByRole("link", { name: "View" }).click();
+    await page.waitForURL("**/charge_item_definitions/**");
     await expect(page.getByRole("heading", { name: title })).toBeVisible();
     await expect(page.getByText(description)).toBeVisible();
     await expect(page.getByText(purpose).last()).toBeVisible();
