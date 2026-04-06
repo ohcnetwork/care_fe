@@ -146,16 +146,9 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     });
     const userBPage = await userBContext.newPage();
 
-    // User B navigates to the same encounter
-    await userBPage.goto(encounterUrl);
-
-    // Wait for the threads API to respond after clicking Notes tab
-    const threadsApiResponse = userBPage.waitForResponse(
-      (resp) =>
-        resp.url().includes("/thread/") && resp.request().method() === "GET",
-    );
-    await userBPage.getByRole("tab", { name: "Notes" }).click();
-    await threadsApiResponse;
+    // User B navigates to the same encounter's Notes tab directly
+    const notesUrl = encounterUrl.replace(/\/[^/]+$/, "/notes");
+    await userBPage.goto(notesUrl);
 
     // Wait for notes UI to load
     await expect(
@@ -170,14 +163,10 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     // First check on the initial load, then retry with reloads if not visible
     if (!(await threadButton.isVisible())) {
       await expect(async () => {
-        const retryApi = userBPage.waitForResponse(
-          (resp) =>
-            resp.url().includes("/thread/") &&
-            resp.request().method() === "GET",
-        );
-        await userBPage.reload();
-        await userBPage.getByRole("tab", { name: "Notes" }).click();
-        await retryApi;
+        await userBPage.goto(notesUrl);
+        await expect(
+          userBPage.getByRole("button", { name: "New", exact: true }),
+        ).toBeVisible();
         await expect(threadButton).toBeVisible({ timeout: 5_000 });
       }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
     }
@@ -198,13 +187,8 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     });
 
     // Refresh User A's view and verify both messages appear
-    const userAThreadsApi = page.waitForResponse(
-      (resp) =>
-        resp.url().includes("/thread/") && resp.request().method() === "GET",
-    );
-    await page.reload();
-    await page.getByRole("tab", { name: "Notes" }).click();
-    await userAThreadsApi;
+    const userANotesUrl = encounterUrl.replace(/\/[^/]+$/, "/notes");
+    await page.goto(userANotesUrl);
     await page.getByRole("button").filter({ hasText: threadTitle }).click();
 
     await expect(page.getByText(userAMessage1)).toBeVisible();
