@@ -84,8 +84,9 @@ async function expectInvoiceShowListsDraftAndChargeItem(
   chargeItemTitle: string,
 ) {
   await page.waitForLoadState("networkidle");
-  await expect(page.getByText(/invoice:/i)).toBeVisible();
-  await expect(page.getByText(/^draft$/i)).toBeVisible();
+  const invoiceTitle = page.getByText(/invoice:/i);
+  await expect(invoiceTitle).toBeVisible();
+  await expect(invoiceTitle.locator("..").getByText(/^draft$/i)).toBeVisible();
   await expect(
     page.getByRole("table").getByText(new RegExp(chargeItemTitle, "i")),
   ).toBeVisible();
