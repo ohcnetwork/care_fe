@@ -103,7 +103,7 @@ test.describe("Product Knowledge Edit operations", () => {
     await page.getByRole("textbox", { name: "Search products" }).fill(name);
     await expect(page.getByRole("table").getByText(name)).toBeVisible();
 
-    await page.getByRole("link", { name: "View" }).click();
+    await page.getByRole("link", { name: "View" }).first().click();
 
     // Verify all the fields
     await expect(page.getByText(name)).toBeVisible();

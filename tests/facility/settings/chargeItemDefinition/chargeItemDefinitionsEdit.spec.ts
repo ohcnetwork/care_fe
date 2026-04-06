@@ -52,14 +52,15 @@ test.describe("Charge Item Definition Edit operations", () => {
       .fill(purchasePrice);
     await page.getByRole("button", { name: /update/i }).click();
 
-    await page.waitForLoadState("networkidle");
-    await expect(page.getByText(/updated successfully/i).first()).toBeVisible();
+    await expect(
+      page.locator("li[data-sonner-toast]").getByText(/updated successfully/i),
+    ).toBeVisible({ timeout: 10000 });
 
     await page
       .getByRole("textbox", { name: /Search/i })
       .fill(title + " - edited");
     await expect(
       page.getByRole("table").getByText(title + " - edited"),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
   });
 });

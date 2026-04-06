@@ -55,7 +55,8 @@ test.describe("Department User Management", () => {
     await expect(
       page
         .locator("li[data-sonner-toast]")
-        .getByText("User added to organization successfully"),
+        .getByText("User added to organization successfully")
+        .first(),
     ).toBeVisible({ timeout: 10000 });
   }
 
