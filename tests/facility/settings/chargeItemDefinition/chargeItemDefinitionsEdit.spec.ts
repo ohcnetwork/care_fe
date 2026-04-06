@@ -52,7 +52,8 @@ test.describe("Charge Item Definition Edit operations", () => {
       .fill(purchasePrice);
     await page.getByRole("button", { name: /update/i }).click();
 
-    await expect(page.getByText(/updated successfully/i)).toBeVisible();
+    await page.waitForLoadState("networkidle");
+    await expect(page.getByText(/updated successfully/i).first()).toBeVisible();
 
     await page
       .getByRole("textbox", { name: /Search/i })
