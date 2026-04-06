@@ -146,7 +146,9 @@ test.describe("Device Location Association", () => {
 
     // Verify location appears in location history
     await expect(page.getByText("Location History")).toBeVisible();
-    await expect(page.getByText(/bed 5/i)).toBeVisible();
+    await expect(
+      page.getByRole("listitem").filter({ hasText: /bed 5/i }).first(),
+    ).toBeVisible();
   });
 
   test("should display location history", async ({ page }) => {

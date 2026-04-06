@@ -93,7 +93,8 @@ test.describe("Product Knowledge Edit operations", () => {
         .fill("30");
     }
     await page.getByRole("button", { name: /update/i }).click();
-    await expect(page.getByText(/updated successfully/i)).toBeVisible();
+    await page.waitForLoadState("networkidle");
+    await expect(page.getByText(/updated successfully/i).first()).toBeVisible();
 
     await expect(page.getByRole("heading").getByText(name)).toBeVisible();
     await page.getByRole("link", { name: "Back" }).click();
