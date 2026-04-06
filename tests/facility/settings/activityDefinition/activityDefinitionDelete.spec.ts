@@ -19,15 +19,25 @@ test.beforeEach(async ({ page }) => {
 
 test.describe("activity definition deletion", () => {
   test("should delete activity definition", async ({ page }) => {
+    // Navigate to the detail page and wait for the API data to load
+    const definitionApiResponse = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/activity_definition/") &&
+        resp.request().method() === "GET" &&
+        resp.ok(),
+    );
     await page.goto(
       `/facility/${facilityId}/settings/activity_definitions/f-${facilityId}-${createdAD.slug}`,
     );
+    await definitionApiResponse;
 
     await expect(
       page.getByRole("heading", { name: createdAD.title }),
     ).toBeVisible();
 
-    await page.getByRole("button", { name: /delete/i }).click();
+    const deleteButton = page.getByRole("button", { name: /delete/i });
+    await expect(deleteButton).toBeVisible();
+    await deleteButton.click();
 
     const dialog = page.getByRole("alertdialog");
     await expect(dialog).toBeVisible();
@@ -43,9 +53,15 @@ test.describe("activity definition deletion", () => {
       `/facility/${facilityId}/settings/activity_definitions`,
     );
 
+    const retiredApiResponse = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/activity_definition/") &&
+        resp.request().method() === "GET",
+    );
     await page.goto(
       `/facility/${facilityId}/settings/activity_definitions/f-${facilityId}-${createdAD.slug}`,
     );
+    await retiredApiResponse;
 
     await expect(page.getByText(/retired/i)).toBeVisible();
   });

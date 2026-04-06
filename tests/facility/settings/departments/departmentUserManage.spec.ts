@@ -56,6 +56,10 @@ test.describe("Department User Management", () => {
     );
     await page.getByRole("button", { name: "Add to Organization" }).click();
     await responsePromise;
+    // Wait for the sheet/dialog to close after successful submission
+    await expect(
+      page.getByRole("button", { name: "Add to Organization" }),
+    ).toBeHidden();
   }
 
   async function searchUserInTable(page: Page, userName: string) {
