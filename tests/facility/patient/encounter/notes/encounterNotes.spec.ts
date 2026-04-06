@@ -148,22 +148,39 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
 
     // User B navigates to the same encounter
     await userBPage.goto(encounterUrl);
+
+    // Wait for the threads API to respond after clicking Notes tab
+    const threadsApiResponse = userBPage.waitForResponse(
+      (resp) =>
+        resp.url().includes("/thread/") && resp.request().method() === "GET",
+    );
     await userBPage.getByRole("tab", { name: "Notes" }).click();
+    await threadsApiResponse;
 
     // Wait for notes UI to load
     await expect(
       userBPage.getByRole("button", { name: "New", exact: true }),
     ).toBeVisible();
 
-    // Poll until the thread created by User A appears (API may return stale data initially)
+    // Wait for the thread created by User A to appear
     const threadButton = userBPage
       .getByRole("button")
       .filter({ hasText: threadTitle });
-    await expect(async () => {
-      await userBPage.reload();
-      await userBPage.getByRole("tab", { name: "Notes" }).click();
-      await expect(threadButton).toBeVisible();
-    }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
+
+    // First check on the initial load, then retry with reloads if not visible
+    if (!(await threadButton.isVisible())) {
+      await expect(async () => {
+        const retryApi = userBPage.waitForResponse(
+          (resp) =>
+            resp.url().includes("/thread/") &&
+            resp.request().method() === "GET",
+        );
+        await userBPage.reload();
+        await userBPage.getByRole("tab", { name: "Notes" }).click();
+        await retryApi;
+        await expect(threadButton).toBeVisible({ timeout: 5_000 });
+      }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
+    }
 
     // Select the thread created by User A
     await threadButton.click();
@@ -181,8 +198,13 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     });
 
     // Refresh User A's view and verify both messages appear
+    const userAThreadsApi = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/thread/") && resp.request().method() === "GET",
+    );
     await page.reload();
     await page.getByRole("tab", { name: "Notes" }).click();
+    await userAThreadsApi;
     await page.getByRole("button").filter({ hasText: threadTitle }).click();
 
     await expect(page.getByText(userAMessage1)).toBeVisible();

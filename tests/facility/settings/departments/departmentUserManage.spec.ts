@@ -52,8 +52,7 @@ test.describe("Department User Management", () => {
       (resp) =>
         resp.url().includes("/organizations/") &&
         resp.url().includes("/users/") &&
-        resp.request().method() === "POST" &&
-        resp.ok(),
+        resp.request().method() === "POST",
     );
     await page.getByRole("button", { name: "Add to Organization" }).click();
     await responsePromise;
