@@ -136,8 +136,6 @@ async function addBillableChargeItemOnCreateInvoicePage(
     .getByRole("row")
     .filter({ hasText: new RegExp(chargeItemTitle, "i") });
 
-  // Accounts can already have billable items with the same title (especially in CI
-  // where setup data is re-used). Assert the action actually added one more row.
   const existingCount = await chargeRowsMatchingTitle.count();
   await expect(chargeRowsMatchingTitle).toHaveCount(existingCount + 1, {
     timeout: 30_000,
