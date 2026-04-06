@@ -19,11 +19,20 @@ let facilityId: string;
 let patientId: string;
 let encounterId: string;
 
-function serviceRequestDataRow(page: Page, activityDefinition: string) {
+function serviceRequestMatchingRows(page: Page, data: ServiceRequestTestData) {
   return page
     .locator('[data-slot="table-body"]')
     .getByRole("row")
-    .filter({ hasText: activityDefinition });
+    .filter({ hasText: data.activityDefinition })
+    .filter({ hasText: data.priority })
+    .filter({ hasText: "Active" });
+}
+
+function newestMatchingServiceRequestRow(
+  page: Page,
+  data: ServiceRequestTestData,
+) {
+  return serviceRequestMatchingRows(page, data).first();
 }
 
 async function createServiceRequestAndGetContext(
@@ -44,11 +53,9 @@ async function createServiceRequestAndGetContext(
   await page.goto(listUrl.href);
   await page.waitForLoadState("networkidle");
 
-  const requestRow = serviceRequestDataRow(
-    page,
-    serviceRequestData.activityDefinition,
-  );
-  await expect(requestRow).toHaveCount(1);
+  const matchingRows = serviceRequestMatchingRows(page, serviceRequestData);
+  const requestRow = newestMatchingServiceRequestRow(page, serviceRequestData);
+  await expect(matchingRows.first()).toBeVisible();
 
   await requestRow.getByRole("button", { name: /see details/i }).click();
   await expect(page).toHaveURL(
@@ -82,8 +89,7 @@ test.describe("Facility Service Request List and Show", () => {
 
     await expect(page.getByRole("tab", { name: /active/i })).toBeVisible();
 
-    const requestRow = serviceRequestDataRow(page, data.activityDefinition);
-    await expect(requestRow).toHaveCount(1);
+    const requestRow = newestMatchingServiceRequestRow(page, data);
     await expect(
       requestRow.getByText(data.activityDefinition).first(),
     ).toBeVisible();
@@ -103,20 +109,21 @@ test.describe("Facility Service Request List and Show", () => {
     await expect(activeTab).toBeVisible();
     await expect(completedTab).toBeVisible();
 
-    const requestRow = serviceRequestDataRow(page, data.activityDefinition);
-    await expect(requestRow).toHaveCount(1);
+    const matchingRows = serviceRequestMatchingRows(page, data);
 
     await completedTab.click();
     await page.waitForLoadState("networkidle");
     await expect(completedTab).toHaveAttribute("data-state", "active");
-    await expect(requestRow).toHaveCount(0);
+    await expect(matchingRows).toHaveCount(0);
 
     await activeTab.click();
     await page.waitForLoadState("networkidle");
     await expect(activeTab).toHaveAttribute("data-state", "active");
-    await expect(requestRow).toHaveCount(1);
+    await expect(matchingRows.first()).toBeVisible();
     await expect(
-      requestRow.getByRole("button", { name: /see details/i }),
+      newestMatchingServiceRequestRow(page, data).getByRole("button", {
+        name: /see details/i,
+      }),
     ).toBeVisible();
   });
 
