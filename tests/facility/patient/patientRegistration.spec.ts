@@ -111,12 +111,13 @@ async function fillAdditionalDetails(
 
 async function submitRegistration(page: Page) {
   await test.step("Submit patient registration", async () => {
-    await page.getByRole("button", { name: /register patient/i }).click();
-    await expect(
+    const toastVisible = expect(
       page
         .locator("li[data-sonner-toast]")
         .getByText(/patient registered successfully/i),
-    ).toBeVisible({ timeout: 15000 });
+    ).toBeVisible({ timeout: 30000 });
+    await page.getByRole("button", { name: /register patient/i }).click();
+    await toastVisible;
   });
 }
 

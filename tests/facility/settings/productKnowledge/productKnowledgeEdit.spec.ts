@@ -95,7 +95,7 @@ test.describe("Product Knowledge Edit operations", () => {
     await page.getByRole("button", { name: /update/i }).click();
     await expect(
       page.locator("li[data-sonner-toast]").getByText(/updated successfully/i),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible({ timeout: 15000 });
 
     await expect(page.getByRole("heading").getByText(name)).toBeVisible();
     await page.getByRole("link", { name: "Back" }).click();

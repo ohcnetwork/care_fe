@@ -74,6 +74,9 @@ test.describe("Facility Image Settings", () => {
     // Close without uploading
     await page.getByRole("button", { name: "Cancel" }).click();
 
+    // Wait for dialog to fully close
+    await page.waitForTimeout(500);
+
     // Reopen and verify state was reset
     await page.getByRole("button", { name: "Edit Cover Photo" }).click();
 

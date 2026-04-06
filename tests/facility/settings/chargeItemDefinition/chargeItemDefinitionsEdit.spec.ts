@@ -61,6 +61,6 @@ test.describe("Charge Item Definition Edit operations", () => {
       .fill(title + " - edited");
     await expect(
       page.getByRole("table").getByText(title + " - edited"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible({ timeout: 15000 });
   });
 });

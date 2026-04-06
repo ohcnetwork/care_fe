@@ -48,16 +48,14 @@ test.describe("Department User Management", () => {
   }
 
   async function submitAddUser(page: Page) {
-    await page.getByRole("button", { name: "Add to Organization" }).click();
-  }
-
-  async function verifyUserAddedSuccess(page: Page) {
-    await expect(
+    const toastVisible = expect(
       page
         .locator("li[data-sonner-toast]")
         .getByText("User added to organization successfully")
         .first(),
     ).toBeVisible({ timeout: 15000 });
+    await page.getByRole("button", { name: "Add to Organization" }).click();
+    await toastVisible;
   }
 
   async function searchUserInTable(page: Page, userName: string) {
@@ -148,7 +146,6 @@ test.describe("Department User Management", () => {
     await selectUser(page, userName);
     await selectRole(page, role);
     await submitAddUser(page);
-    await verifyUserAddedSuccess(page);
 
     // Verify user exists in department list
     await searchUserInTable(page, userName);
@@ -178,7 +175,6 @@ test.describe("Department User Management", () => {
     await selectUser(page, userName);
     await selectRole(page, initialRole);
     await submitAddUser(page);
-    await verifyUserAddedSuccess(page);
 
     // Search and verify user with initial role
     await searchUserInTable(page, userName);
@@ -213,7 +209,6 @@ test.describe("Department User Management", () => {
     await selectUser(page, userName);
     await selectRole(page, role);
     await submitAddUser(page);
-    await verifyUserAddedSuccess(page);
 
     // Verify user is in list
     await searchUserInTable(page, userName);
