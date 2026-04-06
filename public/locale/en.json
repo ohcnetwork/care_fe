@@ -4272,7 +4272,6 @@
   "pin_page_limit_reached": "You have reached the maximum of {{max}} pinned links. Please unpin an existing link before adding a new one.",
   "pin_page_success": "Page pinned to dashboard successfully",
   "pin_page_title_placeholder": "Enter a custom title for the pinned link (optional)",
-  "pinch_to_zoom_scroll_to_pan": "Pinch to zoom, scroll to pan",
   "pincode": "PIN Code",
   "pincode_autofill": "State and District auto-filled from Pincode",
   "pincode_district_auto_fill_error": "Failed to auto-fill district information",
