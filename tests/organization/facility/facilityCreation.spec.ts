@@ -153,7 +153,14 @@ test.describe("Facility Creation", () => {
     await page
       .getByRole("textbox", { name: "Search by facility name" })
       .fill(facilityName);
+    const facilityApiResponse = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/facility/") &&
+        resp.request().method() === "GET" &&
+        resp.ok(),
+    );
     await page.getByRole("link", { name: "View Facility" }).click();
+    await facilityApiResponse;
 
     // Verify facility details
     await expect(
@@ -224,7 +231,14 @@ test.describe("Facility Creation", () => {
     await page
       .getByRole("textbox", { name: "Search by facility name" })
       .fill(facilityName);
+    const facilityApiResponse = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/facility/") &&
+        resp.request().method() === "GET" &&
+        resp.ok(),
+    );
     await page.getByRole("link", { name: "View Facility" }).click();
+    await facilityApiResponse;
 
     // Verify facility details - only mandatory fields should be visible
     await expect(
