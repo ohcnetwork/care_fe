@@ -115,6 +115,14 @@ test.describe("Facility Device Edit", () => {
     // Wait for success message
     await expect(page.getByText("Device updated successfully")).toBeVisible();
 
+    // Wait for page to re-render with updated data
+    await page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/device/") &&
+        resp.request().method() === "GET" &&
+        resp.status() === 200,
+    );
+
     // Verify all updated information is displayed on the details page
     await expect(
       page.getByRole("heading", { name: newDeviceName }),
