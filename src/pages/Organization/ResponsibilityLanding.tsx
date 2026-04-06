@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import query from "@/Utils/request/query";
 import organizationApi from "@/types/organization/organizationApi";
 
+import { usePermissions } from "@/context/PermissionContext";
 import OrganizationUsers from "./OrganizationUsers";
 
 interface Props {
@@ -24,8 +25,12 @@ export default function ResponsibilityLanding({ id }: Props) {
     enabled: !!id,
   });
 
-  const canListUsers =
-    org?.permissions?.includes("can_list_organization_users") ?? false;
+  const { hasPermission } = usePermissions();
+
+  const canListUsers = hasPermission(
+    "can_list_organization_users",
+    org?.permissions,
+  );
 
   useEffect(() => {
     if (!isLoading && org && !canListUsers) {
