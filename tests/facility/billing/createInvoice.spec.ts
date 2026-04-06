@@ -97,8 +97,6 @@ async function addBillableChargeItemOnCreateInvoicePage(
   }
   const [, facilityIdFromUrl, accountIdFromUrl] = urlMatch;
 
-  // Inline charge picker mounts only after account (with patient) loads—charge
-  // items query can finish first and show the table while account is still in flight.
   await page
     .waitForResponse(
       (r) => {
@@ -133,11 +131,17 @@ async function addBillableChargeItemOnCreateInvoicePage(
   await page.getByTitle(/confirm/i).click();
   await page.waitForLoadState("networkidle");
 
-  const chargeRow = page
+  const chargeRowsMatchingTitle = page
     .locator('[data-slot="table-body"]')
     .getByRole("row")
     .filter({ hasText: new RegExp(chargeItemTitle, "i") });
-  await expect(chargeRow).toHaveCount(1);
+
+  // Accounts can already have billable items with the same title (especially in CI
+  // where setup data is re-used). Assert the action actually added one more row.
+  const existingCount = await chargeRowsMatchingTitle.count();
+  await expect(chargeRowsMatchingTitle).toHaveCount(existingCount + 1, {
+    timeout: 30_000,
+  });
 }
 
 async function clickCreateInvoiceFromAccount(page: Page) {
