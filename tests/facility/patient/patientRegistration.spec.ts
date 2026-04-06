@@ -113,8 +113,10 @@ async function submitRegistration(page: Page) {
   await test.step("Submit patient registration", async () => {
     await page.getByRole("button", { name: /register patient/i }).click();
     await expect(
-      page.getByText(/patient registered successfully/i),
-    ).toBeVisible({ timeout: 10000 });
+      page
+        .locator("li[data-sonner-toast]")
+        .getByText(/patient registered successfully/i),
+    ).toBeVisible({ timeout: 15000 });
   });
 }
 

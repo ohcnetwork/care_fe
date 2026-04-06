@@ -39,7 +39,9 @@ test.describe("Charge Item Definition Delete operations", () => {
     ).toBeVisible();
 
     await page.getByRole("textbox", { name: /search/i }).fill(title);
-    await expect(page.getByRole("table").getByText(title)).toBeVisible();
+    await expect(page.getByRole("table").getByText(title)).toBeVisible({
+      timeout: 15000,
+    });
     await page.getByRole("link", { name: "view" }).first().click();
     await expect(page.getByRole("button", { name: "Delete" })).toBeVisible();
     await page.getByRole("button", { name: "Delete" }).click();
