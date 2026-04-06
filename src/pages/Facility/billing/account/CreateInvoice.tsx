@@ -873,7 +873,7 @@ export function CreateInvoicePage({
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 pt-2 pb-4">
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 pt-2 pb-4 items-start">
                   <FormField
                     control={form.control}
                     name="payment_terms"
