@@ -1,78 +1,76 @@
+import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
+import {
+  expectToast,
+  selectFromDefinitionCategoryPicker,
+} from "tests/helper/ui";
 import { getAccountId } from "tests/support/accountId";
 import { getFacilityId } from "tests/support/facilityId";
+import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-async function ensureSubmitInvoiceEnabled(page: Page) {
-  const submitButton = page
-    .locator('button[type="submit"]')
-    .filter({ hasText: /create invoice/i })
-    .first();
-  await expect(submitButton).toBeVisible();
+const medicationsCategoryChargeItemTitles = [
+  "Ibuprofen",
+  "Paracetamol",
+  "Amoxicillin",
+];
 
-  await expect(submitButton)
-    .toBeEnabled({ timeout: 6000 })
-    .catch(() => null);
-  if (await submitButton.isEnabled().catch(() => false)) return submitButton;
+async function addBillableChargeItemOnCreateInvoicePage(
+  page: Page,
+  chargeItemTitle: string,
+) {
+  const definitionPicker = page
+    .getByRole("combobox")
+    .filter({ hasText: /add charges/i });
+  await expect(definitionPicker).toBeVisible();
+  await selectFromDefinitionCategoryPicker(page, definitionPicker, {
+    navigateCategories: ["Medications"],
+    search: chargeItemTitle,
+  });
 
-  const commandItem = page.locator('[data-slot="command-item"]').first();
-  if (!(await commandItem.isVisible().catch(() => false))) {
-    const pickerTrigger = page.getByRole("combobox").first();
-    await expect(pickerTrigger).toBeVisible();
-    await pickerTrigger.click();
-    await expect(commandItem).toBeVisible();
-  }
+  await page.getByTitle(/confirm/i).click();
+  await page.waitForLoadState("networkidle");
 
-  for (let depth = 0; depth < 5; depth += 1) {
-    await commandItem.click();
-    const quantityInput = page.locator('input[type="number"]').first();
-    if (await quantityInput.isVisible().catch(() => false)) break;
-  }
+  const chargeRow = page
+    .locator('[data-slot="table-body"]')
+    .getByRole("row")
+    .filter({ hasText: new RegExp(chargeItemTitle, "i") });
+  await expect(chargeRow).toHaveCount(1);
+}
 
-  const confirmButton = page.getByTitle(/confirm/i).first();
-  if (await confirmButton.isVisible().catch(() => false)) {
-    await confirmButton.click();
-  } else {
-    await page.keyboard.press("Enter");
-  }
-
-  await expect(submitButton).toBeEnabled({ timeout: 15000 });
-  return submitButton;
+async function clickCreateInvoiceFromAccount(page: Page) {
+  const createInvoiceBtn = page
+    .getByRole("button", { name: /create invoice|^invoice$/i })
+    .filter({ visible: true });
+  await expect(createInvoiceBtn).toBeVisible();
+  await createInvoiceBtn.click();
 }
 
 async function createInvoiceAndGetId(
   page: Page,
   facilityId: string,
   accountId: string,
+  chargeItemTitle: string,
 ): Promise<string> {
   await page.goto(`/facility/${facilityId}/billing/account/${accountId}`);
-  await expect(
-    page.getByRole("button", { name: /create invoice|invoice/i }).first(),
-  ).toBeVisible();
+  await page.waitForLoadState("networkidle");
 
-  await page
-    .getByRole("button", { name: /create invoice|invoice/i })
-    .first()
-    .click();
+  await clickCreateInvoiceFromAccount(page);
 
   await page.waitForURL(/\/billing\/account\/[a-f0-9-]+\/invoices\/create/i);
-  const submitButton = await ensureSubmitInvoiceEnabled(page);
+  await page.waitForLoadState("networkidle");
+
+  await addBillableChargeItemOnCreateInvoicePage(page, chargeItemTitle);
+
+  const submitButton = page
+    .locator('button[type="submit"]')
+    .filter({ hasText: /create invoice/i });
+  await expect(submitButton).toBeEnabled();
   await submitButton.click();
 
   await expect(page).toHaveURL(/\/billing\/invoices\/[a-f0-9-]+/i);
-
-  const successToast = page.getByRole("status").filter({
-    hasText: /invoice.*created.*successfully/i,
-  });
-  if (
-    await successToast
-      .first()
-      .isVisible()
-      .catch(() => false)
-  ) {
-    await expect(successToast.first()).toBeVisible();
-  }
+  await expectToast(page, /invoice created successfully/i);
 
   const invoiceId = page.url().match(/\/billing\/invoices\/([a-f0-9-]+)/i)?.[1];
   if (!invoiceId)
@@ -81,50 +79,95 @@ async function createInvoiceAndGetId(
   return invoiceId;
 }
 
+async function expectInvoiceShowListsDraftAndChargeItem(
+  page: Page,
+  chargeItemTitle: string,
+) {
+  await page.waitForLoadState("networkidle");
+  await expect(page.getByText(/invoice:/i)).toBeVisible();
+  await expect(page.getByText(/^draft$/i)).toBeVisible();
+  await expect(
+    page.getByRole("table").getByText(new RegExp(chargeItemTitle, "i")),
+  ).toBeVisible();
+}
+
 test.describe("Create Invoice", () => {
   let facilityId: string;
   let accountId: string;
+  let chargeItemTitle: string;
 
   test.beforeEach(() => {
     facilityId = getFacilityId();
     accountId = getAccountId();
+    chargeItemTitle = faker.helpers.arrayElement(
+      medicationsCategoryChargeItemTitles,
+    );
   });
 
-  test("navigate billing account list and open account", async ({ page }) => {
-    await page.goto(`/facility/${facilityId}/billing/account`);
+  test("billing accounts list filtered by patient opens setup account", async ({
+    page,
+  }) => {
+    const patientId = getPatientId();
+
+    await page.goto(
+      `/facility/${facilityId}/billing/account?patient_filter=${patientId}`,
+    );
+    await page.waitForLoadState("networkidle");
 
     const accountsTable = page.getByRole("table");
     await expect(accountsTable).toBeVisible();
 
-    await page
-      .getByRole("button", { name: /go to account/i })
-      .first()
-      .click();
+    const accountRow = page
+      .locator('[data-slot="table-body"]')
+      .getByRole("row");
+    await expect(accountRow).toHaveCount(1);
 
-    await expect(page).toHaveURL(/\/billing\/account\/[a-f0-9-]+/i);
+    await accountRow.getByRole("button", { name: /go to account/i }).click();
+
+    await expect(page).toHaveURL(
+      new RegExp(`/billing/account/${accountId}(/|$)`),
+    );
+
     await expect(
-      page.getByRole("button", { name: /create invoice|invoice/i }).first(),
+      page
+        .getByRole("button", { name: /create invoice|^invoice$/i })
+        .filter({ visible: true }),
     ).toBeVisible();
   });
 
   test("create invoice and show success", async ({ page }) => {
-    await createInvoiceAndGetId(page, facilityId, accountId);
+    const invoiceId = await createInvoiceAndGetId(
+      page,
+      facilityId,
+      accountId,
+      chargeItemTitle,
+    );
+    await expect(page).toHaveURL(
+      new RegExp(`/billing/invoices/${invoiceId}`, "i"),
+    );
+    await expectInvoiceShowListsDraftAndChargeItem(page, chargeItemTitle);
   });
 
   test("created invoice appears in account invoices tab", async ({ page }) => {
-    const invoiceId = await createInvoiceAndGetId(page, facilityId, accountId);
+    const invoiceId = await createInvoiceAndGetId(
+      page,
+      facilityId,
+      accountId,
+      chargeItemTitle,
+    );
 
     await page.goto(
       `/facility/${facilityId}/billing/account/${accountId}/invoices`,
     );
+    await page.waitForLoadState("networkidle");
 
     const invoicesTable = page.getByRole("table");
     await expect(invoicesTable).toBeVisible();
 
-    const invoiceLink = invoicesTable
-      .locator(`a[href*="/billing/invoices/${invoiceId}"]`)
-      .first();
-
+    const invoiceLink = page.locator(
+      `a[href="/facility/${facilityId}/billing/invoices/${invoiceId}"]`,
+    );
+    await expect(invoiceLink).toHaveCount(1);
     await expect(invoiceLink).toBeVisible();
     await expect(invoiceLink).toContainText(/see invoice/i);
 
