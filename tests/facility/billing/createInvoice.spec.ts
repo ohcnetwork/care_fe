@@ -83,16 +83,14 @@ async function addBillableChargeItemOnCreateInvoicePage(
   page: Page,
   chargeItemTitle: string,
 ) {
-  const createInvoiceForm = page.locator("form").filter({
-    has: page
-      .locator('button[type="submit"]')
-      .filter({ hasText: /create invoice/i }),
-  });
-  await expect(
-    createInvoiceForm.getByRole("columnheader", { name: /^items$/i }),
-  ).toBeVisible({ timeout: 30_000 });
+  const chargeItemsTable = page
+    .locator('[data-slot="table-container"]')
+    .filter({
+      has: page.getByRole("columnheader", { name: /^items$/i }),
+    });
+  await expect(chargeItemsTable).toBeVisible({ timeout: 30_000 });
 
-  const definitionPicker = createInvoiceForm
+  const definitionPicker = page
     .getByRole("combobox")
     .filter({ hasText: /add charges/i });
   await expect(definitionPicker).toBeVisible({ timeout: 30_000 });
