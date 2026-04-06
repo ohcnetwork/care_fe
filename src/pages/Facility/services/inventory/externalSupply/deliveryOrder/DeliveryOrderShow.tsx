@@ -674,15 +674,20 @@ export function DeliveryOrderShow({
               {extensionFields.map((field) => {
                 const value = getExtensionValue(
                   deliveryOrder.extensions as NamespacedExtensionData,
-                  field.extensionName,
-                  field.name,
+                  field,
+                  {
+                    delivery_order: deliveryOrder,
+                    supply_deliveries: supplyDeliveries,
+                  },
                 );
                 if (value === undefined || value === null) return null;
 
                 const displayValue =
-                  field.format === "date" || field.format === "date-time"
-                    ? formatDateTime(value as string)
-                    : String(value);
+                  typeof value === "number"
+                    ? value.toFixed(2)
+                    : field.format === "date" || field.format === "date-time"
+                      ? formatDateTime(value as string)
+                      : String(value);
 
                 return (
                   <div key={`${field.extensionName}-${field.name}`}>

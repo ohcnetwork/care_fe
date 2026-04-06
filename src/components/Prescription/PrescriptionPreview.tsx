@@ -16,7 +16,6 @@ import {
   formatDuration,
   formatFrequencyWithInstructions,
   formatSig,
-  joinInstructionTexts,
 } from "@/components/Medicine/utils";
 
 import query from "@/Utils/request/query";
@@ -63,26 +62,27 @@ const PrescriptionContent = ({
               { key: "duration" },
               { key: "instructions" },
             ]}
-            rows={medications?.map((medication) => {
+            rows={medications.flatMap((medication) => {
               const instructions = medication.dosage_instruction;
-              return {
-                medicine: displayMedicationName(medication),
-                status: t(`medication_status_${medication.status}`),
-                dosage: joinInstructionTexts(instructions, formatDosage),
-                frequency: joinInstructionTexts(
-                  instructions,
-                  formatFrequencyWithInstructions,
-                ),
-                duration: joinInstructionTexts(instructions, formatDuration),
-                instructions: joinInstructionTexts(instructions, (di) =>
-                  [formatSig(di), medication.note].filter(Boolean).join("\n"),
-                ),
-              };
+              const isMulti = instructions.length > 1;
+              return instructions.map((di, idx) => ({
+                _groupedRow:
+                  isMulti && idx < instructions.length - 1 ? "true" : undefined,
+                medicine: idx === 0 ? displayMedicationName(medication) : "",
+                dosage: formatDosage(di) || "-",
+                frequency: formatFrequencyWithInstructions(di) || "-",
+                duration: formatDuration(di) || "-",
+                instructions: [formatSig(di), idx === 0 ? medication.note : ""]
+                  .filter(Boolean)
+                  .join("\n"),
+              }));
             })}
-            className="text-sm break-all font-semibold whitespace-break-spaces text-gray-950"
+            className="text-sm break-words font-semibold whitespace-break-spaces text-gray-950"
             cellConfig={{
               medicine: { className: "text-left" },
+              frequency: { className: "text-left" },
             }}
+            rowClassName={(row) => (row._groupedRow ? "border-b-0" : undefined)}
           />
         </div>
       )}
