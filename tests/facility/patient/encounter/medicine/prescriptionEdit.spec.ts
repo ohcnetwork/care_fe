@@ -51,8 +51,11 @@ test.describe("Edit Patient Prescription", () => {
     });
 
     await test.step("Fill medication details", async () => {
-      await page.getByPlaceholder("Enter a number...").first().click();
-      await page.getByPlaceholder("Enter a number...").first().fill(dosage);
+      const dosageInput = page.getByPlaceholder("Enter a number...").first();
+      await dosageInput.waitFor({ state: "visible" });
+      await dosageInput.click();
+      await dosageInput.fill(dosage);
+      await expect(dosageInput).toHaveValue(dosage);
       await page.keyboard.press("Enter");
 
       await page.getByText("eg. 1-0-1").first().click();
