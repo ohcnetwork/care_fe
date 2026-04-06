@@ -1,9 +1,6 @@
 import { faker } from "@faker-js/faker";
-import { expect, test, type Page } from "@playwright/test";
-import {
-  expectToast,
-  selectFromDefinitionCategoryPicker,
-} from "tests/helper/ui";
+import { expect, test, type Locator, type Page } from "@playwright/test";
+import { closeAnyOpenPopovers, expectToast } from "tests/helper/ui";
 import { getAccountId } from "tests/support/accountId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
@@ -16,15 +13,90 @@ const medicationsCategoryChargeItemTitles = [
   "Amoxicillin",
 ];
 
+async function selectChargeDefinitionForCreateInvoice(
+  page: Page,
+  trigger: Locator,
+  {
+    navigateCategories = [],
+    search,
+    itemIndex = 0,
+  }: {
+    navigateCategories?: string[];
+    search?: string;
+    itemIndex?: number;
+  } = {},
+) {
+  await trigger.waitFor({ state: "visible" });
+  await trigger.evaluate((el) =>
+    (el as HTMLElement).scrollIntoView({ block: "center", inline: "nearest" }),
+  );
+
+  await closeAnyOpenPopovers(page);
+  await trigger.click();
+
+  const dialog = page.getByRole("dialog").last();
+  const hasDialog = await dialog.isVisible().catch(() => false);
+  const popper = page.locator("[data-radix-popper-content-wrapper]").last();
+  const scope = hasDialog ? dialog : popper;
+  await scope.waitFor({ state: "visible" });
+
+  for (const categoryTitle of navigateCategories) {
+    const categoryItem = scope.getByRole("option", {
+      name: new RegExp(categoryTitle, "i"),
+    });
+    await categoryItem.waitFor({ state: "attached" });
+    await categoryItem.waitFor({ state: "visible" });
+    await categoryItem.click();
+    const afterNavItems = scope.getByRole("option");
+    await afterNavItems.first().waitFor({ state: "attached" });
+  }
+
+  if (search) {
+    const input = scope.locator('[data-slot="command-input"]').first();
+    await input.waitFor({ state: "visible" });
+    await input.fill("");
+    await input.fill(search);
+    const afterSearchItems = scope.getByRole("option");
+    await afterSearchItems.first().waitFor({ state: "attached" });
+  }
+
+  const items = scope.getByRole("option");
+  await items.first().waitFor({ state: "attached" });
+  await items.first().waitFor({ state: "visible" });
+
+  const count = await items.count();
+  if (count === 0) {
+    throw new Error("No items found in definition category picker");
+  }
+
+  const targetItem = items.nth(itemIndex);
+  await targetItem.waitFor({ state: "attached" });
+  await targetItem.waitFor({ state: "visible" });
+  await targetItem.evaluate((el) =>
+    (el as HTMLElement).scrollIntoView({ block: "center", inline: "nearest" }),
+  );
+  await targetItem.click();
+  await scope.waitFor({ state: "hidden" }).catch(() => {});
+}
+
 async function addBillableChargeItemOnCreateInvoicePage(
   page: Page,
   chargeItemTitle: string,
 ) {
-  const definitionPicker = page
+  const createInvoiceForm = page.locator("form").filter({
+    has: page
+      .locator('button[type="submit"]')
+      .filter({ hasText: /create invoice/i }),
+  });
+  await expect(
+    createInvoiceForm.getByRole("columnheader", { name: /^items$/i }),
+  ).toBeVisible({ timeout: 30_000 });
+
+  const definitionPicker = createInvoiceForm
     .getByRole("combobox")
     .filter({ hasText: /add charges/i });
-  await expect(definitionPicker).toBeVisible();
-  await selectFromDefinitionCategoryPicker(page, definitionPicker, {
+  await expect(definitionPicker).toBeVisible({ timeout: 30_000 });
+  await selectChargeDefinitionForCreateInvoice(page, definitionPicker, {
     navigateCategories: ["Medications"],
     search: chargeItemTitle,
   });
