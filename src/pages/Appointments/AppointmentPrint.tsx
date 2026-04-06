@@ -36,7 +36,7 @@ import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/pa
 import { formatScheduleResourceName } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { renderTokenNumber } from "@/types/tokens/token/token";
-import { round } from "@/Utils/decimal";
+import { add, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 
@@ -122,7 +122,11 @@ export default function AppointmentPrint(props: Props) {
   );
   const hasPayments = payments.length > 0;
 
-  const totalAmount = invoice?.total_gross;
+  const totalAmount =
+    invoice?.total_gross ??
+    (displayChargeItems && displayChargeItems.length > 0
+      ? add(...displayChargeItems.map((item) => item.total_price)).toString()
+      : undefined);
   const totalPaid = invoice?.total_payments;
 
   const patientTags = patient?.instance_tags ?? [];
@@ -206,12 +210,12 @@ export default function AppointmentPrint(props: Props) {
             {token && (
               <div className="text-right">
                 <p className="text-gray-950">{t("token_no")}</p>
-                <p className="text-2xl font-bold tracking-tigh text-gray-950">
+                <p className="text-2xl font-bold tracking-tight text-gray-950">
                   {renderTokenNumber(token)}
                 </p>
               </div>
             )}
-            <QRCodeSVG size={80} value={patient?.id || ""} className="gray" />
+            <QRCodeSVG size={80} value={patient?.id || ""} />
           </div>
         </div>
 
