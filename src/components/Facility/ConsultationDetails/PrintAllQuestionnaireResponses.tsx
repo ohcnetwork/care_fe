@@ -10,8 +10,7 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import { Separator } from "@/components/ui/separator";
 
-import query from "@/Utils/request/query";
-import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
@@ -23,6 +22,8 @@ import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import questionnaireResponseApi from "@/types/questionnaire/questionnaireResponseApi";
+import query from "@/Utils/request/query";
+import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 
 type PrintAllQuestionnaireResponsesProps = {
   questionnaireId: string;
@@ -213,29 +214,6 @@ export function EncounterDetails({
       </div>
     </div>
   );
-}
-
-function formatValue(value: ResponseValue["value"], type: string): string {
-  if (!value) return "";
-
-  if (
-    typeof value === "object" &&
-    !Array.isArray(value) &&
-    !(value instanceof Date)
-  ) {
-    return JSON.stringify(value);
-  }
-
-  switch (type) {
-    case "dateTime":
-      return formatDateTime(value as string, "hh:mm A; DD/MM/YYYY");
-    case "date":
-      return formatDateTime(value as string, "DD/MM/YYYY");
-    case "decimal":
-    case "integer":
-    default:
-      return value.toString();
-  }
 }
 
 interface QuestionResponseProps {
