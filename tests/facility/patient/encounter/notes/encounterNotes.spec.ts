@@ -111,6 +111,7 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
       `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
     );
     await page.getByRole("link", { name: "View Encounter" }).first().click();
+    await page.waitForURL(/\/encounter\//);
     encounterUrl = page.url();
     await page.getByRole("tab", { name: "Notes" }).click();
     // Wait for notes to load by checking for the "New" button

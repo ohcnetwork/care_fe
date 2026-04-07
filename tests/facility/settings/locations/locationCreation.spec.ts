@@ -205,6 +205,7 @@ test.describe("Facility Location Creation", () => {
       await page.getByRole("button", { name: "Add Location" }).click();
       await page.getByRole("combobox", { name: "Location Form" }).click();
       await page.getByRole("option", { name: "Bed" }).click();
+      await expect(page.getByRole("textbox", { name: "Name" })).toBeVisible();
       await page.getByRole("textbox", { name: "Name" }).fill(bedBaseName);
       await page
         .getByRole("checkbox", { name: "Create Multiple Beds" })

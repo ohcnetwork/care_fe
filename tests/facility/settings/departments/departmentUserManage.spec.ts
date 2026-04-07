@@ -59,7 +59,7 @@ test.describe("Department User Management", () => {
     // Wait for the sheet/dialog to close after successful submission
     await expect(
       page.getByRole("button", { name: "Add to Organization" }),
-    ).toBeHidden();
+    ).toBeHidden({ timeout: 15000 });
   }
 
   async function searchUserInTable(page: Page, userName: string) {

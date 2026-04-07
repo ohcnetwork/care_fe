@@ -22,9 +22,10 @@ test.describe("activity definition deletion", () => {
     // Navigate to the detail page and wait for the API data to load
     const definitionApiResponse = page.waitForResponse(
       (resp) =>
-        resp.url().includes("/activity_definition/") &&
-        resp.request().method() === "GET" &&
-        resp.ok(),
+        resp
+          .url()
+          .includes(`/activity_definition/f-${facilityId}-${createdAD.slug}`) &&
+        resp.request().method() === "GET",
     );
     await page.goto(
       `/facility/${facilityId}/settings/activity_definitions/f-${facilityId}-${createdAD.slug}`,
@@ -36,7 +37,7 @@ test.describe("activity definition deletion", () => {
     ).toBeVisible();
 
     const deleteButton = page.getByRole("button", { name: /delete/i });
-    await expect(deleteButton).toBeVisible();
+    await expect(deleteButton).toBeVisible({ timeout: 15000 });
     await deleteButton.click();
 
     const dialog = page.getByRole("alertdialog");

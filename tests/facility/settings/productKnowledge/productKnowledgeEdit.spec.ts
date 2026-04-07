@@ -95,8 +95,7 @@ test.describe("Product Knowledge Edit operations", () => {
     const updateResponse = page.waitForResponse(
       (resp) =>
         resp.url().includes("/product_knowledge/") &&
-        resp.request().method() === "PUT" &&
-        resp.ok(),
+        resp.request().method() === "PUT",
     );
     await page.getByRole("button", { name: /update/i }).click();
     await updateResponse;

@@ -56,9 +56,13 @@ test.describe("Charge Item Definition Edit operations", () => {
       page.locator("li[data-sonner-toast]").getByText(/updated successfully/i),
     ).toBeVisible();
 
-    await page
-      .getByRole("textbox", { name: /Search/i })
-      .fill(title + " - edited");
+    const searchBox = page.getByRole("textbox", { name: /Search/i });
+    await searchBox.fill(title + " - edited");
+    await page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/charge_item_definition/") &&
+        resp.request().method() === "GET",
+    );
     await expect(
       page.getByRole("table").getByText(title + " - edited"),
     ).toBeVisible();
