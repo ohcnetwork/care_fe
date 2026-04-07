@@ -201,6 +201,9 @@ test.describe("Tag Configuration Management", () => {
     await page
       .getByRole("textbox", { name: "Display name *" })
       .fill(updatedChildTagName);
+    await expect(
+      page.getByRole("button", { name: "Update tag config" }),
+    ).toBeEnabled({ timeout: 15000 });
     await page.getByRole("button", { name: "Update tag config" }).click();
 
     // Verify the update was successful

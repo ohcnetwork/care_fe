@@ -56,10 +56,12 @@ test.describe("Department User Management", () => {
     );
     await page.getByRole("button", { name: "Add to Organization" }).click();
     await responsePromise;
-    // Wait for the sheet/dialog to close after successful submission
+    // Wait for the success toast to confirm the operation completed
     await expect(
-      page.getByRole("button", { name: "Add to Organization" }),
-    ).toBeHidden({ timeout: 15000 });
+      page
+        .locator("li[data-sonner-toast]")
+        .getByText("User added to organization successfully"),
+    ).toBeVisible({ timeout: 15000 });
   }
 
   async function searchUserInTable(page: Page, userName: string) {

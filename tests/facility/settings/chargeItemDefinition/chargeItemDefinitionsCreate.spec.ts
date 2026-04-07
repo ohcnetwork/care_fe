@@ -72,8 +72,14 @@ test.describe("Charge Item Definition Creation", () => {
     await searchResponse;
     await expect(page.getByRole("table").getByText(title)).toBeVisible();
 
+    const viewDetailResponse = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/charge_item_definition/") &&
+        resp.request().method() === "GET",
+    );
     await page.getByRole("link", { name: "View" }).click();
     await page.waitForURL("**/charge_item_definitions/**");
+    await viewDetailResponse;
     await expect(page.getByRole("heading", { name: title })).toBeVisible();
 
     await page.getByRole("button", { name: "Edit" }).first().click();
@@ -176,8 +182,14 @@ test.describe("Charge Item Definition Creation", () => {
     await page.getByRole("textbox", { name: /search/i }).fill(title);
     await searchResponse;
     await expect(page.getByRole("table").getByText(title)).toBeVisible();
+    const detailResponse = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/charge_item_definition/") &&
+        resp.request().method() === "GET",
+    );
     await page.getByRole("link", { name: "View" }).click();
     await page.waitForURL("**/charge_item_definitions/**");
+    await detailResponse;
     await expect(page.getByRole("heading", { name: title })).toBeVisible();
     await expect(page.getByText(description)).toBeVisible();
     await expect(page.getByText(purpose).last()).toBeVisible();
