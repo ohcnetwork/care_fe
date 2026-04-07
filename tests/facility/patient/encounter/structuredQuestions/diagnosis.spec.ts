@@ -134,6 +134,8 @@ test.describe("Diagnosis", () => {
   });
 
   test("verify duplicate diagnosis cannot be added", async ({ page }) => {
+    await page.waitForLoadState("networkidle");
+
     await page
       .getByRole("combobox")
       .filter({ hasText: /Add (another )?Diagnosis/i })
