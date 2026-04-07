@@ -71,7 +71,7 @@ test.describe("Department User Management", () => {
   }
 
   async function verifyUserInList(page: Page, userName: string) {
-    await expect(page.getByText(userName).first()).toBeVisible();
+    await expect(page.getByText(userName)).toBeVisible();
   }
 
   async function openEditRoleDialog(page: Page) {

@@ -47,7 +47,11 @@ test.describe("Product Knowledge Edit operations", () => {
   });
 
   test("view and edit and confirm", async ({ page }) => {
-    await page.getByRole("link", { name: "View" }).first().click();
+    await page
+      .getByRole("row")
+      .first()
+      .getByRole("link", { name: "View" })
+      .click();
     await page.getByRole("button", { name: "Edit" }).click();
 
     await page.getByRole("textbox", { name: /name/i }).first().fill(name);
@@ -100,7 +104,11 @@ test.describe("Product Knowledge Edit operations", () => {
     await page.getByRole("textbox", { name: "Search products" }).fill(name);
     await expect(page.getByRole("table").getByText(name)).toBeVisible();
 
-    await page.getByRole("link", { name: "View" }).first().click();
+    await page
+      .getByRole("row")
+      .filter({ hasText: name })
+      .getByRole("link", { name: "View" })
+      .click();
 
     // Verify all the fields
     await expect(page.getByText(name)).toBeVisible();

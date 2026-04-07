@@ -34,7 +34,11 @@ test.describe("Charge Item Definition Edit operations", () => {
   });
 
   test("edit charge item definition", async ({ page }) => {
-    await page.getByRole("link", { name: "Edit" }).first().click();
+    await page
+      .getByRole("row")
+      .first()
+      .getByRole("link", { name: "Edit" })
+      .click();
     await page
       .getByRole("textbox", { name: /title/i })
       .fill(title + " - edited");
