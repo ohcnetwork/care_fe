@@ -83,6 +83,7 @@ test.describe("Charge Item Definition Creation", () => {
           resp.request().method() === "GET",
       );
       await viewLink.click();
+      await page.waitForURL("**/charge_item_definitions/**");
       await viewDetailResponse;
       await expect(page.getByRole("heading", { name: title })).toBeVisible();
 
@@ -199,6 +200,7 @@ test.describe("Charge Item Definition Creation", () => {
           resp.request().method() === "GET",
       );
       await viewLink.click();
+      await page.waitForURL("**/charge_item_definitions/**");
       await detailResponse;
       await expect(page.getByRole("heading", { name: title })).toBeVisible();
       await expect(page.getByText(description)).toBeVisible();
