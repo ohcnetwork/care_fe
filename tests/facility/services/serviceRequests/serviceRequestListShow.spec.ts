@@ -19,87 +19,34 @@ interface CreatedServiceRequest {
   serviceRequestId: string;
 }
 
-function pathnameOnly(hrefOrUrl: string) {
-  if (hrefOrUrl.startsWith("http")) {
-    try {
-      return new URL(hrefOrUrl).pathname;
-    } catch {
-      return hrefOrUrl.split("?")[0];
-    }
-  }
-  return hrefOrUrl.split("?")[0];
-}
-
-function extractLocationIdFromUrl(url: string, facilityId: string) {
-  const path = pathnameOnly(url);
-  const marker = `/facility/${facilityId}/locations/`;
-  const idx = path.indexOf(marker);
-  if (idx === -1) return null;
-  const tail = path.slice(idx + marker.length);
-  const segment = tail.split("/").filter(Boolean)[0];
-  return segment ?? null;
-}
-
-function extractServiceRequestsLocationIdFromHref(
-  href: string,
-  facilityId: string,
-) {
-  const path = pathnameOnly(href);
-  const marker = `/facility/${facilityId}/locations/`;
-  const idx = path.indexOf(marker);
-  if (idx === -1) return null;
-  const tail = path.slice(idx + marker.length);
-  const parts = tail.split("/").filter(Boolean);
-  if (parts.length >= 2 && parts[1] === "service_requests") return parts[0];
-  return null;
-}
-
-async function getLinkHrefsWithIndex(page: Page) {
-  const links = page.getByRole("link");
-  if ((await links.count()) === 0) return [];
-
-  const hrefs = await links.evaluateAll((elements) =>
-    elements.map((el) => el.getAttribute("href")),
-  );
-
-  return hrefs
-    .map((href, index) => ({ href, index }))
-    .filter(
-      (x): x is { href: string; index: number } => typeof x.href === "string",
-    );
-}
-
-async function findLocationIdInLinks(page: Page, facilityId: string) {
-  const hrefs = await getLinkHrefsWithIndex(page);
-  for (const { href } of hrefs) {
-    const id = extractLocationIdFromUrl(href, facilityId);
-    if (id) return id;
-  }
-
-  return null;
-}
-
 async function getLocationIdFromServiceRequestShow(
   page: Page,
   facilityId: string,
   serviceRequestId: string,
 ) {
-  await page.goto(
-    `/facility/${facilityId}/service_requests/${serviceRequestId}`,
+  const response = await page.request.get(
+    `/api/v1/facility/${facilityId}/service_request/${serviceRequestId}/`,
   );
-  await page.waitForLoadState("networkidle");
-
-  const hrefs = await getLinkHrefsWithIndex(page);
-  for (const { href } of hrefs) {
-    const id = extractServiceRequestsLocationIdFromHref(href, facilityId);
-    if (id) return id;
+  if (!response.ok()) {
+    throw new Error(
+      `Failed to fetch service request ${serviceRequestId} for facility ${facilityId}: ${response.status()} ${response.statusText()}`,
+    );
   }
 
-  const anyLocation = await findLocationIdInLinks(page, facilityId);
-  if (anyLocation) return anyLocation;
+  const data = (await response.json()) as {
+    locations?: Array<{ id?: string }>;
+    encounter?: { current_location?: { id?: string } };
+  };
+
+  const locationId =
+    data.locations?.find((x) => typeof x.id === "string")?.id ??
+    data.encounter?.current_location?.id ??
+    null;
+
+  if (locationId) return locationId;
 
   throw new Error(
-    `Could not resolve a locationId from service request show for facility ${facilityId}.`,
+    `Could not resolve a locationId from service request ${serviceRequestId} for facility ${facilityId}.`,
   );
 }
 
