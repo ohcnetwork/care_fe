@@ -17,7 +17,7 @@ test.describe("Charge Item Definition Edit operations", () => {
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
-    title = faker.commerce.productName();
+    title = faker.string.alphanumeric(10);
     basePrice = faker.commerce.price({ dec: 0 });
     mrp = faker.commerce.price({ dec: 0 });
     purchasePrice = faker.commerce.price({ dec: 0 });

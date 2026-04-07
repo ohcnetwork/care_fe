@@ -1,5 +1,4 @@
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
@@ -27,6 +26,7 @@ import {
   PaymentReconciliationStatus,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
@@ -104,31 +104,11 @@ export function PrintPaymentReconciliation({
     <PrintPreview
       title={`${t(payment.is_credit_note ? "refund_receipt" : "payment_receipt")}`}
       watermark={getWatermark()}
+      facility={facility}
+      templateSlug={PrintTemplateType.payment_receipt}
     >
       <div className="max-w-5xl mx-auto">
         <div>
-          <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
-            <div className="flex items-start gap-4">
-              <div className="text-left">
-                <h1 className="text-2xl font-medium">{facility?.name}</h1>
-                {facility?.address && (
-                  <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
-                    {facility.address}
-                    {facility.phone_number && (
-                      <p className="text-gray-500 text-sm">
-                        {t("phone")}: {facility.phone_number}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-            <img
-              src={careConfig.mainLogo?.dark}
-              alt="Logo"
-              className="h-10 w-auto object-contain mb-2 sm:mb-0 text-end"
-            />
-          </div>
           {/* Header */}
           <div className="flex flex-col sm:flex-row print:flex-row print:items-start justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
             <div className="text-center sm:text-left sm:order-1 print:text-left">
