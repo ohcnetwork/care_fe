@@ -24,14 +24,20 @@ async function getLocationIdFromServiceRequestShow(
   facilityId: string,
   serviceRequestId: string,
 ) {
-  const response = await page.request.get(
-    `/api/v1/facility/${facilityId}/service_request/${serviceRequestId}/`,
+  const retrievePathSubstring = `/api/v1/facility/${facilityId}/service_request/${serviceRequestId}`;
+  const responsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === "GET" &&
+      response.url().includes(retrievePathSubstring) &&
+      response.ok(),
+    { timeout: 45_000 },
   );
-  if (!response.ok()) {
-    throw new Error(
-      `Failed to fetch service request ${serviceRequestId} for facility ${facilityId}: ${response.status()} ${response.statusText()}`,
-    );
-  }
+
+  await page.goto(
+    `/facility/${facilityId}/service_requests/${serviceRequestId}`,
+  );
+  const response = await responsePromise;
+  await page.waitForLoadState("networkidle");
 
   const data = (await response.json()) as {
     locations?: Array<{ id?: string }>;
