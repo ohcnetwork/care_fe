@@ -93,10 +93,8 @@ test.describe("Create Patient Prescription", () => {
             resp.status() === 200,
         ),
       ]);
-      await page
-        .getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2} (AM|PM)$/)
-        .last()
-        .click();
+      // Click "All Prescriptions" to see all medicines across all dates
+      await page.getByText("All Prescriptions").click();
       const table = page.getByRole("table");
       await expect(table).toBeVisible();
       await expect(table).toContainText(medicineName);
