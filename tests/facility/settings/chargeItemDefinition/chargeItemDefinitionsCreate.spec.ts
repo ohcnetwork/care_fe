@@ -65,9 +65,7 @@ test.describe("Charge Item Definition Creation", () => {
     // Verify in search results (retry to handle search indexing delay)
     await expect(async () => {
       await page.getByRole("textbox", { name: /search/i }).fill(title);
-      await expect(page.getByRole("table").getByText(title)).toBeVisible({
-        timeout: 5_000,
-      });
+      await expect(page.getByRole("table").getByText(title)).toBeVisible();
     }).toPass({ intervals: [1_000, 2_000, 3_000], timeout: 15_000 });
 
     const viewDetailResponse = page.waitForResponse(
@@ -174,9 +172,7 @@ test.describe("Charge Item Definition Creation", () => {
     // Verify in search results (retry to handle search indexing delay)
     await expect(async () => {
       await page.getByRole("textbox", { name: /search/i }).fill(title);
-      await expect(page.getByRole("table").getByText(title)).toBeVisible({
-        timeout: 5_000,
-      });
+      await expect(page.getByRole("table").getByText(title)).toBeVisible();
     }).toPass({ intervals: [1_000, 2_000, 3_000], timeout: 15_000 });
     const detailResponse = page.waitForResponse(
       (resp) =>
@@ -190,10 +186,13 @@ test.describe("Charge Item Definition Creation", () => {
     await expect(page.getByText(description)).toBeVisible();
     await expect(page.getByText(purpose).last()).toBeVisible();
     await expect(page.getByText(url)).toBeVisible();
-    await expect(page.getByText(`₹${Number(mrp).toFixed(2)}`)).toBeVisible();
-    await expect(
-      page.getByText(`₹${Number(purchasePrice).toFixed(2)}`),
-    ).toBeVisible();
+    const formatCurrency = (val: string) =>
+      new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+      }).format(Number(val));
+    await expect(page.getByText(formatCurrency(mrp))).toBeVisible();
+    await expect(page.getByText(formatCurrency(purchasePrice))).toBeVisible();
     await expect(page.getByText("9.00%")).toBeVisible();
     await expect(page.getByText("6.00%")).toBeVisible();
     await expect(

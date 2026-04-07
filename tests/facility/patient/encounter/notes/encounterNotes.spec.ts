@@ -74,9 +74,7 @@ test.describe("Encounter Notes - Isolation from Patient Notes", () => {
     // Wait for patient notes to load by checking for the "New" button
     await expect(
       page.getByRole("button", { name: "New", exact: true }),
-    ).toBeVisible({
-      timeout: 10000,
-    });
+    ).toBeVisible();
 
     // Verify encounter note does NOT appear in patient notes
     await expect(
@@ -168,7 +166,7 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
         await expect(
           userBPage.getByRole("button", { name: "New", exact: true }),
         ).toBeVisible();
-        await expect(threadButton).toBeVisible({ timeout: 5_000 });
+        await expect(threadButton).toBeVisible();
       }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
     }
 
@@ -183,9 +181,7 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     await userBPage.getByRole("button", { name: "Send message" }).click();
 
     // Wait for message to be sent by checking if it appears
-    await expect(userBPage.getByText(userBMessage)).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(userBPage.getByText(userBMessage)).toBeVisible();
 
     // Refresh User A's view and verify both messages appear
     await page.goto(encounterUrl);

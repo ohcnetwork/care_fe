@@ -520,7 +520,7 @@ export async function expectToast(
   options: { timeout?: number } = {},
 ) {
   const toaster = page.locator(".toaster.group");
-  await expect(toaster.getByText(text).first()).toBeVisible(options);
+  await expect(toaster.getByText(text).last()).toBeVisible(options);
 }
 
 /**

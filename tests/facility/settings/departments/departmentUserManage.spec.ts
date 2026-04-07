@@ -52,7 +52,8 @@ test.describe("Department User Management", () => {
       (resp) =>
         resp.url().includes("/organizations/") &&
         resp.url().includes("/users/") &&
-        resp.request().method() === "POST",
+        resp.request().method() === "POST" &&
+        resp.ok(),
     );
     await page.getByRole("button", { name: "Add to Organization" }).click();
     await responsePromise;
@@ -61,7 +62,7 @@ test.describe("Department User Management", () => {
       page
         .locator("li[data-sonner-toast]")
         .getByText("User added to organization successfully"),
-    ).toBeVisible({ timeout: 15000 });
+    ).toBeVisible();
   }
 
   async function searchUserInTable(page: Page, userName: string) {
@@ -75,7 +76,9 @@ test.describe("Department User Management", () => {
   }
 
   async function verifyUserInList(page: Page, userName: string) {
-    await expect(page.getByText(userName).first()).toBeVisible();
+    await expect(
+      page.locator('[data-slot="table-body"]').getByText(userName).first(),
+    ).toBeVisible();
   }
 
   async function openEditRoleDialog(page: Page) {
@@ -94,7 +97,7 @@ test.describe("Department User Management", () => {
       page
         .locator("li[data-sonner-toast]")
         .getByText("User role updated successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   }
 
   async function removeUser(page: Page) {
@@ -107,7 +110,7 @@ test.describe("Department User Management", () => {
       page
         .locator("li[data-sonner-toast]")
         .getByText("User removed from organization successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   }
 
   async function closeDialog(page: Page) {

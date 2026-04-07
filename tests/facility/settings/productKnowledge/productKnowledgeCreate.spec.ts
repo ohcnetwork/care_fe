@@ -109,13 +109,14 @@ test.describe("Product Knowledge Creation", () => {
 
     await expect(page.getByText(/created successfully/i)).toBeVisible();
 
-    await page.getByRole("textbox", { name: "Search products" }).fill(name);
-    await page.waitForResponse(
+    const searchResponse = page.waitForResponse(
       (resp) =>
         resp.url().includes("/product_knowledge/") &&
         resp.request().method() === "GET" &&
         resp.status() === 200,
     );
+    await page.getByRole("textbox", { name: "Search products" }).fill(name);
+    await searchResponse;
     await expect(page.getByRole("table").getByText(name)).toBeVisible();
 
     await page.getByRole("link", { name: "View" }).first().click();
@@ -159,13 +160,14 @@ test.describe("Product Knowledge Creation", () => {
 
     await expect(page.getByText(/created successfully/i)).toBeVisible();
 
-    await page.getByRole("textbox", { name: "Search products" }).fill(name);
-    await page.waitForResponse(
+    const searchResponse = page.waitForResponse(
       (resp) =>
         resp.url().includes("/product_knowledge/") &&
         resp.request().method() === "GET" &&
         resp.status() === 200,
     );
+    await page.getByRole("textbox", { name: "Search products" }).fill(name);
+    await searchResponse;
     await expect(page.getByRole("table").getByText(name)).toBeVisible();
 
     // View and verify all details

@@ -197,14 +197,18 @@ test.describe("Tag Configuration Management", () => {
     await expect(displayNameInput).toHaveValue(childTagName);
 
     // Update the child tag
-    await page.getByRole("textbox", { name: "Display name *" }).click();
-    await page
-      .getByRole("textbox", { name: "Display name *" })
-      .fill(updatedChildTagName);
-    await expect(
-      page.getByRole("button", { name: "Update tag config" }),
-    ).toBeEnabled({ timeout: 15000 });
-    await page.getByRole("button", { name: "Update tag config" }).click();
+    const displayNameField = page.getByRole("textbox", {
+      name: "Display name *",
+    });
+    await displayNameField.click();
+    await displayNameField.fill(updatedChildTagName);
+    // Trigger change event by pressing Tab to ensure form validation runs
+    await displayNameField.press("Tab");
+    const updateButton = page.getByRole("button", {
+      name: "Update tag config",
+    });
+    await expect(updateButton).toBeEnabled();
+    await updateButton.click();
 
     // Verify the update was successful
     await page.getByRole("button", { name: "Back" }).click();

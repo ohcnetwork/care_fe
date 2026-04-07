@@ -100,11 +100,11 @@ async function fillAdditionalDetails(
     const stateCombobox = page
       .getByRole("region", { name: "Additional Details" })
       .getByRole("combobox");
-    await stateCombobox.waitFor({ state: "visible", timeout: 5000 });
+    await stateCombobox.waitFor({ state: "visible" });
     await stateCombobox.click();
 
     const stateOption = page.getByRole("option").first();
-    await stateOption.waitFor({ state: "visible", timeout: 5000 });
+    await stateOption.waitFor({ state: "visible" });
     await stateOption.click();
   });
 }
@@ -195,7 +195,7 @@ test.describe("Patient Registration", () => {
 
       await expect(
         page.getByText(/entered phone number is not valid/i).first(),
-      ).toBeVisible({ timeout: 5000 });
+      ).toBeVisible();
     });
   });
 
@@ -245,7 +245,7 @@ test.describe("Patient Registration", () => {
 
     await expect(
       page.locator(`text=Year of Birth: ${expectedYearOfBirth}`),
-    ).toBeVisible({ timeout: 3000 });
+    ).toBeVisible();
 
     await selectBloodGroup(page, "A+");
     await fillAdditionalDetails(page, {
@@ -255,12 +255,12 @@ test.describe("Patient Registration", () => {
 
     await submitRegistration(page);
 
-    await page.waitForURL("**/patients/**", { timeout: 10000 });
+    await page.waitForURL("**/patients/**");
     await expect(
       page.getByRole("button", {
         name: new RegExp(`.*${patientAge} Y, Male`),
       }),
-    ).toBeVisible({ timeout: 5000 });
+    ).toBeVisible();
 
     expect(expectedYearOfBirth).toEqual(currentYear - patientAge);
   });
