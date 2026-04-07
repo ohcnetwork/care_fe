@@ -97,15 +97,14 @@ test.describe("Product Knowledge Edit operations", () => {
         .first()
         .fill("30");
     }
-    await Promise.all([
-      page.getByRole("button", { name: /update/i }).click(),
-      page.waitForResponse(
-        (resp) =>
-          resp.url().includes("/product_knowledge/") &&
-          resp.request().method() === "PUT" &&
-          resp.ok(),
-      ),
-    ]);
+    const updateResponse = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/product_knowledge/") &&
+        resp.request().method() === "PUT" &&
+        resp.ok(),
+    );
+    await page.getByRole("button", { name: /update/i }).click();
+    await updateResponse;
 
     await expect(page.getByRole("heading").getByText(name)).toBeVisible();
     await page.getByRole("link", { name: "Back" }).click();
