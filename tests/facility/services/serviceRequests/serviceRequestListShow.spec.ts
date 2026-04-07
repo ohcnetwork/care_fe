@@ -298,10 +298,7 @@ test.describe("Facility Service Requests (List + Show)", () => {
       const todayItem = page
         .getByRole("menuitem", { name: tr("today") })
         .first();
-      await expect(todayItem.getByRole("checkbox")).toHaveAttribute(
-        "aria-checked",
-        "true",
-      );
+      await expect(todayItem).toHaveClass(/border-green-500/);
       await page.keyboard.press("Escape");
     });
 
