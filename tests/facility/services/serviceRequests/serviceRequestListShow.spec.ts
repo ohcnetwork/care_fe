@@ -1,10 +1,6 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import en from "public/locale/en.json";
-import { generateServiceRequestTestData } from "tests/facility/patient/encounter/serviceRequests/serviceRequest";
-import {
-  expectToast,
-  selectFromDefinitionCategoryPicker,
-} from "tests/helper/ui";
+import { createServiceRequest } from "tests/facility/patient/encounter/serviceRequests/serviceRequest";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
@@ -68,6 +64,12 @@ async function findLocationIdInLinks(page: Page, facilityId: string) {
   return null;
 }
 
+function isServiceLocationsListHref(href: string, facilityId: string) {
+  return new RegExp(
+    `^/facility/${facilityId.replace(/-/g, "\\-")}/services/[^/]+/locations$`,
+  ).test(href);
+}
+
 async function getServiceRequestsLocationId(page: Page, facilityId: string) {
   await page.goto(`/facility/${facilityId}/overview`);
   await page.waitForLoadState("networkidle");
@@ -75,84 +77,34 @@ async function getServiceRequestsLocationId(page: Page, facilityId: string) {
   const overviewLocationId = await findLocationIdInLinks(page, facilityId);
   if (overviewLocationId) return overviewLocationId;
 
-  // Fallback: facility services flow always leads to a location-scoped page
-  await page.goto(`/facility/${facilityId}/services/`);
+  await page.goto(`/facility/${facilityId}/services`);
   await page.waitForLoadState("networkidle");
 
-  const visited = new Set<string>();
-  for (let depth = 0; depth < 6; depth += 1) {
+  const indexHrefPairs = await getLinkHrefsWithIndex(page);
+  const serviceLocationHrefs = indexHrefPairs
+    .filter(({ href }) => isServiceLocationsListHref(href, facilityId))
+    .map(({ href }) => href);
+
+  for (const locationsHref of serviceLocationHrefs) {
+    await page.goto(locationsHref);
+    await page.waitForLoadState("networkidle");
+
     const idFromUrl = extractServiceRequestsLocationIdFromHref(
       page.url(),
       facilityId,
     );
     if (idFromUrl) return idFromUrl;
 
-    const hrefs = await getLinkHrefsWithIndex(page);
-
-    for (const { href } of hrefs) {
+    const pageHrefs = await getLinkHrefsWithIndex(page);
+    for (const { href } of pageHrefs) {
       const id = extractServiceRequestsLocationIdFromHref(href, facilityId);
       if (id) return id;
     }
-
-    const next = hrefs.find(({ href }) => {
-      if (visited.has(href)) return false;
-      return href.startsWith(`/facility/${facilityId}/services/`);
-    });
-
-    if (!next) break;
-    visited.add(next.href);
-
-    await page.getByRole("link").nth(next.index).click();
-    await page.waitForLoadState("networkidle");
   }
 
   throw new Error(
-    `Could not resolve a locationId for facility ${facilityId} via overview or services navigation.`,
+    `Could not resolve a locationId for facility ${facilityId} with a lab /service_requests link (checked each service's locations page).`,
   );
-}
-
-async function createEncounterServiceRequest(
-  page: Page,
-  params: {
-    facilityId: string;
-    patientId: string;
-    encounterId: string;
-  },
-): Promise<CreatedServiceRequest> {
-  const data = generateServiceRequestTestData(false);
-
-  await page.goto(
-    `/facility/${params.facilityId}/patient/${params.patientId}/encounter/${params.encounterId}/service_requests`,
-  );
-  await page.waitForLoadState("networkidle");
-
-  await page
-    .getByRole("button", { name: tr("create_service_request") })
-    .click();
-
-  const activityDefinitionPicker = page
-    .getByRole("combobox")
-    .filter({ hasText: tr("select_activity_definition") })
-    .first();
-  await expect(activityDefinitionPicker).toBeVisible();
-
-  await selectFromDefinitionCategoryPicker(page, activityDefinitionPicker, {
-    navigateCategories: data.navigateCategories,
-    search: data.activityDefinition,
-  });
-
-  await expect(
-    page
-      .getByRole("combobox")
-      .filter({ hasText: data.activityDefinition })
-      .first(),
-  ).toBeVisible();
-
-  await page.getByRole("button", { name: tr("submit") }).click();
-  await expectToast(page, tr("questionnaire_submitted_successfully"));
-  await page.waitForLoadState("networkidle");
-
-  return { activityDefinition: data.activityDefinition };
 }
 
 async function openServiceRequestList(
@@ -201,11 +153,14 @@ test.describe("Facility Service Requests (List + Show)", () => {
   }) => {
     await test.step("Resolve lab location and create a service request", async () => {
       locationId = await getServiceRequestsLocationId(page, facilityId);
-      created = await createEncounterServiceRequest(page, {
+      const data = await createServiceRequest(
+        page,
         facilityId,
         patientId,
         encounterId,
-      });
+        false,
+      );
+      created = { activityDefinition: data.activityDefinition };
     });
 
     await test.step("Open facility location service request list", async () => {
