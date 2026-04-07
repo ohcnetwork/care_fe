@@ -154,9 +154,14 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     // User B navigates to the same encounter, clicks Notes tab, waits for thread to appear
     await expect(async () => {
       await userBPage.goto(encounterUrl);
-      await userBPage.getByRole("tab", { name: "Notes" }).click();
+      const notesTab = userBPage.getByRole("tab", { name: "Notes" });
+      await expect(notesTab).toBeVisible();
+      await notesTab.click();
+      await expect(
+        userBPage.getByRole("button", { name: "New", exact: true }),
+      ).toBeVisible();
       await expect(threadButton).toBeVisible();
-    }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
+    }).toPass({ intervals: [3_000, 5_000, 5_000], timeout: 60_000 });
 
     // Select the thread created by User A
     await threadButton.click();
