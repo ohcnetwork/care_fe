@@ -95,8 +95,11 @@ test.describe("Edit Patient Prescription", () => {
             resp.status() === 200,
         ),
       ]);
-      // Click "All Prescriptions" to see all medicines across all dates
-      await page.getByText("All Prescriptions").click();
+      // Click "All Prescriptions" sidebar card to see all medicines
+      await page
+        .locator("[data-slot='card']")
+        .filter({ hasText: "View all medications" })
+        .click();
       const table = page.getByRole("table");
       await expect(table).toBeVisible();
       await expect(table).toContainText(medicineName);
@@ -154,8 +157,11 @@ test.describe("Edit Patient Prescription", () => {
             resp.status() === 200,
         ),
       ]);
-      // Click "All Prescriptions" to see all medicines across all dates
-      await page.getByText("All Prescriptions").click();
+      // Click "All Prescriptions" sidebar card to see all medicines
+      await page
+        .locator("[data-slot='card']")
+        .filter({ hasText: "View all medications" })
+        .click();
       const table = page.getByRole("table");
       await expect(table).toBeVisible();
       // Expand inactive medications

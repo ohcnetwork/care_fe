@@ -146,31 +146,22 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     });
     const userBPage = await userBContext.newPage();
 
-    // User B navigates to the same encounter and selects Notes tab
-    await userBPage.goto(encounterUrl);
-    await userBPage.getByRole("tab", { name: "Notes" }).click();
-
-    // Wait for notes UI to load
-    await expect(
-      userBPage.getByRole("button", { name: "New", exact: true }),
-    ).toBeVisible();
-
     // Wait for the thread created by User A to appear
     const threadButton = userBPage
       .getByRole("button")
       .filter({ hasText: threadTitle });
 
-    // First check on the initial load, then retry with reloads if not visible
-    if (!(await threadButton.isVisible())) {
-      await expect(async () => {
-        await userBPage.goto(encounterUrl);
-        await userBPage.getByRole("tab", { name: "Notes" }).click();
-        await expect(
-          userBPage.getByRole("button", { name: "New", exact: true }),
-        ).toBeVisible();
-        await expect(threadButton).toBeVisible();
-      }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
-    }
+    // User B navigates to the same encounter, clicks Notes tab, waits for thread list API
+    await expect(async () => {
+      await userBPage.goto(encounterUrl);
+      await Promise.all([
+        userBPage.getByRole("tab", { name: "Notes" }).click(),
+        userBPage.waitForResponse(
+          (resp) => resp.url().includes("/thread/") && resp.status() === 200,
+        ),
+      ]);
+      await expect(threadButton).toBeVisible();
+    }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
 
     // Select the thread created by User A
     await threadButton.click();

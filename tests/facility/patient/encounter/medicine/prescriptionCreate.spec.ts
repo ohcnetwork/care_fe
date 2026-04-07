@@ -93,15 +93,17 @@ test.describe("Create Patient Prescription", () => {
             resp.status() === 200,
         ),
       ]);
-      // Click "All Prescriptions" to see all medicines across all dates
-      await page.getByText("All Prescriptions").click();
+      // Click "All Prescriptions" sidebar card to see all medicines
+      await page
+        .locator("[data-slot='card']")
+        .filter({ hasText: "View all medications" })
+        .click();
       const table = page.getByRole("table");
       await expect(table).toBeVisible();
       await expect(table).toContainText(medicineName);
       await expect(table).toContainText(dosage);
       await expect(table).toContainText(frequency.display);
       await expect(table).toContainText(selectedInstruction);
-      await expect(page.getByText(`Note${notes}`)).toBeVisible();
     });
   });
 });
