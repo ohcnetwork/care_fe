@@ -48,8 +48,8 @@ jobs:
                 `It looks like the description is missing or too short for us to understand the problem.\n\n` +
                 `Could you please provide more details, such as:\n` +
                 `- **Steps to reproduce** the issue\n` +
-                `- **Expected behaviour** – what should happen\n` +
-                `- **Actual behaviour** – what actually happens\n` +
+                `- **Expected behavior** – what should happen\n` +
+                `- **Actual behavior** – what actually happens\n` +
                 `- **Screenshots or logs** (if applicable)\n` +
                 `- **Environment** – browser, OS, CARE version\n\n` +
                 `Once you add more information we'll take another look. Thank you! 🙏`
