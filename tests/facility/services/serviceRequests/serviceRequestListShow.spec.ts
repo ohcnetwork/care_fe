@@ -79,53 +79,27 @@ async function findLocationIdInLinks(page: Page, facilityId: string) {
   return null;
 }
 
-function isServiceLocationsListHref(href: string, facilityId: string) {
-  const path = pathnameOnly(href);
-  const prefix = `/facility/${facilityId}/services/`;
-  if (!path.startsWith(prefix)) return false;
-  const rest = path.slice(prefix.length);
-  const segments = rest.split("/").filter(Boolean);
-  return (
-    segments.length === 2 &&
-    segments[1] === "locations" &&
-    segments[0].length > 0
+async function getLocationIdFromServiceRequestShow(
+  page: Page,
+  facilityId: string,
+  serviceRequestId: string,
+) {
+  await page.goto(
+    `/facility/${facilityId}/service_requests/${serviceRequestId}`,
   );
-}
-
-async function getServiceRequestsLocationId(page: Page, facilityId: string) {
-  await page.goto(`/facility/${facilityId}/overview`);
   await page.waitForLoadState("networkidle");
 
-  const overviewLocationId = await findLocationIdInLinks(page, facilityId);
-  if (overviewLocationId) return overviewLocationId;
-
-  await page.goto(`/facility/${facilityId}/services`);
-  await page.waitForLoadState("networkidle");
-
-  const indexHrefPairs = await getLinkHrefsWithIndex(page);
-  const serviceLocationHrefs = indexHrefPairs
-    .filter(({ href }) => isServiceLocationsListHref(href, facilityId))
-    .map(({ href }) => href);
-
-  for (const locationsHref of serviceLocationHrefs) {
-    await page.goto(locationsHref);
-    await page.waitForLoadState("networkidle");
-
-    const idFromUrl = extractServiceRequestsLocationIdFromHref(
-      page.url(),
-      facilityId,
-    );
-    if (idFromUrl) return idFromUrl;
-
-    const pageHrefs = await getLinkHrefsWithIndex(page);
-    for (const { href } of pageHrefs) {
-      const id = extractServiceRequestsLocationIdFromHref(href, facilityId);
-      if (id) return id;
-    }
+  const hrefs = await getLinkHrefsWithIndex(page);
+  for (const { href } of hrefs) {
+    const id = extractServiceRequestsLocationIdFromHref(href, facilityId);
+    if (id) return id;
   }
 
+  const anyLocation = await findLocationIdInLinks(page, facilityId);
+  if (anyLocation) return anyLocation;
+
   throw new Error(
-    `Could not resolve a locationId for facility ${facilityId} with a lab /service_requests link (checked each service's locations page).`,
+    `Could not resolve a locationId from service request show for facility ${facilityId}.`,
   );
 }
 
@@ -179,10 +153,6 @@ test.describe("Facility Service Requests (List + Show)", () => {
     if (listShowFixture) return listShowFixture;
     if (!listShowFixtureInit) {
       listShowFixtureInit = (async () => {
-        const locationIdResolved = await getServiceRequestsLocationId(
-          page,
-          facilityId,
-        );
         const data = await createServiceRequest(
           page,
           facilityId,
@@ -191,17 +161,25 @@ test.describe("Facility Service Requests (List + Show)", () => {
           false,
         );
 
-        await openServiceRequestList(page, {
-          facilityId,
-          locationId: locationIdResolved,
+        await page.goto(
+          `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+        );
+        await page.waitForLoadState("networkidle");
+
+        const serviceRequestsTab = page.getByRole("tab", {
+          name: /service requests/i,
         });
-        const table = await getServiceRequestTable(page);
-        const createdRow = rowForCreated(table, {
+        await expect(serviceRequestsTab).toBeVisible();
+        await serviceRequestsTab.click();
+        await page.waitForLoadState("networkidle");
+
+        const encounterTable = await getServiceRequestTable(page);
+        const encounterRow = rowForCreated(encounterTable, {
           activityDefinition: data.activityDefinition,
           priority: data.priority,
         });
-        await expect(createdRow).toBeVisible();
-        await createdRow
+        await expect(encounterRow).toBeVisible();
+        await encounterRow
           .getByRole("button", { name: tr("see_details") })
           .click();
         await page.waitForLoadState("networkidle");
@@ -215,6 +193,12 @@ test.describe("Facility Service Requests (List + Show)", () => {
             `Failed to extract serviceRequestId from URL: ${url}`,
           );
         }
+
+        const locationIdResolved = await getLocationIdFromServiceRequestShow(
+          page,
+          facilityId,
+          serviceRequestId,
+        );
 
         listShowFixture = {
           locationId: locationIdResolved,
