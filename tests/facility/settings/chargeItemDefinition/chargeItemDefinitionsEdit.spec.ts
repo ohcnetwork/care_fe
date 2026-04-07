@@ -57,11 +57,16 @@ test.describe("Charge Item Definition Edit operations", () => {
     ).toBeVisible();
 
     const searchBox = page.getByRole("textbox", { name: /Search/i });
+    const searchResponse = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/charge_item_definition/") &&
+        resp.request().method() === "GET" &&
+        resp.ok(),
+    );
     await searchBox.fill(title + " - edited");
-    await expect(async () => {
-      await expect(
-        page.getByRole("table").getByText(title + " - edited"),
-      ).toBeVisible();
-    }).toPass({ intervals: [500, 1000, 2000] });
+    await searchResponse;
+    await expect(
+      page.getByRole("table").getByText(title + " - edited"),
+    ).toBeVisible();
   });
 });

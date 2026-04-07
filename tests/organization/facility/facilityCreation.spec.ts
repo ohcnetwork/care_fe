@@ -154,11 +154,8 @@ test.describe("Facility Creation", () => {
       .getByRole("textbox", { name: "Search by facility name" })
       .fill(facilityName);
     await page.getByRole("link", { name: "View Facility" }).click();
-    await page.waitForURL(/\/facility\/[^/]+\/overview/, {
-      waitUntil: "domcontentloaded",
-    });
 
-    // Verify facility details
+    // Verify facility details (link navigates to /settings/general)
     await expect(
       page.getByRole("heading", { name: facilityName }),
     ).toBeVisible();
@@ -228,9 +225,6 @@ test.describe("Facility Creation", () => {
       .getByRole("textbox", { name: "Search by facility name" })
       .fill(facilityName);
     await page.getByRole("link", { name: "View Facility" }).click();
-    await page.waitForURL(/\/facility\/[^/]+\/overview/, {
-      waitUntil: "domcontentloaded",
-    });
 
     // Verify facility details - only mandatory fields should be visible
     await expect(

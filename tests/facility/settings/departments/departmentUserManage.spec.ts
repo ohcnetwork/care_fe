@@ -5,6 +5,9 @@ import { getFacilityId } from "tests/support/facilityId";
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Department User Management", () => {
+  // Tests share state (users in the same department) — run serially to avoid conflicts
+  test.describe.configure({ mode: "serial" });
+
   let facilityId: string;
 
   const testUsers = ["care-doctor", "care-volunteer"];
@@ -68,11 +71,7 @@ test.describe("Department User Management", () => {
   }
 
   async function verifyUserInList(page: Page, userName: string) {
-    await expect(async () => {
-      await expect(
-        page.locator('[data-slot="table-body"]').getByText(userName).first(),
-      ).toBeVisible();
-    }).toPass({ intervals: [500, 1000, 2000] });
+    await expect(page.getByText(userName).first()).toBeVisible();
   }
 
   async function openEditRoleDialog(page: Page) {

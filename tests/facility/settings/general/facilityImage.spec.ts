@@ -79,9 +79,11 @@ test.describe("Facility Image Settings", () => {
 
     // Reopen and verify state was reset
     await page.getByRole("button", { name: "Edit Cover Photo" }).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
 
-    await expect(page.getByText("Drag & drop image to upload")).toBeVisible();
-    await expect(page.getByText("No image found.")).toBeVisible();
+    await expect(dialog.getByText("Drag & drop image to upload")).toBeVisible();
+    await expect(dialog.getByText("No image found.")).toBeVisible();
 
     await page.getByRole("button", { name: "Cancel" }).click();
   });
