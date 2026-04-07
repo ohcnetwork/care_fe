@@ -2,6 +2,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
 import { PatientTagsDisplay } from "@/components/Patient/PatientTagsDisplay";
 import { formatPatientAddress } from "@/components/Patient/utils";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   PatientListRead,
@@ -49,6 +50,11 @@ export const PatientInfoHoverCard = ({
             </span>
           </div>
         </div>
+        {"deceased_datetime" in patient && patient.deceased_datetime && (
+          <Badge variant="destructive" className="text-xs h-5 mt-1">
+            {t("deceased")}
+          </Badge>
+        )}
       </div>
       <div className="flex items-center gap-2">
         {!isPatientHomePage && facilityId && (
