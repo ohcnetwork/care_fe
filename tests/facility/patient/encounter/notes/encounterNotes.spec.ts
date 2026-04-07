@@ -151,15 +151,10 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
       .getByRole("button")
       .filter({ hasText: threadTitle });
 
-    // User B navigates to the same encounter, clicks Notes tab, waits for thread list API
+    // User B navigates to the same encounter, clicks Notes tab, waits for thread to appear
     await expect(async () => {
       await userBPage.goto(encounterUrl);
-      await Promise.all([
-        userBPage.getByRole("tab", { name: "Notes" }).click(),
-        userBPage.waitForResponse(
-          (resp) => resp.url().includes("/thread/") && resp.status() === 200,
-        ),
-      ]);
+      await userBPage.getByRole("tab", { name: "Notes" }).click();
       await expect(threadButton).toBeVisible();
     }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
 
