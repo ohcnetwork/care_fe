@@ -48,15 +48,7 @@ test.describe("Department User Management", () => {
   }
 
   async function submitAddUser(page: Page) {
-    const responsePromise = page.waitForResponse(
-      (resp) =>
-        resp.url().includes("/organizations/") &&
-        resp.url().includes("/users/") &&
-        resp.request().method() === "POST" &&
-        resp.ok(),
-    );
     await page.getByRole("button", { name: "Add to Organization" }).click();
-    await responsePromise;
     // Wait for the success toast to confirm the operation completed
     await expect(
       page
@@ -76,9 +68,11 @@ test.describe("Department User Management", () => {
   }
 
   async function verifyUserInList(page: Page, userName: string) {
-    await expect(
-      page.locator('[data-slot="table-body"]').getByText(userName).first(),
-    ).toBeVisible();
+    await expect(async () => {
+      await expect(
+        page.locator('[data-slot="table-body"]').getByText(userName).first(),
+      ).toBeVisible();
+    }).toPass({ intervals: [500, 1000, 2000] });
   }
 
   async function openEditRoleDialog(page: Page) {

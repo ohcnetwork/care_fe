@@ -119,7 +119,11 @@ test.describe("Product Knowledge Creation", () => {
     await searchResponse;
     await expect(page.getByRole("table").getByText(name)).toBeVisible();
 
-    await page.getByRole("link", { name: "View" }).first().click();
+    await page
+      .getByRole("row")
+      .filter({ hasText: name })
+      .getByRole("link", { name: "View" })
+      .click();
     await expect(page.getByRole("heading").getByText(name)).toBeVisible();
 
     await page.getByRole("button", { name: "Edit" }).first().click();
@@ -171,7 +175,11 @@ test.describe("Product Knowledge Creation", () => {
     await expect(page.getByRole("table").getByText(name)).toBeVisible();
 
     // View and verify all details
-    await page.getByRole("link", { name: "View" }).first().click();
+    await page
+      .getByRole("row")
+      .filter({ hasText: name })
+      .getByRole("link", { name: "View" })
+      .click();
     await expect(page.getByRole("heading").getByText(name)).toBeVisible();
     await expect(page.getByText(altNames)).toBeVisible();
     await expect(page.getByText(storageGuidelines)).toBeVisible();

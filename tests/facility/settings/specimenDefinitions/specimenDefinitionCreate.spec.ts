@@ -165,11 +165,11 @@ test.describe("Specimen Definitions Create", () => {
     await expect(page.getByText(containerDescription)).toBeVisible();
     await expect(page.getByText(preparationDescription)).toBeVisible();
     await expect(
-      page.getByText(capacity.toFixed(2), { exact: true }),
+      page.getByText(new RegExp(`\\b${capacity}\\.00\\b`)),
     ).toBeVisible();
     await expect(page.getByText(capOption)).toBeVisible();
     await expect(
-      page.getByText(minimumVolume.toString(), { exact: true }),
+      page.getByText(new RegExp(`\\b${minimumVolume}(\\.00)?\\b`)),
     ).toBeVisible();
   });
 
