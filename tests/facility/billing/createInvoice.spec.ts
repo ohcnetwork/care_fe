@@ -148,6 +148,12 @@ async function ensureAtLeastOneChargeItemSelected(
   facilityId: string,
   accountId: string,
 ) {
+  const createInvoiceUrl = `/facility/${facilityId}/billing/account/${accountId}/invoices/create`;
+  if (!page.url().includes(createInvoiceUrl)) {
+    await page.goto(createInvoiceUrl);
+  }
+
+  await expect(page).toHaveURL(new RegExp(`${createInvoiceUrl}(?:\\?|$)`));
   await expect(
     page.getByText(tr("create_invoice"), { exact: true }),
   ).toBeVisible();
@@ -172,7 +178,12 @@ async function ensureAtLeastOneChargeItemSelected(
   const hasNoBillable = await noBillable.isVisible().catch(() => false);
 
   if (hasNoBillable) {
-    await page.getByRole("button", { name: tr("add_charge_items") }).click();
+    const addChargeItemsButton = page.getByRole("button", {
+      name: tr("add_charge_items"),
+      exact: true,
+    });
+    await expect(addChargeItemsButton).toBeVisible({ timeout: 30_000 });
+    await addChargeItemsButton.click({ timeout: 30_000 });
     await page.waitForLoadState("networkidle");
 
     let sheet = page.getByRole("dialog", { name: tr("add_charge_items") });
