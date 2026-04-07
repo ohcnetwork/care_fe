@@ -21,36 +21,94 @@ interface CreatedServiceRequest {
   activityDefinition: string;
 }
 
-async function getAnyLocationId(page: Page, facilityId: string) {
+function extractLocationIdFromUrl(url: string, facilityId: string) {
+  return (
+    url.match(new RegExp(`/facility/${facilityId}/locations/([^/]+)`))?.[1] ??
+    null
+  );
+}
+
+function extractServiceRequestsLocationIdFromHref(
+  href: string,
+  facilityId: string,
+) {
+  return (
+    href.match(
+      new RegExp(`/facility/${facilityId}/locations/([^/]+)/service_requests`),
+    )?.[1] ?? null
+  );
+}
+
+async function getLinkHrefsWithIndex(page: Page) {
+  const links = page.getByRole("link");
+  const hasAnyLinks = await links
+    .first()
+    .isVisible()
+    .catch(() => false);
+  if (!hasAnyLinks) return [];
+
+  const hrefs = await links.evaluateAll((elements) =>
+    elements.map((el) => el.getAttribute("href")),
+  );
+
+  return hrefs
+    .map((href, index) => ({ href, index }))
+    .filter(
+      (x): x is { href: string; index: number } => typeof x.href === "string",
+    );
+}
+
+async function findLocationIdInLinks(page: Page, facilityId: string) {
+  const hrefs = await getLinkHrefsWithIndex(page);
+  for (const { href } of hrefs) {
+    const id = extractLocationIdFromUrl(href, facilityId);
+    if (id) return id;
+  }
+
+  return null;
+}
+
+async function getServiceRequestsLocationId(page: Page, facilityId: string) {
   await page.goto(`/facility/${facilityId}/overview`);
   await page.waitForLoadState("networkidle");
 
-  const links = page.getByRole("link");
-  await expect(links.first()).toBeVisible();
+  const overviewLocationId = await findLocationIdInLinks(page, facilityId);
+  if (overviewLocationId) return overviewLocationId;
 
-  const hrefs = await links.evaluateAll((elements) =>
-    elements
-      .map((el) => el.getAttribute("href"))
-      .filter((href): href is string => typeof href === "string"),
-  );
+  // Fallback: facility services flow always leads to a location-scoped page
+  await page.goto(`/facility/${facilityId}/services/`);
+  await page.waitForLoadState("networkidle");
 
-  const match = hrefs
-    .map((href) => ({
-      href,
-      match: href.match(
-        new RegExp(`/facility/${facilityId}/locations/([^/]+)`),
-      ),
-    }))
-    .find((x) => x.match?.[1]);
-
-  const locationId = match?.match?.[1];
-  if (!locationId) {
-    throw new Error(
-      `Could not find a location link for facility ${facilityId} on overview page.`,
+  const visited = new Set<string>();
+  for (let depth = 0; depth < 6; depth += 1) {
+    const idFromUrl = extractServiceRequestsLocationIdFromHref(
+      page.url(),
+      facilityId,
     );
+    if (idFromUrl) return idFromUrl;
+
+    const hrefs = await getLinkHrefsWithIndex(page);
+
+    for (const { href } of hrefs) {
+      const id = extractServiceRequestsLocationIdFromHref(href, facilityId);
+      if (id) return id;
+    }
+
+    const next = hrefs.find(({ href }) => {
+      if (visited.has(href)) return false;
+      return href.startsWith(`/facility/${facilityId}/services/`);
+    });
+
+    if (!next) break;
+    visited.add(next.href);
+
+    await page.getByRole("link").nth(next.index).click();
+    await page.waitForLoadState("networkidle");
   }
 
-  return locationId;
+  throw new Error(
+    `Could not resolve a locationId for facility ${facilityId} via overview or services navigation.`,
+  );
 }
 
 async function createEncounterServiceRequest(
@@ -142,7 +200,7 @@ test.describe("Facility Service Requests (List + Show)", () => {
     page,
   }) => {
     await test.step("Resolve lab location and create a service request", async () => {
-      locationId = await getAnyLocationId(page, facilityId);
+      locationId = await getServiceRequestsLocationId(page, facilityId);
       created = await createEncounterServiceRequest(page, {
         facilityId,
         patientId,
