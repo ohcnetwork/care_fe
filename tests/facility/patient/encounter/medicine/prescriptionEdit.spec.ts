@@ -30,7 +30,6 @@ test.describe("Edit Patient Prescription", () => {
     const frequencyData = faker.helpers.arrayElement(frequencies);
     const selectedInstruction = faker.helpers.arrayElement(instructions);
     const notes = "testing notes";
-    let prescriptionDateTime = "";
 
     await test.step("Open prescription form", async () => {
       await page.getByRole("link", { name: /Create/i }).click();
@@ -110,7 +109,6 @@ test.describe("Edit Patient Prescription", () => {
         await expect(table).toBeVisible();
         const content = await table.textContent();
         if (content?.includes(medicineName)) {
-          prescriptionDateTime = ((await card.textContent()) || "").trim();
           foundCard = true;
           await expect(table).toContainText(dosage);
           await expect(table).toContainText(frequencyData.display);
@@ -151,20 +149,35 @@ test.describe("Edit Patient Prescription", () => {
             resp.status() === 200,
         ),
       ]);
-      // Re-locate the same prescription card by its datetime text
-      const prescriptionCard = page.getByText(prescriptionDateTime);
-      await expect(prescriptionCard).toBeVisible();
-      await prescriptionCard.click();
-      await expect(
-        page.getByText(/Show \d+ Inactive Medications?/i),
-      ).toBeVisible();
-      await page.getByText(/Show \d+ Inactive Medications?/i).click();
-      const table = page.getByRole("table");
-      await expect(table).toContainText(medicineName);
-      await expect(table).toContainText(dosage);
-      await expect(table).toContainText(frequencyData.display);
-      await expect(table).toContainText(selectedInstruction);
-      await expect(page.getByText(`Note${notes}`)).toBeVisible();
+      // Loop through prescription cards to find one with the inactive medicine
+      const prescriptionCards = page.getByText(
+        /^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2} (AM|PM)$/,
+      );
+      await expect(prescriptionCards.first()).toBeVisible();
+      const count = await prescriptionCards.count();
+      let foundCard = false;
+      for (let i = 0; i < count; i++) {
+        const card = prescriptionCards.nth(i);
+        await card.click();
+        // Check if this card has inactive medications with our medicine
+        const inactiveToggle = page.getByText(
+          /Show \d+ Inactive Medications?/i,
+        );
+        if (await inactiveToggle.isVisible()) {
+          await inactiveToggle.click();
+          const table = page.getByRole("table");
+          const content = await table.textContent();
+          if (content?.includes(medicineName)) {
+            foundCard = true;
+            await expect(table).toContainText(dosage);
+            await expect(table).toContainText(frequencyData.display);
+            await expect(table).toContainText(selectedInstruction);
+            await expect(page.getByText(`Note${notes}`)).toBeVisible();
+            break;
+          }
+        }
+      }
+      expect(foundCard).toBe(true);
     });
   });
 });
