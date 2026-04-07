@@ -1,10 +1,19 @@
 import { faker } from "@faker-js/faker";
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import {
+  expect,
+  test,
+  type Locator,
+  type Page,
+  type Response,
+} from "@playwright/test";
 import en from "public/locale/en.json";
 import { closeAnyOpenPopovers, expectToast } from "tests/helper/ui";
 import { getAccountId } from "tests/support/accountId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
+
+test.use({ storageState: "tests/.auth/user.json" });
+test.describe.configure({ mode: "serial" });
 
 function tr(key: string) {
   const value = (en as Record<string, unknown>)[key];
@@ -24,12 +33,26 @@ function tabLocator(page: Page, tabText: string) {
   });
 }
 
+function createInvoiceForm(page: Page): Locator {
+  return page.getByRole("form");
+}
+
 function addChargeItemsBillingSheetPanel(page: Page): Locator {
-  return page.locator('[data-slot="sheet-content"]').filter({
-    has: page
-      .locator('[data-slot="sheet-title"]')
-      .getByText(tr("add_charge_items"), { exact: true }),
+  return page.getByRole("dialog").filter({
+    has: page.getByRole("heading", { name: tr("add_charge_items") }),
   });
+}
+
+function accountRetrieveResponsePredicate(
+  facilityId: string,
+  accountId: string,
+) {
+  const needle = `/api/v1/facility/${facilityId}/account/${accountId}/`;
+  return (response: Response) =>
+    response.request().method() === "GET" &&
+    response.url().includes(needle) &&
+    !response.url().includes("/rebalance/") &&
+    (response.status() === 200 || response.status() === 304);
 }
 
 function firstNonEmptyLine(text: string) {
@@ -68,7 +91,13 @@ async function addChargeItemsFromPickerInSheet(
   await search.fill(definitionSearch);
   await waitForChargeItemSearchSettled(page);
 
-  const listbox = page.getByRole("listbox").last();
+  const definitionSearchPlaceholder = tr("search_charge_item_definition");
+  const pickerPopover = page
+    .locator("[data-radix-popper-content-wrapper]")
+    .filter({ has: page.getByPlaceholder(definitionSearchPlaceholder) })
+    .filter({ visible: true })
+    .last();
+  const listbox = pickerPopover.getByRole("listbox");
   const listboxVisible = await listbox.isVisible().catch(() => false);
   if (!listboxVisible) return null;
 
@@ -128,7 +157,24 @@ async function ensureAtLeastOneChargeItemSelected(
   accountId: string,
 ) {
   const createInvoiceUrl = `/facility/${facilityId}/billing/account/${accountId}/invoices/create`;
+  const accountResponsePromise = page.waitForResponse(
+    accountRetrieveResponsePredicate(facilityId, accountId),
+  );
+
   await page.goto(createInvoiceUrl, { waitUntil: "domcontentloaded" });
+  const accountResponse = await accountResponsePromise;
+
+  if (accountResponse.status() === 200) {
+    const accountData = (await accountResponse.json()) as {
+      patient?: { id?: string } | string | null;
+    };
+    if (!accountData.patient) {
+      throw new Error(
+        `Billing account ${accountId} has no linked patient; Create Invoice cannot add charge items.`,
+      );
+    }
+  }
+
   await page.waitForLoadState("networkidle");
 
   await expect(page).toHaveURL(
@@ -138,7 +184,7 @@ async function ensureAtLeastOneChargeItemSelected(
     page.getByText(tr("create_invoice"), { exact: true }),
   ).toBeVisible();
 
-  const invoiceForm = page.locator("form.space-y-6");
+  const invoiceForm = createInvoiceForm(page);
   await expect(invoiceForm).toBeVisible();
 
   const noBillableText = tr("no_billable_items");
@@ -158,10 +204,7 @@ async function ensureAtLeastOneChargeItemSelected(
 
     const sheet = addChargeItemsBillingSheetPanel(page);
 
-    const invoiceHeader = page.locator("div.justify-between").filter({
-      has: page.getByText(tr("create_invoice"), { exact: true }),
-    });
-    const toolbarBtn = invoiceHeader.getByRole("button", {
+    const toolbarBtn = page.getByRole("button", {
       name: tr("add_charge_items"),
     });
     await expect(toolbarBtn).toBeVisible();
@@ -225,9 +268,6 @@ async function extractInvoiceNumber(page: Page) {
   return text.replace(new RegExp(`^${tr("invoice")}\\s*:\\s*`, "i"), "").trim();
 }
 
-test.use({ storageState: "tests/.auth/user.json" });
-test.describe.configure({ mode: "serial" });
-
 let facilityId: string;
 let patientId: string;
 let accountId: string;
@@ -242,7 +282,11 @@ test.beforeAll(async () => {
 async function openFixtureAccountFromBillingList(page: Page) {
   await openAccountList(page, facilityId, patientId);
 
-  const goToAccount = page.getByRole("button", { name: tr("go_to_account") });
+  const accountsTable = page.getByRole("table");
+  await expect(accountsTable).toBeVisible();
+  const goToAccount = accountsTable.getByRole("button", {
+    name: tr("go_to_account"),
+  });
   await expect(goToAccount.first()).toBeVisible();
   await goToAccount.first().click();
   await page.waitForLoadState("networkidle");
@@ -277,23 +321,26 @@ test.describe("Create Invoice (facility billing)", () => {
     });
 
     await test.step("Fill optional fields", async () => {
-      const toggleOptional = page.getByRole("button", {
+      const form = createInvoiceForm(page);
+      const toggleOptional = form.getByRole("button", {
         name: tr("payment_terms_and_note"),
         exact: true,
       });
       await expect(toggleOptional).toBeVisible();
       await toggleOptional.click();
 
-      await page
+      await form
         .getByPlaceholder(tr("payment_terms_placeholder"))
         .fill(`PT-${faker.string.alphanumeric(8)}`);
-      await page
+      await form
         .getByPlaceholder(tr("invoice_note_placeholder"))
         .fill(faker.lorem.sentence());
     });
 
     await test.step("Submit invoice and verify success", async () => {
-      await page.getByRole("button", { name: tr("create_invoice") }).click();
+      await createInvoiceForm(page)
+        .getByRole("button", { name: tr("create_invoice") })
+        .click();
       await expectToast(page, tr("invoice_created_successfully"));
 
       await page.waitForLoadState("networkidle");
