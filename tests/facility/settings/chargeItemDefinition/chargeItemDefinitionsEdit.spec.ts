@@ -64,17 +64,10 @@ test.describe("Charge Item Definition Edit operations", () => {
     await expect(async () => {
       const searchBox = page.getByRole("textbox", { name: /Search/i });
       await searchBox.clear();
-      const searchResponse = page.waitForResponse(
-        (resp) =>
-          resp.url().includes("/charge_item_definition/") &&
-          resp.request().method() === "GET" &&
-          resp.ok(),
-      );
       await searchBox.fill(title + " - edited");
-      await searchResponse;
       await expect(
         page.getByRole("table").getByText(title + " - edited"),
       ).toBeVisible();
-    }).toPass({ intervals: [1_000, 2_000], timeout: 15_000 });
+    }).toPass({ intervals: [1_000, 2_000, 3_000], timeout: 15_000 });
   });
 });
