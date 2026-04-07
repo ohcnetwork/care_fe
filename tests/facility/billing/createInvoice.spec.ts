@@ -18,14 +18,20 @@ function escapeRegex(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function firstMeaningfulLine(text: string) {
-  return text
-    .split("\n")
-    .map((s) => s.trim())
-    .find((line) => line.length > 0);
+function tabLocator(page: Page, tabText: string) {
+  return page.getByRole("tab", {
+    name: new RegExp(`^${escapeRegex(tabText)}(\\b|\\s|$)`, "i"),
+  });
 }
 
-const CHARGE_ITEM_DEFINITION_CATEGORY = "Medications";
+function firstNonEmptyLine(text: string) {
+  return (
+    text
+      .split("\n")
+      .map((s) => s.trim())
+      .find((line) => line.length > 0) ?? ""
+  );
+}
 
 async function createMinimalChargeItemDefinition(
   page: Page,
@@ -34,16 +40,16 @@ async function createMinimalChargeItemDefinition(
   const title = `E2E ${faker.string.alphanumeric(12)}`;
   const slug = title.replace(/\s+/g, "-").toLowerCase().slice(0, 25);
   const basePrice = faker.commerce.price({ dec: 0 });
+  const categoryQuery = tr("medication");
 
   await page.goto(`/facility/${facilityId}/settings/charge_item_definitions/`);
   await page.waitForLoadState("networkidle");
 
-  await page
-    .getByRole("textbox", { name: tr("search") })
-    .fill(CHARGE_ITEM_DEFINITION_CATEGORY);
+  await page.getByRole("textbox", { name: tr("search") }).fill(categoryQuery);
   await page.waitForLoadState("networkidle");
   await page
-    .getByRole("heading", { name: CHARGE_ITEM_DEFINITION_CATEGORY })
+    .getByRole("heading", { name: new RegExp(escapeRegex(categoryQuery), "i") })
+    .first()
     .click();
   await page.waitForLoadState("networkidle");
   await page.getByRole("button", { name: tr("add_definition") }).click();
@@ -94,7 +100,7 @@ async function addChargeItemsFromPickerInSheet(
   const option = options.first();
   await expect(option).toBeVisible();
   const optionText = (await option.textContent()) ?? "";
-  const chargeItemTitle = firstMeaningfulLine(optionText) ?? "";
+  const chargeItemTitle = firstNonEmptyLine(optionText);
   if (!chargeItemTitle) return null;
 
   await option.click();
@@ -132,11 +138,9 @@ async function openAccountShow(
   await page.goto(`/facility/${facilityId}/billing/account/${accountId}`);
   await page.waitForLoadState("networkidle");
 
-  await expect(page.getByRole("tab", { name: tr("invoices") })).toBeVisible();
-  await expect(
-    page.getByRole("tab", { name: tr("charge_items") }),
-  ).toBeVisible();
-  await expect(page.getByRole("tab", { name: tr("payments") })).toBeVisible();
+  await expect(tabLocator(page, tr("invoices"))).toBeVisible();
+  await expect(tabLocator(page, tr("charge_items"))).toBeVisible();
+  await expect(tabLocator(page, tr("payments"))).toBeVisible();
 }
 
 async function ensureAtLeastOneChargeItemSelected(
@@ -212,7 +216,7 @@ async function ensureAtLeastOneChargeItemSelected(
 
     const titleCell = dataRow.getByRole("cell").nth(1);
     const titleText = (await titleCell.textContent()) ?? "";
-    chargeItemTitle = firstMeaningfulLine(titleText) ?? "";
+    chargeItemTitle = firstNonEmptyLine(titleText);
     expect(chargeItemTitle).not.toEqual("");
   }
 
@@ -292,15 +296,9 @@ test.describe("Create Invoice (facility billing)", () => {
     });
 
     await test.step("Verify account workspace tabs", async () => {
-      await expect(
-        page.getByRole("tab", { name: tr("invoices") }),
-      ).toBeVisible();
-      await expect(
-        page.getByRole("tab", { name: tr("charge_items") }),
-      ).toBeVisible();
-      await expect(
-        page.getByRole("tab", { name: tr("payments") }),
-      ).toBeVisible();
+      await expect(tabLocator(page, tr("invoices"))).toBeVisible();
+      await expect(tabLocator(page, tr("charge_items"))).toBeVisible();
+      await expect(tabLocator(page, tr("payments"))).toBeVisible();
     });
   });
 
