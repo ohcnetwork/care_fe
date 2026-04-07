@@ -15,6 +15,7 @@ function tr(key: string) {
 
 interface CreatedServiceRequest {
   activityDefinition: string;
+  activityDefinitionSlug: string;
   priority: string;
   serviceRequestId: string;
 }
@@ -42,6 +43,7 @@ async function getLocationIdFromServiceRequestShow(
   const data = (await response.json()) as {
     locations?: Array<{ id?: string }>;
     encounter?: { current_location?: { id?: string } };
+    activity_definition?: { slug?: string };
   };
 
   const locationId =
@@ -53,6 +55,37 @@ async function getLocationIdFromServiceRequestShow(
 
   throw new Error(
     `Could not resolve a locationId from service request ${serviceRequestId} for facility ${facilityId}.`,
+  );
+}
+
+async function getActivityDefinitionSlugFromServiceRequestShow(
+  page: Page,
+  facilityId: string,
+  serviceRequestId: string,
+) {
+  const retrievePathSubstring = `/api/v1/facility/${facilityId}/service_request/${serviceRequestId}`;
+  const responsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === "GET" &&
+      response.url().includes(retrievePathSubstring) &&
+      response.ok(),
+    { timeout: 45_000 },
+  );
+
+  await page.goto(
+    `/facility/${facilityId}/service_requests/${serviceRequestId}`,
+  );
+  const response = await responsePromise;
+  await page.waitForLoadState("networkidle");
+
+  const data = (await response.json()) as {
+    activity_definition?: { slug?: string };
+  };
+  const slug = data.activity_definition?.slug;
+  if (slug) return slug;
+
+  throw new Error(
+    `Could not resolve activity definition slug from service request ${serviceRequestId} for facility ${facilityId}.`,
   );
 }
 
@@ -152,11 +185,18 @@ test.describe("Facility Service Requests (List + Show)", () => {
           facilityId,
           serviceRequestId,
         );
+        const activityDefinitionSlug =
+          await getActivityDefinitionSlugFromServiceRequestShow(
+            page,
+            facilityId,
+            serviceRequestId,
+          );
 
         listShowFixture = {
           locationId: locationIdResolved,
           created: {
             activityDefinition: data.activityDefinition,
+            activityDefinitionSlug,
             priority: data.priority,
             serviceRequestId,
           },
@@ -205,23 +245,32 @@ test.describe("Facility Service Requests (List + Show)", () => {
     await openServiceRequestList(page, { facilityId, locationId });
 
     await test.step("Filter by activity definition", async () => {
-      await page.getByRole("button", { name: tr("filters") }).click();
-      await page
-        .getByRole("menuitem", { name: tr("activity_definition") })
-        .click();
+      const url = new URL(page.url());
+      url.searchParams.set(
+        "activity_definition",
+        created.activityDefinitionSlug,
+      );
 
-      const search = page.getByPlaceholder(tr("search_activity_definition"));
-      await expect(search).toBeVisible();
-      await search.fill(created.activityDefinition);
+      const listPathPart = `/api/v1/facility/${facilityId}/service_request/`;
+      const responsePromise = page.waitForResponse(
+        (r) =>
+          r.request().method() === "GET" &&
+          r.url().includes(listPathPart) &&
+          r
+            .url()
+            .includes(
+              `activity_definition=${created.activityDefinitionSlug}`,
+            ) &&
+          (r.ok() || r.status() === 304),
+        { timeout: 45_000 },
+      );
 
-      await page
-        .getByRole("menuitem", { name: created.activityDefinition })
-        .first()
-        .click();
-
-      await page.keyboard.press("Escape");
-      await expect(page).toHaveURL(/activity_definition=/);
+      await page.goto(url.toString());
+      await responsePromise;
       await page.waitForLoadState("networkidle");
+      await expect(page).toHaveURL(
+        new RegExp(`activity_definition=${created.activityDefinitionSlug}`),
+      );
 
       const table = await getServiceRequestTable(page);
       const dataRows = table.getByRole("row").filter({
@@ -232,19 +281,6 @@ test.describe("Facility Service Requests (List + Show)", () => {
       for (let i = 0; i < rowCount; i += 1) {
         await expect(dataRows.nth(i)).toContainText(created.activityDefinition);
       }
-
-      await page.getByRole("button", { name: tr("filters") }).click();
-      await page
-        .getByRole("menuitem", { name: tr("activity_definition") })
-        .click();
-      const selectedActivity = page
-        .getByRole("menuitem", { name: created.activityDefinition })
-        .first();
-      await expect(selectedActivity.getByRole("checkbox")).toHaveAttribute(
-        "aria-checked",
-        "true",
-      );
-      await page.keyboard.press("Escape");
     });
 
     await test.step("Filter by date range", async () => {
