@@ -17,31 +17,44 @@ interface CreatedServiceRequest {
   activityDefinition: string;
 }
 
+function pathnameOnly(hrefOrUrl: string) {
+  if (hrefOrUrl.startsWith("http")) {
+    try {
+      return new URL(hrefOrUrl).pathname;
+    } catch {
+      return hrefOrUrl.split("?")[0];
+    }
+  }
+  return hrefOrUrl.split("?")[0];
+}
+
 function extractLocationIdFromUrl(url: string, facilityId: string) {
-  return (
-    url.match(new RegExp(`/facility/${facilityId}/locations/([^/]+)`))?.[1] ??
-    null
-  );
+  const path = pathnameOnly(url);
+  const marker = `/facility/${facilityId}/locations/`;
+  const idx = path.indexOf(marker);
+  if (idx === -1) return null;
+  const tail = path.slice(idx + marker.length);
+  const segment = tail.split("/").filter(Boolean)[0];
+  return segment ?? null;
 }
 
 function extractServiceRequestsLocationIdFromHref(
   href: string,
   facilityId: string,
 ) {
-  return (
-    href.match(
-      new RegExp(`/facility/${facilityId}/locations/([^/]+)/service_requests`),
-    )?.[1] ?? null
-  );
+  const path = pathnameOnly(href);
+  const marker = `/facility/${facilityId}/locations/`;
+  const idx = path.indexOf(marker);
+  if (idx === -1) return null;
+  const tail = path.slice(idx + marker.length);
+  const parts = tail.split("/").filter(Boolean);
+  if (parts.length >= 2 && parts[1] === "service_requests") return parts[0];
+  return null;
 }
 
 async function getLinkHrefsWithIndex(page: Page) {
   const links = page.getByRole("link");
-  const hasAnyLinks = await links
-    .first()
-    .isVisible()
-    .catch(() => false);
-  if (!hasAnyLinks) return [];
+  if ((await links.count()) === 0) return [];
 
   const hrefs = await links.evaluateAll((elements) =>
     elements.map((el) => el.getAttribute("href")),
@@ -65,9 +78,16 @@ async function findLocationIdInLinks(page: Page, facilityId: string) {
 }
 
 function isServiceLocationsListHref(href: string, facilityId: string) {
-  return new RegExp(
-    `^/facility/${facilityId.replace(/-/g, "\\-")}/services/[^/]+/locations$`,
-  ).test(href);
+  const path = pathnameOnly(href);
+  const prefix = `/facility/${facilityId}/services/`;
+  if (!path.startsWith(prefix)) return false;
+  const rest = path.slice(prefix.length);
+  const segments = rest.split("/").filter(Boolean);
+  return (
+    segments.length === 2 &&
+    segments[1] === "locations" &&
+    segments[0].length > 0
+  );
 }
 
 async function getServiceRequestsLocationId(page: Page, facilityId: string) {
@@ -137,10 +157,42 @@ test.describe.configure({ mode: "serial" });
 
 test.describe("Facility Service Requests (List + Show)", () => {
   let facilityId: string;
-  let locationId: string;
   let patientId: string;
   let encounterId: string;
-  let created: CreatedServiceRequest;
+
+  let listShowFixture: {
+    locationId: string;
+    created: CreatedServiceRequest;
+  } | null = null;
+  let listShowFixtureInit: Promise<void> | null = null;
+
+  async function ensureListShowFixture(page: Page) {
+    if (listShowFixture) return listShowFixture;
+    if (!listShowFixtureInit) {
+      listShowFixtureInit = (async () => {
+        const locationIdResolved = await getServiceRequestsLocationId(
+          page,
+          facilityId,
+        );
+        const data = await createServiceRequest(
+          page,
+          facilityId,
+          patientId,
+          encounterId,
+          false,
+        );
+        listShowFixture = {
+          locationId: locationIdResolved,
+          created: { activityDefinition: data.activityDefinition },
+        };
+      })();
+    }
+    await listShowFixtureInit;
+    if (!listShowFixture) {
+      throw new Error("List + show fixture failed to initialize");
+    }
+    return listShowFixture;
+  }
 
   test.beforeAll(async () => {
     facilityId = getFacilityId();
@@ -151,17 +203,7 @@ test.describe("Facility Service Requests (List + Show)", () => {
   test("Navigate to facility service request list and verify rows are visible", async ({
     page,
   }) => {
-    await test.step("Resolve lab location and create a service request", async () => {
-      locationId = await getServiceRequestsLocationId(page, facilityId);
-      const data = await createServiceRequest(
-        page,
-        facilityId,
-        patientId,
-        encounterId,
-        false,
-      );
-      created = { activityDefinition: data.activityDefinition };
-    });
+    const { locationId, created } = await ensureListShowFixture(page);
 
     await test.step("Open facility location service request list", async () => {
       await openServiceRequestList(page, { facilityId, locationId });
@@ -185,6 +227,7 @@ test.describe("Facility Service Requests (List + Show)", () => {
   test("Filter by activity definition, date range, and status", async ({
     page,
   }) => {
+    const { locationId, created } = await ensureListShowFixture(page);
     await openServiceRequestList(page, { facilityId, locationId });
 
     await test.step("Filter by activity definition", async () => {
@@ -259,6 +302,7 @@ test.describe("Facility Service Requests (List + Show)", () => {
   test("Open a service request and verify specimen workflow card renders", async ({
     page,
   }) => {
+    const { locationId, created } = await ensureListShowFixture(page);
     await openServiceRequestList(page, { facilityId, locationId });
 
     await test.step("Open the matching service request from the list", async () => {
