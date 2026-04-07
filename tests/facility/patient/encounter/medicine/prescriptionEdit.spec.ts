@@ -30,6 +30,7 @@ test.describe("Edit Patient Prescription", () => {
     const frequencyData = faker.helpers.arrayElement(frequencies);
     const selectedInstruction = faker.helpers.arrayElement(instructions);
     const notes = "testing notes";
+    let prescriptionDateTime = "";
 
     await test.step("Open prescription form", async () => {
       await page.getByRole("link", { name: /Create/i }).click();
@@ -96,18 +97,29 @@ test.describe("Edit Patient Prescription", () => {
             resp.status() === 200,
         ),
       ]);
-      const prescriptionDate = page
-        .getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2} (AM|PM)$/)
-        .first();
-      await expect(prescriptionDate).toBeVisible();
-      await prescriptionDate.click();
-      const table = page.getByRole("table");
-      await expect(table).toBeVisible();
-      await expect(table).toContainText(medicineName);
-      await expect(table).toContainText(dosage);
-      await expect(table).toContainText(frequencyData.display);
-      await expect(table).toContainText(selectedInstruction);
-      await expect(page.getByText(`Note${notes}`)).toBeVisible();
+      const prescriptionCards = page.getByText(
+        /^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2} (AM|PM)$/,
+      );
+      await expect(prescriptionCards.first()).toBeVisible();
+      const count = await prescriptionCards.count();
+      let foundCard = false;
+      for (let i = 0; i < count; i++) {
+        const card = prescriptionCards.nth(i);
+        await card.click();
+        const table = page.getByRole("table");
+        await expect(table).toBeVisible();
+        const content = await table.textContent();
+        if (content?.includes(medicineName)) {
+          prescriptionDateTime = ((await card.textContent()) || "").trim();
+          foundCard = true;
+          await expect(table).toContainText(dosage);
+          await expect(table).toContainText(frequencyData.display);
+          await expect(table).toContainText(selectedInstruction);
+          await expect(page.getByText(`Note${notes}`)).toBeVisible();
+          break;
+        }
+      }
+      expect(foundCard).toBe(true);
     });
 
     await test.step("Remove medication", async () => {
@@ -139,11 +151,10 @@ test.describe("Edit Patient Prescription", () => {
             resp.status() === 200,
         ),
       ]);
-      const prescriptionDate = page
-        .getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2} (AM|PM)$/)
-        .first();
-      await expect(prescriptionDate).toBeVisible();
-      await prescriptionDate.click();
+      // Re-locate the same prescription card by its datetime text
+      const prescriptionCard = page.getByText(prescriptionDateTime);
+      await expect(prescriptionCard).toBeVisible();
+      await prescriptionCard.click();
       await expect(
         page.getByText(/Show \d+ Inactive Medications?/i),
       ).toBeVisible();

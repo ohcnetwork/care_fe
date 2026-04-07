@@ -35,6 +35,7 @@ test.describe("Charge Item Definition Edit operations", () => {
 
   test("edit charge item definition", async ({ page }) => {
     await page
+      .locator('[data-slot="table-body"]')
       .getByRole("row")
       .first()
       .getByRole("link", { name: "Edit" })

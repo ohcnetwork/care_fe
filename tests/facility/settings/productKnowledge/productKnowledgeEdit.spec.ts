@@ -48,6 +48,7 @@ test.describe("Product Knowledge Edit operations", () => {
 
   test("view and edit and confirm", async ({ page }) => {
     await page
+      .locator('[data-slot="table-body"]')
       .getByRole("row")
       .first()
       .getByRole("link", { name: "View" })
