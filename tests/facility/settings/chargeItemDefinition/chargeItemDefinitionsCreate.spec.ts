@@ -62,15 +62,13 @@ test.describe("Charge Item Definition Creation", () => {
       page.getByText(/charge item definition.*created successfully/i),
     ).toBeVisible();
 
-    // Verify in edit view
-    const searchResponse = page.waitForResponse(
-      (resp) =>
-        resp.url().includes("/charge_item_definition/") &&
-        resp.request().method() === "GET",
-    );
-    await page.getByRole("textbox", { name: /search/i }).fill(title);
-    await searchResponse;
-    await expect(page.getByRole("table").getByText(title)).toBeVisible();
+    // Verify in search results (retry to handle search indexing delay)
+    await expect(async () => {
+      await page.getByRole("textbox", { name: /search/i }).fill(title);
+      await expect(page.getByRole("table").getByText(title)).toBeVisible({
+        timeout: 5_000,
+      });
+    }).toPass({ intervals: [1_000, 2_000, 3_000], timeout: 15_000 });
 
     const viewDetailResponse = page.waitForResponse(
       (resp) =>
@@ -173,15 +171,13 @@ test.describe("Charge Item Definition Creation", () => {
       page.getByText(/charge item definition.*created successfully/i),
     ).toBeVisible();
 
-    // Verify all fields
-    const searchResponse = page.waitForResponse(
-      (resp) =>
-        resp.url().includes("/charge_item_definition/") &&
-        resp.request().method() === "GET",
-    );
-    await page.getByRole("textbox", { name: /search/i }).fill(title);
-    await searchResponse;
-    await expect(page.getByRole("table").getByText(title)).toBeVisible();
+    // Verify in search results (retry to handle search indexing delay)
+    await expect(async () => {
+      await page.getByRole("textbox", { name: /search/i }).fill(title);
+      await expect(page.getByRole("table").getByText(title)).toBeVisible({
+        timeout: 5_000,
+      });
+    }).toPass({ intervals: [1_000, 2_000, 3_000], timeout: 15_000 });
     const detailResponse = page.waitForResponse(
       (resp) =>
         resp.url().includes("/charge_item_definition/") &&

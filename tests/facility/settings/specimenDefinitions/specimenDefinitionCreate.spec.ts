@@ -164,9 +164,13 @@ test.describe("Specimen Definitions Create", () => {
     ).toBeVisible();
     await expect(page.getByText(containerDescription)).toBeVisible();
     await expect(page.getByText(preparationDescription)).toBeVisible();
-    await expect(page.getByText(capacity.toFixed(2))).toBeVisible();
+    await expect(
+      page.getByText(capacity.toFixed(2), { exact: true }),
+    ).toBeVisible();
     await expect(page.getByText(capOption)).toBeVisible();
-    await expect(page.getByText(minimumVolume.toString())).toBeVisible();
+    await expect(
+      page.getByText(minimumVolume.toString(), { exact: true }),
+    ).toBeVisible();
   });
 
   test("should create specimen definition with all required fields", async ({

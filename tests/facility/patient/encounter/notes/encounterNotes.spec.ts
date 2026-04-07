@@ -112,12 +112,13 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     );
     await page.getByRole("link", { name: "View Encounter" }).first().click();
     await page.waitForURL(/\/encounter\//);
-    encounterUrl = page.url();
     await page.getByRole("tab", { name: "Notes" }).click();
     // Wait for notes to load by checking for the "New" button
     await expect(
       page.getByRole("button", { name: "New", exact: true }),
     ).toBeVisible();
+    // Capture the notes URL directly from the page
+    encounterUrl = page.url();
   });
 
   test("should support multi-user messaging in same thread", async ({
@@ -148,8 +149,7 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     const userBPage = await userBContext.newPage();
 
     // User B navigates to the same encounter's Notes tab directly
-    const notesUrl = encounterUrl.replace(/\/[^/]+$/, "/notes");
-    await userBPage.goto(notesUrl);
+    await userBPage.goto(encounterUrl);
 
     // Wait for notes UI to load
     await expect(
@@ -164,7 +164,7 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     // First check on the initial load, then retry with reloads if not visible
     if (!(await threadButton.isVisible())) {
       await expect(async () => {
-        await userBPage.goto(notesUrl);
+        await userBPage.goto(encounterUrl);
         await expect(
           userBPage.getByRole("button", { name: "New", exact: true }),
         ).toBeVisible();
@@ -188,8 +188,7 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     });
 
     // Refresh User A's view and verify both messages appear
-    const userANotesUrl = encounterUrl.replace(/\/[^/]+$/, "/notes");
-    await page.goto(userANotesUrl);
+    await page.goto(encounterUrl);
     await page.getByRole("button").filter({ hasText: threadTitle }).click();
 
     await expect(page.getByText(userAMessage1)).toBeVisible();
