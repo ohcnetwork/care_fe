@@ -111,21 +111,12 @@ async function fillAdditionalDetails(
 
 async function submitRegistration(page: Page) {
   await test.step("Submit patient registration", async () => {
-    const toastVisible = expect(
+    await page.getByRole("button", { name: /register patient/i }).click();
+    await expect(
       page
         .locator("li[data-sonner-toast]")
         .getByText(/patient registered successfully/i),
     ).toBeVisible();
-    await Promise.all([
-      page.getByRole("button", { name: /register patient/i }).click(),
-      page.waitForResponse(
-        (resp) =>
-          resp.url().includes("/patient/") &&
-          resp.request().method() === "POST" &&
-          resp.ok(),
-      ),
-    ]);
-    await toastVisible;
   });
 }
 
