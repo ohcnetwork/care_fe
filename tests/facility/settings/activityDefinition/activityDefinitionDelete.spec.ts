@@ -14,7 +14,9 @@ test.beforeAll(() => {
 });
 
 test.beforeEach(async ({ page }) => {
-  createdAD = await createActivityDefinition(page, facilityId);
+  createdAD = await createActivityDefinition(page, facilityId, false, {
+    status: "Active",
+  });
 });
 
 test.describe("activity definition deletion", () => {
