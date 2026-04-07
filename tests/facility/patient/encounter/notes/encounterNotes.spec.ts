@@ -131,9 +131,24 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     await page.getByRole("button", { name: /Create/i }).click();
     await expect(page.getByText("Thread created successfully")).toBeVisible();
 
+    // User A explicitly selects the thread in the sidebar
+    const userAThreadButton = page
+      .getByRole("button")
+      .filter({ hasText: threadTitle });
+    await expect(userAThreadButton).toBeVisible();
+    await userAThreadButton.click();
+
     // User A fills message input and sends first message
     await page.getByPlaceholder("Type your message...").fill(userAMessage1);
-    await page.getByRole("button", { name: "Send message" }).click();
+    await Promise.all([
+      page.getByRole("button", { name: "Send message" }).click(),
+      page.waitForResponse(
+        (resp) =>
+          resp.url().includes("/note/") &&
+          resp.request().method() === "POST" &&
+          resp.ok(),
+      ),
+    ]);
     // Verify message input is cleared
     await expect(page.getByPlaceholder("Type your message...")).toBeEmpty();
 
@@ -154,6 +169,7 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     // User B navigates to the same encounter, clicks Notes tab, waits for thread to appear
     await expect(async () => {
       await userBPage.goto(encounterUrl);
+      await userBPage.waitForLoadState("networkidle");
       const notesTab = userBPage.getByRole("tab", { name: "Notes" });
       await expect(notesTab).toBeVisible();
       await notesTab.click();
@@ -161,9 +177,9 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
         userBPage.getByRole("button", { name: "New", exact: true }),
       ).toBeVisible();
       await expect(threadButton).toBeVisible();
-    }).toPass({ intervals: [3_000, 5_000, 5_000], timeout: 60_000 });
+    }).toPass({ intervals: [5_000, 5_000, 10_000, 10_000], timeout: 90_000 });
 
-    // Select the thread created by User A
+    // User B explicitly selects the thread created by User A
     await threadButton.click();
 
     // Verify User A's message is visible to User B
