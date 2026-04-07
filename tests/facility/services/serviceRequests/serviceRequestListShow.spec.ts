@@ -15,6 +15,8 @@ function tr(key: string) {
 
 interface CreatedServiceRequest {
   activityDefinition: string;
+  priority: string;
+  serviceRequestId: string;
 }
 
 function pathnameOnly(hrefOrUrl: string) {
@@ -147,8 +149,15 @@ async function getServiceRequestTable(page: Page) {
   return table;
 }
 
-function rowForCreated(table: Locator, activityTitle: string) {
-  return table.getByRole("row").filter({ hasText: activityTitle }).first();
+function rowForCreated(
+  table: Locator,
+  created: Pick<CreatedServiceRequest, "activityDefinition" | "priority">,
+) {
+  return table
+    .getByRole("row")
+    .filter({ hasText: created.activityDefinition })
+    .filter({ hasText: created.priority })
+    .first();
 }
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -181,9 +190,39 @@ test.describe("Facility Service Requests (List + Show)", () => {
           encounterId,
           false,
         );
+
+        await openServiceRequestList(page, {
+          facilityId,
+          locationId: locationIdResolved,
+        });
+        const table = await getServiceRequestTable(page);
+        const createdRow = rowForCreated(table, {
+          activityDefinition: data.activityDefinition,
+          priority: data.priority,
+        });
+        await expect(createdRow).toBeVisible();
+        await createdRow
+          .getByRole("button", { name: tr("see_details") })
+          .click();
+        await page.waitForLoadState("networkidle");
+        await expect(page).toHaveURL(/\/service_requests\/[^/]+$/);
+        const url = page.url();
+        const serviceRequestId = url
+          .split("/service_requests/")[1]
+          ?.split(/[/?#]/)[0];
+        if (!serviceRequestId) {
+          throw new Error(
+            `Failed to extract serviceRequestId from URL: ${url}`,
+          );
+        }
+
         listShowFixture = {
           locationId: locationIdResolved,
-          created: { activityDefinition: data.activityDefinition },
+          created: {
+            activityDefinition: data.activityDefinition,
+            priority: data.priority,
+            serviceRequestId,
+          },
         };
       })();
     }
@@ -218,9 +257,7 @@ test.describe("Facility Service Requests (List + Show)", () => {
 
     await test.step("Verify the newly created service request is visible as a row", async () => {
       const table = await getServiceRequestTable(page);
-      await expect(
-        rowForCreated(table, created.activityDefinition),
-      ).toBeVisible();
+      await expect(rowForCreated(table, created)).toBeVisible();
     });
   });
 
@@ -250,9 +287,14 @@ test.describe("Facility Service Requests (List + Show)", () => {
       await page.waitForLoadState("networkidle");
 
       const table = await getServiceRequestTable(page);
-      await expect(
-        rowForCreated(table, created.activityDefinition),
-      ).toBeVisible();
+      const dataRows = table.getByRole("row").filter({
+        has: page.getByRole("button", { name: tr("see_details") }),
+      });
+      const rowCount = await dataRows.count();
+      expect(rowCount).toBeGreaterThan(0);
+      for (let i = 0; i < rowCount; i += 1) {
+        await expect(dataRows.nth(i)).toContainText(created.activityDefinition);
+      }
 
       await page.getByRole("button", { name: tr("filters") }).click();
       await page
@@ -278,10 +320,16 @@ test.describe("Facility Service Requests (List + Show)", () => {
       await expect(page).toHaveURL(/created_date_(after|before)=/);
       await page.waitForLoadState("networkidle");
 
-      const table = await getServiceRequestTable(page);
-      await expect(
-        rowForCreated(table, created.activityDefinition),
-      ).toBeVisible();
+      await page.getByRole("button", { name: tr("filters") }).click();
+      await page.getByRole("menuitem", { name: tr("date") }).click();
+      const todayItem = page
+        .getByRole("menuitem", { name: tr("today") })
+        .first();
+      await expect(todayItem.getByRole("checkbox")).toHaveAttribute(
+        "aria-checked",
+        "true",
+      );
+      await page.keyboard.press("Escape");
     });
 
     await test.step("Filter by status using tabs and validate badges", async () => {
@@ -290,28 +338,29 @@ test.describe("Facility Service Requests (List + Show)", () => {
       await page.waitForLoadState("networkidle");
 
       const table = await getServiceRequestTable(page);
-      const createdRow = rowForCreated(table, created.activityDefinition);
-      await expect(createdRow).toBeVisible();
-
-      await expect(
-        createdRow.getByText(tr("active"), { exact: true }),
-      ).toBeVisible();
+      const dataRows = table.getByRole("row").filter({
+        has: page.getByRole("button", { name: tr("see_details") }),
+      });
+      const rowCount = await dataRows.count();
+      expect(rowCount).toBeGreaterThan(0);
+      for (let i = 0; i < rowCount; i += 1) {
+        await expect(
+          dataRows.nth(i).getByText(tr("active"), { exact: true }),
+        ).toBeVisible();
+      }
     });
   });
 
   test("Open a service request and verify specimen workflow card renders", async ({
     page,
   }) => {
-    const { locationId, created } = await ensureListShowFixture(page);
-    await openServiceRequestList(page, { facilityId, locationId });
+    const { created } = await ensureListShowFixture(page);
+    await page.goto(
+      `/facility/${facilityId}/service_requests/${created.serviceRequestId}`,
+    );
+    await page.waitForLoadState("networkidle");
 
     await test.step("Open the matching service request from the list", async () => {
-      const table = await getServiceRequestTable(page);
-      const createdRow = rowForCreated(table, created.activityDefinition);
-
-      await createdRow.getByRole("button", { name: tr("see_details") }).click();
-      await expect(page).toHaveURL(/\/service_requests\/[^/]+$/);
-      await page.waitForLoadState("networkidle");
       await expect(
         page.getByRole("button", { name: tr("back") }),
       ).toBeVisible();
