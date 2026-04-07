@@ -153,11 +153,15 @@ async function ensureAtLeastOneChargeItemSelected(
   ).toBeVisible();
   await page.waitForLoadState("networkidle");
 
-  const noBillable = page.getByText(tr("no_billable_items"), { exact: true });
-  const hasNoBillable = await noBillable.isVisible().catch(() => false);
+  const chargeItemsTable = page.getByRole("table").filter({
+    has: page.getByRole("columnheader", { name: tr("items") }),
+  });
+  await expect(chargeItemsTable).toBeVisible({ timeout: 30_000 });
 
-  const table = page.getByRole("table");
-  await expect(table).toBeVisible();
+  const noBillable = chargeItemsTable.getByText(tr("no_billable_items"), {
+    exact: true,
+  });
+  const hasNoBillable = await noBillable.isVisible().catch(() => false);
 
   if (hasNoBillable) {
     await page.getByRole("button", { name: tr("add_charge_items") }).click();
@@ -213,7 +217,7 @@ async function ensureAtLeastOneChargeItemSelected(
     await expect(noBillable).not.toBeVisible();
   }
 
-  const rowCheckboxes = table.getByRole("row").getByRole("checkbox");
+  const rowCheckboxes = chargeItemsTable.getByRole("row").getByRole("checkbox");
   await expect(rowCheckboxes.first()).toBeVisible();
 
   const checkboxCount = await rowCheckboxes.count();
