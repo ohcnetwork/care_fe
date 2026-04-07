@@ -34,8 +34,8 @@ jobs:
               await github.rest.issues.addLabels({ owner, repo, issue_number, labels: [label] });
             };
 
-            const addComment = async (body) => {
-              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            const addComment = async (commentBody) => {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body: commentBody });
             };
 
             // --- 1. Check for empty / too-short description ---
