@@ -138,14 +138,27 @@ async function ensureAtLeastOneChargeItemSelected(
   const hasNoBillable = await noBillable.isVisible().catch(() => false);
 
   if (hasNoBillable) {
+    await closeAnyOpenPopovers(page);
+    await page.keyboard.press("Escape");
+    const definitionCombobox = invoiceForm.getByRole("combobox", {
+      name: tr("select_charge_item_definition"),
+    });
+    if (await definitionCombobox.isVisible().catch(() => false)) {
+      await expect(definitionCombobox).toHaveAttribute(
+        "aria-expanded",
+        "false",
+      );
+    }
+    await page.waitForLoadState("networkidle");
+
     const sheet = page.getByRole("dialog", { name: tr("add_charge_items") });
 
     const toolbarBtn = page
-      .locator('button[data-slot="button"]')
-      .filter({ hasText: tr("add_charge_items") });
-    await expect(toolbarBtn.first()).toBeVisible();
-    await toolbarBtn.first().scrollIntoViewIfNeeded();
-    await toolbarBtn.first().click();
+      .getByRole("button", { name: tr("add_charge_items") })
+      .first();
+    await expect(toolbarBtn).toBeVisible();
+    await toolbarBtn.scrollIntoViewIfNeeded();
+    await toolbarBtn.click();
     await page.waitForLoadState("networkidle");
     await expect(sheet).toBeVisible();
 
