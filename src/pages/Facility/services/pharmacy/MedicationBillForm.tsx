@@ -284,6 +284,7 @@ export default function MedicationBillForm({
             }
           }}
           selectedProduct={selectedProduct}
+          // AddMedicationSheet edits a single instruction at a time
           existingDosageInstructions={
             editingItemIndex !== null
               ? form.watch(`items.${editingItemIndex}.dosageInstructions`)?.[0]
@@ -299,7 +300,7 @@ export default function MedicationBillForm({
                     { shouldDirty: true, shouldTouch: true },
                   );
 
-                  if (dosageInstructions?.[0]) {
+                  if (dosageInstructions?.length) {
                     const medicationDataForQuantity =
                       form.getValues(`items.${editingItemIndex}.medication`) ||
                       ({

@@ -30,6 +30,7 @@ export interface FacilityOrganizationRead extends FacilityOrganizationBase {
   has_children: boolean;
   created_at: string;
   updated_at: string;
+  permissions: string[];
 }
 
 export interface FacilityOrganizationCreate extends FacilityOrganizationBase {
