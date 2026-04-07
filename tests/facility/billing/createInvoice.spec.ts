@@ -24,6 +24,14 @@ function tabLocator(page: Page, tabText: string) {
   });
 }
 
+function addChargeItemsBillingSheetPanel(page: Page): Locator {
+  return page.locator('[data-slot="sheet-content"]').filter({
+    has: page
+      .locator('[data-slot="sheet-title"]')
+      .getByText(tr("add_charge_items"), { exact: true }),
+  });
+}
+
 function firstNonEmptyLine(text: string) {
   return (
     text
@@ -138,24 +146,24 @@ async function ensureAtLeastOneChargeItemSelected(
   const hasNoBillable = await noBillable.isVisible().catch(() => false);
 
   if (hasNoBillable) {
-    await closeAnyOpenPopovers(page);
-    await page.keyboard.press("Escape");
     const definitionCombobox = invoiceForm.getByRole("combobox", {
       name: tr("select_charge_item_definition"),
     });
-    if (await definitionCombobox.isVisible().catch(() => false)) {
-      await expect(definitionCombobox).toHaveAttribute(
-        "aria-expanded",
-        "false",
-      );
-    }
+    await expect(definitionCombobox).toBeVisible();
+
+    await closeAnyOpenPopovers(page);
+    await page.keyboard.press("Escape");
+    await expect(definitionCombobox).toHaveAttribute("aria-expanded", "false");
     await page.waitForLoadState("networkidle");
 
-    const sheet = page.getByRole("dialog", { name: tr("add_charge_items") });
+    const sheet = addChargeItemsBillingSheetPanel(page);
 
-    const toolbarBtn = page
-      .getByRole("button", { name: tr("add_charge_items") })
-      .first();
+    const invoiceHeader = page.locator("div.justify-between").filter({
+      has: page.getByText(tr("create_invoice"), { exact: true }),
+    });
+    const toolbarBtn = invoiceHeader.getByRole("button", {
+      name: tr("add_charge_items"),
+    });
     await expect(toolbarBtn).toBeVisible();
     await toolbarBtn.scrollIntoViewIfNeeded();
     await toolbarBtn.click();
@@ -173,7 +181,7 @@ async function ensureAtLeastOneChargeItemSelected(
       await page.keyboard.press("Escape");
       await page.waitForLoadState("networkidle");
 
-      const dialog = page.getByRole("dialog", { name: tr("add_charge_items") });
+      const dialog = addChargeItemsBillingSheetPanel(page);
       const cancelBtn = dialog.getByRole("button", { name: tr("cancel") });
       if (await cancelBtn.isVisible().catch(() => false)) {
         await cancelBtn.click();
