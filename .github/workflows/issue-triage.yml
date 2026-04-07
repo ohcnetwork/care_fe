@@ -1,0 +1,99 @@
+name: Issue Triage
+
+on:
+  issues:
+    types:
+      - opened
+
+permissions:
+  issues: write
+
+jobs:
+  triage:
+    runs-on: ubuntu-24.04-arm
+    # Skip triage for issues opened by bots
+    if: ${{ github.event.issue.user.type != 'Bot' }}
+
+    steps:
+      - name: Triage Issue
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue = context.payload.issue;
+            const title = (issue.title || '').trim();
+            const body = (issue.body || '').trim();
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = issue.number;
+            const author = issue.user.login;
+
+            // --- Helpers ---
+            const addLabel = async (label) => {
+              await github.rest.issues.addLabels({ owner, repo, issue_number, labels: [label] });
+            };
+
+            const addComment = async (body) => {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            };
+
+            // --- 1. Check for empty / too-short description ---
+            // A meaningful issue should have a body of at least 100 characters.
+            const MIN_BODY_LENGTH = 100;
+            if (body.length < MIN_BODY_LENGTH) {
+              await addLabel('needs-info');
+              await addComment(
+                `Hi @${author}, thanks for opening an issue! 👋\n\n` +
+                `It looks like the description is missing or too short for us to understand the problem.\n\n` +
+                `Could you please provide more details, such as:\n` +
+                `- **Steps to reproduce** the issue\n` +
+                `- **Expected behaviour** – what should happen\n` +
+                `- **Actual behaviour** – what actually happens\n` +
+                `- **Screenshots or logs** (if applicable)\n` +
+                `- **Environment** – browser, OS, CARE version\n\n` +
+                `Once you add more information we'll take another look. Thank you! 🙏`
+              );
+              return;
+            }
+
+            // --- 2. Spam / irrelevant detection ---
+            // Check the combined text for known spam signals.
+            const text = `${title} ${body}`.toLowerCase();
+
+            const spamKeywords = [
+              'casino', 'slot machine', 'poker online', 'gambling',
+              'buy followers', 'buy likes', 'buy subscribers',
+              'crypto investment', 'bitcoin investment', 'forex trading',
+              'make money fast', 'earn money online', 'work from home opportunity',
+              'click here to win', 'you have been selected', 'congratulations you won',
+              'weight loss', 'diet pill', 'keto gummies',
+              'seo service', 'backlink', 'guest post',
+              'adult content', 'xxx', 'porn',
+              'whatsapp +', 'call now +', 'contact us at +',
+            ];
+
+            const isSpamKeyword = spamKeywords.some((kw) => text.includes(kw));
+
+            // Count URLs – legitimate bug reports rarely contain more than a couple of links
+            const urlMatches = text.match(/https?:\/\//g) || [];
+            const hasManyUrls = urlMatches.length > 5;
+
+            // A very short title combined with a body that is almost entirely URLs is suspicious
+            const nonUrlBody = body.replace(/https?:\/\/\S+/g, '').trim();
+            const bodyIsAlmostAllUrls = nonUrlBody.length < 30 && urlMatches.length > 1;
+
+            if (isSpamKeyword || hasManyUrls || bodyIsAlmostAllUrls) {
+              await addLabel('spam');
+              await addComment(
+                `Hi @${author}, thanks for taking the time to open an issue.\n\n` +
+                `After an automated review, this issue appears to be **spam or unrelated** to the CARE project.\n\n` +
+                `If you believe this is a mistake and your issue is genuinely related to CARE, please feel free to ` +
+                `open a new issue with more context about how it relates to the project.\n\n` +
+                `Thank you for your understanding!`
+              );
+              return;
+            }
+
+            // --- 3. Looks like a valid issue ---
+            await addLabel('triaged');
