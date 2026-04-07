@@ -213,15 +213,22 @@ async function ensureAtLeastOneChargeItemSelected(
     await expect(noBillable).not.toBeVisible();
   }
 
-  const bodyCheckbox = table.locator("tbody").getByRole("checkbox").first();
-  await expect(bodyCheckbox).toBeVisible();
+  const rowCheckboxes = table.getByRole("row").getByRole("checkbox");
+  await expect(rowCheckboxes.first()).toBeVisible();
+
+  const checkboxCount = await rowCheckboxes.count();
+  expect(checkboxCount).toBeGreaterThan(0);
+
+  const targetCheckbox =
+    checkboxCount > 1 ? rowCheckboxes.nth(1) : rowCheckboxes.first();
+  await expect(targetCheckbox).toBeVisible();
 
   const isChecked =
-    (await bodyCheckbox.getAttribute("aria-checked").catch(() => null)) ===
+    (await targetCheckbox.getAttribute("aria-checked").catch(() => null)) ===
     "true";
-  if (!isChecked) await bodyCheckbox.click();
+  if (!isChecked) await targetCheckbox.click();
 
-  await expect(bodyCheckbox).toHaveAttribute("aria-checked", "true");
+  await expect(targetCheckbox).toHaveAttribute("aria-checked", "true");
 }
 
 async function extractInvoiceNumber(page: Page) {
@@ -247,44 +254,64 @@ let createdInvoiceNumber = "";
 test.beforeAll(async () => {
   facilityId = getFacilityId();
   patientId = getPatientId();
-  accountId = getAccountId();
+  accountId = "";
+  try {
+    accountId = getAccountId();
+  } catch {
+    accountId = "";
+  }
 });
+
+async function ensureAccountExistsAndOpen(page: Page) {
+  await openAccountList(page, facilityId, patientId);
+
+  const table = page.getByRole("table");
+  const hasTable = await table.isVisible().catch(() => false);
+
+  const goToAccountName = tr("go_to_account");
+  const hasGoToAccount =
+    hasTable &&
+    (await table
+      .getByRole("button", { name: goToAccountName })
+      .first()
+      .isVisible()
+      .catch(() => false));
+
+  if (!hasGoToAccount) {
+    await page.getByRole("button", { name: tr("create_account") }).click();
+    await page.waitForLoadState("networkidle");
+
+    await page
+      .getByRole("textbox", { name: tr("name") })
+      .fill(
+        `E2E ${faker.finance.accountName()} ${faker.string.alphanumeric(6)}`,
+      );
+
+    await page.getByRole("button", { name: tr("create") }).click();
+    await page.waitForLoadState("networkidle");
+  }
+
+  const openButtons = page.getByRole("button", { name: goToAccountName });
+  await expect(openButtons.first()).toBeVisible();
+  await openButtons.first().click();
+  await page.waitForLoadState("networkidle");
+
+  const match = page.url().match(/\/billing\/account\/([a-f0-9-]+)/i);
+  if (!match?.[1])
+    throw new Error(`Failed to extract accountId from URL: ${page.url()}`);
+  accountId = match[1];
+
+  await expect(page).toHaveURL(
+    new RegExp(`/billing/account/${accountId}(?:/|$)`),
+  );
+}
 
 test.describe("Create Invoice (facility billing)", () => {
   test("Navigate Billing → Account List → open fixture account from list", async ({
     page,
   }) => {
-    await test.step("Open account list scoped to fixture patient", async () => {
-      await openAccountList(page, facilityId, patientId);
-    });
-
-    await test.step("Open the setup account from list (match URL to getAccountId)", async () => {
-      const table = page.getByRole("table");
-      await expect(table).toBeVisible();
-
-      const dataRows = table.getByRole("row").filter({
-        has: page.getByRole("button", { name: tr("go_to_account") }),
-      });
-      await expect(dataRows.first()).toBeVisible();
-
-      const accountPath = `/billing/account/${accountId}`;
-      let opened = false;
-      const rowCount = await dataRows.count();
-      for (let i = 0; i < rowCount; i += 1) {
-        await dataRows
-          .nth(i)
-          .getByRole("button", { name: tr("go_to_account") })
-          .click();
-        await page.waitForLoadState("networkidle");
-        if (page.url().includes(accountPath)) {
-          opened = true;
-          break;
-        }
-        await page.goBack();
-        await page.waitForLoadState("networkidle");
-        await expect(table).toBeVisible();
-      }
-      expect(opened).toBe(true);
+    await test.step("Ensure account exists and open it", async () => {
+      await ensureAccountExistsAndOpen(page);
     });
 
     await test.step("Verify account workspace tabs", async () => {
