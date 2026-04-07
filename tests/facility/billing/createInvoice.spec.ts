@@ -153,12 +153,19 @@ async function ensureAtLeastOneChargeItemSelected(
   ).toBeVisible();
   await page.waitForLoadState("networkidle");
 
-  const chargeItemsTable = page.getByRole("table").filter({
-    has: page.getByRole("columnheader", { name: tr("items") }),
-  });
-  await expect(chargeItemsTable).toBeVisible({ timeout: 30_000 });
+  async function chargeItemsTableWhenReady(): Promise<Locator> {
+    const invoiceForm = page.locator("form.space-y-6");
+    const firstFormCheckbox = invoiceForm.getByRole("checkbox").first();
+    await expect(firstFormCheckbox).toBeVisible({ timeout: 60_000 });
+    const chargeItemsTable = invoiceForm
+      .getByRole("table")
+      .filter({ has: firstFormCheckbox });
+    await expect(chargeItemsTable).toBeVisible();
+    return chargeItemsTable;
+  }
 
-  const noBillable = chargeItemsTable.getByText(tr("no_billable_items"), {
+  let chargeItemsTable = await chargeItemsTableWhenReady();
+  let noBillable = chargeItemsTable.getByText(tr("no_billable_items"), {
     exact: true,
   });
   const hasNoBillable = await noBillable.isVisible().catch(() => false);
@@ -196,6 +203,11 @@ async function ensureAtLeastOneChargeItemSelected(
       await expect(
         page.getByText(tr("create_invoice"), { exact: true }),
       ).toBeVisible();
+
+      chargeItemsTable = await chargeItemsTableWhenReady();
+      noBillable = chargeItemsTable.getByText(tr("no_billable_items"), {
+        exact: true,
+      });
 
       await page.getByRole("button", { name: tr("add_charge_items") }).click();
       await page.waitForLoadState("networkidle");
