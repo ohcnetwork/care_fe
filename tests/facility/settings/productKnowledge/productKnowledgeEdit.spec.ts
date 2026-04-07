@@ -98,6 +98,7 @@ test.describe("Product Knowledge Edit operations", () => {
         .fill("30");
     }
     await page.getByRole("button", { name: /update/i }).click();
+    await page.waitForURL(/\/product_knowledge\/(?!.*\/edit)/);
 
     await expect(page.getByRole("heading").getByText(name)).toBeVisible();
     await page.getByRole("link", { name: "Back" }).click();
