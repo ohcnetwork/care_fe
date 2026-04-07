@@ -148,13 +148,16 @@ async function ensureAtLeastOneChargeItemSelected(
   facilityId: string,
   accountId: string,
 ) {
+  await expect(
+    page.getByText(tr("create_invoice"), { exact: true }),
+  ).toBeVisible();
+  await page.waitForLoadState("networkidle");
+
   const noBillable = page.getByText(tr("no_billable_items"), { exact: true });
   const hasNoBillable = await noBillable.isVisible().catch(() => false);
 
   const table = page.getByRole("table");
   await expect(table).toBeVisible();
-
-  let chargeItemTitle: string;
 
   if (hasNoBillable) {
     await page.getByRole("button", { name: tr("add_charge_items") }).click();
@@ -207,29 +210,18 @@ async function ensureAtLeastOneChargeItemSelected(
       }
     }
 
-    chargeItemTitle = picked;
     await expect(noBillable).not.toBeVisible();
-  } else {
-    const dataRow = table.getByRole("row").nth(1);
-    await expect(dataRow).toBeVisible();
-    await expect(dataRow).not.toContainText(tr("no_billable_items"));
-
-    const titleCell = dataRow.getByRole("cell").nth(1);
-    const titleText = (await titleCell.textContent()) ?? "";
-    chargeItemTitle = firstNonEmptyLine(titleText);
-    expect(chargeItemTitle).not.toEqual("");
   }
 
-  const itemRow = table
-    .getByRole("row")
-    .filter({ hasText: new RegExp(escapeRegex(chargeItemTitle), "i") });
-  await expect(itemRow.first()).toBeVisible();
+  const bodyCheckbox = table.locator("tbody").getByRole("checkbox").first();
+  await expect(bodyCheckbox).toBeVisible();
 
-  const rowCheckbox = itemRow.first().getByRole("checkbox").first();
   const isChecked =
-    (await rowCheckbox.getAttribute("aria-checked").catch(() => null)) ===
+    (await bodyCheckbox.getAttribute("aria-checked").catch(() => null)) ===
     "true";
-  if (!isChecked) await rowCheckbox.click();
+  if (!isChecked) await bodyCheckbox.click();
+
+  await expect(bodyCheckbox).toHaveAttribute("aria-checked", "true");
 }
 
 async function extractInvoiceNumber(page: Page) {
