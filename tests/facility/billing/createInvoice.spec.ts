@@ -176,18 +176,31 @@ async function ensureAtLeastOneChargeItemSelected(
     page.getByText(tr("create_invoice"), { exact: true }),
   ).toBeVisible();
 
-  let noBillable = page.getByText(tr("no_billable_items"), { exact: true });
+  const invoiceForm = page.locator("form.space-y-6");
+  await expect(invoiceForm).toBeVisible({ timeout: 30_000 });
+
+  async function clickOpenAddChargeItemsSheet() {
+    const labelPattern = new RegExp(escapeRegex(tr("add_charge_items")), "i");
+    const byRole = page.getByRole("button", { name: labelPattern });
+    const byFilter = page.getByRole("button").filter({ hasText: labelPattern });
+    const btn =
+      (await byRole.count()) > 0
+        ? byRole.first()
+        : (await byFilter.count()) > 0
+          ? byFilter.first()
+          : byRole.first();
+    await expect(btn).toBeVisible({ timeout: 30_000 });
+    await btn.scrollIntoViewIfNeeded();
+    await btn.click({ timeout: 30_000 });
+  }
+
+  let noBillable = invoiceForm.getByText(tr("no_billable_items"), {
+    exact: true,
+  });
   const hasNoBillable = await noBillable.isVisible().catch(() => false);
 
-  const addChargeItemsButtonLocator = () =>
-    page.getByRole("button", {
-      name: new RegExp(`^${escapeRegex(tr("add_charge_items"))}`, "i"),
-    });
-
   if (hasNoBillable) {
-    const addChargeItemsButton = addChargeItemsButtonLocator();
-    await expect(addChargeItemsButton).toBeVisible({ timeout: 30_000 });
-    await addChargeItemsButton.click({ timeout: 30_000 });
+    await clickOpenAddChargeItemsSheet();
     await page.waitForLoadState("networkidle");
 
     let sheet = page.getByRole("dialog", { name: tr("add_charge_items") });
@@ -223,12 +236,11 @@ async function ensureAtLeastOneChargeItemSelected(
         page.getByText(tr("create_invoice"), { exact: true }),
       ).toBeVisible();
 
-      noBillable = page.getByText(tr("no_billable_items"), { exact: true });
-
-      await expect(addChargeItemsButtonLocator()).toBeVisible({
-        timeout: 30_000,
+      noBillable = invoiceForm.getByText(tr("no_billable_items"), {
+        exact: true,
       });
-      await addChargeItemsButtonLocator().click({ timeout: 30_000 });
+
+      await clickOpenAddChargeItemsSheet();
       await page.waitForLoadState("networkidle");
       sheet = page.getByRole("dialog", { name: tr("add_charge_items") });
       await expect(sheet).toBeVisible();
@@ -248,7 +260,6 @@ async function ensureAtLeastOneChargeItemSelected(
     await expect(noBillable).not.toBeVisible();
   }
 
-  const invoiceForm = page.locator("form.space-y-6");
   const rowCheckboxes = invoiceForm.getByRole("checkbox");
   await expect(rowCheckboxes.first()).toBeVisible({ timeout: 60_000 });
 
