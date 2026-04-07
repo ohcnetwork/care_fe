@@ -10,7 +10,7 @@ import {
 import scheduleApi from "@/types/scheduling/scheduleApi";
 import { TokenActiveStatuses, TokenStatus } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
-import { useBatchRequest } from "@/Utils/request/batch";
+import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
 import { useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -28,11 +28,7 @@ export function useEncounterProgressController({
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
-  const {
-    mutate: executeBatch,
-    addToBatch,
-    isPending,
-  } = useBatchRequest({
+  const { mutate: executeBatch, isPending } = useBatchRequest({
     onSuccess: ({ results }) => {
       if (results.some((r) => r.reference_id === "encounter-closed")) {
         queryClient.invalidateQueries({
@@ -53,7 +49,7 @@ export function useEncounterProgressController({
   });
 
   const addEncounterCloseRequestToBatch = () => {
-    addToBatch({
+    return {
       api: encounterApi.update,
       referenceId: "encounter-closed",
       pathParams: { id: encounter.id },
@@ -65,7 +61,7 @@ export function useEncounterProgressController({
           end: encounter.period.end || new Date().toISOString(),
         },
       },
-    });
+    };
   };
 
   const addAppointmentCloseRequestsToBatch = () => {
@@ -75,7 +71,7 @@ export function useEncounterProgressController({
       appointment?.id &&
       !AppointmentFinalStatuses.includes(appointment.status)
     ) {
-      addToBatch({
+      return {
         api: scheduleApi.appointments.update,
         referenceId: "appointment-closed",
         pathParams: {
@@ -86,14 +82,17 @@ export function useEncounterProgressController({
           status: AppointmentStatus.FULFILLED,
           note: appointment.note,
         },
-      });
+      };
     }
+  };
 
+  const addTokenCloseRequestToBatch = () => {
+    const appointment = encounter.appointment;
     if (
       appointment?.token?.id &&
       TokenActiveStatuses.includes(appointment.token.status)
     ) {
-      addToBatch({
+      return {
         api: tokenApi.update,
         referenceId: "token-closed",
         pathParams: {
@@ -107,7 +106,7 @@ export function useEncounterProgressController({
           sub_queue: appointment.token.sub_queue?.id || null,
           status: TokenStatus.FULFILLED,
         },
-      });
+      };
     }
   };
 
@@ -118,9 +117,17 @@ export function useEncounterProgressController({
       );
       return;
     }
-    addAppointmentCloseRequestsToBatch();
-    addEncounterCloseRequestToBatch();
-    executeBatch();
+    let requests: BatchRequestObject[] = [];
+    requests.push(addEncounterCloseRequestToBatch());
+    const appointmentRequest = addAppointmentCloseRequestsToBatch();
+    if (appointmentRequest) {
+      requests.push(appointmentRequest);
+    }
+    const tokenRequest = addTokenCloseRequestToBatch();
+    if (tokenRequest) {
+      requests.push(tokenRequest);
+    }
+    executeBatch(requests);
   };
 
   const completeEncounter = () => {
@@ -130,13 +137,20 @@ export function useEncounterProgressController({
       );
       return;
     }
-    addEncounterCloseRequestToBatch();
-    executeBatch();
+    executeBatch([addEncounterCloseRequestToBatch()]);
   };
 
   const completeAppointment = () => {
-    addAppointmentCloseRequestsToBatch();
-    executeBatch();
+    let requests: BatchRequestObject[] = [];
+    const appointmentRequest = addAppointmentCloseRequestsToBatch();
+    if (appointmentRequest) {
+      requests.push(appointmentRequest);
+    }
+    const tokenRequest = addTokenCloseRequestToBatch();
+    if (tokenRequest) {
+      requests.push(tokenRequest);
+    }
+    executeBatch(requests);
   };
 
   return {

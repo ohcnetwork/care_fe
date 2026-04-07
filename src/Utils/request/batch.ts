@@ -11,9 +11,8 @@ import {
   useMutation,
   UseMutationOptions,
 } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
 
-interface BatchRequestObject<T = unknown> {
+export interface BatchRequestObject<T = unknown> {
   api: ApiRoute<unknown, unknown>;
   pathParams?: Record<string, string>;
   body: T;
@@ -21,18 +20,17 @@ interface BatchRequestObject<T = unknown> {
 }
 
 export function useBatchRequest<TError = DefaultError, TContext = unknown>(
-  options: UseMutationOptions<BatchRequestResponse, TError, void, TContext>,
+  options: UseMutationOptions<
+    BatchRequestResponse,
+    TError,
+    BatchRequestObject[],
+    TContext
+  >,
   queryClient?: QueryClient,
 ) {
-  const [requests, setRequests] = useState<BatchRequestObject[]>([]);
-
-  const addToBatch = useCallback((request: BatchRequestObject) => {
-    setRequests((prev) => [...prev, request]);
-  }, []);
-
   const mutation = useMutation(
     {
-      mutationFn: () =>
+      mutationFn: (requests: BatchRequestObject[]) =>
         mutate({
           path: "/api/v1/batch_requests/",
           method: HttpMethod.POST,
@@ -47,16 +45,11 @@ export function useBatchRequest<TError = DefaultError, TContext = unknown>(
           })),
         }),
       ...options,
-      onSuccess: (data, variables, context) => {
-        options.onSuccess?.(data, variables, context);
-        setRequests([]);
-      },
     },
     queryClient,
   );
 
   return {
     ...mutation,
-    addToBatch,
   };
 }

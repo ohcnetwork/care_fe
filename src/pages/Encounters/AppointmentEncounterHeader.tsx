@@ -197,6 +197,7 @@ const AppointmentEncounterHeaderActions = ({
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const requiresDischarge = encounterRequiresDischarge(encounter);
 
   const { completeEverything, completeAppointment, isPending } =
     useEncounterProgressController({
@@ -267,9 +268,7 @@ const AppointmentEncounterHeaderActions = ({
         onClick={completeEverything}
       >
         <CheckCircle />
-        {encounterRequiresDischarge(encounter)
-          ? t("mark_for_discharge")
-          : t("complete")}
+        {requiresDischarge ? t("mark_for_discharge") : t("complete")}
       </Button>
       {encounter.status !== EncounterStatus.COMPLETED && (
         <DropdownMenu>
@@ -302,12 +301,12 @@ const AppointmentEncounterHeaderActions = ({
             >
               <div className="flex flex-col items-start">
                 <span className="text-sm font-medium text-black">
-                  {encounterRequiresDischarge(encounter)
+                  {requiresDischarge
                     ? t("mark_for_discharge")
                     : t("mark_as_complete")}
                 </span>
                 <p className="text-xs text-gray-700">
-                  {encounterRequiresDischarge(encounter)
+                  {requiresDischarge
                     ? t("mark_for_discharge_description")
                     : t("mark_as_complete_description")}
                 </p>
