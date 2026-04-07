@@ -1,11 +1,5 @@
 import { faker } from "@faker-js/faker";
-import {
-  expect,
-  test,
-  type Locator,
-  type Page,
-  type Response,
-} from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import en from "public/locale/en.json";
 import { closeAnyOpenPopovers, expectToast } from "tests/helper/ui";
 import { getAccountId } from "tests/support/accountId";
@@ -120,39 +114,13 @@ async function openAccountShow(
   await expect(tabLocator(page, tr("payments"))).toBeVisible();
 }
 
-function chargeItemsListResponsePredicate(
-  facilityId: string,
-  accountId: string,
-) {
-  const pathNeedle = `/api/v1/facility/${facilityId}/charge_item/`;
-  return (response: Response) =>
-    response.request().method() === "GET" &&
-    response.url().includes(pathNeedle) &&
-    response.url().includes(accountId) &&
-    (response.status() === 200 || response.status() === 304);
-}
-
-async function openCreateInvoiceFromAccountWorkspace(
+async function ensureAtLeastOneChargeItemSelected(
   page: Page,
   facilityId: string,
   accountId: string,
 ) {
   const createInvoiceUrl = `/facility/${facilityId}/billing/account/${accountId}/invoices/create`;
-  const responsePromise = page.waitForResponse(
-    chargeItemsListResponsePredicate(facilityId, accountId),
-  );
-
-  const createInvoiceLink = page.getByRole("link", {
-    name: tr("create_invoice"),
-  });
-  const hasLink = await createInvoiceLink.isVisible().catch(() => false);
-  if (hasLink) {
-    await createInvoiceLink.click();
-  } else {
-    await page.getByRole("button", { name: tr("create_invoice") }).click();
-  }
-
-  await responsePromise;
+  await page.goto(createInvoiceUrl, { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle");
 
   await expect(page).toHaveURL(
@@ -161,23 +129,6 @@ async function openCreateInvoiceFromAccountWorkspace(
   await expect(
     page.getByText(tr("create_invoice"), { exact: true }),
   ).toBeVisible();
-}
-
-async function openAddChargeItemsSheetDialog(page: Page) {
-  const toolbarBtn = page
-    .locator('button[data-slot="button"]')
-    .filter({ hasText: tr("add_charge_items") });
-  await expect(toolbarBtn.first()).toBeVisible();
-  await toolbarBtn.first().scrollIntoViewIfNeeded();
-  await toolbarBtn.first().click();
-}
-
-async function ensureAtLeastOneChargeItemSelected(
-  page: Page,
-  facilityId: string,
-  accountId: string,
-) {
-  await openCreateInvoiceFromAccountWorkspace(page, facilityId, accountId);
 
   const invoiceForm = page.locator("form.space-y-6");
   await expect(invoiceForm).toBeVisible();
@@ -189,7 +140,12 @@ async function ensureAtLeastOneChargeItemSelected(
   if (hasNoBillable) {
     const sheet = page.getByRole("dialog", { name: tr("add_charge_items") });
 
-    await openAddChargeItemsSheetDialog(page);
+    const toolbarBtn = page
+      .locator('button[data-slot="button"]')
+      .filter({ hasText: tr("add_charge_items") });
+    await expect(toolbarBtn.first()).toBeVisible();
+    await toolbarBtn.first().scrollIntoViewIfNeeded();
+    await toolbarBtn.first().click();
     await page.waitForLoadState("networkidle");
     await expect(sheet).toBeVisible();
 
