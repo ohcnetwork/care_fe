@@ -149,39 +149,43 @@ async function ensureAtLeastOneChargeItemSelected(
   accountId: string,
 ) {
   const createInvoiceUrl = `/facility/${facilityId}/billing/account/${accountId}/invoices/create`;
-  if (!page.url().includes(createInvoiceUrl)) {
-    await page.goto(createInvoiceUrl);
+
+  function chargeItemsListResponsePromise() {
+    const pathNeedle = `/api/v1/facility/${facilityId}/charge_item/`;
+    return page.waitForResponse(
+      (r) =>
+        r.request().method() === "GET" &&
+        r.url().includes(pathNeedle) &&
+        r.url().includes(accountId) &&
+        (r.status() === 200 || r.status() === 304),
+      { timeout: 60_000 },
+    );
   }
+
+  async function openCreateInvoiceAndAwaitChargeItems() {
+    const responsePromise = chargeItemsListResponsePromise();
+    await page.goto(createInvoiceUrl, { waitUntil: "domcontentloaded" });
+    await responsePromise;
+    await page.waitForLoadState("networkidle");
+  }
+
+  await openCreateInvoiceAndAwaitChargeItems();
 
   await expect(page).toHaveURL(new RegExp(`${createInvoiceUrl}(?:\\?|$)`));
   await expect(
     page.getByText(tr("create_invoice"), { exact: true }),
   ).toBeVisible();
-  await page.waitForLoadState("networkidle");
-
-  async function waitForChargeItemsLoadAttempt() {
-    const pathPart = `/api/v1/facility/${facilityId}/charge_item/`;
-    await page
-      .waitForResponse(
-        (r) =>
-          r.request().method() === "GET" &&
-          r.url().includes(pathPart) &&
-          r.url().includes(`account=${accountId}`),
-        { timeout: 30_000 },
-      )
-      .catch(() => null);
-  }
-
-  await waitForChargeItemsLoadAttempt();
 
   let noBillable = page.getByText(tr("no_billable_items"), { exact: true });
   const hasNoBillable = await noBillable.isVisible().catch(() => false);
 
-  if (hasNoBillable) {
-    const addChargeItemsButton = page.getByRole("button", {
-      name: tr("add_charge_items"),
-      exact: true,
+  const addChargeItemsButtonLocator = () =>
+    page.getByRole("button", {
+      name: new RegExp(`^${escapeRegex(tr("add_charge_items"))}`, "i"),
     });
+
+  if (hasNoBillable) {
+    const addChargeItemsButton = addChargeItemsButtonLocator();
     await expect(addChargeItemsButton).toBeVisible({ timeout: 30_000 });
     await addChargeItemsButton.click({ timeout: 30_000 });
     await page.waitForLoadState("networkidle");
@@ -208,18 +212,23 @@ async function ensureAtLeastOneChargeItemSelected(
         facilityId,
       );
 
+      const reloadList = chargeItemsListResponsePromise();
       await page.goto(
         `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
+        { waitUntil: "domcontentloaded" },
       );
+      await reloadList;
       await page.waitForLoadState("networkidle");
       await expect(
         page.getByText(tr("create_invoice"), { exact: true }),
       ).toBeVisible();
 
-      await waitForChargeItemsLoadAttempt();
       noBillable = page.getByText(tr("no_billable_items"), { exact: true });
 
-      await page.getByRole("button", { name: tr("add_charge_items") }).click();
+      await expect(addChargeItemsButtonLocator()).toBeVisible({
+        timeout: 30_000,
+      });
+      await addChargeItemsButtonLocator().click({ timeout: 30_000 });
       await page.waitForLoadState("networkidle");
       sheet = page.getByRole("dialog", { name: tr("add_charge_items") });
       await expect(sheet).toBeVisible();
@@ -239,8 +248,9 @@ async function ensureAtLeastOneChargeItemSelected(
     await expect(noBillable).not.toBeVisible();
   }
 
-  const rowCheckboxes = page.getByRole("checkbox");
-  await expect(rowCheckboxes.first()).toBeVisible({ timeout: 30_000 });
+  const invoiceForm = page.locator("form.space-y-6");
+  const rowCheckboxes = invoiceForm.getByRole("checkbox");
+  await expect(rowCheckboxes.first()).toBeVisible({ timeout: 60_000 });
 
   const checkboxCount = await rowCheckboxes.count();
   expect(checkboxCount).toBeGreaterThan(0);
