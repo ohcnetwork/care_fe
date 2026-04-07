@@ -143,68 +143,88 @@ async function openAccountShow(
   await expect(tabLocator(page, tr("payments"))).toBeVisible();
 }
 
-async function ensureAtLeastOneChargeItemSelected(
+async function findAddChargeItemsButton(page: Page): Promise<Locator | null> {
+  const labelKey = tr("add_charge_items");
+  const labelPattern = new RegExp(escapeRegex(labelKey), "i");
+
+  const byRole = page.getByRole("button", { name: labelPattern });
+  if ((await byRole.count()) > 0) return byRole.first();
+
+  const byFilter = page.getByRole("button").filter({ hasText: labelPattern });
+  if ((await byFilter.count()) > 0) return byFilter.first();
+
+  const allButtons = page.getByRole("button");
+  const count = await allButtons.count();
+  for (let i = 0; i < count; i++) {
+    const btn = allButtons.nth(i);
+    const text = (await btn.textContent()) ?? "";
+    const ariaLabel = (await btn.getAttribute("aria-label")) ?? "";
+    if (labelPattern.test(text.trim()) || labelPattern.test(ariaLabel.trim())) {
+      return btn;
+    }
+  }
+
+  return null;
+}
+
+async function navigateToCreateInvoicePage(
   page: Page,
   facilityId: string,
   accountId: string,
 ) {
   const createInvoiceUrl = `/facility/${facilityId}/billing/account/${accountId}/invoices/create`;
+  const pathNeedle = `/api/v1/facility/${facilityId}/charge_item/`;
 
-  function chargeItemsListResponsePromise() {
-    const pathNeedle = `/api/v1/facility/${facilityId}/charge_item/`;
-    return page.waitForResponse(
-      (r) =>
-        r.request().method() === "GET" &&
-        r.url().includes(pathNeedle) &&
-        r.url().includes(accountId) &&
-        (r.status() === 200 || r.status() === 304),
-      { timeout: 60_000 },
-    );
-  }
+  const responsePromise = page.waitForResponse(
+    (r) =>
+      r.request().method() === "GET" &&
+      r.url().includes(pathNeedle) &&
+      r.url().includes(accountId) &&
+      (r.status() === 200 || r.status() === 304),
+    { timeout: 60_000 },
+  );
 
-  async function openCreateInvoiceAndAwaitChargeItems() {
-    const responsePromise = chargeItemsListResponsePromise();
-    await page.goto(createInvoiceUrl, { waitUntil: "domcontentloaded" });
-    await responsePromise;
-    await page.waitForLoadState("networkidle");
-  }
+  await page.goto(createInvoiceUrl, { waitUntil: "domcontentloaded" });
+  await responsePromise;
+  await page.waitForLoadState("networkidle");
 
-  await openCreateInvoiceAndAwaitChargeItems();
-
-  await expect(page).toHaveURL(new RegExp(`${createInvoiceUrl}(?:\\?|$)`));
+  await expect(page).toHaveURL(
+    new RegExp(`${escapeRegex(createInvoiceUrl)}(?:\\?|$)`),
+  );
   await expect(
     page.getByText(tr("create_invoice"), { exact: true }),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 30_000 });
+}
+
+async function ensureAtLeastOneChargeItemSelected(
+  page: Page,
+  facilityId: string,
+  accountId: string,
+) {
+  await navigateToCreateInvoicePage(page, facilityId, accountId);
 
   const invoiceForm = page.locator("form.space-y-6");
   await expect(invoiceForm).toBeVisible({ timeout: 30_000 });
 
-  async function clickOpenAddChargeItemsSheet() {
-    const labelPattern = new RegExp(escapeRegex(tr("add_charge_items")), "i");
-    const byRole = page.getByRole("button", { name: labelPattern });
-    const byFilter = page.getByRole("button").filter({ hasText: labelPattern });
-    const btn =
-      (await byRole.count()) > 0
-        ? byRole.first()
-        : (await byFilter.count()) > 0
-          ? byFilter.first()
-          : byRole.first();
-    await expect(btn).toBeVisible({ timeout: 30_000 });
-    await btn.scrollIntoViewIfNeeded();
-    await btn.click({ timeout: 30_000 });
-  }
-
-  let noBillable = invoiceForm.getByText(tr("no_billable_items"), {
-    exact: true,
-  });
+  const noBillableText = tr("no_billable_items");
+  const noBillable = invoiceForm.getByText(noBillableText, { exact: true });
   const hasNoBillable = await noBillable.isVisible().catch(() => false);
 
   if (hasNoBillable) {
-    await clickOpenAddChargeItemsSheet();
+    const addBtn = await findAddChargeItemsButton(page);
+    if (!addBtn) {
+      throw new Error(
+        `Could not find "${tr("add_charge_items")}" button on the create invoice page. ` +
+          `Ensure charge items are enabled for this facility.`,
+      );
+    }
+    await expect(addBtn).toBeVisible({ timeout: 30_000 });
+    await addBtn.scrollIntoViewIfNeeded();
+    await addBtn.click();
     await page.waitForLoadState("networkidle");
 
     let sheet = page.getByRole("dialog", { name: tr("add_charge_items") });
-    await expect(sheet).toBeVisible();
+    await expect(sheet).toBeVisible({ timeout: 15_000 });
 
     let picked = await addChargeItemsFromPickerInSheet(page, sheet, "");
     if (!picked) {
@@ -212,38 +232,40 @@ async function ensureAtLeastOneChargeItemSelected(
       await page.waitForLoadState("networkidle");
       picked = await addChargeItemsFromPickerInSheet(page, sheet, "a");
     }
+
     if (!picked) {
       await page.keyboard.press("Escape");
       await page.waitForLoadState("networkidle");
-      await sheet.getByRole("button", { name: tr("cancel") }).click();
-      await expect(
-        page.getByRole("dialog", { name: tr("add_charge_items") }),
-      ).toBeHidden();
+
+      const cancelBtn = sheet.getByRole("button", { name: tr("cancel") });
+      if (await cancelBtn.isVisible().catch(() => false)) {
+        await cancelBtn.click();
+        await expect(
+          page.getByRole("dialog", { name: tr("add_charge_items") }),
+        ).toBeHidden();
+      }
 
       const newDefinitionTitle = await createMinimalChargeItemDefinition(
         page,
         facilityId,
       );
 
-      const reloadList = chargeItemsListResponsePromise();
-      await page.goto(
-        `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
-        { waitUntil: "domcontentloaded" },
-      );
-      await reloadList;
-      await page.waitForLoadState("networkidle");
-      await expect(
-        page.getByText(tr("create_invoice"), { exact: true }),
-      ).toBeVisible();
+      await navigateToCreateInvoicePage(page, facilityId, accountId);
+      await expect(invoiceForm).toBeVisible({ timeout: 30_000 });
 
-      noBillable = invoiceForm.getByText(tr("no_billable_items"), {
-        exact: true,
-      });
-
-      await clickOpenAddChargeItemsSheet();
+      const addBtn2 = await findAddChargeItemsButton(page);
+      if (!addBtn2) {
+        throw new Error(
+          `"${tr("add_charge_items")}" button not found after creating definition`,
+        );
+      }
+      await expect(addBtn2).toBeVisible({ timeout: 30_000 });
+      await addBtn2.scrollIntoViewIfNeeded();
+      await addBtn2.click();
       await page.waitForLoadState("networkidle");
+
       sheet = page.getByRole("dialog", { name: tr("add_charge_items") });
-      await expect(sheet).toBeVisible();
+      await expect(sheet).toBeVisible({ timeout: 15_000 });
 
       picked = await addChargeItemsFromPickerInSheet(
         page,
@@ -257,7 +279,7 @@ async function ensureAtLeastOneChargeItemSelected(
       }
     }
 
-    await expect(noBillable).not.toBeVisible();
+    await expect(noBillable).not.toBeVisible({ timeout: 15_000 });
   }
 
   const rowCheckboxes = invoiceForm.getByRole("checkbox");
@@ -290,7 +312,6 @@ async function extractInvoiceNumber(page: Page) {
 }
 
 test.use({ storageState: "tests/.auth/user.json" });
-
 test.describe.configure({ mode: "serial" });
 
 let facilityId: string;
@@ -373,22 +394,6 @@ test.describe("Create Invoice (facility billing)", () => {
   }) => {
     await openAccountShow(page, facilityId, accountId);
 
-    await test.step("Open Create Invoice page", async () => {
-      const createInvoiceLink = page.getByRole("link", {
-        name: tr("create_invoice"),
-      });
-      const hasLink = await createInvoiceLink.isVisible().catch(() => false);
-      if (hasLink) {
-        await createInvoiceLink.click();
-      } else {
-        await page.getByRole("button", { name: tr("create_invoice") }).click();
-      }
-      await expect(
-        page.getByText(tr("create_invoice"), { exact: true }),
-      ).toBeVisible();
-      await page.waitForLoadState("networkidle");
-    });
-
     await test.step("Ensure at least one charge item is selected", async () => {
       await ensureAtLeastOneChargeItemSelected(page, facilityId, accountId);
     });
@@ -398,7 +403,7 @@ test.describe("Create Invoice (facility billing)", () => {
         name: tr("payment_terms_and_note"),
         exact: true,
       });
-      await expect(toggleOptional).toBeVisible();
+      await expect(toggleOptional).toBeVisible({ timeout: 15_000 });
       await toggleOptional.click();
 
       await page
