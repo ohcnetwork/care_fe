@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useQueries } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { QRCodeSVG } from "qrcode.react";
@@ -16,7 +15,6 @@ import {
   formatDuration,
   formatFrequencyWithInstructions,
   formatSig,
-  joinInstructionTexts,
 } from "@/components/Medicine/utils";
 
 import query from "@/Utils/request/query";
@@ -25,6 +23,7 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { displayMedicationName } from "@/types/emr/medicationRequest/medicationRequest";
 import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
 export interface DetailRowProps {
@@ -63,26 +62,27 @@ const PrescriptionContent = ({
               { key: "duration" },
               { key: "instructions" },
             ]}
-            rows={medications?.map((medication) => {
+            rows={medications.flatMap((medication) => {
               const instructions = medication.dosage_instruction;
-              return {
-                medicine: displayMedicationName(medication),
-                status: t(`medication_status_${medication.status}`),
-                dosage: joinInstructionTexts(instructions, formatDosage),
-                frequency: joinInstructionTexts(
-                  instructions,
-                  formatFrequencyWithInstructions,
-                ),
-                duration: joinInstructionTexts(instructions, formatDuration),
-                instructions: joinInstructionTexts(instructions, (di) =>
-                  [formatSig(di), medication.note].filter(Boolean).join("\n"),
-                ),
-              };
+              const isMulti = instructions.length > 1;
+              return instructions.map((di, idx) => ({
+                _groupedRow:
+                  isMulti && idx < instructions.length - 1 ? "true" : undefined,
+                medicine: idx === 0 ? displayMedicationName(medication) : "",
+                dosage: formatDosage(di) || "-",
+                frequency: formatFrequencyWithInstructions(di) || "-",
+                duration: formatDuration(di) || "-",
+                instructions: [formatSig(di), idx === 0 ? medication.note : ""]
+                  .filter(Boolean)
+                  .join("\n"),
+              }));
             })}
-            className="text-sm break-all font-semibold whitespace-break-spaces text-gray-950"
+            className="text-sm break-words font-semibold whitespace-break-spaces text-gray-950"
             cellConfig={{
               medicine: { className: "text-left" },
+              frequency: { className: "text-left" },
             }}
+            rowClassName={(row) => (row._groupedRow ? "border-b-0" : undefined)}
           />
         </div>
       )}
@@ -192,36 +192,12 @@ export const PrescriptionPreview = ({
   return (
     <PrintPreview
       title={`${t("prescriptions")} - ${patient.name}`}
-      autoPrint={{ enabled: hasMedications }}
       disabled={!hasMedications}
+      facility={facility}
+      templateSlug={PrintTemplateType.prescription}
     >
       <div className="max-w-5xl mx-auto">
         <div>
-          {/* Header */}
-          <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
-            <div className="flex items-start gap-4">
-              <div className="text-left">
-                <h1 className="text-2xl font-medium">{facility?.name}</h1>
-                {facility?.address && (
-                  <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
-                    {facility.address}
-                    {facility.phone_number && (
-                      <p className="text-gray-500 text-sm">
-                        {t("phone")}: {facility.phone_number}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-            <QRCodeSVG value={patient.id} size={50} level="Q" marginSize={0} />
-            <img
-              src={careConfig.mainLogo?.dark}
-              alt="Logo"
-              className="h-10 w-auto object-contain mb-2 sm:mb-0 text-end"
-            />
-          </div>
-
           {/* Patient Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-6 pb-3">
             <div className="space-y-1">
@@ -248,15 +224,25 @@ export const PrescriptionPreview = ({
                     isStrong
                   />
                 ))}
-            </div>
-            <div className="space-y-1">
               {prescriptions.length === 1 && (
-                <DetailRow label={t("date")} value={displayDate} isStrong />
+                <DetailRow
+                  label={t("encounter_date")}
+                  value={displayDate}
+                  isStrong
+                />
               )}
               <DetailRow
                 label={t("mobile_number")}
                 value={patient && formatPhoneNumberIntl(patient.phone_number)}
                 isStrong
+              />
+            </div>
+            <div className="space-y-1 flex justify-end items-center pr-3">
+              <QRCodeSVG
+                value={patient.id}
+                size={70}
+                level="Q"
+                marginSize={0}
               />
             </div>
           </div>
