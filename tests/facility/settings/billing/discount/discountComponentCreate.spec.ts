@@ -72,20 +72,24 @@ test.describe("Discount Component Settings", () => {
       .getByRole("button", { name: /create discount component/i })
       .click();
 
-    const sheet = page.locator('[data-slot="sheet-content"]');
-    await expect(sheet).toBeVisible();
-    const discountValueInput = sheet.getByRole("spinbutton").first();
+    const dialog = page.getByRole("dialog", {
+      name: /create discount component/i,
+    });
+    await expect(dialog).toBeVisible();
+    const discountValueInput = dialog.getByRole("spinbutton").first();
     await expect(discountValueInput).toBeVisible();
     await discountValueInput.fill(discountValue);
 
-    await sheet.getByRole("button", { name: /save/i }).click();
+    await dialog.getByRole("button", { name: /save/i }).click();
 
-    const nameField = sheet.getByLabel(/^name$/i);
-    const nameFieldError = nameField
-      .locator('xpath=ancestor::div[@data-slot="form-item"][1]')
-      .locator('[data-slot="form-message"]');
-
+    const nameField = dialog.getByRole("textbox", { name: /^name$/i });
     await expect(nameField).toHaveAttribute("aria-invalid", "true");
+
+    const describedBy = await nameField.getAttribute("aria-describedby");
+    expect(describedBy).toBeTruthy();
+    const messageId = describedBy!.trim().split(/\s+/).pop()!;
+    const nameFieldError = dialog.locator(`[id="${messageId}"]`);
+
     await expect(nameFieldError).toBeVisible();
     await expect(nameFieldError).toHaveText(/required/i);
   });
