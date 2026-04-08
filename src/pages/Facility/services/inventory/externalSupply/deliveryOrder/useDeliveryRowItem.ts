@@ -96,6 +96,7 @@ export function useDeliveryRowItem({
       discount_components: [],
       charge_item_category: undefined,
       is_manually_edited: false,
+      is_tax_inclusive: false,
       supplied_item_pack_quantity: 1,
       supplied_item_pack_size: 1,
     };
@@ -158,18 +159,16 @@ export function useDeliveryRowItem({
   // Fill form from existing product
   const fillFromProduct = useCallback(
     (product: ProductRead) => {
-      setField("supplied_item", product);
+      resetFields();
 
-      if (product.batch?.lot_number) {
-        setField("batch_number", product.batch.lot_number);
-      }
+      setField("supplied_item", product);
+      setField("batch_number", product.batch?.lot_number || "");
       if (product.expiration_date) {
         setField(
           "expiry_date",
           format(new Date(product.expiration_date), "yyyy-MM-dd"),
         );
       }
-
       if (product.standard_pack_size) {
         setField("supplied_item_pack_size", product.standard_pack_size);
       }
@@ -228,14 +227,9 @@ export function useDeliveryRowItem({
         if (discounts.length) {
           setField("discount_components", discounts);
         }
-      } else {
-        setField("unit_price", "0");
       }
-
-      setField("is_manually_edited", false);
-      setIsCreatingNew(false);
     },
-    [setField, form, index],
+    [resetFields, setField, form, index],
   );
 
   // Auto-fill from last product when product knowledge is selected
