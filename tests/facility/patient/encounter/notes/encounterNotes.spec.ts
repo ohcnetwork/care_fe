@@ -74,9 +74,7 @@ test.describe("Encounter Notes - Isolation from Patient Notes", () => {
     // Wait for patient notes to load by checking for the "New" button
     await expect(
       page.getByRole("button", { name: "New", exact: true }),
-    ).toBeVisible({
-      timeout: 10000,
-    });
+    ).toBeVisible();
 
     // Verify encounter note does NOT appear in patient notes
     await expect(
@@ -111,14 +109,14 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
       `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
     );
     await page.getByRole("link", { name: "View Encounter" }).first().click();
+    await page.waitForURL(/\/encounter\//);
+    // Capture the encounter URL before switching tabs
     encounterUrl = page.url();
     await page.getByRole("tab", { name: "Notes" }).click();
     // Wait for notes to load by checking for the "New" button
     await expect(
       page.getByRole("button", { name: "New", exact: true }),
-    ).toBeVisible({
-      timeout: 10000,
-    });
+    ).toBeVisible();
   });
 
   test("should support multi-user messaging in same thread", async ({
@@ -133,9 +131,24 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     await page.getByRole("button", { name: /Create/i }).click();
     await expect(page.getByText("Thread created successfully")).toBeVisible();
 
+    // User A explicitly selects the thread in the sidebar
+    const userAThreadButton = page
+      .getByRole("button")
+      .filter({ hasText: threadTitle });
+    await expect(userAThreadButton).toBeVisible();
+    await userAThreadButton.click();
+
     // User A fills message input and sends first message
     await page.getByPlaceholder("Type your message...").fill(userAMessage1);
-    await page.getByRole("button", { name: "Send message" }).click();
+    await Promise.all([
+      page.getByRole("button", { name: "Send message" }).click(),
+      page.waitForResponse(
+        (resp) =>
+          resp.url().includes("/note/") &&
+          resp.request().method() === "POST" &&
+          resp.ok(),
+      ),
+    ]);
     // Verify message input is cleared
     await expect(page.getByPlaceholder("Type your message...")).toBeEmpty();
 
@@ -148,15 +161,26 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     });
     const userBPage = await userBContext.newPage();
 
-    // User B navigates to the same encounter
-    await userBPage.goto(encounterUrl);
-    await userBPage.getByRole("tab", { name: "Notes" }).click();
-
-    // Select the thread created by User A
-    await userBPage
+    // Wait for the thread created by User A to appear
+    const threadButton = userBPage
       .getByRole("button")
-      .filter({ hasText: threadTitle })
-      .click();
+      .filter({ hasText: threadTitle });
+
+    // User B navigates to the same encounter, clicks Notes tab, waits for thread to appear
+    await expect(async () => {
+      await userBPage.goto(encounterUrl);
+      await userBPage.waitForLoadState("networkidle");
+      const notesTab = userBPage.getByRole("tab", { name: "Notes" });
+      await expect(notesTab).toBeVisible();
+      await notesTab.click();
+      await expect(
+        userBPage.getByRole("button", { name: "New", exact: true }),
+      ).toBeVisible();
+      await expect(threadButton).toBeVisible();
+    }).toPass({ intervals: [5_000, 5_000, 10_000, 10_000], timeout: 90_000 });
+
+    // User B explicitly selects the thread created by User A
+    await threadButton.click();
 
     // Verify User A's message is visible to User B
     await expect(userBPage.getByText(userAMessage1)).toBeVisible();
@@ -166,12 +190,10 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     await userBPage.getByRole("button", { name: "Send message" }).click();
 
     // Wait for message to be sent by checking if it appears
-    await expect(userBPage.getByText(userBMessage)).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(userBPage.getByText(userBMessage)).toBeVisible();
 
     // Refresh User A's view and verify both messages appear
-    await page.reload();
+    await page.goto(encounterUrl);
     await page.getByRole("tab", { name: "Notes" }).click();
     await page.getByRole("button").filter({ hasText: threadTitle }).click();
 
