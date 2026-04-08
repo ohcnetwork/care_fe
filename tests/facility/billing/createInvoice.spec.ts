@@ -136,24 +136,40 @@ async function addChargeItemsFromPickerInSheet(
   const listboxVisible = await listbox.isVisible().catch(() => false);
   if (!listboxVisible) return null;
 
-  const options = listbox.getByRole("option");
-  const count = await options.count();
-  if (count === 0) return null;
+  const folderChevron = page.locator('svg[class*="chevron-right"]');
 
-  const option = options.first();
-  await expect(option).toBeVisible();
-  const optionText = (await option.textContent()) ?? "";
-  const chargeItemTitle = firstNonEmptyLine(optionText);
-  if (!chargeItemTitle) return null;
+  for (let depth = 0; depth < 20; depth += 1) {
+    const lb = definitionPickerSurface.getByRole("listbox");
+    if (!(await lb.isVisible().catch(() => false))) return null;
 
-  await option.click();
-  await expect(
-    sheet.getByText(chargeItemTitle, { exact: false }),
-  ).toBeVisible();
-  await sheet.getByRole("button", { name: tr("add_items") }).click();
-  await expectToast(page, tr("charge_items_added_successfully"));
-  await page.waitForLoadState("networkidle");
-  return chargeItemTitle;
+    const definitionOptions = lb
+      .getByRole("option")
+      .filter({ hasNot: folderChevron });
+    const defCount = await definitionOptions.count();
+    if (defCount > 0) {
+      const option = definitionOptions.first();
+      await expect(option).toBeVisible();
+      const optionText = (await option.textContent()) ?? "";
+      const chargeItemTitle = firstNonEmptyLine(optionText);
+      if (!chargeItemTitle) return null;
+
+      await option.click();
+      await expect(
+        sheet.getByRole("button", { name: tr("add_items") }),
+      ).toBeEnabled();
+      await sheet.getByRole("button", { name: tr("add_items") }).click();
+      await expectToast(page, tr("charge_items_added_successfully"));
+      await page.waitForLoadState("networkidle");
+      return chargeItemTitle;
+    }
+
+    const folderOptions = lb.getByRole("option").filter({ has: folderChevron });
+    if ((await folderOptions.count()) === 0) return null;
+    await folderOptions.first().click();
+    await waitForChargeItemSearchSettled(page);
+  }
+
+  return null;
 }
 
 async function openAccountList(
