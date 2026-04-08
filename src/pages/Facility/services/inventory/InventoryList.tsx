@@ -178,12 +178,15 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                   </TableCell>
                   <TableCell
                     className={cn(
-                      "font-medium",
+                      "font-medium space-x-1",
                       isLessThan(inventory.net_content, 10) &&
                         "text-yellow-600",
                     )}
                   >
-                    {round(inventory.net_content)}
+                    <span>{round(inventory.net_content)}</span>
+                    <span className="text-sm self-center">
+                      {inventory.product.product_knowledge.base_unit.display}
+                    </span>
                   </TableCell>
                   <TableCell className="font-medium">
                     <Badge variant={ACCOUNT_STATUS_COLORS[inventory.status]}>

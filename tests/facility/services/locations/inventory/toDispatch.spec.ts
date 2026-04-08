@@ -1,13 +1,55 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
-import { getFacilityId } from "tests/support/facilityId";
+import fs from "fs";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/facilityAdmin.json" });
 
+let facilityId: string;
 let bioChembasePath: string;
 let pharmacybasePath: string;
 const stockedItemName = "Ibuprofen";
+const facilityName = "FACILITY WITH PATIENTS";
+const pharmacyLocationName = "Pharmacy";
+const bioChemLocationName = "Bio-Chemistry Lab";
+
+function getFacilityAdminAccessToken() {
+  const authState = JSON.parse(
+    fs.readFileSync("tests/.auth/facilityAdmin.json", "utf8"),
+  );
+
+  const accessToken = authState.origins
+    .flatMap(
+      (origin: { localStorage?: { name: string; value: string }[] }) =>
+        origin.localStorage || [],
+    )
+    .find(
+      (item: { name: string; value: string }) =>
+        item.name === "care_access_token",
+    )?.value;
+
+  if (!accessToken) {
+    throw new Error(
+      "Unable to extract care_access_token from tests/.auth/facilityAdmin.json",
+    );
+  }
+
+  return accessToken;
+}
+
+async function fetchJson<T>(page: Page, url: string): Promise<T> {
+  const response = await page.request.get(url, {
+    headers: {
+      Authorization: `Bearer ${getFacilityAdminAccessToken()}`,
+    },
+  });
+
+  if (!response.ok()) {
+    throw new Error(`Request failed (${response.status()}): ${url}`);
+  }
+
+  return response.json();
+}
 
 async function createStockRequest(page: Page, orderName: string) {
   await page.goto(bioChembasePath + "/inventory/internal/receive");
@@ -53,40 +95,40 @@ async function createStockRequest(page: Page, orderName: string) {
 }
 
 async function setupLocationPaths(page: Page) {
-  const facilityId = getFacilityId();
-  const servicesUrl = `/facility/${facilityId}/services/`;
+  const facilities = await fetchJson<{
+    results: { id: string; name: string }[];
+  }>(page, "http://localhost:9000/api/v1/facility/");
 
-  await page.goto(servicesUrl);
-  await page.getByRole("link", { name: "Main Pharmacy" }).click();
-  await page.getByRole("link", { name: "Pharmacy" }).click();
-  const pharmacyMatch = page
-    .url()
-    .match(
-      new RegExp(
-        `/facility/${facilityId}/locations/([^/]+)/medication_requests`,
-      ),
-    );
-  if (!pharmacyMatch) {
-    throw new Error(
-      "Unable to extract the pharmacy location ID from the current URL.",
-    );
+  const facility = facilities.results.find(
+    (entry) => entry.name === facilityName,
+  );
+  if (!facility) {
+    throw new Error(`Unable to find fixture facility: ${facilityName}`);
   }
-  pharmacybasePath = `/facility/${facilityId}/locations/${pharmacyMatch[1]}`;
+  facilityId = facility.id;
 
-  await page.goto(servicesUrl);
-  await page.getByRole("link", { name: "Pathology Lab" }).click();
-  await page.getByRole("link", { name: "Bio-Chemistry" }).click();
-  const bioChemMatch = page
-    .url()
-    .match(
-      new RegExp(`/facility/${facilityId}/locations/([^/]+)/service_requests`),
-    );
-  if (!bioChemMatch) {
-    throw new Error(
-      "Unable to extract the bio-chemistry location ID from the current URL.",
-    );
+  const locations = await fetchJson<{
+    results: { id: string; name: string }[];
+  }>(
+    page,
+    `http://localhost:9000/api/v1/facility/${facilityId}/location/?limit=200`,
+  );
+
+  const pharmacyLocation = locations.results.find(
+    (entry) => entry.name === pharmacyLocationName,
+  );
+  if (!pharmacyLocation) {
+    throw new Error(`Unable to find location: ${pharmacyLocationName}`);
   }
-  bioChembasePath = `/facility/${facilityId}/locations/${bioChemMatch[1]}`;
+  pharmacybasePath = `/facility/${facilityId}/locations/${pharmacyLocation.id}`;
+
+  const bioChemLocation = locations.results.find(
+    (entry) => entry.name === bioChemLocationName,
+  );
+  if (!bioChemLocation) {
+    throw new Error(`Unable to find location: ${bioChemLocationName}`);
+  }
+  bioChembasePath = `/facility/${facilityId}/locations/${bioChemLocation.id}`;
 }
 
 async function openStockRequestDetails(page: Page, orderName: string) {
@@ -189,7 +231,7 @@ test.describe("External Delivery Order Flow", () => {
     );
     await page.getByRole("button", { name: "Create" }).click();
     await expect(page.getByText("Name is required")).toBeVisible();
-    await expect(page.getByText("Required", { exact: true })).toBeVisible();
+    await expect(page.getByText("Supplier is required")).toBeVisible();
   });
 
   test("should create an external delivery order successfully", async ({
@@ -206,24 +248,24 @@ test.describe("External Delivery Order Flow", () => {
       .filter({ hasText: "Select Vendor/Distributor" })
       .click();
     await page.getByPlaceholder("Search vendor").fill("Supplier");
-    await expect(page.getByRole("option").first()).toBeVisible({
+    const supplierOption = page
+      .getByRole("option", { name: /Supplier/ })
+      .first();
+    await expect(supplierOption).toBeVisible({
       timeout: 5000,
     });
-    await page.getByRole("option").first().click();
+    const supplierName =
+      (await supplierOption.textContent())?.trim() || "Supplier";
+    await supplierOption.click();
     await page.getByRole("button", { name: "Create" }).click();
+    await expect(page.getByText("Order created successfully")).toBeVisible();
     await expect(page).toHaveURL(
       /\/inventory\/external\/deliveries\/outgoing\/(?!new)[^/?]+/,
     );
     await expect(
       page.getByRole("heading", { name: deliveryName }),
     ).toBeVisible();
-    await page.goto(
-      pharmacybasePath + "/inventory/external/deliveries/incoming",
-    );
-    const row = page
-      .locator("table tbody tr")
-      .filter({ hasText: deliveryName });
-    await expect(row).toContainText(deliveryName);
+    await expect(page.getByText(supplierName)).toBeVisible();
   });
 
   test("should show empty state in the completed tab", async ({ page }) => {
@@ -235,5 +277,11 @@ test.describe("External Delivery Order Flow", () => {
       "aria-selected",
       "true",
     );
+    await expect(
+      page.getByRole("heading", { name: "No orders found" }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("No orders found based on the selected filters"),
+    ).toBeVisible();
   });
 });
