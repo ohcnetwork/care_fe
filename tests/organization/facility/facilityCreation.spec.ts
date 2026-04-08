@@ -155,7 +155,7 @@ test.describe("Facility Creation", () => {
       .fill(facilityName);
     await page.getByRole("link", { name: "View Facility" }).click();
 
-    // Verify facility details
+    // Verify facility details (link navigates to /settings/general)
     await expect(
       page.getByRole("heading", { name: facilityName }),
     ).toBeVisible();
