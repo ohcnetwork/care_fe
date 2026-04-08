@@ -94,8 +94,13 @@ test.describe("Facility Device Delete", () => {
     // Verify we're still on the device details page
     await expect(page.getByRole("heading", { name: deviceName })).toBeVisible();
 
-    // Navigate back to devices list
+    // Navigate back to devices list and wait for the device list API to load
+    const devicesResponse = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/device/") && resp.request().method() === "GET",
+    );
     await page.goto(`/facility/${facilityId}/settings/devices`);
+    await devicesResponse;
 
     // Search for the device
     await page
