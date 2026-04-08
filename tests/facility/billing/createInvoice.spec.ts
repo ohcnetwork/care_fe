@@ -38,11 +38,34 @@ function createInvoiceForm(page: Page): Locator {
 }
 
 function addChargeItemsBillingSheetPanel(page: Page): Locator {
-  return page.getByRole("dialog", { name: tr("add_charge_items") }).or(
+  const titleText = tr("add_charge_items");
+  const titleInSheet = page.locator('[data-slot="sheet-title"]').filter({
+    hasText: titleText,
+  });
+  const bySheetSlots = page
+    .locator('[data-slot="sheet-content"]')
+    .filter({ has: titleInSheet })
+    .filter({ visible: true });
+  const byDialogRole = page.getByRole("dialog", { name: titleText }).or(
     page.getByRole("dialog").filter({
-      has: page.getByRole("heading", { name: tr("add_charge_items") }),
+      has: page.getByRole("heading", { name: titleText }),
     }),
   );
+  return bySheetSlots.or(byDialogRole);
+}
+
+async function dismissModalChargePickersBlockingPage(page: Page) {
+  await closeAnyOpenPopovers(page);
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const popper = page
+      .locator("[data-radix-popper-content-wrapper]")
+      .filter({ visible: true })
+      .first();
+    const blocking = await popper.isVisible().catch(() => false);
+    if (!blocking) break;
+    await page.keyboard.press("Escape");
+    await popper.waitFor({ state: "hidden" }).catch(() => {});
+  }
 }
 
 function chargeItemDefinitionPickerTrigger(scope: Locator): Locator {
@@ -227,6 +250,7 @@ async function ensureAtLeastOneChargeItemSelected(
     });
     await expect(toolbarBtn).toBeVisible();
     await toolbarBtn.scrollIntoViewIfNeeded();
+    await dismissModalChargePickersBlockingPage(page);
     await toolbarBtn.click();
     await page.waitForLoadState("networkidle");
     await expect(sheet).toBeVisible();
