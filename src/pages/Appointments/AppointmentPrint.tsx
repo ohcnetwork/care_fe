@@ -10,7 +10,6 @@ import { getPermissions } from "@/common/Permissions";
 import PrintFooter from "@/components/Common/PrintFooter";
 import TagBadge from "@/components/Tags/TagBadge";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
-import { Separator } from "@/components/ui/separator";
 import {
   Table,
   TableBody,
@@ -143,41 +142,40 @@ export default function AppointmentPrint(props: Props) {
       templateSlug={PrintTemplateType.appointment}
       className="w-[720px] mx-auto"
     >
-      <div className="max-w-4xl mx-auto text-sm">
-        {/* Header: Appointment Type + Slot Name */}
-        <div className="flex justify-between items-start">
-          <span className="font-semibold text-base text-gray-700">
-            {t(`schedulable_resource__${appointment.resource_type}`)}
+      <div className="max-w-4xl mx-auto text-xs">
+        {/* Header */}
+        <div className="flex justify-between items-start border-b border-gray-300 pb-1 mb-2">
+          <span className="font-semibold text-base text-gray-950">
+            {t("appointment_details")}
           </span>
-          <span className="font-semibold text-base text-gray-700">
-            {appointment.token_slot.availability.name}
-          </span>
+          <div className="text-right text-gray-600 leading-snug">
+            <div className="text-xs font-semibold text-gray-950 gap-1 flex justify-end">
+              <span>
+                {formatDate(
+                  appointment.token_slot.start_datetime,
+                  "dd MMM, yyyy, EEE",
+                )}
+              </span>
+              |<span>{formatSlotTimeRange(appointment.token_slot)}</span>
+            </div>
+            <div className="flex gap-1 justify-end">
+              {t(`schedulable_resource__${appointment.resource_type}`)}:{" "}
+              <span className="text-gray-800 font-medium">
+                {formatScheduleResourceName(appointment)}
+              </span>
+              <span className="text-gray-800 font-semibold"> | </span>
+              <span>{appointment.token_slot.availability.name}</span>
+            </div>
+          </div>
         </div>
 
-        {/* Title + Date */}
-        <div className="flex justify-between items-center mb-3">
-          <h5 className="text-gray-950">{t("appointment_details")}</h5>
-          <span className="font-semibold text-gray-950">
-            {formatDate(
-              appointment.token_slot.start_datetime,
-              "dd MMM, yyyy, EEE",
-            )}{" "}
-            | {formatSlotTimeRange(appointment.token_slot)}
-          </span>
-        </div>
-
-        {/* Patient Info + QR/Token */}
-        <div className="flex justify-between gap-4 mb-3">
+        {/* Patient Info + QR/Token — compact two-column grid */}
+        <div className="flex justify-between gap-3 mb-1.5">
           <div className="flex-1">
-            <div className="text-sm space-y-0.5">
-              <DetailRow label={t("patient")} value={patient?.name} />
+            <div className="text-xs leading-snug space-y-px">
               <DetailRow
-                label={`${t("age")}/${t("gender")}`}
-                value={
-                  patient
-                    ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
-                    : undefined
-                }
+                label={t("patient")}
+                value={`${patient?.name} | ${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`}
               />
               <DetailRow
                 label={t("contact_system_phone")}
@@ -187,10 +185,6 @@ export default function AppointmentPrint(props: Props) {
                       patient.phone_number
                     : undefined
                 }
-              />
-              <DetailRow
-                label={t(`schedulable_resource__${appointment.resource_type}`)}
-                value={formatScheduleResourceName(appointment)}
               />
               {patient?.instance_identifiers
                 ?.filter(
@@ -210,11 +204,11 @@ export default function AppointmentPrint(props: Props) {
               )}
             </div>
           </div>
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex items-start gap-3">
             {token && (
               <div className="text-right">
-                <p className="text-gray-950">{t("token_no")}</p>
-                <p className="text-2xl font-bold tracking-tight text-gray-950">
+                <p className="text-xs text-gray-600">{t("token_no")}</p>
+                <p className="text-xl font-bold tracking-tight text-gray-950 leading-tight">
                   {renderTokenNumber(token)}
                 </p>
               </div>
@@ -223,17 +217,17 @@ export default function AppointmentPrint(props: Props) {
           </div>
         </div>
 
-        {/* Tags */}
+        {/* Tags — inline, compact */}
         {(patientTags.length > 0 || appointmentTags.length > 0) && (
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-gray-700 w-30">{t("tags")}</span>
-            <div className="flex flex-wrap gap-1">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-gray-600 text-xs w-28">{t("tags")}</span>
+            <div className="flex flex-wrap gap-0.5">
               {patientTags.map((tag) => (
                 <TagBadge
                   key={tag.id}
                   tag={tag}
                   hierarchyDisplay
-                  className="text-xs rounded-sm"
+                  className="text-xs rounded-sm py-0 px-1"
                 />
               ))}
               {appointmentTags.map((tag) => (
@@ -241,44 +235,42 @@ export default function AppointmentPrint(props: Props) {
                   key={tag.id}
                   tag={tag}
                   hierarchyDisplay
-                  className="text-xs rounded-sm"
+                  className="text-xs rounded-sm py-0 px-1"
                 />
               ))}
             </div>
           </div>
         )}
 
-        {/* Charges Table */}
+        {/* Charges Table — compact */}
         {hasChargeItems && (
-          <div className="mb-4">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-lg font-semibold text-gray-950">
-                {t("charges")}
-              </span>
+          <div className="mb-2">
+            <div className="text-xs font-semibold text-gray-950 mb-0.5">
+              {t("charges")}
             </div>
 
-            <div className="border rounded-md overflow-hidden">
-              <Table>
+            <div className="border rounded overflow-hidden">
+              <Table className="text-xs">
                 <TableHeader>
                   <TableRow className="bg-gray-50 divide-x">
-                    <TableHead className="text-sm text-gray-700 w-10 text-center">
+                    <TableHead className="text-xs text-gray-700 w-8 text-center h-7">
                       #
                     </TableHead>
-                    <TableHead className="text-sm text-gray-700">
-                      {t("item")}
+                    <TableHead className="text-xs text-gray-700 h-7">
+                      {t("particulars")}
                     </TableHead>
-                    <TableHead className="text-sm text-gray-700">
+                    <TableHead className="text-xs text-gray-700 w-12 h-7">
                       {t("qty")}
                     </TableHead>
-                    <TableHead className="text-sm text-gray-700">
+                    <TableHead className="text-xs text-gray-700 w-16 h-7">
                       {t("price")}
                     </TableHead>
-                    <TableHead className="font-medium text-right text-sm text-gray-700">
+                    <TableHead className="font-medium text-right text-xs text-gray-700 w-20 h-7">
                       {t("amount")}
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody className="text-base font-medium text-gray-950">
+                <TableBody className="text-xs font-medium text-gray-950">
                   {displayChargeItems.map((item, index) => {
                     const unitPrice = getBasePrice(
                       item.unit_price_components,
@@ -288,15 +280,17 @@ export default function AppointmentPrint(props: Props) {
                         key={item.id}
                         className="divide-x hover:bg-transparent"
                       >
-                        <TableCell className="text-center">
+                        <TableCell className="text-center py-0.5 px-1">
                           {index + 1}.
                         </TableCell>
-                        <TableCell>{item.title}</TableCell>
-                        <TableCell>{round(item.quantity)}</TableCell>
-                        <TableCell>
+                        <TableCell className="py-0.5">{item.title}</TableCell>
+                        <TableCell className="py-0.5">
+                          {round(item.quantity)}
+                        </TableCell>
+                        <TableCell className="py-0.5">
                           <MonetaryDisplay amount={unitPrice} hideCurrency />
                         </TableCell>
-                        <TableCell className="text-right font-semibold">
+                        <TableCell className="text-right font-semibold py-0.5">
                           <MonetaryDisplay
                             amount={item.total_price}
                             hideCurrency
@@ -308,71 +302,71 @@ export default function AppointmentPrint(props: Props) {
                 </TableBody>
               </Table>
             </div>
-            <div className="flex justify-end mt-1">
-              <span className="text-base text-gray-950 mr-3">
+            <div className="flex justify-end mt-1 mr-2">
+              <span className="text-xs text-gray-950 mr-2">
                 {t("total_amount")} :
               </span>
               <MonetaryDisplay
                 amount={totalAmount}
-                className="text-base text-gray-950 font-semibold"
+                className="text-xs text-gray-950 font-semibold"
               />
             </div>
           </div>
         )}
 
-        {/* Payment Details Table */}
+        {/* Payment Details — compact */}
         {hasPayments && (
-          <div className="mb-3">
-            <div className="p-1 border-b-2 border-dashed border-gray-200 w-full mb-3" />
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-lg font-semibold text-gray-950">
-                {t("payment_details")}
-              </span>
+          <div className="mb-2">
+            <div className="border-t border-dashed border-gray-300 my-1.5" />
+            <div className="text-xs font-semibold text-gray-950 mb-0.5">
+              {t("payment_details")}
             </div>
 
-            <div className="border rounded-md overflow-hidden">
-              <Table>
+            <div className="border rounded overflow-hidden">
+              <Table className="text-xs">
                 <TableHeader>
                   <TableRow className="bg-gray-50 divide-x">
-                    <TableHead className="text-sm text-gray-700 w-10 text-center">
+                    <TableHead className="text-xs text-gray-700 w-8 text-center h-7 px-1">
                       #
                     </TableHead>
-                    <TableHead className="text-sm text-gray-700">
+                    <TableHead className="text-xs text-gray-700 h-7">
                       {t("date_and_time")}
                     </TableHead>
-                    <TableHead className="text-sm text-gray-700">
+                    <TableHead className="text-xs text-gray-700 h-7">
                       {t("payment_method")}
                     </TableHead>
-                    <TableHead className="text-sm text-gray-700">
+                    <TableHead className="text-xs text-gray-700 h-7">
                       {t("reference")}
                     </TableHead>
-                    <TableHead className="font-medium text-right text-gray-700">
+                    <TableHead className="font-medium text-right text-xs text-gray-700 w-20 h-7">
                       {t("amount")}
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody className="text-base font-medium text-gray-950">
+                <TableBody className="text-xs font-medium text-gray-950">
                   {payments.map((payment, index) => (
                     <TableRow
                       key={payment.id}
                       className="divide-x hover:bg-transparent"
                     >
-                      <TableCell className="text-center">
+                      <TableCell className="text-center py-0.5 px-1">
                         {index + 1}.
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-0.5">
                         {payment.payment_datetime &&
                           format(
                             new Date(payment.payment_datetime),
                             "dd MMM yyyy, hh:mm a",
                           )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-0.5">
                         {PAYMENT_RECONCILIATION_METHOD_MAP[payment.method] ??
                           payment.method}
                       </TableCell>
-                      <TableCell>{payment.reference_number || "--"}</TableCell>
-                      <TableCell className="text-right font-semibold">
+                      <TableCell className="py-0.5">
+                        {payment.reference_number || "--"}
+                      </TableCell>
+                      <TableCell className="text-right font-semibold py-0.5">
                         <MonetaryDisplay amount={payment.amount} hideCurrency />
                       </TableCell>
                     </TableRow>
@@ -380,43 +374,42 @@ export default function AppointmentPrint(props: Props) {
                 </TableBody>
               </Table>
             </div>
-            <div className="flex justify-end mt-1">
-              <span className="text-base text-gray-950 mr-3">
+            <div className="flex justify-end mt-1 mr-2">
+              <span className="text-xs text-gray-950 mr-2">
                 {t("amount_paid")} :
               </span>
               <MonetaryDisplay
                 amount={totalPaid}
-                className="text-base text-gray-950 font-semibold"
+                className="text-xs text-gray-950 font-semibold"
               />
             </div>
           </div>
         )}
 
-        {/* Notes */}
+        {/* Notes — compact */}
         {appointment.note && (
-          <div className="mb-4">
-            <h3 className="font-semibold text-gray-800 mb-2 text-sm border-b border-gray-200 pb-1">
+          <div className="mb-2">
+            <div className="text-xs font-semibold text-gray-700 border-b border-gray-200 pb-0.5 mb-0.5">
               {t("note")}
-            </h3>
-            <div className="text-xs whitespace-pre-wrap bg-gray-50 p-2 rounded">
+            </div>
+            <div className="text-xs whitespace-pre-wrap bg-gray-50 p-1.5 rounded">
               {appointment.note}
             </div>
           </div>
         )}
 
-        <Separator className="my-4" />
-
-        {/* Footer */}
-        <PrintFooter
-          rightContent={format(new Date(), "PP 'at' p")}
-          leftContent={
-            <>
-              <span className="font-semibold">{t("last_updated_by")}: </span>
-              {formatName(appointment.updated_by)}
-            </>
-          }
-          className="text-xs"
-        />
+        <div className="border-t border-gray-200">
+          <PrintFooter
+            rightContent={format(new Date(), "PP 'at' p")}
+            leftContent={
+              <>
+                <span className="font-semibold">{t("last_updated_by")}:</span>{" "}
+                {formatName(appointment.updated_by)}
+              </>
+            }
+            className="text-xs"
+          />
+        </div>
       </div>
     </PrintPreview>
   );
@@ -433,14 +426,14 @@ const DetailRow = ({
   label,
   value,
   isStrong = true,
-  width = "w-32",
+  width = "w-28",
 }: DetailRowProps) => {
   return (
-    <div className="flex">
-      <span className={cn("text-gray-700", width)}>{label}</span>
+    <div className="flex text-xs leading-snug">
+      <span className={cn("text-gray-600 shrink-0", width)}>{label}</span>
       <span className="text-gray-950 font-semibold">: </span>
       <span
-        className={cn("ml-1 whitespace-pre-wrap text-gray-950", {
+        className={cn("ml-0.5 whitespace-pre-wrap text-gray-950", {
           "font-semibold": isStrong,
         })}
       >
