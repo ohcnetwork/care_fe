@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { format, formatDate } from "date-fns";
 import { QRCodeSVG } from "qrcode.react";
 import { useTranslation } from "react-i18next";
@@ -22,9 +22,13 @@ import { usePermissions } from "@/context/PermissionContext";
 import { cn } from "@/lib/utils";
 import { formatSlotTimeRange } from "@/pages/Appointments/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { getBasePrice } from "@/types/base/monetaryComponent/monetaryComponent";
-import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
+import {
+  ChargeItemServiceResource,
+  ChargeItemStatus,
+  EXCLUDED_CHARGE_ITEM_STATUSES,
+} from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import {
   PAYMENT_RECONCILIATION_METHOD_MAP,
@@ -35,7 +39,7 @@ import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/pa
 import { formatScheduleResourceName } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { renderTokenNumber } from "@/types/tokens/token/token";
-import { add, round } from "@/Utils/decimal";
+import { add } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 
@@ -64,7 +68,7 @@ export default function AppointmentPrint(props: Props) {
     enabled: canViewAppointments && !!facility,
   });
 
-  // Get charge items for the appointment to find the linked invoice
+  // Get charge items for the appointment
   const { data: chargeItems } = useQuery({
     queryKey: ["chargeItems", facilityId, props.appointmentId],
     queryFn: query(chargeItemApi.listChargeItem, {
@@ -79,18 +83,29 @@ export default function AppointmentPrint(props: Props) {
     enabled: !!facilityId && !!props.appointmentId,
   });
 
-  // Extract the invoice ID from the charge items' paid_invoice
-  const invoiceId = chargeItems?.results?.find((item) => item.paid_invoice?.id)
-    ?.paid_invoice?.id;
+  // Extract unique invoice IDs from charge items (before early return so hooks are unconditional)
+  const invoiceIds = [
+    ...new Set(
+      chargeItems?.results
+        ?.map((item) => item.paid_invoice?.id)
+        .filter((id): id is string => !!id) ?? [],
+    ),
+  ];
 
-  // Fetch the full invoice which includes both charge_items and payments
-  const { data: invoice } = useQuery({
-    queryKey: ["appointmentInvoice", facilityId, invoiceId],
-    queryFn: query(invoiceApi.retrieveInvoice, {
-      pathParams: { facilityId, invoiceId: invoiceId! },
-    }),
-    enabled: !!facilityId && !!invoiceId,
+  // Fetch each invoice individually to get full payment details
+  const invoiceQueries = useQueries({
+    queries: invoiceIds.map((invoiceId) => ({
+      queryKey: ["appointmentInvoice", facilityId, invoiceId],
+      queryFn: query(invoiceApi.retrieveInvoice, {
+        pathParams: { facilityId, invoiceId },
+      }),
+      enabled: !!facilityId,
+    })),
   });
+
+  const invoices = invoiceQueries
+    .map((q) => q.data)
+    .filter((inv): inv is InvoiceRead => !!inv);
 
   if (isLoading || !appointment || !facility) {
     return (
@@ -114,23 +129,34 @@ export default function AppointmentPrint(props: Props) {
   const patient = appointment.patient;
   const token = appointment.token;
 
-  // Use invoice charge items when available, fall back to the charge items query
-  const displayChargeItems = invoice?.charge_items ?? chargeItems?.results;
+  // Filter out excluded charge items and show all from the query
+  const displayChargeItems = chargeItems?.results?.filter(
+    (item) => !EXCLUDED_CHARGE_ITEM_STATUSES.includes(item.status),
+  );
   const hasChargeItems = displayChargeItems && displayChargeItems.length > 0;
 
-  const payments = (invoice?.payments ?? []).filter(
-    (payment) =>
-      payment.status === PaymentReconciliationStatus.active &&
-      !payment.is_credit_note,
-  );
-  const hasPayments = payments.length > 0;
+  const totalAmount = hasChargeItems
+    ? add(...displayChargeItems.map((item) => item.total_price)).toString()
+    : undefined;
 
-  const totalAmount =
-    invoice?.total_gross ??
-    (displayChargeItems && displayChargeItems.length > 0
-      ? add(...displayChargeItems.map((item) => item.total_price)).toString()
-      : undefined);
-  const totalPaid = invoice?.total_payments;
+  // Collect all active payments across all invoices into one flat list
+  const allPayments = invoices.flatMap((invoice) =>
+    (invoice.payments ?? [])
+      .filter(
+        (payment) =>
+          payment.status === PaymentReconciliationStatus.active &&
+          !payment.is_credit_note,
+      )
+      .map((payment) => ({
+        ...payment,
+        invoiceNumber: invoice.number,
+      })),
+  );
+  const hasPayments = allPayments.length > 0;
+
+  const totalPaid = hasPayments
+    ? add(...allPayments.map((p) => p.amount)).toString()
+    : undefined;
 
   const patientTags = patient?.instance_tags ?? [];
   const appointmentTags = appointment?.tags ?? [];
@@ -259,22 +285,16 @@ export default function AppointmentPrint(props: Props) {
                     <TableHead className="text-xs text-gray-700 h-7">
                       {t("particulars")}
                     </TableHead>
-                    <TableHead className="text-xs text-gray-700 w-12 h-7">
-                      {t("qty")}
-                    </TableHead>
-                    <TableHead className="text-xs text-gray-700 w-16 h-7">
-                      {t("price")}
-                    </TableHead>
-                    <TableHead className="font-medium text-right text-xs text-gray-700 w-20 h-7">
+                    <TableHead className="font-medium text-center text-xs text-gray-700 w-20 h-7">
                       {t("amount")}
+                    </TableHead>
+                    <TableHead className="text-xs text-gray-700 w-20 text-center h-7">
+                      {t("status")}
                     </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody className="text-xs font-medium text-gray-950">
                   {displayChargeItems.map((item, index) => {
-                    const unitPrice = getBasePrice(
-                      item.unit_price_components,
-                    ).toString();
                     return (
                       <TableRow
                         key={item.id}
@@ -283,18 +303,28 @@ export default function AppointmentPrint(props: Props) {
                         <TableCell className="text-center py-0.5 px-1">
                           {index + 1}.
                         </TableCell>
-                        <TableCell className="py-0.5">{item.title}</TableCell>
                         <TableCell className="py-0.5">
-                          {round(item.quantity)}
+                          <div className="flex flex-col">
+                            <span>{item.title}</span>
+                            {item.paid_invoice && (
+                              <span className="text-gray-500">
+                                {item.paid_invoice.number}
+                              </span>
+                            )}
+                          </div>
                         </TableCell>
-                        <TableCell className="py-0.5">
-                          <MonetaryDisplay amount={unitPrice} hideCurrency />
-                        </TableCell>
-                        <TableCell className="text-right font-semibold py-0.5">
+                        <TableCell className="text-center font-semibold py-0.5">
                           <MonetaryDisplay
                             amount={item.total_price}
                             hideCurrency
                           />
+                        </TableCell>
+                        <TableCell className="text-center py-0.5">
+                          {item.status === ChargeItemStatus.paid ? (
+                            <span>{t("paid")}</span>
+                          ) : (
+                            <span>-</span>
+                          )}
                         </TableCell>
                       </TableRow>
                     );
@@ -302,7 +332,7 @@ export default function AppointmentPrint(props: Props) {
                 </TableBody>
               </Table>
             </div>
-            <div className="flex justify-end mt-1 mr-2">
+            <div className="flex justify-end mt-1 mr-1">
               <span className="text-xs text-gray-950 mr-2">
                 {t("total_amount")} :
               </span>
@@ -314,7 +344,7 @@ export default function AppointmentPrint(props: Props) {
           </div>
         )}
 
-        {/* Payment Details — compact */}
+        {/* Payment Details — single table for all invoices */}
         {hasPayments && (
           <div className="mb-2">
             <div className="border-t border-dashed border-gray-300 my-1.5" />
@@ -326,17 +356,14 @@ export default function AppointmentPrint(props: Props) {
               <Table className="text-xs">
                 <TableHeader>
                   <TableRow className="bg-gray-50 divide-x">
-                    <TableHead className="text-xs text-gray-700 w-8 text-center h-7 px-1">
+                    <TableHead className="text-xs text-gray-700 w-8 text-center h-7">
                       #
                     </TableHead>
                     <TableHead className="text-xs text-gray-700 h-7">
-                      {t("date_and_time")}
+                      {t("invoice")}
                     </TableHead>
                     <TableHead className="text-xs text-gray-700 h-7">
                       {t("payment_method")}
-                    </TableHead>
-                    <TableHead className="text-xs text-gray-700 h-7">
-                      {t("reference")}
                     </TableHead>
                     <TableHead className="font-medium text-right text-xs text-gray-700 w-20 h-7">
                       {t("amount")}
@@ -344,7 +371,7 @@ export default function AppointmentPrint(props: Props) {
                   </TableRow>
                 </TableHeader>
                 <TableBody className="text-xs font-medium text-gray-950">
-                  {payments.map((payment, index) => (
+                  {allPayments.map((payment, index) => (
                     <TableRow
                       key={payment.id}
                       className="divide-x hover:bg-transparent"
@@ -353,18 +380,31 @@ export default function AppointmentPrint(props: Props) {
                         {index + 1}.
                       </TableCell>
                       <TableCell className="py-0.5">
-                        {payment.payment_datetime &&
-                          format(
-                            new Date(payment.payment_datetime),
-                            "dd MMM yyyy, hh:mm a",
+                        <div className="flex flex-col">
+                          <span>{payment.invoiceNumber}</span>
+                          {payment.payment_datetime && (
+                            <span className="text-gray-500">
+                              {format(
+                                new Date(payment.payment_datetime),
+                                "dd MMM yyyy, hh:mm a",
+                              )}
+                            </span>
                           )}
+                        </div>
                       </TableCell>
                       <TableCell className="py-0.5">
-                        {PAYMENT_RECONCILIATION_METHOD_MAP[payment.method] ??
-                          payment.method}
-                      </TableCell>
-                      <TableCell className="py-0.5">
-                        {payment.reference_number || "--"}
+                        <div className="flex flex-col">
+                          <span>
+                            {PAYMENT_RECONCILIATION_METHOD_MAP[
+                              payment.method
+                            ] ?? payment.method}
+                          </span>
+                          {payment.reference_number && (
+                            <span className="text-gray-500">
+                              {payment.reference_number}
+                            </span>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="text-right font-semibold py-0.5">
                         <MonetaryDisplay amount={payment.amount} hideCurrency />
@@ -374,7 +414,7 @@ export default function AppointmentPrint(props: Props) {
                 </TableBody>
               </Table>
             </div>
-            <div className="flex justify-end mt-1 mr-2">
+            <div className="flex justify-end mt-1 mr-1">
               <span className="text-xs text-gray-950 mr-2">
                 {t("amount_paid")} :
               </span>
@@ -426,7 +466,7 @@ const DetailRow = ({
   label,
   value,
   isStrong = true,
-  width = "w-28",
+  width = "w-20",
 }: DetailRowProps) => {
   return (
     <div className="flex text-xs leading-snug">
