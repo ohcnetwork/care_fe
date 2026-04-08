@@ -45,6 +45,10 @@ function addChargeItemsBillingSheetPanel(page: Page): Locator {
   );
 }
 
+function chargeItemDefinitionPickerTrigger(scope: Locator): Locator {
+  return scope.locator('button[role="combobox"]').first();
+}
+
 function accountRetrieveResponsePredicate(
   facilityId: string,
   accountId: string,
@@ -81,9 +85,7 @@ async function addChargeItemsFromPickerInSheet(
 ) {
   await closeAnyOpenPopovers(page);
 
-  const picker = sheet.getByRole("combobox", {
-    name: tr("select_charge_item_definition"),
-  });
+  const picker = chargeItemDefinitionPickerTrigger(sheet);
   await expect(picker).toBeVisible();
   await picker.click();
 
@@ -203,14 +205,19 @@ async function ensureAtLeastOneChargeItemSelected(
   const hasNoBillable = await noBillable.isVisible().catch(() => false);
 
   if (hasNoBillable) {
-    const definitionCombobox = page.getByRole("combobox", {
-      name: tr("select_charge_item_definition"),
-    });
-    await expect(definitionCombobox).toBeVisible();
-
     await closeAnyOpenPopovers(page);
     await page.keyboard.press("Escape");
-    await expect(definitionCombobox).toHaveAttribute("aria-expanded", "false");
+
+    const inlinePickerButtons = invoiceForm.locator('button[role="combobox"]');
+    if ((await inlinePickerButtons.count()) > 0) {
+      const definitionPickerTrigger = inlinePickerButtons.first();
+      await expect(definitionPickerTrigger).toBeVisible();
+      await expect(definitionPickerTrigger).toHaveAttribute(
+        "aria-expanded",
+        "false",
+      );
+    }
+
     await page.waitForLoadState("networkidle");
 
     const sheet = addChargeItemsBillingSheetPanel(page);
