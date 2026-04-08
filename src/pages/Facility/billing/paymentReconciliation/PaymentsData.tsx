@@ -132,7 +132,7 @@ export default function PaymentsData({
       queryParams: {
         account: accountId,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         status: qParams.status,
         created_date_after: qParams.created_date_after
           ? dateTimeQueryString(new Date(qParams.created_date_after))

@@ -20,6 +20,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
 import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
 
 import { MedicationAdministrationRead } from "@/types/emr/medicationAdministration/medicationAdministration";
@@ -100,20 +101,38 @@ const IndividualMedicationRow: React.FC<{
         )}
       >
         <div className="flex items-center gap-2 flex-wrap">
-          <span
+          <DosageInstructionList
+            instructions={medication.dosage_instruction}
             className={cn(
               "text-sm font-medium text-gray-700",
               isInactive && medication.status === "ended" && "line-through",
             )}
-          >
-            {[
-              formatDosage(medication.dosage_instruction[0]),
-              formatFrequency(medication.dosage_instruction[0]),
-              medication.dosage_instruction[0]?.method?.display,
-            ]
-              .filter(Boolean)
-              .join(", ")}
-          </span>
+            gap="sm"
+            renderItem={(di) => {
+              const text = [
+                formatDosage(di),
+                formatFrequency(di),
+                di.method?.display,
+              ]
+                .filter(Boolean)
+                .join(", ");
+              return (
+                <div>
+                  {text && <div>{text}</div>}
+                  {di.route?.display && (
+                    <Badge variant="blue" className="text-xs mt-0.5">
+                      {di.route.display}
+                    </Badge>
+                  )}
+                  {medication.note && (
+                    <div className="text-xs text-gray-500 mt-0.5 italic wrap-break-word">
+                      {medication.note}
+                    </div>
+                  )}
+                </div>
+              );
+            }}
+          />
           <Badge
             variant={medication.status === "active" ? "green" : "secondary"}
             className="text-xs"
@@ -121,11 +140,6 @@ const IndividualMedicationRow: React.FC<{
             {t(medication.status)}
           </Badge>
         </div>
-        {medication.note && (
-          <div className="text-xs text-gray-500 mt-0.5 italic wrap-break-word">
-            {medication.note}
-          </div>
-        )}
         <div className="text-xs text-gray-500 mt-0.5">
           {t("added_on")}:{" "}
           {format(
@@ -311,7 +325,7 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
               <div className="flex items-center gap-2 flex-wrap">
                 <span
                   className={cn(
-                    "font-semibold text-gray-900",
+                    "font-semibold text-gray-900 text-wrap break-all",
                     !group.hasActiveRequests && "line-through text-gray-500",
                   )}
                 >
@@ -325,37 +339,42 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
               </div>
 
               {/* Latest prescription dosage and frequency */}
-              {latestActiveRequest &&
-                (() => {
-                  const freq = formatFrequency(
-                    latestActiveRequest.dosage_instruction[0],
-                  );
-                  const method =
-                    latestActiveRequest.dosage_instruction[0]?.method;
-                  return (
-                    <>
-                      <div className="text-sm text-gray-600 mt-0.5 whitespace-pre-wrap">
-                        {formatDosage(
-                          latestActiveRequest.dosage_instruction[0],
+              {latestActiveRequest && (
+                <DosageInstructionList
+                  instructions={latestActiveRequest.dosage_instruction}
+                  className="mt-0.5"
+                  itemClassName="text-sm text-gray-600"
+                  gap="sm"
+                  renderItem={(di) => {
+                    const freq = formatFrequency(di);
+                    return (
+                      <div>
+                        <div>
+                          {formatDosage(di)}
+                          {freq && <span className="text-gray-400"> · </span>}
+                          {freq}
+                          {di.method?.display && (
+                            <>
+                              <span className="text-gray-400"> · </span>
+                              {di.method.display}
+                            </>
+                          )}
+                        </div>
+                        {di.route?.display && (
+                          <Badge variant="blue" className="text-xs mt-0.5">
+                            {di.route.display}
+                          </Badge>
                         )}
-                        {freq && <span className="text-gray-400"> · </span>}
-                        {freq}
-                        {method && (
-                          <>
-                            <span className="text-gray-400"> · </span>
-                            {method.display}
-                          </>
+                        {latestActiveRequest.note && (
+                          <div className="text-xs text-gray-500 mt-0.5 italic whitespace-pre-wrap">
+                            {latestActiveRequest.note}
+                          </div>
                         )}
                       </div>
-                      {latestActiveRequest.note && (
-                        <div className="text-xs text-gray-500 mt-0.5 italic whitespace-pre-wrap">
-                          {latestActiveRequest.note}
-                        </div>
-                      )}
-                    </>
-                  );
-                })()}
-
+                    );
+                  }}
+                />
+              )}
               {/* Status and route badges */}
               <div className="flex flex-wrap gap-1 mt-1">
                 <Badge
@@ -364,26 +383,6 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                 >
                   {group.hasActiveRequests ? t("active") : t("stopped")}
                 </Badge>
-                {group.routes.slice(0, 2).map((route) => (
-                  <Badge key={route} variant="blue" className="text-xs">
-                    {route}
-                  </Badge>
-                ))}
-                {group.routes.length > 2 && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Badge
-                        variant="secondary"
-                        className="text-xs cursor-help"
-                      >
-                        +{group.routes.length - 2}
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {group.routes.slice(2).join(", ")}
-                    </TooltipContent>
-                  </Tooltip>
-                )}
                 {group.hasPRN && (
                   <Badge variant="pink" className="text-xs">
                     PRN

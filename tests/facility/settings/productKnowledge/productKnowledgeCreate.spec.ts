@@ -109,10 +109,21 @@ test.describe("Product Knowledge Creation", () => {
 
     await expect(page.getByText(/created successfully/i)).toBeVisible();
 
+    const searchResponse = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/product_knowledge/") &&
+        resp.request().method() === "GET" &&
+        resp.status() === 200,
+    );
     await page.getByRole("textbox", { name: "Search products" }).fill(name);
+    await searchResponse;
     await expect(page.getByRole("table").getByText(name)).toBeVisible();
 
-    await page.getByRole("link", { name: "View" }).first().click();
+    await page
+      .getByRole("row")
+      .filter({ hasText: name })
+      .getByRole("link", { name: "View" })
+      .click();
     await expect(page.getByRole("heading").getByText(name)).toBeVisible();
 
     await page.getByRole("button", { name: "Edit" }).first().click();
@@ -153,11 +164,22 @@ test.describe("Product Knowledge Creation", () => {
 
     await expect(page.getByText(/created successfully/i)).toBeVisible();
 
+    const searchResponse = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/product_knowledge/") &&
+        resp.request().method() === "GET" &&
+        resp.status() === 200,
+    );
     await page.getByRole("textbox", { name: "Search products" }).fill(name);
+    await searchResponse;
     await expect(page.getByRole("table").getByText(name)).toBeVisible();
 
     // View and verify all details
-    await page.getByRole("link", { name: "View" }).first().click();
+    await page
+      .getByRole("row")
+      .filter({ hasText: name })
+      .getByRole("link", { name: "View" })
+      .click();
     await expect(page.getByRole("heading").getByText(name)).toBeVisible();
     await expect(page.getByText(altNames)).toBeVisible();
     await expect(page.getByText(storageGuidelines)).toBeVisible();

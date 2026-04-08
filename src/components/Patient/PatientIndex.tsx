@@ -116,7 +116,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     yearOfBirth?: string,
     action?: "schedule" | "create_encounter",
   ) => {
-    navigate(`/facility/${facilityId}/patients/verify`, {
+    navigate(`/facility/${facilityId}/patients/home`, {
       query: {
         config: identifierSearch.config,
         value: identifierSearch.value,

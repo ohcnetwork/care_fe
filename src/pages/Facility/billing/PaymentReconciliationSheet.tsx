@@ -244,6 +244,7 @@ export function PaymentReconciliationSheet({
         "returned_amount",
         round(Decimal.max(0, tenderedAmount || "0").minus(amount || "0")),
       );
+      form.setValue("reference_number", "");
     } else {
       // For non-cash payments, tendered amount equals payment amount and returned is 0
       form.setValue("tendered_amount", amount || "0");
@@ -625,27 +626,29 @@ export function PaymentReconciliationSheet({
                 </div>
               )}
 
-              <FormField
-                control={form.control}
-                name="reference_number"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-950">
-                      {t("reference_number")}
-                      <span className="text-gray-600 italic">
-                        ({t("optional")})
-                      </span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} value={field.value || ""} />
-                    </FormControl>
-                    <FormDescription className="text-gray-700 italic -mt-1.5">
-                      {!isCashPayment && t("reference_number_description")}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {!isCashPayment && (
+                <FormField
+                  control={form.control}
+                  name="reference_number"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-950">
+                        {t("reference_number")}
+                        <span className="text-gray-600 italic">
+                          ({t("optional")})
+                        </span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormDescription className="text-gray-700 italic -mt-1.5">
+                        {t("reference_number_description")}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <FormField
                 control={form.control}

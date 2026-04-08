@@ -842,7 +842,7 @@ function AppointmentRow(props: {
         tags: props.tags,
         tags_behavior: props.tags_behavior,
         limit: props.resultsPerPage,
-        offset: ((props.page ?? 1) - 1) * props.resultsPerPage,
+        offset: ((props.page || 1) - 1) * props.resultsPerPage,
         patient: props.patient,
         resource_type: props.resourceType,
         resource_ids: props.resourceIds.join(","),

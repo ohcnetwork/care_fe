@@ -7,7 +7,6 @@ import {
 } from "@tanstack/react-query";
 import {
   CheckIcon,
-  ChevronLeft,
   ChevronRight,
   Package,
   PlusIcon,
@@ -264,7 +263,7 @@ export function CreateInvoicePage({
         onSuccess?.();
       } else {
         onSuccess?.();
-        navigate(invoiceUrl);
+        navigate(invoiceUrl, { replace: true });
       }
     },
   });
@@ -417,14 +416,6 @@ export function CreateInvoicePage({
       {showHeader && (
         <div className="flex items-start justify-between flex-col sm:flex-row gap-4 sm:items-center border-b-3 border-double pb-4">
           <div className="flex gap-3 sm:gap-6 flex-col md:flex-row">
-            <BackButton
-              variant="link"
-              className="px-0 justify-start"
-              fallbackUrl={`/facility/${facilityId}/billing/account/${accountId}`}
-            >
-              <ChevronLeft />
-              <span>{t("back")}</span>
-            </BackButton>
             <div className="h-auto w-px bg-gray-300" aria-hidden="true" />
             {account?.patient && (
               <>

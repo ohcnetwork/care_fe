@@ -465,6 +465,7 @@ export default function ServiceRequestShow({
                     specimens={getActiveAndDraftSpecimens(request?.specimens)}
                     open={isQRCodeSheetOpen}
                     onOpenChange={setIsQRCodeSheetOpen}
+                    isLoading={isPrintingAllQRCodes}
                   >
                     <Button
                       variant="outline"

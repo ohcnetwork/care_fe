@@ -733,8 +733,6 @@ export function QuestionnaireForm({
   };
 
   const handleSubmit = async () => {
-    setIsDirty(false);
-
     // Clear existing errors first
     const formsWithClearedErrors = questionnaireForms.map((form) => ({
       ...form,
@@ -935,6 +933,7 @@ export function QuestionnaireForm({
       });
     }
 
+    setIsDirty(false);
     submitBatch({ requests });
   };
 
