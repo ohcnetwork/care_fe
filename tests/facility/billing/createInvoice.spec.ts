@@ -34,7 +34,7 @@ function tabLocator(page: Page, tabText: string) {
 }
 
 function createInvoiceForm(page: Page): Locator {
-  return page.getByRole("form");
+  return page.locator("form").filter({ has: page.getByRole("table") });
 }
 
 function addChargeItemsBillingSheetPanel(page: Page): Locator {
