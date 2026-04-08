@@ -286,7 +286,6 @@ export function MonetaryComponentSelector({
           className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded"
         >
           <Checkbox
-            aria-label={component.code?.display ?? component.title}
             checked={isSelected}
             onCheckedChange={(checked) =>
               handleCheckboxToggle(component, checked as boolean)
