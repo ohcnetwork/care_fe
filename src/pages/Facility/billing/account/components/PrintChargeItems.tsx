@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 import type React from "react";
@@ -50,6 +49,7 @@ import {
   PaymentReconciliationStatus,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
 import useFilters from "@/hooks/useFilters";
@@ -133,7 +133,7 @@ export const PrintChargeItems = (props: {
   const showStatusLabel = `${t("show_status")}`;
   const groupByParentCategoryLabel = `${t("group_by_parent_category")}`;
 
-  const { data: account } = useQuery({
+  const { data: account, isLoading: isLoadingAccount } = useQuery({
     queryKey: ["account", accountId],
     queryFn: query(accountApi.retrieveAccount, {
       pathParams: { facilityId, accountId },
@@ -415,49 +415,25 @@ export const PrintChargeItems = (props: {
       </div>
       <PrintPreview
         title={t("charge_items")}
-        disabled={!chargeItems?.results?.length}
+        disabled={isLoading || isLoadingPayments || isLoadingAccount}
         className="print:pt-0"
+        facility={facility}
+        templateSlug={PrintTemplateType.charge_items}
+        hideFacilityHeader={hideHeader}
       >
-        <DisablingCover disabled={isLoading || isLoadingPayments}>
+        <DisablingCover
+          disabled={isLoading || isLoadingPayments || isLoadingAccount}
+        >
           {summaryMode && hasUnissuedChargeItems ? (
             <p className="mt-2 text-xs text-red-600">
               {t("unissued_charge_items_summary_warning")}
             </p>
           ) : (
-            <div className="md:p-2 max-w-4xl mx-auto bg-white">
+            <div className="bg-white">
+              {hideHeader && preserveHeaderSpace && (
+                <div className="mb-4 pb-2 border-b border-gray-200 h-20" />
+              )}
               <table className="w-full border-collapse">
-                <thead>
-                  <tr>
-                    <th className="p-0 font-normal text-left">
-                      {hideHeader && preserveHeaderSpace ? (
-                        <div className="mb-4 pb-2 border-b border-gray-200 h-20" />
-                      ) : !hideHeader ? (
-                        <div className="flex flex-col sm:flex-row print:flex-row print:items-start justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
-                          <img
-                            src={careConfig.mainLogo?.dark}
-                            alt="Care Logo"
-                            className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2 print:mb-0 print:order-2"
-                          />
-                          <div className="text-center sm:text-left sm:order-1 print:text-left">
-                            <h1 className="text-2xl font-semibold">
-                              {facility?.name}
-                            </h1>
-                            {facility?.address && (
-                              <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-xs">
-                                {facility.address}
-                                {facility.phone_number && (
-                                  <p className="text-gray-500 text-xs">
-                                    {facility.phone_number}
-                                  </p>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ) : null}
-                    </th>
-                  </tr>
-                </thead>
                 <tbody>
                   <tr>
                     <td className="p-0 align-top">
