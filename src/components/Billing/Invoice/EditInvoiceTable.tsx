@@ -442,8 +442,282 @@ export function EditInvoiceTable({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4 overflow-hidden"
+      >
+        {/* For Small Screens */}
+        <div className="md:hidden space-y-4">
+          {form.watch("items").map((item, index) => {
+            const rowErrors = getRowErrors(
+              form.formState.errors.items?.[index],
+            );
+
+            const canEditRow =
+              chargeItems[index]?.charge_item_definition
+                ?.can_edit_charge_item !== false;
+
+            return (
+              <div
+                key={item.id}
+                className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm space-y-4"
+              >
+                {/* 🔹 Header */}
+                <div className="flex items-start justify-between w-full overflow-hidden">
+                  <div>
+                    <div className="text-sm text-gray-500">#{index + 1}</div>
+                    <div className="font-semibold text-base">{item.title}</div>
+                  </div>
+                </div>
+
+                {/* 🔹 Performer */}
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">
+                    {t("performer")}
+                  </div>
+                  <UserSelector
+                    selected={performers[item.id]}
+                    onChange={(user) => handlePerformerChange(item.id, user)}
+                    facilityId={facilityId}
+                    placeholder={t("select_performer")}
+                    contentClassName="min-w-0"
+                  />
+                </div>
+
+                {/* 🔹 Price + Quantity */}
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Unit Price */}
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1">
+                      {t("unit_price")} ({getCurrencySymbol()})
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name={`items.${index}.baseAmount`}
+                      render={({ field }) => (
+                        <MonetaryAmountInput
+                          {...field}
+                          value={field.value ?? "0"}
+                          onChange={(e) => {
+                            field.onChange(e.target.value);
+                            handleBaseAmountChange(index, e.target.value);
+                          }}
+                          disabled={!canEditRow}
+                        />
+                      )}
+                    />
+                  </div>
+
+                  {/* Quantity */}
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1">
+                      {t("quantity")}
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name={`items.${index}.quantity`}
+                      render={({ field }) => (
+                        <Input
+                          type="number"
+                          {...field}
+                          min="1"
+                          step="1"
+                          disabled={!canEditRow}
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* 🔹 Discounts */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-xs text-gray-500">
+                      {t("discounts")}
+                    </div>
+
+                    {filteredDiscounts.length > 0 &&
+                      chargeItems.length > 1 &&
+                      hasEditableItems && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              {t("apply_to_all")}
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {filteredDiscounts.map((discount) => {
+                              const key = getDiscountComponentKey(discount);
+                              return (
+                                <DropdownMenuItem
+                                  key={key}
+                                  onClick={() =>
+                                    key && handleApplyGlobalDiscount(key)
+                                  }
+                                >
+                                  {discount.code?.display} @{" "}
+                                  <MonetaryDisplay {...discount} />
+                                </DropdownMenuItem>
+                              );
+                            })}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={handleClearAllDiscounts}
+                              className="text-destructive"
+                            >
+                              {t("clear_all")}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                  </div>
+
+                  {/* Discount List */}
+                  <div className="space-y-3">
+                    {item.discounts?.map((discount, discountIndex) => {
+                      const isDisabled = !canEditRow || !discount?.code;
+
+                      const isPercentage =
+                        discount && isPercentageBased(discount);
+
+                      const value = isPercentage
+                        ? (discount?.factor ?? "0")
+                        : (discount?.amount ?? "0");
+
+                      return (
+                        <div
+                          key={discountIndex}
+                          className="border rounded-md p-2 space-y-2"
+                        >
+                          {/* Select */}
+                          <Select
+                            value={getDiscountComponentKey(discount) || ""}
+                            onValueChange={(value) =>
+                              handleDiscountComponentChange(
+                                index,
+                                discountIndex,
+                                value,
+                              )
+                            }
+                            disabled={!canEditRow}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder={t("select_discount")} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {globalDiscounts.map((component) => {
+                                const key = getDiscountComponentKey(component);
+                                return (
+                                  <SelectItem key={key} value={key || ""}>
+                                    {component.code?.display} @{" "}
+                                    <MonetaryDisplay {...component} />
+                                  </SelectItem>
+                                );
+                              })}
+                            </SelectContent>
+                          </Select>
+
+                          {/* Amount + Type */}
+                          <div className="flex items-center gap-2">
+                            <MonetaryAmountInput
+                              className="flex-1"
+                              hideCurrency
+                              value={value}
+                              onChange={(e) => {
+                                const newValue = e.target.value;
+                                if (isPercentage) {
+                                  form.setValue(
+                                    `items.${index}.discounts.${discountIndex}.factor`,
+                                    newValue,
+                                  );
+                                } else {
+                                  form.setValue(
+                                    `items.${index}.discounts.${discountIndex}.amount`,
+                                    newValue,
+                                  );
+                                }
+                              }}
+                              disabled={isDisabled}
+                            />
+
+                            <Switch
+                              checked={isPercentage}
+                              onCheckedChange={(checked) =>
+                                handleDiscountTypeToggle(
+                                  index,
+                                  discountIndex,
+                                  checked,
+                                )
+                              }
+                              disabled={isDisabled}
+                            />
+
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() =>
+                                handleRemoveDiscount(index, discountIndex)
+                              }
+                              disabled={!canEditRow}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {/* Add Discount */}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => handleAddDiscount(index)}
+                      disabled={!canEditRow}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      {t("add_discount")}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* 🔹 Note */}
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">{t("note")}</div>
+                  <FormField
+                    control={form.control}
+                    name={`items.${index}.note`}
+                    render={({ field }) => (
+                      <Textarea
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        placeholder={t("add_notes")}
+                        disabled={!canEditRow}
+                      />
+                    )}
+                  />
+                </div>
+
+                {/* 🔹 Errors */}
+                {rowErrors.length > 0 && (
+                  <div className="bg-red-50 rounded-md p-2">
+                    <ul className="text-sm text-red-600 space-y-1">
+                      {rowErrors.map((error, i) => (
+                        <li key={i}>• {error}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* For Large Screens */}
+        <div className="hidden md:block">
           <Table className="border">
             <TableHeader>
               <TableRow className="divide-x font-semibold">

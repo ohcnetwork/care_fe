@@ -491,158 +491,254 @@ export function CreateInvoicePage({
               {isLoading ? (
                 <TableSkeleton count={3} />
               ) : (
-                <div className="rounded-t-sm border border-gray-300">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-b border-gray-200">
-                        <TableHead
-                          className={cn(
-                            tableHeadClass,
-                            "w-[50px] align-middle",
-                          )}
-                        >
-                          <div className="flex items-center p-1">
-                            <Checkbox
-                              checked={
-                                chargeItems.length > 0 &&
-                                chargeItems.every(
-                                  (item) => selectedRows[item.id],
-                                )
-                              }
-                              onCheckedChange={(_checked) => {
-                                const newSelection = { ...selectedRows };
-                                const allSelected = chargeItems.every(
-                                  (item) => selectedRows[item.id],
-                                );
+                <>
+                  {/* For Small Screens */}
+                  <div className="md:hidden space-y-3">
+                    {chargeItems.length === 0 ? (
+                      <div className="text-center text-gray-400 py-6">
+                        {t("no_billable_items")}
+                      </div>
+                    ) : (
+                      chargeItems.map((item) => {
+                        const baseComponent = getBaseComponent(item);
+                        const baseAmount = baseComponent?.amount || "0";
 
-                                chargeItems.forEach((item) => {
-                                  newSelection[item.id] = !allSelected;
-                                });
-
-                                setSelectedRows(newSelection);
-                                form.setValue(
-                                  "charge_items",
-                                  Object.entries(newSelection)
-                                    .filter(([_, selected]) => selected)
-                                    .map(([id]) => id),
-                                );
-                              }}
-                              disabled={chargeItems.length === 0}
-                            />
-                          </div>
-                        </TableHead>
-                        <TableHead className={cn(tableHeadClass, "text-left")}>
-                          {t("items")}
-                        </TableHead>
-                        <TableHead className={tableHeadClass}>
-                          {t("quantity")}
-                        </TableHead>
-                        <TableHead className={tableHeadClass}>
-                          {t("unit_price")} ({getCurrencySymbol()})
-                        </TableHead>
-                        <TableHead className={cn(tableHeadClass, "text-left")}>
-                          {t("performer")}
-                        </TableHead>
-                        <TableHead className="font-semibold text-center">
-                          {t("amount")} ({getCurrencySymbol()})
-                        </TableHead>
-                        <TableHead className="font-semibold text-center w-[50px]">
-                          {t("actions")}
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {chargeItems.length === 0 ? (
-                        <TableRow>
-                          <TableCell
-                            colSpan={7}
-                            className="h-20 text-center text-gray-400"
+                        return (
+                          <div
+                            key={item.id}
+                            className="border border-gray-200 rounded-lg p-3 shadow-sm"
                           >
-                            {t("no_billable_items")}
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        chargeItems.filter(Boolean).map((item) => {
-                          const baseComponent = getBaseComponent(item);
-                          const baseAmount = baseComponent?.amount || "0";
+                            {/* Top Row */}
+                            <div className="flex justify-between items-start">
+                              <div className="font-semibold">{item.title}</div>
+                              <Checkbox
+                                checked={selectedRows[item.id] || false}
+                                onCheckedChange={() =>
+                                  handleRowSelection(item.id)
+                                }
+                              />
+                            </div>
 
-                          return (
-                            <TableRow
-                              key={item.id}
-                              className="border-b border-gray-200 hover:bg-muted/50"
-                            >
-                              <TableCell
-                                className={cn(tableCellClass, "align-middle")}
-                              >
-                                <div className="flex items-center p-1">
-                                  <Checkbox
-                                    checked={selectedRows[item.id] || false}
-                                    onCheckedChange={() =>
-                                      handleRowSelection(item.id)
-                                    }
-                                  />
+                            {/* Meta */}
+                            <div className="text-xs text-gray-500 mt-1">
+                              {formatName(item.created_by)}
+                              <br />
+                              {formatDateTime(
+                                item.created_date,
+                                "hh:mm a - DD MMM, YYYY",
+                              )}
+                            </div>
+
+                            {/* Details */}
+                            <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                              <div>
+                                <div className="text-gray-500">
+                                  {t("quantity")}
                                 </div>
-                              </TableCell>
-                              <TableCell
-                                className={cn(
-                                  tableCellClass,
-                                  "font-semibold min-w-40",
-                                )}
-                              >
-                                <div className="font-medium text-base">
-                                  {item.title}
+                                <div>{round(item.quantity)}</div>
+                              </div>
+
+                              <div>
+                                <div className="text-gray-500">
+                                  {t("unit_price")}
                                 </div>
-                                <div className="text-xs text-gray-500">
-                                  {formatName(item.created_by)}
-                                  {" · "}
-                                  {formatDateTime(
-                                    item.created_date,
-                                    "hh:mm a - DD MMM, YYYY",
-                                  )}
-                                </div>
-                              </TableCell>
-                              <TableCell
-                                className={cn(tableCellClass, "text-center")}
-                              >
-                                {round(item.quantity)}
-                              </TableCell>
-                              <TableCell
-                                className={cn(tableCellClass, "text-right")}
-                              >
                                 <MonetaryDisplay amount={baseAmount} />
-                              </TableCell>
-                              <TableCell
-                                className={cn(
-                                  tableCellClass,
-                                  "max-w-32 whitespace-pre-wrap",
-                                )}
-                              >
-                                {formatName(item.performer_actor)}
-                              </TableCell>
-                              <TableCell className="text-right">
+                              </div>
+
+                              <div>
+                                <div className="text-gray-500">
+                                  {t("performer")}
+                                </div>
+                                <div>{formatName(item.performer_actor)}</div>
+                              </div>
+
+                              <div>
+                                <div className="text-gray-500">
+                                  {t("amount")}
+                                </div>
                                 <MonetaryDisplay
                                   amount={item.total_price}
                                   hideCurrency
                                 />
-                              </TableCell>
-                              <TableCell className="text-center">
-                                <ChargeItemActionsMenu
-                                  item={item}
-                                  facilityId={facilityId}
-                                  accountId={accountId}
-                                  onEdit={(item) => {
-                                    setSelectedChargeItem(item);
-                                    setIsEditDialogOpen(true);
-                                  }}
-                                />
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
+                              </div>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="mt-3 flex justify-end">
+                              <ChargeItemActionsMenu
+                                item={item}
+                                facilityId={facilityId}
+                                accountId={accountId}
+                                onEdit={(item) => {
+                                  setSelectedChargeItem(item);
+                                  setIsEditDialogOpen(true);
+                                }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+
+                  {/* For Large Screens */}
+                  <div className="hidden md:block rounded-t-sm border border-gray-300">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-b border-gray-200">
+                          <TableHead
+                            className={cn(
+                              tableHeadClass,
+                              "w-[50px] align-middle",
+                            )}
+                          >
+                            <div className="flex items-center p-1">
+                              <Checkbox
+                                checked={
+                                  chargeItems.length > 0 &&
+                                  chargeItems.every(
+                                    (item) => selectedRows[item.id],
+                                  )
+                                }
+                                onCheckedChange={(_checked) => {
+                                  const newSelection = { ...selectedRows };
+                                  const allSelected = chargeItems.every(
+                                    (item) => selectedRows[item.id],
+                                  );
+
+                                  chargeItems.forEach((item) => {
+                                    newSelection[item.id] = !allSelected;
+                                  });
+
+                                  setSelectedRows(newSelection);
+                                  form.setValue(
+                                    "charge_items",
+                                    Object.entries(newSelection)
+                                      .filter(([_, selected]) => selected)
+                                      .map(([id]) => id),
+                                  );
+                                }}
+                                disabled={chargeItems.length === 0}
+                              />
+                            </div>
+                          </TableHead>
+                          <TableHead
+                            className={cn(tableHeadClass, "text-left")}
+                          >
+                            {t("items")}
+                          </TableHead>
+                          <TableHead className={tableHeadClass}>
+                            {t("quantity")}
+                          </TableHead>
+                          <TableHead className={tableHeadClass}>
+                            {t("unit_price")} ({getCurrencySymbol()})
+                          </TableHead>
+                          <TableHead
+                            className={cn(tableHeadClass, "text-left")}
+                          >
+                            {t("performer")}
+                          </TableHead>
+                          <TableHead className="font-semibold text-center">
+                            {t("amount")} ({getCurrencySymbol()})
+                          </TableHead>
+                          <TableHead className="font-semibold text-center w-[50px]">
+                            {t("actions")}
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {chargeItems.length === 0 ? (
+                          <TableRow>
+                            <TableCell
+                              colSpan={7}
+                              className="h-20 text-center text-gray-400"
+                            >
+                              {t("no_billable_items")}
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          chargeItems.filter(Boolean).map((item) => {
+                            const baseComponent = getBaseComponent(item);
+                            const baseAmount = baseComponent?.amount || "0";
+
+                            return (
+                              <TableRow
+                                key={item.id}
+                                className="border-b border-gray-200 hover:bg-muted/50"
+                              >
+                                <TableCell
+                                  className={cn(tableCellClass, "align-middle")}
+                                >
+                                  <div className="flex items-center p-1">
+                                    <Checkbox
+                                      checked={selectedRows[item.id] || false}
+                                      onCheckedChange={() =>
+                                        handleRowSelection(item.id)
+                                      }
+                                    />
+                                  </div>
+                                </TableCell>
+                                <TableCell
+                                  className={cn(
+                                    tableCellClass,
+                                    "font-semibold min-w-40",
+                                  )}
+                                >
+                                  <div className="font-medium text-base">
+                                    {item.title}
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    {formatName(item.created_by)}
+                                    {" · "}
+                                    {formatDateTime(
+                                      item.created_date,
+                                      "hh:mm a - DD MMM, YYYY",
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell
+                                  className={cn(tableCellClass, "text-center")}
+                                >
+                                  {round(item.quantity)}
+                                </TableCell>
+                                <TableCell
+                                  className={cn(tableCellClass, "text-right")}
+                                >
+                                  <MonetaryDisplay amount={baseAmount} />
+                                </TableCell>
+                                <TableCell
+                                  className={cn(
+                                    tableCellClass,
+                                    "max-w-32 whitespace-pre-wrap",
+                                  )}
+                                >
+                                  {formatName(item.performer_actor)}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <MonetaryDisplay
+                                    amount={item.total_price}
+                                    hideCurrency
+                                  />
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  <ChargeItemActionsMenu
+                                    item={item}
+                                    facilityId={facilityId}
+                                    accountId={accountId}
+                                    onEdit={(item) => {
+                                      setSelectedChargeItem(item);
+                                      setIsEditDialogOpen(true);
+                                    }}
+                                  />
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </>
               )}
 
               {!disableCreateChargeItems && account?.patient && (
@@ -824,7 +920,7 @@ export function CreateInvoicePage({
               {chargeItems.length > 0 && (
                 <div className="flex flex-col items-end space-y-2 text-gray-950 font-normal text-sm mt-4">
                   <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
-                  <div className="flex w-64 justify-between font-bold">
+                  <div className="flex max-w-64 w-full justify-between font-bold">
                     <span>{t("invoice_total")}</span>
                     <MonetaryDisplay amount={selectedItemsTotal} />
                   </div>
@@ -873,7 +969,7 @@ export function CreateInvoicePage({
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 pt-2 pb-4 items-start">
+                <div className="grid grid-cols-1 gap-4 pt-2 pb-4 items-start">
                   <FormField
                     control={form.control}
                     name="payment_terms"
