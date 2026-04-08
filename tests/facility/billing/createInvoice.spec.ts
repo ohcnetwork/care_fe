@@ -34,15 +34,15 @@ function tabLocator(page: Page, tabText: string) {
 }
 
 function createInvoiceForm(page: Page): Locator {
-  return page.locator("form").filter({
-    has: page.getByRole("button", { name: tr("create_invoice") }),
-  });
+  return page.locator("form.space-y-6");
 }
 
 function addChargeItemsBillingSheetPanel(page: Page): Locator {
-  return page.getByRole("dialog").filter({
-    has: page.getByRole("heading", { name: tr("add_charge_items") }),
-  });
+  return page.getByRole("dialog", { name: tr("add_charge_items") }).or(
+    page.getByRole("dialog").filter({
+      has: page.getByRole("heading", { name: tr("add_charge_items") }),
+    }),
+  );
 }
 
 function accountRetrieveResponsePredicate(
@@ -94,12 +94,20 @@ async function addChargeItemsFromPickerInSheet(
   await waitForChargeItemSearchSettled(page);
 
   const definitionSearchPlaceholder = tr("search_charge_item_definition");
-  const pickerPopover = page
+  const definitionPickerByDialog = page
+    .getByRole("dialog")
+    .filter({ has: page.getByPlaceholder(definitionSearchPlaceholder) })
+    .filter({ visible: true })
+    .last();
+  const definitionPickerByPopper = page
     .locator("[data-radix-popper-content-wrapper]")
     .filter({ has: page.getByPlaceholder(definitionSearchPlaceholder) })
     .filter({ visible: true })
     .last();
-  const listbox = pickerPopover.getByRole("listbox");
+  const definitionPickerSurface = definitionPickerByDialog.or(
+    definitionPickerByPopper,
+  );
+  const listbox = definitionPickerSurface.getByRole("listbox");
   const listboxVisible = await listbox.isVisible().catch(() => false);
   if (!listboxVisible) return null;
 
@@ -185,11 +193,6 @@ async function ensureAtLeastOneChargeItemSelected(
   await expect(
     page.getByText(tr("create_invoice"), { exact: true }),
   ).toBeVisible();
-
-  const submitInvoice = page.getByRole("button", {
-    name: tr("create_invoice"),
-  });
-  await expect(submitInvoice).toBeVisible();
 
   const invoiceForm = createInvoiceForm(page);
   await expect(invoiceForm).toBeVisible();
@@ -346,7 +349,8 @@ test.describe("Create Invoice (facility billing)", () => {
 
     await test.step("Submit invoice and verify success", async () => {
       await createInvoiceForm(page)
-        .getByRole("button", { name: tr("create_invoice") })
+        .locator('button[type="submit"]')
+        .filter({ has: page.getByText(tr("create_invoice"), { exact: true }) })
         .click();
       await expectToast(page, tr("invoice_created_successfully"));
 
