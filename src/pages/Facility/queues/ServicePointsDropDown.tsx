@@ -51,10 +51,10 @@ export const ServicePointsDropDown = () => {
                 return (
                   <div
                     key={subQueue.id}
-                    className="flex sm:w-auto w-full items-center justify-center gap-1 border border-gray-300 py-0.5 px-1.5 rounded-sm bg-gray-50 whitespace-nowrap"
+                    className="flex w-full max-w-full items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-sm border border-gray-300 bg-gray-50 px-1.5 py-0.5 sm:w-auto sm:max-w-xs"
                   >
-                    <div className="bg-primary-200 border border-primary-500 w-2 h-2 rounded-full" />
-                    <span className="text-sm text-gray-950 font-medium truncate">
+                    <div className="bg-primary-200 border border-primary-500 w-2 h-2 rounded-full shrink-0" />
+                    <span className="min-w-0 truncate text-sm font-medium text-gray-950">
                       {subQueue.name}
                     </span>
                   </div>
