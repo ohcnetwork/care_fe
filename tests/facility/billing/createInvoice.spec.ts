@@ -69,7 +69,13 @@ async function dismissModalChargePickersBlockingPage(page: Page) {
 }
 
 function chargeItemDefinitionPickerTrigger(scope: Locator): Locator {
-  return scope.locator('button[role="combobox"]').first();
+  return scope
+    .locator('button[role="combobox"][data-shortcut-id="keydown-action"]')
+    .or(
+      scope.getByRole("combobox", {
+        name: tr("select_charge_item_definition"),
+      }),
+    );
 }
 
 function accountRetrieveResponsePredicate(
@@ -106,13 +112,14 @@ async function addChargeItemsFromPickerInSheet(
   sheet: Locator,
   definitionSearch: string,
 ) {
-  await closeAnyOpenPopovers(page);
-
-  const picker = chargeItemDefinitionPickerTrigger(sheet);
-  await expect(picker).toBeVisible();
-  await picker.click();
-
   const search = page.getByPlaceholder(tr("search_charge_item_definition"));
+  if (!(await search.isVisible().catch(() => false))) {
+    const picker = chargeItemDefinitionPickerTrigger(sheet);
+    await expect(picker).toBeVisible();
+    await picker.scrollIntoViewIfNeeded();
+    await picker.click();
+  }
+
   await expect(search).toBeVisible();
   await search.fill("");
   await search.fill(definitionSearch);
@@ -259,8 +266,6 @@ async function ensureAtLeastOneChargeItemSelected(
 
     await page.waitForLoadState("networkidle");
 
-    const sheet = addChargeItemsBillingSheetPanel(page);
-
     const toolbarBtn = page.getByRole("button", {
       name: tr("add_charge_items"),
     });
@@ -269,17 +274,28 @@ async function ensureAtLeastOneChargeItemSelected(
     await dismissModalChargePickersBlockingPage(page);
     await toolbarBtn.click();
     await page.waitForLoadState("networkidle");
-    await expect(sheet).toBeVisible();
 
-    let picked = await addChargeItemsFromPickerInSheet(page, sheet, "");
+    const sheetOpen = addChargeItemsBillingSheetPanel(page);
+    await expect(sheetOpen).toBeVisible();
+    await expect(chargeItemDefinitionPickerTrigger(sheetOpen)).toBeVisible();
+
+    let picked = await addChargeItemsFromPickerInSheet(
+      page,
+      addChargeItemsBillingSheetPanel(page),
+      "",
+    );
     if (!picked) {
-      await page.keyboard.press("Escape");
+      await closeAnyOpenPopovers(page);
       await page.waitForLoadState("networkidle");
-      picked = await addChargeItemsFromPickerInSheet(page, sheet, "a");
+      picked = await addChargeItemsFromPickerInSheet(
+        page,
+        addChargeItemsBillingSheetPanel(page),
+        "a",
+      );
     }
 
     if (!picked) {
-      await page.keyboard.press("Escape");
+      await closeAnyOpenPopovers(page);
       await page.waitForLoadState("networkidle");
 
       const dialog = addChargeItemsBillingSheetPanel(page);
