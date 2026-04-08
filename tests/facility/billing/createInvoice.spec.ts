@@ -196,13 +196,14 @@ async function ensureAtLeastOneChargeItemSelected(
 
   const invoiceForm = createInvoiceForm(page);
   await expect(invoiceForm).toBeVisible();
+  await expect(page.getByText(tr("patient_name"))).toBeVisible();
 
   const noBillableText = tr("no_billable_items");
   const noBillable = invoiceForm.getByText(noBillableText, { exact: true });
   const hasNoBillable = await noBillable.isVisible().catch(() => false);
 
   if (hasNoBillable) {
-    const definitionCombobox = invoiceForm.getByRole("combobox", {
+    const definitionCombobox = page.getByRole("combobox", {
       name: tr("select_charge_item_definition"),
     });
     await expect(definitionCombobox).toBeVisible();
