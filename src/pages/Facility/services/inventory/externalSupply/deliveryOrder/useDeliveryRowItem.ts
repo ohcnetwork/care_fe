@@ -96,7 +96,6 @@ export function useDeliveryRowItem({
       discount_components: [],
       charge_item_category: undefined,
       is_manually_edited: false,
-      is_tax_inclusive: false,
       supplied_item_pack_quantity: 1,
       supplied_item_pack_size: 1,
     };
