@@ -39,19 +39,11 @@ function createInvoiceForm(page: Page): Locator {
 
 function addChargeItemsBillingSheetPanel(page: Page): Locator {
   const titleText = tr("add_charge_items");
-  const titleInSheet = page.locator('[data-slot="sheet-title"]').filter({
-    hasText: titleText,
-  });
-  const bySheetSlots = page
-    .locator('[data-slot="sheet-content"]')
-    .filter({ has: titleInSheet })
-    .filter({ visible: true });
-  const byDialogRole = page.getByRole("dialog", { name: titleText }).or(
+  return page.getByRole("dialog", { name: titleText }).or(
     page.getByRole("dialog").filter({
       has: page.getByRole("heading", { name: titleText }),
     }),
   );
-  return bySheetSlots.or(byDialogRole);
 }
 
 async function dismissModalChargePickersBlockingPage(page: Page) {
@@ -69,13 +61,10 @@ async function dismissModalChargePickersBlockingPage(page: Page) {
 }
 
 function chargeItemDefinitionPickerTrigger(scope: Locator): Locator {
+  const definitionComboboxLabel = tr("select_charge_item_definition");
   return scope
-    .locator('button[role="combobox"][data-shortcut-id="keydown-action"]')
-    .or(
-      scope.getByRole("combobox", {
-        name: tr("select_charge_item_definition"),
-      }),
-    );
+    .locator('[data-shortcut-id="keydown-action"]')
+    .or(scope.getByRole("combobox", { name: definitionComboboxLabel }));
 }
 
 function accountRetrieveResponsePredicate(
@@ -105,6 +94,36 @@ async function waitForChargeItemSearchSettled(page: Page) {
     await searchingIndicator.waitFor({ state: "hidden" });
   }
   await page.waitForLoadState("networkidle");
+}
+
+async function dismissChargeDefinitionSearchPopover(page: Page) {
+  const searchInput = page.getByPlaceholder(
+    tr("search_charge_item_definition"),
+  );
+  if (await searchInput.isVisible().catch(() => false)) {
+    await page.keyboard.press("Escape");
+    await searchInput.waitFor({ state: "hidden" }).catch(() => {});
+    await page.waitForLoadState("networkidle");
+  }
+}
+
+async function ensureAddChargeItemsSheetOpen(page: Page): Promise<Locator> {
+  const sheetPanel = addChargeItemsBillingSheetPanel(page);
+  if (
+    (await sheetPanel.isVisible().catch(() => false)) &&
+    (await chargeItemDefinitionPickerTrigger(sheetPanel)
+      .isVisible()
+      .catch(() => false))
+  ) {
+    return sheetPanel;
+  }
+
+  await page.getByRole("button", { name: tr("add_charge_items") }).click();
+  await page.waitForLoadState("networkidle");
+  const again = addChargeItemsBillingSheetPanel(page);
+  await expect(again).toBeVisible();
+  await expect(chargeItemDefinitionPickerTrigger(again)).toBeVisible();
+  return again;
 }
 
 async function addChargeItemsFromPickerInSheet(
@@ -285,8 +304,8 @@ async function ensureAtLeastOneChargeItemSelected(
       "",
     );
     if (!picked) {
-      await closeAnyOpenPopovers(page);
-      await page.waitForLoadState("networkidle");
+      await dismissChargeDefinitionSearchPopover(page);
+      await ensureAddChargeItemsSheetOpen(page);
       picked = await addChargeItemsFromPickerInSheet(
         page,
         addChargeItemsBillingSheetPanel(page),
@@ -295,8 +314,7 @@ async function ensureAtLeastOneChargeItemSelected(
     }
 
     if (!picked) {
-      await closeAnyOpenPopovers(page);
-      await page.waitForLoadState("networkidle");
+      await dismissChargeDefinitionSearchPopover(page);
 
       const dialog = addChargeItemsBillingSheetPanel(page);
       const cancelBtn = dialog.getByRole("button", { name: tr("cancel") });
