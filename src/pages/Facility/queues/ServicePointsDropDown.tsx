@@ -41,7 +41,7 @@ export const ServicePointsDropDown = () => {
             {t("assign_service_points")}
           </span>
         ) : (
-          <div className="flex flex-col md:flex-row gap-1 items-center justify-center w-full">
+          <div className="flex flex-col lg:flex-row gap-1 items-center justify-center w-full">
             {allServicePoints
               .filter((subQueue) =>
                 assignedServicePointIds.includes(subQueue.id),
