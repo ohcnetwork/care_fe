@@ -34,7 +34,9 @@ function tabLocator(page: Page, tabText: string) {
 }
 
 function createInvoiceForm(page: Page): Locator {
-  return page.locator("form").filter({ has: page.getByRole("table") });
+  return page.locator("form").filter({
+    has: page.getByRole("button", { name: tr("create_invoice") }),
+  });
 }
 
 function addChargeItemsBillingSheetPanel(page: Page): Locator {
@@ -183,6 +185,11 @@ async function ensureAtLeastOneChargeItemSelected(
   await expect(
     page.getByText(tr("create_invoice"), { exact: true }),
   ).toBeVisible();
+
+  const submitInvoice = page.getByRole("button", {
+    name: tr("create_invoice"),
+  });
+  await expect(submitInvoice).toBeVisible();
 
   const invoiceForm = createInvoiceForm(page);
   await expect(invoiceForm).toBeVisible();
