@@ -14,7 +14,7 @@ import {
   BedUnavailableUnselected,
 } from "@/CAREUI/icons/CustomIcons";
 import { LocationRead } from "@/types/location/location";
-import { buildLocationHierarchy } from "@/types/location/utils";
+import { buildLocationPath } from "@/types/location/utils";
 
 interface BedListingProps {
   beds: LocationRead[];
@@ -46,9 +46,12 @@ export function BedListing({
         const isDischargedBed = bed.current_encounter?.status === "discharged";
         const isSelected = selectedBed?.id === bed.id;
         const isClickable = isAvailable || isDischargedBed;
-        const segments = buildLocationHierarchy(bed);
-        const fullPath = segments.join(" › ");
-        const shortPath = segments.slice(-2).join(" › ");
+        const segments = buildLocationPath(bed);
+        const fullPath = segments.map((s) => s.name).join(" › ");
+        const shortPath = segments
+          .map((s) => s.name)
+          .slice(-2)
+          .join(" › ");
 
         return (
           <div
