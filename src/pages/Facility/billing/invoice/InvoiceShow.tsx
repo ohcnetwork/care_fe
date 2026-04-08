@@ -65,6 +65,7 @@ import { Separator } from "@/components/ui/separator";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { useCareApps } from "@/hooks/useCareApps";
 import { cn } from "@/lib/utils";
+import { isAccountActiveAndBillable } from "@/pages/Facility/billing/account/utils";
 import {
   InvoiceChargeItemTitle,
   useMedicationDispenseData,
@@ -1058,26 +1059,27 @@ export function InvoiceShow({
                   ).length === 0 && "border-b rounded-b-md",
                 )}
               >
-                {invoice.status === InvoiceStatus.draft && (
-                  <AddChargeItemSheet
-                    facilityId={facilityId}
-                    invoiceId={invoiceId}
-                    accountId={invoice.account.id}
-                    open={isAddChargeItemSheetOpen}
-                    setOpen={setIsAddChargeItemSheetOpen}
-                    trigger={
-                      <Button
-                        variant="ghost"
-                        className="w-full border border-gray-400 text-gray-950 font-semibold text-sm shadow-sm"
-                        disabled={isAddChargeItemSheetOpen}
-                      >
-                        <CareIcon icon="l-plus" className="mr-2 size-4" />
-                        {t("add_charge_item")}
-                        <ShortcutBadge actionId="add-charge-item" />
-                      </Button>
-                    }
-                  />
-                )}
+                {invoice.status === InvoiceStatus.draft &&
+                  isAccountActiveAndBillable(invoice.account) && (
+                    <AddChargeItemSheet
+                      facilityId={facilityId}
+                      invoiceId={invoiceId}
+                      accountId={invoice.account.id}
+                      open={isAddChargeItemSheetOpen}
+                      setOpen={setIsAddChargeItemSheetOpen}
+                      trigger={
+                        <Button
+                          variant="ghost"
+                          className="w-full border border-gray-400 text-gray-950 font-semibold text-sm shadow-sm"
+                          disabled={isAddChargeItemSheetOpen}
+                        >
+                          <CareIcon icon="l-plus" className="mr-2 size-4" />
+                          {t("add_charge_item")}
+                          <ShortcutBadge actionId="add-charge-item" />
+                        </Button>
+                      }
+                    />
+                  )}
 
                 <div className="flex flex-col items-end space-y-2 text-gray-950 font-mormal text-sm mb-4">
                   {/* Base Amount */}
