@@ -62,11 +62,15 @@ test.describe("Charge Item Definition Creation", () => {
       page.getByText(/charge item definition.*created successfully/i),
     ).toBeVisible();
 
-    // Verify in edit view
-    await page.getByRole("textbox", { name: /search/i }).fill(title);
-    await expect(page.getByRole("table").getByText(title)).toBeVisible();
+    // Verify in search results (retry to handle search indexing delay)
+    await expect(async () => {
+      await page.getByRole("textbox", { name: /search/i }).clear();
+      await page.getByRole("textbox", { name: /search/i }).fill(title);
+      await expect(page.getByRole("table").getByText(title)).toBeVisible();
+    }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
 
     await page.getByRole("link", { name: "View" }).click();
+    await page.waitForURL("**/charge_item_definitions/**");
     await expect(page.getByRole("heading", { name: title })).toBeVisible();
 
     await page.getByRole("button", { name: "Edit" }).first().click();
@@ -160,16 +164,26 @@ test.describe("Charge Item Definition Creation", () => {
       page.getByText(/charge item definition.*created successfully/i),
     ).toBeVisible();
 
-    // Verify all fields
-    await page.getByRole("textbox", { name: /search/i }).fill(title);
-    await expect(page.getByRole("table").getByText(title)).toBeVisible();
+    // Verify in search results (retry to handle search indexing delay)
+    await expect(async () => {
+      await page.getByRole("textbox", { name: /search/i }).clear();
+      await page.getByRole("textbox", { name: /search/i }).fill(title);
+      await expect(page.getByRole("table").getByText(title)).toBeVisible();
+    }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
+
     await page.getByRole("link", { name: "View" }).click();
+    await page.waitForURL("**/charge_item_definitions/**");
     await expect(page.getByRole("heading", { name: title })).toBeVisible();
     await expect(page.getByText(description)).toBeVisible();
     await expect(page.getByText(purpose).last()).toBeVisible();
     await expect(page.getByText(url)).toBeVisible();
-    await expect(page.getByText(mrp)).toBeVisible();
-    await expect(page.getByText(purchasePrice)).toBeVisible();
+    const formatCurrency = (val: string) =>
+      new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+      }).format(Number(val));
+    await expect(page.getByText(formatCurrency(mrp))).toBeVisible();
+    await expect(page.getByText(formatCurrency(purchasePrice))).toBeVisible();
     await expect(page.getByText("9.00%")).toBeVisible();
     await expect(page.getByText("6.00%")).toBeVisible();
     await expect(
