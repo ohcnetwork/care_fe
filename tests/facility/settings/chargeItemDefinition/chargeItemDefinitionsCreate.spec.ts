@@ -65,13 +65,7 @@ test.describe("Charge Item Definition Creation", () => {
     // Verify in search results (retry to handle search indexing delay)
     await expect(async () => {
       await page.getByRole("textbox", { name: /search/i }).clear();
-      const searchResponse = page.waitForResponse(
-        (resp) =>
-          resp.url().includes("/charge_item_definition/") &&
-          resp.request().method() === "GET",
-      );
       await page.getByRole("textbox", { name: /search/i }).fill(title);
-      await searchResponse;
       await expect(page.getByRole("table").getByText(title)).toBeVisible();
     }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
 
@@ -173,13 +167,7 @@ test.describe("Charge Item Definition Creation", () => {
     // Verify in search results (retry to handle search indexing delay)
     await expect(async () => {
       await page.getByRole("textbox", { name: /search/i }).clear();
-      const searchResponse = page.waitForResponse(
-        (resp) =>
-          resp.url().includes("/charge_item_definition/") &&
-          resp.request().method() === "GET",
-      );
       await page.getByRole("textbox", { name: /search/i }).fill(title);
-      await searchResponse;
       await expect(page.getByRole("table").getByText(title)).toBeVisible();
     }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
 
