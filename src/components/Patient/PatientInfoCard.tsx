@@ -1,9 +1,11 @@
+import { getPermissions } from "@/common/Permissions";
 import TagAssignmentSheet, {
   TagEntityType,
 } from "@/components/Tags/TagAssignmentSheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
+import { usePermissions } from "@/context/PermissionContext";
 import { PatientHoverCard } from "@/pages/Facility/services/serviceRequests/PatientHoverCard";
 import {
   PatientListRead,
@@ -17,6 +19,16 @@ import {
 import { SettingsIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+interface PatientInfoCardProps {
+  patient: PublicPatientRead | PatientListRead | PatientRead;
+  tags: TagConfig[];
+  facilityId: string;
+  onTagsUpdate: () => void;
+  children?: React.ReactNode;
+  tagEntityType: TagEntityType;
+  tagEntityId: string;
+}
+
 export const PatientInfoCard = ({
   patient,
   tags,
@@ -25,24 +37,23 @@ export const PatientInfoCard = ({
   children,
   tagEntityType,
   tagEntityId,
-}: {
-  patient: PublicPatientRead | PatientListRead | PatientRead;
-  tags: TagConfig[];
-  facilityId: string;
-  onTagsUpdate: () => void;
-  children?: React.ReactNode;
-  tagEntityType: TagEntityType;
-  tagEntityId: string;
-}) => {
+}: PatientInfoCardProps) => {
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
+  const { canWritePatient } = getPermissions(
+    hasPermission,
+    "permissions" in patient ? patient.permissions : [],
+  );
 
   return (
     <>
       <Card className="bg-white shadow-sm rounded-md">
         <CardHeader className="pb-4 flex flex-col sm:flex-row sm:items-center justify-between px-2">
-          <div className="space-y-4">
-            <PatientHoverCard patient={patient} facilityId={facilityId} />
-          </div>
+          <PatientHoverCard
+            patient={patient}
+            facilityId={facilityId}
+            canWritePatient={canWritePatient}
+          />
           {children}
         </CardHeader>
       </Card>
@@ -68,7 +79,7 @@ export const PatientInfoCard = ({
               entityId={tagEntityId}
               facilityId={facilityId}
               currentTags={tags}
-              canWrite={true}
+              canWrite={canWritePatient}
               onUpdate={() => {
                 onTagsUpdate();
               }}

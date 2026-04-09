@@ -2051,6 +2051,7 @@
   "edit_location_description": "Edit the Location to make any changes",
   "edit_observation_definition": "Edit Observation Definition",
   "edit_order": "Edit Order",
+  "edit_patient": "Edit Patient",
   "edit_patient_identifier_config": "Edit patient identifier config",
   "edit_policy": "Edit Insurance Policy",
   "edit_policy_description": "Add or edit patient's insurance details",
