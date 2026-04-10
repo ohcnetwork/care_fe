@@ -1,3 +1,4 @@
+import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import { useScheduleResourceFromPath } from "@/components/Schedule/useScheduleResource";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -56,7 +57,8 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
   const { preferredServicePointCategories } = usePreferredServicePointCategory({
     facilityId,
   });
-  const [{ autoRefresh, search }, setQueryParams] = useQueryParams();
+  const [qParams, setQueryParams] = useQueryParams();
+  const { autoRefresh, search, patient, patient_name } = qParams;
   const { data: summary } = useQuery({
     queryKey: ["token-queue-summary", facilityId, queueId],
     queryFn: query(tokenQueueApi.summary, {
@@ -68,22 +70,50 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col sm:flex-row justify-between items-start mt-2 gap-4">
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 w-full">
           <Label className="text-gray-950 text-sm font-medium">
             {t("search_patients")}
           </Label>
-          <div className="relative w-64">
-            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
-            <Input
-              type="search"
-              placeholder={t("search_by_patient_name")}
-              value={search || ""}
-              onChange={(e) => setQueryParams({ search: e.target.value || "" })}
-              className="pl-10"
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="relative">
+              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
+              <Input
+                type="search"
+                placeholder={t("search_by_patient_name")}
+                value={search || ""}
+                onChange={(e) =>
+                  setQueryParams(
+                    { search: e.target.value || "" },
+                    { overwrite: false, replace: true },
+                  )
+                }
+                className="pl-10 w-full sm:w-64 h-9"
+              />
+            </div>
+            <PatientIdentifierFilter
+              onSelect={(patientId, patientName) => {
+                if (patientId && patientName) {
+                  setQueryParams(
+                    {
+                      patient: patientId,
+                      patient_name: patientName,
+                    },
+                    { overwrite: false, replace: true },
+                  );
+                } else {
+                  delete qParams.patient;
+                  delete qParams.patient_name;
+                  setQueryParams(qParams, { replace: true });
+                }
+              }}
+              placeholder={t("filter_by_identifier")}
+              className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
+              patientId={patient}
+              patientName={patient_name}
             />
           </div>
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 w-full sm:items-end">
           <Label className="text-gray-950 text-sm font-medium">
             {t("service_points")}
           </Label>
@@ -101,6 +131,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
               sub_queue_is_null: true,
               status: TokenStatus.CREATED,
               patient_name: search || "",
+              patient: patient,
             }}
             emptyState={
               <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-10 border border-gray-100">

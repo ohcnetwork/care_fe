@@ -34,7 +34,7 @@ test.describe("Facility Location Edit", () => {
       await page.getByRole("button", { name: "Create" }).click();
       await expect(
         page.locator("li[data-sonner-toast]").getByText("Location Created"),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
 
     await test.step("Search and open edit form", async () => {

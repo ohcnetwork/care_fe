@@ -9,6 +9,10 @@ import { FieldValues, Path, UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 
 import {
+  ComputedFieldContext,
+  evaluateComputedField,
+} from "@/Utils/schema/computedField";
+import {
   createExtensionValidationSchema,
   extractSchemaInfo,
 } from "@/Utils/schema/extensionSchema";
@@ -48,17 +52,41 @@ export interface ProcessedExtension {
 // ============================================================================
 
 /**
+ * Evaluate a computed extension field using a FHIRPath expression.
+ */
+export function computeExtensionValue(
+  field: { name: string; uiMetadata?: Record<string, unknown> },
+  context: ComputedFieldContext,
+): unknown {
+  const expression = field.uiMetadata?.expression as string | undefined;
+  if (!expression) return undefined;
+
+  try {
+    return evaluateComputedField(context, expression);
+  } catch (e) {
+    console.error(`Failed to evaluate computed field "${field.name}":`, e);
+    return undefined;
+  }
+}
+
+/**
  * Get a value from namespaced extension data.
+ * For computed fields (uiControl === "computed"), evaluates the FHIRPath expression instead.
  *
  * @example
- * const value = getExtensionValue(delivery.extensions, "billing_extension", "custom_field");
+ * const value = getExtensionValue(delivery.extensions, field);
+ * const value = getExtensionValue(delivery.extensions, field, context);
  */
 export function getExtensionValue(
   extensions: NamespacedExtensionData | undefined,
-  extensionName: string,
-  fieldName: string,
+  field: ExtensionFieldWithName,
+  context?: ComputedFieldContext,
 ): unknown {
-  return extensions?.[extensionName]?.[fieldName];
+  if (field.uiControl === "computed") {
+    return computeExtensionValue(field, context ?? {});
+  }
+
+  return extensions?.[field.extensionName]?.[field.name];
 }
 
 /**
