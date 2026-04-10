@@ -1,5 +1,4 @@
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Loader } from "lucide-react";
@@ -15,6 +14,7 @@ import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { FileReadMinimal } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
@@ -212,33 +212,11 @@ export default function DiagnosticReportPrint({
     <div className="flex justify-center items-center">
       <PrintPreview
         title={`${t("diagnostic_report", { count: 1 })} - ${report.code?.display || report.service_request?.title || t("diagnostic_report", { count: 1 })}`}
+        facility={facility}
+        templateSlug={PrintTemplateType.diagnostic_report}
       >
-        <div className="max-w-4xl mx-auto">
-          {/* Header with Facility Name and Logo */}
-          <div className="flex justify-between items-start pb-2 border-b border-gray-200">
-            <div className="flex items-start gap-4">
-              <div className="text-left">
-                <h1 className="text-2xl font-medium">{facility?.name}</h1>
-                {facility?.address && (
-                  <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
-                    {facility.address}
-                    {facility.phone_number && (
-                      <p className="text-gray-500 text-sm">
-                        {t("phone")}: {facility.phone_number}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-            <img
-              src={careConfig.mainLogo?.dark}
-              alt="Care Logo"
-              className="h-10 w-auto object-contain ml-6"
-            />
-          </div>
-
-          <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold my-2">
+        <div>
+          <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold mb-2">
             {report.service_request?.title ||
               t("diagnostic_report", { count: 1 })}
           </h2>
