@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 
 import { AutoExpandingTextarea } from "@/components/ui/auto-expanding-textarea";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -49,17 +49,18 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import { PLUGIN_Component } from "@/PluginEngine";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { NoteRead } from "@/types/notes/messages";
+import { ThreadRead, threadTemplates } from "@/types/notes/thread";
+import threadApi from "@/types/notes/threadApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime, formatName, isTouchDevice } from "@/Utils/utils";
-import { NoteRead } from "@/types/notes/messages";
-import { ThreadRead, threadTemplates } from "@/types/notes/thread";
-import threadApi from "@/types/notes/threadApi";
 
 const MESSAGES_LIMIT = 20;
 
@@ -708,6 +709,15 @@ export function NoteManager({
                               }
                             }}
                             className="flex-1 min-h-10 max-h-[50vh]"
+                          />
+                          <PLUGIN_Component
+                            __name="NoteMessageInput"
+                            className={cn(
+                              buttonVariants({ variant: "primary_gradient" }),
+                              "size-10 shrink-0",
+                            )}
+                            message={newMessage}
+                            setMessage={setNewMessage}
                           />
                           <Button
                             aria-label="send message"

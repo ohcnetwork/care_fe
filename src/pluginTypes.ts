@@ -84,6 +84,12 @@ export type ServiceRequestComponentType = React.FC<{
   serviceRequestId: string;
 }>;
 
+export type NoteMessageInputComponentType = React.FC<{
+  className?: string;
+  message: string;
+  setMessage: React.Dispatch<React.SetStateAction<string>>;
+}>;
+
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
@@ -99,6 +105,7 @@ export type SupportedPluginComponents = {
   PatientSearchActions: PatientSearchActionsComponentType;
   PatientInfoCardActions: PatientInfoCardActionsComponentType;
   ServiceRequestAction: ServiceRequestComponentType;
+  NoteMessageInput: NoteMessageInputComponentType;
 };
 
 // Create a type for lazy-loaded components
