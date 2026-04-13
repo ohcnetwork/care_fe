@@ -179,7 +179,7 @@ test.describe("Facility Location Creation", () => {
     await test.step("Verify bed created", async () => {
       await expect(
         page.locator("li[data-sonner-toast]").getByText("Location Created"),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
 
     await test.step("Verify bed in child table", async () => {
@@ -205,6 +205,7 @@ test.describe("Facility Location Creation", () => {
       await page.getByRole("button", { name: "Add Location" }).click();
       await page.getByRole("combobox", { name: "Location Form" }).click();
       await page.getByRole("option", { name: "Bed" }).click();
+      await expect(page.getByRole("textbox", { name: "Name" })).toBeVisible();
       await page.getByRole("textbox", { name: "Name" }).fill(bedBaseName);
       await page
         .getByRole("checkbox", { name: "Create Multiple Beds" })
@@ -222,7 +223,7 @@ test.describe("Facility Location Creation", () => {
         page
           .locator("li[data-sonner-toast]")
           .getByText(`${bedCount} Beds created successfully`),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
 
     await test.step("Verify each bed in child table", async () => {
@@ -250,7 +251,7 @@ test.describe("Facility Location Creation", () => {
         page
           .locator("li[data-sonner-toast]")
           .getByText(/Beds can only be created under a parent location/i),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
   });
 });

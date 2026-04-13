@@ -18,6 +18,7 @@ import { TwoFactorAuth } from "@/components/Users/TwoFactorAuth";
 import UserAvatar from "@/components/Users/UserAvatar";
 import UserDeleteDialog from "@/components/Users/UserDeleteDialog";
 import UserResetPassword from "@/components/Users/UserResetPassword";
+import { RoleOrgAccessSummary } from "@/components/Users/UserRoleOrganizationAccess";
 import UserSoftwareUpdate from "@/components/Users/UserSoftwareUpdate";
 import {
   BasicInfoDetails,
@@ -71,6 +72,15 @@ export default function UserSummaryTab({
       <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-white">
         <GeoOrgDetails user={userData} />
       </div>
+    );
+  };
+
+  const renderRoleOrganizationAccess = () => {
+    return (
+      <RoleOrgAccessSummary
+        userId={userData.id}
+        memberships={userData.role_orgs || []}
+      />
     );
   };
 
@@ -153,6 +163,18 @@ export default function UserSummaryTab({
             childProps={userColumnsData}
           />
         )}
+        <UserColumns
+          heading={t("role_organizations")}
+          note={
+            authUser.username === userData.username
+              ? t("role_organization_access_note_self")
+              : canEditUser
+                ? t("role_organization_access_note")
+                : t("role_organization_access_note_view")
+          }
+          Child={renderRoleOrganizationAccess}
+          childProps={userColumnsData}
+        />
         {canResetPassword && (
           <UserColumns
             heading={t("reset_password")}

@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import FilterHeader from "./filterHeader";
@@ -171,9 +172,7 @@ function DateRangeOptions({
   isSameRange: (option: DateRangeOption) => boolean | undefined;
 }) {
   const { t } = useTranslation();
-  const [focusItemRef, setFocusItemRef] = useState<HTMLButtonElement | null>(
-    null,
-  );
+  const [focusItemRef, setFocusItemRef] = useState<HTMLDivElement | null>(null);
   const { focusItemIndex, setFocusItemIndex } =
     useMultiFilterNavigationShortcuts(options.length + 1, handleBack);
 
@@ -188,12 +187,14 @@ function DateRangeOptions({
       {handleBack && <FilterHeader label={filter.label} onBack={handleBack} />}
       <div className="flex flex-col gap-1 p-2 max-h-[30vh] overflow-y-auto">
         {options.map((option, index) => (
-          <Button
+          <DropdownMenuItem
             key={index}
             ref={index === focusItemIndex ? setFocusItemRef : null}
             onFocus={() => setFocusItemIndex(index)}
-            onClick={() => handleDateRangeSelect(option)}
-            variant="ghost"
+            onSelect={(e) => {
+              e.preventDefault();
+              handleDateRangeSelect(option);
+            }}
             className={cn(
               "w-full justify-start px-3 font-medium text-sm text-gray-950",
               isSameRange(option) && "bg-gray-100 border-green-500 border",
@@ -202,21 +203,23 @@ function DateRangeOptions({
             {option.count
               ? t(option.label, { count: option.count })
               : t(option.label)}
-          </Button>
+          </DropdownMenuItem>
         ))}
-        <Button
-          variant="ghost"
+        <DropdownMenuItem
           ref={options.length === focusItemIndex ? setFocusItemRef : null}
           className={cn(
             "w-full justify-between px-3 font-medium text-sm text-gray-950",
             isCustomDateRangeSelected && "bg-gray-100 border-green-500 border",
           )}
-          onClick={() => setView("custom")}
+          onSelect={(e) => {
+            e.preventDefault();
+            setView("custom");
+          }}
           onFocus={() => setFocusItemIndex(options.length)}
         >
           {t("custom_date_range")}
           <ChevronRight className="h-4 w-4" />
-        </Button>
+        </DropdownMenuItem>
       </div>
       <NavigationHelper isActiveFilter={true} />
     </>
