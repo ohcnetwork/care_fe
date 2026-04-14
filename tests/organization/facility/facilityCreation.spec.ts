@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
+import { expectToast } from "tests/helper/ui";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -154,7 +155,7 @@ test.describe("Facility Creation", () => {
       .fill(facilityName);
     await page.getByRole("link", { name: "View Facility" }).click();
 
-    // Verify facility details
+    // Verify facility details (link navigates to /settings/general)
     await expect(
       page.getByRole("heading", { name: facilityName }),
     ).toBeVisible();
@@ -361,9 +362,7 @@ test.describe("Facility Creation", () => {
     await editDialog.getByRole("button", { name: "Update Facility" }).click();
 
     // Verify success message
-    await expect(
-      page.getByText(/Facility updated successfully|Updated successfully/i),
-    ).toBeVisible();
+    await expectToast(page, /Facility updated successfully/i);
 
     // Wait for dialog to close
     await expect(editDialog).not.toBeVisible();
@@ -443,9 +442,7 @@ test.describe("Facility Creation", () => {
     await updateButton.click();
 
     // Verify success message
-    await expect(
-      page.getByText(/Facility updated successfully|Updated successfully/i),
-    ).toBeVisible();
+    await expectToast(page, /Facility updated successfully/i);
 
     // Wait for dialog to close
     await expect(editDialog).not.toBeVisible();

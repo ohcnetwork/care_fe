@@ -93,7 +93,7 @@ export function ManageQueueFinishedTab({
                 <TableCell>
                   {token.patient ? (
                     <Link
-                      href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
+                      href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
                         {
                           phone_number: token.patient.phone_number,
                           year_of_birth:

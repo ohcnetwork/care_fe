@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
@@ -11,6 +12,8 @@ import { cn } from "@/lib/utils";
 import { CancelTokenDialog } from "@/pages/Facility/queues/CancelTokenDialog";
 import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePoints";
 import {
+  getQueueTokenStatus,
+  QUEUE_TOKEN_STATUS_COLORS,
   renderTokenNumber,
   TokenRead,
   TokenStatus,
@@ -117,6 +120,17 @@ export function OngoingQueueTokenCard({
                   </Link>
                 </Button>
                 <div className="flex gap-2 items-center justify-center p-1 bg-gray-100 border border-gray-200 rounded-lg">
+                  <Badge
+                    variant={
+                      QUEUE_TOKEN_STATUS_COLORS[getQueueTokenStatus(token)]
+                    }
+                    className="h-2 w-2 rounded-full p-0 border"
+                  />
+
+                  <span className="text-base font-medium text-black">
+                    {t(`token_status__${getQueueTokenStatus(token)}`)}:
+                  </span>
+
                   <span className="text-lg font-bold text-black">
                     {renderTokenNumber(token)}
                   </span>

@@ -268,7 +268,11 @@ export function SupplyDeliveryTable({
                     </Link>
                   );
                 }
-                return <div className="font-medium">{productName}</div>;
+                return (
+                  <div className="font-medium text-wrap wrap-break-word">
+                    {productName}
+                  </div>
+                );
               })()}
             </TableCell>
             <TableCell>
@@ -383,8 +387,7 @@ export function SupplyDeliveryTable({
             {extensionFields.map((field) => {
               const value = getExtensionValue(
                 delivery.extensions as NamespacedExtensionData,
-                field.extensionName,
-                field.name,
+                field,
               );
               return (
                 <TableCell key={`${field.extensionName}-${field.name}`}>
