@@ -53,6 +53,7 @@ import { PLUGIN_Component } from "@/PluginEngine";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import useAuthUser from "@/hooks/useAuthUser";
+import { useControlState } from "@/hooks/useControlState";
 
 import { NoteRead } from "@/types/notes/messages";
 import { ThreadRead, threadTemplates } from "@/types/notes/thread";
@@ -333,7 +334,7 @@ export function NoteManager({
   const [selectedThread, setSelectedThread] = useState<string | null>(null);
   const [isThreadsExpanded, setIsThreadsExpanded] = useState(false);
   const [showNewThreadDialog, setShowNewThreadDialog] = useState(false);
-  const [newMessage, setNewMessage] = useState("");
+  const [newMessage, setNewMessage] = useControlState("noteMessage", "");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   // points to the first message fetched in the last page or the newly created message
   const recentMessageRef = useRef<HTMLDivElement | null>(null);
@@ -713,11 +714,9 @@ export function NoteManager({
                           <PLUGIN_Component
                             __name="NoteMessageInput"
                             className={cn(
-                              buttonVariants({ variant: "primary_gradient" }),
+                              buttonVariants({ variant: "primary" }),
                               "size-10 shrink-0",
                             )}
-                            message={newMessage}
-                            setMessage={setNewMessage}
                           />
                           <Button
                             aria-label="send message"
