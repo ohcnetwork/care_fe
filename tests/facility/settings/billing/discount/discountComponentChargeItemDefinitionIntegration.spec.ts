@@ -5,17 +5,25 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-const CHARGE_ITEM_CATEGORY_NAMES = ["Medications"] as const;
+const CHARGE_ITEM_CATEGORY_NAME = "Medications";
 
 test.describe("Discount Component & Charge Item Definition Integration", () => {
   let facilityId: string;
   let discountComponentName: string;
-  let selectedDiscountLabel: string;
+  let selectedDiscountLabel: string | undefined;
   let chargeItemTitle: string;
   let chargeItemSlug: string;
   let basePrice: string;
   let categoryName: string;
+  let discountValue: string;
+  let discountMinAge: string;
+  let discountMaxAge: string;
+  let discountConfigSnapshot: DiscountConfigSnapshot | undefined;
 
+  interface DiscountConfigSnapshot {
+    maxApplicableDiscounts: string;
+    applicabilityOrderLabel: string;
+  }
   async function ensureDiscountConfiguration(page: Page) {
     await page.goto(
       `/facility/${facilityId}/settings/billing/discount_configuration`,
@@ -26,6 +34,27 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     const editButton = page.getByRole("button", { name: /edit/i });
     await expect(editButton).toBeVisible();
     await editButton.click();
+
+    // Snapshot current values from the form controls so we can restore them in afterEach
+    const snapshotMaxApplicableInput = page.getByLabel(
+      /maximum applicable discounts/i,
+    );
+    await expect(snapshotMaxApplicableInput).toBeVisible();
+    const previousMaxApplicableDiscounts = (
+      (await snapshotMaxApplicableInput.inputValue()) ?? ""
+    ).trim();
+
+    const snapshotApplicabilityOrderTrigger =
+      page.getByLabel(/applicability order/i);
+    await expect(snapshotApplicabilityOrderTrigger).toBeVisible();
+    const previousApplicabilityOrderLabel = (
+      (await snapshotApplicabilityOrderTrigger.textContent()) ?? ""
+    ).trim();
+
+    discountConfigSnapshot = {
+      maxApplicableDiscounts: previousMaxApplicableDiscounts,
+      applicabilityOrderLabel: previousApplicabilityOrderLabel,
+    };
 
     // Set a simple, valid configuration using the real labels
     const maxApplicableInput = page.getByLabel(/maximum applicable discounts/i);
@@ -53,20 +82,65 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     ).toBeVisible();
   }
 
+  async function restoreDiscountConfiguration(page: Page) {
+    if (!discountConfigSnapshot) return;
+
+    await page.goto(
+      `/facility/${facilityId}/settings/billing/discount_configuration`,
+    );
+    await page.waitForLoadState("networkidle");
+
+    const editButton = page.getByRole("button", { name: /edit/i });
+    await expect(editButton).toBeVisible();
+    await editButton.click();
+
+    const maxApplicableInput = page.getByLabel(/maximum applicable discounts/i);
+    await expect(maxApplicableInput).toBeVisible();
+    await maxApplicableInput.fill(
+      discountConfigSnapshot.maxApplicableDiscounts,
+    );
+
+    // Restore applicability order only if we could reliably snapshot it.
+    const applicabilityOrderTrigger = page.getByLabel(/applicability order/i);
+    await expect(applicabilityOrderTrigger).toBeVisible();
+
+    const label = discountConfigSnapshot.applicabilityOrderLabel.trim();
+    if (label) {
+      await applicabilityOrderTrigger.click();
+      await page.getByRole("option", { name: label }).click();
+    }
+
+    const saveButton = page.getByRole("button", { name: /save/i });
+    await expect(saveButton).toBeVisible();
+    await saveButton.click();
+    await page.waitForLoadState("networkidle");
+  }
+
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
     await ensureDiscountConfiguration(page);
 
-    categoryName = faker.helpers.arrayElement([...CHARGE_ITEM_CATEGORY_NAMES]);
+    categoryName = CHARGE_ITEM_CATEGORY_NAME;
 
-    const discountName = faker.commerce.productName();
-    discountComponentName = discountName;
+    // Generate unique names per test run to avoid collisions.
+    // Keep as a single word to avoid UI/search edge cases around whitespace.
+    discountComponentName = faker.word.noun();
+    discountValue = faker.number.int({ min: 1, max: 99 }).toString();
+    const minAge = faker.number.int({ min: 1, max: 90 });
+    const maxAge = faker.number.int({ min: minAge + 1, max: 120 });
+    discountMinAge = minAge.toString();
+    discountMaxAge = maxAge.toString();
 
     const chargeItemName = faker.commerce.productName();
     chargeItemTitle = chargeItemName;
-    chargeItemSlug = `test-${chargeItemName.replace(/\s+/g, "-").toLowerCase()}`
-      .replace(/[^a-z0-9-]/g, "")
-      .slice(0, 25);
+    const rawSlug = `test-${chargeItemName.toLowerCase()}`;
+    chargeItemSlug =
+      rawSlug
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9_-]/g, "") // allow underscore
+        .replace(/^[-_]+|[-_]+$/g, "") // must start/end with alphanumeric
+        .slice(0, 25)
+        .replace(/^[-_]+|[-_]+$/g, "") || "test-slug";
     basePrice = faker.commerce.price({ dec: 0 });
 
     await page.goto(
@@ -77,6 +151,10 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     await expect(
       page.getByRole("button", { name: /create discount component/i }),
     ).toBeVisible();
+  });
+
+  test.afterEach(async ({ page }) => {
+    await restoreDiscountConfiguration(page);
   });
 
   async function createDiscountComponent(
@@ -95,9 +173,39 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
       .getByRole("textbox", { name: /name/i })
       .fill(discountComponentName);
 
-    const discountValueInput = dialog.getByRole("spinbutton").first();
+    const amountInput = dialog.locator('input[name="amount"]');
+    const factorInput = dialog.locator('input[name="factor"]');
+    const discountValueInput =
+      (await amountInput.count()) > 0 ? amountInput : factorInput;
+
     await expect(discountValueInput).toBeVisible();
-    await discountValueInput.fill("10");
+    await discountValueInput.fill(discountValue);
+
+    const discountCodeCombobox = dialog
+      .getByText(/discount code/i)
+      .locator("..")
+      .locator("..")
+      .getByRole("combobox")
+      .last();
+    await expect(discountCodeCombobox).toBeVisible();
+    await discountCodeCombobox.click();
+    const codeOptions = page.getByRole("option");
+    const preferredCodeOption = codeOptions
+      .filter({ hasText: /general/i })
+      .first();
+    const fallbackCodeOption = codeOptions
+      .filter({ hasText: /default/i })
+      .first();
+
+    if (await preferredCodeOption.isVisible()) {
+      await preferredCodeOption.click();
+    } else if (await fallbackCodeOption.isVisible()) {
+      await fallbackCodeOption.click();
+    } else {
+      const firstCodeOption = codeOptions.first();
+      await expect(firstCodeOption).toBeVisible();
+      await firstCodeOption.click();
+    }
 
     if (withCondition) {
       await dialog.getByRole("button", { name: /add condition/i }).click();
@@ -114,8 +222,8 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
         .click();
       await page.getByRole("option", { name: "In range" }).click();
 
-      await dialog.getByPlaceholder("Min").fill("60");
-      await dialog.getByPlaceholder("Max").fill("120");
+      await dialog.getByPlaceholder("Min").fill(discountMinAge);
+      await dialog.getByPlaceholder("Max").fill(discountMaxAge);
       await dialog.getByRole("button", { name: /^add$/i }).click();
     }
 
@@ -156,20 +264,23 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
   async function selectDiscountByName(page: Page) {
     const searchInput = page.getByPlaceholder(/search for discount code/i);
     await expect(searchInput).toBeVisible();
-    await searchInput.fill("");
+    // Search matches by component title or code.code; code is the most reliable.
+    await searchInput.fill(discountComponentName);
 
+    // The selector is a Radix popover; scope to the portal content that contains the search box.
     const scope = page
-      .locator("[role='dialog'], [data-radix-popper-content-wrapper]")
+      .locator("[data-radix-popper-content-wrapper]")
       .filter({ has: searchInput })
-      .last();
+      .first();
     await expect(scope).toBeVisible();
 
-    const discountCheckbox = scope.getByRole("checkbox").first();
-    await expect(discountCheckbox).toBeVisible();
+    const componentOption = scope.getByRole("radio").first();
+    await expect(componentOption).toBeVisible();
+    await componentOption.click();
 
     selectedDiscountLabel =
-      (await discountCheckbox.getAttribute("aria-label"))?.trim() ?? "";
-    await discountCheckbox.click();
+      (await componentOption.getAttribute("aria-label"))?.trim() ??
+      discountValue;
 
     await page.getByRole("button", { name: "Done" }).click();
   }
@@ -192,7 +303,7 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     await page.getByRole("button", { name: /create/i }).click();
 
     await expect(
-      page.getByText(/charge item definition.*created successfully/i),
+      page.getByText(/charge item definition created successfully/i),
     ).toBeVisible();
 
     await page.getByPlaceholder(/search definitions/i).fill(chargeItemTitle);
@@ -251,14 +362,14 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
     await page.getByRole("option", { name: "Patient Age" }).click();
     await page.getByRole("combobox").filter({ hasText: "In range" }).click();
     await page.getByRole("option", { name: "In range" }).click();
-    await page.getByPlaceholder("Min").fill("60");
-    await page.getByPlaceholder("Max").fill("120");
+    await page.getByPlaceholder("Min").fill(discountMinAge);
+    await page.getByPlaceholder("Max").fill(discountMaxAge);
     await page.getByRole("button", { name: /^add$/i }).click();
 
     await page.getByRole("button", { name: /create/i }).click();
 
     await expect(
-      page.getByText(/charge item definition.*created successfully/i),
+      page.getByText(/charge item definition created successfully/i),
     ).toBeVisible();
 
     await page.getByPlaceholder(/search definitions/i).fill(chargeItemTitle);
@@ -273,12 +384,16 @@ test.describe("Discount Component & Charge Item Definition Integration", () => {
       .click();
 
     await expect(
-      page.getByText("Patient Age is in range 60 to 120 years"),
+      page.getByText(
+        `Patient Age is in range ${discountMinAge} to ${discountMaxAge} years`,
+      ),
     ).toBeVisible();
 
     await page.getByRole("button", { name: "Edit" }).click();
     await expect(
-      page.getByText("Patient Age is in range 60 to 120 years"),
+      page.getByText(
+        `Patient Age is in range ${discountMinAge} to ${discountMaxAge} years`,
+      ),
     ).toBeVisible();
   });
 });
