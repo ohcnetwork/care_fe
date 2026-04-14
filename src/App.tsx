@@ -51,6 +51,16 @@ const App = () => {
                   </PluginEngine>
                 </AuthUserProvider>
               </HistoryAPIProvider>
+              {/* <HistoryAPIProvider>
+                <PluginEngine>
+                  <AuthUserProvider
+                    unauthorized={<Routers.PublicRouter />}
+                    otpAuthorized={<Routers.PatientRouter />}
+                  >
+                    <Routers.AppRouter />
+                  </AuthUserProvider>
+                </PluginEngine>
+              </HistoryAPIProvider> */}
               <Toaster
                 position="top-center"
                 theme="light"

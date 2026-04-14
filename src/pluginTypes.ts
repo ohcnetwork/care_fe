@@ -84,6 +84,12 @@ export type ServiceRequestComponentType = React.FC<{
   serviceRequestId: string;
 }>;
 
+export type PatientSidebarActionsComponentType = React.FC<{
+  patient: PublicPatientRead;
+  facilityId?: string;
+  __meta?: unknown;
+}>;
+
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
@@ -99,6 +105,7 @@ export type SupportedPluginComponents = {
   PatientSearchActions: PatientSearchActionsComponentType;
   PatientInfoCardActions: PatientInfoCardActionsComponentType;
   ServiceRequestAction: ServiceRequestComponentType;
+  PatientSidebarActions: PatientSidebarActionsComponentType;
 };
 
 // Create a type for lazy-loaded components
