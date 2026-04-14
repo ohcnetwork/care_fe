@@ -18,7 +18,7 @@ export const ServicePointsDropDown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { assignedServicePointIds, allServicePoints, toggleServicePoint } =
     useQueueServicePoints();
-  const defaultServicePoints = useBreakpoints({ default: 4, sm: 2, lg: 4 });
+  const defaultServicePoints = useBreakpoints({ default: 4, lg: 4 });
 
   if (!allServicePoints) {
     return (
@@ -35,40 +35,52 @@ export const ServicePointsDropDown = () => {
 
   return (
     <div className="flex">
-      <div className="flex w-full gap-1 rounded-r-none border border-r-0 border-gray-300 rounded-l-md p-1 bg-white">
+      <div
+        className="flex w-full gap-1 rounded-r-none border border-r-0 border-gray-300 rounded-l-md p-1 bg-white cursor-pointer"
+        onClick={() => setIsOpen(true)}
+      >
         {assignedServicePointIds.length === 0 ? (
           <span className="text-sm font-medium">
             {t("assign_service_points")}
           </span>
         ) : (
-          <div className="flex flex-col lg:flex-row gap-1 items-center justify-center w-full">
-            {allServicePoints
-              .filter((subQueue) =>
-                assignedServicePointIds.includes(subQueue.id),
-              )
-              .slice(0, defaultServicePoints)
-              .map((subQueue) => {
-                return (
-                  <div
-                    key={subQueue.id}
-                    className="flex w-full max-w-full items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-sm border border-gray-300 bg-gray-50 px-1.5 py-0.5 sm:w-auto sm:max-w-xs"
-                  >
-                    <div className="bg-primary-200 border border-primary-500 w-2 h-2 rounded-full shrink-0" />
-                    <span className="min-w-0 truncate text-sm font-medium text-gray-950">
-                      {subQueue.name}
-                    </span>
-                  </div>
-                );
-              })}
-            {activeServicePointCount > defaultServicePoints && (
-              <span className="text-sm text-gray-950 font-medium">
-                {"+"}
-                {t("count_more", {
-                  count: activeServicePointCount - defaultServicePoints,
+          <>
+            <div className="hidden lg:flex flex-col lg:flex-row gap-1 items-center justify-center w-full">
+              {allServicePoints
+                .filter((subQueue) =>
+                  assignedServicePointIds.includes(subQueue.id),
+                )
+                .slice(0, defaultServicePoints)
+                .map((subQueue) => {
+                  return (
+                    <div
+                      key={subQueue.id}
+                      className="flex w-full max-w-full items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-sm border border-gray-300 bg-gray-50 px-1.5 py-0.5 sm:w-auto sm:max-w-xs"
+                    >
+                      <div className="bg-primary-200 border border-primary-500 w-2 h-2 rounded-full shrink-0" />
+                      <span className="min-w-0 truncate text-sm font-medium text-gray-950">
+                        {subQueue.name}
+                      </span>
+                    </div>
+                  );
+                })}
+              {activeServicePointCount > defaultServicePoints && (
+                <span className="text-sm text-gray-950 font-medium">
+                  {"+"}
+                  {t("count_more", {
+                    count: activeServicePointCount - defaultServicePoints,
+                  })}
+                </span>
+              )}
+            </div>
+            <div className="lg:hidden flex items-center justify-center w-full">
+              <span className="text-sm font-medium whitespace-nowrap">
+                {t("selected_service_points", {
+                  count: assignedServicePointIds.length,
                 })}
               </span>
-            )}
-          </div>
+            </div>
+          </>
         )}
       </div>
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>

@@ -5488,6 +5488,7 @@
   "selected_organizations": "Selected Organizations",
   "selected_payments": "Selected payments",
   "selected_practitioner": "Selected practitioner",
+  "selected_service_points": "{{count}} Service points",
   "selected_slot_not_found": "Selected Slot Not Found",
   "selected_substitute": "Selected Substitute",
   "selected_tags": "Selected Tags",
