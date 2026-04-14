@@ -5,7 +5,11 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import { ZoomProvider, ZoomTransform } from "@/CAREUI/interactive/Zoom";
+import {
+  FitToWidthScrollContainer,
+  ZoomProvider,
+  ZoomTransform,
+} from "@/CAREUI/interactive/Zoom";
 
 import { Button } from "@/components/ui/button";
 
@@ -21,6 +25,7 @@ import type {
   WatermarkConfig,
 } from "@/types/facility/printTemplate";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { isIOSDevice } from "@/Utils/utils";
 
 interface WatermarkProps {
   text: string;
@@ -40,7 +45,7 @@ type Props = {
 };
 
 export default function PrintPreview(props: Props) {
-  const initialScale = useBreakpoints({ default: 0.44, md: 1 });
+  const isMobile = useBreakpoints({ default: true, md: false });
   const { goBack } = useAppHistory();
   const { t } = useTranslation();
   useShortcutSubContext();
@@ -88,6 +93,26 @@ export default function PrintPreview(props: Props) {
     ? resolvePrintTemplate(props.facility, props.templateSlug)?.watermark
     : undefined;
 
+  const printContent = (
+    <div
+      ref={printSectionRef}
+      id="section-to-print"
+      className={cn("w-full relative overflow-clip", props.className)}
+    >
+      {props.watermark && <StatusWatermark watermark={props.watermark} />}
+      {templateWatermark?.enabled && templateWatermark.text && (
+        <TiledWatermark watermark={templateWatermark} />
+      )}
+      <FacilityPrintLayout
+        facility={props.facility}
+        templateSlug={props.templateSlug}
+        hideFacilityHeader={props.hideFacilityHeader}
+      >
+        {props.children}
+      </FacilityPrintLayout>
+    </div>
+  );
+
   return (
     <div className="flex items-center justify-center max-w-6xl mx-auto">
       <Page
@@ -116,31 +141,24 @@ export default function PrintPreview(props: Props) {
           </div>
         }
       >
-        <div className="mx-auto my-4 max-w-[95vw] print:max-w-none sm:my-8">
-          <ZoomProvider initialScale={initialScale}>
-            <ZoomTransform className="origin-top-left bg-white p-10 text-sm shadow-2xl transition-all duration-200 ease-in-out print:transform-none max-w-[calc(100vw-1rem)]">
-              <div
-                ref={printSectionRef}
-                id="section-to-print"
-                className={cn("w-full relative", props.className)}
-              >
-                {props.watermark && (
-                  <StatusWatermark watermark={props.watermark} />
-                )}
-                {templateWatermark?.enabled && templateWatermark.text && (
-                  <TiledWatermark watermark={templateWatermark} />
-                )}
-                <FacilityPrintLayout
-                  facility={props.facility}
-                  templateSlug={props.templateSlug}
-                  hideFacilityHeader={props.hideFacilityHeader}
-                >
-                  {props.children}
-                </FacilityPrintLayout>
-              </div>
-            </ZoomTransform>
-          </ZoomProvider>
-        </div>
+        {isMobile ? (
+          <div className="mt-4 print:max-w-none">
+            <FitToWidthScrollContainer
+              className="w-[95vw] mx-2 shadow-2xl"
+              contentClassName="bg-white p-4 text-sm min-w-[800px]"
+            >
+              {printContent}
+            </FitToWidthScrollContainer>
+          </div>
+        ) : (
+          <div className="mx-auto my-4 max-w-[95vw] print:max-w-none sm:my-8">
+            <ZoomProvider>
+              <ZoomTransform className="origin-top-left bg-white p-10 text-sm shadow-2xl transition-all duration-200 ease-in-out print:transform-none max-w-[calc(100vw-1rem)]">
+                {printContent}
+              </ZoomTransform>
+            </ZoomProvider>
+          </div>
+        )}
       </Page>
     </div>
   );
@@ -148,11 +166,6 @@ export default function PrintPreview(props: Props) {
 
 const TILE_W = 220;
 const TILE_H = 100;
-
-const STATUS_WATERMARK_CLASSES =
-  "inset-0 flex items-center justify-center select-none pointer-events-none z-10";
-const STATUS_WATERMARK_TEXT_CLASSES =
-  "text-6xl font-bold uppercase tracking-widest opacity-20 -rotate-30 whitespace-nowrap";
 
 function StatusWatermark({ watermark }: { watermark: WatermarkProps }) {
   const colorClass = cn(
@@ -164,15 +177,20 @@ function StatusWatermark({ watermark }: { watermark: WatermarkProps }) {
 
   return (
     <>
-      {/* Screen: absolute within the content area */}
-      <div className={cn("absolute print:hidden", STATUS_WATERMARK_CLASSES)}>
-        <span className={cn(STATUS_WATERMARK_TEXT_CLASSES, colorClass)}>
-          {watermark.text}
-        </span>
-      </div>
-      {/* Print: fixed so the browser stamps it on every page */}
-      <div className={cn("hidden print:flex fixed", STATUS_WATERMARK_CLASSES)}>
-        <span className={cn(STATUS_WATERMARK_TEXT_CLASSES, colorClass)}>
+      {/* Print: fixed so the browser stamps it on every page (absolute on iOS where fixed print is broken) */}
+      <div
+        className={cn(
+          "print:flex",
+          isIOSDevice ? "absolute" : "fixed",
+          "inset-0 flex items-center justify-center select-none pointer-events-none z-10",
+        )}
+      >
+        <span
+          className={cn(
+            "text-6xl font-bold uppercase tracking-widest opacity-20 -rotate-30 whitespace-nowrap",
+            colorClass,
+          )}
+        >
           {watermark.text}
         </span>
       </div>
@@ -209,7 +227,10 @@ function TiledWatermark({ watermark }: { watermark: WatermarkConfig }) {
         }}
       />
       <div
-        className="hidden print:block fixed inset-0 select-none pointer-events-none z-10 text-gray-900"
+        className={cn(
+          "hidden print:block inset-0 select-none pointer-events-none z-10 text-gray-900",
+          isIOSDevice ? "absolute" : "fixed",
+        )}
         aria-hidden="true"
         style={{
           backgroundImage: dataUri,
@@ -278,14 +299,14 @@ function FacilityPrintLayout({
   const pageStyle = buildPageStyle(printTemplate);
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-80px)] print:min-h-[100vh]">
+    <div className="flex flex-col min-h-[calc(100vh-80px)] print:min-h-screen">
       {pageStyle && <style>{pageStyle}</style>}
       {hideFacilityHeader ? null : headerImage?.url ? (
         <div className="flex justify-between items-start mb-4 pb-2">
           <img
             src={headerImage.url}
             alt="Custom Header"
-            className="flex-1 h-auto object-contain"
+            className="flex-1 h-auto object-contain max-w-3xl"
             style={
               headerImage.height
                 ? { maxHeight: `${headerImage.height}px` }
