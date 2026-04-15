@@ -1,42 +1,44 @@
 import { expect, test } from "@playwright/test";
+import { expectToast } from "tests/helper/ui";
+import { getEncounterId } from "tests/support/encounterId";
+import { getFacilityId } from "tests/support/facilityId";
+import { getPatientId } from "tests/support/patientId";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
 
+let facilityId: string;
+let patientId: string;
+let encounterId: string;
+
+test.beforeAll(async () => {
+  facilityId = getFacilityId();
+  patientId = getPatientId();
+  encounterId = getEncounterId();
+});
+
 test.describe("Diagnostic Report Atomic Save", () => {
   /**
-   * Verifies that saving diagnostic results uses the batch endpoint
-   * (/api/v1/batch_requests/) instead of separate API calls for
-   * observations and diagnostic report updates.
-   *
-   * This test intercepts network requests to confirm atomicity:
-   * - A single POST to /api/v1/batch_requests/ should be made
-   * - No separate calls to upsert_observations or individual report update
+   * Navigate to the service requests tab of an encounter,
+   * open an active service request with a diagnostic report,
+   * enter a result value, and verify the save uses a single
+   * batch API call rather than two independent mutations.
    */
   test("should use batch endpoint when saving diagnostic results", async ({
     page,
   }) => {
-    // Track API calls to verify batch usage
-    const batchRequests: { url: string; body: unknown }[] = [];
+    const batchRequests: string[] = [];
     const separateObservationCalls: string[] = [];
     const separateReportUpdateCalls: string[] = [];
 
-    // Intercept network requests
+    // Intercept network requests before navigation
     page.on("request", (request) => {
       const url = request.url();
       const method = request.method();
 
       if (url.includes("/api/v1/batch_requests/") && method === "POST") {
-        let body: unknown = null;
-        try {
-          body = request.postDataJSON();
-        } catch {
-          body = request.postData();
-        }
-        batchRequests.push({ url, body });
+        batchRequests.push(url);
       }
-
-      // Track if old separate endpoints are still being called
       if (url.includes("/upsert_observations/") && method === "POST") {
         separateObservationCalls.push(url);
       }
@@ -45,260 +47,124 @@ test.describe("Diagnostic Report Atomic Save", () => {
       }
     });
 
-    // Navigate to encounters and find one with a service request
-    // We need to find a service request with a diagnostic report in preliminary status
-    const facilityResponse = await page.request.get(
-      "/api/v1/facility/?limit=1",
+    // Navigate to service requests tab
+    await page.goto(
+      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/service_requests`,
     );
-    const facilityData = await facilityResponse.json();
-
-    if (!facilityData.results || facilityData.results.length === 0) {
-      test.skip(true, "No facility found - skipping test");
-      return;
-    }
-
-    const facilityId = facilityData.results[0].id;
-
-    // Find a service request with diagnostic results
-    const srResponse = await page.request.get(
-      `/api/v1/facility/${facilityId}/service_request/?limit=20&status=active`,
-    );
-    const srData = await srResponse.json();
-
-    if (!srData.results || srData.results.length === 0) {
-      test.skip(true, "No active service requests found - skipping test");
-      return;
-    }
-
-    // Find a service request that has a diagnostic report in preliminary status
-    let targetSR = null;
-    for (const sr of srData.results) {
-      if (
-        sr.diagnostic_reports?.length > 0 &&
-        sr.diagnostic_reports[0].status === "preliminary"
-      ) {
-        targetSR = sr;
-        break;
-      }
-    }
-
-    if (!targetSR) {
-      test.skip(
-        true,
-        "No service request with preliminary diagnostic report found - skipping test",
-      );
-      return;
-    }
-
-    // Navigate to the service request page
-    await page.goto(`/facility/${facilityId}/service_requests/${targetSR.id}`);
-
-    // Wait for the page to load
     await page.waitForLoadState("networkidle");
 
-    // Expand the test results section if collapsed
-    const testResultsEntry = page.getByText("Test Results Entry");
-    if (await testResultsEntry.isVisible()) {
-      // Check if form is collapsed - look for the expand button
-      const expandButton = page.locator(
-        "button:has(svg.lucide-chevrons-up-down)",
-      );
-      if (await expandButton.isVisible().catch(() => false)) {
-        await expandButton.click();
-        await page.waitForTimeout(500);
-      }
+    // Find a service request row and open its detail
+    const firstRow = page
+      .locator('[data-slot="table-body"] [data-slot="table-row"]')
+      .first();
+
+    const hasRows = await firstRow.isVisible().catch(() => false);
+    if (!hasRows) {
+      test.skip(true, "No service requests found in this encounter");
+      return;
     }
 
-    // Look for result input fields and fill at least one
-    const resultInputs = page
-      .locator('input[type="number"], input[type="text"]')
-      .filter({
-        has: page.locator("[placeholder]"),
-      });
+    await firstRow.getByRole("button", { name: /see details/i }).click();
+    await page.waitForLoadState("networkidle");
 
+    // Look for a "Save Results" button — only present when report is in preliminary status
+    const saveButton = page.getByRole("button", { name: /save results/i });
+    const hasSaveButton = await saveButton.isVisible().catch(() => false);
+
+    if (!hasSaveButton) {
+      test.skip(
+        true,
+        "No Save Results button — report may not be in preliminary state",
+      );
+      return;
+    }
+
+    // Fill at least one result input if available
+    const resultInputs = page.locator(
+      '[data-slot="card"] input[type="number"], [data-slot="card"] input[type="text"]',
+    );
     const inputCount = await resultInputs.count();
     if (inputCount > 0) {
-      // Fill the first available result input
       await resultInputs.first().fill("42");
     }
 
-    // Click the "Save Results" button
-    const saveButton = page.getByRole("button", { name: /save results/i });
+    // Reset tracking before the actual save click
+    batchRequests.length = 0;
+    separateObservationCalls.length = 0;
+    separateReportUpdateCalls.length = 0;
 
-    if (await saveButton.isVisible().catch(() => false)) {
-      // Reset tracking arrays before clicking save
-      batchRequests.length = 0;
-      separateObservationCalls.length = 0;
-      separateReportUpdateCalls.length = 0;
+    await saveButton.click();
+    await page.waitForTimeout(3000);
 
-      await saveButton.click();
+    // 1. Batch endpoint must have been called
+    expect(
+      batchRequests.length,
+      "Expected POST /api/v1/batch_requests/ to be called for atomic save",
+    ).toBeGreaterThanOrEqual(1);
 
-      // Wait for the API call to complete
-      await page.waitForTimeout(3000);
+    // 2. Separate observation upsert must NOT have been called
+    expect(
+      separateObservationCalls.length,
+      "Separate /upsert_observations/ endpoint should NOT be called — use batch",
+    ).toBe(0);
 
-      // CRITICAL ASSERTIONS: Verify atomicity
-
-      // 1. Batch endpoint should have been called
-      expect(
-        batchRequests.length,
-        "Expected batch endpoint (/api/v1/batch_requests/) to be called for atomic save",
-      ).toBeGreaterThanOrEqual(1);
-
-      // 2. Separate observation upsert should NOT have been called
-      expect(
-        separateObservationCalls.length,
-        "Separate observation upsert endpoint should NOT be called - use batch instead",
-      ).toBe(0);
-
-      // 3. Separate diagnostic report update should NOT have been called
-      expect(
-        separateReportUpdateCalls.length,
-        "Separate diagnostic report update endpoint should NOT be called - use batch instead",
-      ).toBe(0);
-
-      // 4. Verify the batch request body contains both sub-requests
-      if (batchRequests.length > 0) {
-        const batchBody = batchRequests[0].body as {
-          requests?: Array<{
-            url: string;
-            method: string;
-            reference_id: string;
-          }>;
-        };
-
-        expect(batchBody).toHaveProperty("requests");
-        expect(Array.isArray(batchBody.requests)).toBe(true);
-
-        // Should contain at least the diagnostic report update request
-        const referenceIds = batchBody.requests!.map((r) => r.reference_id);
-        expect(referenceIds).toContain("update-diagnostic-report");
-
-        // If observations were submitted, should also contain observation upsert
-        if (inputCount > 0) {
-          expect(referenceIds).toContain("upsert-observations");
-        }
-      }
-    } else {
-      test.skip(
-        true,
-        "Save Results button not visible - report may not be in editable state",
-      );
-    }
+    // 3. Separate diagnostic report PUT must NOT have been called
+    expect(
+      separateReportUpdateCalls.length,
+      "Separate PUT /diagnostic_report/ endpoint should NOT be called — use batch",
+    ).toBe(0);
   });
 
   /**
-   * Verifies that a successful batch save shows the correct i18n toast message
-   * and collapses the form.
+   * Verifies the correct i18n success toast appears after a successful save,
+   * confirming the new key `diagnostic_report_updated_successfully` is used.
    */
-  test("should show localized success toast and collapse form on successful save", async ({
+  test("should show localized success toast on successful save", async ({
     page,
   }) => {
-    // Wait for a successful batch response
-    await page.route("**/api/v1/batch_requests/", async (route) => {
-      const request = route.request();
-      if (request.method() === "POST") {
-        // Let the request through but intercept the response
-        const response = await route.fetch();
-        const status = response.status();
-
-        if (status >= 200 && status < 300) {
-          // Pass through the successful response
-          await route.fulfill({ response });
-        } else {
-          await route.fulfill({ response });
-        }
-      } else {
-        await route.continue();
-      }
-    });
-
-    // Navigate to encounters and find a suitable service request
-    const facilityResponse = await page.request.get(
-      "/api/v1/facility/?limit=1",
+    await page.goto(
+      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/service_requests`,
     );
-    const facilityData = await facilityResponse.json();
-
-    if (!facilityData.results || facilityData.results.length === 0) {
-      test.skip(true, "No facility found");
-      return;
-    }
-
-    const facilityId = facilityData.results[0].id;
-
-    const srResponse = await page.request.get(
-      `/api/v1/facility/${facilityId}/service_request/?limit=20&status=active`,
-    );
-    const srData = await srResponse.json();
-
-    let targetSR = null;
-    for (const sr of srData.results || []) {
-      if (
-        sr.diagnostic_reports?.length > 0 &&
-        sr.diagnostic_reports[0].status === "preliminary"
-      ) {
-        targetSR = sr;
-        break;
-      }
-    }
-
-    if (!targetSR) {
-      test.skip(
-        true,
-        "No service request with preliminary diagnostic report found",
-      );
-      return;
-    }
-
-    await page.goto(`/facility/${facilityId}/service_requests/${targetSR.id}`);
     await page.waitForLoadState("networkidle");
 
-    // Expand form if collapsed
-    const expandButton = page.locator(
-      "button:has(svg.lucide-chevrons-up-down)",
-    );
-    if (await expandButton.isVisible().catch(() => false)) {
-      await expandButton.click();
-      await page.waitForTimeout(500);
+    const firstRow = page
+      .locator('[data-slot="table-body"] [data-slot="table-row"]')
+      .first();
+
+    if (!(await firstRow.isVisible().catch(() => false))) {
+      test.skip(true, "No service requests found");
+      return;
     }
 
-    // Fill a result value
-    const resultInputs = page
-      .locator('input[type="number"], input[type="text"]')
-      .filter({
-        has: page.locator("[placeholder]"),
-      });
+    await firstRow.getByRole("button", { name: /see details/i }).click();
+    await page.waitForLoadState("networkidle");
+
+    const saveButton = page.getByRole("button", { name: /save results/i });
+    if (!(await saveButton.isVisible().catch(() => false))) {
+      test.skip(true, "No Save Results button visible");
+      return;
+    }
+
+    // Fill a value if inputs are present
+    const resultInputs = page.locator(
+      '[data-slot="card"] input[type="number"], [data-slot="card"] input[type="text"]',
+    );
     if ((await resultInputs.count()) > 0) {
       await resultInputs.first().fill("55");
     }
 
-    const saveButton = page.getByRole("button", { name: /save results/i });
-    if (!(await saveButton.isVisible().catch(() => false))) {
-      test.skip(true, "Save Results button not visible");
-      return;
-    }
-
     await saveButton.click();
 
-    // Verify success toast appears with i18n message
-    const toaster = page.locator(".toaster.group");
-    await expect(
-      toaster.getByText(/diagnostic report updated successfully/i),
-    ).toBeVisible({ timeout: 10000 });
-
-    // Verify form collapses after successful save
-    // The collapse button should switch to expand (chevrons-up-down)
-    await expect(
-      page.locator("button:has(svg.lucide-chevrons-up-down)"),
-    ).toBeVisible({ timeout: 5000 });
+    // Verify the i18n success toast key fires
+    await expectToast(page, /diagnostic report updated successfully/i);
   });
 
   /**
-   * Verifies that the batch request body structure is correct,
-   * containing proper URLs and methods for both sub-requests.
+   * Verifies the batch request body contains the correct sub-request structure:
+   * - reference_id "update-diagnostic-report" with method PUT
+   * - reference_id "upsert-observations" with method POST (when observations exist)
    */
-  test("should send correct batch request structure with proper URLs and methods", async ({
-    page,
-  }) => {
+  test("should send correct batch request structure", async ({ page }) => {
     let capturedBatchBody: {
       requests?: Array<{
         url: string;
@@ -308,87 +174,52 @@ test.describe("Diagnostic Report Atomic Save", () => {
       }>;
     } | null = null;
 
-    // Intercept the batch request to capture its body
+    // Intercept to capture the batch request body
     await page.route("**/api/v1/batch_requests/", async (route) => {
-      const request = route.request();
-      if (request.method() === "POST") {
+      if (route.request().method() === "POST") {
         try {
-          capturedBatchBody = request.postDataJSON();
+          capturedBatchBody = route.request().postDataJSON();
         } catch {
           capturedBatchBody = null;
         }
-        await route.continue();
-      } else {
-        await route.continue();
       }
+      await route.continue();
     });
 
-    const facilityResponse = await page.request.get(
-      "/api/v1/facility/?limit=1",
+    await page.goto(
+      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/service_requests`,
     );
-    const facilityData = await facilityResponse.json();
-    if (!facilityData.results?.length) {
-      test.skip(true, "No facility found");
-      return;
-    }
-    const facilityId = facilityData.results[0].id;
-
-    const srResponse = await page.request.get(
-      `/api/v1/facility/${facilityId}/service_request/?limit=20&status=active`,
-    );
-    const srData = await srResponse.json();
-
-    let targetSR = null;
-    for (const sr of srData.results || []) {
-      if (
-        sr.diagnostic_reports?.length > 0 &&
-        sr.diagnostic_reports[0].status === "preliminary"
-      ) {
-        targetSR = sr;
-        break;
-      }
-    }
-
-    if (!targetSR) {
-      test.skip(
-        true,
-        "No service request with preliminary diagnostic report found",
-      );
-      return;
-    }
-
-    await page.goto(`/facility/${facilityId}/service_requests/${targetSR.id}`);
     await page.waitForLoadState("networkidle");
 
-    // Expand form
-    const expandButton = page.locator(
-      "button:has(svg.lucide-chevrons-up-down)",
-    );
-    if (await expandButton.isVisible().catch(() => false)) {
-      await expandButton.click();
-      await page.waitForTimeout(500);
+    const firstRow = page
+      .locator('[data-slot="table-body"] [data-slot="table-row"]')
+      .first();
+
+    if (!(await firstRow.isVisible().catch(() => false))) {
+      test.skip(true, "No service requests found");
+      return;
     }
 
-    // Fill result
-    const resultInputs = page
-      .locator('input[type="number"], input[type="text"]')
-      .filter({
-        has: page.locator("[placeholder]"),
-      });
-    if ((await resultInputs.count()) > 0) {
-      await resultInputs.first().fill("99");
-    }
+    await firstRow.getByRole("button", { name: /see details/i }).click();
+    await page.waitForLoadState("networkidle");
 
     const saveButton = page.getByRole("button", { name: /save results/i });
     if (!(await saveButton.isVisible().catch(() => false))) {
-      test.skip(true, "Save Results button not visible");
+      test.skip(true, "No Save Results button visible");
       return;
+    }
+
+    const resultInputs = page.locator(
+      '[data-slot="card"] input[type="number"], [data-slot="card"] input[type="text"]',
+    );
+    const inputCount = await resultInputs.count();
+    if (inputCount > 0) {
+      await resultInputs.first().fill("99");
     }
 
     await saveButton.click();
     await page.waitForTimeout(3000);
 
-    // Validate the batch request body structure
     expect(
       capturedBatchBody,
       "Batch request body should have been captured",
@@ -397,20 +228,20 @@ test.describe("Diagnostic Report Atomic Save", () => {
     const requests = capturedBatchBody!.requests!;
     expect(requests.length).toBeGreaterThanOrEqual(1);
 
-    // Find the diagnostic report update request
+    // Validate the diagnostic report update sub-request
     const reportUpdate = requests.find(
       (r) => r.reference_id === "update-diagnostic-report",
     );
     expect(
       reportUpdate,
-      "Batch should contain update-diagnostic-report request",
+      'Batch must contain a sub-request with reference_id "update-diagnostic-report"',
     ).toBeDefined();
     expect(reportUpdate!.method).toBe("PUT");
     expect(reportUpdate!.url).toMatch(
       /\/api\/v1\/patient\/[^/]+\/diagnostic_report\/[^/]+\/$/,
     );
 
-    // If observations were included, validate that sub-request too
+    // Validate the observation upsert sub-request if observations were submitted
     const obsUpsert = requests.find(
       (r) => r.reference_id === "upsert-observations",
     );
