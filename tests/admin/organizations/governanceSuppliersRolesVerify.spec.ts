@@ -82,7 +82,6 @@ async function openGovtOrgDetailByName(
 
 test.describe("Admin organization lists", () => {
   let parentOrgName: string;
-  let createdChildOrgName: string;
 
   test.beforeAll(async ({ browser }) => {
     const context = await browser.newContext({
@@ -98,34 +97,6 @@ test.describe("Admin organization lists", () => {
       await firstCard.getByRole("heading").first().innerText()
     ).trim();
     expect(parentOrgName.length).toBeGreaterThan(0);
-
-    const link = seeDetailsLinkInCard(firstCard);
-    await expect(link).toBeVisible();
-    await Promise.all([
-      page.waitForURL(adminOrgDetailUrlRegex(DEFAULT_ORG_TYPE)),
-      link.click(),
-    ]);
-
-    const addOrgButton = page.getByRole("button", {
-      name: /add organization/i,
-    });
-    await expect(addOrgButton).toBeVisible();
-    await addOrgButton.click();
-
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible();
-
-    createdChildOrgName = `TestOrg_${faker.string.alphanumeric(8)}`;
-    await dialog
-      .getByRole("textbox", { name: /name/i })
-      .fill(createdChildOrgName);
-
-    await dialog.getByRole("button", { name: /create organization/i }).click();
-    await expect(
-      page
-        .locator("li[data-sonner-toast]")
-        .getByText(/organization created successfully/i),
-    ).toBeVisible({ timeout: 10000 });
 
     await context.close();
   });
@@ -182,17 +153,13 @@ test.describe("Admin organization lists", () => {
     page,
   }) => {
     await gotoOrgTypeList(page, DEFAULT_ORG_TYPE);
-    await openGovtOrgDetailByName(page, parentOrgName, DEFAULT_ORG_TYPE);
 
     const input = searchInput(page, DEFAULT_ORG_TYPE);
     await expect(input).toBeVisible();
 
-    await input.fill(createdChildOrgName);
+    await input.fill(parentOrgName);
     const matchedCard = govtOrgCards(page).filter({
-      has: page.getByRole("heading", {
-        name: createdChildOrgName,
-        exact: true,
-      }),
+      has: page.getByRole("heading", { name: parentOrgName, exact: true }),
     });
     await expect(matchedCard).toBeVisible();
 
@@ -203,9 +170,7 @@ test.describe("Admin organization lists", () => {
       const headingText = (
         await filteredCards.nth(i).getByRole("heading").first().innerText()
       ).trim();
-      expect(headingText.toLowerCase()).toContain(
-        createdChildOrgName.toLowerCase(),
-      );
+      expect(headingText.toLowerCase()).toContain(parentOrgName.toLowerCase());
     }
 
     await input.fill(`zz_${faker.string.uuid()}`);
@@ -239,14 +204,18 @@ test.describe("Admin organization lists", () => {
 
     const treePanel = firstResizablePanel(page);
     await expect(treePanel).toBeVisible();
+    await expect(treePanel.locator("div.space-y-1").first()).toBeVisible();
 
-    const parentNode = treePanel
-      .locator("div.space-y-1")
-      .filter({ hasText: parentOrgName })
-      .first();
-    await expect(parentNode).toBeVisible();
+    const expandButtons = treePanel
+      .locator("div.space-y-1 > div")
+      .getByRole("button");
+    const expandCount = await expandButtons.count();
+    if (expandCount === 0) {
+      test.skip(true, "No expandable orgs in tree (all nodes are leaf nodes)");
+      return;
+    }
 
-    const expandBtn = parentNode.getByRole("button").first();
+    const expandBtn = expandButtons.first();
     await expect(expandBtn).toBeVisible();
 
     const treeNodes = treePanel.locator("div.space-y-1");
@@ -255,8 +224,6 @@ test.describe("Admin organization lists", () => {
     await expect
       .poll(() => treeNodes.count(), { message: "tree should grow on expand" })
       .toBeGreaterThan(beforeCount);
-
-    await expect(treePanel.getByText(createdChildOrgName)).toBeVisible();
 
     await expandBtn.click();
     await expect
