@@ -75,7 +75,7 @@ const CommentSection = ({ id }: { id: string }) => {
 
         <div className="flex w-full justify-end mt-2">
           <Button
-            variant="primary"
+            variant="default"
             onClick={submitComment}
             disabled={commentBox.trim().length == 0}
           >

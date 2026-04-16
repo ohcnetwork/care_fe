@@ -207,7 +207,7 @@ export function LocationCardWrapper({
                   {t("cancel")}
                 </Button>
                 <Button
-                  variant="primary"
+                  variant="default"
                   onClick={handleConfirm}
                   disabled={isPending}
                 >

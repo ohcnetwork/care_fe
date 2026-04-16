@@ -211,7 +211,7 @@ function SubQueueCard({
                 {t("cancel")}
               </Button>
               <Button
-                variant="primary"
+                variant="default"
                 onClick={handleUpdateSubQueue}
                 disabled={!hasChanges || subQueueName.trim().length === 0}
               >

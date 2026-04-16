@@ -835,7 +835,7 @@ const AppointmentActions = ({
         {currentStatus && currentStatus === AppointmentStatus.BOOKED && (
           <Button
             disabled={!canCheckIn}
-            variant="primary"
+            variant="default"
             onClick={() =>
               updateAppointment({
                 status: AppointmentStatus.CHECKED_IN,

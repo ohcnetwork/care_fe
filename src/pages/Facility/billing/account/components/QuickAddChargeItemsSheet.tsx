@@ -334,7 +334,7 @@ export default function QuickAddChargeItemsSheet({
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting || cartItems.length === 0 || disabled}
-                variant="primary"
+                variant="default"
                 className="flex-1"
               >
                 {isSubmitting ? (

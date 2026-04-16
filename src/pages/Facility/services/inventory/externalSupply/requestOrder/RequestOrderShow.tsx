@@ -390,7 +390,7 @@ export function RequestOrderShow({
             {((internal && !isRequester) ||
               (!internal &&
                 requestOrder.status === RequestOrderStatus.pending)) && (
-              <Button variant="primary" asChild>
+              <Button variant="default" asChild>
                 <Link
                   basePath="/"
                   href={getInventoryBasePath(

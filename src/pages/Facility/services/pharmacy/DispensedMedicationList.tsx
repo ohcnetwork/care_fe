@@ -674,7 +674,7 @@ function InvoiceCard({
                 onClick={handleIssueInvoice}
                 disabled={isIssuingInvoice}
                 className="w-full"
-                variant="primary"
+                variant="default"
               >
                 {isIssuingInvoice ? (
                   <>
@@ -703,7 +703,7 @@ function InvoiceCard({
                         onClick={handleMarkAsBalanced}
                         disabled={isMarkingBalanced}
                         className="w-full"
-                        variant="primary"
+                        variant="default"
                       >
                         {isMarkingBalanced ? (
                           <>
@@ -732,7 +732,7 @@ function InvoiceCard({
                     <Button
                       onClick={() => setPaymentSheetOpen(true)}
                       className="w-full"
-                      variant="primary"
+                      variant="default"
                     >
                       <BanknoteIcon className="size-4" />
                       {t("collect_payment")}
@@ -953,7 +953,7 @@ function BillingSummaryPanel({
             </div>
             {onCreateInvoice && accountId && (
               <Button
-                variant="primary"
+                variant="default"
                 className="w-full"
                 onClick={() =>
                   onCreateInvoice(unbilledItems as ChargeItemRead[])

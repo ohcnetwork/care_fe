@@ -99,7 +99,7 @@ export default function UserResetPassword({
             onClick={() => setIsEditing(true)}
             type="button"
             id="change-edit-password-button"
-            variant="primary"
+            variant="default"
           >
             <CareIcon
               icon={isEditing ? "l-times" : "l-pen"}
@@ -230,7 +230,7 @@ export default function UserResetPassword({
               <Button
                 type="submit"
                 disabled={!form.formState.isValid || isPending}
-                variant="primary"
+                variant="default"
               >
                 {isPending && (
                   <CareIcon

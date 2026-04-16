@@ -1,8 +1,15 @@
-import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { XIcon } from "lucide-react";
+/**
+ * @name dialog
+ * @description A window overlaid on either the primary window or another dialog window.
+ * @dependencies radix-ui
+ * @type registry:ui
+ */
+import { Dialog as DialogPrimitive } from "radix-ui";
 import * as React from "react";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { XIcon } from "lucide-react";
 
 function Dialog({
   ...props
@@ -36,7 +43,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50",
+        "fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className,
       )}
       {...props}
@@ -46,51 +53,108 @@ function DialogOverlay({
 
 function DialogContent({
   className,
+  innerClassName,
   children,
+  onOpenAutoFocus,
   ...props
-}: React.ComponentProps<typeof DialogPrimitive.Content>) {
+}: React.ComponentProps<typeof DialogPrimitive.Content> & {
+  innerClassName?: string;
+}) {
   return (
-    <DialogPortal data-slot="dialog-portal">
+    <DialogPortal>
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border border-border p-6 shadow-lg duration-200 sm:max-w-lg",
+          "fixed top-1/2 left-1/2 z-50 w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-foreground/10 p-1.5 duration-100 outline-none shadow-xl sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           className,
         )}
+        onOpenAutoFocus={(e) => {
+          if (onOpenAutoFocus) {
+            onOpenAutoFocus(e);
+            return;
+          }
+          const input = (
+            e.currentTarget as HTMLElement
+          ).querySelector<HTMLElement>(
+            'input:not([disabled]):not([type="hidden"]), textarea:not([disabled]), select:not([disabled])',
+          );
+          if (input) {
+            e.preventDefault();
+            input.focus();
+          }
+        }}
         {...props}
       >
-        {children}
-        <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-muted data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
-          <XIcon />
-          {/* eslint-disable-next-line i18next/no-literal-string */}
-          <span className="sr-only">Close</span>
-        </DialogPrimitive.Close>
+        <div
+          className={cn(
+            "grid gap-4 rounded-lg bg-background p-4 text-sm md:px-6 md:py-5",
+            innerClassName,
+          )}
+        >
+          {children}
+        </div>
       </DialogPrimitive.Content>
     </DialogPortal>
   );
 }
 
-function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
+function DialogHeader({
+  className,
+  children,
+  showCloseButton = true,
+  ...props
+}: React.ComponentProps<"div"> & {
+  showCloseButton?: boolean;
+}) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
+      className={cn(
+        "flex flex-row border-b pb-4 items-start justify-between gap-4",
+        className,
+      )}
       {...props}
-    />
+    >
+      <div className="flex flex-col gap-0.5">{children}</div>
+      {showCloseButton && (
+        <DialogPrimitive.Close data-slot="dialog-close" asChild>
+          <Button variant="ghost" size="icon" className="shrink-0 -mt-1 -mr-1">
+            <XIcon />
+            {/* eslint-disable-next-line i18next/no-literal-string */}
+            <span className="sr-only">Close</span>
+          </Button>
+        </DialogPrimitive.Close>
+      )}
+    </div>
   );
 }
 
-function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
+function DialogFooter({
+  className,
+  showCloseButton = false,
+  children,
+  ...props
+}: React.ComponentProps<"div"> & {
+  showCloseButton?: boolean;
+}) {
   return (
     <div
       data-slot="dialog-footer"
       className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
+        "flex border-t pt-4 flex-col-reverse gap-4 sm:flex-row sm:justify-end",
         className,
       )}
       {...props}
-    />
+    >
+      {children}
+      {showCloseButton && (
+        <DialogPrimitive.Close asChild>
+          {/* eslint-disable-next-line i18next/no-literal-string */}
+          <Button variant="outline">Close</Button>
+        </DialogPrimitive.Close>
+      )}
+    </div>
   );
 }
 
@@ -101,7 +165,7 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lg leading-none font-semibold", className)}
+      className={cn("leading-none text-lg font-semibold", className)}
       {...props}
     />
   );
@@ -114,7 +178,10 @@ function DialogDescription({
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("text-muted-foreground text-sm", className)}
+      className={cn(
+        "text-sm text-soft-foreground *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground",
+        className,
+      )}
       {...props}
     />
   );

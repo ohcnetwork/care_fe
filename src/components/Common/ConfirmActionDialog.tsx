@@ -36,7 +36,7 @@ export default function ConfirmActionDialog({
   onConfirm,
   cancelText,
   confirmText,
-  variant = "primary",
+  variant = "default",
   disabled,
   hideCancel,
 }: ConfirmActionDialogProps) {

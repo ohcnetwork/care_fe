@@ -162,7 +162,7 @@ export const Authenticate = () => {
                     <Button
                       type="submit"
                       className="w-full mt-4"
-                      variant="primary"
+                      variant="default"
                       disabled={
                         isVerifyingMFA ||
                         codeValue.length < (currentMethod === "backup" ? 8 : 6)

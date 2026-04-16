@@ -25,7 +25,7 @@ export default function TemplatePage({ facilityId }: TemplatePageProps) {
       title={t("templates")}
       options={
         canWriteTemplate && (
-          <Button variant="primary" asChild>
+          <Button variant="default" asChild>
             <Link href={`/facility/${facilityId}/template/builder`}>
               <CareIcon icon="l-plus" className="mr-1" />
               <span>{t("create_template")}</span>

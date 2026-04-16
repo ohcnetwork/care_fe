@@ -560,7 +560,7 @@ export default function ReportViewer({
                 action={
                   canGenerateReport ? (
                     <Button
-                      variant="primary"
+                      variant="default"
                       onClick={() => generateReport(template)}
                       aria-label={t("generate_report")}
                     >
@@ -598,7 +598,7 @@ export default function ReportViewer({
                   description={t("pdf_preview_not_supported_description")}
                   action={
                     <Button
-                      variant="primary"
+                      variant="default"
                       onClick={() => window.open(pdfUrl, "_blank")}
                       aria-label={t("open_pdf")}
                     >

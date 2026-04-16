@@ -546,7 +546,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
             </Button>
             <Button
               type="submit"
-              variant="primary"
+              variant="default"
               disabled={
                 id ? isUpdatePending || !form.formState.isDirty : isPending
               }

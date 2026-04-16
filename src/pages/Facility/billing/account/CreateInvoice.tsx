@@ -725,7 +725,7 @@ export function CreateInvoicePage({
                               <Button
                                 type="button"
                                 size="icon"
-                                variant="primary"
+                                variant="default"
                                 className="size-8"
                                 onClick={handleConfirmPendingItem}
                                 onKeyDown={(e) => {

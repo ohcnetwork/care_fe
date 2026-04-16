@@ -308,7 +308,7 @@ const ScheduleTemplateEditor = ({
             </Button>
 
             <Button
-              variant="primary"
+              variant="default"
               type="submit"
               disabled={isUpdating || !form.formState.isDirty}
               size="sm"
@@ -960,7 +960,7 @@ const NewAvailabilityCard = ({
             >
               {t("cancel")}
             </Button>
-            <Button variant="primary" type="submit" disabled={isPending}>
+            <Button variant="default" type="submit" disabled={isPending}>
               {isPending ? t("creating") : t("create")}
             </Button>
           </div>

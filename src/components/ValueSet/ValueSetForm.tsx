@@ -517,7 +517,7 @@ export function ValueSetForm({
           </Button>
 
           <Button
-            variant="primary"
+            variant="default"
             type="submit"
             disabled={
               isSystemDefined || isSubmitting || !form.formState.isDirty

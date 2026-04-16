@@ -234,7 +234,7 @@ export default function LocationSettings({
                         />
                         <div className="w-full sm:w-auto flex justify-center sm:justify-start">
                           <Button
-                            variant="primary"
+                            variant="default"
                             onClick={handleAddLocation}
                             className="w-full sm:w-auto"
                           >

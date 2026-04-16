@@ -384,7 +384,7 @@ export default function AvatarEditModal({
                   <div>
                     <Button
                       id="upload-cover-image"
-                      variant="primary"
+                      variant="default"
                       className="w-full"
                       disabled={isProcessing || isDeleting}
                       asChild
@@ -407,7 +407,7 @@ export default function AvatarEditModal({
                     </Button>
                   </div>
                   <Button
-                    variant="primary"
+                    variant="default"
                     onClick={() => {
                       setIsCameraOpen(true);
                     }}

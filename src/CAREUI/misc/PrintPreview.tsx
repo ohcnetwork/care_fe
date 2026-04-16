@@ -130,7 +130,7 @@ export default function PrintPreview(props: Props) {
               </Button>
             )}
             <Button
-              variant="primary"
+              variant="default"
               disabled={props.disabled || isPrinting}
               onClick={print}
             >

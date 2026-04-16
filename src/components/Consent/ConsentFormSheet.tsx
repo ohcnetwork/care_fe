@@ -294,7 +294,7 @@ export default function ConsentFormSheet({
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant={isEdit ? "outline" : "primary"} className="gap-2">
+        <Button variant={isEdit ? "outline" : "default"} className="gap-2">
           {isEdit ? (
             <>
               <Edit className="size-4" />

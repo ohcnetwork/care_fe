@@ -162,7 +162,7 @@ export function LocationAssignmentView({
           {t("schedule_for_later")}
         </Button>
         <Button
-          variant="primary"
+          variant="default"
           disabled={!selectedBed && !selectedLinkedBed}
           onClick={() => {
             isLinkedBed

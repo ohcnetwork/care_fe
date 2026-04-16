@@ -257,7 +257,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                   </Button>
                 )}
                 {downloadURL && downloadURL.length > 0 && (
-                  <Button variant="primary" onClick={handleDownload}>
+                  <Button variant="default" onClick={handleDownload}>
                     <CareIcon icon="l-file-download" className="size-4" />
                     <span>{t("download")}</span>
                   </Button>
@@ -267,7 +267,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
             <div className="flex flex-1 items-center justify-between gap-4">
               {uploadedFiles && uploadedFiles.length > 1 && (
                 <Button
-                  variant="primary"
+                  variant="default"
                   onClick={() => handleNext(index - 1)}
                   disabled={index <= 0}
                   aria-label="Previous file"
@@ -340,7 +340,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                         {t("mov_file_safari_only")}
                       </p>
                       {downloadURL && (
-                        <Button variant="primary" onClick={handleDownload}>
+                        <Button variant="default" onClick={handleDownload}>
                           <CareIcon icon="l-file-download" className="size-4" />
                           <span>{t("download_to_play")}</span>
                         </Button>
@@ -380,7 +380,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
               </div>
               {uploadedFiles && uploadedFiles.length > 1 && (
                 <Button
-                  variant="primary"
+                  variant="default"
                   onClick={() => handleNext(index + 1)}
                   disabled={index >= uploadedFiles.length - 1}
                   aria-label={t("next_file")}

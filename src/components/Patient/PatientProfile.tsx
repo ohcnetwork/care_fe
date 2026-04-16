@@ -83,7 +83,7 @@ export const PatientProfile = (props: {
               patientId={id}
               facilityId={facilityId}
               trigger={
-                <Button variant="primary">{t("schedule_appointment")}</Button>
+                <Button variant="default">{t("schedule_appointment")}</Button>
               }
             />
           )}

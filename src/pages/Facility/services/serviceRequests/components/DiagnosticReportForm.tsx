@@ -1111,7 +1111,7 @@ export function DiagnosticReportForm({
                     DiagnosticReportStatus.preliminary && (
                     <div className="flex justify-end space-x-4">
                       <Button
-                        variant="primary"
+                        variant="default"
                         onClick={handleSubmit}
                         disabled={isSubmitting || disableEdit}
                       >

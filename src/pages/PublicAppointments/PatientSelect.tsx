@@ -254,7 +254,7 @@ export default function PatientSelect({
             <Button variant="outline" onClick={() => setSelectedPatient(null)}>
               {t("cancel")}
             </Button>
-            <Button variant="primary" onClick={handleConfirm}>
+            <Button variant="default" onClick={handleConfirm}>
               {t("confirm")}
             </Button>
           </div>

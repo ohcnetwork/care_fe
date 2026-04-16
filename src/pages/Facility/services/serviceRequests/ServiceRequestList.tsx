@@ -346,7 +346,7 @@ export default function ServiceRequestList({
                 {t("service_requests")}
               </h1>
               <Button
-                variant="primary"
+                variant="default"
                 size="sm"
                 onClick={() => setBarcodeOpen(true)}
                 className="w-full sm:w-auto"

@@ -238,7 +238,7 @@ export default function SessionExpired() {
         </p>
         <Button
           type="button"
-          variant="primary"
+          variant="default"
           className="mt-6"
           onClick={signOut}
         >

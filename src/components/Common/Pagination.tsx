@@ -166,7 +166,7 @@ const NavButton = (props: NavButtonProps) => {
         id={props.id}
         disabled={props.disabled}
         onClick={props.onClick}
-        variant={props.selected ? "primary" : "secondary"}
+        variant={props.selected ? "default" : "secondary"}
         className="rounded-none text-sm font-bold"
       >
         {props.children}

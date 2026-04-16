@@ -434,7 +434,7 @@ const Login = (props: LoginProps) => {
                         <Button
                           type="submit"
                           className="w-full"
-                          variant="primary"
+                          variant="default"
                           disabled={isLoading}
                         >
                           {isLoading ? (
@@ -492,7 +492,7 @@ const Login = (props: LoginProps) => {
                           <Button
                             type="submit"
                             className="w-full"
-                            variant="primary"
+                            variant="default"
                             disabled={isLoading || forgotPasswordPending}
                           >
                             {isLoading || forgotPasswordPending ? (
@@ -593,7 +593,7 @@ const Login = (props: LoginProps) => {
                           <Button
                             type="submit"
                             className="w-full"
-                            variant="primary"
+                            variant="default"
                             disabled={isLoading}
                           >
                             {isLoading ? (
@@ -654,7 +654,7 @@ const Login = (props: LoginProps) => {
                             <Button
                               type="submit"
                               className="w-full"
-                              variant="primary"
+                              variant="default"
                               disabled={isLoading || forgotPasswordPending}
                             >
                               {isLoading || forgotPasswordPending ? (
@@ -736,7 +736,7 @@ const Login = (props: LoginProps) => {
                         <Button
                           type="submit"
                           className="w-full"
-                          variant="primary"
+                          variant="default"
                           disabled={
                             isLoading ||
                             !isValidPhoneNumber(phone) ||

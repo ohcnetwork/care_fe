@@ -978,7 +978,7 @@ export default function DispenseDrawer({
               {t("discard_and_switch")}
             </Button>
             <Button
-              variant="primary"
+              variant="default"
               onClick={() => setIsLocationWarningOpen(false)}
               className="w-full"
             >

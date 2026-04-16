@@ -74,7 +74,7 @@ export function ToReceive({ facilityId, locationId, internal, tab }: Props) {
           {currentTab === "orders" && (
             <div className="flex items-center gap-2">
               <Button
-                variant="primary"
+                variant="default"
                 onClick={() =>
                   navigate(
                     getInventoryBasePath(

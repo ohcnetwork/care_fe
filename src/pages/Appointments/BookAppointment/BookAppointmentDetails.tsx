@@ -153,7 +153,7 @@ export const BookAppointmentDetails = ({
               {t("cancel")}
             </Button>
             <Button
-              variant="primary"
+              variant="default"
               size="sm"
               onClick={handleSubmit}
               type="submit"
@@ -224,7 +224,7 @@ export const BookAppointmentDetails = ({
                   {t("back")}
                 </Button>
                 <Button
-                  variant="primary"
+                  variant="default"
                   className="w-full"
                   onClick={handleSubmit}
                   disabled={!selectedSlotId || isCreating}

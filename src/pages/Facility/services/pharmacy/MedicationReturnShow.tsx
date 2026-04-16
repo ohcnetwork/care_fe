@@ -794,7 +794,7 @@ export default function MedicationReturnShow({
                 variant={
                   confirmDialog.status === SupplyDeliveryStatus.abandoned
                     ? "destructive"
-                    : "primary"
+                    : "default"
                 }
                 onClick={handleSubmitDialog}
                 disabled={isUpsertingDeliveries}

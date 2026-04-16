@@ -1029,7 +1029,7 @@ export function DeliveryOrderShow({
                 variant={
                   confirmDialog.status === SupplyDeliveryStatus.abandoned
                     ? "destructive"
-                    : "primary"
+                    : "default"
                 }
                 onClick={handleSubmitDialog}
                 disabled={isUpsertingDeliveries}

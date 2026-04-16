@@ -200,7 +200,7 @@ export default function CreateScheduleExceptionSheet({
     >
       <SheetTrigger asChild>
         {trigger ?? (
-          <Button variant="primary" disabled={isPending}>
+          <Button variant="default" disabled={isPending}>
             {t("add_exception")}
           </Button>
         )}
@@ -345,7 +345,7 @@ export default function CreateScheduleExceptionSheet({
                       {t("cancel")}
                     </Button>
                   </SheetClose>
-                  <Button variant="primary" type="submit" disabled={isPending}>
+                  <Button variant="default" type="submit" disabled={isPending}>
                     {t("confirm_unavailability")}
                   </Button>
                 </SheetFooter>

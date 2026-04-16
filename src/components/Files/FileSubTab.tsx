@@ -540,7 +540,7 @@ export const FilesPage = ({
                 encounterId={encounter?.id || ""}
                 permissions={encounter?.permissions || []}
                 trigger={
-                  <Button variant="primary" asChild>
+                  <Button variant="default" asChild>
                     <div className="flex items-center gap-1 text-foreground py-0.5 cursor-pointer">
                       <CareIcon
                         icon="l-file-export"

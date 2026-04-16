@@ -437,7 +437,7 @@ export default function FacilityForm({
         <Button
           type="submit"
           className="w-full"
-          variant="primary"
+          variant="default"
           disabled={
             facilityId ? isUpdatePending || !form.formState.isDirty : isPending
           }

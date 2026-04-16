@@ -125,7 +125,7 @@ export const EncounterServiceRequestTab = () => {
           </div>
 
           {encounter && !inactiveEncounterStatus.includes(encounter.status) && (
-            <Button variant="primary">
+            <Button variant="default">
               <Link
                 href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/service_request`}
                 className="flex items-center"

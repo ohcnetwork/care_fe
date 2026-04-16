@@ -1629,7 +1629,7 @@ export function InvoiceShow({
                   buttonVariants({
                     variant:
                       selectedStatus === InvoiceStatus.balanced
-                        ? "primary"
+                        ? "default"
                         : "destructive",
                   }),
                 )}
@@ -1834,7 +1834,7 @@ export function InvoiceShow({
               </div>
               <div className="flex items-center bg-background rounded-r-lg p-2 pl-0">
                 <Button
-                  variant="primary"
+                  variant="default"
                   onClick={() => navigate(sourceUrl)}
                   className="shadow ml-2"
                 >

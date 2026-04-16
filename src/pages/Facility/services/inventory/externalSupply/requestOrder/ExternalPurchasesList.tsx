@@ -109,7 +109,7 @@ export function ExternalPurchasesList({
           {isRequester && (
             <div className="flex items-center gap-2">
               <Button
-                variant="primary"
+                variant="default"
                 onClick={() =>
                   navigate(
                     getInventoryBasePath(

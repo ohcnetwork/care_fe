@@ -195,7 +195,7 @@ export function EntitySelectionDrawer({
                     {t("back")}
                   </Button>
                   <Button
-                    variant="primary"
+                    variant="default"
                     onClick={handleConfirm}
                     className="text-sm"
                   >

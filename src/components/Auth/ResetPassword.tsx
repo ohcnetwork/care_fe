@@ -183,7 +183,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
             <span>{t("cancel")}</span>
           </Button>
           <Button
-            variant="primary"
+            variant="default"
             type="submit"
             onClick={(e) => handleSubmit(e)}
             className="w-full sm:w-auto"

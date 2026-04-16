@@ -240,7 +240,7 @@ export default function LocationView({
                   "mode" in location &&
                   location.mode === "kind" && (
                     <Button
-                      variant="primary"
+                      variant="default"
                       onClick={handleAddLocation}
                       className="w-full sm:w-auto"
                     >

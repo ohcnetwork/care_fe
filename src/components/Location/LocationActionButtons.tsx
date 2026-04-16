@@ -40,7 +40,7 @@ export function LocationActionButtons({
   type ActionButton = {
     label: string;
     onClick: () => void;
-    variant: "outline" | "primary" | "link" | "destructive";
+    variant: "outline" | "default" | "link" | "destructive";
     className?: string;
   };
 
@@ -59,7 +59,7 @@ export function LocationActionButtons({
     buttons.push({
       label: t("assign_bed_now"),
       onClick: onAssignNow,
-      variant: "primary",
+      variant: "default",
       className: "shadow-sm",
     });
   }

@@ -296,7 +296,7 @@ function FinishedTokenOptions({
         onConfirm={handleMoveBackToInService}
         cancelText={t("cancel")}
         confirmText={t("confirm")}
-        variant="primary"
+        variant="default"
         disabled={isUpdating}
       />
 
@@ -311,7 +311,7 @@ function FinishedTokenOptions({
         onConfirm={handleMoveBackToWaiting}
         cancelText={t("cancel")}
         confirmText={t("confirm")}
-        variant="primary"
+        variant="default"
         disabled={isUpdating}
       />
     </>

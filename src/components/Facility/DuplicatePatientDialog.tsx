@@ -144,7 +144,7 @@ const DuplicatePatientDialog = ({
                 action === "transfer" ? onTransfer() : onOpenChange(false)
               }
               disabled={!action}
-              variant={"primary"}
+              variant={"default"}
             >
               <CareIcon icon="l-check" className="text-lg mr-1" />
               {t("continue")}

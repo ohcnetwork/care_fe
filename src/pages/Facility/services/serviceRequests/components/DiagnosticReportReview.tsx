@@ -296,7 +296,7 @@ export function DiagnosticReportReview({
                       basePath="/"
                       href={`/facility/${facilityId}/patient/${patientId}/diagnostic_reports/${fullReport?.id}`}
                     >
-                      <Button variant="primary" className="gap-2">
+                      <Button variant="default" className="gap-2">
                         <ExternalLink className="h-4 w-4" />
                         {t("view_report")}
                       </Button>
@@ -307,7 +307,7 @@ export function DiagnosticReportReview({
                 {fullReport?.status === DiagnosticReportStatus.preliminary && (
                   <div className="flex justify-end">
                     <Button
-                      variant="primary"
+                      variant="default"
                       disabled={isUpdatingReport}
                       className="gap-2"
                       onClick={() => setShowApproveDialog(true)}

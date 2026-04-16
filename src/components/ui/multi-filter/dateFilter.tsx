@@ -128,7 +128,7 @@ function CustomDateRange({
       </div>
       <div className="px-3 p-2">
         <Button
-          variant="primary"
+          variant="default"
           className="w-full justify-center"
           onClick={() => {
             if (dateFrom && dateTo) {

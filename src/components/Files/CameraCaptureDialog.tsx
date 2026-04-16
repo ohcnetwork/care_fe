@@ -284,7 +284,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                   </Button>
 
                   <Button
-                    variant="primary"
+                    variant="default"
                     onClick={() => {
                       onOpenChange(false);
                       setPreviewImage(null);

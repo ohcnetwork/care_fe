@@ -296,7 +296,7 @@ export default function CreateScheduleTemplateSheet({
     >
       <SheetTrigger asChild>
         {trigger ?? (
-          <Button variant="primary" disabled={isPending}>
+          <Button variant="default" disabled={isPending}>
             {t("create_template")}
           </Button>
         )}
@@ -779,7 +779,7 @@ export default function CreateScheduleTemplateSheet({
                   </Button>
                 </SheetClose>
 
-                <Button variant="primary" type="submit" disabled={isPending}>
+                <Button variant="default" type="submit" disabled={isPending}>
                   {isPending ? t("saving") : t("save")}
                 </Button>
               </SheetFooter>

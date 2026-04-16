@@ -380,7 +380,7 @@ export function AccountShow({
 
                 <div className="flex gap-2">
                   <Button
-                    variant="primary"
+                    variant="default"
                     onClick={() =>
                       setPaymentSheet({
                         isOpen: true,
@@ -436,7 +436,7 @@ export function AccountShow({
               </Button>
 
               <Button
-                variant="primary"
+                variant="default"
                 onClick={() =>
                   setPaymentSheet({
                     isOpen: true,

@@ -290,7 +290,7 @@ export function LocationSelectorDialog({
                 <X />
               </Button>
               <Button
-                variant="primary"
+                variant="default"
                 onClick={() =>
                   handleConfirmSelection(
                     locationLevel[locationLevel.length - 1],

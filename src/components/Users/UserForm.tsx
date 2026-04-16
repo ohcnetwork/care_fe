@@ -821,7 +821,7 @@ export default function UserForm({
         <Button
           type="submit"
           className="w-full"
-          variant="primary"
+          variant="default"
           disabled={isLoadingUser || !form.formState.isDirty || isSubmitting}
         >
           {isSubmitting

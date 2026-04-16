@@ -175,7 +175,7 @@ function ListContent({
       <div className="flex justify-end space-x-2 p-3 border-t border-t-border shrink-0">
         <Button
           variant="link"
-          size="md"
+          size="default"
           className="underline"
           onClick={() => setOpen(false)}
         >
@@ -183,7 +183,7 @@ function ListContent({
         </Button>
         <Button
           variant="primary_gradient"
-          size="md"
+          size="default"
           onClick={() => {
             onValueChange(selectedValues);
             setOpen(false);

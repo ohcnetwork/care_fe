@@ -333,7 +333,7 @@ export default function useFileManager(
               >
                 {t("cancel")}
               </Button>
-              <Button type="submit" variant="primary" disabled={archiving}>
+              <Button type="submit" variant="default" disabled={archiving}>
                 {t("proceed")}
               </Button>
             </div>
@@ -479,7 +479,7 @@ export default function useFileManager(
               </Button>
               <Button
                 type="submit"
-                variant="primary"
+                variant="default"
                 disabled={
                   editing === true ||
                   editDialogueOpen?.name === "" ||

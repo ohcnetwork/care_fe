@@ -278,7 +278,7 @@ export const TokenSlotButton = ({
       key={slot.id}
       size="lg"
       type="button"
-      variant={selectedSlotId === slot.id ? "primary" : "outline"}
+      variant={selectedSlotId === slot.id ? "default" : "outline"}
       onClick={onClick}
       disabled={slot.allocated === availability.tokens_per_slot}
       className={cn(

@@ -659,7 +659,7 @@ export default function MedicationDispenseList({
         }}
         confirmText={t("update_status")}
         cancelText={t("cancel")}
-        variant="primary"
+        variant="default"
       />
     </div>
   );

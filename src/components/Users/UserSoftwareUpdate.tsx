@@ -25,7 +25,7 @@ function ClearCacheButton() {
 
   return (
     <Button
-      variant="primary"
+      variant="default"
       onClick={clearCache}
       className="rounded-md bg-primary-700 text-white shadow-sm hover:bg-primary-600 hover:text-white disabled:opacity-70"
     >
@@ -62,7 +62,7 @@ export default function UserSoftwareUpdate() {
         <div className="flex gap-2">
           {isChecking ? (
             <Button
-              variant="primary"
+              variant="default"
               disabled
               aria-busy="true"
               aria-label={t("checking_for_update")}
@@ -71,13 +71,13 @@ export default function UserSoftwareUpdate() {
               {t("checking_for_update")}
             </Button>
           ) : pendingUpdate ? (
-            <Button variant="primary" onClick={updateApp}>
+            <Button variant="default" onClick={updateApp}>
               <CareIcon icon="l-sync" className="text-xl" />
               {t("update_now")}
             </Button>
           ) : (
             <Button
-              variant="primary"
+              variant="default"
               onClick={async () => {
                 const hasUpdate = await checkForUpdate();
                 if (!hasUpdate) {

@@ -89,7 +89,7 @@ const CriticalActionConfirmationDialog = ({
           iconColor: "text-alert-500",
           defaultIcon: <AlertTriangleIcon className="size-4 text-alert-500" />,
         };
-      case "primary":
+      case "default":
       case "primary_gradient":
       case "outline_primary":
         return {

@@ -364,7 +364,7 @@ export default function ServiceRequestShow({
                         </AlertDialog>
                       )}
                       <Button
-                        variant="primary"
+                        variant="default"
                         className="font-semibold"
                         onClick={() =>
                           navigate(
