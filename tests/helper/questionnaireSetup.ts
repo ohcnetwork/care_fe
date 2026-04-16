@@ -39,6 +39,12 @@ export async function ensureQuestionnaireExists(
     headers,
   });
   if (checkRes.status === 200) return;
+  if (checkRes.status !== 404) {
+    const errorText = await checkRes.text();
+    throw new Error(
+      `Failed to check questionnaire existence: ${checkRes.status} — ${errorText}`,
+    );
+  }
 
   // Fetch organization IDs (required for questionnaire creation)
   const orgRes = await fetch(`${apiUrl}/api/v1/organization/?org_type=role`, {

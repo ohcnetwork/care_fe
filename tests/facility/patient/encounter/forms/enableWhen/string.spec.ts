@@ -288,6 +288,10 @@ test.describe("Enable When — String Operators", () => {
       const licenseNumber = faker.string.alphanumeric(8);
       const specialization = faker.lorem.word();
 
+      await test.step("Fill other sources with safe values", async () => {
+        await fillStringField(page, "Category", NOT_EQUALS_MATCH);
+      });
+
       await test.step("Type matching value — dependents appear", async () => {
         await fillStringField(page, "Professional Type", EQUALS_MATCH);
         await checkVisibility(page, "Medical License Number", true);

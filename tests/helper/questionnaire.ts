@@ -1,4 +1,5 @@
 import { type Page, expect } from "@playwright/test";
+import { expectToast } from "tests/helper/ui";
 
 /**
  * Locates the question container div for a given label.
@@ -75,23 +76,22 @@ export async function expectFieldError(page: Page, labelText: string) {
  */
 export async function submitAndExpectSuccess(page: Page) {
   await submitForm(page);
-  await page
-    .locator(".toaster.group")
-    .getByText(/questionnaire submitted successfully/i)
-    .waitFor({ state: "visible", timeout: 15000 });
+  await expectToast(page, /questionnaire submitted successfully/i, {
+    timeout: 15000,
+  });
 }
 
 /**
  * After submission, waits for navigation to the encounter updates page,
  * then asserts that `expectedValues` are visible and `excludedValues` are
- * NOT visible inside the questionnaire response card.
+ * NOT visible on the page.
  */
 export async function verifySubmittedValues(
   page: Page,
   expectedValues: string[],
   excludedValues: string[] = [],
 ) {
-  await page.waitForURL(/\/encounter\/[^/]+/, { timeout: 10000 });
+  await page.waitForURL(/\/encounter\/[^/]+\/updates/, { timeout: 10000 });
 
   for (const val of expectedValues) {
     const locator = page.getByText(val, { exact: true }).first();
