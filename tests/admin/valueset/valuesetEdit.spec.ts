@@ -27,6 +27,8 @@ async function createBasicValueSet(page: Page) {
   await page.getByRole("textbox", { name: "Name *" }).fill(name);
   await page.getByRole("textbox", { name: "Slug *" }).fill(slug);
   await page.getByRole("button", { name: "Save ValueSet" }).click();
+  // Wait for redirect back to valueset list
+  await page.waitForURL("**/admin/valuesets");
 }
 
 test.describe("ValueSet Edit", () => {

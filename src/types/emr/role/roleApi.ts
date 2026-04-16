@@ -11,7 +11,7 @@ export default {
   createRole: {
     path: "/api/v1/role/",
     method: HttpMethod.POST,
-    TReq: Type<RoleCreate>(),
+    TBody: Type<RoleCreate>(),
     TRes: Type<RoleRead>(),
   },
   getRole: {
@@ -22,7 +22,7 @@ export default {
   updateRole: {
     path: "/api/v1/role/{external_id}/",
     method: HttpMethod.PUT,
-    TReq: Type<RoleCreate>(),
+    TBody: Type<RoleCreate>(),
     TRes: Type<RoleRead>(),
   },
   deleteRole: {

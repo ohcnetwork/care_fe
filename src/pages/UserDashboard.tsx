@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, LogOut, SquarePen, User2Icon } from "lucide-react";
 import { Link } from "raviger";
 import { useState } from "react";
@@ -19,13 +20,15 @@ import { Avatar } from "@/components/Common/Avatar";
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
+import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { Organization, getOrgLabel } from "@/types/organization/organization";
+import organizationApi from "@/types/organization/organizationApi";
 
 enum DashboardTabs {
   TAB_FACILITIES = "Facilities",
-  TAB_ASSOCIATIONS = "Associations",
+  TAB_ASSOCIATIONS = "Responsibilities",
   TAB_GOVERNANCE = "Governance",
 }
 
@@ -34,6 +37,7 @@ type TabContentProps = {
   tabItems: FacilityBareMinimum[] | Organization[];
   description: string;
   renderChild: (item: FacilityBareMinimum | Organization) => React.ReactNode;
+  isLoading?: boolean;
 };
 
 export default function UserDashboard() {
@@ -43,17 +47,37 @@ export default function UserDashboard() {
   const { t } = useTranslation();
 
   const organizations = user.organizations || [];
-  const associations = organizations.filter((org) => org.org_type === "role");
   const governance = organizations.filter((org) => org.org_type === "govt");
+
+  // Fetch accessible role organizations from dedicated API (includes user's role per org)
+  const { data: accessibleRoleOrgs, isLoading: isLoadingRoleOrgs } = useQuery({
+    queryKey: ["accessibleRoleOrganizations", "dashboard"],
+    queryFn: query(organizationApi.accessibleRoleOrganizations, {
+      queryParams: {},
+    }),
+  });
+  const responsibilityItems = accessibleRoleOrgs?.results || [];
+  // Extract organizations for tab items
+  const responsibilities = responsibilityItems.map((item) => item.organization);
+  // Map org ID → role name for showing designation on cards
+  const roleByOrgId = new Map(
+    responsibilityItems
+      .filter((item) => item.role)
+      .map((item) => [item.organization.id, item.role!.name]),
+  );
 
   const tabsData = [
     { id: DashboardTabs.TAB_FACILITIES, items: facilities },
-    { id: DashboardTabs.TAB_ASSOCIATIONS, items: associations },
+    { id: DashboardTabs.TAB_ASSOCIATIONS, items: responsibilities },
     { id: DashboardTabs.TAB_GOVERNANCE, items: governance },
   ];
 
   const availableTabs = tabsData
-    .filter((tab) => tab.items.length > 0)
+    .filter(
+      (tab) =>
+        tab.items.length > 0 ||
+        (tab.id === DashboardTabs.TAB_ASSOCIATIONS && isLoadingRoleOrgs),
+    )
     .map((tab) => tab.id);
 
   const [activeTab, setActiveTab] = useState<DashboardTabs | null>(
@@ -227,36 +251,39 @@ export default function UserDashboard() {
             {activeTab === DashboardTabs.TAB_ASSOCIATIONS && (
               <TabContent
                 tabId="associations-panel"
-                tabItems={associations}
+                tabItems={responsibilities}
                 description={t("dashboard_tab_associations")}
-                renderChild={(association) => (
-                  <Link
-                    key={association.id}
-                    href={`/organization/${association.id}`}
-                  >
-                    <Card className="transition-all hover:shadow-md hover:border-primary/20 border-gray-200">
-                      <CardContent className="flex items-center gap-3 p-3 md:p-4">
-                        <Avatar
-                          name={association.name}
-                          className="size-12 md:size-14"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-medium truncate text-sm md:text-base">
-                            {association.name}
-                          </h3>
-                          <p className="text-xs md:text-sm text-gray-500 truncate">
-                            {"org_type" in association &&
-                              getOrgLabel(
-                                association.org_type,
-                                association.metadata,
-                              )}
-                          </p>
-                        </div>
-                        <ChevronRight className="size-4 md:size-5 text-gray-500" />
-                      </CardContent>
-                    </Card>
-                  </Link>
-                )}
+                isLoading={isLoadingRoleOrgs}
+                renderChild={(association) => {
+                  const roleName = roleByOrgId.get(association.id);
+                  return (
+                    <Link
+                      key={association.id}
+                      href={`/responsibilities/${association.id}`}
+                      className="h-full"
+                    >
+                      <Card className="h-full transition-all hover:shadow-md hover:border-primary/20 border-gray-200">
+                        <CardContent className="flex h-full items-center gap-3 p-3 md:p-4">
+                          <Avatar
+                            name={association.name}
+                            className="size-12 md:size-14"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium truncate text-sm md:text-base">
+                              {association.name}
+                            </h3>
+                            {roleName && (
+                              <p className="text-xs md:text-sm text-gray-500 truncate">
+                                {roleName}
+                              </p>
+                            )}
+                          </div>
+                          <ChevronRight className="size-4 md:size-5 text-gray-500" />
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                }}
               />
             )}
 
@@ -307,6 +334,7 @@ const TabContent = ({
   tabItems,
   description,
   renderChild,
+  isLoading,
 }: TabContentProps) => {
   return (
     <section
@@ -317,11 +345,27 @@ const TabContent = ({
     >
       <p className="text-sm text-gray-800 font-normal px-1">{description}</p>
 
-      <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        {tabItems.map((item: FacilityBareMinimum | Organization) => {
-          return renderChild(item);
-        })}
-      </div>
+      {isLoading ? (
+        <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} className="border-gray-200">
+              <CardContent className="flex items-center gap-3 p-3 md:p-4">
+                <div className="size-12 md:size-14 rounded-md bg-gray-100 animate-pulse" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-24 bg-gray-100 rounded animate-pulse" />
+                  <div className="h-3 w-16 bg-gray-100 rounded animate-pulse" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {tabItems.map((item: FacilityBareMinimum | Organization) => {
+            return renderChild(item);
+          })}
+        </div>
+      )}
     </section>
   );
 };
