@@ -15,7 +15,7 @@ import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
 const QUESTIONNAIRE_SLUG = "enable-when-string-test";
-const FIXTURE_PATH = "tests/fixtures/questionnaires/enableWhenStringTest.json";
+const FIXTURE_PATH = "tests/fixtures/questionnaires/enableWhenTest.json";
 
 // Operator match values — must match the fixture's enable_when answers
 const EQUALS_MATCH = "Doctor";
